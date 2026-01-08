@@ -1,0 +1,63 @@
+[
+  {
+    "name": "span",
+    "kind": "INTERNAL",
+    "statusData": {
+      "name": "UNSET",
+      "description": ""
+    },
+    "spanContext": {
+      "traceId": "2cc2b48c50aefe53b3974ed91e6b4ea9",
+      "spanId": "e77bcc2f537f0b02",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "parentSpanContext": {
+      "traceId": "00000000000000000000000000000000",
+      "spanId": "0000000000000000",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "startTimestamp": 0,
+    "attributes": {
+      "key": "value"
+    },
+    "events": [
+      {
+        "name": "test",
+        "attributes": {},
+        "timestamp": 0,
+        "totalAttributesCount": 0
+      }
+    ],
+    "links": [
+      {
+        "spanContext": {
+          "traceId": "00000000000000000000000000000000",
+          "spanId": "0000000000000000",
+          "traceFlags": "00",
+          "traceState": {
+            "foo": "bar"
+          }
+        },
+        "attributes": {},
+        "totalAttributeCount": 0
+      }
+    ],
+    "endTimestamp": 500,
+    "ended": true,
+    "totalRecordedEvents": 1,
+    "totalRecordedLinks": 1,
+    "totalAttributeCount": 1,
+    "resource": {
+      "schemaUrl": "null",
+      "attributes": {}
+    },
+    "instrumentationScopeInfo": {
+      "name": "test_tracer",
+      "version": "0.1.0",
+      "schemaUrl": "null",
+      "attributes": {}
+    }
+  }
+]

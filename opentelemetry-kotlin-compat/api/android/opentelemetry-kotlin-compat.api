@@ -1,0 +1,61 @@
+public final class io/opentelemetry/kotlin/OpenTelemetryCompatEntrypointKt {
+	public static final fun createCompatOpenTelemetry (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/OpenTelemetry;
+	public static synthetic fun createCompatOpenTelemetry$default (Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/OpenTelemetry;
+}
+
+public final class io/opentelemetry/kotlin/OpenTelemetryCompatExtKt {
+	public static final fun toOtelJavaApi (Lio/opentelemetry/kotlin/OpenTelemetry;)Lio/opentelemetry/api/OpenTelemetry;
+}
+
+public final class io/opentelemetry/kotlin/OtelJavaOpenTelemetryExtKt {
+	public static final fun toOtelKotlinApi (Lio/opentelemetry/api/OpenTelemetry;)Lio/opentelemetry/kotlin/OpenTelemetry;
+}
+
+public final class io/opentelemetry/kotlin/context/ContextExtKt {
+	public static final fun toOtelJavaContext (Lio/opentelemetry/kotlin/context/Context;)Lio/opentelemetry/context/Context;
+}
+
+public final class io/opentelemetry/kotlin/context/ContextKeyExtKt {
+	public static final fun toOtelJavaContextKey (Lio/opentelemetry/kotlin/context/ContextKey;)Lio/opentelemetry/context/ContextKey;
+}
+
+public final class io/opentelemetry/kotlin/context/OtelJavaContextExtKt {
+	public static final fun toOtelKotlinContext (Lio/opentelemetry/context/Context;)Lio/opentelemetry/kotlin/context/Context;
+}
+
+public final class io/opentelemetry/kotlin/logging/export/LogRecordExporterExtKt {
+	public static final fun toOtelKotlinLogRecordExporter (Lio/opentelemetry/sdk/logs/export/LogRecordExporter;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
+}
+
+public final class io/opentelemetry/kotlin/logging/export/LogRecordProcessorExtKt {
+	public static final fun toOtelKotlinLogRecordProcessor (Lio/opentelemetry/sdk/logs/LogRecordProcessor;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
+}
+
+public final class io/opentelemetry/kotlin/tracing/export/SpanExporterExtKt {
+	public static final fun toOtelKotlinSpanExporter (Lio/opentelemetry/sdk/trace/export/SpanExporter;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
+}
+
+public final class io/opentelemetry/kotlin/tracing/export/SpanProcessorExtKt {
+	public static final fun toOtelKotlinSpanProcessor (Lio/opentelemetry/sdk/trace/SpanProcessor;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
+}
+
+public final class io/opentelemetry/kotlin/tracing/ext/EventDataExtKt {
+	public static final fun toOtelJavaEventData (Lio/opentelemetry/kotlin/tracing/data/EventData;)Lio/opentelemetry/sdk/trace/data/EventData;
+}
+
+public final class io/opentelemetry/kotlin/tracing/ext/LinkDataExtKt {
+	public static final fun toOtelJavaLinkData (Lio/opentelemetry/kotlin/tracing/data/LinkData;)Lio/opentelemetry/sdk/trace/data/LinkData;
+}
+
+public final class io/opentelemetry/kotlin/tracing/ext/OtelJavaSpanContextExtKt {
+	public static final fun toOtelKotlinSpanContext (Lio/opentelemetry/api/trace/SpanContext;)Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+}
+
+public final class io/opentelemetry/kotlin/tracing/ext/SpanContextExtKt {
+	public static final fun toOtelJavaSpanContext (Lio/opentelemetry/kotlin/tracing/model/SpanContext;)Lio/opentelemetry/api/trace/SpanContext;
+}
+
+public final class io/opentelemetry/kotlin/tracing/ext/SpanContextStorageExtKt {
+	public static final fun storeInContext (Lio/opentelemetry/kotlin/tracing/model/Span;Lio/opentelemetry/kotlin/context/Context;)Lio/opentelemetry/kotlin/context/Context;
+}
+

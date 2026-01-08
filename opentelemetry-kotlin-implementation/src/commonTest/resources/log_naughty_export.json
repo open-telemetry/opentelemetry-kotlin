@@ -1,0 +1,32 @@
+[
+  {
+    "resource": {
+      "schemaUrl": "https://example.com/foo",
+      "attributes": {
+        "resource.foo": "bar"
+      }
+    },
+    "instrumentationScopeInfo": {
+      "name": "test_logger",
+      "version": "null",
+      "schemaUrl": "null",
+      "attributes": {}
+    },
+    "timestampEpochNanos": 500,
+    "observedTimestampEpochNanos": 600,
+    "spanContext": {
+      "traceId": "2cc2b48c50aefe53b3974ed91e6b4ea9",
+      "spanId": "e77bcc2f537f0b02",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "severity": "WARN2",
+    "severityText": "warn2",
+    "body": "custom_log",
+    "attributes": {
+      "experiment_enabled": "true",
+      "foo": "bar"
+    },
+    "totalAttributeCount": 2
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "resource": {
+      "schemaUrl": "null",
+      "attributes": {}
+    },
+    "instrumentationScopeInfo": {
+      "name": "test_logger",
+      "version": "null",
+      "schemaUrl": "null",
+      "attributes": {}
+    },
+    "timestampEpochNanos": 0,
+    "observedTimestampEpochNanos": 0,
+    "spanContext": {
+      "traceId": "2cc2b48c50aefe53b3974ed91e6b4ea9",
+      "spanId": "e77bcc2f537f0b02",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "severity": "UNKNOWN",
+    "severityText": null,
+    "body": "test",
+    "attributes": {},
+    "totalAttributeCount": 0
+  }
+]

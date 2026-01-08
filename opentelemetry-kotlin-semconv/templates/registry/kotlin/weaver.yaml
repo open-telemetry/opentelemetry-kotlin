@@ -1,0 +1,27 @@
+params:
+  excluded_namespaces: ["dotnet", "aspnetcore", "signalr"]
+  excluded_attributes: []
+comment_formats:
+  kdoc:
+    format: html
+    header: "/**"
+    prefix: "* "
+    footer: "*/"
+default_comment_format: kdoc
+templates:
+  - pattern: kotlin_semconv_template.kt.j2
+    filter: >
+      semconv_grouped_attributes({
+        "exclude_root_namespace": $excluded_namespaces,
+        "exclude_stability": []
+      })
+      | map({ root_namespace: .root_namespace,
+              attributes: (.attributes | unique_by(.name)),
+              excluded_attributes: $excluded_attributes })
+
+    application_mode: each
+    file_name: "{{ctx.root_namespace | pascal_case}}Attributes.kt"
+text_maps:
+  kotlin_enum_type:
+    int: Int
+    string: String

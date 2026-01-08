@@ -1,0 +1,29 @@
+[
+  {
+    "resource": {
+      "schemaUrl": "null",
+      "attributes": {}
+    },
+    "instrumentationScopeInfo": {
+      "name": "logger",
+      "version": "null",
+      "schemaUrl": "null",
+      "attributes": {}
+    },
+    "timestampEpochNanos": 0,
+    "observedTimestampEpochNanos": 0,
+    "spanContext": {
+      "traceId": "00000000000000000000000000000000",
+      "spanId": "0000000000000000",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "severity": "DEBUG2",
+    "severityText": null,
+    "body": "my_log",
+    "attributes": {
+      "key": "value"
+    },
+    "totalAttributeCount": 1
+  }
+]

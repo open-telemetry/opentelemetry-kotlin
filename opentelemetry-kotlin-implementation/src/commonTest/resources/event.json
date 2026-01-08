@@ -1,0 +1,30 @@
+[
+  {
+    "resource": {
+      "schemaUrl": "null",
+      "attributes": {}
+    },
+    "instrumentationScopeInfo": {
+      "name": "test_logger",
+      "version": "null",
+      "schemaUrl": "null",
+      "attributes": {}
+    },
+    "timestampEpochNanos": 0,
+    "observedTimestampEpochNanos": 0,
+    "spanContext": {
+      "traceId": "00000000000000000000000000000000",
+      "spanId": "0000000000000000",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "severity": "WARN4",
+    "severityText": null,
+    "body": "Some Event",
+    "eventName": "my_event_name",
+    "attributes": {
+      "key1": "value1"
+    },
+    "totalAttributeCount": 1
+  }
+]

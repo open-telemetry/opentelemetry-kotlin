@@ -1,0 +1,20 @@
+public final class io/opentelemetry/kotlin/OpenTelemetryExtKt {
+	public static final fun getLogger (Lio/opentelemetry/kotlin/OpenTelemetry;Ljava/lang/String;)Lio/opentelemetry/kotlin/logging/Logger;
+	public static final fun getTracer (Lio/opentelemetry/kotlin/OpenTelemetry;Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/Tracer;
+}
+
+public final class io/opentelemetry/kotlin/attributes/MutableAttributeContainerExtKt {
+	public static final fun setAttributes (Lio/opentelemetry/kotlin/attributes/MutableAttributeContainer;Ljava/util/Map;)V
+}
+
+public final class io/opentelemetry/kotlin/context/ContextApiExtKt {
+	public static final fun with (Lio/opentelemetry/kotlin/context/Context;Ljava/util/Map;)Lio/opentelemetry/kotlin/context/Context;
+}
+
+public final class io/opentelemetry/kotlin/tracing/SpanExtKt {
+	public static final fun addLink (Lio/opentelemetry/kotlin/tracing/model/Span;Lio/opentelemetry/kotlin/tracing/model/Span;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun addLink$default (Lio/opentelemetry/kotlin/tracing/model/Span;Lio/opentelemetry/kotlin/tracing/model/Span;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static final fun recordException (Lio/opentelemetry/kotlin/tracing/model/Span;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun recordException$default (Lio/opentelemetry/kotlin/tracing/model/Span;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+

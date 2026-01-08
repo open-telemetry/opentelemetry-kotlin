@@ -1,0 +1,27 @@
+[
+  {
+    "resource": {
+      "schemaUrl": "null",
+      "attributes": {}
+    },
+    "instrumentationScopeInfo": {
+      "name": "test_logger",
+      "version": "null",
+      "schemaUrl": "null",
+      "attributes": {}
+    },
+    "timestampEpochNanos": 500,
+    "observedTimestampEpochNanos": 600,
+    "spanContext": {
+      "traceId": "00000000000000000000000000000000",
+      "spanId": "0000000000000000",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "severity": "WARN2",
+    "severityText": "warn2",
+    "body": "custom_log",
+    "attributes": {},
+    "totalAttributeCount": 0
+  }
+]

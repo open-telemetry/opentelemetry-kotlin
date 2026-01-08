@@ -1,0 +1,34 @@
+[
+  {
+    "resource": {
+      "schemaUrl": "null",
+      "attributes": {
+        "service.name": "unknown_service:java",
+        "telemetry.sdk.language": "java",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "UNKNOWN"
+      }
+    },
+    "instrumentationScopeInfo": {
+      "name": "my_logger",
+      "version": "0.1.0",
+      "schemaUrl": "https://example.com/schema",
+      "attributes": {}
+    },
+    "timestampEpochNanos": 100,
+    "observedTimestampEpochNanos": 50,
+    "spanContext": {
+      "traceId": "00000000000000000000000000000000",
+      "spanId": "0000000000000000",
+      "traceFlags": "00",
+      "traceState": {}
+    },
+    "severity": "ERROR2",
+    "severityText": "Error",
+    "body": "Hello, world!",
+    "attributes": {
+      "key2": "value2"
+    },
+    "totalAttributeCount": 1
+  }
+]

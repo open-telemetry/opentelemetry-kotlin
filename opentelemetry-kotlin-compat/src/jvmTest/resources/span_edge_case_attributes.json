@@ -1,0 +1,54 @@
+[
+  {
+    "name": "edge_case_attributes",
+    "kind": "INTERNAL",
+    "statusData": {
+      "name": "UNSET",
+      "description": ""
+    },
+    "spanContext": {
+      "traceId": "1e6b4ea924f9baa8e77bcc2f537f0b02",
+      "spanId": "2cc2b48c50aefe53",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "parentSpanContext": {
+      "traceId": "00000000000000000000000000000000",
+      "spanId": "0000000000000000",
+      "traceFlags": "00",
+      "traceState": {}
+    },
+    "startTimestamp": 0,
+    "attributes": {
+      "empty_bool_list": "[]",
+      "whitespace_only": " ",
+      "empty_string": "",
+      "list_with_empty": "[, non-empty, , another-value]",
+      "empty_double_list": "[]",
+      "empty_long_list": "[]",
+      "empty_string_list": "[]"
+    },
+    "events": [],
+    "links": [],
+    "endTimestamp": 0,
+    "ended": true,
+    "totalRecordedEvents": 0,
+    "totalRecordedLinks": 0,
+    "totalAttributeCount": 7,
+    "resource": {
+      "schemaUrl": "null",
+      "attributes": {
+        "service.name": "unknown_service:java",
+        "telemetry.sdk.language": "java",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "UNKNOWN"
+      }
+    },
+    "instrumentationScopeInfo": {
+      "name": "test_tracer",
+      "version": "0.1.0",
+      "schemaUrl": "null",
+      "attributes": {}
+    }
+  }
+]

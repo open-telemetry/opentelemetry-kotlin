@@ -1,0 +1,78 @@
+[versions]
+agp = "8.13.2"
+kotlin = "2.3.0"
+android-minSdk = "21"
+android-compileSdk = "36"
+detekt = "1.23.8"
+binaryCompatibilityValidator = "0.18.1"
+kotlinxBenchmarkRuntime = "0.4.15"
+kotlinxCoroutines = "1.10.2"
+ktor = "3.3.3"
+otel = "1.57.0"
+kotlinSerialization = "1.9.0"
+mavenPublish = "0.35.0"
+nexus = "2.0.0"
+junit4 = "4.13.2"
+junit5 = "5.13.4"
+koverGradlePlugin = "0.9.4"
+downloadPlugin = "5.6.0"
+#noinspection GradleDependency
+kotlinExposed = "2.0.0"
+androidxBenchmark = "1.4.1"
+kotlinxBenchmark = "0.4.15"
+androidxTest = "1.7.0"
+androidxRunner = "1.7.0"
+androidxJunit = "1.3.0"
+protobufKotlin = "4.33.2"
+protobufPlugin = "0.9.6"
+wire = "5.4.0"
+
+[libraries]
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-test-common = { module = "org.jetbrains.kotlin:kotlin-test-common", version.ref = "kotlin" }
+kotlin-test-common-annotations = { module = "org.jetbrains.kotlin:kotlin-test-annotations-common", version.ref = "kotlin" }
+kotlinMultiplatform = { module = "org.jetbrains.kotlin.multiplatform:org.jetbrains.kotlin.multiplatform.gradle.plugin", version.ref = "kotlin" }
+agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+detekt-api = { module = "io.gitlab.arturbosch.detekt:detekt-api", version.ref = "detekt" }
+detekt-test = { module = "io.gitlab.arturbosch.detekt:detekt-test", version.ref = "detekt" }
+detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+binary-compatibility-validator = { module = "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "binaryCompatibilityValidator" }
+kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmarkRuntime" }
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-encoding = { module = "io.ktor:ktor-client-encoding", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+opentelemetry-bom = { group = "io.opentelemetry", name = "opentelemetry-bom", version.ref = "otel" }
+opentelemetry-api = { group = "io.opentelemetry", name = "opentelemetry-api"}
+opentelemetry-sdk = { group = "io.opentelemetry", name = "opentelemetry-sdk"}
+kotlin-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }
+mavenPublish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version.ref = "mavenPublish" }
+junit4 = { module = "junit:junit", version.ref = "junit4" }
+junit5-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
+kotlin-exposed = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinExposed" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTest" }
+androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxRunner" }
+androidx-benchmark-junit4 = { group = "androidx.benchmark", name = "benchmark-junit4", version.ref = "androidxBenchmark" }
+protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref = "protobufKotlin" }
+wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
+
+[plugins]
+androidLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+nexus-publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexus" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "koverGradlePlugin" }
+download = {id = "de.undercouch.download", version.ref = "downloadPlugin" }
+androidx-benchmark = { id = "androidx.benchmark", version.ref = "androidxBenchmark" }
+kotlinx-benchmark = { id = "org.jetbrains.kotlinx.benchmark", version.ref = "kotlinxBenchmark" }
+kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
+google-protobuf = { id = "com.google.protobuf", version.ref = "protobufPlugin" }
+wire = { id = "com.squareup.wire", version.ref = "wire" }

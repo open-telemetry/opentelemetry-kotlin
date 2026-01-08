@@ -1,0 +1,435 @@
+public abstract interface class io/opentelemetry/kotlin/Clock {
+	public abstract fun now ()J
+}
+
+public abstract interface annotation class io/opentelemetry/kotlin/ExperimentalApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface class io/opentelemetry/kotlin/InstrumentationScopeInfo {
+	public abstract fun getAttributes ()Ljava/util/Map;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getSchemaUrl ()Ljava/lang/String;
+	public abstract fun getVersion ()Ljava/lang/String;
+}
+
+public abstract interface class io/opentelemetry/kotlin/OpenTelemetry : io/opentelemetry/kotlin/factory/SdkFactory {
+	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
+	public abstract fun getLoggerProvider ()Lio/opentelemetry/kotlin/logging/LoggerProvider;
+	public abstract fun getTracerProvider ()Lio/opentelemetry/kotlin/tracing/TracerProvider;
+}
+
+public abstract interface annotation class io/opentelemetry/kotlin/ThreadSafe : java/lang/annotation/Annotation {
+}
+
+public abstract interface class io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun getAttributes ()Ljava/util/Map;
+}
+
+public abstract interface class io/opentelemetry/kotlin/attributes/MutableAttributeContainer : io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun setBooleanAttribute (Ljava/lang/String;Z)V
+	public abstract fun setBooleanListAttribute (Ljava/lang/String;Ljava/util/List;)V
+	public abstract fun setDoubleAttribute (Ljava/lang/String;D)V
+	public abstract fun setDoubleListAttribute (Ljava/lang/String;Ljava/util/List;)V
+	public abstract fun setLongAttribute (Ljava/lang/String;J)V
+	public abstract fun setLongListAttribute (Ljava/lang/String;Ljava/util/List;)V
+	public abstract fun setStringAttribute (Ljava/lang/String;Ljava/lang/String;)V
+	public abstract fun setStringListAttribute (Ljava/lang/String;Ljava/util/List;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/context/Context {
+	public abstract fun attach ()Lio/opentelemetry/kotlin/context/Scope;
+	public abstract fun createKey (Ljava/lang/String;)Lio/opentelemetry/kotlin/context/ContextKey;
+	public abstract fun get (Lio/opentelemetry/kotlin/context/ContextKey;)Ljava/lang/Object;
+	public abstract fun set (Lio/opentelemetry/kotlin/context/ContextKey;Ljava/lang/Object;)Lio/opentelemetry/kotlin/context/Context;
+}
+
+public abstract interface class io/opentelemetry/kotlin/context/ContextKey {
+	public abstract fun getName ()Ljava/lang/String;
+}
+
+public abstract interface class io/opentelemetry/kotlin/context/ImplicitContextStorage {
+	public abstract fun implicitContext ()Lio/opentelemetry/kotlin/context/Context;
+	public abstract fun setImplicitContext (Lio/opentelemetry/kotlin/context/Context;)V
+}
+
+public final class io/opentelemetry/kotlin/context/ImplicitContextStorageMode : java/lang/Enum {
+	public static final field GLOBAL Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
+	public static fun values ()[Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
+}
+
+public abstract interface class io/opentelemetry/kotlin/context/Scope {
+	public abstract fun detach ()V
+}
+
+public abstract class io/opentelemetry/kotlin/export/OperationResultCode {
+}
+
+public final class io/opentelemetry/kotlin/export/OperationResultCode$Failure : io/opentelemetry/kotlin/export/OperationResultCode {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/export/OperationResultCode$Failure;
+}
+
+public final class io/opentelemetry/kotlin/export/OperationResultCode$Success : io/opentelemetry/kotlin/export/OperationResultCode {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/export/OperationResultCode$Success;
+}
+
+public abstract interface class io/opentelemetry/kotlin/export/TelemetryCloseable {
+	public abstract fun forceFlush ()Lio/opentelemetry/kotlin/export/OperationResultCode;
+	public abstract fun shutdown ()Lio/opentelemetry/kotlin/export/OperationResultCode;
+}
+
+public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
+	public abstract fun implicitContext ()Lio/opentelemetry/kotlin/context/Context;
+	public abstract fun root ()Lio/opentelemetry/kotlin/context/Context;
+	public abstract fun storeSpan (Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/model/Span;)Lio/opentelemetry/kotlin/context/Context;
+}
+
+public abstract interface class io/opentelemetry/kotlin/factory/SdkFactory {
+	public abstract fun getContextFactory ()Lio/opentelemetry/kotlin/factory/ContextFactory;
+	public abstract fun getSpanContextFactory ()Lio/opentelemetry/kotlin/factory/SpanContextFactory;
+	public abstract fun getSpanFactory ()Lio/opentelemetry/kotlin/factory/SpanFactory;
+	public abstract fun getTraceFlagsFactory ()Lio/opentelemetry/kotlin/factory/TraceFlagsFactory;
+	public abstract fun getTraceStateFactory ()Lio/opentelemetry/kotlin/factory/TraceStateFactory;
+	public abstract fun getTracingIdFactory ()Lio/opentelemetry/kotlin/factory/TracingIdFactory;
+}
+
+public abstract interface class io/opentelemetry/kotlin/factory/SpanContextFactory {
+	public abstract fun create (Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/model/TraceFlags;Lio/opentelemetry/kotlin/tracing/model/TraceState;)Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+	public abstract fun create ([B[BLio/opentelemetry/kotlin/tracing/model/TraceFlags;Lio/opentelemetry/kotlin/tracing/model/TraceState;)Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+	public abstract fun getInvalid ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+}
+
+public abstract interface class io/opentelemetry/kotlin/factory/SpanFactory {
+	public abstract fun fromContext (Lio/opentelemetry/kotlin/context/Context;)Lio/opentelemetry/kotlin/tracing/model/Span;
+	public abstract fun fromSpanContext (Lio/opentelemetry/kotlin/tracing/model/SpanContext;)Lio/opentelemetry/kotlin/tracing/model/Span;
+	public abstract fun getInvalid ()Lio/opentelemetry/kotlin/tracing/model/Span;
+}
+
+public abstract interface class io/opentelemetry/kotlin/factory/TraceFlagsFactory {
+	public abstract fun create (ZZ)Lio/opentelemetry/kotlin/tracing/model/TraceFlags;
+	public abstract fun fromHex (Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/model/TraceFlags;
+	public abstract fun getDefault ()Lio/opentelemetry/kotlin/tracing/model/TraceFlags;
+}
+
+public abstract interface class io/opentelemetry/kotlin/factory/TraceStateFactory {
+	public abstract fun getDefault ()Lio/opentelemetry/kotlin/tracing/model/TraceState;
+}
+
+public abstract interface class io/opentelemetry/kotlin/factory/TracingIdFactory {
+	public abstract fun generateSpanIdBytes ()[B
+	public abstract fun generateTraceIdBytes ()[B
+	public abstract fun getInvalidSpanId ()[B
+	public abstract fun getInvalidTraceId ()[B
+}
+
+public final class io/opentelemetry/kotlin/factory/TracingIdFactoryKt {
+	public static final fun hexToByteArray (Ljava/lang/String;)[B
+	public static final fun toHexString ([B)Ljava/lang/String;
+}
+
+public abstract interface annotation class io/opentelemetry/kotlin/init/ConfigDsl : java/lang/annotation/Annotation {
+}
+
+public abstract interface class io/opentelemetry/kotlin/init/ContextConfigDsl {
+	public abstract fun getStorageMode ()Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
+	public abstract fun setStorageMode (Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/init/LogLimitsConfigDsl {
+	public abstract fun getAttributeCountLimit ()I
+	public abstract fun getAttributeValueLengthLimit ()I
+	public abstract fun setAttributeCountLimit (I)V
+	public abstract fun setAttributeValueLengthLimit (I)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/init/LoggerProviderConfigDsl : io/opentelemetry/kotlin/init/ResourceConfigDsl {
+	public abstract fun addLogRecordProcessor (Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;)V
+	public abstract fun logLimits (Lkotlin/jvm/functions/Function1;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/init/OpenTelemetryConfigDsl {
+	public abstract fun context (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
+	public abstract fun loggerProvider (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun setClock (Lio/opentelemetry/kotlin/Clock;)V
+	public abstract fun tracerProvider (Lkotlin/jvm/functions/Function1;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/init/ResourceConfigDsl {
+	public abstract fun resource (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun resource (Ljava/util/Map;)V
+}
+
+public final class io/opentelemetry/kotlin/init/ResourceConfigDsl$DefaultImpls {
+	public static synthetic fun resource$default (Lio/opentelemetry/kotlin/init/ResourceConfigDsl;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/init/SpanLimitsConfigDsl {
+	public abstract fun getAttributeCountLimit ()I
+	public abstract fun getAttributeCountPerEventLimit ()I
+	public abstract fun getAttributeCountPerLinkLimit ()I
+	public abstract fun getEventCountLimit ()I
+	public abstract fun getLinkCountLimit ()I
+	public abstract fun setAttributeCountLimit (I)V
+	public abstract fun setAttributeCountPerEventLimit (I)V
+	public abstract fun setAttributeCountPerLinkLimit (I)V
+	public abstract fun setEventCountLimit (I)V
+	public abstract fun setLinkCountLimit (I)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/init/TracerProviderConfigDsl : io/opentelemetry/kotlin/init/ResourceConfigDsl {
+	public abstract fun addSpanProcessor (Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;)V
+	public abstract fun spanLimits (Lkotlin/jvm/functions/Function1;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/logging/Logger {
+	public abstract fun log (Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun logEvent (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/opentelemetry/kotlin/logging/Logger$DefaultImpls {
+	public static synthetic fun log$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static synthetic fun logEvent$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/logging/LoggerProvider {
+	public abstract fun getLogger (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/logging/Logger;
+}
+
+public final class io/opentelemetry/kotlin/logging/LoggerProvider$DefaultImpls {
+	public static synthetic fun getLogger$default (Lio/opentelemetry/kotlin/logging/LoggerProvider;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/logging/Logger;
+}
+
+public abstract interface class io/opentelemetry/kotlin/logging/export/LogRecordExporter : io/opentelemetry/kotlin/export/TelemetryCloseable {
+	public abstract fun export (Ljava/util/List;)Lio/opentelemetry/kotlin/export/OperationResultCode;
+}
+
+public abstract interface class io/opentelemetry/kotlin/logging/export/LogRecordProcessor : io/opentelemetry/kotlin/export/TelemetryCloseable {
+	public abstract fun onEmit (Lio/opentelemetry/kotlin/logging/model/ReadWriteLogRecord;Lio/opentelemetry/kotlin/context/Context;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/logging/model/ReadWriteLogRecord : io/opentelemetry/kotlin/attributes/MutableAttributeContainer, io/opentelemetry/kotlin/logging/model/ReadableLogRecord {
+	public abstract fun getBody ()Ljava/lang/String;
+	public abstract fun getEventName ()Ljava/lang/String;
+	public abstract fun getObservedTimestamp ()Ljava/lang/Long;
+	public abstract fun getSeverityNumber ()Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public abstract fun getSeverityText ()Ljava/lang/String;
+	public abstract fun getTimestamp ()Ljava/lang/Long;
+	public abstract fun setBody (Ljava/lang/String;)V
+	public abstract fun setEventName (Ljava/lang/String;)V
+	public abstract fun setObservedTimestamp (Ljava/lang/Long;)V
+	public abstract fun setSeverityNumber (Lio/opentelemetry/kotlin/logging/model/SeverityNumber;)V
+	public abstract fun setSeverityText (Ljava/lang/String;)V
+	public abstract fun setTimestamp (Ljava/lang/Long;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/logging/model/ReadableLogRecord {
+	public abstract fun getAttributes ()Ljava/util/Map;
+	public abstract fun getBody ()Ljava/lang/String;
+	public abstract fun getEventName ()Ljava/lang/String;
+	public abstract fun getInstrumentationScopeInfo ()Lio/opentelemetry/kotlin/InstrumentationScopeInfo;
+	public abstract fun getObservedTimestamp ()Ljava/lang/Long;
+	public abstract fun getResource ()Lio/opentelemetry/kotlin/resource/Resource;
+	public abstract fun getSeverityNumber ()Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public abstract fun getSeverityText ()Ljava/lang/String;
+	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+	public abstract fun getTimestamp ()Ljava/lang/Long;
+}
+
+public final class io/opentelemetry/kotlin/logging/model/SeverityNumber : java/lang/Enum {
+	public static final field DEBUG Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field DEBUG2 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field DEBUG3 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field DEBUG4 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field ERROR Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field ERROR2 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field ERROR3 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field ERROR4 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field FATAL Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field FATAL2 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field FATAL3 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field FATAL4 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field INFO Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field INFO2 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field INFO3 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field INFO4 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field TRACE Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field TRACE2 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field TRACE3 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field TRACE4 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field UNKNOWN Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field WARN Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field WARN2 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field WARN3 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static final field WARN4 Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getSeverityNumber ()I
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+	public static fun values ()[Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
+}
+
+public abstract interface class io/opentelemetry/kotlin/resource/MutableResource {
+	public abstract fun getAttributes ()Ljava/util/Map;
+	public abstract fun getSchemaUrl ()Ljava/lang/String;
+	public abstract fun setSchemaUrl (Ljava/lang/String;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/resource/Resource {
+	public abstract fun asNewResource (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/resource/Resource;
+	public abstract fun getAttributes ()Ljava/util/Map;
+	public abstract fun getSchemaUrl ()Ljava/lang/String;
+}
+
+public final class io/opentelemetry/kotlin/tracing/StatusCode : java/lang/Enum {
+	public static final field ERROR Lio/opentelemetry/kotlin/tracing/StatusCode;
+	public static final field OK Lio/opentelemetry/kotlin/tracing/StatusCode;
+	public static final field UNSET Lio/opentelemetry/kotlin/tracing/StatusCode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/StatusCode;
+	public static fun values ()[Lio/opentelemetry/kotlin/tracing/StatusCode;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/Tracer {
+	public abstract fun createSpan (Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/model/SpanKind;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/model/Span;
+}
+
+public final class io/opentelemetry/kotlin/tracing/Tracer$DefaultImpls {
+	public static synthetic fun createSpan$default (Lio/opentelemetry/kotlin/tracing/Tracer;Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/model/SpanKind;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/model/Span;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/TracerProvider {
+	public abstract fun getTracer (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/Tracer;
+}
+
+public final class io/opentelemetry/kotlin/tracing/TracerProvider$DefaultImpls {
+	public static synthetic fun getTracer$default (Lio/opentelemetry/kotlin/tracing/TracerProvider;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/Tracer;
+}
+
+public abstract interface annotation class io/opentelemetry/kotlin/tracing/TracingDsl : java/lang/annotation/Annotation {
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/data/EventData : io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getTimestamp ()J
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/data/LinkData : io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanData : io/opentelemetry/kotlin/tracing/data/SpanSchema {
+	public abstract fun getEndTimestamp ()Ljava/lang/Long;
+	public abstract fun getHasEnded ()Z
+	public abstract fun getInstrumentationScopeInfo ()Lio/opentelemetry/kotlin/InstrumentationScopeInfo;
+	public abstract fun getResource ()Lio/opentelemetry/kotlin/resource/Resource;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanSchema : io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun getEvents ()Ljava/util/List;
+	public abstract fun getLinks ()Ljava/util/List;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getParent ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+	public abstract fun getSpanKind ()Lio/opentelemetry/kotlin/tracing/model/SpanKind;
+	public abstract fun getStartTimestamp ()J
+	public abstract fun getStatus ()Lio/opentelemetry/kotlin/tracing/data/StatusData;
+}
+
+public abstract class io/opentelemetry/kotlin/tracing/data/StatusData {
+	public synthetic fun <init> (Lio/opentelemetry/kotlin/tracing/StatusCode;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getStatusCode ()Lio/opentelemetry/kotlin/tracing/StatusCode;
+}
+
+public final class io/opentelemetry/kotlin/tracing/data/StatusData$Error : io/opentelemetry/kotlin/tracing/data/StatusData {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class io/opentelemetry/kotlin/tracing/data/StatusData$Ok : io/opentelemetry/kotlin/tracing/data/StatusData {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/tracing/data/StatusData$Ok;
+}
+
+public final class io/opentelemetry/kotlin/tracing/data/StatusData$Unset : io/opentelemetry/kotlin/tracing/data/StatusData {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/tracing/data/StatusData$Unset;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanExporter : io/opentelemetry/kotlin/export/TelemetryCloseable {
+	public abstract fun export (Ljava/util/List;)Lio/opentelemetry/kotlin/export/OperationResultCode;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanProcessor : io/opentelemetry/kotlin/export/TelemetryCloseable {
+	public abstract fun isEndRequired ()Z
+	public abstract fun isStartRequired ()Z
+	public abstract fun onEnd (Lio/opentelemetry/kotlin/tracing/model/ReadableSpan;)V
+	public abstract fun onStart (Lio/opentelemetry/kotlin/tracing/model/ReadWriteSpan;Lio/opentelemetry/kotlin/context/Context;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/model/Link : io/opentelemetry/kotlin/attributes/MutableAttributeContainer, io/opentelemetry/kotlin/tracing/data/LinkData {
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadWriteSpan : io/opentelemetry/kotlin/tracing/model/ReadableSpan, io/opentelemetry/kotlin/tracing/model/Span {
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadableSpan : io/opentelemetry/kotlin/tracing/data/SpanData {
+	public abstract fun toSpanData ()Lio/opentelemetry/kotlin/tracing/data/SpanData;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/model/Span : io/opentelemetry/kotlin/tracing/data/SpanSchema, io/opentelemetry/kotlin/tracing/model/SpanRelationships {
+	public abstract fun end ()V
+	public abstract fun end (J)V
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getStatus ()Lio/opentelemetry/kotlin/tracing/data/StatusData;
+	public abstract fun isRecording ()Z
+	public abstract fun setName (Ljava/lang/String;)V
+	public abstract fun setStatus (Lio/opentelemetry/kotlin/tracing/data/StatusData;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanContext {
+	public abstract fun getSpanId ()Ljava/lang/String;
+	public abstract fun getSpanIdBytes ()[B
+	public abstract fun getTraceFlags ()Lio/opentelemetry/kotlin/tracing/model/TraceFlags;
+	public abstract fun getTraceId ()Ljava/lang/String;
+	public abstract fun getTraceIdBytes ()[B
+	public abstract fun getTraceState ()Lio/opentelemetry/kotlin/tracing/model/TraceState;
+	public abstract fun isRemote ()Z
+	public abstract fun isValid ()Z
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEvent : io/opentelemetry/kotlin/attributes/MutableAttributeContainer, io/opentelemetry/kotlin/tracing/data/EventData {
+}
+
+public final class io/opentelemetry/kotlin/tracing/model/SpanKind : java/lang/Enum {
+	public static final field CLIENT Lio/opentelemetry/kotlin/tracing/model/SpanKind;
+	public static final field CONSUMER Lio/opentelemetry/kotlin/tracing/model/SpanKind;
+	public static final field INTERNAL Lio/opentelemetry/kotlin/tracing/model/SpanKind;
+	public static final field PRODUCER Lio/opentelemetry/kotlin/tracing/model/SpanKind;
+	public static final field SERVER Lio/opentelemetry/kotlin/tracing/model/SpanKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/model/SpanKind;
+	public static fun values ()[Lio/opentelemetry/kotlin/tracing/model/SpanKind;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanRelationships : io/opentelemetry/kotlin/attributes/MutableAttributeContainer {
+	public abstract fun addEvent (Ljava/lang/String;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun addLink (Lio/opentelemetry/kotlin/tracing/model/SpanContext;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/opentelemetry/kotlin/tracing/model/SpanRelationships$DefaultImpls {
+	public static synthetic fun addEvent$default (Lio/opentelemetry/kotlin/tracing/model/SpanRelationships;Ljava/lang/String;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static synthetic fun addLink$default (Lio/opentelemetry/kotlin/tracing/model/SpanRelationships;Lio/opentelemetry/kotlin/tracing/model/SpanContext;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/model/TraceFlags {
+	public abstract fun getHex ()Ljava/lang/String;
+	public abstract fun isRandom ()Z
+	public abstract fun isSampled ()Z
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/model/TraceState {
+	public abstract fun asMap ()Ljava/util/Map;
+	public abstract fun get (Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun put (Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/model/TraceState;
+	public abstract fun remove (Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/model/TraceState;
+}
+

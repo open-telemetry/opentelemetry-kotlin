@@ -1,0 +1,45 @@
+[
+  {
+    "name": "test_span",
+    "kind": "INTERNAL",
+    "statusData": {
+      "name": "UNSET",
+      "description": ""
+    },
+    "spanContext": {
+      "traceId": "1e6b4ea924f9baa8e77bcc2f537f0b02",
+      "spanId": "2cc2b48c50aefe53",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "parentSpanContext": {
+      "traceId": "00000000000000000000000000000000",
+      "spanId": "0000000000000000",
+      "traceFlags": "00",
+      "traceState": {}
+    },
+    "startTimestamp": 0,
+    "attributes": {},
+    "events": [],
+    "links": [],
+    "endTimestamp": 0,
+    "ended": true,
+    "totalRecordedEvents": 0,
+    "totalRecordedLinks": 0,
+    "totalAttributeCount": 0,
+    "resource": {
+      "schemaUrl": "https://example.com/some_schema.json",
+      "attributes": {
+        "environment": "test",
+        "service.name": "test-service",
+        "service.version": "1.0.0"
+      }
+    },
+    "instrumentationScopeInfo": {
+      "name": "test_tracer",
+      "version": "null",
+      "schemaUrl": "null",
+      "attributes": {}
+    }
+  }
+]

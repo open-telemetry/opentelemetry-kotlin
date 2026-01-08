@@ -1,0 +1,31 @@
+[
+  {
+    "resource": {
+      "schemaUrl": "https://example.com/foo",
+      "attributes": {
+        "resource.foo": "bar"
+      }
+    },
+    "instrumentationScopeInfo": {
+      "name": "test",
+      "version": "0.1.0",
+      "schemaUrl": "https://example.com/bar/",
+      "attributes": {
+        "instrumentation_scope.foo": "bar"
+      }
+    },
+    "timestampEpochNanos": 0,
+    "observedTimestampEpochNanos": 0,
+    "spanContext": {
+      "traceId": "00000000000000000000000000000000",
+      "spanId": "0000000000000000",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "severity": "UNKNOWN",
+    "severityText": null,
+    "body": "test",
+    "attributes": {},
+    "totalAttributeCount": 0
+  }
+]

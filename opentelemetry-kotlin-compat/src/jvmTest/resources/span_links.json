@@ -1,0 +1,110 @@
+[
+  {
+    "name": "span_links",
+    "kind": "INTERNAL",
+    "statusData": {
+      "name": "UNSET",
+      "description": ""
+    },
+    "spanContext": {
+      "traceId": "f9a51310c8eed9889d46ef3bafda11b1",
+      "spanId": "ac2c315346a8f5dc",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "parentSpanContext": {
+      "traceId": "00000000000000000000000000000000",
+      "spanId": "0000000000000000",
+      "traceFlags": "00",
+      "traceState": {}
+    },
+    "startTimestamp": 0,
+    "attributes": {},
+    "events": [],
+    "links": [
+      {
+        "spanContext": {
+          "traceId": "1e6b4ea924f9baa8e77bcc2f537f0b02",
+          "spanId": "2cc2b48c50aefe53",
+          "traceFlags": "01",
+          "traceState": {}
+        },
+        "attributes": {
+          "bool_key": "true",
+          "bool_list_key": "[true]",
+          "double_key": "3.14",
+          "double_list_key": "[3.14]",
+          "long_key": "42",
+          "long_list_key": "[42]",
+          "string_key": "second_value",
+          "string_list_key": "[a]"
+        },
+        "totalAttributeCount": 8
+      }
+    ],
+    "endTimestamp": 0,
+    "ended": true,
+    "totalRecordedEvents": 0,
+    "totalRecordedLinks": 1,
+    "totalAttributeCount": 0,
+    "resource": {
+      "schemaUrl": "null",
+      "attributes": {
+        "service.name": "unknown_service:java",
+        "telemetry.sdk.language": "java",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "UNKNOWN"
+      }
+    },
+    "instrumentationScopeInfo": {
+      "name": "test_tracer",
+      "version": "0.1.0",
+      "schemaUrl": "null",
+      "attributes": {}
+    }
+  },
+  {
+    "name": "linked_span",
+    "kind": "INTERNAL",
+    "statusData": {
+      "name": "UNSET",
+      "description": ""
+    },
+    "spanContext": {
+      "traceId": "1e6b4ea924f9baa8e77bcc2f537f0b02",
+      "spanId": "2cc2b48c50aefe53",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "parentSpanContext": {
+      "traceId": "00000000000000000000000000000000",
+      "spanId": "0000000000000000",
+      "traceFlags": "00",
+      "traceState": {}
+    },
+    "startTimestamp": 0,
+    "attributes": {},
+    "events": [],
+    "links": [],
+    "endTimestamp": 0,
+    "ended": true,
+    "totalRecordedEvents": 0,
+    "totalRecordedLinks": 0,
+    "totalAttributeCount": 0,
+    "resource": {
+      "schemaUrl": "null",
+      "attributes": {
+        "service.name": "unknown_service:java",
+        "telemetry.sdk.language": "java",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "UNKNOWN"
+      }
+    },
+    "instrumentationScopeInfo": {
+      "name": "test_tracer",
+      "version": "0.1.0",
+      "schemaUrl": "null",
+      "attributes": {}
+    }
+  }
+]

@@ -1,0 +1,34 @@
+[
+  {
+    "resource": {
+      "schemaUrl": "https://example.com/foo",
+      "attributes": {
+        "resource.foo": "bar"
+      }
+    },
+    "instrumentationScopeInfo": {
+      "name": "test_logger",
+      "version": "null",
+      "schemaUrl": "null",
+      "attributes": {}
+    },
+    "timestampEpochNanos": 123,
+    "observedTimestampEpochNanos": 456,
+    "spanContext": {
+      "traceId": "2cc2b48c50aefe53b3974ed91e6b4ea9",
+      "spanId": "e77bcc2f537f0b02",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "severity": "INFO",
+    "severityText": "info",
+    "body": "override",
+    "eventName": "override",
+    "attributes": {
+      "experiment_enabled": "true",
+      "foo": "bar",
+      "key": "value"
+    },
+    "totalAttributeCount": 3
+  }
+]

@@ -1,0 +1,71 @@
+# https://detekt.dev/docs/introduction/configurations/
+build:
+  maxIssues: 0
+complexity:
+  NestedBlockDepth:
+    threshold: 10
+  LongMethod:
+    active: false
+  LongParameterList:
+    constructorThreshold: 30
+    functionThreshold: 31
+    ignoreDataClasses: true
+  TooManyFunctions:
+    thresholdInFiles: 31
+    thresholdInClasses: 31
+    thresholdInInterfaces: 31
+    thresholdInObjects: 31
+    thresholdInEnums: 31
+    ignoreOverridden: true
+  CyclomaticComplexMethod:
+    active: false
+empty-blocks:
+  EmptyFunctionBlock:
+    ignoreOverridden: true
+exceptions:
+  InstanceOfCheckForException:
+    active: false
+  SwallowedException:
+    active: false
+  TooGenericExceptionCaught:
+    active: false
+formatting:
+  ArgumentListWrapping:
+    maxLineLength: 140
+  MaximumLineLength:
+    maxLineLength: 140
+  useTrailingCommaOnCallSite:
+    active: true
+  useTrailingCommaOnDeclarationSite:
+    active: true
+potential-bugs:
+  ElseCaseInsteadOfExhaustiveWhen:
+    active: true
+style:
+  ForbiddenComment:
+    active: false
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    maxLineLength: 140
+  ReturnCount:
+    active: false
+  BracesOnIfStatements:
+    active: true
+    singleLine: 'always'
+    multiLine: 'always'
+  BracesOnWhenStatements:
+    active: true
+    singleLine: 'consistent'
+    multiLine: 'consistent'
+  MandatoryBracesLoops:
+    active: true
+  SpacingBetweenPackageAndImports:
+    active: true
+  UnusedImports:
+    active: true
+
+naming:
+  ClassNaming:
+    active: true
+    classPattern: '^(?!.*Utils)[A-Z][A-Za-z0-9]*$'
