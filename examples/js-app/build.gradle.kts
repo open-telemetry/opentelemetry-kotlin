@@ -19,7 +19,7 @@ kotlin {
         val jsMain by getting {
             dependencies {
                 implementation(project(":examples:example-common"))
-                implementation(project(":opentelemetry-kotlin"))
+                implementation(project(":core"))
             }
         }
     }

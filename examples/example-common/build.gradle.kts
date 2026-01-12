@@ -30,17 +30,17 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(project(":opentelemetry-kotlin-api"))
-                api(project(":opentelemetry-kotlin-api-ext"))
-                api(project(":opentelemetry-kotlin-noop"))
-                implementation(project(":opentelemetry-kotlin-model"))
-                implementation(project(":opentelemetry-kotlin-implementation"))
+                api(project(":api"))
+                api(project(":api-ext"))
+                api(project(":noop"))
+                implementation(project(":model"))
+                implementation(project(":implementation"))
             }
         }
         val jvmMain by getting {
             dependencies {
-                api(project(":opentelemetry-kotlin-exporters-core"))
-                api(project(":opentelemetry-kotlin-exporters-otlp"))
+                api(project(":exporters-core"))
+                api(project(":exporters-otlp"))
             }
         }
     }

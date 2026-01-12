@@ -46,10 +46,10 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
-    implementation(platform(libs.opentelemetry.kotlin.compat.bom))
-    implementation(libs.opentelemetry.kotlin.api)
-    implementation(libs.opentelemetry.kotlin.api.ext)
-    implementation(libs.opentelemetry.kotlin.compat)
+    implementation(platform(libs.otel.kotlin.compat.bom))
+    implementation(libs.otel.kotlin.api)
+    implementation(libs.otel.kotlin.api.ext)
+    implementation(libs.otel.kotlin.compat)
     implementation(libs.opentelemetry.context)
     implementation(libs.opentelemetry.exporter.otlp)
     implementation(libs.opentelemetry.exporter.logging)
@@ -66,7 +66,7 @@ dependencies {
     testImplementation(libs.junit4)
     testRuntimeOnly(libs.junit.vintage.engine)
 
-    testImplementation(libs.opentelemetry.kotlin.testing)
+    testImplementation(libs.otel.kotlin.testing)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

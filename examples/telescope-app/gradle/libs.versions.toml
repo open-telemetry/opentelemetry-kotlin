@@ -33,11 +33,11 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-opentelemetry-kotlin-compat-bom = { group = "io.opentelemetry.kotlin", name = "opentelemetry-kotlin-compat-bom", version.ref = "opentelemetry-kotlin" }
-opentelemetry-kotlin-api = { group = "io.opentelemetry.kotlin", name = "opentelemetry-kotlin-api", version.ref = "opentelemetry-kotlin" }
-opentelemetry-kotlin-testing = { group = "io.opentelemetry.kotlin", name = "opentelemetry-kotlin-testing", version.ref = "opentelemetry-kotlin" }
-opentelemetry-kotlin-api-ext = { group = "io.opentelemetry.kotlin", name = "opentelemetry-kotlin-api-ext", version.ref = "opentelemetry-kotlin" }
-opentelemetry-kotlin-compat = { group = "io.opentelemetry.kotlin", name = "opentelemetry-kotlin-compat", version.ref = "opentelemetry-kotlin" }
+otel-kotlin-compat-bom = { group = "io.opentelemetry.kotlin", name = "compat-bom", version.ref = "opentelemetry-kotlin" }
+otel-kotlin-api = { group = "io.opentelemetry.kotlin", name = "api", version.ref = "opentelemetry-kotlin" }
+otel-kotlin-testing = { group = "io.opentelemetry.kotlin", name = "testing", version.ref = "opentelemetry-kotlin" }
+otel-kotlin-api-ext = { group = "io.opentelemetry.kotlin", name = "api-ext", version.ref = "opentelemetry-kotlin" }
+otel-kotlin-compat = { group = "io.opentelemetry.kotlin", name = "compat", version.ref = "opentelemetry-kotlin" }
 opentelemetry-context = { group = "io.opentelemetry", name = "opentelemetry-context" }
 opentelemetry-exporter-otlp = { group = "io.opentelemetry", name = "opentelemetry-exporter-otlp" }
 opentelemetry-exporter-logging = { group = "io.opentelemetry", name = "opentelemetry-exporter-logging" }
