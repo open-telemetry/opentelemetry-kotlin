@@ -116,6 +116,7 @@ For more information about the maintainer role, see the [community repository](h
 
 - [Hanson Ho](https://github.com/bidetofevil), Embrace
 - [Masaki Sugimoto](https://github.com/Msksgm), Henry, Inc
+- [Francisco Prieto](https://github.com/priettt), Embrace
 
 For more information about the approver role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#approver).
 
