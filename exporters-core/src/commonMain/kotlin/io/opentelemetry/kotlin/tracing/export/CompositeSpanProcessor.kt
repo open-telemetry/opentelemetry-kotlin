@@ -40,6 +40,20 @@ internal class CompositeSpanProcessor(
         }
     }
 
+    override fun onEnding(span: ReadWriteSpan) {
+        lock.write {
+            batchExportOperation(
+                processors,
+                sdkErrorHandler
+            ) {
+                if (it.isEndRequired()) {
+                    it.onEnding(span)
+                }
+                OperationResultCode.Success
+            }
+        }
+    }
+
     override fun onEnd(span: ReadableSpan) {
         lock.write {
             batchExportOperation(

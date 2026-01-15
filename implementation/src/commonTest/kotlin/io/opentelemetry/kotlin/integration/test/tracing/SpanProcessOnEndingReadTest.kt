@@ -14,11 +14,11 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
-internal class SpanProcessOnStartOverrideTest {
+internal class SpanProcessOnEndingReadTest {
 
     private lateinit var harness: IntegrationTestHarness
 
@@ -29,26 +29,22 @@ internal class SpanProcessOnStartOverrideTest {
     }
 
     @Test
-    fun testOverridePropertiesInProcessor() {
-        harness.config.spanProcessors.add(OnStartSpanProcessor())
+    fun testReadPropertiesInProcessor() {
+        harness.config.spanProcessors.add(OnEndingSpanProcessor())
         harness.tracer.createSpan("span") {
             setStringAttribute("key", "value")
             addEvent("test")
-            addLink(FakeSpanContext.INVALID)
-        }
+            addLink(FakeSpanContext.INVALID) {
+                setStringAttribute("foo", "bar")
+            }
+        }.end()
         harness.assertSpans(
             expectedCount = 1,
-            goldenFileName = "span_override_on_start.json",
+            goldenFileName = "span_override_on_ending.json",
         )
     }
 
-    private class OnStartSpanProcessor : SpanProcessor {
-        override fun onStart(
-            span: ReadWriteSpan,
-            parentContext: Context
-        ) {
-            span.handleSpan()
-        }
+    private class OnEndingSpanProcessor : SpanProcessor {
 
         private fun ReadWriteSpan.handleSpan() {
             // assert properties can be read
@@ -57,7 +53,7 @@ internal class SpanProcessOnStartOverrideTest {
             assertFalse(hasEnded)
             assertEquals(SpanKind.INTERNAL, spanKind)
             assertEquals(0, startTimestamp)
-            assertNull(endTimestamp)
+            assertNotNull(endTimestamp)
             assertTrue(spanContext.isValid)
             assertFalse(parent.isValid)
             assertTrue(resource.attributes.isEmpty())
@@ -79,7 +75,15 @@ internal class SpanProcessOnStartOverrideTest {
             end(678)
         }
 
+        override fun onStart(
+            span: ReadWriteSpan,
+            parentContext: Context
+        ) {
+        }
+
         override fun onEnding(span: ReadWriteSpan) {
+            assertNotNull(span.endTimestamp)
+            span.handleSpan()
         }
 
         override fun onEnd(span: ReadableSpan) {

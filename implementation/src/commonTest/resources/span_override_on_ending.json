@@ -1,0 +1,88 @@
+[
+  {
+    "name": "override",
+    "kind": "INTERNAL",
+    "statusData": {
+      "name": "ERROR",
+      "description": "override"
+    },
+    "spanContext": {
+      "traceId": "2cc2b48c50aefe53b3974ed91e6b4ea9",
+      "spanId": "e77bcc2f537f0b02",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "parentSpanContext": {
+      "traceId": "00000000000000000000000000000000",
+      "spanId": "0000000000000000",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "startTimestamp": 0,
+    "attributes": {
+      "key": "value",
+      "foo": "bar"
+    },
+    "events": [
+      {
+        "name": "test",
+        "attributes": {},
+        "timestamp": 0,
+        "totalAttributesCount": 0
+      },
+      {
+        "name": "test",
+        "attributes": {
+          "foo": "bar"
+        },
+        "timestamp": 5,
+        "totalAttributesCount": 1
+      }
+    ],
+    "links": [
+      {
+        "spanContext": {
+          "traceId": "00000000000000000000000000000000",
+          "spanId": "0000000000000000",
+          "traceFlags": "00",
+          "traceState": {
+            "foo": "bar"
+          }
+        },
+        "attributes": {
+          "foo": "bar"
+        },
+        "totalAttributeCount": 1
+      },
+      {
+        "spanContext": {
+          "traceId": "12345678901234567890123456789012",
+          "spanId": "1234567890123456",
+          "traceFlags": "00",
+          "traceState": {
+            "foo": "bar"
+          }
+        },
+        "attributes": {
+          "foo": "bar"
+        },
+        "totalAttributeCount": 1
+      }
+    ],
+    "endTimestamp": 0,
+    "ended": true,
+    "totalRecordedEvents": 2,
+    "totalRecordedLinks": 2,
+    "totalAttributeCount": 2,
+    "resource": {
+      "schemaUrl": "null",
+      "attributes": {}
+    },
+    "instrumentationScopeInfo": {
+      "name": "test_tracer",
+      "version": "0.1.0",
+      "schemaUrl": "null",
+      "attributes": {}
+    }
+  }
+]

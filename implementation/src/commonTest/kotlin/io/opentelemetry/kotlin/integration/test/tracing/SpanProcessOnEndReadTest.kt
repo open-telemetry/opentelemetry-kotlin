@@ -45,15 +45,6 @@ internal class SpanProcessOnEndReadTest {
     }
 
     private class OnEndSpanProcessor : SpanProcessor {
-        override fun onStart(
-            span: ReadWriteSpan,
-            parentContext: Context
-        ) {
-            span.handleSpan()
-        }
-
-        override fun onEnd(span: ReadableSpan) {
-        }
 
         private fun ReadableSpan.handleSpan() {
             // assert properties can be read
@@ -70,6 +61,19 @@ internal class SpanProcessOnEndReadTest {
             assertEquals(mapOf("key" to "value"), attributes)
             assertEquals("test", events.single().name)
             assertEquals("bar", links.single().attributes["foo"])
+        }
+
+        override fun onStart(
+            span: ReadWriteSpan,
+            parentContext: Context
+        ) {
+        }
+
+        override fun onEnd(span: ReadableSpan) {
+            span.handleSpan()
+        }
+
+        override fun onEnding(span: ReadWriteSpan) {
         }
 
         override fun isStartRequired(): Boolean = true

@@ -52,6 +52,9 @@ internal class SpanProcessNaughtyOnEndTest {
             ref = span
         }
 
+        override fun onEnding(span: ReadWriteSpan) {
+        }
+
         override fun onEnd(span: ReadableSpan) {
             ref.handleSpan()
         }

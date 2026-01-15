@@ -55,6 +55,10 @@ internal class OtelJavaSpanProcessorAdapterTest {
                     endAction = assertReadableSpan(
                         expectedName = "test",
                         expectedSpanSupplier = { span }
+                    ),
+                    endingAction = assertReadableSpan(
+                        expectedName = "test",
+                        expectedSpanSupplier = { span }
                     )
                 )
             )

@@ -18,6 +18,9 @@ internal class ExampleSpanProcessor : SpanProcessor {
     ) {
     }
 
+    override fun onEnding(span: ReadWriteSpan) {
+    }
+
     override fun onEnd(span: ReadableSpan) {
         exporter.export(mutableListOf(span.toSpanData()))
     }
