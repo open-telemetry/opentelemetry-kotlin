@@ -10,14 +10,23 @@ import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 /**
  * A Tracer is responsible for creating spans.
  *
- * https://opentelemetry.io/docs/specs/otel/trace/api/#tracerprovider
+ * https://opentelemetry.io/docs/specs/otel/trace/api/#tracer
  */
 @ExperimentalApi
 @ThreadSafe
 public interface Tracer {
 
     /**
-     * Creates a new span.
+     * Creates a new span. A span must have a non-empty name, and can optionally include:
+     *
+     * @param parentContext - a context object containing the parent span. If this is not set
+     * explicitly, the implicit context via [io.opentelemetry.kotlin.factory.ContextFactory.implicitContext] will be used.
+     * @param spanKind - the kind of span. Defaults to [SpanKind.INTERNAL].
+     * @param startTimestamp - the start time of the span in nanoseconds. Defaults to the current time.
+     * @param action - an action that allows attributes, links, and events to be added to the span. It
+     * is possible to add these after span creation too, but it is preferred to add them before if possible.
+     *
+     * https://opentelemetry.io/docs/specs/otel/trace/api/#span
      */
     @ThreadSafe
     public fun createSpan(
