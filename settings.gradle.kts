@@ -32,6 +32,7 @@ include(
     ":benchmark-jvm",
     ":benchmark-fixtures",
     ":exporters-core",
+    ":exporters-in-memory",
     ":exporters-otlp",
     ":exporters-protobuf",
     ":java-typealiases",

@@ -45,6 +45,7 @@ public fun createCompositeLogRecordExporter(exporters: List<LogRecordExporter>):
  * Creates a batching processor that sends telemetry in batches.
  * See https://opentelemetry.io/docs/specs/otel/logs/sdk/#batching-processor
  */
+@ExperimentalApi
 public fun createBatchLogRecordProcessor(
     exporter: LogRecordExporter,
     maxQueueSize: Int = MAX_QUEUE_SIZE,

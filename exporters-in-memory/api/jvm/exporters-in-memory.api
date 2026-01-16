@@ -1,0 +1,16 @@
+public abstract interface class io/opentelemetry/kotlin/logging/export/InMemoryLogRecordExporter : io/opentelemetry/kotlin/logging/export/LogRecordExporter {
+	public abstract fun getExportedLogRecords ()Ljava/util/List;
+}
+
+public final class io/opentelemetry/kotlin/logging/export/InMemoryLogRecordExporterApiKt {
+	public static final fun createInMemoryLogRecordExporter ()Lio/opentelemetry/kotlin/logging/export/InMemoryLogRecordExporter;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/export/InMemorySpanExporter : io/opentelemetry/kotlin/tracing/export/SpanExporter {
+	public abstract fun getExportedSpans ()Ljava/util/List;
+}
+
+public final class io/opentelemetry/kotlin/tracing/export/InMemorySpanExporterApiKt {
+	public static final fun createInMemorySpanExporter ()Lio/opentelemetry/kotlin/tracing/export/InMemorySpanExporter;
+}
+
