@@ -3,10 +3,12 @@ package io.opentelemetry.kotlin.export
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.compression.compress
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsBytes
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.export.OtlpResponse.ClientError
@@ -27,6 +29,7 @@ internal class OtlpClient(
 ) {
 
     private val contentType = ContentType.Companion.parse("application/x-protobuf")
+    private val userAgent = "OTel-OTLP-Exporter-Kotlin/${BuildKonfig.VERSION}"
 
     suspend fun exportLogs(telemetry: List<ReadableLogRecord>): OtlpResponse = exportTelemetry(
         OtlpEndpoint.Logs,
@@ -50,13 +53,13 @@ internal class OtlpClient(
             val response = httpClient.post(url) {
                 compress("gzip")
                 contentType(contentType)
+                header(HttpHeaders.UserAgent, userAgent)
                 setBody(requestSerializer())
             }
-            val code = response.status.value
-            when {
-                code == 200 -> Success
-                code >= 400 && code <= 499 -> ClientError(code, onError(response.bodyAsBytes()))
-                code >= 500 && code <= 599 -> ServerError(code, onError(response.bodyAsBytes()))
+            when (val code = response.status.value) {
+                200 -> Success
+                in 400..499 -> ClientError(code, onError(response.bodyAsBytes()))
+                in 500..599 -> ServerError(code, onError(response.bodyAsBytes()))
                 else -> Unknown
             }
         } catch (ignored: HttpRequestTimeoutException) {

@@ -5,6 +5,15 @@ plugins {
     id("signing")
     id("com.vanniktech.maven.publish")
     id("org.jetbrains.kotlinx.kover")
+    alias(libs.plugins.buildKonfig)
+}
+
+buildkonfig {
+    packageName = "io.opentelemetry.kotlin.export"
+
+    defaultConfigs {
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "VERSION", project.version.toString())
+    }
 }
 
 kotlin {
@@ -35,4 +44,8 @@ kotlin {
             }
         }
     }
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    exclude { it.file.path.contains("buildkonfig") }
 }
