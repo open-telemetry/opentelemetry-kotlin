@@ -28,6 +28,7 @@ internal class OtlpClientTest {
     private val logRecords = listOf(FakeReadableLogRecord())
     private val spans = listOf(FakeSpanData())
     private val baseUrl = "http://localhost:1234"
+    private val expectedUserAgent = "OTel-OTLP-Exporter-Kotlin/${BuildKonfig.VERSION}"
 
     private lateinit var client: OtlpClient
     private lateinit var server: MockEngine
@@ -145,6 +146,28 @@ internal class OtlpClientTest {
             mockResponseStatus = HttpStatusCode.OK,
             expectedResponse = OtlpResponse.Unknown,
         )
+    }
+
+    @Test
+    fun testExportLogsSetsUserAgentHeader() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        client.exportLogs(logRecords)
+
+        val request = server.requestHistory.single()
+        val headers = request.headers.toMap().mapValues { it.value.joinToString() }
+        val userAgent = headers["User-Agent"]
+        assertEquals(expectedUserAgent, userAgent)
+    }
+
+    @Test
+    fun testExportTracesSetsUserAgentHeader() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        client.exportTraces(spans)
+
+        val request = server.requestHistory.single()
+        val headers = request.headers.toMap().mapValues { it.value.joinToString() }
+        val userAgent = headers["User-Agent"]
+        assertEquals(expectedUserAgent, userAgent)
     }
 
     private suspend fun sendAndAssertLogRequest(
