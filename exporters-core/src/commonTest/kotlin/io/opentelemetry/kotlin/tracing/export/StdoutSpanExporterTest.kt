@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.tracing.data.FakeEventData
 import io.opentelemetry.kotlin.tracing.data.FakeLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.SpanKind
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -75,13 +76,13 @@ internal class StdoutSpanExporterTest {
     }
 
     @Test
-    fun testForceFlush() {
+    fun testForceFlush() = runTest {
         val exporter = StdoutSpanExporter()
         assertEquals(OperationResultCode.Success, exporter.forceFlush())
     }
 
     @Test
-    fun testShutdown() {
+    fun testShutdown() = runTest {
         val exporter = StdoutSpanExporter()
         assertEquals(OperationResultCode.Success, exporter.shutdown())
     }

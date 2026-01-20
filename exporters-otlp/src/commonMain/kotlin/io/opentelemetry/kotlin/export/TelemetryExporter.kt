@@ -49,9 +49,9 @@ internal class TelemetryExporter<T>(
         }
     }
 
-    override fun forceFlush(): OperationResultCode = Success
+    override suspend fun forceFlush(): OperationResultCode = Success
 
-    override fun shutdown(): OperationResultCode {
+    override suspend fun shutdown(): OperationResultCode {
         scope.cancel()
         return Success
     }

@@ -41,6 +41,6 @@ class FakeSpanProcessor(
 
     override fun isStartRequired(): Boolean = startRequired
     override fun isEndRequired(): Boolean = endRequired
-    override fun forceFlush(): OperationResultCode = flushCode()
-    override fun shutdown(): OperationResultCode = shutdownCode()
+    override suspend fun forceFlush(): OperationResultCode = flushCode()
+    override suspend fun shutdown(): OperationResultCode = shutdownCode()
 }

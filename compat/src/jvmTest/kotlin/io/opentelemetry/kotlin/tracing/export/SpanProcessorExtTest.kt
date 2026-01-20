@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanProcessor
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import kotlin.test.assertSame
@@ -35,7 +36,7 @@ internal class SpanProcessorExtTest {
     }
 
     @Test
-    fun testFlush() {
+    fun testFlush() = runTest {
         val impl = FakeOtelJavaSpanProcessor()
         val adapter = impl.toOtelKotlinSpanProcessor()
         adapter.forceFlush()
@@ -43,7 +44,7 @@ internal class SpanProcessorExtTest {
     }
 
     @Test
-    fun testShutdown() {
+    fun testShutdown() = runTest {
         val impl = FakeOtelJavaSpanProcessor()
         val adapter = impl.toOtelKotlinSpanProcessor()
         adapter.shutdown()

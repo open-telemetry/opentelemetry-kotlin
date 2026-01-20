@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
 import io.opentelemetry.kotlin.logging.model.SeverityNumber
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -68,13 +69,13 @@ internal class StdoutLogRecordExporterTest {
     }
 
     @Test
-    fun testForceFlush() {
+    fun testForceFlush() = runTest {
         val exporter = StdoutLogRecordExporter()
         assertEquals(OperationResultCode.Success, exporter.forceFlush())
     }
 
     @Test
-    fun testShutdown() {
+    fun testShutdown() = runTest {
         val exporter = StdoutLogRecordExporter()
         assertEquals(OperationResultCode.Success, exporter.shutdown())
     }

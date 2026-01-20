@@ -61,7 +61,7 @@ internal class OtlpHttpSpanExporterTest {
     }
 
     @Test
-    fun testExportForceFlush() {
+    fun testExportForceFlush() = runTest {
         val code = exporter.forceFlush()
         assertEquals(OperationResultCode.Success, code)
     }

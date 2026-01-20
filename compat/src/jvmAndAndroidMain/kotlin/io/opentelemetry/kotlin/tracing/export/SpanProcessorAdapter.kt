@@ -37,6 +37,6 @@ internal class SpanProcessorAdapter(
 
     override fun isStartRequired(): Boolean = impl.isStartRequired
     override fun isEndRequired(): Boolean = impl.isEndRequired
-    override fun shutdown(): OperationResultCode = impl.shutdown().toOperationResultCode()
-    override fun forceFlush(): OperationResultCode = impl.forceFlush().toOperationResultCode()
+    override suspend fun shutdown(): OperationResultCode = impl.shutdown().toOperationResultCode()
+    override suspend fun forceFlush(): OperationResultCode = impl.forceFlush().toOperationResultCode()
 }

@@ -55,7 +55,7 @@ internal class BatchTelemetryProcessor<T>(
         }
     }
 
-    fun forceFlush(): OperationResultCode {
+    suspend fun forceFlush(): OperationResultCode {
         scope.launch {
             flushInternal()
         }

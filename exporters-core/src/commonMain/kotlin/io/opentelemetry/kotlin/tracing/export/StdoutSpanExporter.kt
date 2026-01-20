@@ -20,8 +20,8 @@ internal class StdoutSpanExporter(
         return OperationResultCode.Success
     }
 
-    override fun forceFlush(): OperationResultCode = OperationResultCode.Success
-    override fun shutdown(): OperationResultCode = OperationResultCode.Success
+    override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
+    override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
 
     /**
      * Formats a [SpanData] into a human-readable string representation.

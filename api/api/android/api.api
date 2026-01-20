@@ -75,8 +75,8 @@ public final class io/opentelemetry/kotlin/export/OperationResultCode$Success : 
 }
 
 public abstract interface class io/opentelemetry/kotlin/export/TelemetryCloseable {
-	public abstract fun forceFlush ()Lio/opentelemetry/kotlin/export/OperationResultCode;
-	public abstract fun shutdown ()Lio/opentelemetry/kotlin/export/OperationResultCode;
+	public abstract fun forceFlush (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun shutdown (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {

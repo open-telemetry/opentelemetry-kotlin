@@ -18,6 +18,6 @@ class FakeLogRecordExporter(
         return action(telemetry)
     }
 
-    override fun forceFlush(): OperationResultCode = flushCode()
-    override fun shutdown(): OperationResultCode = shutdownCode()
+    override suspend fun forceFlush(): OperationResultCode = flushCode()
+    override suspend fun shutdown(): OperationResultCode = shutdownCode()
 }

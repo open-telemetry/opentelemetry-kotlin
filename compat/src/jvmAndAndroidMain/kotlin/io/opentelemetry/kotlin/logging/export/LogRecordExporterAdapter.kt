@@ -16,6 +16,6 @@ internal class LogRecordExporterAdapter(
         return code.toOperationResultCode()
     }
 
-    override fun shutdown(): OperationResultCode = impl.shutdown().toOperationResultCode()
-    override fun forceFlush(): OperationResultCode = impl.flush().toOperationResultCode()
+    override suspend fun shutdown(): OperationResultCode = impl.shutdown().toOperationResultCode()
+    override suspend fun forceFlush(): OperationResultCode = impl.flush().toOperationResultCode()
 }

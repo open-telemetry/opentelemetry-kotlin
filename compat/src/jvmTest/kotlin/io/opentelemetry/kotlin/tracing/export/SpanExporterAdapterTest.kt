@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanExporter
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusCode
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -24,13 +25,13 @@ internal class SpanExporterAdapterTest {
     }
 
     @Test
-    fun `test flush`() {
+    fun `test flush`() = runTest {
         assertEquals(OperationResultCode.Success, wrapper.forceFlush())
         assertEquals(1, impl.flushCount)
     }
 
     @Test
-    fun `test shutdown`() {
+    fun `test shutdown`() = runTest {
         assertEquals(OperationResultCode.Success, wrapper.shutdown())
         assertEquals(1, impl.shutdownCount)
     }
@@ -55,7 +56,10 @@ internal class SpanExporterAdapterTest {
         assertEquals(originalScope.name, observedScope.name)
         assertEquals(originalScope.version, observedScope.version)
         assertEquals(originalScope.schemaUrl, observedScope.schemaUrl)
-        assertEquals(emptyMap(), observedScope.attributes.convertToMap()) // otel-java don't support this
+        assertEquals(
+            emptyMap(),
+            observedScope.attributes.convertToMap()
+        ) // otel-java don't support this
 
         val originalEvent = original.events.single()
         val observedEvent = observed.events.single()

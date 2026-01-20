@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
+import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,7 +26,7 @@ internal class CompositeSpanExporterTest {
     }
 
     @Test
-    fun testNoSpanExporters() {
+    fun testNoSpanExporters() = runTest {
         val exporter =
             CompositeSpanExporter(
                 emptyList(),
@@ -40,7 +41,7 @@ internal class CompositeSpanExporterTest {
     }
 
     @Test
-    fun testMultipleSpanExporters() {
+    fun testMultipleSpanExporters() = runTest {
         val first = FakeSpanExporter()
         val second = FakeSpanExporter()
         val exporter =
@@ -60,7 +61,7 @@ internal class CompositeSpanExporterTest {
     }
 
     @Test
-    fun testOneExporterExportFails() {
+    fun testOneExporterExportFails() = runTest {
         val first = FakeSpanExporter(exportReturnValue = { Failure })
         val second = FakeSpanExporter()
         val exporter =
@@ -80,7 +81,7 @@ internal class CompositeSpanExporterTest {
     }
 
     @Test
-    fun testOneExporterFlushFails() {
+    fun testOneExporterFlushFails() = runTest {
         val first = FakeSpanExporter(forceFlushReturnValue = { Failure })
         val second = FakeSpanExporter()
         val exporter =
@@ -100,7 +101,7 @@ internal class CompositeSpanExporterTest {
     }
 
     @Test
-    fun testOneExporterShutdownFails() {
+    fun testOneExporterShutdownFails() = runTest {
         val first = FakeSpanExporter(shutdownReturnValue = { Failure })
         val second = FakeSpanExporter()
         val exporter =
@@ -120,7 +121,7 @@ internal class CompositeSpanExporterTest {
     }
 
     @Test
-    fun testOneExporterThrowsInExport() {
+    fun testOneExporterThrowsInExport() = runTest {
         val first = FakeSpanExporter(exportReturnValue = { throw IllegalStateException() })
         val second = FakeSpanExporter()
         val exporter =
@@ -140,7 +141,7 @@ internal class CompositeSpanExporterTest {
     }
 
     @Test
-    fun testOneExporterThrowsInFlush() {
+    fun testOneExporterThrowsInFlush() = runTest {
         val first = FakeSpanExporter(forceFlushReturnValue = { throw IllegalStateException() })
         val second = FakeSpanExporter()
         val exporter =
@@ -160,7 +161,7 @@ internal class CompositeSpanExporterTest {
     }
 
     @Test
-    fun testOneExporterThrowsInShutdown() {
+    fun testOneExporterThrowsInShutdown() = runTest {
         val first = FakeSpanExporter(shutdownReturnValue = { throw IllegalStateException() })
         val second = FakeSpanExporter()
         val exporter =
@@ -179,7 +180,7 @@ internal class CompositeSpanExporterTest {
         assertTelemetryCapturedFailure(first, second)
     }
 
-    private fun CompositeSpanExporter.assertReturnValuesMatch(
+    private suspend fun CompositeSpanExporter.assertReturnValuesMatch(
         export: OperationResultCode,
         flush: OperationResultCode,
         shutdown: OperationResultCode

@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
+import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,7 +28,7 @@ internal class CompositeSpanProcessorTest {
     }
 
     @Test
-    fun testNoSpanProcessors() {
+    fun testNoSpanProcessors() = runTest {
         val processor =
             CompositeSpanProcessor(
                 emptyList(),
@@ -43,7 +44,7 @@ internal class CompositeSpanProcessorTest {
     }
 
     @Test
-    fun testProcessorNotInvoked() {
+    fun testProcessorNotInvoked() = runTest {
         val impl = FakeSpanProcessor(startRequired = false, endRequired = false)
         val other = FakeSpanProcessor()
         val processor =
@@ -67,7 +68,7 @@ internal class CompositeSpanProcessorTest {
     }
 
     @Test
-    fun testMultipleSpanProcessors() {
+    fun testMultipleSpanProcessors() = runTest {
         val first = FakeSpanProcessor()
         val second = FakeSpanProcessor()
         val processor =
@@ -86,7 +87,7 @@ internal class CompositeSpanProcessorTest {
     }
 
     @Test
-    fun testOneProcessorFlushFails() {
+    fun testOneProcessorFlushFails() = runTest {
         val first = FakeSpanProcessor(flushCode = { Failure })
         val second = FakeSpanProcessor()
         val processor =
@@ -105,7 +106,7 @@ internal class CompositeSpanProcessorTest {
     }
 
     @Test
-    fun testOneProcessorShutdownFails() {
+    fun testOneProcessorShutdownFails() = runTest {
         val first = FakeSpanProcessor(shutdownCode = { Failure })
         val second = FakeSpanProcessor()
         val processor =
@@ -124,7 +125,7 @@ internal class CompositeSpanProcessorTest {
     }
 
     @Test
-    fun testOneProcessorsThrowsInOnStart() {
+    fun testOneProcessorsThrowsInOnStart() = runTest {
         val first = FakeSpanProcessor(startAction = { _, _ -> throw IllegalStateException() })
         val second = FakeSpanProcessor()
         val processor =
@@ -143,7 +144,7 @@ internal class CompositeSpanProcessorTest {
     }
 
     @Test
-    fun testOneProcessorsThrowsInOnEnding() {
+    fun testOneProcessorsThrowsInOnEnding() = runTest {
         val first = FakeSpanProcessor(endingAction = { throw IllegalStateException() })
         val second = FakeSpanProcessor()
         val processor =
@@ -162,7 +163,7 @@ internal class CompositeSpanProcessorTest {
     }
 
     @Test
-    fun testOneProcessorsThrowsInOnEnd() {
+    fun testOneProcessorsThrowsInOnEnd() = runTest {
         val first = FakeSpanProcessor(endAction = { throw IllegalStateException() })
         val second = FakeSpanProcessor()
         val processor =
@@ -181,7 +182,7 @@ internal class CompositeSpanProcessorTest {
     }
 
     @Test
-    fun testOneProcessorsThrowsInFlush() {
+    fun testOneProcessorsThrowsInFlush() = runTest {
         val first = FakeSpanProcessor(flushCode = { throw IllegalStateException() })
         val second = FakeSpanProcessor()
         val processor =
@@ -200,7 +201,7 @@ internal class CompositeSpanProcessorTest {
     }
 
     @Test
-    fun testOneProcessorsThrowsInShutdown() {
+    fun testOneProcessorsThrowsInShutdown() = runTest {
         val first = FakeSpanProcessor(shutdownCode = { throw IllegalStateException() })
         val second = FakeSpanProcessor()
         val processor =
@@ -218,7 +219,7 @@ internal class CompositeSpanProcessorTest {
         assertTelemetryCapturedFailure(first, second)
     }
 
-    private fun CompositeSpanProcessor.assertReturnValuesMatch(
+    private suspend fun CompositeSpanProcessor.assertReturnValuesMatch(
         flush: OperationResultCode,
         shutdown: OperationResultCode
     ) {

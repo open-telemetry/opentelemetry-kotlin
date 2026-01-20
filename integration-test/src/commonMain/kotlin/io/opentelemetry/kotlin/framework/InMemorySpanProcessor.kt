@@ -20,8 +20,8 @@ internal class InMemorySpanProcessor(private val exporter: InMemorySpanExporter)
         exporter.export(listOf(span.toSpanData()))
     }
 
-    override fun forceFlush(): OperationResultCode = OperationResultCode.Success
-    override fun shutdown(): OperationResultCode = OperationResultCode.Success
+    override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
+    override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
     override fun isStartRequired(): Boolean = true
     override fun isEndRequired(): Boolean = true
 }

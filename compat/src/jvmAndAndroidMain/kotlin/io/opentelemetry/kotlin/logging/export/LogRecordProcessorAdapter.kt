@@ -22,6 +22,6 @@ internal class LogRecordProcessorAdapter(
         }
     }
 
-    override fun shutdown(): OperationResultCode = impl.shutdown().toOperationResultCode()
-    override fun forceFlush(): OperationResultCode = impl.forceFlush().toOperationResultCode()
+    override suspend fun shutdown(): OperationResultCode = impl.shutdown().toOperationResultCode()
+    override suspend fun forceFlush(): OperationResultCode = impl.forceFlush().toOperationResultCode()
 }

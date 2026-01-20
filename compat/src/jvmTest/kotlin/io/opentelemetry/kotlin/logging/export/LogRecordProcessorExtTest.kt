@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordProcessor
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -27,7 +28,7 @@ internal class LogRecordProcessorExtTest {
     }
 
     @Test
-    fun testFlush() {
+    fun testFlush() = runTest {
         val impl = FakeOtelJavaLogRecordProcessor()
         val adapter = impl.toOtelKotlinLogRecordProcessor()
         adapter.forceFlush()
@@ -35,7 +36,7 @@ internal class LogRecordProcessorExtTest {
     }
 
     @Test
-    fun testShutdown() {
+    fun testShutdown() = runTest {
         val impl = FakeOtelJavaLogRecordProcessor()
         val adapter = impl.toOtelKotlinLogRecordProcessor()
         adapter.shutdown()

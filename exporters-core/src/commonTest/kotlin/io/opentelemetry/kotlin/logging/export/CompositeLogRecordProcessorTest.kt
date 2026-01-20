@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
+import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,7 +28,7 @@ internal class CompositeLogRecordProcessorTest {
     }
 
     @Test
-    fun testNoSpanProcessors() {
+    fun testNoSpanProcessors() = runTest {
         val processor =
             CompositeLogRecordProcessor(
                 emptyList(),
@@ -41,7 +42,7 @@ internal class CompositeLogRecordProcessorTest {
     }
 
     @Test
-    fun testMultipleSpanProcessors() {
+    fun testMultipleSpanProcessors() = runTest {
         val first = FakeLogRecordProcessor()
         val second = FakeLogRecordProcessor()
         val processor =
@@ -57,7 +58,7 @@ internal class CompositeLogRecordProcessorTest {
     }
 
     @Test
-    fun testOneProcessorFlushFails() {
+    fun testOneProcessorFlushFails() = runTest {
         val first = FakeLogRecordProcessor(flushCode = { Failure })
         val second = FakeLogRecordProcessor()
         val processor =
@@ -73,7 +74,7 @@ internal class CompositeLogRecordProcessorTest {
     }
 
     @Test
-    fun testOneProcessorShutdownFails() {
+    fun testOneProcessorShutdownFails() = runTest {
         val first = FakeLogRecordProcessor(shutdownCode = { Failure })
         val second = FakeLogRecordProcessor()
         val processor =
@@ -89,7 +90,7 @@ internal class CompositeLogRecordProcessorTest {
     }
 
     @Test
-    fun testOneProcessorThrowsInOnEmit() {
+    fun testOneProcessorThrowsInOnEmit() = runTest {
         val first = FakeLogRecordProcessor(action = { _, _ -> throw IllegalStateException() })
         val second = FakeLogRecordProcessor()
         val processor =
@@ -105,7 +106,7 @@ internal class CompositeLogRecordProcessorTest {
     }
 
     @Test
-    fun testOneProcessorThrowsInFlush() {
+    fun testOneProcessorThrowsInFlush() = runTest {
         val first = FakeLogRecordProcessor(flushCode = { throw IllegalStateException() })
         val second = FakeLogRecordProcessor()
         val processor =
@@ -121,7 +122,7 @@ internal class CompositeLogRecordProcessorTest {
     }
 
     @Test
-    fun testOneProcessorThrowsInShutdown() {
+    fun testOneProcessorThrowsInShutdown() = runTest {
         val first = FakeLogRecordProcessor(shutdownCode = { throw IllegalStateException() })
         val second = FakeLogRecordProcessor()
         val processor =
@@ -136,7 +137,7 @@ internal class CompositeLogRecordProcessorTest {
         assertTelemetryCapturedFailure(first, second)
     }
 
-    private fun CompositeLogRecordProcessor.assertReturnValuesMatch(
+    private suspend fun CompositeLogRecordProcessor.assertReturnValuesMatch(
         flush: OperationResultCode,
         shutdown: OperationResultCode
     ) {

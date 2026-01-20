@@ -18,6 +18,6 @@ class FakeSpanExporter(
         return exportReturnValue(telemetry)
     }
 
-    override fun forceFlush(): OperationResultCode = forceFlushReturnValue()
-    override fun shutdown(): OperationResultCode = shutdownReturnValue()
+    override suspend fun forceFlush(): OperationResultCode = forceFlushReturnValue()
+    override suspend fun shutdown(): OperationResultCode = shutdownReturnValue()
 }
