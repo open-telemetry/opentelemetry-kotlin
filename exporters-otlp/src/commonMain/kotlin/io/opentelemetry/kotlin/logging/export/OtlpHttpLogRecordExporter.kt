@@ -20,7 +20,7 @@ internal class OtlpHttpLogRecordExporter(
         }
     }
 
-    override fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {
+    override suspend fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {
         return exporter.export(telemetry)
     }
 

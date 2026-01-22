@@ -11,7 +11,7 @@ internal class LogRecordExporterAdapter(
     private val impl: OtelJavaLogRecordExporter
 ) : LogRecordExporter {
 
-    override fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {
+    override suspend fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {
         val code = impl.export(telemetry.map(ReadableLogRecord::toLogRecordData))
         return code.toOperationResultCode()
     }

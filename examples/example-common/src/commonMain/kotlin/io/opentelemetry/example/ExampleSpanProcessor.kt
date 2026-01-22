@@ -6,11 +6,15 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalApi::class)
 internal class ExampleSpanProcessor : SpanProcessor {
 
     private val exporter: ExampleSpanExporter = ExampleSpanExporter()
+    private val scope = CoroutineScope(Job())
 
     override fun onStart(
         span: ReadWriteSpan,
@@ -22,7 +26,9 @@ internal class ExampleSpanProcessor : SpanProcessor {
     }
 
     override fun onEnd(span: ReadableSpan) {
-        exporter.export(mutableListOf(span.toSpanData()))
+        scope.launch {
+            exporter.export(mutableListOf(span.toSpanData()))
+        }
     }
 
     override fun isStartRequired(): Boolean = true

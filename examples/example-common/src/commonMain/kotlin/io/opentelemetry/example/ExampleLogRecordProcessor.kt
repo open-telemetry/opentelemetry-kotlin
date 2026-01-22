@@ -5,17 +5,23 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalApi::class)
 internal class ExampleLogRecordProcessor : LogRecordProcessor {
 
     private val exporter: ExampleLogRecordExporter = ExampleLogRecordExporter()
+    private val scope = CoroutineScope(Job())
 
     override fun onEmit(
         log: ReadWriteLogRecord,
         context: Context
     ) {
-        exporter.export(listOf(log))
+        scope.launch {
+            exporter.export(listOf(log))
+        }
     }
 
     override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success

@@ -8,10 +8,12 @@ import io.opentelemetry.kotlin.factory.CompatSdkFactory
 import io.opentelemetry.kotlin.factory.CompatTracingIdFactory
 import io.opentelemetry.kotlin.factory.TracingIdFactory
 import io.opentelemetry.kotlin.toOtelJavaApi
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlin.random.Random
 
 @OptIn(ExperimentalApi::class)
-internal class OtelKotlinHarness : OtelKotlinTestRule() {
+internal class OtelKotlinHarness(scheduler: TestCoroutineScheduler) :
+    OtelKotlinTestRule(scheduler) {
 
     override val kotlinApi: OpenTelemetry by lazy {
         createCompatOpenTelemetryImpl(

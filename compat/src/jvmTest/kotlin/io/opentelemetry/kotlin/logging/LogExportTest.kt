@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import io.opentelemetry.kotlin.logging.model.SeverityNumber
+import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertSame
@@ -17,12 +18,12 @@ internal class LogExportTest {
     private lateinit var harness: OtelKotlinHarness
 
     @BeforeTest
-    fun setUp() {
-        harness = OtelKotlinHarness()
+    fun setUp() = runTest {
+        harness = OtelKotlinHarness(testScheduler)
     }
 
     @Test
-    fun `test minimal log export`() {
+    fun `test minimal log export`() = runTest {
         // logging without a body is allowed by the OTel spec, so we assert the MVP log here
         harness.logger.log()
 
@@ -33,7 +34,7 @@ internal class LogExportTest {
     }
 
     @Test
-    fun `test log properties export`() {
+    fun `test log properties export`() = runTest {
         val logger = harness.kotlinApi.loggerProvider.getLogger(
             name = "my_logger",
             version = "0.1.0",
@@ -58,7 +59,7 @@ internal class LogExportTest {
     }
 
     @Test
-    fun `test logger provider resource export`() {
+    fun `test logger provider resource export`() = runTest {
         harness.config.apply {
             schemaUrl = "https://example.com/some_schema.json"
             attributes = {
@@ -98,7 +99,7 @@ internal class LogExportTest {
     }
 
     @Test
-    fun `test log limit export`() {
+    fun `test log limit export`() = runTest {
         harness.config.logLimits = {
             attributeCountLimit = 2
             attributeValueLengthLimit = 3
@@ -112,7 +113,7 @@ internal class LogExportTest {
     }
 
     @Test
-    fun `test log export with custom processor`() {
+    fun `test log export with custom processor`() = runTest {
         harness.config.logRecordProcessors.add(CustomLogRecordProcessor())
         harness.logger.log("Test")
 
@@ -123,7 +124,7 @@ internal class LogExportTest {
     }
 
     @Test
-    fun `test event export`() {
+    fun `test event export`() = runTest {
         val logger = harness.kotlinApi.loggerProvider.getLogger("test_logger")
         logger.logEvent(
             eventName = "my_event_name",

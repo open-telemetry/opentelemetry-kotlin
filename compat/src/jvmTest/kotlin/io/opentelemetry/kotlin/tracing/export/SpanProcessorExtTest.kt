@@ -13,10 +13,10 @@ import kotlin.test.assertTrue
 internal class SpanProcessorExtTest {
 
     @Test
-    fun toOtelKotlinSpanProcessor() {
+    fun toOtelKotlinSpanProcessor() = runTest {
         val impl = FakeOtelJavaSpanProcessor()
         val adapter = impl.toOtelKotlinSpanProcessor()
-        val harness = OtelKotlinHarness()
+        val harness = OtelKotlinHarness(testScheduler)
         harness.config.spanProcessors.add(adapter)
 
         val tracer = harness.javaApi.tracerProvider.get("tracer")

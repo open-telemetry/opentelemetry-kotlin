@@ -20,7 +20,7 @@ internal class OtlpHttpSpanExporter(
         }
     }
 
-    override fun export(telemetry: List<SpanData>): OperationResultCode {
+    override suspend fun export(telemetry: List<SpanData>): OperationResultCode {
         return exporter.export(telemetry)
     }
 

@@ -5,6 +5,8 @@ import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * A simple log record processor that immediately exports log records to a [LogRecordExporter].
@@ -14,6 +16,7 @@ import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 @OptIn(ExperimentalApi::class)
 internal class SimpleLogRecordProcessor(
     private val exporter: LogRecordExporter,
+    private val scope: CoroutineScope,
 ) : LogRecordProcessor {
 
     private val lock = ReentrantReadWriteLock()
@@ -22,8 +25,10 @@ internal class SimpleLogRecordProcessor(
         log: ReadWriteLogRecord,
         context: Context
     ) {
-        lock.write {
-            exporter.export(listOf(log))
+        scope.launch {
+            lock.write {
+                exporter.export(listOf(log))
+            }
         }
     }
 

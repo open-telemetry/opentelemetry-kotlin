@@ -15,5 +15,5 @@ public interface SpanExporter : TelemetryCloseable {
      * Exports a batch of spans. This operation is considered successful if the implementation
      * returns [OperationResultCode.Success]. If the export operation fails the batch must be dropped.
      */
-    public fun export(telemetry: List<SpanData>): OperationResultCode
+    public suspend fun export(telemetry: List<SpanData>): OperationResultCode
 }

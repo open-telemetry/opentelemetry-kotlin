@@ -35,6 +35,7 @@ kotlin {
                 api(project(":noop"))
                 implementation(project(":model"))
                 implementation(project(":implementation"))
+                implementation(libs.kotlinx.coroutines)
             }
         }
         val jvmMain by getting {

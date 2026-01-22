@@ -13,7 +13,7 @@ class FakeSpanExporter(
 
     val exports = mutableListOf<SpanData>()
 
-    override fun export(telemetry: List<SpanData>): OperationResultCode {
+    override suspend fun export(telemetry: List<SpanData>): OperationResultCode {
         exports += telemetry
         return exportReturnValue(telemetry)
     }

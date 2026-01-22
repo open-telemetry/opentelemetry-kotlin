@@ -6,6 +6,10 @@ import io.opentelemetry.kotlin.export.EXPORT_TIMEOUT_MS
 import io.opentelemetry.kotlin.export.MAX_EXPORT_BATCH_SIZE
 import io.opentelemetry.kotlin.export.MAX_QUEUE_SIZE
 import io.opentelemetry.kotlin.export.SCHEDULE_DELAY_MS
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 /**
  * Creates a composite span processor that delegates to a list of processors.
@@ -23,7 +27,9 @@ public fun createCompositeSpanProcessor(processors: List<SpanProcessor>): SpanPr
  */
 @ExperimentalApi
 public fun createSimpleSpanProcessor(exporter: SpanExporter): SpanProcessor {
-    return SimpleSpanProcessor(exporter)
+    val dispatcher: CoroutineDispatcher = Dispatchers.Default
+    val scope = CoroutineScope(SupervisorJob() + dispatcher)
+    return SimpleSpanProcessor(exporter, scope)
 }
 
 /**
