@@ -24,6 +24,6 @@ internal class OtlpHttpSpanExporter(
         return exporter.export(telemetry)
     }
 
-    override fun forceFlush(): OperationResultCode = exporter.forceFlush()
-    override fun shutdown(): OperationResultCode = exporter.shutdown()
+    override suspend fun forceFlush(): OperationResultCode = exporter.forceFlush()
+    override suspend fun shutdown(): OperationResultCode = exporter.shutdown()
 }

@@ -25,6 +25,10 @@ internal class SpanProcessorAdapter(
         }
     }
 
+    override fun onEnding(span: ReadWriteSpan) {
+        // no-op - unsupported in opentelemetry-java
+    }
+
     override fun onEnd(span: ReadableSpan) {
         if (span is ReadableSpanAdapter) {
             impl.onEnd(span.impl)
@@ -33,6 +37,6 @@ internal class SpanProcessorAdapter(
 
     override fun isStartRequired(): Boolean = impl.isStartRequired
     override fun isEndRequired(): Boolean = impl.isEndRequired
-    override fun shutdown(): OperationResultCode = impl.shutdown().toOperationResultCode()
-    override fun forceFlush(): OperationResultCode = impl.forceFlush().toOperationResultCode()
+    override suspend fun shutdown(): OperationResultCode = impl.shutdown().toOperationResultCode()
+    override suspend fun forceFlush(): OperationResultCode = impl.forceFlush().toOperationResultCode()
 }

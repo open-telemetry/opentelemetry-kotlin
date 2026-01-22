@@ -85,6 +85,7 @@ internal class SpanModel(
             if (state == State.STARTED) {
                 state = State.ENDING
                 endTimestamp = timestamp
+                processor?.onEnding(ReadWriteSpanImpl(this))
                 state = State.ENDED
                 processor?.onEnd(ReadableSpanImpl(this))
             }

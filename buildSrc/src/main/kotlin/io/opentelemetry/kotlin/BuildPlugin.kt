@@ -14,11 +14,13 @@ class BuildPlugin : Plugin<Project> {
             project.configureDetekt()
             project.configureBinaryCompatValidation()
             project.configureExplicitApiMode(kotlin)
+            project.configureTest()
         }
         project.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
             val kotlin = project.extensions.getByType(KotlinJvmProjectExtension::class.java)
             project.configureDetekt()
             project.configureBinaryCompatValidation()
+            project.configureTest()
         }
         project.configurePublishing()
     }

@@ -180,7 +180,7 @@ internal class BatchTelemetryProcessorTest {
         assertEquals(emptyList(), exports)
     }
 
-    private fun <T> TestScope.assertTelemetryBatched(
+    private suspend fun <T> TestScope.assertTelemetryBatched(
         telemetry: List<T>,
         batchSize: Int = 3,
         exportTimeoutMs: Long = 1000,

@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -12,7 +13,7 @@ import kotlin.test.assertTrue
 internal class SimpleSpanProcessorTest {
 
     @Test
-    fun testSpanProcessorDefaults() {
+    fun testSpanProcessorDefaults() = runTest {
         val processor =
             SimpleSpanProcessor(
                 FakeSpanExporter()

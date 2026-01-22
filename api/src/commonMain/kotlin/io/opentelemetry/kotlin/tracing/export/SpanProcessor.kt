@@ -21,6 +21,11 @@ public interface SpanProcessor : TelemetryCloseable {
     public fun onStart(span: ReadWriteSpan, parentContext: Context)
 
     /**
+     * Invoked just before a span is about to end with a mutable representation of the span.
+     */
+    public fun onEnding(span: ReadWriteSpan)
+
+    /**
      * Invoked after a span has ended with an immutable representation of the span.
      */
     public fun onEnd(span: ReadableSpan)

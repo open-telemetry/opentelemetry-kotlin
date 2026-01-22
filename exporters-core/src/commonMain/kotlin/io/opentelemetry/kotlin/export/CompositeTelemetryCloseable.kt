@@ -9,15 +9,15 @@ internal class CompositeTelemetryCloseable(
     private val sdkErrorHandler: SdkErrorHandler,
 ) : TelemetryCloseable {
 
-    override fun forceFlush(): OperationResultCode =
-        batchExportOperation(
+    override suspend fun forceFlush(): OperationResultCode =
+        batchExportOperationSuspend(
             closeables,
             sdkErrorHandler,
             TelemetryCloseable::forceFlush
         )
 
-    override fun shutdown(): OperationResultCode =
-        batchExportOperation(
+    override suspend fun shutdown(): OperationResultCode =
+        batchExportOperationSuspend(
             closeables,
             sdkErrorHandler,
             TelemetryCloseable::shutdown

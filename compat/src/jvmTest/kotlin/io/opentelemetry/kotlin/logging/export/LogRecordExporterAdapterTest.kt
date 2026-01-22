@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordExporter
 import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -22,13 +23,13 @@ internal class LogRecordExporterAdapterTest {
     }
 
     @Test
-    fun `test flush`() {
+    fun `test flush`() = runTest {
         assertEquals(OperationResultCode.Success, wrapper.forceFlush())
         assertEquals(1, impl.flushCount)
     }
 
     @Test
-    fun `test shutdown`() {
+    fun `test shutdown`() = runTest {
         assertEquals(OperationResultCode.Success, wrapper.shutdown())
         assertEquals(1, impl.shutdownCount)
     }

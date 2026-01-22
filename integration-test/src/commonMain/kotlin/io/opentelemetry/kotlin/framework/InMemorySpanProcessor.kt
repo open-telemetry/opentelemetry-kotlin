@@ -13,12 +13,15 @@ internal class InMemorySpanProcessor(private val exporter: InMemorySpanExporter)
     override fun onStart(span: ReadWriteSpan, parentContext: Context) {
     }
 
+    override fun onEnding(span: ReadWriteSpan) {
+    }
+
     override fun onEnd(span: ReadableSpan) {
         exporter.export(listOf(span.toSpanData()))
     }
 
-    override fun forceFlush(): OperationResultCode = OperationResultCode.Success
-    override fun shutdown(): OperationResultCode = OperationResultCode.Success
+    override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
+    override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
     override fun isStartRequired(): Boolean = true
     override fun isEndRequired(): Boolean = true
 }

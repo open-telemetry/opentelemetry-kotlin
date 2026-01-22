@@ -13,10 +13,12 @@ class FakeSpanProcessor(
     var flushCode: () -> OperationResultCode = { OperationResultCode.Success },
     var shutdownCode: () -> OperationResultCode = { OperationResultCode.Success },
     var startAction: (ReadWriteSpan, Context) -> Unit = { _, _ -> },
+    var endingAction: (ReadWriteSpan) -> Unit = {},
     var endAction: (ReadableSpan) -> Unit = {}
 ) : SpanProcessor {
 
     val startCalls = mutableListOf<ReadWriteSpan>()
+    val endingCalls = mutableListOf<ReadWriteSpan>()
     val endCalls = mutableListOf<ReadableSpan>()
 
     override fun onStart(
@@ -27,6 +29,11 @@ class FakeSpanProcessor(
         startAction(span, parentContext)
     }
 
+    override fun onEnding(span: ReadWriteSpan) {
+        endingCalls.add(span)
+        endingAction(span)
+    }
+
     override fun onEnd(span: ReadableSpan) {
         endCalls.add(span)
         endAction(span)
@@ -34,6 +41,6 @@ class FakeSpanProcessor(
 
     override fun isStartRequired(): Boolean = startRequired
     override fun isEndRequired(): Boolean = endRequired
-    override fun forceFlush(): OperationResultCode = flushCode()
-    override fun shutdown(): OperationResultCode = shutdownCode()
+    override suspend fun forceFlush(): OperationResultCode = flushCode()
+    override suspend fun shutdown(): OperationResultCode = shutdownCode()
 }

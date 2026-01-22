@@ -112,7 +112,7 @@ internal class OtelJavaLogExportTest {
             capturedJavaContext = (context as ContextAdapter).impl
         }
 
-        override fun shutdown(): OperationResultCode = OperationResultCode.Success
-        override fun forceFlush(): OperationResultCode = OperationResultCode.Success
+        override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
+        override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
     }
 }

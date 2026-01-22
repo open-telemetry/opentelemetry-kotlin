@@ -12,10 +12,10 @@ public interface TelemetryCloseable {
     /**
      * Requests the implementation to flush any buffered telemetry.
      */
-    public fun forceFlush(): OperationResultCode
+    public suspend fun forceFlush(): OperationResultCode
 
     /**
      * Shuts down the implementation and completes cleanup tasks necessary.
      */
-    public fun shutdown(): OperationResultCode
+    public suspend fun shutdown(): OperationResultCode
 }

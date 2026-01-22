@@ -14,11 +14,11 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
-internal class SpanProcessOnEndReadTest {
+internal class SpanProcessOnEndingReadTest {
 
     private lateinit var harness: IntegrationTestHarness
 
@@ -30,7 +30,7 @@ internal class SpanProcessOnEndReadTest {
 
     @Test
     fun testReadPropertiesInProcessor() {
-        harness.config.spanProcessors.add(OnEndSpanProcessor())
+        harness.config.spanProcessors.add(OnEndingSpanProcessor())
         harness.tracer.createSpan("span") {
             setStringAttribute("key", "value")
             addEvent("test")
@@ -40,27 +40,39 @@ internal class SpanProcessOnEndReadTest {
         }.end()
         harness.assertSpans(
             expectedCount = 1,
-            goldenFileName = "span_read_on_end.json",
+            goldenFileName = "span_override_on_ending.json",
         )
     }
 
-    private class OnEndSpanProcessor : SpanProcessor {
+    private class OnEndingSpanProcessor : SpanProcessor {
 
-        private fun ReadableSpan.handleSpan() {
+        private fun ReadWriteSpan.handleSpan() {
             // assert properties can be read
             assertEquals("span", name)
             assertEquals(StatusData.Unset, status)
             assertFalse(hasEnded)
             assertEquals(SpanKind.INTERNAL, spanKind)
             assertEquals(0, startTimestamp)
-            assertNull(endTimestamp)
+            assertNotNull(endTimestamp)
             assertTrue(spanContext.isValid)
             assertFalse(parent.isValid)
             assertTrue(resource.attributes.isEmpty())
             assertEquals("test_tracer", instrumentationScopeInfo.name)
             assertEquals(mapOf("key" to "value"), attributes)
-            assertEquals("test", events.single().name)
-            assertEquals("bar", links.single().attributes["foo"])
+            assertEquals(1, events.size)
+            assertEquals(1, links.size)
+
+            // assert subset of properties can be written
+            name = "override"
+            status = StatusData.Error("override")
+            setStringAttribute("foo", "bar")
+            addEvent("test", 5) {
+                setStringAttribute("foo", "bar")
+            }
+            addLink(FakeSpanContext.VALID) {
+                setStringAttribute("foo", "bar")
+            }
+            end(678)
         }
 
         override fun onStart(
@@ -69,11 +81,12 @@ internal class SpanProcessOnEndReadTest {
         ) {
         }
 
-        override fun onEnd(span: ReadableSpan) {
+        override fun onEnding(span: ReadWriteSpan) {
+            assertNotNull(span.endTimestamp)
             span.handleSpan()
         }
 
-        override fun onEnding(span: ReadWriteSpan) {
+        override fun onEnd(span: ReadableSpan) {
         }
 
         override fun isStartRequired(): Boolean = true

@@ -22,6 +22,6 @@ class FakeLogRecordProcessor(
         action(log, context)
     }
 
-    override fun forceFlush(): OperationResultCode = flushCode()
-    override fun shutdown(): OperationResultCode = shutdownCode()
+    override suspend fun forceFlush(): OperationResultCode = flushCode()
+    override suspend fun shutdown(): OperationResultCode = shutdownCode()
 }

@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
+import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,7 +26,7 @@ internal class CompositeLogRecordExporterTest {
     }
 
     @Test
-    fun testNoSpanExporters() {
+    fun testNoSpanExporters() = runTest {
         val exporter =
             CompositeLogRecordExporter(
                 emptyList(),
@@ -40,7 +41,7 @@ internal class CompositeLogRecordExporterTest {
     }
 
     @Test
-    fun testMultipleSpanExporters() {
+    fun testMultipleSpanExporters() = runTest {
         val first = FakeLogRecordExporter()
         val second = FakeLogRecordExporter()
         val exporter =
@@ -57,7 +58,7 @@ internal class CompositeLogRecordExporterTest {
     }
 
     @Test
-    fun testOneExporterExportFails() {
+    fun testOneExporterExportFails() = runTest {
         val first = FakeLogRecordExporter(action = { Failure })
         val second = FakeLogRecordExporter()
         val exporter =
@@ -74,7 +75,7 @@ internal class CompositeLogRecordExporterTest {
     }
 
     @Test
-    fun testOneExporterFlushFails() {
+    fun testOneExporterFlushFails() = runTest {
         val first = FakeLogRecordExporter(flushCode = { Failure })
         val second = FakeLogRecordExporter()
         val exporter =
@@ -91,7 +92,7 @@ internal class CompositeLogRecordExporterTest {
     }
 
     @Test
-    fun testOneExporterShutdownFails() {
+    fun testOneExporterShutdownFails() = runTest {
         val first = FakeLogRecordExporter(shutdownCode = { Failure })
         val second = FakeLogRecordExporter()
         val exporter =
@@ -108,7 +109,7 @@ internal class CompositeLogRecordExporterTest {
     }
 
     @Test
-    fun testOneExporterThrowsInExport() {
+    fun testOneExporterThrowsInExport() = runTest {
         val first = FakeLogRecordExporter(action = { throw IllegalStateException() })
         val second = FakeLogRecordExporter()
         val exporter =
@@ -125,7 +126,7 @@ internal class CompositeLogRecordExporterTest {
     }
 
     @Test
-    fun testOneExporterThrowsInFlush() {
+    fun testOneExporterThrowsInFlush() = runTest {
         val first = FakeLogRecordExporter(flushCode = { throw IllegalStateException() })
         val second = FakeLogRecordExporter()
         val exporter =
@@ -142,7 +143,7 @@ internal class CompositeLogRecordExporterTest {
     }
 
     @Test
-    fun testOneExporterThrowsInShutdown() {
+    fun testOneExporterThrowsInShutdown() = runTest {
         val first = FakeLogRecordExporter(shutdownCode = { throw IllegalStateException() })
         val second = FakeLogRecordExporter()
         val exporter =
@@ -158,7 +159,7 @@ internal class CompositeLogRecordExporterTest {
         assertTelemetryCapturedFailure(first, second)
     }
 
-    private fun CompositeLogRecordExporter.assertReturnValuesMatch(
+    private suspend fun CompositeLogRecordExporter.assertReturnValuesMatch(
         export: OperationResultCode,
         flush: OperationResultCode,
         shutdown: OperationResultCode
