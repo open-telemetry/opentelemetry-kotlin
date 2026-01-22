@@ -9,7 +9,7 @@ import platform.Foundation.dataWithContentsOfFile
 import platform.posix.memcpy
 
 // see https://developer.squareup.com/blog/kotlin-multiplatform-shared-test-resources/
-internal actual fun loadTestFixture(fixtureName: String): String {
+actual fun loadTestFixture(fixtureName: String): String {
     val mainBundle = NSBundle.mainBundle.bundlePath()
     val path = "$mainBundle/resources/$fixtureName"
     val data = checkNotNull(NSData.dataWithContentsOfFile(path)) {

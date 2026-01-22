@@ -1,0 +1,13 @@
+LogRecord [INFO]
+  Timestamp: 1000000000
+  ObservedTimestamp: 1000000100
+  SeverityText: INFO
+  Body: Application started successfully
+  EventName: my_event
+  TraceId: 12345678901234567890123456789012
+  SpanId: 1234567890123456
+  Attributes:
+    thread.name: main
+    code.function: start
+  Resource: {service.name=test-service}
+  InstrumentationScope: io.opentelemetry.test:1.0.0

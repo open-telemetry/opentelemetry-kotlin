@@ -1,0 +1,5 @@
+LogRecord
+  TraceId: 00000000000000000000000000000000
+  SpanId: 0000000000000000
+  Resource: {}
+  InstrumentationScope: 0.1.0

@@ -19,6 +19,7 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(project(":test-fakes"))
+                implementation(project(":integration-test"))
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
             }
@@ -29,4 +30,13 @@ kotlin {
             }
         }
     }
+}
+
+tasks.register<Copy>("copyiOSTestResources") {
+    from("src/commonTest/resources")
+    into("build/bin/iosSimulatorArm64/debugTest/resources")
+}
+
+tasks.named("iosSimulatorArm64Test").configure {
+    dependsOn("copyiOSTestResources")
 }

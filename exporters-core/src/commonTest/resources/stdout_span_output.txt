@@ -1,0 +1,17 @@
+Span: test-span [SERVER]
+  TraceId: 12345678901234567890123456789012
+  SpanId: 1234567890123456
+  ParentSpanId: 0000000000000000
+  Status: OK
+  StartTime: 1000000000
+  EndTime: 2000000000
+  Duration: 1000000000 ns
+  Attributes:
+    http.method: GET
+    http.status_code: 200
+  Events:
+    - request.started @ 1100000000
+    - request.completed @ 1900000000
+  Links: 1
+  Resource: {service.name=test-service}
+  InstrumentationScope: io.opentelemetry.test:1.0.0
