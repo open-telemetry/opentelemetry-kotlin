@@ -59,3 +59,15 @@ public fun createBatchLogRecordProcessor(
         exportTimeoutMs,
         maxExportBatchSize
     )
+
+/**
+ * Creates a log record exporter that outputs log records to stdout. The destination is configurable
+ * via a parameter that defaults to [println].
+ *
+ * This exporter is intended for debugging and learning purposes. It is not recommended for
+ * production use. The output format is not standardized and can change at any time.
+ */
+@ExperimentalApi
+public fun createStdoutLogRecordExporter(
+    logger: (String) -> Unit = ::println
+): LogRecordExporter = StdoutLogRecordExporter(logger)

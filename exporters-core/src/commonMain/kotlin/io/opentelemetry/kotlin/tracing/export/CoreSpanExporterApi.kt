@@ -55,3 +55,15 @@ public fun createBatchSpanProcessor(
     exportTimeoutMs,
     maxExportBatchSize
 )
+
+/**
+ * Creates a span exporter that outputs span data to stdout. The destination is configurable
+ * via a parameter that defaults to [println].
+ *
+ * This exporter is intended for debugging and learning purposes. It is not recommended for
+ * production use. The output format is not standardized and can change at any time.
+ */
+@ExperimentalApi
+public fun createStdoutSpanExporter(
+    logger: (String) -> Unit = ::println
+): SpanExporter = StdoutSpanExporter(logger)

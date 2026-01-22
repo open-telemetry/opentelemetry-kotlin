@@ -1,0 +1,8 @@
+Span: test-span [INTERNAL]
+  TraceId: 00000000000000000000000000000000
+  SpanId: 0000000000000000
+  ParentSpanId: 0000000000000000
+  Status: ERROR - Whoops
+  StartTime: 0
+  Resource: {foo=bar}
+  InstrumentationScope: 0.1.0
