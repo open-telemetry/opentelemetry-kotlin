@@ -13,6 +13,9 @@ internal class InMemorySpanProcessor(private val exporter: InMemorySpanExporter)
     override fun onStart(span: ReadWriteSpan, parentContext: Context) {
     }
 
+    override fun onEnding(span: ReadWriteSpan) {
+    }
+
     override fun onEnd(span: ReadableSpan) {
         exporter.export(listOf(span.toSpanData()))
     }

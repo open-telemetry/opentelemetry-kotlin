@@ -59,8 +59,10 @@ internal class CompositeSpanProcessorTest {
             Success,
         )
         assertTrue(impl.startCalls.isEmpty())
+        assertTrue(impl.endingCalls.isEmpty())
         assertTrue(impl.endCalls.isEmpty())
         assertEquals(1, other.startCalls.size)
+        assertEquals(1, other.endingCalls.size)
         assertEquals(1, other.endCalls.size)
     }
 
@@ -141,6 +143,25 @@ internal class CompositeSpanProcessorTest {
     }
 
     @Test
+    fun testOneProcessorsThrowsInOnEnding() {
+        val first = FakeSpanProcessor(endingAction = { throw IllegalStateException() })
+        val second = FakeSpanProcessor()
+        val processor =
+            CompositeSpanProcessor(
+                listOf(
+                    first,
+                    second
+                ),
+                errorHandler
+            )
+        processor.assertReturnValuesMatch(
+            Success,
+            Success,
+        )
+        assertTelemetryCapturedFailure(first, second)
+    }
+
+    @Test
     fun testOneProcessorsThrowsInOnEnd() {
         val first = FakeSpanProcessor(endAction = { throw IllegalStateException() })
         val second = FakeSpanProcessor()
@@ -204,6 +225,7 @@ internal class CompositeSpanProcessorTest {
         assertEquals(shutdown, shutdown())
         assertEquals(flush, forceFlush())
         onStart(fakeSpan, fakeContext)
+        onEnding(fakeSpan)
         onEnd(fakeSpan)
     }
 
@@ -213,8 +235,10 @@ internal class CompositeSpanProcessorTest {
     ) {
         assertFalse(errorHandler.hasErrors())
         assertSame(fakeSpan, first.startCalls.single())
+        assertSame(fakeSpan, first.endingCalls.single())
         assertSame(fakeSpan, first.endCalls.single())
         assertSame(fakeSpan, second.startCalls.single())
+        assertSame(fakeSpan, second.endingCalls.single())
         assertSame(fakeSpan, second.endCalls.single())
     }
 
@@ -225,8 +249,10 @@ internal class CompositeSpanProcessorTest {
         assertTrue(errorHandler.hasErrors())
         assertEquals(1, errorHandler.userCodeErrors.size)
         assertSame(fakeSpan, first.startCalls.single())
+        assertSame(fakeSpan, first.endingCalls.single())
         assertSame(fakeSpan, first.endCalls.single())
         assertSame(fakeSpan, second.startCalls.single())
+        assertSame(fakeSpan, second.endingCalls.single())
         assertSame(fakeSpan, second.endCalls.single())
     }
 }

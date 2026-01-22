@@ -25,6 +25,9 @@ internal class SimpleSpanProcessor(
     ) {
     }
 
+    override fun onEnding(span: ReadWriteSpan) {
+    }
+
     override fun onEnd(span: ReadableSpan) {
         lock.write {
             exporter.export(listOf(span))

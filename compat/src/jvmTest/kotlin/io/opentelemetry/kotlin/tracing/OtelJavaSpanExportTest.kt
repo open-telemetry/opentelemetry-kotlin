@@ -336,6 +336,9 @@ internal class OtelJavaSpanExportTest {
             capturedJavaContext = (parentContext as ContextAdapter).impl
         }
 
+        override fun onEnding(span: ReadWriteSpan) {
+        }
+
         override fun onEnd(span: ReadableSpan) = Unit
         override fun isStartRequired(): Boolean = true
         override fun isEndRequired(): Boolean = false

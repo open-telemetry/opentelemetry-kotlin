@@ -36,6 +36,9 @@ internal class BatchSpanProcessorImpl(
     ) {
     }
 
+    override fun onEnding(span: ReadWriteSpan) {
+    }
+
     override fun forceFlush(): OperationResultCode = processor.forceFlush()
     override fun shutdown(): OperationResultCode = processor.shutdown()
 }

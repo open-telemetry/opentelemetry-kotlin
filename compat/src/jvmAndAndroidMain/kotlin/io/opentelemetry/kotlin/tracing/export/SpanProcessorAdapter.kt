@@ -25,6 +25,10 @@ internal class SpanProcessorAdapter(
         }
     }
 
+    override fun onEnding(span: ReadWriteSpan) {
+        // no-op - unsupported in opentelemetry-java
+    }
+
     override fun onEnd(span: ReadableSpan) {
         if (span is ReadableSpanAdapter) {
             impl.onEnd(span.impl)

@@ -362,6 +362,7 @@ public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanProce
 	public abstract fun isEndRequired ()Z
 	public abstract fun isStartRequired ()Z
 	public abstract fun onEnd (Lio/opentelemetry/kotlin/tracing/model/ReadableSpan;)V
+	public abstract fun onEnding (Lio/opentelemetry/kotlin/tracing/model/ReadWriteSpan;)V
 	public abstract fun onStart (Lio/opentelemetry/kotlin/tracing/model/ReadWriteSpan;Lio/opentelemetry/kotlin/context/Context;)V
 }
 
