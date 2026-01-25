@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.export.EXPORT_INITIAL_DELAY_MS
 import io.opentelemetry.kotlin.export.EXPORT_MAX_ATTEMPTS
 import io.opentelemetry.kotlin.export.EXPORT_MAX_ATTEMPT_INTERVAL_MS
 import io.opentelemetry.kotlin.export.OtlpClient
-import io.opentelemetry.kotlin.tracing.export.SpanExporter
 
 @OptIn(ExperimentalApi::class)
 public actual fun createOtlpHttpSpanExporter(baseUrl: String): SpanExporter = OtlpHttpSpanExporter(

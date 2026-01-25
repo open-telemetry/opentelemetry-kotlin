@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanBuilder
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
+import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.context.ContextAdapter
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
@@ -17,7 +18,6 @@ import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
 import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
-import io.opentelemetry.kotlin.attributes.convertToMap
 
 @OptIn(ExperimentalApi::class)
 internal class OtelJavaSpanBuilderAdapter(
