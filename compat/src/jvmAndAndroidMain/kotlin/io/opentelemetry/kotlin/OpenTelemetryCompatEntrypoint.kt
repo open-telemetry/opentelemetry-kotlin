@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.factory.SdkFactory
 import io.opentelemetry.kotlin.factory.createCompatSdkFactory
 import io.opentelemetry.kotlin.init.CompatOpenTelemetryConfig
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
-import io.opentelemetry.kotlin.OpenTelemetryImpl
 
 /**
  * Constructs an [OpenTelemetry] instance that exposes OpenTelemetry as a Kotlin API. The SDK is
