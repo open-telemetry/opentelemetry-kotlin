@@ -8,8 +8,6 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 private val KOTLIN_VERSION = KotlinVersion.KOTLIN_2_0
-private const val COMPILE_SDK_VERSION = 36
-private const val MIN_SDK_VERSION = 21
 private const val JDK_VERSION = 11
 
 fun Project.configureKotlin(
