@@ -12,7 +12,7 @@ internal class InMemoryLogRecordExporterImpl : InMemoryLogRecordExporter {
     override val exportedLogRecords: List<ReadableLogRecord>
         get() = impl
 
-    override fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {
+    override suspend fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {
         impl += telemetry
         return OperationResultCode.Success
     }

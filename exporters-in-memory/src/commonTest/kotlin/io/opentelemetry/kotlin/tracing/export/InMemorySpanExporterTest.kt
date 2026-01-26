@@ -30,7 +30,7 @@ internal class InMemorySpanExporterTest {
     }
 
     @Test
-    fun testExport() {
+    fun testExport() = runTest {
         exporter.export(fakeTelemetry)
         assertEquals(fakeTelemetry, exporter.exportedSpans)
     }

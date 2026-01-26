@@ -12,7 +12,7 @@ internal class InMemorySpanExporterImpl : InMemorySpanExporter {
     override val exportedSpans: List<SpanData>
         get() = impl
 
-    override fun export(telemetry: List<SpanData>): OperationResultCode {
+    override suspend fun export(telemetry: List<SpanData>): OperationResultCode {
         impl += telemetry
         return OperationResultCode.Success
     }

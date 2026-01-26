@@ -30,7 +30,7 @@ internal class InMemoryLogRecordExporterTest {
     }
 
     @Test
-    fun testExport() {
+    fun testExport() = runTest {
         exporter.export(fakeTelemetry)
         assertEquals(fakeTelemetry, exporter.exportedLogRecords)
     }
