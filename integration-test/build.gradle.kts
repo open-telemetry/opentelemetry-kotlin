@@ -13,6 +13,8 @@ kotlin {
                 implementation(project(":test-fakes"))
                 implementation(project(":semconv"))
                 implementation(libs.kotlin.serialization)
+                implementation(libs.kotlinx.coroutines)
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
     }

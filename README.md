@@ -31,8 +31,9 @@ Other targets compile but are not considered sufficiently tested to count as 'su
 
 ```
 dependencies {
-    implementation("io.opentelemetry.kotlin:core:<latest-version>")
-    implementation("io.opentelemetry.kotlin:implementation:<latest-version>")
+    val otelKotlinVersion = "0.8.0"
+    implementation("io.opentelemetry.kotlin:core:$otelKotlinVersion")
+    implementation("io.opentelemetry.kotlin:implementation:$otelKotlinVersion")
 }
 ```
 
@@ -53,8 +54,9 @@ This can be helpful if you already use the Java implementation or don't want to 
 
 ```
 dependencies {
-    implementation("io.opentelemetry.kotlin:core:<latest-version>")
-    implementation("io.opentelemetry.kotlin:compat:<latest-version>")
+    val otelKotlinVersion = "0.8.0"
+    implementation("io.opentelemetry.kotlin:core:$otelKotlinVersion")
+    implementation("io.opentelemetry.kotlin:compat:$otelKotlinVersion")
 }
 ```
 

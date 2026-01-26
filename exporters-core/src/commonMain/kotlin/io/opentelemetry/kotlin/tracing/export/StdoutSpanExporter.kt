@@ -13,7 +13,7 @@ internal class StdoutSpanExporter(
     private val logger: (String) -> Unit = ::println
 ) : SpanExporter {
 
-    override fun export(telemetry: List<SpanData>): OperationResultCode {
+    override suspend fun export(telemetry: List<SpanData>): OperationResultCode {
         telemetry.forEach { span ->
             logger(formatSpan(span))
         }

@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
 import io.opentelemetry.kotlin.toOtelJavaApi
+import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -14,12 +15,12 @@ internal class OtelJavaApiExportTest {
     private lateinit var harness: IntegrationTestHarness
 
     @BeforeTest
-    fun setUp() {
-        harness = IntegrationTestHarness()
+    fun setUp() = runTest {
+        harness = IntegrationTestHarness(testScheduler)
     }
 
     @Test
-    fun testSimpleSpanExport() {
+    fun testSimpleSpanExport() = runTest {
         val javaApi = harness.kotlinApi.toOtelJavaApi()
         val tracer = javaApi.tracerProvider.get("tracer")
 
@@ -32,7 +33,7 @@ internal class OtelJavaApiExportTest {
     }
 
     @Test
-    fun testComplexSpanExport() {
+    fun testComplexSpanExport() = runTest {
         val javaApi = harness.kotlinApi.toOtelJavaApi()
         val tracer = javaApi.tracerProvider.get("tracer")
         val spanA = tracer.spanBuilder("span_a").startSpan().apply {
@@ -57,7 +58,7 @@ internal class OtelJavaApiExportTest {
     }
 
     @Test
-    fun testSimpleLogExport() {
+    fun testSimpleLogExport() = runTest {
         val javaApi = harness.kotlinApi.toOtelJavaApi()
         val logger = javaApi.logsBridge.get("logger")
 

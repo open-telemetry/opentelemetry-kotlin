@@ -202,7 +202,7 @@ public final class io/opentelemetry/kotlin/logging/LoggerProvider$DefaultImpls {
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/export/LogRecordExporter : io/opentelemetry/kotlin/export/TelemetryCloseable {
-	public abstract fun export (Ljava/util/List;)Lio/opentelemetry/kotlin/export/OperationResultCode;
+	public abstract fun export (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/export/LogRecordProcessor : io/opentelemetry/kotlin/export/TelemetryCloseable {
@@ -355,7 +355,7 @@ public final class io/opentelemetry/kotlin/tracing/data/StatusData$Unset : io/op
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanExporter : io/opentelemetry/kotlin/export/TelemetryCloseable {
-	public abstract fun export (Ljava/util/List;)Lio/opentelemetry/kotlin/export/OperationResultCode;
+	public abstract fun export (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanProcessor : io/opentelemetry/kotlin/export/TelemetryCloseable {

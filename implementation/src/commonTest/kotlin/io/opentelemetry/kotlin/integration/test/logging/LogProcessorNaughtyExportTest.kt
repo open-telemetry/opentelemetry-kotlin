@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import io.opentelemetry.kotlin.logging.model.SeverityNumber
+import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -16,13 +17,13 @@ internal class LogProcessorNaughtyExportTest {
     private lateinit var harness: IntegrationTestHarness
 
     @BeforeTest
-    fun setUp() {
+    fun setUp() = runTest {
         harness =
-            IntegrationTestHarness()
+            IntegrationTestHarness(testScheduler)
     }
 
     @Test
-    fun testOverridePropertiesInProcessor() {
+    fun testOverridePropertiesInProcessor() = runTest {
         val processor = NaughtyLogRecordProcessor()
         prepareConfig(processor)
         val ctx = prepareContext()

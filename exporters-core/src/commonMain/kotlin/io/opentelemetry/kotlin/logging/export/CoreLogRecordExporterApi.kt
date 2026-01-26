@@ -8,6 +8,10 @@ import io.opentelemetry.kotlin.export.EXPORT_TIMEOUT_MS
 import io.opentelemetry.kotlin.export.MAX_EXPORT_BATCH_SIZE
 import io.opentelemetry.kotlin.export.MAX_QUEUE_SIZE
 import io.opentelemetry.kotlin.export.SCHEDULE_DELAY_MS
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 /**
  * Creates a composite log record processor that delegates to a list of processors.
@@ -25,9 +29,9 @@ public fun createCompositeLogRecordProcessor(processors: List<LogRecordProcessor
  */
 @ExperimentalApi
 public fun createSimpleLogRecordProcessor(exporter: LogRecordExporter): LogRecordProcessor {
-    return SimpleLogRecordProcessor(
-        exporter
-    )
+    val dispatcher: CoroutineDispatcher = Dispatchers.Default
+    val scope = CoroutineScope(SupervisorJob() + dispatcher)
+    return SimpleLogRecordProcessor(exporter, scope)
 }
 
 /**
@@ -45,6 +49,7 @@ public fun createCompositeLogRecordExporter(exporters: List<LogRecordExporter>):
  * Creates a batching processor that sends telemetry in batches.
  * See https://opentelemetry.io/docs/specs/otel/logs/sdk/#batching-processor
  */
+@ExperimentalApi
 public fun createBatchLogRecordProcessor(
     exporter: LogRecordExporter,
     maxQueueSize: Int = MAX_QUEUE_SIZE,

@@ -35,7 +35,7 @@ internal class LogRecordExporterAdapterTest {
     }
 
     @Test
-    fun `test export`() {
+    fun `test export`() = runTest {
         val original = FakeReadableLogRecord()
         assertEquals(OperationResultCode.Success, wrapper.export(listOf(original)))
 
