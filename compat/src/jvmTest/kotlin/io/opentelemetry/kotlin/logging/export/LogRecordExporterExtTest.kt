@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordExporter
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -10,7 +11,7 @@ import org.junit.Test
 internal class LogRecordExporterExtTest {
 
     @Test
-    fun toOtelKotlinLogRecordExporter() {
+    fun toOtelKotlinLogRecordExporter() = runTest {
         val impl = FakeOtelJavaLogRecordExporter()
         val adapter = impl.toOtelKotlinLogRecordExporter()
         val timestamp = 500L

@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.integration.test.logging
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
 import io.opentelemetry.kotlin.logging.model.SeverityNumber
+import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -14,8 +15,8 @@ internal class LoggerExportTest {
     private lateinit var harness: IntegrationTestHarness
 
     @BeforeTest
-    fun setUp() {
-        harness = IntegrationTestHarness()
+    fun setUp() = runTest {
+        harness = IntegrationTestHarness(testScheduler)
             .apply {
                 config.logLimits = {
                     attributeCountLimit = logAttributeLimit
@@ -24,7 +25,7 @@ internal class LoggerExportTest {
     }
 
     @Test
-    fun testMinimalLogExported() {
+    fun testMinimalLogExported() = runTest {
         harness.logger.log("test") {
             setStringAttribute("foo", "bar")
         }
@@ -32,7 +33,7 @@ internal class LoggerExportTest {
     }
 
     @Test
-    fun testLogWithBasicPropertiesExported() {
+    fun testLogWithBasicPropertiesExported() = runTest {
         harness.logger.log(
             body = "custom_log",
             timestamp = 500,
@@ -44,7 +45,7 @@ internal class LoggerExportTest {
     }
 
     @Test
-    fun testLogWithAttributesExported() {
+    fun testLogWithAttributesExported() = runTest {
         harness.logger.log("test") {
             setStringAttribute("foo", "bar")
             setBooleanAttribute("experiment_enabled", true)
@@ -53,7 +54,7 @@ internal class LoggerExportTest {
     }
 
     @Test
-    fun testLogWithMetadataExported() {
+    fun testLogWithMetadataExported() = runTest {
         harness.config.attributes = {
             setStringAttribute("resource.foo", "bar")
         }
@@ -66,7 +67,7 @@ internal class LoggerExportTest {
     }
 
     @Test
-    fun testLogWithParentSpanInContext() {
+    fun testLogWithParentSpanInContext() = runTest {
         val span = harness.tracer.createSpan("span")
         val contextFactory = harness.kotlinApi.contextFactory
         val ctx = contextFactory.storeSpan(contextFactory.root(), span)
@@ -75,7 +76,7 @@ internal class LoggerExportTest {
     }
 
     @Test
-    fun testLogWithRootContext() {
+    fun testLogWithRootContext() = runTest {
         val contextFactory = harness.kotlinApi.contextFactory
         val ctx = contextFactory.root()
         harness.logger.log("test", context = ctx)
@@ -83,7 +84,7 @@ internal class LoggerExportTest {
     }
 
     @Test
-    fun testAttributeLimitsOnLogExport() {
+    fun testAttributeLimitsOnLogExport() = runTest {
         harness.logger.log("test") {
             repeat(logAttributeLimit + 1) {
                 setStringAttribute("key-$it", "value")
@@ -95,7 +96,7 @@ internal class LoggerExportTest {
     }
 
     @Test
-    fun `testEventExport`() {
+    fun testEventExport() = runTest {
         val logger = harness.kotlinApi.loggerProvider.getLogger("test_logger")
         logger.logEvent(
             eventName = "my_event_name",

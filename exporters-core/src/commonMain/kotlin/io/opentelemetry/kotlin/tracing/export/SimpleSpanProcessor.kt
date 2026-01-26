@@ -6,6 +6,8 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * A simple span processor that immediately exports spans to a [SpanExporter].
@@ -15,6 +17,7 @@ import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 @OptIn(ExperimentalApi::class)
 internal class SimpleSpanProcessor(
     private val exporter: SpanExporter,
+    private val scope: CoroutineScope,
 ) : SpanProcessor {
 
     private val lock = ReentrantReadWriteLock()
@@ -29,8 +32,10 @@ internal class SimpleSpanProcessor(
     }
 
     override fun onEnd(span: ReadableSpan) {
-        lock.write {
-            exporter.export(listOf(span))
+        scope.launch {
+            lock.write {
+                exporter.export(listOf(span))
+            }
         }
     }
 

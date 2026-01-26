@@ -12,13 +12,17 @@ import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import io.opentelemetry.kotlin.tracing.Tracer
 import io.opentelemetry.kotlin.tracing.TracerProvider
 import io.opentelemetry.kotlin.tracing.data.SpanData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 
 /**
  * Contains business logic for writing integration tests that assert the behavior of the
  * opentelemetry-kotlin API.
  */
-@OptIn(ExperimentalApi::class)
-abstract class OtelKotlinTestRule {
+@OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
+abstract class OtelKotlinTestRule(context: TestCoroutineScheduler) {
 
     /**
      * Reference to an instance of the opentelemetry-kotlin API. Implementations should pass in
@@ -37,10 +41,9 @@ abstract class OtelKotlinTestRule {
      */
     val fakeClock: FakeClock = FakeClock()
 
-    private val spanExporter =
-        InMemorySpanExporter()
-    private val logRecordExporter =
-        InMemoryLogRecordExporter()
+    private val scope: CoroutineScope = CoroutineScope(UnconfinedTestDispatcher(context))
+    private val spanExporter = InMemorySpanExporter()
+    private val logRecordExporter = InMemoryLogRecordExporter()
 
     /**
      * Configuration for the logger provider that adds test hooks to obtain exported logs.
@@ -49,7 +52,8 @@ abstract class OtelKotlinTestRule {
         config.attributes?.let { resource(config.schemaUrl, it) }
         addLogRecordProcessor(
             InMemoryLogRecordProcessor(
-                logRecordExporter
+                logRecordExporter,
+                scope,
             )
         )
         config.logRecordProcessors.forEach { addLogRecordProcessor(it) }
@@ -63,7 +67,8 @@ abstract class OtelKotlinTestRule {
         config.attributes?.let { resource(config.schemaUrl, it) }
         addSpanProcessor(
             InMemorySpanProcessor(
-                spanExporter
+                spanExporter,
+                scope,
             )
         )
         config.spanProcessors.forEach { addSpanProcessor(it) }
@@ -101,7 +106,7 @@ abstract class OtelKotlinTestRule {
     ) {
         val observedLogRecords: List<ReadableLogRecord> = logRecordExporter.exportedLogRecords
         if (observedLogRecords.size != expectedCount) {
-            error("Expected $observedLogRecords log records, but found ${observedLogRecords.size}")
+            error("Expected $expectedCount log records, but found ${observedLogRecords.size}")
         }
         val data = observedLogRecords.map(ReadableLogRecord::toSerializable)
         assertions(observedLogRecords)

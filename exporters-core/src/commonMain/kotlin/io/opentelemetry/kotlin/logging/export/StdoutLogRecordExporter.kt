@@ -12,7 +12,7 @@ internal class StdoutLogRecordExporter(
     private val logger: (String) -> Unit = ::println
 ) : LogRecordExporter {
 
-    override fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {
+    override suspend fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {
         telemetry.forEach { logRecord ->
             logger(formatLogRecord(logRecord))
         }

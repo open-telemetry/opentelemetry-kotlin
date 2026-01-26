@@ -1,0 +1,35 @@
+name: Issue management - run stale action
+
+on:
+  schedule:
+    # every 8 hours at 41 past
+    - cron: "41 */8 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  stale:
+    permissions:
+      issues: write         # for actions/stale to close stale issues
+      pull-requests: write  # for actions/stale to close stale PRs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@997185467fa4f803885201cee163a9f38240193d # v10.1.1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-stale: 21
+          days-before-close: 14
+          only-labels: "needs author feedback"
+          stale-issue-label: stale
+          stale-issue-message: >
+            This has been automatically marked as stale because it has been marked
+            as needing author feedback and has not had any activity for 21 days.
+            It will be closed automatically if there is no response from the author
+            within 14 additional days from this comment.
+          stale-pr-label: stale
+          stale-pr-message: >
+            This has been automatically marked as stale because it has been marked
+            as needing author feedback and has not had any activity for 21 days.
+            It will be closed automatically if there is no response from the author
+            within 14 additional days from this comment.

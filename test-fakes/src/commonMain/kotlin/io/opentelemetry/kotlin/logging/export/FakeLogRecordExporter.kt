@@ -13,7 +13,7 @@ class FakeLogRecordExporter(
 
     val logs: MutableList<ReadableLogRecord> = mutableListOf()
 
-    override fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {
+    override suspend fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {
         logs += telemetry
         return action(telemetry)
     }

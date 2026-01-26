@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 @OptIn(ExperimentalApi::class)
 internal class ExampleLogRecordExporter : LogRecordExporter {
 
-    override fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {
+    override suspend fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {
         telemetry.forEach {
             println("Exporting log: $it")
         }

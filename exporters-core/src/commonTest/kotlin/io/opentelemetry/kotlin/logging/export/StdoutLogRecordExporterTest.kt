@@ -16,7 +16,7 @@ import kotlin.test.assertEquals
 internal class StdoutLogRecordExporterTest {
 
     @Test
-    fun testExportLogRecordMinimal() {
+    fun testExportLogRecordMinimal() = runTest {
         val output = mutableListOf<String>()
         val exporter = createStdoutLogRecordExporter(logger = { output.add(it) })
 
@@ -40,7 +40,7 @@ internal class StdoutLogRecordExporterTest {
     }
 
     @Test
-    fun testExportLogRecord() {
+    fun testExportLogRecord() = runTest {
         val output = mutableListOf<String>()
         val exporter = createStdoutLogRecordExporter(logger = { output.add(it) })
 

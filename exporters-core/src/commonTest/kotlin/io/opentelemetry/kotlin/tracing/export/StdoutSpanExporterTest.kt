@@ -19,7 +19,7 @@ import kotlin.test.assertEquals
 internal class StdoutSpanExporterTest {
 
     @Test
-    fun testExportMinimalSpan() {
+    fun testExportMinimalSpan() = runTest {
         val output = mutableListOf<String>()
         val exporter = createStdoutSpanExporter(logger = { output.add(it) })
 
@@ -39,7 +39,7 @@ internal class StdoutSpanExporterTest {
     }
 
     @Test
-    fun testExportSpan() {
+    fun testExportSpan() = runTest {
         val output = mutableListOf<String>()
         val exporter = createStdoutSpanExporter(logger = { output.add(it) })
 

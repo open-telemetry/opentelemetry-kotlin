@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
+import kotlinx.coroutines.test.runTest
 import java.util.concurrent.TimeUnit
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -24,12 +25,12 @@ internal class OtelJavaLogExportTest {
         get() = harness.javaApi.logsBridge.get("test_logger")
 
     @BeforeTest
-    fun setUp() {
-        harness = OtelKotlinHarness()
+    fun setUp() = runTest {
+        harness = OtelKotlinHarness(testScheduler)
     }
 
     @Test
-    fun `test minimal log export`() {
+    fun `test minimal log export`() = runTest {
         // logging without a body is allowed by the OTel spec, so we assert the MVP log here
         logger.logRecordBuilder().emit()
 
@@ -40,7 +41,7 @@ internal class OtelJavaLogExportTest {
     }
 
     @Test
-    fun `test log properties export`() {
+    fun `test log properties export`() = runTest {
         val logger = harness.javaApi.logsBridge.loggerBuilder("my_logger")
             .setInstrumentationVersion("0.1.0")
             .setSchemaUrl("https://example.com/schema")
@@ -62,7 +63,7 @@ internal class OtelJavaLogExportTest {
     }
 
     @Test
-    fun `test java logger provider resource export`() {
+    fun `test java logger provider resource export`() = runTest {
         harness.config.apply {
             schemaUrl = "https://example.com/some_schema.json"
             attributes = {
