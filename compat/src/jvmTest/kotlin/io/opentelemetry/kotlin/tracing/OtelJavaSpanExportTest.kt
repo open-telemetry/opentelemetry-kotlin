@@ -17,6 +17,7 @@ import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
+import kotlinx.coroutines.test.runTest
 import java.util.concurrent.TimeUnit
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -38,12 +39,12 @@ internal class OtelJavaSpanExportTest {
         get() = tracerProvider.get("test_tracer", "0.1.0")
 
     @BeforeTest
-    fun setUp() {
-        harness = OtelKotlinHarness()
+    fun setUp() = runTest {
+        harness = OtelKotlinHarness(testScheduler)
     }
 
     @Test
-    fun `test minimal span export`() {
+    fun `test minimal span export`() = runTest {
         val spanName = "my_span"
         tracer.spanBuilder(spanName).startSpan().end()
 
@@ -54,7 +55,7 @@ internal class OtelJavaSpanExportTest {
     }
 
     @Test
-    fun `test span properties export`() {
+    fun `test span properties export`() = runTest {
         val spanName = "my_span"
         val span = tracer.spanBuilder(spanName)
             .setSpanKind(OtelJavaSpanKind.CLIENT)
@@ -75,7 +76,7 @@ internal class OtelJavaSpanExportTest {
     }
 
     @Test
-    fun `test span attributes export`() {
+    fun `test span attributes export`() = runTest {
         val spanName = "span_attrs"
         val span = tracer.spanBuilder(spanName).startSpan()
         span.setAllAttributes(attrs)
@@ -88,7 +89,7 @@ internal class OtelJavaSpanExportTest {
     }
 
     @Test
-    fun `test span events export`() {
+    fun `test span events export`() = runTest {
         val spanName = "span_events"
         val span = tracer.spanBuilder(spanName).startSpan().apply {
             val eventName = "my_event"
@@ -104,7 +105,7 @@ internal class OtelJavaSpanExportTest {
     }
 
     @Test
-    fun `test span context parent`() {
+    fun `test span context parent`() = runTest {
         val a = tracer.spanBuilder("a").startSpan()
         val current = OtelJavaContext.current()
         val parentA = current.with(a)
@@ -146,7 +147,7 @@ internal class OtelJavaSpanExportTest {
     }
 
     @Test
-    fun `test span links export`() {
+    fun `test span links export`() = runTest {
         val linkedSpan = tracer.spanBuilder("linked_span").startSpan()
         val span = tracer.spanBuilder("span_links").startSpan().apply {
             addLink(linkedSpan.spanContext, attrs)
@@ -161,7 +162,7 @@ internal class OtelJavaSpanExportTest {
     }
 
     @Test
-    fun `test java tracer builder`() {
+    fun `test java tracer builder`() = runTest {
         val javaTracer = tracerProvider.tracerBuilder("test-tracer")
             .build()
 
@@ -172,7 +173,7 @@ internal class OtelJavaSpanExportTest {
     }
 
     @Test
-    fun `test java tracer with schema url and attributes`() {
+    fun `test java tracer with schema url and attributes`() = runTest {
         val schemaUrl = "https://opentelemetry.io/schemas/1.21.0"
         val javaTracerWithSchemaUrl = tracerProvider.tracerBuilder("test-tracer")
             .setInstrumentationVersion("2.0.0")
@@ -186,7 +187,7 @@ internal class OtelJavaSpanExportTest {
     }
 
     @Test
-    fun `test java multiple operations`() {
+    fun `test java multiple operations`() = runTest {
         val linkedSpan1 = tracer.spanBuilder("linked_span_1").startSpan()
         val linkedSpan2 = tracer.spanBuilder("linked_span_2").startSpan()
         val linkedSpan3 = tracer.spanBuilder("linked_span_3").startSpan()
@@ -218,7 +219,7 @@ internal class OtelJavaSpanExportTest {
     }
 
     @Test
-    fun `test java attributes edge cases`() {
+    fun `test java attributes edge cases`() = runTest {
         val span = tracer.spanBuilder("edge_case_attributes").startSpan().apply {
             // Test empty string
             setAttribute("empty_string", "")
@@ -248,7 +249,7 @@ internal class OtelJavaSpanExportTest {
     }
 
     @Test
-    fun `test java trace and span id validation without sanitization`() {
+    fun `test java trace and span id validation without sanitization`() = runTest {
         val span1 = tracer.spanBuilder("validation_span_1").startSpan()
         val span2 = tracer.spanBuilder("validation_span_2").startSpan()
         val ctx = OtelJavaContext.current().with(span1)
@@ -283,7 +284,7 @@ internal class OtelJavaSpanExportTest {
     }
 
     @Test
-    fun `test java tracer provider resource export`() {
+    fun `test java tracer provider resource export`() = runTest {
         harness.config.apply {
             schemaUrl = "https://example.com/some_schema.json"
             attributes = {
@@ -303,7 +304,7 @@ internal class OtelJavaSpanExportTest {
     }
 
     @Test
-    fun `test context is passed to processor`() {
+    fun `test context is passed to processor`() = runTest {
         // Create a processor that can capture the original Java context
         val javaContextCapturingProcessor = JavaContextCapturingProcessor()
         harness.config.spanProcessors.add(javaContextCapturingProcessor)

@@ -25,6 +25,7 @@ import io.opentelemetry.kotlin.tracing.ext.toOtelJavaLinkData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusData
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
@@ -38,11 +39,11 @@ internal class ReadWriteSpanAdapterTest {
     private lateinit var fakeImpl: FakeOtelJavaReadWriteSpan
 
     @BeforeTest
-    fun setUp() {
+    fun setUp() = runTest {
         fakeReadableSpan = FakeOtelJavaReadableSpan(fakeInProgressOtelJavaSpanData)
         fakeImpl = FakeOtelJavaReadWriteSpan(fakeReadableSpan)
         adapter = ReadWriteSpanAdapter(fakeImpl)
-        harness = OtelKotlinHarness()
+        harness = OtelKotlinHarness(testScheduler)
     }
 
     @Test
@@ -78,7 +79,7 @@ internal class ReadWriteSpanAdapterTest {
     }
 
     @Test
-    fun `span updatable`() {
+    fun `span updatable`() = runTest {
         val newStatus = StatusData.Error("err")
         val processor = FakeSpanProcessor(
             startAction = assertReadWriteSpan(

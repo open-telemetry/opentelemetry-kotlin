@@ -37,7 +37,7 @@ internal class SpanExporterAdapterTest {
     }
 
     @Test
-    fun `test export`() {
+    fun `test export`() = runTest {
         val original = FakeSpanData()
         assertEquals(OperationResultCode.Success, wrapper.export(listOf(original)))
 

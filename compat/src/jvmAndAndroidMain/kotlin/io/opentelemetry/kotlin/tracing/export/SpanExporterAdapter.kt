@@ -12,7 +12,7 @@ internal class SpanExporterAdapter(
     private val impl: OtelJavaSpanExporter
 ) : SpanExporter {
 
-    override fun export(telemetry: List<SpanData>): OperationResultCode {
+    override suspend fun export(telemetry: List<SpanData>): OperationResultCode {
         val code = impl.export(telemetry.map(SpanData::toOtelJavaSpanData))
         return code.toOperationResultCode()
     }

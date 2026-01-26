@@ -15,6 +15,7 @@ import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanRelationships
+import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -30,8 +31,8 @@ internal class SpanExportTest {
     private lateinit var harness: OtelKotlinHarness
 
     @BeforeTest
-    fun setUp() {
-        harness = OtelKotlinHarness()
+    fun setUp() = runTest {
+        harness = OtelKotlinHarness(testScheduler)
         harness.config.spanLimits = {
             attributeCountLimit = 100
             linkCountLimit = 100
@@ -42,7 +43,7 @@ internal class SpanExportTest {
     }
 
     @Test
-    fun `test minimal span export`() {
+    fun `test minimal span export`() = runTest {
         val spanName = "my_span"
         harness.tracer.createSpan(spanName).end()
 
@@ -53,7 +54,7 @@ internal class SpanExportTest {
     }
 
     @Test
-    fun `test span properties export`() {
+    fun `test span properties export`() = runTest {
         val spanName = "my_span"
         val span = harness.tracer.createSpan(
             name = spanName,
@@ -83,7 +84,7 @@ internal class SpanExportTest {
     }
 
     @Test
-    fun `test span attributes export`() {
+    fun `test span attributes export`() = runTest {
         val spanName = "span_attrs"
         val span = harness.tracer.createSpan(spanName)
         span.assertAttributes()
@@ -96,7 +97,7 @@ internal class SpanExportTest {
     }
 
     @Test
-    fun `test span events export`() {
+    fun `test span events export`() = runTest {
         val spanName = "span_events"
         val span = harness.tracer.createSpan(spanName).apply {
             assertTrue(events.isEmpty())
@@ -120,7 +121,7 @@ internal class SpanExportTest {
     }
 
     @Test
-    fun `test span context parent`() {
+    fun `test span context parent`() = runTest {
         val root = harness.kotlinApi.contextFactory.root()
 
         val a = harness.tracer.createSpan("a", parentContext = root)
@@ -155,7 +156,7 @@ internal class SpanExportTest {
     }
 
     @Test
-    fun `test span trace flags`() {
+    fun `test span trace flags`() = runTest {
         val span = harness.tracer.createSpan("my_span")
         val flags = span.spanContext.traceFlags
         assertEquals("01", flags.toOtelJavaTraceFlags().asHex())
@@ -187,7 +188,7 @@ internal class SpanExportTest {
     }
 
     @Test
-    fun `test span links export`() {
+    fun `test span links export`() = runTest {
         val linkedSpan = harness.tracer.createSpan("linked_span")
         val span = harness.tracer.createSpan("span_links").apply {
             assertTrue(events.isEmpty())
@@ -209,7 +210,7 @@ internal class SpanExportTest {
     }
 
     @Test
-    fun `test tracer with schema url and attributes`() {
+    fun `test tracer with schema url and attributes`() = runTest {
         val schemaUrl = "https://opentelemetry.io/schemas/1.21.0"
         val tracerWithSchemaUrl = harness.tracerProvider.getTracer(
             name = "test-tracer",
@@ -227,7 +228,7 @@ internal class SpanExportTest {
     }
 
     @Test
-    fun `test multiple operations`() {
+    fun `test multiple operations`() = runTest {
         // create multiple spans, with multiple links and events
         val linkedSpan1 = harness.tracer.createSpan("linked_span_1")
         val linkedSpan2 = harness.tracer.createSpan("linked_span_2")
@@ -262,7 +263,7 @@ internal class SpanExportTest {
     }
 
     @Test
-    fun `test attributes edge cases`() {
+    fun `test attributes edge cases`() = runTest {
         val span = harness.tracer.createSpan("edge_case_attributes").apply {
             // Test empty string
             setStringAttribute("empty_string", "")
@@ -286,7 +287,7 @@ internal class SpanExportTest {
     }
 
     @Test
-    fun `test trace and span id validation without sanitization`() {
+    fun `test trace and span id validation without sanitization`() = runTest {
         val span1 = harness.tracer.createSpan("validation_span_1")
         val span2 = harness.tracer.createSpan("validation_span_2")
         val ctx = span1.storeInContext(harness.kotlinApi.contextFactory.root())
@@ -370,7 +371,7 @@ internal class SpanExportTest {
     }
 
     @Test
-    fun `test tracer provider resource export`() {
+    fun `test tracer provider resource export`() = runTest {
         harness.config.apply {
             schemaUrl = "https://example.com/some_schema.json"
             attributes = {
@@ -411,7 +412,7 @@ internal class SpanExportTest {
     }
 
     @Test
-    fun `test span limit export`() {
+    fun `test span limit export`() = runTest {
         harness.config.spanLimits = {
             attributeCountLimit = 1
             linkCountLimit = 1
@@ -444,7 +445,7 @@ internal class SpanExportTest {
     }
 
     @Test
-    fun `test log export with custom processor`() {
+    fun `test log export with custom processor`() = runTest {
         var link: SpanContext? = null
         harness.config.spanProcessors.add(
             CustomSpanProcessor {

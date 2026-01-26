@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
-import io.opentelemetry.kotlin.export.batchExportOperation
+import io.opentelemetry.kotlin.export.batchExportOperationSuspend
 import io.opentelemetry.kotlin.tracing.data.SpanData
 
 @OptIn(ExperimentalApi::class)
@@ -18,8 +18,8 @@ internal class CompositeSpanExporter(
     )
 ) : SpanExporter, TelemetryCloseable by telemetryCloseable {
 
-    override fun export(telemetry: List<SpanData>): OperationResultCode =
-        batchExportOperation(
+    override suspend fun export(telemetry: List<SpanData>): OperationResultCode =
+        batchExportOperationSuspend(
             exporters,
             sdkErrorHandler
         ) {

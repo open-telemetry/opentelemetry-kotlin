@@ -22,6 +22,7 @@ kotlin {
             dependencies {
                 implementation(project(":test-fakes"))
                 implementation(project(":integration-test"))
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
         val jvmTest by getting {

@@ -6,9 +6,14 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalApi::class)
-internal class InMemorySpanProcessor(private val exporter: InMemorySpanExporter) : SpanProcessor {
+internal class InMemorySpanProcessor(
+    private val exporter: InMemorySpanExporter,
+    private val scope: CoroutineScope,
+) : SpanProcessor {
 
     override fun onStart(span: ReadWriteSpan, parentContext: Context) {
     }
@@ -17,7 +22,9 @@ internal class InMemorySpanProcessor(private val exporter: InMemorySpanExporter)
     }
 
     override fun onEnd(span: ReadableSpan) {
-        exporter.export(listOf(span.toSpanData()))
+        scope.launch {
+            exporter.export(listOf(span.toSpanData()))
+        }
     }
 
     override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success

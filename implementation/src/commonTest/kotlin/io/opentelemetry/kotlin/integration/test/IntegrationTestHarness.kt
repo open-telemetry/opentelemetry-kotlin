@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.createOpenTelemetryImpl
 import io.opentelemetry.kotlin.factory.SdkFactoryImpl
 import io.opentelemetry.kotlin.factory.TracingIdFactoryImpl
 import io.opentelemetry.kotlin.framework.OtelKotlinTestRule
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlin.random.Random
 
 /**
@@ -13,7 +14,7 @@ import kotlin.random.Random
  * can be verified against expected output.
  */
 @OptIn(ExperimentalApi::class)
-internal class IntegrationTestHarness : OtelKotlinTestRule() {
+internal class IntegrationTestHarness(scheduler: TestCoroutineScheduler) : OtelKotlinTestRule(scheduler) {
     override val kotlinApi: OpenTelemetry by lazy {
         createOpenTelemetryImpl(
             config = {

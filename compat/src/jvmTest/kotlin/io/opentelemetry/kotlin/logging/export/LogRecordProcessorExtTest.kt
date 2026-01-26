@@ -11,10 +11,10 @@ import org.junit.Test
 internal class LogRecordProcessorExtTest {
 
     @Test
-    fun testOnEmit() {
+    fun testOnEmit() = runTest {
         val impl = FakeOtelJavaLogRecordProcessor()
         val adapter = impl.toOtelKotlinLogRecordProcessor()
-        val harness = OtelKotlinHarness()
+        val harness = OtelKotlinHarness(testScheduler)
         harness.config.logRecordProcessors.add(adapter)
 
         val logger = harness.javaApi.logsBridge.get("logger")

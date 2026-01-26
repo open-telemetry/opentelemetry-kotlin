@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import io.opentelemetry.kotlin.tracing.model.SpanKind
+import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -23,13 +24,13 @@ internal class SpanProcessOnStartOverrideTest {
     private lateinit var harness: IntegrationTestHarness
 
     @BeforeTest
-    fun setUp() {
+    fun setUp() = runTest {
         harness =
-            IntegrationTestHarness()
+            IntegrationTestHarness(testScheduler)
     }
 
     @Test
-    fun testOverridePropertiesInProcessor() {
+    fun testOverridePropertiesInProcessor() = runTest {
         harness.config.spanProcessors.add(OnStartSpanProcessor())
         harness.tracer.createSpan("span") {
             setStringAttribute("key", "value")
