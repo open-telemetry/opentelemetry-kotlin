@@ -3,11 +3,16 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainerImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.createSdkFactory
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.init.config.LoggingConfig
+import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
+import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.ResourceImpl
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
@@ -86,5 +91,63 @@ internal class LoggerProviderImplTest {
         }
         assertSame(first, second)
         assertNotEquals(first, third)
+    }
+
+    @Test
+    fun testForceFlushEmptyProcessors() = runTest {
+        val impl = LoggerProviderImpl(clock, loggingConfig, factory)
+        val result = impl.forceFlush()
+        assertEquals(OperationResultCode.Success, result)
+    }
+
+    @Test
+    fun testShutdownEmptyProcessors() = runTest {
+        val impl = LoggerProviderImpl(clock, loggingConfig, factory)
+        val result = impl.shutdown()
+        assertEquals(OperationResultCode.Success, result)
+    }
+
+    @Test
+    fun testForceFlushProcessorDelegation() = runTest {
+        var flushCalled = false
+        val processor = FakeLogRecordProcessor(
+            flushCode = {
+                flushCalled = true
+                OperationResultCode.Success
+            }
+        )
+        val config = LoggingConfig(
+            listOf(processor),
+            LogLimitConfig(100, 100),
+            FakeResource(),
+        )
+        val impl = LoggerProviderImpl(clock, config, factory)
+        impl.getLogger(name = "test")
+
+        val result = impl.forceFlush()
+        assertEquals(OperationResultCode.Success, result)
+        assertEquals(true, flushCalled)
+    }
+
+    @Test
+    fun testShutdownProcessorDelegation() = runTest {
+        var shutdownCalled = false
+        val processor = FakeLogRecordProcessor(
+            shutdownCode = {
+                shutdownCalled = true
+                OperationResultCode.Success
+            }
+        )
+        val config = LoggingConfig(
+            listOf(processor),
+            LogLimitConfig(100, 100),
+            FakeResource(),
+        )
+        val impl = LoggerProviderImpl(clock, config, factory)
+        impl.getLogger(name = "test")
+
+        val result = impl.shutdown()
+        assertEquals(OperationResultCode.Success, result)
+        assertEquals(true, shutdownCalled)
     }
 }

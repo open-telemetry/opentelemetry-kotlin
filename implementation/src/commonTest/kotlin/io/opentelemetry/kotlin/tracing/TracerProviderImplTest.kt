@@ -3,11 +3,16 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainerImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.FakeSdkFactory
 import io.opentelemetry.kotlin.init.config.TracingConfig
+import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.ResourceImpl
+import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
@@ -21,7 +26,7 @@ internal class TracerProviderImplTest {
         ResourceImpl(MutableAttributeContainerImpl(), null)
     )
 
-    private lateinit var impl: TracerProvider
+    private lateinit var impl: TracerProviderImpl
 
     @BeforeTest
     fun setUp() {
@@ -85,5 +90,61 @@ internal class TracerProviderImplTest {
         }
         assertSame(first, second)
         assertNotEquals(first, third)
+    }
+
+    @Test
+    fun testForceFlushEmptyProcessors() = runTest {
+        val result = impl.forceFlush()
+        assertEquals(OperationResultCode.Success, result)
+    }
+
+    @Test
+    fun testShutdownEmptyProcessors() = runTest {
+        val result = impl.shutdown()
+        assertEquals(OperationResultCode.Success, result)
+    }
+
+    @Test
+    fun testForceFlushProcessorDelegation() = runTest {
+        var flushCalled = false
+        val processor = FakeSpanProcessor(
+            flushCode = {
+                flushCalled = true
+                OperationResultCode.Success
+            }
+        )
+        val config = TracingConfig(
+            listOf(processor),
+            fakeSpanLimitsConfig,
+            FakeResource(),
+        )
+        val provider = TracerProviderImpl(FakeClock(), config, FakeSdkFactory())
+        provider.getTracer(name = "test")
+
+        val result = provider.forceFlush()
+        assertEquals(OperationResultCode.Success, result)
+        assertEquals(true, flushCalled)
+    }
+
+    @Test
+    fun testShutdownProcessorDelegation() = runTest {
+        var shutdownCalled = false
+        val processor = FakeSpanProcessor(
+            shutdownCode = {
+                shutdownCalled = true
+                OperationResultCode.Success
+            }
+        )
+        val config = TracingConfig(
+            listOf(processor),
+            fakeSpanLimitsConfig,
+            FakeResource(),
+        )
+        val provider = TracerProviderImpl(FakeClock(), config, FakeSdkFactory())
+        provider.getTracer(name = "test")
+
+        val result = provider.shutdown()
+        assertEquals(OperationResultCode.Success, result)
+        assertEquals(true, shutdownCalled)
     }
 }
