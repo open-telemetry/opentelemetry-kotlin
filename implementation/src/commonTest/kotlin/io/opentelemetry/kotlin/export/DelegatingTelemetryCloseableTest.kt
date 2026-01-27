@@ -12,7 +12,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
-internal class DelegatingCompositeTelemetryCloseableTest {
+internal class DelegatingTelemetryCloseableTest {
 
     private lateinit var errorHandler: FakeSdkErrorHandler
     private lateinit var closeable: DelegatingTelemetryCloseable
@@ -27,14 +27,14 @@ internal class DelegatingCompositeTelemetryCloseableTest {
     fun testEmptyForceFlushSuccess() = runTest {
         val result = closeable.forceFlush()
         assertEquals(Success, result)
-        assertFalse(errorHandler.hasErrors())
+        assertNoExportExceptions()
     }
 
     @Test
     fun testEmptyShutdownSuccess() = runTest {
         val result = closeable.shutdown()
         assertEquals(Success, result)
-        assertFalse(errorHandler.hasErrors())
+        assertNoExportExceptions()
     }
 
     @Test
@@ -46,7 +46,7 @@ internal class DelegatingCompositeTelemetryCloseableTest {
         assertEquals(Success, result)
         assertEquals(1, fake.forceFlushCount)
         assertEquals(0, fake.shutdownCount)
-        assertFalse(errorHandler.hasErrors())
+        assertNoExportExceptions()
     }
 
     @Test
@@ -58,7 +58,7 @@ internal class DelegatingCompositeTelemetryCloseableTest {
         assertEquals(Success, result)
         assertEquals(0, fake.forceFlushCount)
         assertEquals(1, fake.shutdownCount)
-        assertFalse(errorHandler.hasErrors())
+        assertNoExportExceptions()
     }
 
     @Test
@@ -72,7 +72,7 @@ internal class DelegatingCompositeTelemetryCloseableTest {
         assertEquals(Success, result)
         assertEquals(1, first.forceFlushCount)
         assertEquals(1, second.forceFlushCount)
-        assertFalse(errorHandler.hasErrors())
+        assertNoExportExceptions()
     }
 
     @Test
@@ -86,7 +86,7 @@ internal class DelegatingCompositeTelemetryCloseableTest {
         assertEquals(Success, result)
         assertEquals(1, first.shutdownCount)
         assertEquals(1, second.shutdownCount)
-        assertFalse(errorHandler.hasErrors())
+        assertNoExportExceptions()
     }
 
     @Test
@@ -100,7 +100,7 @@ internal class DelegatingCompositeTelemetryCloseableTest {
         assertEquals(Failure, result)
         assertEquals(1, first.forceFlushCount)
         assertEquals(1, second.forceFlushCount)
-        assertFalse(errorHandler.hasErrors())
+        assertNoExportExceptions()
     }
 
     @Test
@@ -114,6 +114,14 @@ internal class DelegatingCompositeTelemetryCloseableTest {
         assertEquals(Failure, result)
         assertEquals(1, first.shutdownCount)
         assertEquals(1, second.shutdownCount)
+        assertNoExportExceptions()
+    }
+
+    /**
+     * Asserts that no exceptions were thrown during export. The operation can still return
+     * [OperationResultCode.Failure] even if no exceptional circumstances occurred.
+     */
+    private fun assertNoExportExceptions() {
         assertFalse(errorHandler.hasErrors())
     }
 
@@ -146,6 +154,28 @@ internal class DelegatingCompositeTelemetryCloseableTest {
         assertEquals(1, second.forceFlushCount)
         assertTrue(errorHandler.hasErrors())
         assertEquals(2, errorHandler.userCodeErrors.size)
+    }
+
+    @Test
+    fun testForceFlushOnlyRunsOnce() = runTest {
+        val fake = FakeTelemetryCloseable()
+        closeable.add(fake)
+
+        closeable.forceFlush()
+        closeable.forceFlush()
+        closeable.forceFlush()
+        assertEquals(1, fake.forceFlushCount)
+    }
+
+    @Test
+    fun testShutdownOnlyOnce() = runTest {
+        val fake = FakeTelemetryCloseable()
+        closeable.add(fake)
+
+        closeable.shutdown()
+        closeable.shutdown()
+        closeable.shutdown()
+        assertEquals(1, fake.shutdownCount)
     }
 
     private class FakeTelemetryCloseable(
