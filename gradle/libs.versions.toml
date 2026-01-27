@@ -17,7 +17,7 @@ junit5 = "5.14.2"
 koverGradlePlugin = "0.9.4"
 downloadPlugin = "5.6.0"
 #noinspection GradleDependency
-kotlinExposed = "2.0.0"
+kotlinExposed = "2.3.0"
 androidxBenchmark = "1.4.1"
 kotlinxBenchmark = "0.4.15"
 androidxTest = "1.7.0"
