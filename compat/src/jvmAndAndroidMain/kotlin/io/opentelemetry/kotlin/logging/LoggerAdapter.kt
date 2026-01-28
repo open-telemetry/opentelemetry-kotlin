@@ -16,6 +16,15 @@ internal class LoggerAdapter(
     private val contextKeyRepository: OtelJavaContextKeyRepository = OtelJavaContextKeyRepository.INSTANCE,
 ) : Logger {
 
+    override fun enabled(
+        context: Context?,
+        severityNumber: SeverityNumber?,
+        eventName: String?,
+    ): Boolean {
+        // no implementation in opentelemetry-java. Return true to allow all logs
+        return true
+    }
+
     override fun log(
         body: String?,
         timestamp: Long?,
