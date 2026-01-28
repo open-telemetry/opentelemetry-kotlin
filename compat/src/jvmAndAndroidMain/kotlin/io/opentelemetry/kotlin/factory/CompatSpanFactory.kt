@@ -2,6 +2,7 @@
 
 package io.opentelemetry.kotlin.factory
 
+import io.opentelemetry.api.trace.otelJavaSpanContextKey
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
@@ -11,7 +12,6 @@ import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.model.Span
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanContextAdapter
-import io.opentelemetry.api.trace.otelJavaSpanContextKey
 
 @OptIn(ExperimentalApi::class)
 internal class CompatSpanFactory(spanContextFactory: SpanContextFactory) : SpanFactory {

@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.factory.createCompatSdkFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.logging.LoggerProviderAdapter
 import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
-import io.opentelemetry.kotlin.OpenTelemetryImpl
 
 /**
  * Constructs an [OpenTelemetry] instance that exposes OpenTelemetry as a Kotlin API.

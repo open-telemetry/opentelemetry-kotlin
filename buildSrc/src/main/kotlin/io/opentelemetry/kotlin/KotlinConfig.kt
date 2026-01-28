@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin
 
-import com.android.build.api.dsl.androidLibrary
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.exclude
 import org.jetbrains.kotlin.gradle.dsl.KotlinCommonCompilerOptions
@@ -9,23 +8,11 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 fun Project.configureKotlin(
-    kotlin: KotlinMultiplatformExtension
+    kotlin: KotlinMultiplatformExtension,
 ) {
     kotlin.apply {
         jvmToolchain(11)
         compilerOptions.configureCompiler()
-
-        androidLibrary {
-            namespace = "io.opentelemetry.kotlin.${project.name.replace("-", ".")}"
-            compileSdk = 36
-            minSdk = 21
-
-            compilations.configureEach {
-                compileTaskProvider.configure {
-                    compilerOptions.configureCompiler()
-                }
-            }
-        }
         jvm {
             compilerOptions.configureCompiler()
         }
@@ -96,7 +83,7 @@ fun Project.configureKotlin(
     }
 }
 
-private fun KotlinCommonCompilerOptions.configureCompiler() {
+fun KotlinCommonCompilerOptions.configureCompiler() {
     allWarningsAsErrors.set(true)
     apiVersion.set(KotlinVersion.KOTLIN_2_0)
     languageVersion.set(KotlinVersion.KOTLIN_2_0)

@@ -7,9 +7,11 @@ plugins {
 
 description = "OpenTelemetry Kotlin Java Compatibility BOM"
 
+javaPlatform {
+    allowDependencies()
+}
+
 dependencies {
-    constraints {
-        // Pin OpenTelemetry Java BOM version
-        api(libs.opentelemetry.bom)
-    }
+    // Import OpenTelemetry Java BOM version constraints
+    api(platform(libs.opentelemetry.bom))
 }
