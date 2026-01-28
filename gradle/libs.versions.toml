@@ -8,6 +8,7 @@ binaryCompatibilityValidator = "0.18.1"
 kotlinxBenchmarkRuntime = "0.4.15"
 kotlinxCoroutines = "1.10.2"
 ktor = "3.4.0"
+okio = "3.16.4"
 otel = "1.58.0"
 kotlinSerialization = "1.10.0"
 mavenPublish = "0.36.0"
@@ -48,6 +49,7 @@ ktor-client-encoding = { module = "io.ktor:ktor-client-encoding", version.ref = 
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+okio-fakefilesystem = { module = "com.squareup.okio:okio-fakefilesystem", version.ref = "okio" }
 opentelemetry-bom = { group = "io.opentelemetry", name = "opentelemetry-bom", version.ref = "otel" }
 opentelemetry-api = { group = "io.opentelemetry", name = "opentelemetry-api"}
 opentelemetry-sdk = { group = "io.opentelemetry", name = "opentelemetry-sdk"}
