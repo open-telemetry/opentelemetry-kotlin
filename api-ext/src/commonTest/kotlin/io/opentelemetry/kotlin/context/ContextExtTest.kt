@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.context
 import io.opentelemetry.kotlin.ExperimentalApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
 internal class ContextExtTest {
@@ -31,6 +33,43 @@ internal class ContextExtTest {
 
         val thirdCtx = secondCtx.with(emptyMap()) as FakeContext
         assertEquals(expected, thirdCtx.findAttrs())
+    }
+
+    @Test
+    fun testAsImplicitContext() {
+        var attached = false
+        var detached = false
+        val ctx = FakeContext(
+            onAttach = { attached = true },
+            onDetach = { detached = true }
+        )
+
+        val expected = "result"
+        val result = ctx.asImplicitContext {
+            expected
+        }
+
+        assertEquals(expected, result)
+        assertTrue(attached)
+        assertTrue(detached)
+    }
+
+    @Test
+    fun testAsImplicitContextDetachesOnException() {
+        var attached = false
+        var detached = false
+        val ctx = FakeContext(
+            onAttach = { attached = true },
+            onDetach = { detached = true }
+        )
+
+        assertFailsWith<IllegalStateException> {
+            ctx.asImplicitContext {
+                throw IllegalStateException("test exception")
+            }
+        }
+        assertTrue(attached)
+        assertTrue(detached)
     }
 
     private fun FakeContext.findAttrs(): Map<String, Any?> = attrs.mapKeys { it.key.name }
