@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
 internal class LogExportTest {
@@ -20,6 +21,12 @@ internal class LogExportTest {
     @BeforeTest
     fun setUp() = runTest {
         harness = OtelKotlinHarness(testScheduler)
+    }
+
+    @Test
+    fun `test enabled returns true`() {
+        val logger = harness.kotlinApi.loggerProvider.getLogger("test-logger")
+        assertTrue(logger.enabled())
     }
 
     @Test

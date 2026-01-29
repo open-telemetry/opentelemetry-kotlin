@@ -28,6 +28,18 @@ internal class LoggerImpl(
     private val invalidSpanContext = sdkFactory.spanContextFactory.invalid
     private val spanFactory = sdkFactory.spanFactory
 
+    override fun enabled(
+        context: Context?,
+        severityNumber: SeverityNumber?,
+        eventName: String?,
+    ): Boolean {
+        if (processor == null) {
+            return false
+        }
+        val ctx = context ?: contextFactory.implicitContext()
+        return processor.enabled(ctx, key, severityNumber, eventName)
+    }
+
     override fun log(
         body: String?,
         timestamp: Long?,

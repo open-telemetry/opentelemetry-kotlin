@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
@@ -20,6 +21,7 @@ internal class CompositeLogRecordProcessorTest {
 
     private val fakeLogRecord = FakeReadWriteLogRecord()
     private val fakeContext = FakeContext()
+    private val scopeInfo = FakeInstrumentationScopeInfo()
     private lateinit var errorHandler: FakeSdkErrorHandler
 
     @BeforeTest
@@ -163,5 +165,35 @@ internal class CompositeLogRecordProcessorTest {
         assertEquals(1, errorHandler.userCodeErrors.size)
         assertSame(fakeLogRecord, first.logs.single())
         assertSame(fakeLogRecord, second.logs.single())
+    }
+
+    @Test
+    fun testEnabledNoProcessors() {
+        val processor = CompositeLogRecordProcessor(emptyList(), errorHandler)
+        assertFalse(processor.enabled(fakeContext, scopeInfo, null, null))
+    }
+
+    @Test
+    fun testEnabledAnyProcessorEnabled() {
+        val first = FakeLogRecordProcessor(enabledResult = { false })
+        val second = FakeLogRecordProcessor(enabledResult = { true })
+        val processor = CompositeLogRecordProcessor(listOf(first, second), errorHandler)
+        assertTrue(processor.enabled(fakeContext, scopeInfo, null, null))
+    }
+
+    @Test
+    fun testEnabledAllProcessorsDisabled() {
+        val first = FakeLogRecordProcessor(enabledResult = { false })
+        val second = FakeLogRecordProcessor(enabledResult = { false })
+        val processor = CompositeLogRecordProcessor(listOf(first, second), errorHandler)
+        assertFalse(processor.enabled(fakeContext, scopeInfo, null, null))
+    }
+
+    @Test
+    fun testEnabledAllProcessorsEnabled() {
+        val first = FakeLogRecordProcessor(enabledResult = { true })
+        val second = FakeLogRecordProcessor(enabledResult = { true })
+        val processor = CompositeLogRecordProcessor(listOf(first, second), errorHandler)
+        assertTrue(processor.enabled(fakeContext, scopeInfo, null, null))
     }
 }
