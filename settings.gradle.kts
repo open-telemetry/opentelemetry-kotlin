@@ -34,6 +34,7 @@ include(
     ":exporters-core",
     ":exporters-in-memory",
     ":exporters-otlp",
+    ":exporters-persistence",
     ":exporters-protobuf",
     ":java-typealiases",
     "examples:jvm-app",
