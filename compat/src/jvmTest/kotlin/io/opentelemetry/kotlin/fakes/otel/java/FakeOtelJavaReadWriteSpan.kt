@@ -18,6 +18,8 @@ internal class FakeOtelJavaReadWriteSpan(
     val readableSpan: OtelJavaReadableSpan = FakeOtelJavaReadableSpan()
 ) : OtelJavaReadWriteSpan, OtelJavaReadableSpan by readableSpan {
 
+    var endCalls: Int = 0
+
     override fun getInstrumentationScopeInfo(): OtelJavaInstrumentationScopeInfo {
         return readableSpan.instrumentationScopeInfo
     }
@@ -65,15 +67,15 @@ internal class FakeOtelJavaReadWriteSpan(
     }
 
     override fun end() {
-        TODO("Not yet implemented")
+        endCalls++
     }
 
     override fun end(timestamp: Long, unit: TimeUnit) {
-        TODO("Not yet implemented")
+        endCalls++
     }
 
     override fun isRecording(): Boolean {
-        TODO("Not yet implemented")
+        return endCalls <= 0
     }
 
     override fun getLatencyNanos(): Long {
