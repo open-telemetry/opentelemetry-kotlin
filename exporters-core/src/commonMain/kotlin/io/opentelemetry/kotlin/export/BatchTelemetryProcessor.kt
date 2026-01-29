@@ -46,19 +46,15 @@ internal class BatchTelemetryProcessor<T>(
     }
 
     fun processTelemetry(telemetry: T) {
-        scope.launch {
-            mutex.withLock {
-                if (queue.size <= maxQueueSize) {
-                    queue.add(telemetry)
-                }
-            }
+        if (queue.size <= maxQueueSize) {
+            queue.add(telemetry)
         }
     }
 
     suspend fun forceFlush(): OperationResultCode {
         scope.launch {
             flushInternal()
-        }
+        }.join()
         return OperationResultCode.Success
     }
 

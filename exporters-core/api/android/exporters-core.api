@@ -1,6 +1,14 @@
+public final class io/opentelemetry/kotlin/export/BatchTelemetryDefaults {
+	public static final field EXPORT_TIMEOUT_MS J
+	public static final field INSTANCE Lio/opentelemetry/kotlin/export/BatchTelemetryDefaults;
+	public static final field MAX_EXPORT_BATCH_SIZE I
+	public static final field MAX_QUEUE_SIZE I
+	public static final field SCHEDULE_DELAY_MS J
+}
+
 public final class io/opentelemetry/kotlin/logging/export/CoreLogRecordExporterApiKt {
-	public static final fun createBatchLogRecordProcessor (Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;IJJI)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
-	public static synthetic fun createBatchLogRecordProcessor$default (Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;IJJIILjava/lang/Object;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
+	public static final fun createBatchLogRecordProcessor (Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;IJJILkotlinx/coroutines/CoroutineDispatcher;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
+	public static synthetic fun createBatchLogRecordProcessor$default (Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;IJJILkotlinx/coroutines/CoroutineDispatcher;ILjava/lang/Object;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
 	public static final fun createCompositeLogRecordExporter (Ljava/util/List;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
 	public static final fun createCompositeLogRecordProcessor (Ljava/util/List;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
 	public static final fun createSimpleLogRecordProcessor (Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
