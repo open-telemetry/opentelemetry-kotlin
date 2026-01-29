@@ -12,8 +12,10 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":api"))
+                implementation(project(":exporters-core"))
                 implementation(project(":exporters-otlp"))
                 implementation(project(":exporters-protobuf"))
+                implementation(project(":platform-implementations"))
                 implementation(libs.kotlinx.coroutines)
             }
         }
