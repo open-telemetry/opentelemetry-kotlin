@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
@@ -10,6 +11,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
 internal class SimpleLogRecordProcessorTest {
@@ -19,6 +21,7 @@ internal class SimpleLogRecordProcessorTest {
         val processor = createSimpleLogRecordProcessor(FakeLogRecordExporter())
         assertEquals(OperationResultCode.Success, processor.shutdown())
         assertEquals(OperationResultCode.Success, processor.forceFlush())
+        assertTrue(processor.enabled(FakeContext(), FakeInstrumentationScopeInfo(), null, null))
     }
 
     @Test

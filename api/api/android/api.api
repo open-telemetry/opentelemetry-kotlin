@@ -184,11 +184,13 @@ public abstract interface class io/opentelemetry/kotlin/init/TracerProviderConfi
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/Logger {
+	public abstract fun enabled (Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;)Z
 	public abstract fun log (Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun logEvent (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class io/opentelemetry/kotlin/logging/Logger$DefaultImpls {
+	public static synthetic fun enabled$default (Lio/opentelemetry/kotlin/logging/Logger;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;ILjava/lang/Object;)Z
 	public static synthetic fun log$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun logEvent$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
@@ -206,7 +208,12 @@ public abstract interface class io/opentelemetry/kotlin/logging/export/LogRecord
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/export/LogRecordProcessor : io/opentelemetry/kotlin/export/TelemetryCloseable {
+	public abstract fun enabled (Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/InstrumentationScopeInfo;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;)Z
 	public abstract fun onEmit (Lio/opentelemetry/kotlin/logging/model/ReadWriteLogRecord;Lio/opentelemetry/kotlin/context/Context;)V
+}
+
+public final class io/opentelemetry/kotlin/logging/export/LogRecordProcessor$DefaultImpls {
+	public static fun enabled (Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/InstrumentationScopeInfo;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;)Z
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/model/ReadWriteLogRecord : io/opentelemetry/kotlin/attributes/MutableAttributeContainer, io/opentelemetry/kotlin/logging/model/ReadableLogRecord {
