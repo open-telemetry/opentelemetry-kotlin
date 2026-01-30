@@ -16,5 +16,6 @@ public final class io/opentelemetry/kotlin/tracing/SpanExtKt {
 	public static synthetic fun addLink$default (Lio/opentelemetry/kotlin/tracing/model/Span;Lio/opentelemetry/kotlin/tracing/model/Span;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static final fun recordException (Lio/opentelemetry/kotlin/tracing/model/Span;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun recordException$default (Lio/opentelemetry/kotlin/tracing/model/Span;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static final fun wrapOperation (Lio/opentelemetry/kotlin/tracing/model/Span;Lkotlin/jvm/functions/Function0;)V
 }
 
