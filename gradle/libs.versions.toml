@@ -17,14 +17,12 @@ junit4 = "4.13.2"
 junit5 = "5.14.2"
 koverGradlePlugin = "0.9.4"
 downloadPlugin = "5.6.0"
-#noinspection GradleDependency
-kotlinExposed = "2.0.0"
 androidxBenchmark = "1.4.1"
 kotlinxBenchmark = "0.4.15"
 androidxTest = "1.7.0"
 androidxRunner = "1.7.0"
 androidxJunit = "1.3.0"
-protobufKotlin = "4.33.4"
+protobufKotlin = "4.33.5"
 protobufPlugin = "0.9.6"
 wire = "5.5.0"
 buildKonfig = "0.17.1"
@@ -57,7 +55,6 @@ kotlin-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-j
 mavenPublish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version.ref = "mavenPublish" }
 junit4 = { module = "junit:junit", version.ref = "junit4" }
 junit5-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
-kotlin-exposed = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinExposed" }
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTest" }
 androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxRunner" }
