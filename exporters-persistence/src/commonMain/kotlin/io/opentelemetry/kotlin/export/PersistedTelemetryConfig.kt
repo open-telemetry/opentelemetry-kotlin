@@ -13,4 +13,13 @@ internal class PersistedTelemetryConfig(
      * so it can be deleted after 30 days by default.
      */
     val maxTelemetryAgeInDays: Long = 30,
-)
+) {
+    init {
+        require(maxBatchedItemsPerSignal > 0) {
+            "maxBatchedItemsPerSignal must be positive, was $maxBatchedItemsPerSignal"
+        }
+        require(maxTelemetryAgeInDays > 0) {
+            "maxTelemetryAgeInDays must be positive, was $maxTelemetryAgeInDays"
+        }
+    }
+}
