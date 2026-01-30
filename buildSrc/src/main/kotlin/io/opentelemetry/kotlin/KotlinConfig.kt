@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin
 
-import com.android.build.api.dsl.androidLibrary
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.exclude
 import org.jetbrains.kotlin.gradle.dsl.KotlinCommonCompilerOptions
@@ -8,24 +7,15 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
+private val KOTLIN_VERSION = KotlinVersion.KOTLIN_2_0
+private const val JDK_VERSION = 11
+
 fun Project.configureKotlin(
     kotlin: KotlinMultiplatformExtension
 ) {
     kotlin.apply {
-        jvmToolchain(11)
+        jvmToolchain(JDK_VERSION)
         compilerOptions.configureCompiler()
-
-        androidLibrary {
-            namespace = "io.opentelemetry.kotlin.${project.name.replace("-", ".")}"
-            compileSdk = 36
-            minSdk = 21
-
-            compilations.configureEach {
-                compileTaskProvider.configure {
-                    compilerOptions.configureCompiler()
-                }
-            }
-        }
         jvm {
             compilerOptions.configureCompiler()
         }
@@ -63,7 +53,7 @@ fun Project.configureKotlin(
 
             getByName("commonMain").apply {
                 dependencies {
-                    implementation(findLibrary("kotlin-exposed"))
+                    implementation("org.jetbrains.kotlin:kotlin-stdlib:${KOTLIN_VERSION.version}.0")
                     // add dependencies here
                 }
             }
@@ -96,10 +86,10 @@ fun Project.configureKotlin(
     }
 }
 
-private fun KotlinCommonCompilerOptions.configureCompiler() {
+fun KotlinCommonCompilerOptions.configureCompiler() {
     allWarningsAsErrors.set(true)
-    apiVersion.set(KotlinVersion.KOTLIN_2_0)
-    languageVersion.set(KotlinVersion.KOTLIN_2_0)
+    apiVersion.set(KOTLIN_VERSION)
+    languageVersion.set(KOTLIN_VERSION)
     freeCompilerArgs.addAll("-Xexpect-actual-classes", "-Xsuppress-version-warnings")
 }
 
