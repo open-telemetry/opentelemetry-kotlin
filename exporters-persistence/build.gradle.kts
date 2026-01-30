@@ -13,6 +13,7 @@ kotlin {
             dependencies {
                 implementation(project(":api"))
                 implementation(project(":exporters-otlp"))
+                implementation(project(":exporters-protobuf"))
                 implementation(libs.kotlinx.coroutines)
             }
         }
@@ -22,6 +23,7 @@ kotlin {
                 implementation(project(":integration-test"))
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.okio.fakefilesystem)
             }
         }
         val jvmTest by getting {
