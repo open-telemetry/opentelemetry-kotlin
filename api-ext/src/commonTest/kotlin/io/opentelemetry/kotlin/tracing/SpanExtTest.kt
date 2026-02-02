@@ -96,7 +96,6 @@ internal class SpanExtTest {
         assertFalse(span.isRecording())
         assertEquals(StatusData.Ok, span.status)
         assertEquals(updatedName, span.name)
-        span.end()
     }
 
     @Test
