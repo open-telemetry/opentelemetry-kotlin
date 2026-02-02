@@ -43,5 +43,3 @@ jobs:
 
       - name: Build Example Apps
         run: ./gradlew :examples:jvm-app:run :examples:android-app:assembleRelease :examples:js-app:jsNodeDevelopmentRun --stacktrace
-      - name: Build Telescope App
-        run: ./gradlew pTML && cd examples/telescope-app && ./gradlew assembleRelease --stacktrace
