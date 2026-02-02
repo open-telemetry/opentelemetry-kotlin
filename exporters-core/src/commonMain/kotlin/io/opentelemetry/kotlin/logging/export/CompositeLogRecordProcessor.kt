@@ -42,6 +42,7 @@ internal class CompositeLogRecordProcessor(
         severityNumber: SeverityNumber?,
         eventName: String?,
     ): Boolean {
+        // returns true if _any_ of the processors are enabled.
         return lock.read {
             processors.any { it.enabled(context, instrumentationScopeInfo, severityNumber, eventName) }
         }
