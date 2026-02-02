@@ -21,13 +21,13 @@ class FakeSpan(
     override val events: MutableList<EventData> = mutableListOf()
     override val links: MutableList<LinkData> = mutableListOf()
 
+    private var recording: Boolean = true
+
     override fun setBooleanAttribute(key: String, value: Boolean) {
         TODO("Not yet implemented")
     }
 
-    override var status: StatusData
-        get() = TODO("Not yet implemented")
-        set(value) {}
+    override var status: StatusData = StatusData.Unset
     override val parent: SpanContext = FakeSpanContext.INVALID
     override val spanKind: SpanKind
         get() = TODO("Not yet implemented")
@@ -35,16 +35,14 @@ class FakeSpan(
         get() = TODO("Not yet implemented")
 
     override fun end() {
-        TODO("Not yet implemented")
+        recording = false
     }
 
     override fun end(timestamp: Long) {
-        TODO("Not yet implemented")
+        recording = false
     }
 
-    override fun isRecording(): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun isRecording(): Boolean = recording
 
     override fun addLink(
         spanContext: SpanContext,
