@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.export.DelegatingTelemetryCloseable
+import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.factory.SdkFactory
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.export.createCompositeLogRecordProcessor
@@ -13,7 +15,8 @@ internal class LoggerProviderImpl(
     private val clock: Clock,
     loggingConfig: LoggingConfig,
     sdkFactory: SdkFactory,
-) : LoggerProvider {
+    private val closeable: DelegatingTelemetryCloseable = DelegatingTelemetryCloseable()
+) : LoggerProvider, TelemetryCloseable by closeable {
 
     private val apiProvider by lazy {
         ApiProviderImpl<Logger> { key ->
@@ -23,6 +26,7 @@ internal class LoggerProviderImpl(
                     loggingConfig.processors
                 )
             }
+            processor?.let(closeable::add)
             LoggerImpl(
                 clock,
                 processor,

@@ -8,10 +8,17 @@ import io.opentelemetry.kotlin.logging.model.SeverityNumber
 
 @OptIn(ExperimentalApi::class)
 class FakeLogger(
-    val name: String
+    val name: String,
+    var enabledResult: () -> Boolean = { true },
 ) : Logger {
 
     val logs: MutableList<FakeReadableLogRecord> = mutableListOf()
+
+    override fun enabled(
+        context: Context?,
+        severityNumber: SeverityNumber?,
+        eventName: String?,
+    ): Boolean = enabledResult()
 
     override fun log(
         body: String?,

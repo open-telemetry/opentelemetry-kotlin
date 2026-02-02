@@ -8,6 +8,7 @@ public final class io/opentelemetry/kotlin/attributes/MutableAttributeContainerE
 }
 
 public final class io/opentelemetry/kotlin/context/ContextApiExtKt {
+	public static final fun asImplicitContext (Lio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public static final fun with (Lio/opentelemetry/kotlin/context/Context;Ljava/util/Map;)Lio/opentelemetry/kotlin/context/Context;
 }
 

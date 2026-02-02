@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -9,6 +10,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.batchExportOperation
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
+import io.opentelemetry.kotlin.logging.model.SeverityNumber
 
 @OptIn(ExperimentalApi::class)
 internal class CompositeLogRecordProcessor(
@@ -31,6 +33,18 @@ internal class CompositeLogRecordProcessor(
                 it.onEmit(log, context)
                 OperationResultCode.Success
             }
+        }
+    }
+
+    override fun enabled(
+        context: Context,
+        instrumentationScopeInfo: InstrumentationScopeInfo,
+        severityNumber: SeverityNumber?,
+        eventName: String?,
+    ): Boolean {
+        // returns true if _any_ of the processors are enabled.
+        return lock.read {
+            processors.any { it.enabled(context, instrumentationScopeInfo, severityNumber, eventName) }
         }
     }
 }

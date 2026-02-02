@@ -83,6 +83,7 @@ internal class NoopTests {
             setLongListAttribute("numbers", listOf(1L, 2L, 3L))
             setDoubleListAttribute("rates", listOf(1.0, 2.5))
         }
+        assertFalse(logger.enabled())
     }
 
     @Test

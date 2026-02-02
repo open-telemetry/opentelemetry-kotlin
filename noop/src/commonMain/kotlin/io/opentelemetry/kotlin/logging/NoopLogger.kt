@@ -7,6 +7,12 @@ import io.opentelemetry.kotlin.logging.model.SeverityNumber
 
 @ExperimentalApi
 internal object NoopLogger : Logger {
+    override fun enabled(
+        context: Context?,
+        severityNumber: SeverityNumber?,
+        eventName: String?,
+    ): Boolean = false
+
     override fun log(
         body: String?,
         timestamp: Long?,

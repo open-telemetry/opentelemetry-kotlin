@@ -8,7 +8,7 @@ plugins {
 
 kotlin {
     sourceSets {
-        val jvmMain by getting {
+        val jvmAndAndroidMain by getting {
             dependencies {
                 api(project(":core"))
                 api(project(":compat"))
