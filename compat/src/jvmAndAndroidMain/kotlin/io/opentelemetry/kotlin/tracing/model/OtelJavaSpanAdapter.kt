@@ -9,11 +9,11 @@ import io.opentelemetry.kotlin.aliases.OtelJavaScope
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaStatusCode
+import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
 import io.opentelemetry.kotlin.tracing.recordException
 import java.util.concurrent.TimeUnit
-import io.opentelemetry.kotlin.attributes.convertToMap
 
 @OptIn(ExperimentalApi::class)
 internal class OtelJavaSpanAdapter(private val span: Span) : OtelJavaSpan, OtelJavaImplicitContextKeyed {

@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin
 
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
@@ -15,6 +16,11 @@ class BuildPlugin : Plugin<Project> {
             project.configureBinaryCompatValidation()
             project.configureExplicitApiMode(kotlin)
             project.configureTest()
+
+            project.pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
+                val androidTarget = kotlin.extensions.getByType(KotlinMultiplatformAndroidLibraryTarget::class.java)
+                project.configureKotlinAndroidTarget(androidTarget)
+            }
         }
         project.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
             val kotlin = project.extensions.getByType(KotlinJvmProjectExtension::class.java)
