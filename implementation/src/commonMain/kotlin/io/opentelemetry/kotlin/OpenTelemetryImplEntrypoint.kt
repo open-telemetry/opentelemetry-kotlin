@@ -31,7 +31,7 @@ internal fun createOpenTelemetryImpl(
     val tracingConfig = cfg.tracingConfig.generateTracingConfig()
     val loggingConfig = cfg.loggingConfig.generateLoggingConfig()
     val clock = cfg.clock
-    return OpenTelemetryImpl(
+    return CloseableOpenTelemetryImpl(
         tracerProvider = TracerProviderImpl(clock, tracingConfig, sdkFactory),
         loggerProvider = LoggerProviderImpl(clock, loggingConfig, sdkFactory),
         clock = clock,

@@ -16,6 +16,7 @@ kotlin {
                 implementation(project(":model"))
                 implementation(project(":platform-implementations"))
                 implementation(project(":exporters-core"))
+                implementation(libs.kotlinx.coroutines)
             }
         }
         val commonTest by getting {
