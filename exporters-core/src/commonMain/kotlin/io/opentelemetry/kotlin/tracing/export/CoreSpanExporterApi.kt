@@ -2,10 +2,7 @@ package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
-import io.opentelemetry.kotlin.export.EXPORT_TIMEOUT_MS
-import io.opentelemetry.kotlin.export.MAX_EXPORT_BATCH_SIZE
-import io.opentelemetry.kotlin.export.MAX_QUEUE_SIZE
-import io.opentelemetry.kotlin.export.SCHEDULE_DELAY_MS
+import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,10 +47,10 @@ public fun createCompositeSpanExporter(exporters: List<SpanExporter>): SpanExpor
 @OptIn(ExperimentalApi::class)
 public fun createBatchSpanProcessor(
     exporter: SpanExporter,
-    maxQueueSize: Int = MAX_QUEUE_SIZE,
-    scheduleDelayMs: Long = SCHEDULE_DELAY_MS,
-    exportTimeoutMs: Long = EXPORT_TIMEOUT_MS,
-    maxExportBatchSize: Int = MAX_EXPORT_BATCH_SIZE
+    maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
+    scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
+    exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
+    maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE
 ): SpanProcessor = BatchSpanProcessorImpl(
     exporter,
     maxQueueSize,
