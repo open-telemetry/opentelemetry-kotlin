@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/bin/bash
+set -euo pipefail
 
 [[ ! -f "gradle.properties" ]] && { echo "Error: gradle.properties not found" >&2; exit 1; }
 

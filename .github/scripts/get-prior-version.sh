@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/bin/bash
+set -euo pipefail
 
 [[ -z "$1" ]] && { echo "Error: missing version argument" >&2; exit 1; }
 

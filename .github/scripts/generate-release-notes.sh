@@ -1,13 +1,22 @@
-#!/bin/bash -e
+#!/bin/bash
+set -euo pipefail
 
-# Generates release notes, like what appears in GitHub release pages.
+# Generates release notes
 
-[[ -z "$1" ]] && { echo "Error: missing VERSION argument"; exit 1; }
-[[ -z "$2" ]] && { echo "Error: missing PRIOR_VERSION argument"; exit 1; }
-[[ ! -f "CHANGELOG.md" ]] && { echo "Error: CHANGELOG.md not found"; exit 1; }
+if [[ -z "${VERSION:-}" ]]; then
+  echo "Error: VERSION environment variable is required" >&2
+  exit 1
+fi
 
-VERSION=$1
-PRIOR_VERSION=$2
+if [[ -z "${PRIOR_VERSION:-}" ]]; then
+  echo "Error: PRIOR_VERSION environment variable is required" >&2
+  exit 1
+fi
+
+if [[ ! -f "CHANGELOG.md" ]]; then
+  echo "Error: CHANGELOG.md not found" >&2
+  exit 1
+fi
 
 sed -n "0,/^## Version $VERSION /d;/^## Version /q;p" CHANGELOG.md > /tmp/CHANGELOG_SECTION.md
 
@@ -23,4 +32,4 @@ cat >> /tmp/release-notes.txt << EOF
 
 EOF
 
-.github/scripts/generate-release-contributors.sh "v${PRIOR_VERSION}" >> /tmp/release-notes.txt
+"$(dirname "$0")/generate-release-contributors.sh" "v${PRIOR_VERSION}" >> /tmp/release-notes.txt

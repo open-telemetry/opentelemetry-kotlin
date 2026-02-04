@@ -1,10 +1,19 @@
-#!/bin/bash -e
+#!/bin/bash
+set -euo pipefail
 
-[[ -z "$1" ]] && { echo "Error: missing version argument"; exit 1; }
-[[ ! -f "gradle.properties" ]] && { echo "Error: gradle.properties not found"; exit 1; }
+# Updates the version in gradle.properties.
 
-version=$1
-alpha_version=${version}-alpha
+version="${1:-${VERSION:-}}"
+
+if [[ -z "$version" ]]; then
+  echo "Error: VERSION environment variable or argument is required" >&2
+  exit 1
+fi
+
+if [[ ! -f "gradle.properties" ]]; then
+  echo "Error: gradle.properties not found" >&2
+  exit 1
+fi
 
 sed -Ei "s/version=.*/version=$version/" gradle.properties
-
+echo "Updated gradle.properties with version $version"

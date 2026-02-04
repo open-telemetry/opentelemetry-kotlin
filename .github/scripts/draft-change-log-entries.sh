@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/bin/bash
+set -euo pipefail
 
 version=$("$(dirname "$0")/get-version.sh")
 [[ -z "$version" ]] && { echo "Error: failed to get version" >&2; exit 1; }
