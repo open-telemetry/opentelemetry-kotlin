@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 0.1.0 (2026-02-05)
+
 ## Legacy release notes made under io.embrace coordinates
 
 # 0.7.0
