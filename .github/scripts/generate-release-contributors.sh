@@ -7,6 +7,9 @@
 #   git push origin upstream/main:main
 #   export GITHUB_REPOSITORY=open-telemetry/opentelemetry-kotlin
 
+[[ -z "$1" ]] && { echo "Error: missing from_version argument"; exit 1; }
+[[ -z "$GITHUB_REPOSITORY" ]] && { echo "Error: GITHUB_REPOSITORY not set"; exit 1; }
+
 from_version=$1
 
 # get the date of the first commit that was not in the from_version

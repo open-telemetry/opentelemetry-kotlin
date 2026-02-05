@@ -3,8 +3,8 @@
 version=$1
 
 if [[ -z "$version" ]]; then
- echo "Unexpected version argument: $version"
- exit 1
+  echo "Error: missing version argument" >&2
+  exit 1
 fi
 
 if [[ $version =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-(rc\.([0-9]+)))?$ ]]; then
@@ -13,7 +13,7 @@ if [[ $version =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-(rc\.([0-9]+)))?$ ]]; then
   version_patch="${BASH_REMATCH[3]}"
   version_rc="${BASH_REMATCH[6]}"
 else
-  echo "unexpected version: '$version'"
+  echo "Error: invalid version format '$version' (expected: X.Y.Z or X.Y.Z-rc.N)" >&2
   exit 1
 fi
 
