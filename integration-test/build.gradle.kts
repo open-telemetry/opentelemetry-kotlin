@@ -9,7 +9,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":api"))
+                implementation(project(":sdk"))
                 implementation(project(":test-fakes"))
                 implementation(project(":semconv"))
                 implementation(libs.kotlin.serialization)
