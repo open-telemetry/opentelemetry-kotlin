@@ -8,7 +8,7 @@ fun Project.configurePublishing() {
         val mavenPublishing = project.extensions.getByType(MavenPublishBaseExtension::class.java)
 
         mavenPublishing.apply {
-            publishToMavenCentral()
+            publishToMavenCentral(automaticRelease = true)
             signAllPublications()
             coordinates("io.opentelemetry.kotlin", project.name, project.version.toString())
 

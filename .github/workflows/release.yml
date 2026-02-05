@@ -62,7 +62,7 @@ jobs:
           java-version: 21
 
       - name: Build and publish artifacts
-        run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository -Pfinal=true --no-build-cache --no-configuration-cache --no-parallel
+        run: ./gradlew publishToMavenCentral -Dorg.gradle.parallel=false --no-build-cache --no-configuration-cache --stacktrace
         env:
           SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
           SONATYPE_KEY: ${{ secrets.SONATYPE_KEY }}
