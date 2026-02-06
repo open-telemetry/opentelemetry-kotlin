@@ -1,6 +1,9 @@
 # api
 
-This module contains the main public API of the SDK as prescribed by the OTel specification.
+This module contains the main public API of the SDK as prescribed by the OTel specification in the
+[API section](https://opentelemetry.io/docs/specs/otel/overview/#api). This is intended for use by
+instrumentation authors and application developers.
+
 It is intended that library consumers will spend the vast majority of their time using symbols from
 this module, with the exception of the entrypoints supplied in `compat`,
 `implementation`, or  `noop`.
