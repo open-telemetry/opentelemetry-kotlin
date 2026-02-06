@@ -1,5 +1,9 @@
 # opentelemetry-kotlin changelog
 
+## Unreleased
+
+## Legacy release notes made under io.embrace coordinates
+
 # 0.7.0
 *Oct 15, 2025*
 

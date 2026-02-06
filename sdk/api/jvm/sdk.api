@@ -1,0 +1,19 @@
+public abstract interface class io/opentelemetry/kotlin/tracing/sampling/Sampler {
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun shouldSample (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/model/SpanKind;Lio/opentelemetry/kotlin/attributes/AttributeContainer;Ljava/util/List;)Lio/opentelemetry/kotlin/tracing/sampling/SamplingResult;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/sampling/SamplingResult {
+	public abstract fun getAttributes ()Lio/opentelemetry/kotlin/attributes/AttributeContainer;
+	public abstract fun getTraceState ()Lio/opentelemetry/kotlin/tracing/model/TraceState;
+}
+
+public final class io/opentelemetry/kotlin/tracing/sampling/SamplingResult$Decision : java/lang/Enum {
+	public static final field DROP Lio/opentelemetry/kotlin/tracing/sampling/SamplingResult$Decision;
+	public static final field RECORD_AND_SAMPLE Lio/opentelemetry/kotlin/tracing/sampling/SamplingResult$Decision;
+	public static final field RECORD_ONLY Lio/opentelemetry/kotlin/tracing/sampling/SamplingResult$Decision;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/sampling/SamplingResult$Decision;
+	public static fun values ()[Lio/opentelemetry/kotlin/tracing/sampling/SamplingResult$Decision;
+}
+
