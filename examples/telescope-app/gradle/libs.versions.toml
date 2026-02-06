@@ -10,7 +10,7 @@ lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
 composeBom = "2025.02.00"
 opentelemetry-bom = "1.46.0"
-opentelemetry-kotlin = "0.8.0-SNAPSHOT"
+opentelemetry-kotlin = "0.1.0-SNAPSHOT"
 opentelemetry-semconv = "1.28.0-alpha"
 navigationCompose = "2.8.8"
 

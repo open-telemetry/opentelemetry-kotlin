@@ -1,9 +1,15 @@
 #!/bin/bash -e
 
 version=$("$(dirname "$0")/get-version.sh")
-prior_version=$("$(dirname "$0")/get-prior-version.sh" "$version")
+[[ -z "$version" ]] && { echo "Error: failed to get version" >&2; exit 1; }
 
-range="v$prior_version..HEAD"
+if prior_version=$("$(dirname "$0")/get-prior-version.sh" "$version" 2>/dev/null); then
+  range="v$prior_version..HEAD"
+else
+  # No prior version tag exists, use initial commit
+  initial_commit=$(git rev-list --max-parents=0 HEAD)
+  range="$initial_commit..HEAD"
+fi
 
 echo "## Unreleased"
 echo

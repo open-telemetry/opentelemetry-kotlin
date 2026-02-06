@@ -2,6 +2,10 @@
 
 # Generates release notes, like what appears in GitHub release pages.
 
+[[ -z "$1" ]] && { echo "Error: missing VERSION argument"; exit 1; }
+[[ -z "$2" ]] && { echo "Error: missing PRIOR_VERSION argument"; exit 1; }
+[[ ! -f "CHANGELOG.md" ]] && { echo "Error: CHANGELOG.md not found"; exit 1; }
+
 VERSION=$1
 PRIOR_VERSION=$2
 

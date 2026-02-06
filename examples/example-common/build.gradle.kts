@@ -30,7 +30,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(project(":api"))
+                api(project(":sdk"))
                 api(project(":api-ext"))
                 api(project(":noop"))
                 implementation(project(":model"))
