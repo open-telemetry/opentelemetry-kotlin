@@ -8,6 +8,9 @@ import io.opentelemetry.kotlin.tracing.TracerProvider
 
 /**
  * The main entry point for the OpenTelemetry API.
+ *
+ * This contains interfaces in the SDK package and is intended for use by instrumentation
+ * authors and application developers: https://opentelemetry.io/docs/specs/otel/overview/#api
  */
 @ExperimentalApi
 public interface OpenTelemetry : SdkFactory {
@@ -21,9 +24,4 @@ public interface OpenTelemetry : SdkFactory {
      * The [LoggerProvider] for creating [Logger] instances.
      */
     public val loggerProvider: LoggerProvider
-
-    /**
-     * The [Clock] that will be used for obtaining timestamps by this instance.
-     */
-    public val clock: Clock
 }

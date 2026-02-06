@@ -1,3 +1,11 @@
+public abstract interface class io/opentelemetry/kotlin/Clock {
+	public abstract fun now ()J
+}
+
+public abstract interface class io/opentelemetry/kotlin/OpenTelemetrySdk : io/opentelemetry/kotlin/OpenTelemetry {
+	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
+}
+
 public abstract class io/opentelemetry/kotlin/export/OperationResultCode {
 }
 

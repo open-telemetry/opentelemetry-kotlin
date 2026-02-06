@@ -65,7 +65,7 @@ fun runTracingExamples(api: OpenTelemetry) {
 
     // end the span
     simpleSpan.end()
-    complexSpan.end(timestamp = api.clock.now() + 100)
+    complexSpan.end()
 }
 
 private fun createComplexSpan(

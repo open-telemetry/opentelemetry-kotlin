@@ -116,7 +116,7 @@ internal class NoopTests {
 
     @Test
     fun testNoopClockDefault() {
-        val otel = createNoopOpenTelemetry()
+        val otel = createNoopOpenTelemetry() as OpenTelemetrySdk
         val clock = otel.clock
 
         // Noop clock always returns 0
