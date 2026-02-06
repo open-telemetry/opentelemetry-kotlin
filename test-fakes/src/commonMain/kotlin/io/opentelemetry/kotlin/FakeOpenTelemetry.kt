@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.tracing.TracerProvider
 @OptIn(ExperimentalApi::class)
 class FakeOpenTelemetry(
     private val sdkFactory: SdkFactory = FakeSdkFactory()
-) : OpenTelemetry, SdkFactory by sdkFactory {
+) : OpenTelemetrySdk, SdkFactory by sdkFactory {
     override val tracerProvider: TracerProvider = FakeTracerProvider()
     override val loggerProvider: LoggerProvider = FakeLoggerProvider()
     override val clock: Clock = FakeClock()

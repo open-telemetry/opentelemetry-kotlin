@@ -1,7 +1,3 @@
-public abstract interface class io/opentelemetry/kotlin/Clock {
-	public abstract fun now ()J
-}
-
 public abstract interface annotation class io/opentelemetry/kotlin/ExperimentalApi : java/lang/annotation/Annotation {
 }
 
@@ -13,7 +9,6 @@ public abstract interface class io/opentelemetry/kotlin/InstrumentationScopeInfo
 }
 
 public abstract interface class io/opentelemetry/kotlin/OpenTelemetry : io/opentelemetry/kotlin/factory/SdkFactory {
-	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
 	public abstract fun getLoggerProvider ()Lio/opentelemetry/kotlin/logging/LoggerProvider;
 	public abstract fun getTracerProvider ()Lio/opentelemetry/kotlin/tracing/TracerProvider;
 }
