@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+[[ -z "$1" ]] && { echo "Error: missing version argument" >&2; exit 1; }
+
 from_version_json=$("$(dirname "$0")/parse-version.sh" "$1")
 major=$(echo "$from_version_json" | jq -r '.major')
 minor=$(echo "$from_version_json" | jq -r '.minor')
@@ -20,6 +22,11 @@ else
   else
     prior_version="$major.$minor.$((patch - 1))"
   fi
+fi
+
+if ! git rev-parse "v$prior_version" >/dev/null 2>&1; then
+  echo "Error: prior version tag 'v$prior_version' does not exist" >&2
+  exit 1
 fi
 
 echo "$prior_version"
