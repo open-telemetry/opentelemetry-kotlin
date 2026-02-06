@@ -1,4 +1,5 @@
 public final class io/opentelemetry/kotlin/NoopOpenTelemetryEntrypointKt {
 	public static final fun createNoopOpenTelemetry ()Lio/opentelemetry/kotlin/OpenTelemetry;
+	public static final fun getNoopOpenTelemetry ()Lio/opentelemetry/kotlin/OpenTelemetry;
 }
 
