@@ -16,7 +16,7 @@ internal class CloseableOpenTelemetryImpl(
     override val clock: Clock,
     private val sdkFactory: SdkFactory,
     private val timeoutMs: Long = 3000,
-) : OpenTelemetry, SdkFactory by sdkFactory, TelemetryCloseable {
+) : OpenTelemetrySdk, SdkFactory by sdkFactory, TelemetryCloseable {
 
     override suspend fun forceFlush(): OperationResultCode = withOverallTimeout {
         val tracerResult = when (tracerProvider) {
