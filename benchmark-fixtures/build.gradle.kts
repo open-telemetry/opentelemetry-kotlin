@@ -15,7 +15,7 @@ kotlin {
                 implementation(project(":implementation"))
             }
         }
-        jvmMain {
+        val jvmAndAndroidMain by getting {
             dependencies {
                 implementation(project.dependencies.platform(libs.opentelemetry.bom))
                 implementation(libs.opentelemetry.api)
