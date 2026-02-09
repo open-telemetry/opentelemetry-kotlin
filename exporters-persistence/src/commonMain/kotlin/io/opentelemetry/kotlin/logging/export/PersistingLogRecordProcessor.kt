@@ -1,13 +1,19 @@
 package io.opentelemetry.kotlin.logging.export
 
+import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.export.PersistedTelemetryConfig
+import io.opentelemetry.kotlin.export.PersistedTelemetryType
 import io.opentelemetry.kotlin.export.TelemetryCloseable
+import io.opentelemetry.kotlin.export.TelemetryFileSystem
+import io.opentelemetry.kotlin.export.TelemetryRepositoryImpl
 import io.opentelemetry.kotlin.export.TimeoutTelemetryCloseable
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
+import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
@@ -26,6 +32,11 @@ import kotlinx.coroutines.Dispatchers
 internal class PersistingLogRecordProcessor(
     processors: List<LogRecordProcessor>,
     exporters: List<LogRecordExporter>,
+    fileSystem: TelemetryFileSystem,
+    clock: Clock,
+    config: PersistedTelemetryConfig,
+    serializer: (List<ReadableLogRecord>) -> ByteArray,
+    deserializer: (ByteArray) -> List<ReadableLogRecord>,
     maxQueueSize: Int,
     scheduleDelayMs: Long,
     exportTimeoutMs: Long,
@@ -34,7 +45,16 @@ internal class PersistingLogRecordProcessor(
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : LogRecordProcessor {
 
-    private val exporter = PersistingLogRecordExporter(exporters)
+    private val repository = TelemetryRepositoryImpl(
+        type = PersistedTelemetryType.LOGS,
+        config = config,
+        fileSystem = fileSystem,
+        serializer = serializer,
+        deserializer = deserializer,
+        clock = clock,
+    )
+
+    private val exporter = PersistingLogRecordExporter(exporters, repository)
 
     private val batchingProcessor = createBatchLogRecordProcessor(
         exporter,

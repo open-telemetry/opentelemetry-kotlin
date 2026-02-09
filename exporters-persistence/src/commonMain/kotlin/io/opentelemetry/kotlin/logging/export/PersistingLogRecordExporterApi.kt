@@ -2,10 +2,14 @@
 
 package io.opentelemetry.kotlin.logging.export
 
+import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
+import io.opentelemetry.kotlin.export.PersistedTelemetryConfig
+import io.opentelemetry.kotlin.export.TelemetryFileSystem
+import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
@@ -22,6 +26,10 @@ import kotlinx.coroutines.Dispatchers
 internal fun createPersistingLogRecordProcessor(
     processors: List<LogRecordProcessor>,
     exporters: List<LogRecordExporter>,
+    fileSystem: TelemetryFileSystem,
+    clock: Clock,
+    serializer: (List<ReadableLogRecord>) -> ByteArray,
+    deserializer: (ByteArray) -> List<ReadableLogRecord>,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
@@ -30,13 +38,18 @@ internal fun createPersistingLogRecordProcessor(
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ): LogRecordProcessor {
     return PersistingLogRecordProcessor(
-        processors,
-        exporters,
-        maxQueueSize,
-        scheduleDelayMs,
-        exportTimeoutMs,
-        maxExportBatchSize,
-        sdkErrorHandler,
-        dispatcher,
+        processors = processors,
+        exporters = exporters,
+        fileSystem = fileSystem,
+        clock = clock,
+        serializer = serializer,
+        deserializer = deserializer,
+        config = PersistedTelemetryConfig(),
+        maxQueueSize = maxQueueSize,
+        scheduleDelayMs = scheduleDelayMs,
+        exportTimeoutMs = exportTimeoutMs,
+        maxExportBatchSize = maxExportBatchSize,
+        sdkErrorHandler = sdkErrorHandler,
+        dispatcher = dispatcher,
     )
 }
