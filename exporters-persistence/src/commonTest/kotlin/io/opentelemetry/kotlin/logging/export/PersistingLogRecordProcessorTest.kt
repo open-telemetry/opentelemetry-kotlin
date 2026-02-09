@@ -1,8 +1,10 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.export.FakeTelemetryFileSystem
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
@@ -310,9 +312,13 @@ internal class PersistingLogRecordProcessorTest {
         return createPersistingLogRecordProcessor(
             processors = processors,
             exporters = exporters,
+            fileSystem = FakeTelemetryFileSystem(),
+            clock = FakeClock(),
             maxExportBatchSize = maxExportBatchSize,
             scheduleDelayMs = scheduleDelayMs,
             dispatcher = dispatcher,
+            serializer = { ByteArray(0) },
+            deserializer = { emptyList() },
         )
     }
 
