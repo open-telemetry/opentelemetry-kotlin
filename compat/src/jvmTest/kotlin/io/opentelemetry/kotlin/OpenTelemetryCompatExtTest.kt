@@ -9,7 +9,7 @@ internal class OpenTelemetryCompatExtTest {
 
     @Test
     fun `toOtelJavaApi returns noop when called on noop instance`() {
-        val noopKotlinInstance = createNoopOpenTelemetry()
+        val noopKotlinInstance = NoopOpenTelemetry
         val result = noopKotlinInstance.toOtelJavaApi()
         assertSame(OtelJavaOpenTelemetry.noop(), result)
     }
