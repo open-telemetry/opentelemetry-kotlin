@@ -1,0 +1,25 @@
+package io.opentelemetry.kotlin.export
+
+import io.opentelemetry.kotlin.ExperimentalApi
+import okio.FileSystem
+import okio.Path
+
+/**
+ * Returns the base directory that should be used to store cached data.
+ */
+@ExperimentalApi
+internal expect fun getCacheDirectory(): Path
+
+/**
+ * Returns an Okio representation of the file system.
+ */
+@ExperimentalApi
+internal expect fun getFileSystem(): FileSystem
+
+/**
+ * Returns the directory used to store telemetry with a specified subdirectory appended (e.g. 'logs').
+ */
+@ExperimentalApi
+internal fun getTelemetryStorageDirectory(subdirectory: String): Path {
+    return getCacheDirectory() / "/opentelemetry-kotlin/persisted-telemetry" / subdirectory
+}
