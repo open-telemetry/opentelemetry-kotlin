@@ -32,7 +32,7 @@ object ErrorAttributes {
     * should be prepared for <c>error.type</c> to have high cardinality at query time when no
     * additional filters are applied.</p>
     * <p>If the operation has completed successfully, instrumentations SHOULD NOT set <c>error.type</c>.</p>
-    * <p>If a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),
+    * <p>If a specific domain defines its own set of error identifiers (such as HTTP or RPC status codes),
     * it's RECOMMENDED to:</p>
     * <ul>
     *   <li>Use a domain-specific attribute</li>

@@ -12,7 +12,7 @@ object SystemAttributes {
     /**
     * <p>Deprecated, use <c>cpu.logical_number</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `cpu.logical_number`.")
     const val SYSTEM_CPU_LOGICAL_NUMBER: String = "system.cpu.logical_number"
 
     /**
@@ -52,6 +52,12 @@ object SystemAttributes {
     const val SYSTEM_FILESYSTEM_TYPE: String = "system.filesystem.type"
 
     /**
+    * <p>The Linux Slab memory state</p>
+    */
+    @IncubatingApi
+    const val SYSTEM_MEMORY_LINUX_SLAB_STATE: String = "system.memory.linux.slab.state"
+
+    /**
     * <p>The memory state</p>
     */
     @IncubatingApi
@@ -70,27 +76,33 @@ object SystemAttributes {
     const val SYSTEM_PAGING_DIRECTION: String = "system.paging.direction"
 
     /**
+    * <p>The paging fault type</p>
+    */
+    @IncubatingApi
+    const val SYSTEM_PAGING_FAULT_TYPE: String = "system.paging.fault.type"
+
+    /**
     * <p>The memory paging state</p>
     */
     @IncubatingApi
     const val SYSTEM_PAGING_STATE: String = "system.paging.state"
 
     /**
-    * <p>The memory paging type</p>
+    * <p>Deprecated, use <c>system.paging.fault.type</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `system.paging.fault.type`.")
     const val SYSTEM_PAGING_TYPE: String = "system.paging.type"
 
     /**
-    * <p>The process state, e.g., <a href="https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES">Linux Process State Codes</a></p>
+    * <p>Deprecated, use <c>process.state</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `process.state`.")
     const val SYSTEM_PROCESS_STATUS: String = "system.process.status"
 
     /**
-    * <p>Deprecated, use <c>system.process.status</c> instead.</p>
+    * <p>Deprecated, use <c>process.state</c> instead.</p>
     */
-    @Deprecated("Replaced by `system.process.status`.")
+    @Deprecated("Replaced by `process.state`.")
     const val SYSTEM_PROCESSES_STATUS: String = "system.processes.status"
 
     /**
@@ -192,6 +204,23 @@ object SystemAttributes {
         * <p>ext4.</p>
         */
         EXT4("ext4"),
+    }
+
+    /**
+    * <p>SYSTEM_MEMORY_LINUX_SLAB_STATE</p>
+    */
+    @IncubatingApi
+    enum class SystemMemoryLinuxSlabStateValues(val value: String) {
+
+        /**
+        * <p>reclaimable.</p>
+        */
+        RECLAIMABLE("reclaimable"),
+
+        /**
+        * <p>unreclaimable.</p>
+        */
+        UNRECLAIMABLE("unreclaimable"),
     }
 
     /**
@@ -311,6 +340,23 @@ object SystemAttributes {
     }
 
     /**
+    * <p>SYSTEM_PAGING_FAULT_TYPE</p>
+    */
+    @IncubatingApi
+    enum class SystemPagingFaultTypeValues(val value: String) {
+
+        /**
+        * <p>major.</p>
+        */
+        MAJOR("major"),
+
+        /**
+        * <p>minor.</p>
+        */
+        MINOR("minor"),
+    }
+
+    /**
     * <p>SYSTEM_PAGING_STATE</p>
     */
     @IncubatingApi
@@ -330,7 +376,7 @@ object SystemAttributes {
     /**
     * <p>SYSTEM_PAGING_TYPE</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `system.paging.fault.type`.")
     enum class SystemPagingTypeValues(val value: String) {
 
         /**
@@ -347,7 +393,7 @@ object SystemAttributes {
     /**
     * <p>SYSTEM_PROCESS_STATUS</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `process.state`.")
     enum class SystemProcessStatusValues(val value: String) {
 
         /**
@@ -374,7 +420,7 @@ object SystemAttributes {
     /**
     * <p>SYSTEM_PROCESSES_STATUS</p>
     */
-    @Deprecated("Replaced by `system.process.status`.")
+    @Deprecated("Replaced by `process.state`.")
     enum class SystemProcessesStatusValues(val value: String) {
 
         /**

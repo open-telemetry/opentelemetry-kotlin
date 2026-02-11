@@ -72,6 +72,60 @@ object GcpAttributes {
     const val GCP_APPHUB_WORKLOAD_ID: String = "gcp.apphub.workload.id"
 
     /**
+    * <p>The container within GCP where the AppHub destination application is defined.</p>
+    */
+    @IncubatingApi
+    const val GCP_APPHUB_DESTINATION_APPLICATION_CONTAINER: String = "gcp.apphub_destination.application.container"
+
+    /**
+    * <p>The name of the destination application as configured in AppHub.</p>
+    */
+    @IncubatingApi
+    const val GCP_APPHUB_DESTINATION_APPLICATION_ID: String = "gcp.apphub_destination.application.id"
+
+    /**
+    * <p>The GCP zone or region where the destination application is defined.</p>
+    */
+    @IncubatingApi
+    const val GCP_APPHUB_DESTINATION_APPLICATION_LOCATION: String = "gcp.apphub_destination.application.location"
+
+    /**
+    * <p>Criticality of a destination workload indicates its importance to the business as specified in <a href="https://cloud.google.com/app-hub/docs/reference/rest/v1/Attributes#type">AppHub type enum</a></p>
+    */
+    @IncubatingApi
+    const val GCP_APPHUB_DESTINATION_SERVICE_CRITICALITY_TYPE: String = "gcp.apphub_destination.service.criticality_type"
+
+    /**
+    * <p>Software lifecycle stage of a destination service as defined <a href="https://cloud.google.com/app-hub/docs/reference/rest/v1/Attributes#type_1">AppHub environment type</a></p>
+    */
+    @IncubatingApi
+    const val GCP_APPHUB_DESTINATION_SERVICE_ENVIRONMENT_TYPE: String = "gcp.apphub_destination.service.environment_type"
+
+    /**
+    * <p>The name of the destination service as configured in AppHub.</p>
+    */
+    @IncubatingApi
+    const val GCP_APPHUB_DESTINATION_SERVICE_ID: String = "gcp.apphub_destination.service.id"
+
+    /**
+    * <p>Criticality of a destination workload indicates its importance to the business as specified in <a href="https://cloud.google.com/app-hub/docs/reference/rest/v1/Attributes#type">AppHub type enum</a></p>
+    */
+    @IncubatingApi
+    const val GCP_APPHUB_DESTINATION_WORKLOAD_CRITICALITY_TYPE: String = "gcp.apphub_destination.workload.criticality_type"
+
+    /**
+    * <p>Environment of a destination workload is the stage of a software lifecycle as provided in the <a href="https://cloud.google.com/app-hub/docs/reference/rest/v1/Attributes#type_1">AppHub environment type</a></p>
+    */
+    @IncubatingApi
+    const val GCP_APPHUB_DESTINATION_WORKLOAD_ENVIRONMENT_TYPE: String = "gcp.apphub_destination.workload.environment_type"
+
+    /**
+    * <p>The name of the destination workload as configured in AppHub.</p>
+    */
+    @IncubatingApi
+    const val GCP_APPHUB_DESTINATION_WORKLOAD_ID: String = "gcp.apphub_destination.workload.id"
+
+    /**
     * <p>Identifies the Google Cloud service for which the official client library is intended.</p>
     * <p>Notes:</p>
     * <p>Intended to be a stable identifier for Google Cloud client libraries that is uniform across implementation languages. The value should be derived from the canonical service domain for the service; for example, 'foo.googleapis.com' should result in a value of 'foo'.</p>
@@ -189,6 +243,114 @@ object GcpAttributes {
     */
     @IncubatingApi
     enum class GcpApphubWorkloadEnvironmentTypeValues(val value: String) {
+
+        /**
+        * <p>Production environment.</p>
+        */
+        PRODUCTION("PRODUCTION"),
+
+        /**
+        * <p>Staging environment.</p>
+        */
+        STAGING("STAGING"),
+
+        /**
+        * <p>Test environment.</p>
+        */
+        TEST("TEST"),
+
+        /**
+        * <p>Development environment.</p>
+        */
+        DEVELOPMENT("DEVELOPMENT"),
+    }
+
+    /**
+    * <p>GCP_APPHUB_DESTINATION_SERVICE_CRITICALITY_TYPE</p>
+    */
+    @IncubatingApi
+    enum class GcpApphubDestinationServiceCriticalityTypeValues(val value: String) {
+
+        /**
+        * <p>Mission critical service.</p>
+        */
+        MISSION_CRITICAL("MISSION_CRITICAL"),
+
+        /**
+        * <p>High impact.</p>
+        */
+        HIGH("HIGH"),
+
+        /**
+        * <p>Medium impact.</p>
+        */
+        MEDIUM("MEDIUM"),
+
+        /**
+        * <p>Low impact.</p>
+        */
+        LOW("LOW"),
+    }
+
+    /**
+    * <p>GCP_APPHUB_DESTINATION_SERVICE_ENVIRONMENT_TYPE</p>
+    */
+    @IncubatingApi
+    enum class GcpApphubDestinationServiceEnvironmentTypeValues(val value: String) {
+
+        /**
+        * <p>Production environment.</p>
+        */
+        PRODUCTION("PRODUCTION"),
+
+        /**
+        * <p>Staging environment.</p>
+        */
+        STAGING("STAGING"),
+
+        /**
+        * <p>Test environment.</p>
+        */
+        TEST("TEST"),
+
+        /**
+        * <p>Development environment.</p>
+        */
+        DEVELOPMENT("DEVELOPMENT"),
+    }
+
+    /**
+    * <p>GCP_APPHUB_DESTINATION_WORKLOAD_CRITICALITY_TYPE</p>
+    */
+    @IncubatingApi
+    enum class GcpApphubDestinationWorkloadCriticalityTypeValues(val value: String) {
+
+        /**
+        * <p>Mission critical service.</p>
+        */
+        MISSION_CRITICAL("MISSION_CRITICAL"),
+
+        /**
+        * <p>High impact.</p>
+        */
+        HIGH("HIGH"),
+
+        /**
+        * <p>Medium impact.</p>
+        */
+        MEDIUM("MEDIUM"),
+
+        /**
+        * <p>Low impact.</p>
+        */
+        LOW("LOW"),
+    }
+
+    /**
+    * <p>GCP_APPHUB_DESTINATION_WORKLOAD_ENVIRONMENT_TYPE</p>
+    */
+    @IncubatingApi
+    enum class GcpApphubDestinationWorkloadEnvironmentTypeValues(val value: String) {
 
         /**
         * <p>Production environment.</p>

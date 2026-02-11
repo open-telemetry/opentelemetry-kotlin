@@ -76,6 +76,11 @@ object CloudAttributes {
     enum class CloudPlatformValues(val value: String) {
 
         /**
+        * <p>Akamai Cloud Compute</p>
+        */
+        AKAMAI_CLOUD_COMPUTE("akamai_cloud.compute"),
+
+        /**
         * <p>Alibaba Cloud Elastic Compute Service</p>
         */
         ALIBABA_CLOUD_ECS("alibaba_cloud_ecs"),
@@ -161,6 +166,11 @@ object CloudAttributes {
         AZURE_OPENSHIFT("azure.openshift"),
 
         /**
+        * <p>Google Vertex AI Agent Engine</p>
+        */
+        GCP_AGENT_ENGINE("gcp.agent_engine"),
+
+        /**
         * <p>Google Bare Metal Solution (BMS)</p>
         */
         GCP_BARE_METAL_SOLUTION("gcp_bare_metal_solution"),
@@ -196,6 +206,11 @@ object CloudAttributes {
         GCP_OPENSHIFT("gcp_openshift"),
 
         /**
+        * <p>Server on Hetzner Cloud</p>
+        */
+        HETZNER_CLOUD_SERVER("hetzner.cloud_server"),
+
+        /**
         * <p>Red Hat OpenShift on IBM Cloud</p>
         */
         IBM_CLOUD_OPENSHIFT("ibm_cloud_openshift"),
@@ -224,6 +239,11 @@ object CloudAttributes {
         * <p>Tencent Cloud Serverless Cloud Function (SCF)</p>
         */
         TENCENT_CLOUD_SCF("tencent_cloud_scf"),
+
+        /**
+        * <p>Vultr Cloud Compute</p>
+        */
+        VULTR_CLOUD_COMPUTE("vultr.cloud_compute"),
     }
 
     /**
@@ -231,6 +251,11 @@ object CloudAttributes {
     */
     @IncubatingApi
     enum class CloudProviderValues(val value: String) {
+
+        /**
+        * <p>Akamai Cloud</p>
+        */
+        AKAMAI_CLOUD("akamai_cloud"),
 
         /**
         * <p>Alibaba Cloud</p>
@@ -258,6 +283,11 @@ object CloudAttributes {
         HEROKU("heroku"),
 
         /**
+        * <p>Hetzner</p>
+        */
+        HETZNER("hetzner"),
+
+        /**
         * <p>IBM Cloud</p>
         */
         IBM_CLOUD("ibm_cloud"),
@@ -271,5 +301,10 @@ object CloudAttributes {
         * <p>Tencent Cloud</p>
         */
         TENCENT_CLOUD("tencent_cloud"),
+
+        /**
+        * <p>Vultr</p>
+        */
+        VULTR("vultr"),
     }
 }

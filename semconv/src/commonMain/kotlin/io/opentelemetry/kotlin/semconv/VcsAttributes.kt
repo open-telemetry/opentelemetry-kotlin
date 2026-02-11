@@ -168,7 +168,7 @@ object VcsAttributes {
     const val VCS_REPOSITORY_REF_TYPE: String = "vcs.repository.ref.type"
 
     /**
-    * <p>The <a href="https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.">canonical URL</a> of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.</p>
+    * <p>The <a href="https://support.google.com/webmasters/answer/10347851">canonical URL</a> of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.</p>
     * <p>Notes:</p>
     * <p>In Git Version Control Systems, the canonical URL SHOULD NOT include
     * the <c>.git</c> extension.</p>

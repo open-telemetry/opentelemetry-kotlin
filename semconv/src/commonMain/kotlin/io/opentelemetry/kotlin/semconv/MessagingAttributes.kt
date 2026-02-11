@@ -131,7 +131,7 @@ object MessagingAttributes {
     /**
     * <p>Deprecated, use <c>messaging.destination.partition.id</c> instead.</p>
     */
-    @Deprecated("Replaced by `messaging.destination.partition.id`.")
+    @Deprecated("Record string representation of the partition id in `messaging.destination.partition.id` attribute.")
     const val MESSAGING_KAFKA_DESTINATION_PARTITION: String = "messaging.kafka.destination.partition"
 
     /**

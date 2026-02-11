@@ -12,7 +12,7 @@ object UserAgentAttributes {
     /**
     * <p>Name of the user-agent extracted from original. Usually refers to the browser's name.</p>
     * <p>Notes:</p>
-    * <p><a href="https://www.whatsmyua.info">Example</a> of extracting browser's name from original string. In the case of using a user-agent for non-browser products, such as microservices with multiple names/versions inside the <c>user_agent.original</c>, the most significant name SHOULD be selected. In such a scenario it should align with <c>user_agent.version</c></p>
+    * <p><a href="https://uaparser.dev/#demo">Example</a> of extracting browser's name from original string. In the case of using a user-agent for non-browser products, such as microservices with multiple names/versions inside the <c>user_agent.original</c>, the most significant name SHOULD be selected. In such a scenario it should align with <c>user_agent.version</c></p>
     */
     @IncubatingApi
     const val USER_AGENT_NAME: String = "user_agent.name"
@@ -49,7 +49,7 @@ object UserAgentAttributes {
     /**
     * <p>Version of the user-agent extracted from original. Usually refers to the browser's version</p>
     * <p>Notes:</p>
-    * <p><a href="https://www.whatsmyua.info">Example</a> of extracting browser's version from original string. In the case of using a user-agent for non-browser products, such as microservices with multiple names/versions inside the <c>user_agent.original</c>, the most significant version SHOULD be selected. In such a scenario it should align with <c>user_agent.name</c></p>
+    * <p><a href="https://uaparser.dev/#demo">Example</a> of extracting browser's version from original string. In the case of using a user-agent for non-browser products, such as microservices with multiple names/versions inside the <c>user_agent.original</c>, the most significant version SHOULD be selected. In such a scenario it should align with <c>user_agent.name</c></p>
     */
     @IncubatingApi
     const val USER_AGENT_VERSION: String = "user_agent.version"

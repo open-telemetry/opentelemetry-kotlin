@@ -11,7 +11,13 @@ object PeerAttributes {
 
     /**
     * <p>The <a href="/docs/resource/README.md#service"><c>service.name</c></a> of the remote service. SHOULD be equal to the actual <c>service.name</c> resource attribute of the remote service if any.</p>
+    * <p>Notes:</p>
+    * <p>Examples of <c>peer.service</c> that users may specify:</p>
+    * <ul>
+    *   <li>A Redis cache of auth tokens as <c>peer.service="AuthTokenCache"</c>.</li>
+    *   <li>A gRPC service <c>rpc.service="io.opentelemetry.AuthService"</c> may be hosted in both a gateway, <c>peer.service="ExternalApiService"</c> and a backend, <c>peer.service="AuthService"</c>.</li>
+    * </ul>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `service.peer.name`.")
     const val PEER_SERVICE: String = "peer.service"
 }

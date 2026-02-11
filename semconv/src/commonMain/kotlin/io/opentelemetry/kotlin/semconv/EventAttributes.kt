@@ -12,6 +12,6 @@ object EventAttributes {
     /**
     * <p>Identifies the class / type of event.</p>
     */
-    @Deprecated("Replaced by EventName top-level field on the LogRecord.")
+    @Deprecated("The value of this attribute MUST now be set as the value of the EventName field on the LogRecord to indicate that the LogRecord represents an Event.")
     const val EVENT_NAME: String = "event.name"
 }

@@ -34,7 +34,7 @@ object EnduserAttributes {
     /**
     * <p>Deprecated, use <c>user.roles</c> instead.</p>
     */
-    @Deprecated("Replaced by `user.roles`.")
+    @Deprecated("Use `user.roles` instead.")
     const val ENDUSER_ROLE: String = "enduser.role"
 
     /**

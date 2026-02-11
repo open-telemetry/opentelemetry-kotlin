@@ -405,6 +405,27 @@ object K8sAttributes {
     const val K8S_POD_ANNOTATION: String = "k8s.pod.annotation"
 
     /**
+    * <p>Specifies the hostname of the Pod.</p>
+    * <p>Notes:</p>
+    * <p>The K8s Pod spec has an optional hostname field, which can be used to specify a hostname.
+    * Refer to <a href="https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-hostname-and-subdomain-field">K8s docs</a>
+    * for more information about this field.</p>
+    * <p>This attribute aligns with the <c>hostname</c> field of the
+    * <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podspec-v1-core">K8s PodSpec</a>.</p>
+    */
+    @IncubatingApi
+    const val K8S_POD_HOSTNAME: String = "k8s.pod.hostname"
+
+    /**
+    * <p>IP address allocated to the Pod.</p>
+    * <p>Notes:</p>
+    * <p>This attribute aligns with the <c>podIP</c> field of the
+    * <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podstatus-v1-core">K8s PodStatus</a>.</p>
+    */
+    @IncubatingApi
+    const val K8S_POD_IP: String = "k8s.pod.ip"
+
+    /**
     * <p>The label placed on the Pod, the <c><key></c> being the label name, the value being the label value.</p>
     * <p>Notes:</p>
     * <p>Examples:</p>
@@ -431,6 +452,30 @@ object K8sAttributes {
     */
     @IncubatingApi
     const val K8S_POD_NAME: String = "k8s.pod.name"
+
+    /**
+    * <p>The start timestamp of the Pod.</p>
+    * <p>Notes:</p>
+    * <p>Date and time at which the object was acknowledged by the Kubelet.
+    * This is before the Kubelet pulled the container image(s) for the pod.</p>
+    * <p>This attribute aligns with the <c>startTime</c> field of the
+    * <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podstatus-v1-core">K8s PodStatus</a>,
+    * in ISO 8601 (RFC 3339 compatible) format.</p>
+    */
+    @IncubatingApi
+    const val K8S_POD_START_TIME: String = "k8s.pod.start_time"
+
+    /**
+    * <p>The phase for the pod. Corresponds to the <c>phase</c> field of the: <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#podstatus-v1-core">K8s PodStatus</a></p>
+    */
+    @IncubatingApi
+    const val K8S_POD_STATUS_PHASE: String = "k8s.pod.status.phase"
+
+    /**
+    * <p>The reason for the pod state. Corresponds to the <c>reason</c> field of the: <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#podstatus-v1-core">K8s PodStatus</a></p>
+    */
+    @IncubatingApi
+    const val K8S_POD_STATUS_REASON: String = "k8s.pod.status.reason"
 
     /**
     * <p>The UID of the Pod.</p>
@@ -499,7 +544,7 @@ object K8sAttributes {
     /**
     * <p>The name of the K8s resource a resource quota defines.</p>
     * <p>Notes:</p>
-    * <p>The value for this attribute can be either the full <c>count/<resource>[.<group>]</c> string (e.g., count/deployments.apps, count/pods), or, for certain core Kubernetes resources, just the resource name (e.g., pods, services, configmaps). Both forms are supported by Kubernetes for object count quotas. See <a href="https://kubernetes.io/docs/concepts/policy/resource-quotas/#object-count-quota">Kubernetes Resource Quotas documentation</a> for more details.</p>
+    * <p>The value for this attribute can be either the full <c>count/<resource>[.<group>]</c> string (e.g., count/deployments.apps, count/pods), or, for certain core Kubernetes resources, just the resource name (e.g., pods, services, configmaps). Both forms are supported by Kubernetes for object count quotas. See <a href="https://kubernetes.io/docs/concepts/policy/resource-quotas/#quota-on-object-count">Kubernetes Resource Quotas documentation</a> for more details.</p>
     */
     @IncubatingApi
     const val K8S_RESOURCEQUOTA_RESOURCE_NAME: String = "k8s.resourcequota.resource_name"
@@ -711,6 +756,70 @@ object K8sAttributes {
         * <p>The network for the node is not correctly configured</p>
         */
         NETWORK_UNAVAILABLE("NetworkUnavailable"),
+    }
+
+    /**
+    * <p>K8S_POD_STATUS_PHASE</p>
+    */
+    @IncubatingApi
+    enum class K8sPodStatusPhaseValues(val value: String) {
+
+        /**
+        * <p>The pod has been accepted by the system, but one or more of the containers has not been started. This includes time before being bound to a node, as well as time spent pulling images onto the host.</p>
+        */
+        PENDING("Pending"),
+
+        /**
+        * <p>The pod has been bound to a node and all of the containers have been started. At least one container is still running or is in the process of being restarted.</p>
+        */
+        RUNNING("Running"),
+
+        /**
+        * <p>All containers in the pod have voluntarily terminated with a container exit code of 0, and the system is not going to restart any of these containers.</p>
+        */
+        SUCCEEDED("Succeeded"),
+
+        /**
+        * <p>All containers in the pod have terminated, and at least one container has terminated in a failure (exited with a non-zero exit code or was stopped by the system).</p>
+        */
+        FAILED("Failed"),
+
+        /**
+        * <p>For some reason the state of the pod could not be obtained, typically due to an error in communicating with the host of the pod.</p>
+        */
+        UNKNOWN("Unknown"),
+    }
+
+    /**
+    * <p>K8S_POD_STATUS_REASON</p>
+    */
+    @IncubatingApi
+    enum class K8sPodStatusReasonValues(val value: String) {
+
+        /**
+        * <p>The pod is evicted.</p>
+        */
+        EVICTED("Evicted"),
+
+        /**
+        * <p>The pod is in a status because of its node affinity</p>
+        */
+        NODE_AFFINITY("NodeAffinity"),
+
+        /**
+        * <p>The reason on a pod when its state cannot be confirmed as kubelet is unresponsive on the node it is (was) running.</p>
+        */
+        NODE_LOST("NodeLost"),
+
+        /**
+        * <p>The node is shutdown</p>
+        */
+        SHUTDOWN("Shutdown"),
+
+        /**
+        * <p>The pod was rejected admission to the node because of an error during admission that could not be categorized.</p>
+        */
+        UNEXPECTED_ADMISSION_ERROR("UnexpectedAdmissionError"),
     }
 
     /**

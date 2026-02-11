@@ -145,7 +145,7 @@ object DbAttributes {
     /**
     * <p>Deprecated, use <c>db.response.status_code</c> instead.</p>
     */
-    @Deprecated("Replaced by `db.response.status_code`.")
+    @Deprecated("Use `db.response.status_code` instead.")
     const val DB_COSMOSDB_STATUS_CODE: String = "db.cosmosdb.status_code"
 
     /**
@@ -259,13 +259,15 @@ object DbAttributes {
     * then <c><key></c> SHOULD be the 0-based index.</p>
     * <p><c>db.query.parameter.<key></c> SHOULD match
     * up with the parameterized placeholders present in <c>db.query.text</c>.</p>
+    * <p>It is RECOMMENDED to capture the value as provided by the application
+    * without attempting to do any case normalization.</p>
     * <p><c>db.query.parameter.<key></c> SHOULD NOT be captured on batch operations.</p>
     * <p>Examples:</p>
     * <ul>
     *   <li>For a query <c>SELECT * FROM users where username =  %s</c> with the parameter <c>"jdoe"</c>,
     * the attribute <c>db.query.parameter.0</c> SHOULD be set to <c>"jdoe"</c>.</li>
-    *   <li>For a query <c>"SELECT * FROM users WHERE username = %(username)s;</c> with parameter
-    * <c>username = "jdoe"</c>, the attribute <c>db.query.parameter.username</c> SHOULD be set to <c>"jdoe"</c>.</li>
+    *   <li>For a query <c>"SELECT * FROM users WHERE username = %(userName)s;</c> with parameter
+    * <c>userName = "jdoe"</c>, the attribute <c>db.query.parameter.userName</c> SHOULD be set to <c>"jdoe"</c>.</li>
     * </ul>
     */
     @IncubatingApi
@@ -280,7 +282,7 @@ object DbAttributes {
     * <p>Summary may be available to the instrumentation through
     * instrumentation hooks or other means. If it is not available, instrumentations
     * that support query parsing SHOULD generate a summary following
-    * <a href="/docs/database/database-spans.md#generating-a-summary-of-the-query">Generating query summary</a>
+    * <a href="/docs/db/database-spans.md#generating-a-summary-of-the-query">Generating query summary</a>
     * section.</p>
     */
     const val DB_QUERY_SUMMARY: String = "db.query.summary"
@@ -288,7 +290,7 @@ object DbAttributes {
     /**
     * <p>The database query being executed.</p>
     * <p>Notes:</p>
-    * <p>For sanitization see <a href="/docs/database/database-spans.md#sanitization-of-dbquerytext">Sanitization of <c>db.query.text</c></a>.
+    * <p>For sanitization see <a href="/docs/db/database-spans.md#sanitization-of-dbquerytext">Sanitization of <c>db.query.text</c></a>.
     * For batch operations, if the individual operations are known to have the same query text then that query text SHOULD be used, otherwise all of the individual query texts SHOULD be concatenated with separator <c>; </c> or some other database system specific separator if more applicable.
     * Parameterized query text SHOULD NOT be sanitized. Even though parameterized query text can potentially have sensitive data, by using a parameterized query the user is giving a strong signal that any sensitive data will be passed as parameter values, and the benefit to observability of capturing the static part of the query text by default outweighs the risk.</p>
     */
@@ -297,7 +299,7 @@ object DbAttributes {
     /**
     * <p>Deprecated, use <c>db.namespace</c> instead.</p>
     */
-    @Deprecated("Replaced by `db.namespace`.")
+    @Deprecated("Uncategorized.")
     const val DB_REDIS_DATABASE_INDEX: String = "db.redis.database_index"
 
     /**

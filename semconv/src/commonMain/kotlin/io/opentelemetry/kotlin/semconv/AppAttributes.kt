@@ -70,6 +70,22 @@ object AppAttributes {
     const val APP_SCREEN_COORDINATE_Y: String = "app.screen.coordinate.y"
 
     /**
+    * <p>An identifier that uniquely differentiates this screen from other screens in the same application.</p>
+    * <p>Notes:</p>
+    * <p>A screen represents only the part of the device display drawn by the app. It typically contains multiple widgets or UI components and is larger in scope than individual widgets. Multiple screens can coexist on the same display simultaneously (e.g., split view on tablets).</p>
+    */
+    @IncubatingApi
+    const val APP_SCREEN_ID: String = "app.screen.id"
+
+    /**
+    * <p>The name of an application screen.</p>
+    * <p>Notes:</p>
+    * <p>A screen represents only the part of the device display drawn by the app. It typically contains multiple widgets or UI components and is larger in scope than individual widgets. Multiple screens can coexist on the same display simultaneously (e.g., split view on tablets).</p>
+    */
+    @IncubatingApi
+    const val APP_SCREEN_NAME: String = "app.screen.name"
+
+    /**
     * <p>An identifier that uniquely differentiates this widget from other widgets in the same application.</p>
     * <p>Notes:</p>
     * <p>A widget is an application component, typically an on-screen visual GUI element.</p>

@@ -10,7 +10,7 @@ plugins {
 }
 
 // The release version of https://github.com/open-telemetry/semantic-conventions used to generate classes
-val semanticConventionsVersion = "1.37.0"
+val semanticConventionsVersion = "1.39.0"
 val semanticConventionsRepoZip =
     "https://github.com/open-telemetry/semantic-conventions/archive/v${semanticConventionsVersion}.zip"
 

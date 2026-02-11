@@ -39,7 +39,7 @@ object ProcessAttributes {
     * <p>Specifies whether the context switches for this data point were voluntary or involuntary.</p>
     */
     @IncubatingApi
-    const val PROCESS_CONTEXT_SWITCH_TYPE: String = "process.context_switch_type"
+    const val PROCESS_CONTEXT_SWITCH_TYPE: String = "process.context_switch.type"
 
     /**
     * <p>Deprecated, use <c>cpu.mode</c> instead.</p>
@@ -143,9 +143,9 @@ object ProcessAttributes {
     const val PROCESS_OWNER: String = "process.owner"
 
     /**
-    * <p>The type of page fault for this data point. Type <c>major</c> is for major/hard page faults, and <c>minor</c> is for minor/soft page faults.</p>
+    * <p>Deprecated, use <c>system.paging.fault.type</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `system.paging.fault.type`.")
     const val PROCESS_PAGING_FAULT_TYPE: String = "process.paging.fault_type"
 
     /**
@@ -207,6 +207,12 @@ object ProcessAttributes {
     */
     @IncubatingApi
     const val PROCESS_SESSION_LEADER_PID: String = "process.session_leader.pid"
+
+    /**
+    * <p>The process state, e.g., <a href="https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES">Linux Process State Codes</a></p>
+    */
+    @IncubatingApi
+    const val PROCESS_STATE: String = "process.state"
 
     /**
     * <p>Process title (proctitle)</p>
@@ -284,7 +290,7 @@ object ProcessAttributes {
     /**
     * <p>PROCESS_PAGING_FAULT_TYPE</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `system.paging.fault.type`.")
     enum class ProcessPagingFaultTypeValues(val value: String) {
 
         /**
@@ -296,5 +302,32 @@ object ProcessAttributes {
         * <p>minor.</p>
         */
         MINOR("minor"),
+    }
+
+    /**
+    * <p>PROCESS_STATE</p>
+    */
+    @IncubatingApi
+    enum class ProcessStateValues(val value: String) {
+
+        /**
+        * <p>running.</p>
+        */
+        RUNNING("running"),
+
+        /**
+        * <p>sleeping.</p>
+        */
+        SLEEPING("sleeping"),
+
+        /**
+        * <p>stopped.</p>
+        */
+        STOPPED("stopped"),
+
+        /**
+        * <p>defunct.</p>
+        */
+        DEFUNCT("defunct"),
     }
 }

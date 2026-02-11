@@ -48,6 +48,38 @@ object GenAiAttributes {
     const val GEN_AI_DATA_SOURCE_ID: String = "gen_ai.data_source.id"
 
     /**
+    * <p>The number of dimensions the resulting output embeddings should have.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_EMBEDDINGS_DIMENSION_COUNT: String = "gen_ai.embeddings.dimension.count"
+
+    /**
+    * <p>A free-form explanation for the assigned score provided by the evaluator.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_EVALUATION_EXPLANATION: String = "gen_ai.evaluation.explanation"
+
+    /**
+    * <p>The name of the evaluation metric used for the GenAI response.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_EVALUATION_NAME: String = "gen_ai.evaluation.name"
+
+    /**
+    * <p>Human readable label for evaluation.</p>
+    * <p>Notes:</p>
+    * <p>This attribute provides a human-readable interpretation of the evaluation score produced by an evaluator. For example, a score value of 1 could mean "relevant" in one evaluation system and "not relevant" in another, depending on the scoring range and evaluator. The label SHOULD have low cardinality. Possible values depend on the evaluation metric and evaluator used; implementations SHOULD document the possible values.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_EVALUATION_SCORE_LABEL: String = "gen_ai.evaluation.score.label"
+
+    /**
+    * <p>The evaluation score returned by the evaluator.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_EVALUATION_SCORE_VALUE: String = "gen_ai.evaluation.score.value"
+
+    /**
     * <p>The chat history provided to the model as an input.</p>
     * <p>Notes:</p>
     * <p>Instrumentations MUST follow <a href="/docs/gen-ai/gen-ai-input-messages.json">Input messages JSON schema</a>.
@@ -141,6 +173,12 @@ object GenAiAttributes {
     */
     @Deprecated("Removed, no replacement at this time.")
     const val GEN_AI_PROMPT: String = "gen_ai.prompt"
+
+    /**
+    * <p>The name of the prompt that uniquely identifies it.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_PROMPT_NAME: String = "gen_ai.prompt.name"
 
     /**
     * <p>The Generative AI provider as identified by the client or server instrumentation.</p>
@@ -285,10 +323,50 @@ object GenAiAttributes {
     const val GEN_AI_TOKEN_TYPE: String = "gen_ai.token.type"
 
     /**
+    * <p>Parameters passed to the tool call.</p>
+    * <p>Notes:</p>
+    * <blockquote>
+    * <p>[!WARNING]
+    * This attribute may contain sensitive information.</p></blockquote>
+    * <p>It's expected to be an object - in case a serialized string is available
+    * to the instrumentation, the instrumentation SHOULD do the best effort to
+    * deserialize it to an object. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_TOOL_CALL_ARGUMENTS: String = "gen_ai.tool.call.arguments"
+
+    /**
     * <p>The tool call identifier.</p>
     */
     @IncubatingApi
     const val GEN_AI_TOOL_CALL_ID: String = "gen_ai.tool.call.id"
+
+    /**
+    * <p>The result returned by the tool call (if any and if execution was successful).</p>
+    * <p>Notes:</p>
+    * <blockquote>
+    * <p>[!WARNING]
+    * This attribute may contain sensitive information.</p></blockquote>
+    * <p>It's expected to be an object - in case a serialized string is available
+    * to the instrumentation, the instrumentation SHOULD do the best effort to
+    * deserialize it to an object. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_TOOL_CALL_RESULT: String = "gen_ai.tool.call.result"
+
+    /**
+    * <p>The list of source system tool definitions available to the GenAI agent or model.</p>
+    * <p>Notes:</p>
+    * <p>The value of this attribute matches source system tool definition format.</p>
+    * <p>It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
+    * to the instrumentation, the instrumentation SHOULD do the best effort to
+    * deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.</p>
+    * <p>Since this attribute could be large, it's NOT RECOMMENDED to populate
+    * it by default. Instrumentations MAY provide a way to enable
+    * populating this attribute.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_TOOL_DEFINITIONS: String = "gen_ai.tool.definitions"
 
     /**
     * <p>The tool description.</p>

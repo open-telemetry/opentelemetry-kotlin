@@ -22,9 +22,9 @@ object HttpAttributes {
     const val HTTP_CONNECTION_STATE: String = "http.connection.state"
 
     /**
-    * <p>Deprecated, use <c>network.protocol.name</c> instead.</p>
+    * <p>Deprecated, use <c>network.protocol.name</c> and <c>network.protocol.version</c> instead.</p>
     */
-    @Deprecated("Replaced by `network.protocol.name`.")
+    @Deprecated("Split into `network.protocol.name` and `network.protocol.version`")
     const val HTTP_FLAVOR: String = "http.flavor"
 
     /**
@@ -69,8 +69,9 @@ object HttpAttributes {
     * <p>HTTP request method.</p>
     * <p>Notes:</p>
     * <p>HTTP request method value SHOULD be "known" to the instrumentation.
-    * By default, this convention defines "known" methods as the ones listed in <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-methods">RFC9110</a>
-    * and the PATCH method defined in <a href="https://www.rfc-editor.org/rfc/rfc5789.html">RFC5789</a>.</p>
+    * By default, this convention defines "known" methods as the ones listed in <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-methods">RFC9110</a>,
+    * the PATCH method defined in <a href="https://www.rfc-editor.org/rfc/rfc5789.html">RFC5789</a>
+    * and the QUERY method defined in <a href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-safe-method-w-body/?include_text=1">httpbis-safe-method-w-body</a>.</p>
     * <p>If the HTTP request method is not known to instrumentation, it MUST set the <c>http.request.method</c> attribute to <c>_OTHER</c>.</p>
     * <p>If the HTTP instrumentation could end up converting valid HTTP request methods to <c>_OTHER</c>, then it MUST provide a way to override
     * the list of known HTTP methods. If this override is done via environment variable, then the environment variable MUST be named
@@ -161,10 +162,15 @@ object HttpAttributes {
     const val HTTP_RESPONSE_CONTENT_LENGTH_UNCOMPRESSED: String = "http.response_content_length_uncompressed"
 
     /**
-    * <p>The matched route, that is, the path template in the format used by the respective server framework.</p>
+    * <p>The matched route template for the request. This MUST be low-cardinality and include all static path segments, with dynamic path segments represented with placeholders.</p>
     * <p>Notes:</p>
     * <p>MUST NOT be populated when this is not supported by the HTTP server framework as the route attribute should have low-cardinality and the URI path can NOT substitute it.
     * SHOULD include the <a href="/docs/http/http-spans.md#http-server-definitions">application root</a> if there is one.</p>
+    * <p>A static path segment is a part of the route template with a fixed, low-cardinality value. This includes literal strings like <c>/users/</c> and placeholders that
+    * are constrained to a finite, predefined set of values, e.g. <c>{controller}</c> or <c>{action}</c>.</p>
+    * <p>A dynamic path segment is a placeholder for a value that can have high cardinality and is not constrained to a predefined list like static path segments.</p>
+    * <p>Instrumentations SHOULD use routing information provided by the corresponding web framework. They SHOULD pick the most precise source of routing information and MAY
+    * support custom route formatting. Instrumentations SHOULD document the format and the API used to obtain the route string.</p>
     */
     const val HTTP_ROUTE: String = "http.route"
 
@@ -224,7 +230,7 @@ object HttpAttributes {
     /**
     * <p>HTTP_FLAVOR</p>
     */
-    @Deprecated("Replaced by `network.protocol.name`.")
+    @Deprecated("Split into `network.protocol.name` and `network.protocol.version`")
     enum class HttpFlavorValues(val value: String) {
 
         /**
@@ -307,6 +313,11 @@ object HttpAttributes {
         * <p>TRACE method.</p>
         */
         TRACE("TRACE"),
+
+        /**
+        * <p>QUERY method.</p>
+        */
+        QUERY("QUERY"),
 
         /**
         * <p>Any HTTP method that the instrumentation has no prior knowledge of.</p>

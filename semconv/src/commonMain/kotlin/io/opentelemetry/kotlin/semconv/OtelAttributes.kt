@@ -36,6 +36,14 @@ object OtelAttributes {
     const val OTEL_COMPONENT_TYPE: String = "otel.component.type"
 
     /**
+    * <p>Identifies the class / type of event.</p>
+    * <p>Notes:</p>
+    * <p>This attribute SHOULD be used by non-OTLP exporters when destination does not support <c>EventName</c> or equivalent field. This attribute MAY be used by applications using existing logging libraries so that it can be used to set the <c>EventName</c> field by Collector or SDK components.</p>
+    */
+    @IncubatingApi
+    const val OTEL_EVENT_NAME: String = "otel.event.name"
+
+    /**
     * <p>Deprecated. Use the <c>otel.scope.name</c> attribute</p>
     */
     @Deprecated("Replaced by `otel.scope.name`.")

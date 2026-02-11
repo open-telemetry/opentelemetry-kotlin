@@ -12,13 +12,13 @@ object LinuxAttributes {
     /**
     * <p>The Linux Slab memory state</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `system.memory.linux.slab.state`.")
     const val LINUX_MEMORY_SLAB_STATE: String = "linux.memory.slab.state"
 
     /**
     * <p>LINUX_MEMORY_SLAB_STATE</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `system.memory.linux.slab.state`.")
     enum class LinuxMemorySlabStateValues(val value: String) {
 
         /**

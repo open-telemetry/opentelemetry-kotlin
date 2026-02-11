@@ -54,7 +54,19 @@ object ServiceAttributes {
     const val SERVICE_NAMESPACE: String = "service.namespace"
 
     /**
-    * <p>The version string of the service API or implementation. The format is not defined by these conventions.</p>
+    * <p>Logical name of the service on the other side of the connection. SHOULD be equal to the actual <a href="/docs/resource/README.md#service"><c>service.name</c></a> resource attribute of the remote service if any.</p>
+    */
+    @IncubatingApi
+    const val SERVICE_PEER_NAME: String = "service.peer.name"
+
+    /**
+    * <p>Logical namespace of the service on the other side of the connection. SHOULD be equal to the actual <a href="/docs/resource/README.md#service"><c>service.namespace</c></a> resource attribute of the remote service if any.</p>
+    */
+    @IncubatingApi
+    const val SERVICE_PEER_NAMESPACE: String = "service.peer.namespace"
+
+    /**
+    * <p>The version string of the service component. The format is not defined by these conventions.</p>
     */
     const val SERVICE_VERSION: String = "service.version"
 }

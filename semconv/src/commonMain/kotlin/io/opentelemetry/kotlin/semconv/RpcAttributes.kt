@@ -10,83 +10,63 @@ object RpcAttributes {
   
 
     /**
-    * <p>The <a href="https://connectrpc.com//docs/protocol/#error-codes">error codes</a> of the Connect request. Error codes are always string values.</p>
+    * <p>Deprecated, use <c>rpc.response.status_code</c> attribute instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rpc.response.status_code`.")
     const val RPC_CONNECT_RPC_ERROR_CODE: String = "rpc.connect_rpc.error_code"
 
     /**
-    * <p>Connect request metadata, <c><key></c> being the normalized Connect Metadata key (lowercase), the value being the metadata values.</p>
-    * <p>Notes:</p>
-    * <p>Instrumentations SHOULD require an explicit configuration of which metadata values are to be captured.
-    * Including all request metadata values can be a security risk - explicit configuration helps avoid leaking sensitive information.</p>
-    * <p>For example, a property <c>my-custom-key</c> with value <c>["1.2.3.4", "1.2.3.5"]</c> SHOULD be recorded as
-    * the <c>rpc.connect_rpc.request.metadata.my-custom-key</c> attribute with value <c>["1.2.3.4", "1.2.3.5"]</c></p>
+    * <p>Deprecated, use <c>rpc.request.metadata</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rpc.request.metadata`.")
     const val RPC_CONNECT_RPC_REQUEST_METADATA: String = "rpc.connect_rpc.request.metadata"
 
     /**
-    * <p>Connect response metadata, <c><key></c> being the normalized Connect Metadata key (lowercase), the value being the metadata values.</p>
-    * <p>Notes:</p>
-    * <p>Instrumentations SHOULD require an explicit configuration of which metadata values are to be captured.
-    * Including all response metadata values can be a security risk - explicit configuration helps avoid leaking sensitive information.</p>
-    * <p>For example, a property <c>my-custom-key</c> with value <c>"attribute_value"</c> SHOULD be recorded as
-    * the <c>rpc.connect_rpc.response.metadata.my-custom-key</c> attribute with value <c>["attribute_value"]</c></p>
+    * <p>Deprecated, use <c>rpc.response.metadata</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rpc.response.metadata`.")
     const val RPC_CONNECT_RPC_RESPONSE_METADATA: String = "rpc.connect_rpc.response.metadata"
 
     /**
-    * <p>gRPC request metadata, <c><key></c> being the normalized gRPC Metadata key (lowercase), the value being the metadata values.</p>
-    * <p>Notes:</p>
-    * <p>Instrumentations SHOULD require an explicit configuration of which metadata values are to be captured.
-    * Including all request metadata values can be a security risk - explicit configuration helps avoid leaking sensitive information.</p>
-    * <p>For example, a property <c>my-custom-key</c> with value <c>["1.2.3.4", "1.2.3.5"]</c> SHOULD be recorded as
-    * <c>rpc.grpc.request.metadata.my-custom-key</c> attribute with value <c>["1.2.3.4", "1.2.3.5"]</c></p>
+    * <p>Deprecated, use <c>rpc.request.metadata</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rpc.request.metadata`.")
     const val RPC_GRPC_REQUEST_METADATA: String = "rpc.grpc.request.metadata"
 
     /**
-    * <p>gRPC response metadata, <c><key></c> being the normalized gRPC Metadata key (lowercase), the value being the metadata values.</p>
-    * <p>Notes:</p>
-    * <p>Instrumentations SHOULD require an explicit configuration of which metadata values are to be captured.
-    * Including all response metadata values can be a security risk - explicit configuration helps avoid leaking sensitive information.</p>
-    * <p>For example, a property <c>my-custom-key</c> with value <c>["attribute_value"]</c> SHOULD be recorded as
-    * the <c>rpc.grpc.response.metadata.my-custom-key</c> attribute with value <c>["attribute_value"]</c></p>
+    * <p>Deprecated, use <c>rpc.response.metadata</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rpc.response.metadata`.")
     const val RPC_GRPC_RESPONSE_METADATA: String = "rpc.grpc.response.metadata"
 
     /**
-    * <p>The <a href="https://github.com/grpc/grpc/blob/v1.33.2/doc/statuscodes.md">numeric status code</a> of the gRPC request.</p>
+    * <p>Deprecated, use string representation on the <c>rpc.response.status_code</c> attribute instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Use string representation of the gRPC status code on the `rpc.response.status_code` attribute.")
     const val RPC_GRPC_STATUS_CODE: String = "rpc.grpc.status_code"
 
     /**
-    * <p><c>error.code</c> property of response if it is an error response.</p>
+    * <p>Deprecated, use string representation on the <c>rpc.response.status_code</c> attribute instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Use string representation of the error code on the `rpc.response.status_code` attribute.")
     const val RPC_JSONRPC_ERROR_CODE: String = "rpc.jsonrpc.error_code"
 
     /**
-    * <p><c>error.message</c> property of response if it is an error response.</p>
+    * <p>Deprecated, use span status description or <c>error.message</c> attribute on other signals.</p>
     */
-    @IncubatingApi
+    @Deprecated("Use the span status description or `error.message` attribute on other signals.")
     const val RPC_JSONRPC_ERROR_MESSAGE: String = "rpc.jsonrpc.error_message"
 
     /**
-    * <p><c>id</c> property of request or response. Since protocol allows id to be int, string, <c>null</c> or missing (for notifications), value is expected to be cast to string for simplicity. Use empty string in case of <c>null</c> value. Omit entirely if this is a notification.</p>
+    * <p>Deprecated, use <c>jsonrpc.request.id</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `jsonrpc.request.id`.")
     const val RPC_JSONRPC_REQUEST_ID: String = "rpc.jsonrpc.request_id"
 
     /**
-    * <p>Protocol version as in <c>jsonrpc</c> property of request/response. Since JSON-RPC 1.0 doesn't specify this, the value can be omitted.</p>
+    * <p>Deprecated, use <c>jsonrpc.protocol.version</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `jsonrpc.protocol.version`.")
     const val RPC_JSONRPC_VERSION: String = "rpc.jsonrpc.version"
 
     /**
@@ -116,31 +96,92 @@ object RpcAttributes {
     const val RPC_MESSAGE_UNCOMPRESSED_SIZE: String = "rpc.message.uncompressed_size"
 
     /**
-    * <p>The name of the (logical) method being called, must be equal to the $method part in the span name.</p>
+    * <p>The fully-qualified logical name of the method from the RPC interface perspective.</p>
     * <p>Notes:</p>
-    * <p>This is the logical name of the method from the RPC interface perspective, which can be different from the name of any implementing method/function. The <c>code.function.name</c> attribute may be used to store the latter (e.g., method actually executing the call on the server side, RPC client stub method on the client side).</p>
+    * <p>The method name MAY have unbounded cardinality in edge or error cases.</p>
+    * <p>Some RPC frameworks or libraries provide a fixed set of recognized methods
+    * for client stubs and server implementations. Instrumentations for such
+    * frameworks MUST set this attribute to the original method name only
+    * when the method is recognized by the framework or library.</p>
+    * <p>When the method is not recognized, for example, when the server receives
+    * a request for a method that is not predefined on the server, or when
+    * instrumentation is not able to reliably detect if the method is predefined,
+    * the attribute MUST be set to <c>_OTHER</c>. In such cases, tracing
+    * instrumentations MUST also set <c>rpc.method_original</c> attribute to
+    * the original method value.</p>
+    * <p>If the RPC instrumentation could end up converting valid RPC methods to
+    * <c>_OTHER</c>, then it SHOULD provide a way to configure the list of recognized
+    * RPC methods.</p>
+    * <p>The <c>rpc.method</c> can be different from the name of any implementing
+    * method/function.
+    * The <c>code.function.name</c> attribute may be used to record the fully-qualified
+    * method actually executing the call on the server side, or the
+    * RPC client stub method on the client side.</p>
     */
     @IncubatingApi
     const val RPC_METHOD: String = "rpc.method"
 
     /**
-    * <p>The full (logical) name of the service being called, including its package name, if applicable.</p>
-    * <p>Notes:</p>
-    * <p>This is the logical name of the service from the RPC interface perspective, which can be different from the name of any implementing class. The <c>code.namespace</c> attribute may be used to store the latter (despite the attribute name, it may include a class name; e.g., class with method actually executing the call on the server side, RPC client stub class on the client side).</p>
+    * <p>The original name of the method used by the client.</p>
     */
     @IncubatingApi
+    const val RPC_METHOD_ORIGINAL: String = "rpc.method_original"
+
+    /**
+    * <p>RPC request metadata, <c><key></c> being the normalized RPC metadata key (lowercase), the value being the metadata values.</p>
+    * <p>Notes:</p>
+    * <p>Instrumentations SHOULD require an explicit configuration of which metadata values are to be captured.
+    * Including all request metadata values can be a security risk - explicit configuration helps avoid leaking sensitive information.</p>
+    * <p>For example, a property <c>my-custom-key</c> with value <c>["1.2.3.4", "1.2.3.5"]</c> SHOULD be recorded as
+    * <c>rpc.request.metadata.my-custom-key</c> attribute with value <c>["1.2.3.4", "1.2.3.5"]</c></p>
+    */
+    @IncubatingApi
+    const val RPC_REQUEST_METADATA: String = "rpc.request.metadata"
+
+    /**
+    * <p>RPC response metadata, <c><key></c> being the normalized RPC metadata key (lowercase), the value being the metadata values.</p>
+    * <p>Notes:</p>
+    * <p>Instrumentations SHOULD require an explicit configuration of which metadata values are to be captured.
+    * Including all response metadata values can be a security risk - explicit configuration helps avoid leaking sensitive information.</p>
+    * <p>For example, a property <c>my-custom-key</c> with value <c>["attribute_value"]</c> SHOULD be recorded as
+    * the <c>rpc.response.metadata.my-custom-key</c> attribute with value <c>["attribute_value"]</c></p>
+    */
+    @IncubatingApi
+    const val RPC_RESPONSE_METADATA: String = "rpc.response.metadata"
+
+    /**
+    * <p>Status code of the RPC returned by the RPC server or generated by the client</p>
+    * <p>Notes:</p>
+    * <p>Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
+    * Semantic conventions for individual RPC frameworks SHOULD document what <c>rpc.response.status_code</c> means in the context of that system and which values are considered to represent errors.</p>
+    */
+    @IncubatingApi
+    const val RPC_RESPONSE_STATUS_CODE: String = "rpc.response.status_code"
+
+    /**
+    * <p>Deprecated, use fully-qualified <c>rpc.method</c> instead.</p>
+    */
+    @Deprecated("Value should be included in `rpc.method` which is expected to be a fully-qualified name.")
     const val RPC_SERVICE: String = "rpc.service"
 
     /**
-    * <p>A string identifying the remoting system. See below for a list of well-known identifiers.</p>
+    * <p>Deprecated, use <c>rpc.system.name</c> attribute instead.</p>
+    */
+    @Deprecated("Replaced by `rpc.system.name`.")
+    const val RPC_SYSTEM: String = "rpc.system"
+
+    /**
+    * <p>The Remote Procedure Call (RPC) system.</p>
+    * <p>Notes:</p>
+    * <p>The client and server RPC systems may differ for the same RPC interaction. For example, a client may use Apache Dubbo or Connect RPC to communicate with a server that uses gRPC since both protocols provide compatibility with gRPC.</p>
     */
     @IncubatingApi
-    const val RPC_SYSTEM: String = "rpc.system"
+    const val RPC_SYSTEM_NAME: String = "rpc.system.name"
 
     /**
     * <p>RPC_CONNECT_RPC_ERROR_CODE</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rpc.response.status_code`.")
     enum class RpcConnectRpcErrorCodeValues(val value: String) {
 
         /**
@@ -227,7 +268,7 @@ object RpcAttributes {
     /**
     * <p>RPC_GRPC_STATUS_CODE</p>
     */
-    @IncubatingApi
+    @Deprecated("Use string representation of the gRPC status code on the `rpc.response.status_code` attribute.")
     enum class RpcGrpcStatusCodeValues(val value: Int) {
 
         /**
@@ -336,7 +377,7 @@ object RpcAttributes {
     /**
     * <p>RPC_SYSTEM</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rpc.system.name`.")
     enum class RpcSystemValues(val value: String) {
 
         /**
@@ -363,5 +404,42 @@ object RpcAttributes {
         * <p>Connect RPC</p>
         */
         CONNECT_RPC("connect_rpc"),
+
+        /**
+        * <p><a href="https://datatracker.ietf.org/doc/html/rfc5531">ONC RPC (Sun RPC)</a></p>
+        */
+        ONC_RPC("onc_rpc"),
+
+        /**
+        * <p>JSON-RPC</p>
+        */
+        JSONRPC("jsonrpc"),
+    }
+
+    /**
+    * <p>RPC_SYSTEM_NAME</p>
+    */
+    @IncubatingApi
+    enum class RpcSystemNameValues(val value: String) {
+
+        /**
+        * <p><a href="https://grpc.io/">gRPC</a></p>
+        */
+        GRPC("grpc"),
+
+        /**
+        * <p><a href="https://dubbo.apache.org/">Apache Dubbo</a></p>
+        */
+        DUBBO("dubbo"),
+
+        /**
+        * <p><a href="https://connectrpc.com/">Connect RPC</a></p>
+        */
+        CONNECTRPC("connectrpc"),
+
+        /**
+        * <p><a href="https://www.jsonrpc.org/">JSON-RPC</a></p>
+        */
+        JSONRPC("jsonrpc"),
     }
 }
