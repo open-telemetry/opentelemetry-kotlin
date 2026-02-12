@@ -8,6 +8,26 @@ import io.opentelemetry.proto.common.v1.KeyValue
 @OptIn(ExperimentalApi::class)
 fun Map<String, Any>.createKeyValues(): List<KeyValue> = map(::createKeyValue)
 
+@OptIn(ExperimentalApi::class)
+internal fun List<KeyValue>.toAttributeMap(): Map<String, Any> {
+    val map = mutableMapOf<String, Any>()
+    forEach { entry ->
+        entry.value_?.toAttributeValue()?.let {
+            map[entry.key] = it
+        }
+    }
+    return map
+}
+
+private fun AnyValue.toAttributeValue(): Any? = when {
+    string_value != null -> string_value
+    int_value != null -> int_value
+    double_value != null -> double_value
+    bool_value != null -> bool_value
+    array_value != null -> array_value.values.mapNotNull(AnyValue::toAttributeValue)
+    else -> null
+}
+
 private fun createKeyValue(entry: Map.Entry<String, Any>) = KeyValue(
     key = entry.key, value_ = convertAttributeValue(entry.value)
 )
