@@ -8,15 +8,14 @@ This API operates in 2 modes:
 1. Compatibility mode, where it acts as a façade for the [OpenTelemetry Java SDK](https://github.com/open-telemetry/opentelemetry-java)
 2. Regular mode, where it captures telemetry via a Kotlin Multiplatform (KMP) implementation
 
-
 ## Supported targets
 
 The following targets are supported:
 
 - Android (API >=21)
 - JVM (JDK >= 8)
-
-Other targets compile but are not considered sufficiently tested to count as 'supported' at this current time.
+- iOS
+- JavaScript
 
 ## Supported OTel APIs
 
@@ -40,7 +39,9 @@ dependencies {
 2. Initialize the SDK:
 
 ```
-val otelKotlin = createOpenTelemetryKotlin()
+val otelKotlin = createOpenTelemetry {
+    // configure SDK here
+}
 ```
 
 3. Use the Kotlin API in your app
@@ -65,6 +66,11 @@ dependencies {
 ```
 val otelJava = io.opentelemetry.sdk.OpenTelemetrySdk.builder().build()
 val otelKotlin = otelJava.toOtelKotlinApi()
+
+// or alternatively, create an instance that uses opentelemetry-java under the hood
+val otelKotlin = createCompatOpenTelemetry {
+    // configure SDK here
+}
 ```
 
 3. Use the Kotlin API instead of the Java API in your app
@@ -118,7 +124,7 @@ For more information about the maintainer role, see the [community repository](h
 
 - [Hanson Ho](https://github.com/bidetofevil), Embrace
 - [Masaki Sugimoto](https://github.com/Msksgm), Henry, Inc
-- [Francisco Prieto](https://github.com/priettt), Embrace
+- [Francisco Prieto](https://github.com/priettt), Canary Technologies
 
 For more information about the approver role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#approver).
 
