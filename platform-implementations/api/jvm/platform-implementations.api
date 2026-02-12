@@ -19,6 +19,10 @@ public final class io/opentelemetry/kotlin/ExceptionType_jvmKt {
 	public static final fun exceptionType (Ljava/lang/Throwable;)Ljava/lang/String;
 }
 
+public final class io/opentelemetry/kotlin/PlatformLogger_jvmKt {
+	public static final fun platformLog (Ljava/lang/String;)V
+}
+
 public final class io/opentelemetry/kotlin/ReentrantReadWriteLock {
 	public fun <init> ()V
 	public final fun getImpl ()Ljava/util/concurrent/locks/ReentrantReadWriteLock;
