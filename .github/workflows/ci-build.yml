@@ -42,4 +42,4 @@ jobs:
           files: build/reports/kover/reportRelease.xml
 
       - name: Build Example Apps
-        run: ./gradlew :examples:jvm-app:run :examples:android-app:assembleRelease :examples:js-app:jsNodeDevelopmentRun --stacktrace
+        run: ./gradlew :examples:jvm-app:run :examples:android-app:assembleRelease :examples:js-app:jsNodeDevelopmentRun :examples:example-app:build :examples:example-app-android:assembleRelease --stacktrace

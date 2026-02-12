@@ -9,6 +9,9 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.PersistedTelemetryConfig
 import io.opentelemetry.kotlin.export.TelemetryFileSystem
+import io.opentelemetry.kotlin.export.TelemetryFileSystemImpl
+import io.opentelemetry.kotlin.export.getFileSystem
+import io.opentelemetry.kotlin.export.getTelemetryStorageDirectory
 import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -21,12 +24,17 @@ import kotlinx.coroutines.Dispatchers
  * should only contain processors that mutate the log record.
  * @param exporters a list of exporters. These will be invoked after telemetry has been
  * queued on disk. This may include telemetry from previous process launches.
+ *
+ * This processor is not supported on JS platforms currently.
  */
 @ExperimentalApi
 internal fun createPersistingLogRecordProcessor(
     processors: List<LogRecordProcessor>,
     exporters: List<LogRecordExporter>,
-    fileSystem: TelemetryFileSystem,
+    fileSystem: TelemetryFileSystem = TelemetryFileSystemImpl(
+        getFileSystem(),
+        getTelemetryStorageDirectory("logs"),
+    ),
     clock: Clock,
     serializer: (List<ReadableLogRecord>) -> ByteArray,
     deserializer: (ByteArray) -> List<ReadableLogRecord>,
