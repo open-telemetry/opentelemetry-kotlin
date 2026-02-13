@@ -1,8 +1,10 @@
 public final class io/opentelemetry/kotlin/logging/export/OtlpLogRecordExporterApiKt {
-	public static final fun createOtlpHttpLogRecordExporter (Ljava/lang/String;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
+	public static final fun createOtlpHttpLogRecordExporter (Ljava/lang/String;Lio/ktor/client/engine/HttpClientEngine;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
+	public static synthetic fun createOtlpHttpLogRecordExporter$default (Ljava/lang/String;Lio/ktor/client/engine/HttpClientEngine;ILjava/lang/Object;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
 }
 
 public final class io/opentelemetry/kotlin/tracing/export/OtlpSpanExporterApiKt {
-	public static final fun createOtlpHttpSpanExporter (Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
+	public static final fun createOtlpHttpSpanExporter (Ljava/lang/String;Lio/ktor/client/engine/HttpClientEngine;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
+	public static synthetic fun createOtlpHttpSpanExporter$default (Ljava/lang/String;Lio/ktor/client/engine/HttpClientEngine;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
 }
 

@@ -40,4 +40,5 @@ include(
     ":java-typealiases",
     "examples:example-app",
     "examples:example-app-android",
+    ":smoke-test",
 )
