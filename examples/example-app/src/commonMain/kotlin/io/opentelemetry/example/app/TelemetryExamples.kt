@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.semconv.UrlAttributes
 import io.opentelemetry.kotlin.semconv.UserAttributes
 import io.opentelemetry.kotlin.tracing.Tracer
 import io.opentelemetry.kotlin.tracing.model.SpanKind
+import kotlinx.coroutines.delay
 
 /**
  * Runs platform-independent examples demonstrating how to use opentelemetry-kotlin's API.
@@ -20,9 +21,12 @@ import io.opentelemetry.kotlin.tracing.model.SpanKind
 suspend fun runAllExamples(platform: String) {
     println("=== OpenTelemetry Kotlin Example ($platform) ===")
     println()
-    println("All telemetry data will be exported to stdout.")
-    println("In a real application, you would configure exporters to send")
-    println("data to your observability backend via OTLP.")
+    if (AppConfig.url != null) {
+        println("Telemetry will be exported to: ${AppConfig.url}")
+    } else {
+        println("Telemetry will be printed to stdout.")
+    }
+    println()
 
     val otel = initializeOtelSdk()
     val tracer = otel.tracerProvider.getTracer(AppConfig.APP_NAME)
@@ -37,6 +41,12 @@ suspend fun runAllExamples(platform: String) {
     // flush all pending telemetry before terminating
     AppConfig.spanProcessor.forceFlush()
     AppConfig.logRecordProcessor.forceFlush()
+    AppConfig.spanProcessor.shutdown()
+    AppConfig.logRecordProcessor.shutdown()
+
+    // give HTTP client time to complete requests before process exits.
+    // in future the SDK needs to be updated to handle this automatically.
+    delay(500)
 }
 
 /**

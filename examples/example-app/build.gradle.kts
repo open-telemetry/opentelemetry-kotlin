@@ -43,6 +43,7 @@ kotlin {
                 implementation(project(":implementation"))
                 implementation(project(":semconv"))
                 implementation(libs.kotlinx.coroutines)
+                implementation(project(":exporters-otlp"))
             }
         }
 
@@ -60,6 +61,7 @@ kotlin {
             dependsOn(composeMain)
             dependencies {
                 implementation(libs.androidx.activity.compose)
+                implementation(project(":compat"))
             }
         }
 
@@ -67,6 +69,7 @@ kotlin {
             dependsOn(composeMain)
             dependencies {
                 implementation(compose.desktop.currentOs)
+                implementation(project(":compat"))
             }
         }
 

@@ -3,9 +3,7 @@
 package io.opentelemetry.example.app
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.OpenTelemetry
-import io.opentelemetry.kotlin.createOpenTelemetry
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 
 /**
@@ -20,8 +18,5 @@ fun initializeOtelSdk(): OpenTelemetry {
             addLogRecordProcessor(AppConfig.logRecordProcessor)
         }
     }
-    return when (AppConfig.sdkMode) {
-        AppConfig.SdkMode.IMPLEMENTATION -> createOpenTelemetry(config)
-        AppConfig.SdkMode.NOOP -> NoopOpenTelemetry
-    }
+    return createPlatformOpenTelemetry(AppConfig.sdkMode, config)
 }
