@@ -61,6 +61,7 @@ kotlin {
             dependsOn(composeMain)
             dependencies {
                 implementation(libs.androidx.activity.compose)
+                implementation(project(":compat"))
             }
         }
 
@@ -68,6 +69,7 @@ kotlin {
             dependsOn(composeMain)
             dependencies {
                 implementation(compose.desktop.currentOs)
+                implementation(project(":compat"))
             }
         }
 
