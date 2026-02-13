@@ -43,6 +43,7 @@ kotlin {
                 implementation(project(":implementation"))
                 implementation(project(":semconv"))
                 implementation(libs.kotlinx.coroutines)
+                implementation(project(":exporters-otlp"))
             }
         }
 

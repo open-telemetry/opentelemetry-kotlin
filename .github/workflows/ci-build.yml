@@ -31,7 +31,7 @@ jobs:
         uses: gradle/actions/setup-gradle@f29f5a9d7b09a7c6b29859002d29d24e1674c884 # v5.0.1
 
       - name: Gradle Build
-        run: ./gradlew build :benchmark-android:assemble :benchmark-android:compileReleaseAndroidTestKotlin :benchmark-jvm:assemble koverXmlReport --stacktrace
+        run: ./gradlew build :benchmark-android:assemble :benchmark-android:compileReleaseAndroidTestKotlin :benchmark-jvm:assemble :examples:example-app-android:assembleRelease koverXmlReport --stacktrace
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
@@ -40,6 +40,3 @@ jobs:
           slug: open-telemetry/opentelemetry-kotlin
           fail_ci_if_error: false
           files: build/reports/kover/reportRelease.xml
-
-      - name: Build Example Apps
-        run: ./gradlew :examples:example-app:build :examples:example-app-android:assembleRelease --stacktrace

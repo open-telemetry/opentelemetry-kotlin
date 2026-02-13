@@ -1,10 +1,9 @@
 package io.opentelemetry.example.app
 
+import io.opentelemetry.example.app.AppConfig.url
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.logging.export.createSimpleLogRecordProcessor
-import io.opentelemetry.kotlin.logging.export.createStdoutLogRecordExporter
-import io.opentelemetry.kotlin.tracing.export.createSimpleSpanProcessor
-import io.opentelemetry.kotlin.tracing.export.createStdoutSpanExporter
+import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
+import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 
 /**
  * Controls how the example app behaves.
@@ -39,18 +38,22 @@ object AppConfig {
     val sdkMode = SdkMode.IMPLEMENTATION
 
     /**
-     * The [io.opentelemetry.kotlin.tracing.export.SpanProcessor] that should be used to export
-     * telemetry. The example app defaults to logging immediately to stdout. In a real application,
-     * you would likely use [io.opentelemetry.kotlin.tracing.export.createBatchSpanProcessor] with
-     * an OTLP span exporter.
+     * URL of an OpenTelemetry collector endpoint. If set, telemetry will be exported
+     * to the collector via OTLP/HTTP, otherwise telemetry will be printed to stdout.
      */
-    val spanProcessor = createSimpleSpanProcessor(createStdoutSpanExporter())
+    val url: String? = null
+
+    /**
+     * The [io.opentelemetry.kotlin.tracing.export.SpanProcessor] that should be used to export
+     * telemetry. If [url] is set, an OTLP HTTP exporter with batch processing will be used.
+     * Otherwise, telemetry is logged immediately to stdout.
+     */
+    val spanProcessor: SpanProcessor = createSpanProcessor(url)
 
     /**
      * The [io.opentelemetry.kotlin.logging.export.LogRecordProcessor] that should be used to export
-     * telemetry. The example app defaults to logging immediately to stdout. In a real application,
-     * you would likely use [io.opentelemetry.kotlin.logging.export.createBatchLogRecordProcessor] with
-     * an OTLP log record exporter.
+     * telemetry. If [url] is set, an OTLP HTTP exporter with batch processing will be used.
+     * Otherwise, telemetry is logged immediately to stdout.
      */
-    val logRecordProcessor = createSimpleLogRecordProcessor(createStdoutLogRecordExporter())
+    val logRecordProcessor: LogRecordProcessor = createLogRecordProcessor(url)
 }
