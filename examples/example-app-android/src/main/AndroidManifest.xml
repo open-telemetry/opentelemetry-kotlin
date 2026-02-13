@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application android:label="OTel Example App">
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:label="OTel Example App"
+        android:networkSecurityConfig="@xml/network_security_config">
         <activity
             android:name="io.opentelemetry.kotlin.example.app.MainActivity"
             android:exported="true">

@@ -1,8 +1,8 @@
-public final class io/opentelemetry/kotlin/logging/export/OtlpHttpLogRecordExporterApi_jvmKt {
+public final class io/opentelemetry/kotlin/logging/export/OtlpLogRecordExporterApiKt {
 	public static final fun createOtlpHttpLogRecordExporter (Ljava/lang/String;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
 }
 
-public final class io/opentelemetry/kotlin/tracing/export/OtlpHttpSpanExporterApi_jvmKt {
+public final class io/opentelemetry/kotlin/tracing/export/OtlpSpanExporterApiKt {
 	public static final fun createOtlpHttpSpanExporter (Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
 }
 
