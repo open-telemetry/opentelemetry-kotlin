@@ -22,6 +22,12 @@ object AppConfig {
         IMPLEMENTATION,
 
         /**
+         * Kotlin API that wraps the opentelemetry-java SDK.
+         * Only available on JVM/Android platforms.
+         */
+        COMPAT,
+
+        /**
          * No-op implementation (KMP).
          */
         NOOP
