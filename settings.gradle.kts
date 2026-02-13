@@ -40,8 +40,4 @@ include(
     ":java-typealiases",
     "examples:example-app",
     "examples:example-app-android",
-    "examples:jvm-app",
-    "examples:js-app",
-    "examples:android-app",
-    "examples:example-common"
 )
