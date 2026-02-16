@@ -317,8 +317,6 @@ internal class PersistingLogRecordProcessorTest {
             maxExportBatchSize = maxExportBatchSize,
             scheduleDelayMs = scheduleDelayMs,
             dispatcher = dispatcher,
-            serializer = { ByteArray(0) },
-            deserializer = { emptyList() },
         )
     }
 
