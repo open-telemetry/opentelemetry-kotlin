@@ -11,8 +11,20 @@ import io.opentelemetry.kotlin.tracing.TracerProviderImpl
  * Constructs an [OpenTelemetry] instance that uses the opentelemetry-kotlin implementation.
  */
 @ExperimentalApi
-public fun createOpenTelemetry(config: OpenTelemetryConfigDsl.() -> Unit = {}): OpenTelemetry {
+public fun createOpenTelemetry(
+
+    /**
+     * Defines the [Clock] implementation used by OpenTelemetry.
+     */
+    clock: Clock = ClockImpl(),
+
+    /**
+     * Defines configuration for OpenTelemetry.
+     */
+    config: OpenTelemetryConfigDsl.() -> Unit = {}
+): OpenTelemetry {
     return createOpenTelemetryImpl(
+        clock,
         config,
         createSdkFactory(),
     )
@@ -24,13 +36,13 @@ public fun createOpenTelemetry(config: OpenTelemetryConfigDsl.() -> Unit = {}): 
  */
 @ExperimentalApi
 internal fun createOpenTelemetryImpl(
+    clock: Clock,
     config: OpenTelemetryConfigDsl.() -> Unit,
     sdkFactory: SdkFactory,
 ): OpenTelemetry {
-    val cfg = OpenTelemetryConfigImpl().apply(config)
+    val cfg = OpenTelemetryConfigImpl(clock).apply(config)
     val tracingConfig = cfg.tracingConfig.generateTracingConfig()
     val loggingConfig = cfg.loggingConfig.generateLoggingConfig()
-    val clock = cfg.clock
     return CloseableOpenTelemetryImpl(
         tracerProvider = TracerProviderImpl(clock, tracingConfig, sdkFactory),
         loggerProvider = LoggerProviderImpl(clock, loggingConfig, sdkFactory),

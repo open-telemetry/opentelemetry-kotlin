@@ -5,6 +5,8 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
+import io.opentelemetry.kotlin.init.ConfigDsl
+import io.opentelemetry.kotlin.init.LogExportConfigDsl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +27,14 @@ public fun createCompositeLogRecordProcessor(processors: List<LogRecordProcessor
  * Creates a simple log record processor that immediately sends any telemetry to its exporter.
  */
 @ExperimentalApi
+@ConfigDsl
+public fun LogExportConfigDsl.simpleLogRecordProcessor(exporter: LogRecordExporter): LogRecordProcessor {
+    @Suppress("DEPRECATION")
+    return createSimpleLogRecordProcessor(exporter)
+}
+
+@ExperimentalApi
+@Deprecated("Deprecated.", ReplaceWith("simpleLogRecordProcessor(exporter)"))
 public fun createSimpleLogRecordProcessor(exporter: LogRecordExporter): LogRecordProcessor {
     val dispatcher: CoroutineDispatcher = Dispatchers.Default
     val scope = CoroutineScope(SupervisorJob() + dispatcher)
@@ -71,6 +81,16 @@ public fun createBatchLogRecordProcessor(
  * This exporter is intended for debugging and learning purposes. It is not recommended for
  * production use. The output format is not standardized and can change at any time.
  */
+@ExperimentalApi
+@ConfigDsl
+public fun LogExportConfigDsl.stdoutLogRecordExporter(
+    logger: (String) -> Unit = ::println
+): LogRecordExporter {
+    @Suppress("DEPRECATION")
+    return createStdoutLogRecordExporter(logger)
+}
+
+@Deprecated("Deprecated.", ReplaceWith("stdoutLogRecordExporter(logger)"))
 @ExperimentalApi
 public fun createStdoutLogRecordExporter(
     logger: (String) -> Unit = ::println

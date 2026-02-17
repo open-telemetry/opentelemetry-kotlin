@@ -17,10 +17,10 @@ internal class OtelKotlinHarness(scheduler: TestCoroutineScheduler) :
 
     override val kotlinApi: OpenTelemetry by lazy {
         createCompatOpenTelemetryImpl(
+            clock = fakeClock,
             config = {
                 tracerProvider { tracerProviderConfig() }
                 loggerProvider { loggerProviderConfig() }
-                clock = fakeClock
             },
             sdkFactory = CompatSdkFactory(tracingIdFactory = FakeTracingIdFactory())
         )

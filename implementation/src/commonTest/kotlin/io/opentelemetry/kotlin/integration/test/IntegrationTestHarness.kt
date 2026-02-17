@@ -17,10 +17,10 @@ import kotlin.random.Random
 internal class IntegrationTestHarness(scheduler: TestCoroutineScheduler) : OtelKotlinTestRule(scheduler) {
     override val kotlinApi: OpenTelemetry by lazy {
         createOpenTelemetryImpl(
+            clock = fakeClock,
             config = {
                 tracerProvider { tracerProviderConfig() }
                 loggerProvider { loggerProviderConfig() }
-                clock = fakeClock
             },
             sdkFactory = SdkFactoryImpl(tracingIdFactory = TracingIdFactoryImpl(Random(0)))
         )

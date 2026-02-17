@@ -12,6 +12,7 @@ kotlin {
                 implementation(project(":sdk"))
                 implementation(project(":test-fakes"))
                 implementation(project(":semconv"))
+                implementation(project(":exporters-core"))
                 implementation(libs.kotlin.serialization)
                 implementation(libs.kotlinx.coroutines)
                 implementation(libs.kotlinx.coroutines.test)

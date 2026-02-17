@@ -12,7 +12,7 @@ internal actual fun createPlatformOpenTelemetry(
     config: OpenTelemetryConfigDsl.() -> Unit
 ): OpenTelemetry {
     return when (sdkMode) {
-        AppConfig.SdkMode.IMPLEMENTATION -> createOpenTelemetry(config)
+        AppConfig.SdkMode.IMPLEMENTATION -> createOpenTelemetry(config = config)
         AppConfig.SdkMode.COMPAT -> {
             throw UnsupportedOperationException(
                 "COMPAT mode is unsupported on JS. Use IMPLEMENTATION or NOOP instead."

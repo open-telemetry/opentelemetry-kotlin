@@ -14,7 +14,9 @@ import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.OtelJavaLogRecordProcessorAdapter
 
 @ExperimentalApi
-internal class CompatLoggerProviderConfig : LoggerProviderConfigDsl {
+internal class CompatLoggerProviderConfig(
+    private val clock: Clock,
+) : LoggerProviderConfigDsl {
 
     private val builder: OtelJavaSdkLoggerProviderBuilder = OtelJavaSdkLoggerProvider.builder()
 
@@ -29,8 +31,15 @@ internal class CompatLoggerProviderConfig : LoggerProviderConfigDsl {
         }
     }
 
+    @Deprecated("Deprecated.", replaceWith = ReplaceWith("export {processor}"))
     override fun addLogRecordProcessor(processor: LogRecordProcessor) {
         builder.addLogRecordProcessor(OtelJavaLogRecordProcessorAdapter(processor))
+    }
+
+    override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
+        val processor = LogExportConfigCompat(clock).action()
+        @Suppress("DEPRECATION")
+        addLogRecordProcessor(processor)
     }
 
     override fun logLimits(action: LogLimitsConfigDsl.() -> Unit) {
@@ -41,4 +50,6 @@ internal class CompatLoggerProviderConfig : LoggerProviderConfigDsl {
         builder.setClock(OtelJavaClockWrapper(clock))
         return LoggerProviderAdapter(builder.build())
     }
+
+    private class LogExportConfigCompat(override val clock: Clock) : LogExportConfigDsl
 }

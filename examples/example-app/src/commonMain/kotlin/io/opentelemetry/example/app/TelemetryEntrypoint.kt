@@ -12,10 +12,10 @@ import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 fun initializeOtelSdk(): OpenTelemetry {
     val config: OpenTelemetryConfigDsl.() -> Unit = {
         tracerProvider {
-            addSpanProcessor(AppConfig.spanProcessor)
+            export { AppConfig.spanProcessor }
         }
         loggerProvider {
-            addLogRecordProcessor(AppConfig.logRecordProcessor)
+            export { AppConfig.logRecordProcessor }
         }
     }
     return createPlatformOpenTelemetry(AppConfig.sdkMode, config)

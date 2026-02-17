@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.init
 
-import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 
 /**
@@ -24,9 +23,4 @@ public interface OpenTelemetryConfigDsl {
      * Defines configuration for how Context behaves.
      */
     public fun context(action: ContextConfigDsl.() -> Unit)
-
-    /**
-     * Defines the [Clock] implementation used by OpenTelemetry.
-     */
-    public var clock: Clock
 }

@@ -14,6 +14,9 @@ public final class io/opentelemetry/kotlin/logging/export/CoreLogRecordExporterA
 	public static final fun createSimpleLogRecordProcessor (Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
 	public static final fun createStdoutLogRecordExporter (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
 	public static synthetic fun createStdoutLogRecordExporter$default (Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
+	public static final fun simpleLogRecordProcessor (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
+	public static final fun stdoutLogRecordExporter (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
+	public static synthetic fun stdoutLogRecordExporter$default (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
 }
 
 public final class io/opentelemetry/kotlin/tracing/export/CoreSpanExporterApiKt {
@@ -24,5 +27,8 @@ public final class io/opentelemetry/kotlin/tracing/export/CoreSpanExporterApiKt 
 	public static final fun createSimpleSpanProcessor (Lio/opentelemetry/kotlin/tracing/export/SpanExporter;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
 	public static final fun createStdoutSpanExporter (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
 	public static synthetic fun createStdoutSpanExporter$default (Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
+	public static final fun simpleSpanProcessor (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
+	public static final fun stdoutSpanExporter (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
+	public static synthetic fun stdoutSpanExporter$default (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
 }
 

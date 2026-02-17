@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.export.FakeTraceExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import kotlinx.coroutines.CoroutineScope
@@ -17,7 +18,7 @@ internal class SimpleSpanProcessorTest {
 
     @Test
     fun testSpanProcessorDefaults() = runTest {
-        val processor = createSimpleSpanProcessor(FakeSpanExporter())
+        val processor = FakeTraceExportConfig().simpleSpanProcessor(FakeSpanExporter())
         assertTrue(processor.isStartRequired())
         assertTrue(processor.isEndRequired())
         assertEquals(OperationResultCode.Success, processor.shutdown())

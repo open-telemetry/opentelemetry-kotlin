@@ -2,18 +2,26 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
+import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import io.opentelemetry.kotlin.tracing.export.createCompositeSpanProcessor
+import io.opentelemetry.kotlin.tracing.export.simpleSpanProcessor
+import io.opentelemetry.kotlin.tracing.export.stdoutSpanExporter
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
 internal class TracerProviderConfigImplTest {
 
+    private val clock = FakeClock()
+
     @Test
     fun testDefaultTracingConfig() {
-        val cfg = TracerProviderConfigImpl().generateTracingConfig()
+        val cfg = TracerProviderConfigImpl(clock).generateTracingConfig()
         assertTrue(cfg.processors.isEmpty())
         assertTrue(cfg.resource.attributes.isEmpty())
         assertNull(cfg.resource.schemaUrl)
@@ -38,9 +46,8 @@ internal class TracerProviderConfigImplTest {
         val attrCountPerEvent = 500
         val schemaUrl = "https://example.com/schema"
 
-        val cfg = TracerProviderConfigImpl().apply {
-            addSpanProcessor(firstProcessor)
-            addSpanProcessor(secondProcessor)
+        val cfg = TracerProviderConfigImpl(clock).apply {
+            export { createCompositeSpanProcessor(listOf(firstProcessor, secondProcessor)) }
 
             resource(schemaUrl) {
                 setStringAttribute("key", "value")
@@ -55,7 +62,7 @@ internal class TracerProviderConfigImplTest {
             }
         }.generateTracingConfig()
 
-        assertEquals(listOf(firstProcessor, secondProcessor), cfg.processors)
+        assertNotNull(cfg.processors.single())
         assertEquals(schemaUrl, cfg.resource.schemaUrl)
         assertEquals(mapOf("key" to "value"), cfg.resource.attributes)
 
@@ -69,8 +76,18 @@ internal class TracerProviderConfigImplTest {
     }
 
     @Test
+    fun testDoubleExportConfig() {
+        assertFailsWith(IllegalArgumentException::class) {
+            TracerProviderConfigImpl(clock).apply {
+                export { simpleSpanProcessor(stdoutSpanExporter()) }
+                export { simpleSpanProcessor(stdoutSpanExporter()) }
+            }
+        }
+    }
+
+    @Test
     fun testResourceOverride() {
-        val cfg = TracerProviderConfigImpl().apply {
+        val cfg = TracerProviderConfigImpl(clock).apply {
             resource(mapOf("extra" to true))
         }.generateTracingConfig()
         assertEquals(mapOf("extra" to true), cfg.resource.attributes)
@@ -78,7 +95,7 @@ internal class TracerProviderConfigImplTest {
 
     @Test
     fun testSimpleResourceConfig() {
-        val cfg = TracerProviderConfigImpl().apply {
+        val cfg = TracerProviderConfigImpl(clock).apply {
             resource(mapOf("key" to "value"))
         }.generateTracingConfig()
         assertEquals(mapOf("key" to "value"), cfg.resource.attributes)
@@ -89,7 +106,7 @@ internal class TracerProviderConfigImplTest {
         val attrs = (0..DEFAULT_ATTRIBUTE_LIMIT + 2).associate {
             "key$it" to "value$it"
         }
-        val cfg = TracerProviderConfigImpl().apply {
+        val cfg = TracerProviderConfigImpl(clock).apply {
             resource(attrs)
         }.generateTracingConfig()
         assertEquals(DEFAULT_ATTRIBUTE_LIMIT, cfg.resource.attributes.size)

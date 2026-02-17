@@ -18,6 +18,7 @@ import io.opentelemetry.kotlin.tracing.export.createStdoutSpanExporter
  * Creates a [SpanProcessor]. If a URL is supplied via [AppConfig.url] an OTLP HTTP exporter will
  * be used with batch processing. Otherwise, telemetry will be printed to stdout immediately.
  */
+@Suppress("DEPRECATION")
 internal fun createSpanProcessor(url: String?): SpanProcessor = when (url) {
     null -> createSimpleSpanProcessor(createStdoutSpanExporter())
     else -> createBatchSpanProcessor(createOtlpHttpSpanExporter(url))
@@ -27,6 +28,7 @@ internal fun createSpanProcessor(url: String?): SpanProcessor = when (url) {
  * Creates a [LogRecordProcessor]. If a URL is supplied via [AppConfig.url] an OTLP HTTP exporter
  * will be used with batch processing. Otherwise, telemetry will be printed to stdout immediately.
  */
+@Suppress("DEPRECATION")
 internal fun createLogRecordProcessor(url: String?): LogRecordProcessor = when (url) {
     null -> createSimpleLogRecordProcessor(createStdoutLogRecordExporter())
     else -> createBatchLogRecordProcessor(createOtlpHttpLogRecordExporter(url))

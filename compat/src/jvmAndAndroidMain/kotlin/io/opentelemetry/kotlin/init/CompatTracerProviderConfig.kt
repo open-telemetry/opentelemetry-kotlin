@@ -17,6 +17,7 @@ import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 
 @ExperimentalApi
 internal class CompatTracerProviderConfig(
+    private val clock: Clock,
     sdkFactory: SdkFactory,
 ) : TracerProviderConfigDsl {
 
@@ -45,12 +46,21 @@ internal class CompatTracerProviderConfig(
         builder.setSpanLimits(spanLimitsConfig.apply(action).build())
     }
 
+    @Deprecated("Deprecated.", replaceWith = ReplaceWith("export {processor}"))
     override fun addSpanProcessor(processor: SpanProcessor) {
         builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor))
+    }
+
+    override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
+        val processor = TraceExportConfigCompat(clock).action()
+        @Suppress("DEPRECATION")
+        addSpanProcessor(processor)
     }
 
     fun build(clock: Clock): TracerProvider {
         builder.setClock(OtelJavaClockWrapper(clock))
         return TracerProviderAdapter(builder.build(), clock, spanLimitsConfig)
     }
+
+    private class TraceExportConfigCompat(override val clock: Clock) : TraceExportConfigDsl
 }

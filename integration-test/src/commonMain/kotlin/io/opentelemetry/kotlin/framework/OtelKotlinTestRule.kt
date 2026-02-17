@@ -8,10 +8,12 @@ import io.opentelemetry.kotlin.init.LoggerProviderConfigDsl
 import io.opentelemetry.kotlin.init.TracerProviderConfigDsl
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.logging.LoggerProvider
+import io.opentelemetry.kotlin.logging.export.createCompositeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import io.opentelemetry.kotlin.tracing.Tracer
 import io.opentelemetry.kotlin.tracing.TracerProvider
 import io.opentelemetry.kotlin.tracing.data.SpanData
+import io.opentelemetry.kotlin.tracing.export.createCompositeSpanProcessor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -33,8 +35,7 @@ abstract class OtelKotlinTestRule(context: TestCoroutineScheduler) {
     /**
      * Configuration for the test harness that specifies how the API should behave.
      */
-    val config: TestHarnessConfig =
-        TestHarnessConfig()
+    val config: TestHarnessConfig = TestHarnessConfig()
 
     /**
      * Fake clock used by the test harness.
@@ -50,13 +51,16 @@ abstract class OtelKotlinTestRule(context: TestCoroutineScheduler) {
      */
     protected val loggerProviderConfig: LoggerProviderConfigDsl.() -> Unit = {
         config.attributes?.let { resource(config.schemaUrl, it) }
-        addLogRecordProcessor(
-            InMemoryLogRecordProcessor(
-                logRecordExporter,
-                scope,
+        export {
+            createCompositeLogRecordProcessor(
+                listOf(
+                    InMemoryLogRecordProcessor(
+                        logRecordExporter,
+                        scope,
+                    )
+                ) + config.logRecordProcessors
             )
-        )
-        config.logRecordProcessors.forEach { addLogRecordProcessor(it) }
+        }
         logLimits(config.logLimits)
     }
 
@@ -65,13 +69,16 @@ abstract class OtelKotlinTestRule(context: TestCoroutineScheduler) {
      */
     protected val tracerProviderConfig: TracerProviderConfigDsl.() -> Unit = {
         config.attributes?.let { resource(config.schemaUrl, it) }
-        addSpanProcessor(
-            InMemorySpanProcessor(
-                spanExporter,
-                scope,
+        export {
+            createCompositeSpanProcessor(
+                listOf(
+                    InMemorySpanProcessor(
+                        spanExporter,
+                        scope,
+                    )
+                ) + config.spanProcessors
             )
-        )
-        config.spanProcessors.forEach { addSpanProcessor(it) }
+        }
         spanLimits(config.spanLimits)
     }
 

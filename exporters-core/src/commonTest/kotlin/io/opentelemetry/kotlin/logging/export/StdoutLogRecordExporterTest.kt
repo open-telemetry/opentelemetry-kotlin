@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
+import io.opentelemetry.kotlin.export.FakeLogExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.loadTestFixture
 import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
@@ -18,7 +19,9 @@ internal class StdoutLogRecordExporterTest {
     @Test
     fun testExportLogRecordMinimal() = runTest {
         val output = mutableListOf<String>()
-        val exporter = createStdoutLogRecordExporter(logger = { output.add(it) })
+        val exporter = FakeLogExportConfig().stdoutLogRecordExporter {
+            output.add(it)
+        }
 
         val logRecord = FakeReadableLogRecord(
             body = null,
@@ -42,7 +45,9 @@ internal class StdoutLogRecordExporterTest {
     @Test
     fun testExportLogRecord() = runTest {
         val output = mutableListOf<String>()
-        val exporter = createStdoutLogRecordExporter(logger = { output.add(it) })
+        val exporter = FakeLogExportConfig().stdoutLogRecordExporter {
+            output.add(it)
+        }
 
         val logRecord = FakeReadableLogRecord(
             timestamp = 1000000000L,

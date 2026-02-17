@@ -30,6 +30,10 @@ public abstract interface class io/opentelemetry/kotlin/init/ContextConfigDsl {
 	public abstract fun setStorageMode (Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;)V
 }
 
+public abstract interface class io/opentelemetry/kotlin/init/LogExportConfigDsl {
+	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
+}
+
 public abstract interface class io/opentelemetry/kotlin/init/LogLimitsConfigDsl {
 	public abstract fun getAttributeCountLimit ()I
 	public abstract fun getAttributeValueLengthLimit ()I
@@ -39,14 +43,13 @@ public abstract interface class io/opentelemetry/kotlin/init/LogLimitsConfigDsl 
 
 public abstract interface class io/opentelemetry/kotlin/init/LoggerProviderConfigDsl : io/opentelemetry/kotlin/init/ResourceConfigDsl {
 	public abstract fun addLogRecordProcessor (Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;)V
+	public abstract fun export (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun logLimits (Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/OpenTelemetryConfigDsl {
 	public abstract fun context (Lkotlin/jvm/functions/Function1;)V
-	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
 	public abstract fun loggerProvider (Lkotlin/jvm/functions/Function1;)V
-	public abstract fun setClock (Lio/opentelemetry/kotlin/Clock;)V
 	public abstract fun tracerProvider (Lkotlin/jvm/functions/Function1;)V
 }
 
@@ -72,8 +75,13 @@ public abstract interface class io/opentelemetry/kotlin/init/SpanLimitsConfigDsl
 	public abstract fun setLinkCountLimit (I)V
 }
 
+public abstract interface class io/opentelemetry/kotlin/init/TraceExportConfigDsl {
+	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
+}
+
 public abstract interface class io/opentelemetry/kotlin/init/TracerProviderConfigDsl : io/opentelemetry/kotlin/init/ResourceConfigDsl {
 	public abstract fun addSpanProcessor (Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;)V
+	public abstract fun export (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun spanLimits (Lkotlin/jvm/functions/Function1;)V
 }
 

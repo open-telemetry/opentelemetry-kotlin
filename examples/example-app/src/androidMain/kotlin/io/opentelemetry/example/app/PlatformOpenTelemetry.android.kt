@@ -13,8 +13,8 @@ internal actual fun createPlatformOpenTelemetry(
     config: OpenTelemetryConfigDsl.() -> Unit
 ): OpenTelemetry {
     return when (sdkMode) {
-        AppConfig.SdkMode.IMPLEMENTATION -> createOpenTelemetry(config)
-        AppConfig.SdkMode.COMPAT -> createCompatOpenTelemetry(config)
+        AppConfig.SdkMode.IMPLEMENTATION -> createOpenTelemetry(config = config)
+        AppConfig.SdkMode.COMPAT -> createCompatOpenTelemetry(config = config)
         AppConfig.SdkMode.NOOP -> NoopOpenTelemetry
     }
 }

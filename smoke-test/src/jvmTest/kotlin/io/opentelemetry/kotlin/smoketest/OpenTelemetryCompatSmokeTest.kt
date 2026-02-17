@@ -4,9 +4,9 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.logging.export.createOtlpHttpLogRecordExporter
-import io.opentelemetry.kotlin.logging.export.createSimpleLogRecordProcessor
+import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.createOtlpHttpSpanExporter
-import io.opentelemetry.kotlin.tracing.export.createSimpleSpanProcessor
+import io.opentelemetry.kotlin.tracing.export.simpleSpanProcessor
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -24,18 +24,24 @@ class OpenTelemetryCompatSmokeTest {
         server = FakeOtlpServer()
         otel = createCompatOpenTelemetry {
             tracerProvider {
-                addSpanProcessor(
-                    createSimpleSpanProcessor(
-                        createOtlpHttpSpanExporter(server.baseUrl, server.mockEngine)
+                export {
+                    simpleSpanProcessor(
+                        createOtlpHttpSpanExporter(
+                            server.baseUrl,
+                            server.mockEngine
+                        )
                     )
-                )
+                }
             }
             loggerProvider {
-                addLogRecordProcessor(
-                    createSimpleLogRecordProcessor(
-                        createOtlpHttpLogRecordExporter(server.baseUrl, server.mockEngine)
+                export {
+                    simpleLogRecordProcessor(
+                        createOtlpHttpLogRecordExporter(
+                            server.baseUrl,
+                            server.mockEngine
+                        )
                     )
-                )
+                }
             }
         }
     }

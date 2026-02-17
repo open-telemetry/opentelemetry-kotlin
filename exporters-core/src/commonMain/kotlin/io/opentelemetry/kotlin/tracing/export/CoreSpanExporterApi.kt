@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
+import io.opentelemetry.kotlin.init.ConfigDsl
+import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +24,15 @@ public fun createCompositeSpanProcessor(processors: List<SpanProcessor>): SpanPr
 /**
  * Creates a simple span processor that immediately sends any telemetry to its exporter.
  */
+@ConfigDsl
 @ExperimentalApi
+public fun TraceExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): SpanProcessor {
+    @Suppress("DEPRECATION")
+    return createSimpleSpanProcessor(exporter)
+}
+
+@ExperimentalApi
+@Deprecated("Deprecated.", ReplaceWith("simpleSpanProcessor(exporter)"))
 public fun createSimpleSpanProcessor(exporter: SpanExporter): SpanProcessor {
     val dispatcher: CoroutineDispatcher = Dispatchers.Default
     val scope = CoroutineScope(SupervisorJob() + dispatcher)
@@ -67,6 +77,16 @@ public fun createBatchSpanProcessor(
  * production use. The output format is not standardized and can change at any time.
  */
 @ExperimentalApi
+@ConfigDsl
+public fun TraceExportConfigDsl.stdoutSpanExporter(
+    logger: (String) -> Unit = ::println
+): SpanExporter {
+    @Suppress("DEPRECATION")
+    return createStdoutSpanExporter(logger)
+}
+
+@ExperimentalApi
+@Deprecated("Deprecated.", ReplaceWith("stdoutSpanExporter(logger)"))
 public fun createStdoutSpanExporter(
     logger: (String) -> Unit = ::println
 ): SpanExporter = StdoutSpanExporter(logger)

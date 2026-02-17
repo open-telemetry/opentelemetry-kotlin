@@ -1,5 +1,5 @@
 public final class io/opentelemetry/kotlin/OpenTelemetryImplEntrypointKt {
-	public static final fun createOpenTelemetry (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/OpenTelemetry;
-	public static synthetic fun createOpenTelemetry$default (Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/OpenTelemetry;
+	public static final fun createOpenTelemetry (Lio/opentelemetry/kotlin/Clock;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/OpenTelemetry;
+	public static synthetic fun createOpenTelemetry$default (Lio/opentelemetry/kotlin/Clock;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/OpenTelemetry;
 }
 
