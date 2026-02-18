@@ -127,7 +127,6 @@ internal class BatchTelemetryProcessorTest {
 
         processor.processTelemetry(1)
 
-        // TODO: dry
         advanceTimeBy(10)
         processor.forceFlush()
         processor.shutdown()
@@ -138,6 +137,38 @@ internal class BatchTelemetryProcessorTest {
         advanceUntilIdle()
 
         assertEquals(1, exports.size)
+    }
+
+    @Test
+    fun testShutdownReturnsSuccessOnSecondCall() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val processor = BatchTelemetryProcessor<Int>(
+            maxQueueSize = 100,
+            maxExportBatchSize = 1,
+            scheduleDelayMs = 1,
+            exportTimeoutMs = 1000,
+            dispatcher = dispatcher,
+            exportAction = { OperationResultCode.Success }
+        )
+        assertEquals(OperationResultCode.Success, processor.shutdown())
+        assertEquals(OperationResultCode.Success, processor.shutdown())
+    }
+
+    @Test
+    fun testForceFlushWorksAfterShutdown() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val processor = BatchTelemetryProcessor<Int>(
+            maxQueueSize = 100,
+            maxExportBatchSize = 1,
+            scheduleDelayMs = 1,
+            exportTimeoutMs = 1000,
+            dispatcher = dispatcher,
+            exportAction = { OperationResultCode.Success }
+        )
+        processor.shutdown()
+        advanceUntilIdle()
+        // forceFlush is independent of shutdown
+        assertEquals(OperationResultCode.Success, processor.forceFlush())
     }
 
     @Test
