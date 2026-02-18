@@ -17,6 +17,14 @@ public final class io/opentelemetry/kotlin/export/OperationResultCode$Success : 
 	public static final field INSTANCE Lio/opentelemetry/kotlin/export/OperationResultCode$Success;
 }
 
+public abstract class io/opentelemetry/kotlin/export/ShutdownState {
+	public fun <init> ()V
+	public final fun execute (Lkotlin/jvm/functions/Function0;)V
+	public final fun ifActive (Lkotlin/jvm/functions/Function0;)Lio/opentelemetry/kotlin/export/OperationResultCode;
+	public final fun ifActiveOrElse (Ljava/lang/Object;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public abstract fun isShutdown ()Z
+}
+
 public abstract interface class io/opentelemetry/kotlin/export/TelemetryCloseable {
 	public abstract fun forceFlush (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun shutdown (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

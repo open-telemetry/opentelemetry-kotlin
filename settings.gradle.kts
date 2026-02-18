@@ -19,6 +19,7 @@ include(
     ":api",
     ":api-ext",
     ":sdk-api",
+    ":sdk-common",
     ":noop",
     ":implementation",
     ":model",
