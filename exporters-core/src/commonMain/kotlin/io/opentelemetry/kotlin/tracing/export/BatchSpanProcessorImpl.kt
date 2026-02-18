@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.BatchTelemetryProcessor
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
@@ -16,6 +17,8 @@ internal class BatchSpanProcessorImpl(
     private val maxExportBatchSize: Int,
 ) : SpanProcessor {
 
+    private val shutdownState = MutableShutdownState()
+
     private val processor =
         BatchTelemetryProcessor(
             maxQueueSize = maxQueueSize,
@@ -25,7 +28,9 @@ internal class BatchSpanProcessorImpl(
             exportAction = exporter::export
         )
 
-    override fun onEnd(span: ReadableSpan) = processor.processTelemetry(span)
+    override fun onEnd(span: ReadableSpan) {
+        shutdownState.execute { processor.processTelemetry(span) }
+    }
 
     override fun isStartRequired(): Boolean = true
     override fun isEndRequired(): Boolean = true
@@ -40,5 +45,9 @@ internal class BatchSpanProcessorImpl(
     }
 
     override suspend fun forceFlush(): OperationResultCode = processor.forceFlush()
-    override suspend fun shutdown(): OperationResultCode = processor.shutdown()
+
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownState.shutdown {
+            processor.shutdown()
+        }
 }

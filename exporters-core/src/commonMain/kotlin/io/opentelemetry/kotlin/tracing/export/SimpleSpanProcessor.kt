@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
@@ -21,6 +22,7 @@ internal class SimpleSpanProcessor(
 ) : SpanProcessor {
 
     private val lock = ReentrantReadWriteLock()
+    private val shutdownState = MutableShutdownState()
 
     override fun onStart(
         span: ReadWriteSpan,
@@ -32,15 +34,21 @@ internal class SimpleSpanProcessor(
     }
 
     override fun onEnd(span: ReadableSpan) {
-        scope.launch {
-            lock.write {
-                exporter.export(listOf(span))
+        shutdownState.execute {
+            scope.launch {
+                lock.write {
+                    exporter.export(listOf(span))
+                }
             }
         }
     }
 
     override fun isStartRequired(): Boolean = true
     override fun isEndRequired(): Boolean = true
-    override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
-    override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
+    override suspend fun forceFlush(): OperationResultCode = exporter.forceFlush()
+
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownState.shutdown {
+            exporter.shutdown()
+        }
 }
