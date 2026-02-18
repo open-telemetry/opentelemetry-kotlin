@@ -38,4 +38,39 @@ internal class SimpleSpanProcessorTest {
         val export = exporter.exports.single()
         assertEquals(span.name, export.name)
     }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testOnEndNoOpAfterShutdown() = runTest {
+        val exporter = FakeSpanExporter()
+        val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
+        val processor = SimpleSpanProcessor(exporter, scope)
+        processor.shutdown()
+
+        val span = FakeReadWriteSpan()
+        processor.onEnd(span)
+        assertTrue(exporter.exports.isEmpty())
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testShutdownReturnsSuccessOnSecondCall() = runTest {
+        val exporter = FakeSpanExporter()
+        val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
+        val processor = SimpleSpanProcessor(exporter, scope)
+
+        assertEquals(OperationResultCode.Success, processor.shutdown())
+        assertEquals(OperationResultCode.Success, processor.shutdown())
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testForceFlushWorksAfterShutdown() = runTest {
+        val exporter = FakeSpanExporter()
+        val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
+        val processor = SimpleSpanProcessor(exporter, scope)
+        processor.shutdown()
+
+        assertEquals(OperationResultCode.Success, processor.forceFlush())
+    }
 }
