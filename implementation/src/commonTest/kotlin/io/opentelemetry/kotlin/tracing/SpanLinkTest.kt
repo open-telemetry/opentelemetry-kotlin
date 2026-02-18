@@ -50,7 +50,7 @@ internal class SpanLinkTest {
 
     @Test
     fun testSpanLink() {
-        tracer.createSpan("test").apply {
+        tracer.startSpan("test").apply {
             addLink(fakeSpanContext)
             addLink(otherFakeSpanContext) {
                 setStringAttribute("foo", "bar")
@@ -65,7 +65,7 @@ internal class SpanLinkTest {
 
     @Test
     fun testTwoSpanLinksWithSameKey() {
-        tracer.createSpan("test").apply {
+        tracer.startSpan("test").apply {
             addLink(fakeSpanContext)
             addLink(fakeSpanContext)
             end()
@@ -76,7 +76,7 @@ internal class SpanLinkTest {
 
     @Test
     fun testSpanLinkAfterEnd() {
-        tracer.createSpan("test").apply {
+        tracer.startSpan("test").apply {
             end()
             addLink(fakeSpanContext)
         }
@@ -85,7 +85,7 @@ internal class SpanLinkTest {
 
     @Test
     fun testSpanLinkDuringCreation() {
-        tracer.createSpan("test", action = {
+        tracer.startSpan("test", action = {
             addLink(fakeSpanContext)
             addLink(otherFakeSpanContext) {
                 setStringAttribute("foo", "bar")
@@ -101,7 +101,7 @@ internal class SpanLinkTest {
 
     @Test
     fun testLinksLimitNotExceeded() {
-        tracer.createSpan("test", action = {
+        tracer.startSpan("test", action = {
             repeat(linkLimit + 1) {
                 addLink(
                     FakeSpanContext(
@@ -119,7 +119,7 @@ internal class SpanLinkTest {
 
     @Test
     fun testLinksLimitNotExceeded2() {
-        tracer.createSpan("test").apply {
+        tracer.startSpan("test").apply {
             repeat(linkLimit + 1) {
                 addLink(
                     FakeSpanContext(
@@ -136,7 +136,7 @@ internal class SpanLinkTest {
 
     @Test
     fun testSpanLinkAttributesLimit() {
-        val span = tracer.createSpan("test", action = {
+        val span = tracer.startSpan("test", action = {
             addLink(FakeSpanContext()) {
                 repeat(fakeSpanLimitsConfig.attributeCountLimit + 1) {
                     setStringAttribute("foo$it", "bar")
@@ -149,7 +149,7 @@ internal class SpanLinkTest {
 
     @Test
     fun testSpanLinkAttributesLimit2() {
-        val span = tracer.createSpan("test").apply {
+        val span = tracer.startSpan("test").apply {
             addLink(FakeSpanContext(), attributes = {
                 repeat(fakeSpanLimitsConfig.attributeCountLimit + 1) {
                     setStringAttribute("foo$it", "bar")

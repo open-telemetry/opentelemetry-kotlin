@@ -46,7 +46,7 @@ internal class SpanEventTest {
     @Test
     fun testSpanEvent() {
         clock.time = 2
-        tracer.createSpan("test").apply {
+        tracer.startSpan("test").apply {
             addEvent("event")
             addEvent("event2", 5)
             addEvent("event3", 10) {
@@ -63,7 +63,7 @@ internal class SpanEventTest {
 
     @Test
     fun testTwoEventsWithSameKey() {
-        tracer.createSpan("test").apply {
+        tracer.startSpan("test").apply {
             addEvent("event")
             addEvent("event")
             end()
@@ -75,7 +75,7 @@ internal class SpanEventTest {
 
     @Test
     fun testSpanEventAfterEnd() {
-        tracer.createSpan("test").apply {
+        tracer.startSpan("test").apply {
             end()
             addEvent("event")
         }
@@ -85,7 +85,7 @@ internal class SpanEventTest {
     @Test
     fun testSpanEventDuringCreation() {
         clock.time = 2
-        tracer.createSpan("test", action = {
+        tracer.startSpan("test", action = {
             addEvent("event")
             addEvent("event2", 5)
             addEvent("event3", 10) {
@@ -103,7 +103,7 @@ internal class SpanEventTest {
 
     @Test
     fun testEventsLimitNotExceeded() {
-        tracer.createSpan("test", action = {
+        tracer.startSpan("test", action = {
             repeat(eventLimit + 1) {
                 addEvent("event")
             }
@@ -116,7 +116,7 @@ internal class SpanEventTest {
 
     @Test
     fun testEventsLimitNotExceeded2() {
-        tracer.createSpan("test").apply {
+        tracer.startSpan("test").apply {
             repeat(eventLimit + 1) {
                 addEvent("event")
             }
@@ -128,7 +128,7 @@ internal class SpanEventTest {
 
     @Test
     fun testSpanEventAttributesLimit() {
-        val span = tracer.createSpan("test", action = {
+        val span = tracer.startSpan("test", action = {
             addEvent("event") {
                 repeat(fakeSpanLimitsConfig.attributeCountLimit + 1) {
                     setStringAttribute("foo$it", "bar")
@@ -141,7 +141,7 @@ internal class SpanEventTest {
 
     @Test
     fun testSpanEventAttributesLimit2() {
-        val span = tracer.createSpan("test").apply {
+        val span = tracer.startSpan("test").apply {
             addEvent("event", attributes = {
                 repeat(fakeSpanLimitsConfig.attributeCountLimit + 1) {
                     setStringAttribute("foo$it", "bar")

@@ -10,7 +10,7 @@ class AddSpanEventFixture(
 ) : BenchmarkFixture {
 
     private val tracer = otel.tracerProvider.getTracer("test")
-    private val span = tracer.createSpan("new_span")
+    private val span = tracer.startSpan("new_span")
 
     override fun execute() {
         span.addEvent("my_event") {

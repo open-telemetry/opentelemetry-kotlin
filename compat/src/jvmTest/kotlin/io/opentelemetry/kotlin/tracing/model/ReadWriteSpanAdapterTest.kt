@@ -101,7 +101,7 @@ internal class ReadWriteSpanAdapterTest {
             ),
         )
         harness.config.spanProcessors.add(processor)
-        harness.tracer.createSpan("name").end()
+        harness.tracer.startSpan("name").end()
         harness.assertSpans(
             expectedCount = 1,
             assertions = { spans ->

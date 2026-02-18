@@ -25,8 +25,8 @@ internal class NoopTests {
         val tracer = tracerProvider.getTracer("test-tracer")
 
         // All created spans are the same noop instance
-        val span = tracer.createSpan("span")
-        val anotherSpan = tracer.createSpan("span2", spanKind = SpanKind.CLIENT)
+        val span = tracer.startSpan("span")
+        val anotherSpan = tracer.startSpan("span2", spanKind = SpanKind.CLIENT)
         assertSame(span, anotherSpan)
         assertTrue(span is NoopSpan)
 
@@ -167,7 +167,7 @@ internal class NoopTests {
     @Test
     fun testStoreSpan() {
         val otel = NoopOpenTelemetry
-        val span = otel.tracerProvider.getTracer("tracer").createSpan("span")
+        val span = otel.tracerProvider.getTracer("tracer").startSpan("span")
         val ctx = otel.contextFactory.storeSpan(otel.contextFactory.root(), span)
         assertTrue(ctx is NoopContext)
     }

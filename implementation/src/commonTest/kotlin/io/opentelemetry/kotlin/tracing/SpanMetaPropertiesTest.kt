@@ -35,14 +35,14 @@ internal class SpanMetaPropertiesTest {
 
     @Test
     fun testSpanInstrumentationScope() {
-        tracer.createSpan("test").end()
+        tracer.startSpan("test").end()
         val scope = processor.endCalls.single().instrumentationScopeInfo
         assertSame(key, scope)
     }
 
     @Test
     fun testSpanResource() {
-        tracer.createSpan("test").end()
+        tracer.startSpan("test").end()
         val resource = processor.endCalls.single().resource
         assertSame(fakeResource, resource)
     }

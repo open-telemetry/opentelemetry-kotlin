@@ -43,7 +43,7 @@ internal class TracerSpanContextTest {
 
     @Test
     fun testNoExplicitParentContext() {
-        val span = tracer.createSpan("test")
+        val span = tracer.startSpan("test")
         assertFalse(span.parent.isValid)
         val spanContext = span.spanContext
         assertValidSpanContext(spanContext)
@@ -54,7 +54,10 @@ internal class TracerSpanContextTest {
         val invalidSpan = sdkFactory.spanFactory.invalid
         assertFalse(invalidSpan.spanContext.isValid)
         val parentCtx = sdkFactory.contextFactory.storeSpan(sdkFactory.contextFactory.root(), invalidSpan)
-        val span = tracer.createSpan("test", parentContext = parentCtx)
+        val span = tracer.startSpan(
+            "test",
+            parentContext = parentCtx,
+        )
 
         assertFalse(span.parent.isValid)
         val spanContext = span.spanContext
@@ -63,9 +66,12 @@ internal class TracerSpanContextTest {
 
     @Test
     fun testExplicitParentContextOfValidSpan() {
-        val parentSpan = tracer.createSpan("parent")
+        val parentSpan = tracer.startSpan("parent")
         val parentCtx = sdkFactory.contextFactory.storeSpan(sdkFactory.contextFactory.root(), parentSpan)
-        val span = tracer.createSpan("test", parentContext = parentCtx)
+        val span = tracer.startSpan(
+            "test",
+            parentContext = parentCtx,
+        )
 
         assertTrue(span.parent.isValid)
         val spanContext = span.spanContext
@@ -76,16 +82,16 @@ internal class TracerSpanContextTest {
 
     @Test
     fun testImplicitContext() {
-        val span = tracer.createSpan("span")
+        val span = tracer.startSpan("span")
         val ctx = sdkFactory.contextFactory.storeSpan(sdkFactory.contextFactory.root(), span)
         val scope = ctx.attach()
 
-        val first = tracer.createSpan("first")
+        val first = tracer.startSpan("first")
         first.end()
 
         scope.detach()
 
-        val second = tracer.createSpan("second")
+        val second = tracer.startSpan("second")
         second.end()
 
         assertSame(span.spanContext, first.parent)

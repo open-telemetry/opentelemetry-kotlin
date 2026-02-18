@@ -11,8 +11,8 @@ class AddSpanLinkFixture(
 ) : BenchmarkFixture {
 
     private val tracer = otel.tracerProvider.getTracer("test")
-    private val other = tracer.createSpan("other")
-    private val span = tracer.createSpan("new_span")
+    private val other = tracer.startSpan("other")
+    private val span = tracer.startSpan("new_span")
 
     override fun execute() {
         span.addLink(other) {

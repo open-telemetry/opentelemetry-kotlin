@@ -21,7 +21,7 @@ internal class ContextFactoryImplTest {
     @Test
     fun `test store span`() {
         val tracer = createCompatOpenTelemetry().tracerProvider.getTracer("tracer")
-        val span = tracer.createSpan("span")
+        val span = tracer.startSpan("span")
         val contextFactory = factory.contextFactory
         val ctx = contextFactory.storeSpan(contextFactory.root(), span)
         val retrievedSpan = factory.spanFactory.fromContext(ctx)

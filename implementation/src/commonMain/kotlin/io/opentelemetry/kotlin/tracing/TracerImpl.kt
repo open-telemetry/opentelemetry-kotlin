@@ -34,7 +34,20 @@ internal class TracerImpl(
     private val spanFactory = sdkFactory.spanFactory
     private val tracingIdFactory = sdkFactory.tracingIdFactory
 
+    @Suppress("DEPRECATION")
+    @Deprecated(
+        "Deprecated.",
+        replaceWith = ReplaceWith("startSpan(name, parentContext, spanKind, startTimestamp, action)")
+    )
     override fun createSpan(
+        name: String,
+        parentContext: Context?,
+        spanKind: SpanKind,
+        startTimestamp: Long?,
+        action: (SpanRelationships.() -> Unit)?
+    ): Span = startSpan(name, parentContext, spanKind, startTimestamp, action)
+
+    override fun startSpan(
         name: String,
         parentContext: Context?,
         spanKind: SpanKind,

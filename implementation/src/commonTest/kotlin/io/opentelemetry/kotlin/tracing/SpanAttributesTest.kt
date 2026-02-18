@@ -53,7 +53,7 @@ internal class SpanAttributesTest {
 
     @Test
     fun testSpanDefaultAttributes() {
-        val span = tracer.createSpan("test")
+        val span = tracer.startSpan("test")
         assertTrue(span.attributes.isEmpty())
 
         // ensure returned values is immutable, and not the underlying implementation
@@ -62,22 +62,20 @@ internal class SpanAttributesTest {
 
     @Test
     fun testSpanAddAttributesDuringCreation() {
-        val span = tracer.createSpan("test") {
-            addTestAttributes()
-        }
+        val span = tracer.startSpan("test") { addTestAttributes() }
         assertEquals(expected, span.attributes)
     }
 
     @Test
     fun testSpanAddAttributesAfterCreation() {
-        val span = tracer.createSpan("test")
+        val span = tracer.startSpan("test")
         span.addTestAttributes()
         assertEquals(expected, span.attributes)
     }
 
     @Test
     fun testSpanAddAttributesAfterEnd() {
-        val span = tracer.createSpan("test")
+        val span = tracer.startSpan("test")
         span.addTestAttributes()
         assertEquals(expected, span.attributes)
         span.end()
@@ -87,7 +85,7 @@ internal class SpanAttributesTest {
 
     @Test
     fun testAttributesLimitNotExceeded() {
-        val span = tracer.createSpan("test", action = {
+        val span = tracer.startSpan("test", action = {
             addTestAttributesAlternateValues()
             addTestAttributes("xyz")
             addTestAttributes()
@@ -100,7 +98,7 @@ internal class SpanAttributesTest {
 
     @Test
     fun testAttributesLimitNotExceeded2() {
-        val span = tracer.createSpan("test").apply {
+        val span = tracer.startSpan("test").apply {
             addTestAttributesAlternateValues()
             addTestAttributes("xyz")
             addTestAttributes()

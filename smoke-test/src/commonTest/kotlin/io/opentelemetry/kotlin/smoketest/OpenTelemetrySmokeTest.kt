@@ -55,7 +55,7 @@ class OpenTelemetrySmokeTest {
     fun exportsSpansAndLogs() = runTest {
         val spanName = "test-span"
         val tracer = otel.tracerProvider.getTracer("test-tracer")
-        val span = tracer.createSpan(spanName)
+        val span = tracer.startSpan(spanName)
         span.end()
 
         val logBody = "test-log-message"

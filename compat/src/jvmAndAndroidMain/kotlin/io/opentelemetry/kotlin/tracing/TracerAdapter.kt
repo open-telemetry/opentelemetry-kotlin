@@ -22,7 +22,19 @@ internal class TracerAdapter(
     private val spanLimitsConfig: CompatSpanLimitsConfig
 ) : Tracer {
 
+    @Deprecated(
+        "Deprecated.",
+        replaceWith = ReplaceWith("startSpan(name, parentContext, spanKind, startTimestamp, action)")
+    )
     override fun createSpan(
+        name: String,
+        parentContext: Context?,
+        spanKind: SpanKind,
+        startTimestamp: Long?,
+        action: (SpanRelationships.() -> Unit)?
+    ): Span = startSpan(name, parentContext, spanKind, startTimestamp, action)
+
+    override fun startSpan(
         name: String,
         parentContext: Context?,
         spanKind: SpanKind,

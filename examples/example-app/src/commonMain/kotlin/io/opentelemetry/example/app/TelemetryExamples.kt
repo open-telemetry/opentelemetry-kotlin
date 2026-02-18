@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.semconv.UrlAttributes
 import io.opentelemetry.kotlin.semconv.UserAttributes
 import io.opentelemetry.kotlin.tracing.Tracer
 import io.opentelemetry.kotlin.tracing.model.SpanKind
+import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 import kotlinx.coroutines.delay
 
 /**
@@ -53,7 +54,7 @@ suspend fun runAllExamples(platform: String) {
  * Creates a basic span with no attributes.
  */
 private fun demonstrateBasicSpan(tracer: Tracer) {
-    val span = tracer.createSpan("basic-span")
+    val span = tracer.startSpan("basic-span")
     span.end()
 }
 
@@ -61,17 +62,19 @@ private fun demonstrateBasicSpan(tracer: Tracer) {
  * Creates a complex span with attributes and events.
  */
 private fun demonstrateComplexSpan(tracer: Tracer) {
-    val span = tracer.createSpan(
-        name = "http-request",
-        spanKind = SpanKind.CLIENT
-    ) {
-        setStringAttribute(HttpAttributes.HTTP_REQUEST_METHOD, "GET")
-        setStringAttribute(UrlAttributes.URL_FULL, "https://api.example.com/users/123")
-        setLongAttribute("net.peer.port", 443L)
+    val span = // Add an event to mark when the request started
+        tracer.startSpan(
+            name = "http-request",
+            spanKind = SpanKind.CLIENT,
+            // Add an event to mark when the request started
+            action = {
+                setStringAttribute(HttpAttributes.HTTP_REQUEST_METHOD, "GET")
+                setStringAttribute(UrlAttributes.URL_FULL, "https://api.example.com/users/123")
+                setLongAttribute("net.peer.port", 443L)
 
-        // Add an event to mark when the request started
-        addEvent("request-started")
-    }
+                // Add an event to mark when the request started
+                addEvent("request-started")
+            })
 
     // Add more attributes during span lifetime
     span.setLongAttribute(HttpAttributes.HTTP_RESPONSE_STATUS_CODE, 200L)
@@ -90,25 +93,32 @@ private fun demonstrateComplexSpan(tracer: Tracer) {
  * Creates nested spans that represent parent-child relationships.
  */
 private fun demonstrateSpanNesting(tracer: Tracer) {
-    val parentSpan = tracer.createSpan("parent-operation") {
-        setStringAttribute("operation.type", "database-transaction")
-    }
+    val parentSpan = tracer.startSpan(
+        "parent-operation",
+        null,
+        SpanKind.INTERNAL,
+        null
+    ) { setStringAttribute("operation.type", "database-transaction") }
 
     // Create first child span (database query)
-    val childSpan1 = tracer.createSpan(
-        name = "database-query",
-        spanKind = SpanKind.INTERNAL
-    ) {
-        setStringAttribute(DbAttributes.DB_SYSTEM_NAME, "postgresql")
-        setStringAttribute(DbAttributes.DB_QUERY_TEXT, "SELECT * FROM users WHERE id = ?")
-        setStringAttribute(DbAttributes.DB_COLLECTION_NAME, "users")
-    }
+    val childSpan1 =
+        tracer.startSpan(
+            name = "database-query",
+            spanKind = SpanKind.INTERNAL,
+            action = {
+                setStringAttribute(DbAttributes.DB_SYSTEM_NAME, "postgresql")
+                setStringAttribute(DbAttributes.DB_QUERY_TEXT, "SELECT * FROM users WHERE id = ?")
+                setStringAttribute(DbAttributes.DB_COLLECTION_NAME, "users")
+            })
     childSpan1.end()
 
     // Create second child span (cache lookup)
-    val childSpan2 = tracer.createSpan("cache-lookup") {
-        setStringAttribute("cache.type", "redis")
-    }
+    val childSpan2 = tracer.startSpan(
+        "cache-lookup",
+        null,
+        SpanKind.INTERNAL,
+        null
+    ) { setStringAttribute("cache.type", "redis") }
     childSpan2.end()
 
     parentSpan.end()

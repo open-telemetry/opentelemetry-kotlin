@@ -16,6 +16,21 @@ import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 @ThreadSafe
 public interface Tracer {
 
+    @Deprecated(
+        "Deprecated.",
+        ReplaceWith(
+            expression = "startSpan(name, parentContext, spanKind, startTimestamp, action)",
+            imports = ["io.opentelemetry.kotlin.tracing.model.SpanKind"]
+        )
+    )
+    public fun createSpan(
+        name: String,
+        parentContext: Context? = null,
+        spanKind: SpanKind = SpanKind.INTERNAL,
+        startTimestamp: Long? = null,
+        action: (SpanRelationships.() -> Unit)? = null
+    ): Span
+
     /**
      * Creates a new span. A span must have a non-empty name, and can optionally include:
      *
@@ -29,7 +44,7 @@ public interface Tracer {
      * https://opentelemetry.io/docs/specs/otel/trace/api/#span
      */
     @ThreadSafe
-    public fun createSpan(
+    public fun startSpan(
         name: String,
         parentContext: Context? = null,
         spanKind: SpanKind = SpanKind.INTERNAL,

@@ -68,7 +68,7 @@ internal class LoggerExportTest {
 
     @Test
     fun testLogWithParentSpanInContext() = runTest {
-        val span = harness.tracer.createSpan("span")
+        val span = harness.tracer.startSpan("span")
         val contextFactory = harness.kotlinApi.contextFactory
         val ctx = contextFactory.storeSpan(contextFactory.root(), span)
         harness.logger.log("test", context = ctx)

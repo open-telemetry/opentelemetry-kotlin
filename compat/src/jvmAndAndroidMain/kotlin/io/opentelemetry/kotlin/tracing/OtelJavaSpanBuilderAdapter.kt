@@ -93,19 +93,20 @@ internal class OtelJavaSpanBuilderAdapter(
     }
 
     override fun startSpan(): OtelJavaSpan {
-        val span = tracer.createSpan(
+        val span = tracer.startSpan(
             name = spanName,
+            parentContext = ContextAdapter(parent ?: OtelJavaContext.current()),
             spanKind = kind.toOtelKotlinSpanKind(),
             startTimestamp = start,
-            parentContext = ContextAdapter(parent ?: OtelJavaContext.current())
-        ) {
-            setAttributes(attrs.build().asMap().mapKeys { it.key.key })
-            links.forEach { link ->
-                this.addLink(link.spanContext.toOtelKotlinSpanContext()) {
-                    setAttributes(link.attributes.convertToMap())
+            action = {
+                setAttributes(attrs.build().asMap().mapKeys { it.key.key })
+                links.forEach { link ->
+                    addLink(link.spanContext.toOtelKotlinSpanContext()) {
+                        setAttributes(link.attributes.convertToMap())
+                    }
                 }
             }
-        }
+        )
         return OtelJavaSpanAdapter(span)
     }
 

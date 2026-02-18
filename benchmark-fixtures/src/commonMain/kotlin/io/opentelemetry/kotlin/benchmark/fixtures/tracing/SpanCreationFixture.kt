@@ -12,6 +12,6 @@ class SpanCreationFixture(
     private val tracer = otel.tracerProvider.getTracer("test")
 
     override fun execute() {
-        tracer.createSpan("new_span")
+        tracer.startSpan("new_span")
     }
 }

@@ -59,7 +59,7 @@ internal class LogContextTest {
 
     @Test
     fun testOverrideContext() {
-        val span = tracer.createSpan("span")
+        val span = tracer.startSpan("span")
         val ctx = sdkFactory.contextFactory.storeSpan(sdkFactory.contextFactory.root(), span)
         logger.log(context = ctx)
 
@@ -69,7 +69,7 @@ internal class LogContextTest {
 
     @Test
     fun testImplicitContext() {
-        val span = tracer.createSpan("span")
+        val span = tracer.startSpan("span")
         val ctx = sdkFactory.contextFactory.storeSpan(sdkFactory.contextFactory.root(), span)
         val scope = ctx.attach()
         logger.log()

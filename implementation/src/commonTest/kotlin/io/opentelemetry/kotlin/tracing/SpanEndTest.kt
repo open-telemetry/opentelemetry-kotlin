@@ -40,7 +40,7 @@ internal class SpanEndTest {
     @Test
     fun testSpanEndWithExplicitTimestamp() {
         val timestamp = 100L
-        val span = tracer.createSpan("test")
+        val span = tracer.startSpan("test")
         span.end(timestamp)
         assertSpanTimestamp(timestamp)
     }
@@ -49,14 +49,14 @@ internal class SpanEndTest {
     fun testSpanEndWithImplicitTimestamp() {
         val timestamp = 50L
         clock.time = timestamp
-        val span = tracer.createSpan("test")
+        val span = tracer.startSpan("test")
         span.end()
         assertSpanTimestamp(timestamp)
     }
 
     @Test
     fun testSpanIsRecording() {
-        val span = tracer.createSpan("test")
+        val span = tracer.startSpan("test")
         assertTrue(span.isRecording())
         span.end()
         assertFalse(span.isRecording())
@@ -64,7 +64,7 @@ internal class SpanEndTest {
 
     @Test
     fun testMultipleEndCalls() {
-        val span = tracer.createSpan("test")
+        val span = tracer.startSpan("test")
         assertTrue(span.isRecording())
 
         val timestamp = 100L
@@ -95,7 +95,7 @@ internal class SpanEndTest {
             assertTrue(rSpan.hasEnded)
         }
 
-        val span = tracer.createSpan("test")
+        val span = tracer.startSpan("test")
         assertFalse(span.isRecording())
         span.end()
         assertFalse(span.isRecording())
