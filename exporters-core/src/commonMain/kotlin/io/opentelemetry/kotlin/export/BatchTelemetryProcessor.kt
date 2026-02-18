@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
-import kotlin.concurrent.Volatile
 
 @OptIn(ExperimentalApi::class)
 internal class BatchTelemetryProcessor<T>(
@@ -26,9 +25,7 @@ internal class BatchTelemetryProcessor<T>(
     private val scope = CoroutineScope(SupervisorJob() + dispatcher)
     private val mutex = Mutex()
     private val queue = mutableListOf<T>()
-
-    @Volatile
-    private var running = true
+    private val shutdownState = MutableShutdownState()
 
     init {
         require(scheduleDelayMs > 0)
@@ -38,7 +35,7 @@ internal class BatchTelemetryProcessor<T>(
         require(maxExportBatchSize <= maxQueueSize)
 
         scope.launch {
-            while (running) {
+            while (!shutdownState.isShutdown) {
                 delay(scheduleDelayMs)
                 flushInternal()
             }
@@ -46,8 +43,10 @@ internal class BatchTelemetryProcessor<T>(
     }
 
     fun processTelemetry(telemetry: T) {
-        if (queue.size <= maxQueueSize) {
-            queue.add(telemetry)
+        shutdownState.execute {
+            if (queue.size <= maxQueueSize) {
+                queue.add(telemetry)
+            }
         }
     }
 
@@ -58,11 +57,12 @@ internal class BatchTelemetryProcessor<T>(
         return OperationResultCode.Success
     }
 
-    fun shutdown(): OperationResultCode {
-        running = false
-        scope.cancel()
-        return OperationResultCode.Success
-    }
+    fun shutdown(): OperationResultCode =
+        shutdownState.ifActive(OperationResultCode.Success) {
+            shutdownState.shutdown()
+            scope.cancel()
+            OperationResultCode.Success
+        }
 
     private suspend fun flushInternal() {
         while (queue.isNotEmpty()) {
