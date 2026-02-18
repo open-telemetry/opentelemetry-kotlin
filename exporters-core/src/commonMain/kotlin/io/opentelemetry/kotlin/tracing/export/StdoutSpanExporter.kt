@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -14,15 +15,22 @@ internal class StdoutSpanExporter(
     private val logger: (String) -> Unit = ::platformLog
 ) : SpanExporter {
 
-    override suspend fun export(telemetry: List<SpanData>): OperationResultCode {
-        telemetry.forEach { span ->
-            logger(formatSpan(span))
+    private val shutdownState = MutableShutdownState()
+
+    override suspend fun export(telemetry: List<SpanData>): OperationResultCode =
+        shutdownState.ifActive {
+            telemetry.forEach { span ->
+                logger(formatSpan(span))
+            }
+            OperationResultCode.Success
         }
-        return OperationResultCode.Success
-    }
 
     override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
-    override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
+
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownState.shutdown {
+            OperationResultCode.Success
+        }
 
     /**
      * Formats a [SpanData] into a human-readable string representation.
