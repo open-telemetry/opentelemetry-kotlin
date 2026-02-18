@@ -6,6 +6,12 @@ public abstract interface class io/opentelemetry/kotlin/OpenTelemetrySdk : io/op
 	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
 }
 
+public final class io/opentelemetry/kotlin/export/MutableShutdownState : io/opentelemetry/kotlin/export/ShutdownState {
+	public fun <init> ()V
+	public fun isShutdown ()Z
+	public final fun shutdown ()V
+}
+
 public abstract class io/opentelemetry/kotlin/export/OperationResultCode {
 }
 
@@ -15,6 +21,15 @@ public final class io/opentelemetry/kotlin/export/OperationResultCode$Failure : 
 
 public final class io/opentelemetry/kotlin/export/OperationResultCode$Success : io/opentelemetry/kotlin/export/OperationResultCode {
 	public static final field INSTANCE Lio/opentelemetry/kotlin/export/OperationResultCode$Success;
+}
+
+public abstract class io/opentelemetry/kotlin/export/ShutdownState {
+	public fun <init> ()V
+	public final fun execute (Lkotlin/jvm/functions/Function0;)V
+	public final fun ifActive (Lio/opentelemetry/kotlin/export/OperationResultCode;Lkotlin/jvm/functions/Function0;)Lio/opentelemetry/kotlin/export/OperationResultCode;
+	public static synthetic fun ifActive$default (Lio/opentelemetry/kotlin/export/ShutdownState;Lio/opentelemetry/kotlin/export/OperationResultCode;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lio/opentelemetry/kotlin/export/OperationResultCode;
+	public final fun ifActiveOrElse (Ljava/lang/Object;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public abstract fun isShutdown ()Z
 }
 
 public abstract interface class io/opentelemetry/kotlin/export/TelemetryCloseable {
