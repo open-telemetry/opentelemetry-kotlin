@@ -12,7 +12,6 @@ import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryFileSystemImpl
 import io.opentelemetry.kotlin.export.getFileSystem
 import io.opentelemetry.kotlin.export.getTelemetryStorageDirectory
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
@@ -36,8 +35,6 @@ internal fun createPersistingLogRecordProcessor(
         getTelemetryStorageDirectory("logs"),
     ),
     clock: Clock,
-    serializer: (List<ReadableLogRecord>) -> ByteArray,
-    deserializer: (ByteArray) -> List<ReadableLogRecord>,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
@@ -50,8 +47,8 @@ internal fun createPersistingLogRecordProcessor(
         exporters = exporters,
         fileSystem = fileSystem,
         clock = clock,
-        serializer = serializer,
-        deserializer = deserializer,
+        serializer = { it.toProtobufByteArray() },
+        deserializer = { it.toReadableLogRecordList() },
         config = PersistedTelemetryConfig(),
         maxQueueSize = maxQueueSize,
         scheduleDelayMs = scheduleDelayMs,
