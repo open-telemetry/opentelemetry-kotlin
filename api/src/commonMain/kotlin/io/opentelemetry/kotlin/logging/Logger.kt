@@ -32,18 +32,32 @@ public interface Logger {
         eventName: String? = null,
     ): Boolean
 
-    /**
-     * Emits a log record with the given optional parameters:
-     *
-     * - [body] - the body of the log message
-     * - [timestamp] - the timestamp at which the event occurred
-     * - [observedTimestamp] - the timestamp at which the event was entered into the OpenTelemetry API
-     * - [context] - the context in which the log was emitted
-     * - [severityNumber] - the severity of the log
-     * - [severityText] - a string representation of the severity at the point it was captured
-     * - [attributes] - additional attributes to associate with the log
-     */
+    @Deprecated(
+        "Deprecated",
+        ReplaceWith(
+            expression = "emit(body, eventName, timestamp, observedTimestamp, context, severityNumber, severityText, attributes)",
+            imports = ["io.opentelemetry.kotlin.logging.model.SeverityNumber"]
+        )
+    )
     public fun log(
+        body: String? = null,
+        timestamp: Long? = null,
+        observedTimestamp: Long? = null,
+        context: Context? = null,
+        severityNumber: SeverityNumber? = null,
+        severityText: String? = null,
+        attributes: (MutableAttributeContainer.() -> Unit)? = null,
+    )
+
+    @Deprecated(
+        "Deprecated",
+        ReplaceWith(
+            expression = "emit(body, eventName, timestamp, observedTimestamp, context, severityNumber, severityText, attributes)",
+            imports = ["io.opentelemetry.kotlin.logging.model.SeverityNumber"]
+        )
+    )
+    public fun logEvent(
+        eventName: String,
         body: String? = null,
         timestamp: Long? = null,
         observedTimestamp: Long? = null,
@@ -57,6 +71,7 @@ public interface Logger {
      * Emits an event with a name and the given optional parameters:
      *
      * - [body] - the body of the log message
+     * - [eventName] - the name of the event, or null if none is set
      * - [timestamp] - the timestamp at which the event occurred
      * - [observedTimestamp] - the timestamp at which the event was entered into the OpenTelemetry API
      * - [context] - the context in which the log was emitted
@@ -64,9 +79,9 @@ public interface Logger {
      * - [severityText] - a string representation of the severity at the point it was captured
      * - [attributes] - additional attributes to associate with the log
      */
-    public fun logEvent(
-        eventName: String,
+    public fun emit(
         body: String? = null,
+        eventName: String? = null,
         timestamp: Long? = null,
         observedTimestamp: Long? = null,
         context: Context? = null,

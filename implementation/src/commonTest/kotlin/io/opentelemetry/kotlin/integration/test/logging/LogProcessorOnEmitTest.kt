@@ -29,18 +29,19 @@ internal class LogProcessorOnEmitTest {
         prepareConfig()
         val ctx = prepareContext()
 
-        harness.logger.logEvent(
-            eventName = "my_event",
+        harness.logger.emit(
             body = "custom_log",
+            eventName = "my_event",
             timestamp = 500,
             observedTimestamp = 600,
+            context = ctx,
             severityNumber = SeverityNumber.WARN2,
             severityText = "warn2",
-            context = ctx,
-        ) {
-            setStringAttribute("foo", "bar")
-            setBooleanAttribute("experiment_enabled", true)
-        }
+            attributes = {
+                setStringAttribute("foo", "bar")
+                setBooleanAttribute("experiment_enabled", true)
+            }
+        )
         harness.assertLogRecords(1, "log_emit_override.json")
     }
 

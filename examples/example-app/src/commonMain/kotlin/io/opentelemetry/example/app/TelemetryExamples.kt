@@ -118,7 +118,7 @@ private fun demonstrateSpanNesting(tracer: Tracer) {
  * Emits a basic log.
  */
 private fun demonstrateBasicLogging(logger: Logger) {
-    logger.log("Application started successfully")
+    logger.emit("Application started successfully")
 }
 
 /**
@@ -126,33 +126,33 @@ private fun demonstrateBasicLogging(logger: Logger) {
  */
 private fun demonstrateComplexLogging(logger: Logger) {
     // Info log
-    logger.log(
+    logger.emit(
         body = "User authentication successful",
         severityNumber = SeverityNumber.INFO,
-        severityText = "INFO"
-    ) {
-        setStringAttribute(UserAttributes.USER_ID, "user-123")
-        setStringAttribute("auth.method", "oauth2")
-    }
+        severityText = "INFO",
+        attributes = {
+            setStringAttribute(UserAttributes.USER_ID, "user-123")
+            setStringAttribute("auth.method", "oauth2")
+        })
 
     // Warning log
-    logger.log(
+    logger.emit(
         body = "Request rate limit approaching threshold",
         severityNumber = SeverityNumber.WARN,
-        severityText = "WARN"
-    ) {
-        setStringAttribute("component", "rate-limiter")
-        setDoubleAttribute("usage_percentage", 95.0)
-    }
+        severityText = "WARN",
+        attributes = {
+            setStringAttribute("component", "rate-limiter")
+            setDoubleAttribute("usage_percentage", 95.0)
+        })
 
     // Error log
-    logger.log(
+    logger.emit(
         body = "Failed to connect to database",
         severityNumber = SeverityNumber.ERROR,
-        severityText = "ERROR"
-    ) {
-        setStringAttribute(ErrorAttributes.ERROR_TYPE, "DatabaseConnectionError")
-        setStringAttribute(ErrorAttributes.ERROR_MESSAGE, "Connection timeout after 30s")
-        setStringAttribute("db.host", "db.example.com")
-    }
+        severityText = "ERROR",
+        attributes = {
+            setStringAttribute(ErrorAttributes.ERROR_TYPE, "DatabaseConnectionError")
+            setStringAttribute(ErrorAttributes.ERROR_MESSAGE, "Connection timeout after 30s")
+            setStringAttribute("db.host", "db.example.com")
+        })
 }

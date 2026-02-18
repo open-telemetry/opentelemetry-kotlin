@@ -119,24 +119,31 @@ fun LogScreen(otel: OpenTelemetry) {
 }
 
 private fun emitLog(otel: OpenTelemetry, form: LogFormState) {
-    otel.loggerProvider.getLogger(AppConfig.APP_NAME).log(
+    otel.loggerProvider.getLogger(AppConfig.APP_NAME).emit(
         body = form.body.ifBlank { null },
         timestamp = form.timestamp.toLongOrNull(),
         observedTimestamp = form.observedTimestamp.toLongOrNull(),
         severityNumber = parseSeverityNumber(form.severityNumber),
         severityText = form.severityText.ifBlank { null },
-    ) {
-        form.attributes.forEach { attr ->
-            if (attr.key.isNotBlank()) {
-                when (attr.type) {
-                    AttributeType.STRING -> setStringAttribute(attr.key, attr.value)
-                    AttributeType.LONG -> attr.value.toLongOrNull()?.let { setLongAttribute(attr.key, it) }
-                    AttributeType.DOUBLE -> attr.value.toDoubleOrNull()?.let { setDoubleAttribute(attr.key, it) }
-                    AttributeType.BOOLEAN -> setBooleanAttribute(attr.key, attr.value.toBoolean())
+        attributes = {
+            form.attributes.forEach { attr ->
+                if (attr.key.isNotBlank()) {
+                    when (attr.type) {
+                        AttributeType.STRING -> setStringAttribute(attr.key, attr.value)
+                        AttributeType.LONG -> attr.value.toLongOrNull()
+                            ?.let { setLongAttribute(attr.key, it) }
+
+                        AttributeType.DOUBLE -> attr.value.toDoubleOrNull()
+                            ?.let { setDoubleAttribute(attr.key, it) }
+
+                        AttributeType.BOOLEAN -> setBooleanAttribute(
+                            attr.key,
+                            attr.value.toBoolean()
+                        )
+                    }
                 }
             }
-        }
-    }
+        })
 }
 
 private fun parseSeverityNumber(value: String): SeverityNumber? =

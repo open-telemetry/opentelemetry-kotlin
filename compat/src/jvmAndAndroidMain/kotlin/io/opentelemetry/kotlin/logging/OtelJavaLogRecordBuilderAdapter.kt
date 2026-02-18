@@ -75,16 +75,15 @@ internal class OtelJavaLogRecordBuilderAdapter(private val impl: Logger) :
     }
 
     override fun emit() {
-        impl.log(
+        impl.emit(
             body = body,
             timestamp = timestamp,
             observedTimestamp = observedTimestamp,
             context = context?.toOtelKotlinContext(),
             severityNumber = severity?.toOtelKotlinSeverityNumber(),
             severityText = severityText,
-        ) {
-            attrs.forEach { setStringAttribute(it.key, it.value) }
-        }
+            attributes = { attrs.forEach { setStringAttribute(it.key, it.value) } }
+        )
     }
 
     private fun Instant.convertToNanos(): Long? {

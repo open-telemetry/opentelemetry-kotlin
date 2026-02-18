@@ -108,12 +108,14 @@ public final class io/opentelemetry/kotlin/factory/TracingIdFactoryKt {
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/Logger {
+	public abstract fun emit (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun enabled (Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;)Z
 	public abstract fun log (Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun logEvent (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class io/opentelemetry/kotlin/logging/Logger$DefaultImpls {
+	public static synthetic fun emit$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun enabled$default (Lio/opentelemetry/kotlin/logging/Logger;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;ILjava/lang/Object;)Z
 	public static synthetic fun log$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun logEvent$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V

@@ -51,7 +51,7 @@ internal class LogContextTest {
 
     @Test
     fun testDefaultContext() {
-        logger.log()
+        logger.emit()
         val log = processor.logs.single()
         val root = sdkFactory.spanFactory.fromContext(sdkFactory.contextFactory.root()).spanContext
         assertSame(root, log.spanContext)
@@ -61,7 +61,9 @@ internal class LogContextTest {
     fun testOverrideContext() {
         val span = tracer.createSpan("span")
         val ctx = sdkFactory.contextFactory.storeSpan(sdkFactory.contextFactory.root(), span)
-        logger.log(context = ctx)
+        logger.emit(
+            context = ctx,
+        )
 
         val log = processor.logs.single()
         assertSame(span.spanContext, log.spanContext)
@@ -72,10 +74,10 @@ internal class LogContextTest {
         val span = tracer.createSpan("span")
         val ctx = sdkFactory.contextFactory.storeSpan(sdkFactory.contextFactory.root(), span)
         val scope = ctx.attach()
-        logger.log()
+        logger.emit()
 
         scope.detach()
-        logger.log()
+        logger.emit()
 
         assertEquals(2, processor.logs.size)
         assertSame(span.spanContext, processor.logs[0].spanContext)

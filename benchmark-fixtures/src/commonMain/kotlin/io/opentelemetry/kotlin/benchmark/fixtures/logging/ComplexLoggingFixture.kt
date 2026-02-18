@@ -14,15 +14,13 @@ class ComplexLoggingFixture(
     private val logger: Logger = otel.loggerProvider.getLogger("logger")
 
     override fun execute() {
-        logger.log(
-            "Hello world!",
-            500,
-            1000,
-            otel.contextFactory.root(),
-            SeverityNumber.DEBUG3,
-            "debug3"
-        ) {
-            setStringAttribute("key", "value")
-        }
+        logger.emit(
+            body = "Hello world!",
+            timestamp = 500,
+            observedTimestamp = 1000,
+            context = otel.contextFactory.root(),
+            severityNumber = SeverityNumber.DEBUG3,
+            severityText = "debug3"
+        ) { setStringAttribute("key", "value") }
     }
 }
