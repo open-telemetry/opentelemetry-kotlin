@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
@@ -65,8 +66,9 @@ internal class LogContextTest {
             spanFactory = spanFactory,
             scope = key,
             resource = FakeResource(),
+            spanLimitConfig = fakeSpanLimitsConfig,
             idGenerator = FakeIdGenerator(),
-            spanLimitConfig = fakeSpanLimitsConfig
+            shutdownState = MutableShutdownState(),
         )
     }
 

@@ -1,8 +1,11 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.export.DelegatingTelemetryCloseable
+import io.opentelemetry.kotlin.export.MutableShutdownState
+import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
@@ -21,9 +24,12 @@ internal class TracerProviderImpl(
     traceFlagsFactory: TraceFlagsFactory,
     traceStateFactory: TraceStateFactory,
     spanFactory: SpanFactory,
-    idGenerator: IdGenerator,
+    private val idGenerator: IdGenerator,
+) : TracerProvider, TelemetryCloseable {
+
+    private val shutdownState: MutableShutdownState = MutableShutdownState()
     private val closeable: DelegatingTelemetryCloseable = DelegatingTelemetryCloseable()
-) : TracerProvider, TelemetryCloseable by closeable {
+    private val noopTracer = NoopOpenTelemetry.tracerProvider.getTracer("")
 
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
         val processor = tracingConfig.processors.firstOrNull()
@@ -40,6 +46,7 @@ internal class TracerProviderImpl(
             resource = tracingConfig.resource,
             spanLimitConfig = tracingConfig.spanLimits,
             idGenerator = idGenerator,
+            shutdownState = shutdownState,
         )
     }
 
@@ -48,13 +55,21 @@ internal class TracerProviderImpl(
         version: String?,
         schemaUrl: String?,
         attributes: (MutableAttributeContainer.() -> Unit)?
-    ): Tracer {
-        val key = apiProvider.createInstrumentationScopeInfo(
-            name = name,
-            version = version,
-            schemaUrl = schemaUrl,
-            attributes = attributes
-        )
-        return apiProvider.getOrCreate(key)
-    }
+    ): Tracer =
+        shutdownState.ifActiveOrElse(noopTracer) {
+            val key = apiProvider.createInstrumentationScopeInfo(
+                name = name,
+                version = version,
+                schemaUrl = schemaUrl,
+                attributes = attributes
+            )
+            apiProvider.getOrCreate(key)
+        }
+
+    override suspend fun forceFlush(): OperationResultCode = closeable.forceFlush()
+
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownState.shutdown {
+            closeable.shutdown()
+        }
 }
