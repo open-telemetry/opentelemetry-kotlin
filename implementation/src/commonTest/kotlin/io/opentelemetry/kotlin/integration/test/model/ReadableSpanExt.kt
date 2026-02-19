@@ -15,6 +15,7 @@ import io.opentelemetry.kotlin.tracing.data.LinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import io.opentelemetry.kotlin.tracing.model.SpanContext
+import io.opentelemetry.kotlin.tracing.model.hex
 
 @OptIn(ExperimentalApi::class)
 internal fun ReadableSpan.toSerializable(): SerializableSpanData =

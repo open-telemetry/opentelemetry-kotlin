@@ -276,7 +276,6 @@ public final class io/opentelemetry/kotlin/tracing/model/SpanRelationships$Defau
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/TraceFlags {
-	public abstract fun getHex ()Ljava/lang/String;
 	public abstract fun isRandom ()Z
 	public abstract fun isSampled ()Z
 }

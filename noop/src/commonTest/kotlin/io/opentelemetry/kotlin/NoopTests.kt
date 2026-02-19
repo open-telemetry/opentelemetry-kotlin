@@ -47,7 +47,6 @@ internal class NoopTests {
         val traceFlags = context.traceFlags
         assertFalse(traceFlags.isSampled)
         assertFalse(traceFlags.isRandom)
-        assertEquals("00", traceFlags.hex)
 
         // Test trace state default values
         val traceState = context.traceState

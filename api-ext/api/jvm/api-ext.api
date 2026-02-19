@@ -20,3 +20,7 @@ public final class io/opentelemetry/kotlin/tracing/SpanExtKt {
 	public static final fun wrapOperation (Lio/opentelemetry/kotlin/tracing/model/Span;Lkotlin/jvm/functions/Function0;)V
 }
 
+public final class io/opentelemetry/kotlin/tracing/model/TraceFlagsExtKt {
+	public static final fun getHex (Lio/opentelemetry/kotlin/tracing/model/TraceFlags;)Ljava/lang/String;
+}
+

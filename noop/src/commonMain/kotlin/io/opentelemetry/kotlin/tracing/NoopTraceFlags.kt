@@ -7,5 +7,4 @@ import io.opentelemetry.kotlin.tracing.model.TraceFlags
 internal object NoopTraceFlags : TraceFlags {
     override val isSampled: Boolean = false
     override val isRandom: Boolean = false
-    override val hex: String = "00"
 }

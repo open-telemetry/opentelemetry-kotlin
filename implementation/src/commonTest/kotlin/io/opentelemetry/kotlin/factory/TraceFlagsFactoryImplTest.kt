@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -17,7 +16,6 @@ internal class TraceFlagsFactoryImplTest {
 
         assertTrue(flags.isSampled)
         assertFalse(flags.isRandom)
-        assertEquals("01", flags.hex)
     }
 
     @Test
@@ -26,7 +24,6 @@ internal class TraceFlagsFactoryImplTest {
 
         assertTrue(flags.isSampled)
         assertFalse(flags.isRandom)
-        assertEquals("01", flags.hex)
     }
 
     @Test
@@ -35,7 +32,6 @@ internal class TraceFlagsFactoryImplTest {
 
         assertFalse(flags.isSampled)
         assertTrue(flags.isRandom)
-        assertEquals("02", flags.hex)
     }
 
     @Test
@@ -44,7 +40,6 @@ internal class TraceFlagsFactoryImplTest {
 
         assertTrue(flags.isSampled)
         assertTrue(flags.isRandom)
-        assertEquals("03", flags.hex)
     }
 
     @Test
@@ -53,7 +48,6 @@ internal class TraceFlagsFactoryImplTest {
 
         assertFalse(flags.isSampled)
         assertFalse(flags.isRandom)
-        assertEquals("00", flags.hex)
     }
 
     @Test
@@ -61,27 +55,22 @@ internal class TraceFlagsFactoryImplTest {
         val default = factory.fromHex("00")
         assertFalse(default.isSampled)
         assertFalse(default.isRandom)
-        assertEquals("00", default.hex)
 
         val sampled = factory.fromHex("01")
         assertTrue(sampled.isSampled)
         assertFalse(sampled.isRandom)
-        assertEquals("01", sampled.hex)
 
         val random = factory.fromHex("02")
         assertFalse(random.isSampled)
         assertTrue(random.isRandom)
-        assertEquals("02", random.hex)
 
         val both = factory.fromHex("03")
         assertTrue(both.isSampled)
         assertTrue(both.isRandom)
-        assertEquals("03", both.hex)
 
         val anotherBoth = factory.fromHex("2f") // 00101111
         assertTrue(anotherBoth.isSampled)
         assertTrue(anotherBoth.isRandom)
-        assertEquals("03", anotherBoth.hex)
     }
 
     @Test
@@ -89,16 +78,13 @@ internal class TraceFlagsFactoryImplTest {
         val emptyString = factory.fromHex("")
         assertFalse(emptyString.isSampled)
         assertFalse(emptyString.isRandom)
-        assertEquals("00", emptyString.hex)
 
         val shortString = factory.fromHex("1")
         assertFalse(shortString.isSampled)
         assertFalse(shortString.isRandom)
-        assertEquals("00", shortString.hex)
 
         val notHex = factory.fromHex("2g")
         assertFalse(notHex.isSampled)
         assertFalse(notHex.isRandom)
-        assertEquals("00", notHex.hex)
     }
 }
