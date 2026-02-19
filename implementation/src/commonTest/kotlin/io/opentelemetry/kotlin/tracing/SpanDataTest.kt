@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeSdkFactory
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -32,12 +33,13 @@ internal class SpanDataTest {
         fakeResource = FakeResource()
         fakeSpanContext = FakeSpanContext.INVALID
         tracer = TracerImpl(
-            clock,
-            processor,
-            FakeSdkFactory(),
-            key,
-            fakeResource,
-            fakeSpanLimitsConfig
+            clock = clock,
+            processor = processor,
+            sdkFactory = FakeSdkFactory(),
+            scope = key,
+            resource = fakeResource,
+            spanLimitConfig = fakeSpanLimitsConfig,
+            shutdownState = MutableShutdownState(),
         )
     }
 

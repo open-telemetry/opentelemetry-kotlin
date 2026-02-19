@@ -17,6 +17,7 @@ kotlin {
                 implementation(project(":model"))
                 implementation(project(":platform-implementations"))
                 implementation(project(":exporters-core"))
+                implementation(project(":noop"))
                 implementation(libs.kotlinx.coroutines)
             }
         }
