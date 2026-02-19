@@ -60,7 +60,7 @@ class OpenTelemetrySmokeTest {
 
         val logBody = "test-log-message"
         val logger = otel.loggerProvider.getLogger("test-logger")
-        logger.log(body = logBody)
+        logger.emit(body = logBody)
 
         // assert span received
         val receivedSpan = server.awaitSpan { it.name == spanName }

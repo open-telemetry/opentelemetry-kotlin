@@ -13,6 +13,6 @@ class SimpleLoggingFixture(
     private val logger: Logger = otel.loggerProvider.getLogger("logger")
 
     override fun execute() {
-        logger.log("Hello world!")
+        logger.emit("Hello world!")
     }
 }

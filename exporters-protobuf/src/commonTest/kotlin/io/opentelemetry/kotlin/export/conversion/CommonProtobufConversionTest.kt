@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeTraceFlags
 import io.opentelemetry.proto.common.v1.InstrumentationScope
-import kotlin.collections.get
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -123,7 +122,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testTraceFlagsConversion() {
-        val flags = FakeTraceFlags(isSampled = true, isRandom = false, hex = "01")
+        val flags = FakeTraceFlags(isSampled = true, isRandom = false)
         assertEquals(1, flags.toFlagsInt())
     }
 

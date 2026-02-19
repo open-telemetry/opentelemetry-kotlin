@@ -21,7 +21,7 @@ class ExportLogsServiceRequestTest {
         spanContext = FakeSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
             spanIdBytes = "1234567890123456".hexToByteArray(),
-            traceFlags = FakeTraceFlags(isSampled = true, hex = "01"),
+            traceFlags = FakeTraceFlags(isSampled = true),
             traceState = FakeTraceState(emptyMap())
         )
     )
@@ -118,7 +118,6 @@ class ExportLogsServiceRequestTest {
         assertEquals(expectedContext.spanId, actualContext.spanId)
         assertEquals(expectedContext.traceFlags.isSampled, actualContext.traceFlags.isSampled)
         assertEquals(expectedContext.traceFlags.isRandom, actualContext.traceFlags.isRandom)
-        assertEquals(expectedContext.traceFlags.hex, actualContext.traceFlags.hex)
         assertEquals(expectedContext.traceState.asMap(), actualContext.traceState.asMap())
     }
 

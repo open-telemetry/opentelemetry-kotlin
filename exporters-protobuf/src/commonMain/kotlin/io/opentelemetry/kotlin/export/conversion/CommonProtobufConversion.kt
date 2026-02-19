@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.TraceFlags
 import io.opentelemetry.kotlin.tracing.model.TraceState
+import io.opentelemetry.kotlin.tracing.model.hex
 import io.opentelemetry.proto.common.v1.InstrumentationScope
 
 @OptIn(ExperimentalApi::class)
@@ -79,7 +80,6 @@ internal class DeserializedSpanContext(
 private class DeserializedTraceFlags(private val value: Int) : TraceFlags {
     override val isSampled: Boolean = (value and 0x01) != 0
     override val isRandom: Boolean = (value and 0x02) != 0
-    override val hex: String = "0${value.toString(16)}"
 }
 
 @OptIn(ExperimentalApi::class)

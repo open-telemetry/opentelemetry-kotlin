@@ -22,6 +22,7 @@ kotlin {
         }
         val commonTest by getting {
             dependencies {
+                implementation(project(":api-ext"))
                 implementation(project(":test-fakes"))
                 implementation(project(":integration-test"))
                 implementation(libs.kotlinx.coroutines.test)

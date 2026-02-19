@@ -14,7 +14,6 @@ internal fun assertSpanContextsMatch(lhs: SpanContext, rhs: SpanContext) {
     // trace flags
     assertEquals(lhs.traceFlags.isSampled, rhs.traceFlags.isSampled)
     assertEquals(lhs.traceFlags.isRandom, rhs.traceFlags.isRandom)
-    assertEquals(lhs.traceFlags.hex, rhs.traceFlags.hex)
 
     // trace flags
     assertEquals(lhs.traceState.asMap(), rhs.traceState.asMap())

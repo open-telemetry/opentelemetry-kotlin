@@ -28,17 +28,18 @@ internal class LogProcessorNaughtyExportTest {
         prepareConfig(processor)
         val ctx = prepareContext()
 
-        harness.logger.log(
+        harness.logger.emit(
             body = "custom_log",
             timestamp = 500,
             observedTimestamp = 600,
+            context = ctx,
             severityNumber = SeverityNumber.WARN2,
             severityText = "warn2",
-            context = ctx,
-        ) {
-            setStringAttribute("foo", "bar")
-            setBooleanAttribute("experiment_enabled", true)
-        }
+            attributes = {
+                setStringAttribute("foo", "bar")
+                setBooleanAttribute("experiment_enabled", true)
+            }
+        )
         harness.assertLogRecords(1, "log_naughty_export.json") {
             processor.overrideAttributes()
         }

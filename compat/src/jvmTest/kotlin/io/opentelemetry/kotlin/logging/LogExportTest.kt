@@ -32,7 +32,7 @@ internal class LogExportTest {
     @Test
     fun `test minimal log export`() = runTest {
         // logging without a body is allowed by the OTel spec, so we assert the MVP log here
-        harness.logger.log()
+        harness.logger.emit(null)
 
         harness.assertLogRecords(
             expectedCount = 1,
@@ -49,15 +49,14 @@ internal class LogExportTest {
         ) {
             setStringAttribute("key1", "value1")
         }
-        logger.log(
+        logger.emit(
             body = "Hello, world!",
             timestamp = 100L,
             observedTimestamp = 50L,
             severityNumber = SeverityNumber.ERROR2,
             severityText = "Error",
-        ) {
-            setStringAttribute("key2", "value2")
-        }
+            attributes = { setStringAttribute("key2", "value2") }
+        )
 
         harness.assertLogRecords(
             expectedCount = 1,
@@ -77,7 +76,7 @@ internal class LogExportTest {
         }
 
         val logger = harness.kotlinApi.loggerProvider.getLogger("test_logger")
-        logger.log(body = "Test log with custom resource")
+        logger.emit(body = "Test log with custom resource")
 
         harness.assertLogRecords(
             expectedCount = 1,
@@ -98,7 +97,10 @@ internal class LogExportTest {
         val testContext = currentContext.set(contextKey, testContextValue)
 
         // Log a message with the created context
-        harness.logger.log(body = "Test log with context", context = testContext)
+        harness.logger.emit(
+            body = "Test log with context",
+            context = testContext
+        )
 
         // Verify context was captured and contains expected value
         val actualValue = contextCapturingProcessor.capturedContext?.get(contextKey)
@@ -111,18 +113,18 @@ internal class LogExportTest {
             attributeCountLimit = 2
             attributeValueLengthLimit = 3
         }
-        harness.logger.log(body = "Test log limits") {
+        harness.logger.emit(body = "Test log limits", attributes = {
             setStringAttribute("key1", "max")
             setStringAttribute("key2", "over_max")
             setStringAttribute("key3", "another")
-        }
+        })
         harness.assertLogRecords(1, "log_limits.json")
     }
 
     @Test
     fun `test log export with custom processor`() = runTest {
         harness.config.logRecordProcessors.add(CustomLogRecordProcessor())
-        harness.logger.log("Test")
+        harness.logger.emit("Test")
 
         harness.assertLogRecords(
             expectedCount = 1,
@@ -133,13 +135,12 @@ internal class LogExportTest {
     @Test
     fun `test event export`() = runTest {
         val logger = harness.kotlinApi.loggerProvider.getLogger("test_logger")
-        logger.logEvent(
-            eventName = "my_event_name",
+        logger.emit(
             body = "Some Event",
-            severityNumber = SeverityNumber.WARN4
-        ) {
-            setStringAttribute("key1", "value1")
-        }
+            eventName = "my_event_name",
+            severityNumber = SeverityNumber.WARN4,
+            attributes = { setStringAttribute("key1", "value1") }
+        )
 
         harness.assertLogRecords(
             expectedCount = 1,

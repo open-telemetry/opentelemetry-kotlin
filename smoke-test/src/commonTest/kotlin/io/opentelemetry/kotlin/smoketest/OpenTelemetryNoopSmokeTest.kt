@@ -35,7 +35,7 @@ class OpenTelemetryNoopSmokeTest {
         span.end()
 
         val logger = otel.loggerProvider.getLogger("test-logger")
-        logger.log(body = "test-log")
+        logger.emit(body = "test-log")
 
         // assert nothing sent after 1s
         delay(1.seconds)
