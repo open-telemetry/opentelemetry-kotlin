@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeSdkFactory
 import io.opentelemetry.kotlin.factory.SdkFactory
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
@@ -29,12 +30,13 @@ internal class LogSimplePropertiesTest {
         processor = FakeLogRecordProcessor()
         sdkFactory = FakeSdkFactory()
         logger = LoggerImpl(
-            clock,
-            processor,
-            sdkFactory,
-            key,
-            FakeResource(),
-            fakeLogLimitsConfig
+            clock = clock,
+            processor = processor,
+            sdkFactory = sdkFactory,
+            key = key,
+            resource = FakeResource(),
+            logLimitConfig = fakeLogLimitsConfig,
+            shutdownState = MutableShutdownState(),
         )
     }
 

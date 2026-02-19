@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.SdkFactory
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
@@ -21,6 +22,7 @@ internal class LoggerImpl(
     private val key: InstrumentationScopeInfo,
     private val resource: Resource,
     private val logLimitConfig: LogLimitConfig,
+    private val shutdownState: ShutdownState,
 ) : Logger {
 
     private val contextFactory = sdkFactory.contextFactory
@@ -32,13 +34,13 @@ internal class LoggerImpl(
         context: Context?,
         severityNumber: SeverityNumber?,
         eventName: String?,
-    ): Boolean {
-        if (processor == null) {
-            return false
+    ): Boolean =
+        if (shutdownState.isShutdown || processor == null) {
+            false
+        } else {
+            val ctx = context ?: contextFactory.implicitContext()
+            processor.enabled(ctx, key, severityNumber, eventName)
         }
-        val ctx = context ?: contextFactory.implicitContext()
-        return processor.enabled(ctx, key, severityNumber, eventName)
-    }
 
     @Deprecated(
         "Deprecated",
@@ -129,28 +131,30 @@ internal class LoggerImpl(
         severityNumber: SeverityNumber?,
         attributes: (MutableAttributeContainer.() -> Unit)?
     ) {
-        val ctx = context ?: contextFactory.implicitContext()
-        val spanContext = when (ctx) {
-            root -> invalidSpanContext
-            else -> spanFactory.fromContext(ctx).spanContext
-        }
+        shutdownState.execute {
+            val ctx = context ?: contextFactory.implicitContext()
+            val spanContext = when (ctx) {
+                root -> invalidSpanContext
+                else -> spanFactory.fromContext(ctx).spanContext
+            }
 
-        val now = clock.now()
-        val log = LogRecordModel(
-            resource = resource,
-            instrumentationScopeInfo = key,
-            timestamp = timestamp ?: now,
-            observedTimestamp = observedTimestamp ?: now,
-            body = body,
-            severityText = severityText,
-            severityNumber = severityNumber ?: SeverityNumber.UNKNOWN,
-            spanContext = spanContext,
-            logLimitConfig = logLimitConfig,
-            eventName = eventName,
-        )
-        if (attributes != null) {
-            attributes(log)
+            val now = clock.now()
+            val log = LogRecordModel(
+                resource = resource,
+                instrumentationScopeInfo = key,
+                timestamp = timestamp ?: now,
+                observedTimestamp = observedTimestamp ?: now,
+                body = body,
+                severityText = severityText,
+                severityNumber = severityNumber ?: SeverityNumber.UNKNOWN,
+                spanContext = spanContext,
+                logLimitConfig = logLimitConfig,
+                eventName = eventName,
+            )
+            if (attributes != null) {
+                attributes(log)
+            }
+            processor?.onEmit(ReadWriteLogRecordImpl(log), ctx)
         }
-        processor?.onEmit(ReadWriteLogRecordImpl(log), ctx)
     }
 }
