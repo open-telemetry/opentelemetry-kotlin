@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanExporter
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.toOperationResultCode
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -12,11 +13,17 @@ internal class SpanExporterAdapter(
     private val impl: OtelJavaSpanExporter
 ) : SpanExporter {
 
-    override suspend fun export(telemetry: List<SpanData>): OperationResultCode {
-        val code = impl.export(telemetry.map(SpanData::toOtelJavaSpanData))
-        return code.toOperationResultCode()
-    }
+    private val shutdownState = MutableShutdownState()
 
-    override suspend fun shutdown(): OperationResultCode = impl.shutdown().toOperationResultCode()
+    override suspend fun export(telemetry: List<SpanData>): OperationResultCode =
+        shutdownState.ifActive {
+            impl.export(telemetry.map(SpanData::toOtelJavaSpanData)).toOperationResultCode()
+        }
+
     override suspend fun forceFlush(): OperationResultCode = impl.flush().toOperationResultCode()
+
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownState.shutdown {
+            impl.shutdown().toOperationResultCode()
+        }
 }
