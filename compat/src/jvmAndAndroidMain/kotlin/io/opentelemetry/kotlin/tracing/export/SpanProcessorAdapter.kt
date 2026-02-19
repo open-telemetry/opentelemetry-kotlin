@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanProcessor
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.toOperationResultCode
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
@@ -16,12 +17,16 @@ internal class SpanProcessorAdapter(
     private val impl: OtelJavaSpanProcessor
 ) : SpanProcessor {
 
+    private val shutdownState = MutableShutdownState()
+
     override fun onStart(
         span: ReadWriteSpan,
         parentContext: Context
     ) {
-        if (span is ReadWriteSpanAdapter) {
-            impl.onStart(parentContext.toOtelJavaContext(), span.impl)
+        shutdownState.execute {
+            if (span is ReadWriteSpanAdapter) {
+                impl.onStart(parentContext.toOtelJavaContext(), span.impl)
+            }
         }
     }
 
@@ -30,13 +35,20 @@ internal class SpanProcessorAdapter(
     }
 
     override fun onEnd(span: ReadableSpan) {
-        if (span is ReadableSpanAdapter) {
-            impl.onEnd(span.impl)
+        shutdownState.execute {
+            if (span is ReadableSpanAdapter) {
+                impl.onEnd(span.impl)
+            }
         }
     }
 
     override fun isStartRequired(): Boolean = impl.isStartRequired
     override fun isEndRequired(): Boolean = impl.isEndRequired
-    override suspend fun shutdown(): OperationResultCode = impl.shutdown().toOperationResultCode()
     override suspend fun forceFlush(): OperationResultCode = impl.forceFlush().toOperationResultCode()
+
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownState.ifActive(OperationResultCode.Success) {
+            shutdownState.shutdown()
+            impl.shutdown().toOperationResultCode()
+        }
 }
