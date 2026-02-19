@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>SpreadOperator:OtelKotlinTestRule.kt$OtelKotlinTestRule$( InMemoryLogRecordProcessor( logRecordExporter, scope, ), *config.logRecordProcessors.toTypedArray() )</ID>
+    <ID>SpreadOperator:OtelKotlinTestRule.kt$OtelKotlinTestRule$( InMemorySpanProcessor( spanExporter, scope, ), *config.spanProcessors.toTypedArray() )</ID>
+  </CurrentIssues>
+</SmellBaseline>

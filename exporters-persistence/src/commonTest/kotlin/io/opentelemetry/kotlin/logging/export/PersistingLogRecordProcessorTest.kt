@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.logging.export
 
+import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
@@ -8,6 +9,7 @@ import io.opentelemetry.kotlin.export.FakeTelemetryFileSystem
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
+import io.opentelemetry.kotlin.init.LogExportConfigDsl
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -309,7 +311,7 @@ internal class PersistingLogRecordProcessorTest {
         scheduleDelayMs: Long = 5000,
     ): LogRecordProcessor {
         val dispatcher = StandardTestDispatcher(testScheduler)
-        return createPersistingLogRecordProcessor(
+        return FakeLogExportConfig().persistingLogRecordProcessor(
             processors = processors,
             exporters = exporters,
             fileSystem = FakeTelemetryFileSystem(),
@@ -319,6 +321,8 @@ internal class PersistingLogRecordProcessorTest {
             dispatcher = dispatcher,
         )
     }
+
+    private class FakeLogExportConfig(override val clock: Clock = FakeClock()) : LogExportConfigDsl
 
     @OptIn(ExperimentalApi::class)
     private class DelayingLogRecordProcessor(

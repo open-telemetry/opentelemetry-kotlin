@@ -8,12 +8,12 @@ import io.opentelemetry.kotlin.init.LoggerProviderConfigDsl
 import io.opentelemetry.kotlin.init.TracerProviderConfigDsl
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.logging.LoggerProvider
-import io.opentelemetry.kotlin.logging.export.createCompositeLogRecordProcessor
+import io.opentelemetry.kotlin.logging.export.compositeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import io.opentelemetry.kotlin.tracing.Tracer
 import io.opentelemetry.kotlin.tracing.TracerProvider
 import io.opentelemetry.kotlin.tracing.data.SpanData
-import io.opentelemetry.kotlin.tracing.export.createCompositeSpanProcessor
+import io.opentelemetry.kotlin.tracing.export.compositeSpanProcessor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -52,13 +52,12 @@ abstract class OtelKotlinTestRule(context: TestCoroutineScheduler) {
     protected val loggerProviderConfig: LoggerProviderConfigDsl.() -> Unit = {
         config.attributes?.let { resource(config.schemaUrl, it) }
         export {
-            createCompositeLogRecordProcessor(
-                listOf(
-                    InMemoryLogRecordProcessor(
-                        logRecordExporter,
-                        scope,
-                    )
-                ) + config.logRecordProcessors
+            compositeLogRecordProcessor(
+                InMemoryLogRecordProcessor(
+                    logRecordExporter,
+                    scope,
+                ),
+                *config.logRecordProcessors.toTypedArray()
             )
         }
         logLimits(config.logLimits)
@@ -70,13 +69,12 @@ abstract class OtelKotlinTestRule(context: TestCoroutineScheduler) {
     protected val tracerProviderConfig: TracerProviderConfigDsl.() -> Unit = {
         config.attributes?.let { resource(config.schemaUrl, it) }
         export {
-            createCompositeSpanProcessor(
-                listOf(
-                    InMemorySpanProcessor(
-                        spanExporter,
-                        scope,
-                    )
-                ) + config.spanProcessors
+            compositeSpanProcessor(
+                InMemorySpanProcessor(
+                    spanExporter,
+                    scope,
+                ),
+                *config.spanProcessors.toTypedArray()
             )
         }
         spanLimits(config.spanLimits)

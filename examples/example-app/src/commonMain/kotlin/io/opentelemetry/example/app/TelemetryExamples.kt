@@ -13,7 +13,6 @@ import io.opentelemetry.kotlin.semconv.UrlAttributes
 import io.opentelemetry.kotlin.semconv.UserAttributes
 import io.opentelemetry.kotlin.tracing.Tracer
 import io.opentelemetry.kotlin.tracing.model.SpanKind
-import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 import kotlinx.coroutines.delay
 
 /**

@@ -15,6 +15,7 @@ internal class InMemoryLogRecordExporterTest {
     private lateinit var exporter: InMemoryLogRecordExporter
 
     @BeforeTest
+    @Suppress("DEPRECATION")
     fun setUp() {
         exporter = createInMemoryLogRecordExporter()
     }

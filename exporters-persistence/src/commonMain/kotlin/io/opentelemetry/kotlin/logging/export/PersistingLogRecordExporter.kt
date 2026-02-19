@@ -12,6 +12,7 @@ internal class PersistingLogRecordExporter(
     private val repository: TelemetryRepository<ReadableLogRecord>,
 ) : LogRecordExporter {
 
+    @Suppress("DEPRECATION")
     private val exporter = createCompositeLogRecordExporter(exporters)
 
     override suspend fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {

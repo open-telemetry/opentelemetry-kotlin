@@ -20,6 +20,7 @@ internal class LoggerProviderImpl(
 
     private val apiProvider by lazy {
         ApiProviderImpl<Logger> { key ->
+            @Suppress("DEPRECATION")
             val processor = when {
                 loggingConfig.processors.isEmpty() -> null
                 else -> createCompositeLogRecordProcessor(

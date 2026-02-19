@@ -3,9 +3,9 @@ package io.opentelemetry.kotlin.smoketest
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
-import io.opentelemetry.kotlin.logging.export.createOtlpHttpLogRecordExporter
+import io.opentelemetry.kotlin.logging.export.otlpHttpLogRecordExporter
 import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
-import io.opentelemetry.kotlin.tracing.export.createOtlpHttpSpanExporter
+import io.opentelemetry.kotlin.tracing.export.otlpHttpSpanExporter
 import io.opentelemetry.kotlin.tracing.export.simpleSpanProcessor
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
@@ -26,7 +26,7 @@ class OpenTelemetryCompatSmokeTest {
             tracerProvider {
                 export {
                     simpleSpanProcessor(
-                        createOtlpHttpSpanExporter(
+                        otlpHttpSpanExporter(
                             server.baseUrl,
                             server.mockEngine
                         )
@@ -36,7 +36,7 @@ class OpenTelemetryCompatSmokeTest {
             loggerProvider {
                 export {
                     simpleLogRecordProcessor(
-                        createOtlpHttpLogRecordExporter(
+                        otlpHttpLogRecordExporter(
                             server.baseUrl,
                             server.mockEngine
                         )

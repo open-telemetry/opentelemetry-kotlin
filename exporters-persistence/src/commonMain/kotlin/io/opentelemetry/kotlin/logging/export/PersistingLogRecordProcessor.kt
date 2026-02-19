@@ -56,6 +56,7 @@ internal class PersistingLogRecordProcessor(
 
     private val exporter = PersistingLogRecordExporter(exporters, repository)
 
+    @Suppress("DEPRECATION")
     private val batchingProcessor = createBatchLogRecordProcessor(
         exporter,
         maxQueueSize,
@@ -64,6 +65,8 @@ internal class PersistingLogRecordProcessor(
         maxExportBatchSize,
         dispatcher,
     )
+
+    @Suppress("DEPRECATION")
     private val processor = createCompositeLogRecordProcessor(processors + batchingProcessor)
     private val telemetryCloseable: TelemetryCloseable = TimeoutTelemetryCloseable(processor)
 

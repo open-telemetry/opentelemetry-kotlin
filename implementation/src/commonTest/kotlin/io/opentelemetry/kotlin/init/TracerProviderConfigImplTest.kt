@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
-import io.opentelemetry.kotlin.tracing.export.createCompositeSpanProcessor
+import io.opentelemetry.kotlin.tracing.export.compositeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.simpleSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.stdoutSpanExporter
 import kotlin.test.Test
@@ -47,7 +47,7 @@ internal class TracerProviderConfigImplTest {
         val schemaUrl = "https://example.com/schema"
 
         val cfg = TracerProviderConfigImpl(clock).apply {
-            export { createCompositeSpanProcessor(listOf(firstProcessor, secondProcessor)) }
+            export { compositeSpanProcessor(firstProcessor, secondProcessor) }
 
             resource(schemaUrl) {
                 setStringAttribute("key", "value")

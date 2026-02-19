@@ -15,6 +15,7 @@ internal class InMemorySpanExporterTest {
     private lateinit var exporter: InMemorySpanExporter
 
     @BeforeTest
+    @Suppress("DEPRECATION")
     fun setUp() {
         exporter = createInMemorySpanExporter()
     }

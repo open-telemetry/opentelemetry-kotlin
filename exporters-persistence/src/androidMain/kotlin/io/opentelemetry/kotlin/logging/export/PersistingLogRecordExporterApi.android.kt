@@ -10,19 +10,22 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.TelemetryFileSystemImpl
 import io.opentelemetry.kotlin.export.getFileSystem
+import io.opentelemetry.kotlin.init.ConfigDsl
+import io.opentelemetry.kotlin.init.LogExportConfigDsl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import okio.Path.Companion.toPath
 
 /**
- * See [createPersistingLogRecordProcessor].
+ * See [persistingLogRecordProcessor].
  */
 @ExperimentalApi
-internal fun createPersistingLogRecordProcessor(
+@ConfigDsl
+internal fun LogExportConfigDsl.persistingLogRecordProcessor(
     context: Context,
     processors: List<LogRecordProcessor>,
     exporters: List<LogRecordExporter>,
-    clock: Clock,
+    clock: Clock = this.clock,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
@@ -37,11 +40,11 @@ internal fun createPersistingLogRecordProcessor(
         getFileSystem(),
         storagePath
     )
-    return createPersistingLogRecordProcessor(
+    return persistingLogRecordProcessor(
         processors = processors,
         exporters = exporters,
         fileSystem = fileSystem,
-        clock = clock,
+        clock = this.clock,
         maxQueueSize = maxQueueSize,
         scheduleDelayMs = scheduleDelayMs,
         exportTimeoutMs = exportTimeoutMs,

@@ -7,6 +7,10 @@ public final class io/opentelemetry/kotlin/export/BatchTelemetryDefaults {
 }
 
 public final class io/opentelemetry/kotlin/logging/export/CoreLogRecordExporterApiKt {
+	public static final fun batchLogRecordProcessor (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;IJJILkotlinx/coroutines/CoroutineDispatcher;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
+	public static synthetic fun batchLogRecordProcessor$default (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;IJJILkotlinx/coroutines/CoroutineDispatcher;ILjava/lang/Object;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
+	public static final fun compositeLogRecordExporter (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;[Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
+	public static final fun compositeLogRecordProcessor (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;[Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
 	public static final fun createBatchLogRecordProcessor (Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;IJJILkotlinx/coroutines/CoroutineDispatcher;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
 	public static synthetic fun createBatchLogRecordProcessor$default (Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;IJJILkotlinx/coroutines/CoroutineDispatcher;ILjava/lang/Object;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
 	public static final fun createCompositeLogRecordExporter (Ljava/util/List;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
@@ -20,6 +24,10 @@ public final class io/opentelemetry/kotlin/logging/export/CoreLogRecordExporterA
 }
 
 public final class io/opentelemetry/kotlin/tracing/export/CoreSpanExporterApiKt {
+	public static final fun batchSpanProcessor (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJI)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
+	public static synthetic fun batchSpanProcessor$default (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJIILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
+	public static final fun compositeSpanExporter (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;[Lio/opentelemetry/kotlin/tracing/export/SpanExporter;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
+	public static final fun compositeSpanProcessor (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;[Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
 	public static final fun createBatchSpanProcessor (Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJI)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
 	public static synthetic fun createBatchSpanProcessor$default (Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJIILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
 	public static final fun createCompositeSpanExporter (Ljava/util/List;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;

@@ -14,6 +14,15 @@ import kotlinx.coroutines.SupervisorJob
  * Creates a composite span processor that delegates to a list of processors.
  */
 @ExperimentalApi
+@ConfigDsl
+public fun TraceExportConfigDsl.compositeSpanProcessor(vararg processors: SpanProcessor): SpanProcessor {
+    require(processors.isNotEmpty()) { "At least one processor must be provided" }
+    @Suppress("DEPRECATION")
+    return createCompositeSpanProcessor(processors.toList())
+}
+
+@ExperimentalApi
+@Deprecated("Deprecated.", ReplaceWith("compositeSpanProcessor(processors)"))
 public fun createCompositeSpanProcessor(processors: List<SpanProcessor>): SpanProcessor {
     return CompositeSpanProcessor(
         processors,
@@ -43,6 +52,15 @@ public fun createSimpleSpanProcessor(exporter: SpanExporter): SpanProcessor {
  * Creates a composite span exporter that delegates to a list of exporters.
  */
 @ExperimentalApi
+@ConfigDsl
+public fun TraceExportConfigDsl.compositeSpanExporter(vararg exporters: SpanExporter): SpanExporter {
+    require(exporters.isNotEmpty()) { "At least one exporter must be provided" }
+    @Suppress("DEPRECATION")
+    return createCompositeSpanExporter(exporters.toList())
+}
+
+@ExperimentalApi
+@Deprecated("Deprecated.", ReplaceWith("compositeSpanExporter(exporters)"))
 public fun createCompositeSpanExporter(exporters: List<SpanExporter>): SpanExporter {
     return CompositeSpanExporter(
         exporters,
@@ -54,7 +72,21 @@ public fun createCompositeSpanExporter(exporters: List<SpanExporter>): SpanExpor
  * Creates a batching processor that sends telemetry in batches.
  * See https://opentelemetry.io/docs/specs/otel/logs/sdk/#batching-processor
  */
-@OptIn(ExperimentalApi::class)
+@ExperimentalApi
+@ConfigDsl
+public fun TraceExportConfigDsl.batchSpanProcessor(
+    exporter: SpanExporter,
+    maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
+    scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
+    exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
+    maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE
+): SpanProcessor {
+    @Suppress("DEPRECATION")
+    return createBatchSpanProcessor(exporter, maxQueueSize, scheduleDelayMs, exportTimeoutMs, maxExportBatchSize)
+}
+
+@ExperimentalApi
+@Deprecated("Deprecated.", ReplaceWith("batchSpanProcessor(exporter, maxQueueSize, scheduleDelayMs, exportTimeoutMs, maxExportBatchSize)"))
 public fun createBatchSpanProcessor(
     exporter: SpanExporter,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,

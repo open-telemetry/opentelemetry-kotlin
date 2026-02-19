@@ -4,6 +4,7 @@ public abstract interface class io/opentelemetry/kotlin/logging/export/InMemoryL
 
 public final class io/opentelemetry/kotlin/logging/export/InMemoryLogRecordExporterApiKt {
 	public static final fun createInMemoryLogRecordExporter ()Lio/opentelemetry/kotlin/logging/export/InMemoryLogRecordExporter;
+	public static final fun inMemoryLogRecordExporter (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;)Lio/opentelemetry/kotlin/logging/export/InMemoryLogRecordExporter;
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/export/InMemorySpanExporter : io/opentelemetry/kotlin/tracing/export/SpanExporter {
@@ -12,5 +13,6 @@ public abstract interface class io/opentelemetry/kotlin/tracing/export/InMemoryS
 
 public final class io/opentelemetry/kotlin/tracing/export/InMemorySpanExporterApiKt {
 	public static final fun createInMemorySpanExporter ()Lio/opentelemetry/kotlin/tracing/export/InMemorySpanExporter;
+	public static final fun inMemorySpanExporter (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;)Lio/opentelemetry/kotlin/tracing/export/InMemorySpanExporter;
 }
 

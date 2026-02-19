@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
-import io.opentelemetry.kotlin.logging.export.createCompositeLogRecordProcessor
+import io.opentelemetry.kotlin.logging.export.compositeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.stdoutLogRecordExporter
 import kotlin.test.Test
@@ -41,7 +41,7 @@ internal class LoggerProviderConfigImplTest {
         val schemaUrl = "https://example.com/schema"
 
         val cfg = LoggerProviderConfigImpl(clock).apply {
-            export { createCompositeLogRecordProcessor(listOf(firstProcessor, secondProcessor)) }
+            export { compositeLogRecordProcessor(firstProcessor, secondProcessor) }
 
             resource(schemaUrl) {
                 setStringAttribute("key", "value")

@@ -16,6 +16,15 @@ import kotlinx.coroutines.SupervisorJob
  * Creates a composite log record processor that delegates to a list of processors.
  */
 @ExperimentalApi
+@ConfigDsl
+public fun LogExportConfigDsl.compositeLogRecordProcessor(vararg processors: LogRecordProcessor): LogRecordProcessor {
+    require(processors.isNotEmpty()) { "At least one processor must be provided" }
+    @Suppress("DEPRECATION")
+    return createCompositeLogRecordProcessor(processors.toList())
+}
+
+@ExperimentalApi
+@Deprecated("Deprecated.", ReplaceWith("compositeLogRecordProcessor(processors)"))
 public fun createCompositeLogRecordProcessor(processors: List<LogRecordProcessor>): LogRecordProcessor {
     return CompositeLogRecordProcessor(
         processors,
@@ -45,6 +54,15 @@ public fun createSimpleLogRecordProcessor(exporter: LogRecordExporter): LogRecor
  * Creates a composite log record exporter that delegates to a list of exporters.
  */
 @ExperimentalApi
+@ConfigDsl
+public fun LogExportConfigDsl.compositeLogRecordExporter(vararg exporters: LogRecordExporter): LogRecordExporter {
+    require(exporters.isNotEmpty()) { "At least one exporter must be provided" }
+    @Suppress("DEPRECATION")
+    return createCompositeLogRecordExporter(exporters.toList())
+}
+
+@ExperimentalApi
+@Deprecated("Deprecated.", ReplaceWith("compositeLogRecordExporter(exporters)"))
 public fun createCompositeLogRecordExporter(exporters: List<LogRecordExporter>): LogRecordExporter {
     return CompositeLogRecordExporter(
         exporters,
@@ -57,6 +75,24 @@ public fun createCompositeLogRecordExporter(exporters: List<LogRecordExporter>):
  * See https://opentelemetry.io/docs/specs/otel/logs/sdk/#batching-processor
  */
 @ExperimentalApi
+@ConfigDsl
+public fun LogExportConfigDsl.batchLogRecordProcessor(
+    exporter: LogRecordExporter,
+    maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
+    scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
+    exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
+    maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+): LogRecordProcessor {
+    @Suppress("DEPRECATION")
+    return createBatchLogRecordProcessor(exporter, maxQueueSize, scheduleDelayMs, exportTimeoutMs, maxExportBatchSize, dispatcher)
+}
+
+@ExperimentalApi
+@Deprecated(
+    "Deprecated.",
+    ReplaceWith("batchLogRecordProcessor(exporter, maxQueueSize, scheduleDelayMs, exportTimeoutMs, maxExportBatchSize, dispatcher)")
+)
 public fun createBatchLogRecordProcessor(
     exporter: LogRecordExporter,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,

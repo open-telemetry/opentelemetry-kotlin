@@ -19,6 +19,7 @@ internal class TracerProviderImpl(
 ) : TracerProvider, TelemetryCloseable by closeable {
 
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
+        @Suppress("DEPRECATION")
         val processor = when {
             tracingConfig.processors.isEmpty() -> null
             else -> createCompositeSpanProcessor(

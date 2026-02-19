@@ -12,6 +12,8 @@ import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryFileSystemImpl
 import io.opentelemetry.kotlin.export.getFileSystem
 import io.opentelemetry.kotlin.export.getTelemetryStorageDirectory
+import io.opentelemetry.kotlin.init.ConfigDsl
+import io.opentelemetry.kotlin.init.LogExportConfigDsl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
@@ -27,14 +29,15 @@ import kotlinx.coroutines.Dispatchers
  * This processor is not supported on JS platforms currently.
  */
 @ExperimentalApi
-internal fun createPersistingLogRecordProcessor(
+@ConfigDsl
+internal fun LogExportConfigDsl.persistingLogRecordProcessor(
     processors: List<LogRecordProcessor>,
     exporters: List<LogRecordExporter>,
     fileSystem: TelemetryFileSystem = TelemetryFileSystemImpl(
         getFileSystem(),
         getTelemetryStorageDirectory("logs"),
     ),
-    clock: Clock,
+    clock: Clock = this.clock,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
