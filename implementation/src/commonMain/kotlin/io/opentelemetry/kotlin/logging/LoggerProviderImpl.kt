@@ -1,8 +1,11 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.export.DelegatingTelemetryCloseable
+import io.opentelemetry.kotlin.export.MutableShutdownState
+import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactory
@@ -17,7 +20,10 @@ internal class LoggerProviderImpl(
     spanContextFactory: SpanContextFactory,
     spanFactory: SpanFactory,
     private val closeable: DelegatingTelemetryCloseable = DelegatingTelemetryCloseable()
-) : LoggerProvider, TelemetryCloseable by closeable {
+) : LoggerProvider, TelemetryCloseable {
+
+    private val shutdownState: MutableShutdownState = MutableShutdownState()
+    private val noopLogger = NoopOpenTelemetry.loggerProvider.getLogger("")
 
     private val apiProvider by lazy {
         ApiProviderImpl<Logger> { key ->
@@ -31,7 +37,8 @@ internal class LoggerProviderImpl(
                 spanFactory,
                 key,
                 loggingConfig.resource,
-                loggingConfig.logLimits
+                loggingConfig.logLimits,
+                shutdownState,
             )
         }
     }
@@ -41,8 +48,16 @@ internal class LoggerProviderImpl(
         version: String?,
         schemaUrl: String?,
         attributes: (MutableAttributeContainer.() -> Unit)?
-    ): Logger {
-        val key = apiProvider.createInstrumentationScopeInfo(name, version, schemaUrl, attributes)
-        return apiProvider.getOrCreate(key)
-    }
+    ): Logger =
+        shutdownState.ifActiveOrElse(noopLogger) {
+            val key = apiProvider.createInstrumentationScopeInfo(name, version, schemaUrl, attributes)
+            apiProvider.getOrCreate(key)
+        }
+
+    override suspend fun forceFlush(): OperationResultCode = closeable.forceFlush()
+
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownState.shutdown {
+            closeable.shutdown()
+        }
 }

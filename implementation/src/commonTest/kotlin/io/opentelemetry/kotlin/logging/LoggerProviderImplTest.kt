@@ -12,8 +12,10 @@ import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.ResourceImpl
 import kotlinx.coroutines.test.runTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
@@ -29,16 +31,20 @@ internal class LoggerProviderImplTest {
     private val contextFactory = FakeContextFactory()
     private val spanContextFactory = FakeSpanContextFactory()
     private val spanFactory = FakeSpanFactory()
+    private lateinit var impl: LoggerProviderImpl
+
+    @BeforeTest
+    fun setup() {
+        impl = LoggerProviderImpl(clock, loggingConfig, contextFactory, spanContextFactory, spanFactory)
+    }
 
     @Test
     fun testMinimalLoggerProvider() {
-        val impl = LoggerProviderImpl(clock, loggingConfig, contextFactory, spanContextFactory, spanFactory)
         assertNotNull(impl.getLogger(name = ""))
     }
 
     @Test
     fun testFullLoggerProvider() {
-        val impl = LoggerProviderImpl(clock, loggingConfig, contextFactory, spanContextFactory, spanFactory)
         val first = impl.getLogger(
             name = "name",
             version = "0.1.0",
@@ -51,7 +57,6 @@ internal class LoggerProviderImplTest {
 
     @Test
     fun testDupeLoggerProviderName() {
-        val impl = LoggerProviderImpl(clock, loggingConfig, contextFactory, spanContextFactory, spanFactory)
         val first = impl.getLogger(name = "name")
         val second = impl.getLogger(name = "name")
         val third = impl.getLogger(name = "other")
@@ -61,7 +66,6 @@ internal class LoggerProviderImplTest {
 
     @Test
     fun testDupeLoggerProviderVersion() {
-        val impl = LoggerProviderImpl(clock, loggingConfig, contextFactory, spanContextFactory, spanFactory)
         val first = impl.getLogger(name = "name", version = "0.1.0")
         val second = impl.getLogger(name = "name", version = "0.1.0")
         val third = impl.getLogger(name = "name", version = "0.2.0")
@@ -71,7 +75,6 @@ internal class LoggerProviderImplTest {
 
     @Test
     fun testDupeLoggerProviderSchemaUrl() {
-        val impl = LoggerProviderImpl(clock, loggingConfig, contextFactory, spanContextFactory, spanFactory)
         val first = impl.getLogger(name = "name", schemaUrl = "https://example.com/foo")
         val second = impl.getLogger(name = "name", schemaUrl = "https://example.com/foo")
         val third = impl.getLogger(name = "name", schemaUrl = "https://example.com/bar")
@@ -81,7 +84,6 @@ internal class LoggerProviderImplTest {
 
     @Test
     fun testDupeLoggerProviderAttributes() {
-        val impl = LoggerProviderImpl(clock, loggingConfig, contextFactory, spanContextFactory, spanFactory)
         val first = impl.getLogger(name = "name") {
             setStringAttribute("key", "value")
         }
@@ -97,14 +99,12 @@ internal class LoggerProviderImplTest {
 
     @Test
     fun testForceFlushEmptyProcessors() = runTest {
-        val impl = LoggerProviderImpl(clock, loggingConfig, contextFactory, spanContextFactory, spanFactory)
         val result = impl.forceFlush()
         assertEquals(OperationResultCode.Success, result)
     }
 
     @Test
     fun testShutdownEmptyProcessors() = runTest {
-        val impl = LoggerProviderImpl(clock, loggingConfig, contextFactory, spanContextFactory, spanFactory)
         val result = impl.shutdown()
         assertEquals(OperationResultCode.Success, result)
     }
@@ -123,7 +123,7 @@ internal class LoggerProviderImplTest {
             LogLimitConfig(100, 100),
             FakeResource(),
         )
-        val impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory, spanFactory)
+        impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory, spanFactory)
         impl.getLogger(name = "test")
 
         val result = impl.forceFlush()
@@ -145,11 +145,33 @@ internal class LoggerProviderImplTest {
             LogLimitConfig(100, 100),
             FakeResource(),
         )
-        val impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory, spanFactory)
+        impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory, spanFactory)
         impl.getLogger(name = "test")
 
         val result = impl.shutdown()
         assertEquals(OperationResultCode.Success, result)
         assertEquals(true, shutdownCalled)
+    }
+
+    @Test
+    fun testGetLoggerAfterShutdownReturnsNoopLogger() = runTest {
+        impl.shutdown()
+        val logger = impl.getLogger(name = "test")
+        assertFalse(logger.enabled())
+    }
+
+    @Test
+    fun testExistingLoggerDoesNotEmitAfterShutdown() = runTest {
+        val processor = FakeLogRecordProcessor()
+        val config = LoggingConfig(
+            listOf(processor),
+            LogLimitConfig(100, 100),
+            FakeResource(),
+        )
+        impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory, spanFactory)
+        val logger = impl.getLogger(name = "test")
+        impl.shutdown()
+        logger.emit(body = "should not emit")
+        assertEquals(0, processor.logs.size)
     }
 }
