@@ -2,8 +2,10 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.export.DelegatingTelemetryCloseable
+import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.factory.SdkFactory
 import io.opentelemetry.kotlin.init.config.TracingConfig
@@ -15,8 +17,11 @@ internal class TracerProviderImpl(
     private val clock: Clock,
     tracingConfig: TracingConfig,
     sdkFactory: SdkFactory,
+    private val shutdownState: ShutdownState,
     private val closeable: DelegatingTelemetryCloseable = DelegatingTelemetryCloseable()
 ) : TracerProvider, TelemetryCloseable by closeable {
+
+    private val noopTracer = NoopOpenTelemetry.tracerProvider.getTracer("")
 
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
         @Suppress("DEPRECATION")
@@ -33,7 +38,8 @@ internal class TracerProviderImpl(
             sdkFactory = sdkFactory,
             scope = key,
             resource = tracingConfig.resource,
-            spanLimitConfig = tracingConfig.spanLimits
+            spanLimitConfig = tracingConfig.spanLimits,
+            shutdownState = shutdownState,
         )
     }
 
@@ -42,13 +48,14 @@ internal class TracerProviderImpl(
         version: String?,
         schemaUrl: String?,
         attributes: (MutableAttributeContainer.() -> Unit)?
-    ): Tracer {
-        val key = apiProvider.createInstrumentationScopeInfo(
-            name = name,
-            version = version,
-            schemaUrl = schemaUrl,
-            attributes = attributes
-        )
-        return apiProvider.getOrCreate(key)
-    }
+    ): Tracer =
+        shutdownState.ifActiveOrElse(noopTracer) {
+            val key = apiProvider.createInstrumentationScopeInfo(
+                name = name,
+                version = version,
+                schemaUrl = schemaUrl,
+                attributes = attributes
+            )
+            apiProvider.getOrCreate(key)
+        }
 }
