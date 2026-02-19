@@ -32,7 +32,7 @@ internal class SpanProcessOnEndingReadTest {
     @Test
     fun testReadPropertiesInProcessor() = runTest {
         harness.config.spanProcessors.add(OnEndingSpanProcessor())
-        harness.tracer.startSpan("span", null, SpanKind.INTERNAL, null) {
+        harness.tracer.startSpan("span") {
             setStringAttribute("key", "value")
             addEvent("test")
             addLink(FakeSpanContext.INVALID) {

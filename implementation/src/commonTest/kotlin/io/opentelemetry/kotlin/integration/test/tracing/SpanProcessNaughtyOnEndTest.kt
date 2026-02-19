@@ -32,7 +32,7 @@ internal class SpanProcessNaughtyOnEndTest {
     @Test
     fun testSpanProcessorOnEndOverrideIgnored() = runTest {
         harness.config.spanProcessors.add(NaughtySpanProcessor())
-        harness.tracer.startSpan("span", null, SpanKind.INTERNAL, null) {
+        harness.tracer.startSpan("span") {
             setStringAttribute("key", "value")
             addEvent("test")
             addLink(FakeSpanContext.INVALID)

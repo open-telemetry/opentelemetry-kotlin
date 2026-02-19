@@ -38,7 +38,6 @@ import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.context.Scope
 import io.opentelemetry.kotlin.tracing.model.Span
 import io.opentelemetry.kotlin.tracing.model.SpanKind
-import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 
 @Composable
 fun SpanScreen(
@@ -138,7 +137,7 @@ fun SpanScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Button(onClick = {
-                    val (span, scope) = createSpan(otel, formState)
+                    val (span, scope) = startSpan(otel, formState)
                     span.end()
                     scope?.detach()
                     showSuccessFeedback = true
@@ -146,7 +145,7 @@ fun SpanScreen(
                     Text("Create & End Span")
                 }
                 OutlinedButton(onClick = {
-                    val (span, scope) = createSpan(otel, formState)
+                    val (span, scope) = startSpan(otel, formState)
                     activeScope = scope
                     onActiveSpanChanged(span)
                 }) {
@@ -178,7 +177,7 @@ fun SpanScreen(
 }
 
 @ExperimentalApi
-private fun createSpan(otel: OpenTelemetry, form: SpanFormState): Pair<Span, Scope?> {
+private fun startSpan(otel: OpenTelemetry, form: SpanFormState): Pair<Span, Scope?> {
     val startTs = form.startTimestamp.toLongOrNull()
     val span = otel.tracerProvider.getTracer(AppConfig.APP_NAME).startSpan(
         name = form.name,
