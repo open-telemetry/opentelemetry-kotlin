@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeSdkFactory
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
@@ -35,15 +36,16 @@ internal class LogAttributesTest {
     @BeforeTest
     fun setUp() {
         logger = LoggerImpl(
-            FakeClock(),
-            processor,
-            FakeSdkFactory(),
-            key,
-            FakeResource(),
-            LogLimitConfig(
+            clock = FakeClock(),
+            processor = processor,
+            sdkFactory = FakeSdkFactory(),
+            key = key,
+            resource = FakeResource(),
+            logLimitConfig = LogLimitConfig(
                 attributeCountLimit = 8,
                 attributeValueLengthLimit = fakeLogLimitsConfig.attributeValueLengthLimit
-            )
+            ),
+            shutdownState = MutableShutdownState(),
         )
     }
 
