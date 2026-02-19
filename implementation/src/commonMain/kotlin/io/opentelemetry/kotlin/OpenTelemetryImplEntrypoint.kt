@@ -46,9 +46,20 @@ internal fun createOpenTelemetryImpl(
     val loggingConfig = cfg.loggingConfig.generateLoggingConfig()
     val shutdownState = MutableShutdownState()
     return CloseableOpenTelemetryImpl(
-        tracerProvider = TracerProviderImpl(clock, tracingConfig, sdkFactory, shutdownState),
-        loggerProvider = LoggerProviderImpl(clock, loggingConfig, sdkFactory),
+        tracerProvider = TracerProviderImpl(
+            clock = clock,
+            tracingConfig = tracingConfig,
+            sdkFactory = sdkFactory,
+            shutdownState = shutdownState,
+        ),
+        loggerProvider = LoggerProviderImpl(
+            clock = clock,
+            loggingConfig = loggingConfig,
+            sdkFactory = sdkFactory,
+            shutdownState = shutdownState,
+        ),
         clock = clock,
-        sdkFactory = sdkFactory
+        sdkFactory = sdkFactory,
+        shutdownState = shutdownState,
     )
 }
