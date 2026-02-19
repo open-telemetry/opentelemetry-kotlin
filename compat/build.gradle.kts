@@ -13,6 +13,7 @@ kotlin {
             dependencies {
                 api(project(":core"))
                 implementation(project(":sdk-api"))
+                implementation(project(":sdk-common"))
                 implementation(project(":model"))
                 implementation(project(":java-typealiases"))
                 implementation(project.dependencies.platform(libs.opentelemetry.bom))
