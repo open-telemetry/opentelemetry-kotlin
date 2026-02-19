@@ -28,7 +28,7 @@ The following targets are supported:
 
 1. Add the following dependencies to your Android/Java project:
 
-```
+```kotlin
 dependencies {
     val otelKotlinVersion = "0.1.0-alpha"
     implementation("io.opentelemetry.kotlin:core:$otelKotlinVersion")
@@ -38,7 +38,7 @@ dependencies {
 
 2. Initialize the SDK:
 
-```
+```kotlin
 val otelKotlin = createOpenTelemetry {
     // configure SDK here
 }
@@ -53,7 +53,7 @@ This can be helpful if you already use the Java implementation or don't want to 
 
 1. Add the following dependencies to your Android/Java project:
 
-```
+```kotlin
 dependencies {
     val otelKotlinVersion = "0.1.0-alpha"
     implementation("io.opentelemetry.kotlin:core:$otelKotlinVersion")
@@ -63,7 +63,7 @@ dependencies {
 
 2. Wrap your existing [OTel Java](https://github.com/open-telemetry/opentelemetry-java) instance:
 
-```
+```kotlin
 val otelJava = io.opentelemetry.sdk.OpenTelemetrySdk.builder().build()
 val otelKotlin = otelJava.toOtelKotlinApi()
 
@@ -75,11 +75,37 @@ val otelKotlin = createCompatOpenTelemetry {
 
 3. Use the Kotlin API instead of the Java API in your app
 
+### Instrumenting code
+
+If you need to instrument code outside the module where the OpenTelemetry SDK initializes, only 
+the `api` and `noop` dependencies are required: 
+
+```kotlin
+dependencies {
+    val otelKotlinVersion = "0.1.0-alpha"
+    implementation("io.opentelemetry.kotlin:api:$otelKotlinVersion")
+    implementation("io.opentelemetry.kotlin:noop:$otelKotlinVersion")
+}
+```
+
+This ensures that you are writing instrumentation solely against OpenTelemetry's [Instrumentation API](https://opentelemetry.io/docs/specs/otel/overview/#api)
+and allows straightforward injection of different `OpenTelemetry` implementations. This is 
+particularly useful for library authors who can instrument an SDK with the optional `noop` module
+by default, then ask consumers to pass in a real instance, as demonstrated below:
+
+```kotlin
+fun example(otel: OpenTelemetry = NoopOpenTelemetry) {
+    val logger = otel.loggerProvider.getLogger("my_logger")
+    logger.log("Hello, World!")
+}
+```
+
+
 ## Example usage
 
 ### Tracing API
 
-```
+```kotlin
 val tracer = otelKotlin.tracerProvider.getTracer(
     name = "kotlin-example-app",
     version = "0.1.0"
@@ -89,7 +115,7 @@ tracer.createSpan("my_span")
 
 ### Logging API
 
-```
+```kotlin
 val logger = otelKotlin.loggerProvider.getLogger("my_logger")
 logger.log("Hello, World!")
 ```

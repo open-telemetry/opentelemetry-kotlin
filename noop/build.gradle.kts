@@ -11,7 +11,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(project(":sdk"))
+                api(project(":sdk-api"))
             }
         }
     }

@@ -12,7 +12,7 @@ kotlin {
         val jvmAndAndroidMain by getting {
             dependencies {
                 api(project(":core"))
-                implementation(project(":sdk"))
+                implementation(project(":sdk-api"))
                 implementation(project(":model"))
                 implementation(project(":java-typealiases"))
                 implementation(project.dependencies.platform(libs.opentelemetry.bom))

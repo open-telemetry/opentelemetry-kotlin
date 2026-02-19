@@ -18,7 +18,7 @@ include(
     ":core",
     ":api",
     ":api-ext",
-    ":sdk",
+    ":sdk-api",
     ":noop",
     ":implementation",
     ":model",

@@ -11,9 +11,9 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":sdk"))
+                implementation(project(":sdk-api"))
                 implementation(project(":api-ext"))
-                implementation(project(":sdk"))
+                implementation(project(":sdk-api"))
                 implementation(project(":model"))
                 implementation(project(":platform-implementations"))
                 implementation(project(":exporters-core"))

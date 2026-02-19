@@ -9,7 +9,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.kotlinx.benchmark.runtime)
-                implementation(project(":sdk"))
+                implementation(project(":sdk-api"))
                 implementation(project(":api-ext"))
                 implementation(project(":noop"))
                 implementation(project(":implementation"))
@@ -20,7 +20,7 @@ kotlin {
                 implementation(project.dependencies.platform(libs.opentelemetry.bom))
                 implementation(libs.opentelemetry.api)
                 implementation(libs.opentelemetry.sdk)
-                implementation(project(":sdk"))
+                implementation(project(":sdk-api"))
                 implementation(project(":api-ext"))
                 implementation(project(":noop"))
                 implementation(project(":compat"))

@@ -10,7 +10,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":api-ext"))
-                implementation(project(":sdk"))
+                implementation(project(":sdk-api"))
                 implementation(project(":test-fakes"))
                 implementation(project(":semconv"))
                 implementation(project(":exporters-core"))
