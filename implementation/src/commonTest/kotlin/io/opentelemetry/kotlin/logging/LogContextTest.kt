@@ -33,12 +33,13 @@ internal class LogContextTest {
         processor = FakeLogRecordProcessor()
         sdkFactory = createSdkFactory()
         logger = LoggerImpl(
-            clock,
-            processor,
-            sdkFactory,
-            key,
-            FakeResource(),
-            fakeLogLimitsConfig
+            clock = clock,
+            processor = processor,
+            sdkFactory = sdkFactory,
+            key = key,
+            resource = FakeResource(),
+            logLimitConfig = fakeLogLimitsConfig,
+            shutdownState = MutableShutdownState(),
         )
         tracer = TracerImpl(
             clock = clock,
