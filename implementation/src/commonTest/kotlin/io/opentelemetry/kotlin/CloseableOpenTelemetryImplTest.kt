@@ -144,7 +144,29 @@ internal class CloseableOpenTelemetryImplTest {
         assertEquals(Failure, result)
     }
 
-    // TODO: test cases where telemetry submitted after shutdown. For tracer/logger impl in separate PR?
+    @Test
+    fun testShutdownReturnsSuccessOnSecondCall() = runTest {
+        val tracerProvider = FakeCloseableTracerProvider(shutdownResult = Success)
+        val loggerProvider = FakeCloseableLoggerProvider(shutdownResult = Success)
+        val api = createOpenTelemetry(tracerProvider, loggerProvider)
+
+        assertEquals(Success, api.shutdown())
+        assertEquals(Success, api.shutdown())
+        assertEquals(1, tracerProvider.shutdownCount)
+        assertEquals(1, loggerProvider.shutdownCount)
+    }
+
+    @Test
+    fun testForceFlushWorksAfterShutdown() = runTest {
+        val tracerProvider = FakeCloseableTracerProvider(flushResult = Success)
+        val loggerProvider = FakeCloseableLoggerProvider(flushResult = Success)
+        val api = createOpenTelemetry(tracerProvider, loggerProvider)
+
+        assertEquals(Success, api.shutdown())
+        assertEquals(Success, api.forceFlush())
+        assertEquals(1, tracerProvider.flushCount)
+        assertEquals(1, loggerProvider.flushCount)
+    }
 
     private fun createOpenTelemetry(
         tracerProvider: TracerProvider,
