@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeSdkFactory
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
@@ -39,12 +40,13 @@ internal class SpanLinkTest {
             attributeCountPerLinkLimit = fakeSpanLimitsConfig.attributeCountPerLinkLimit
         )
         tracer = TracerImpl(
-            clock,
-            processor,
-            FakeSdkFactory(),
-            key,
-            FakeResource(),
-            spanLimitConfig
+            clock = clock,
+            processor = processor,
+            sdkFactory = FakeSdkFactory(),
+            scope = key,
+            resource = FakeResource(),
+            spanLimitConfig = spanLimitConfig,
+            shutdownState = MutableShutdownState(),
         )
     }
 

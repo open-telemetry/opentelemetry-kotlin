@@ -3,7 +3,9 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
+import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.SdkFactory
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.Resource
@@ -24,7 +26,10 @@ internal class TracerImpl(
     private val scope: InstrumentationScopeInfo,
     private val resource: Resource,
     private val spanLimitConfig: SpanLimitConfig,
+    private val shutdownState: ShutdownState,
 ) : Tracer {
+
+    private val noopSpan = NoopOpenTelemetry.tracerProvider.getTracer("").startSpan("")
 
     private val contextFactory = sdkFactory.contextFactory
     private val root = contextFactory.root()
@@ -53,34 +58,35 @@ internal class TracerImpl(
         spanKind: SpanKind,
         startTimestamp: Long?,
         action: (SpanRelationships.() -> Unit)?
-    ): Span {
-        val ctx = parentContext ?: contextFactory.implicitContext()
+    ): Span =
+        shutdownState.ifActiveOrElse(noopSpan) {
+            val ctx = parentContext ?: contextFactory.implicitContext()
 
-        val parentSpanContext = when (ctx) {
-            root -> invalidSpanContext
-            else -> spanFactory.fromContext(ctx).spanContext
+            val parentSpanContext = when (ctx) {
+                root -> invalidSpanContext
+                else -> spanFactory.fromContext(ctx).spanContext
+            }
+
+            val spanContext = calculateSpanContext(parentSpanContext)
+
+            val spanModel = SpanModel(
+                clock = clock,
+                processor = processor,
+                name = name,
+                spanKind = spanKind,
+                startTimestamp = startTimestamp ?: clock.now(),
+                instrumentationScopeInfo = scope,
+                resource = resource,
+                parent = parentSpanContext,
+                spanContext = spanContext,
+                spanLimitConfig = spanLimitConfig
+            )
+            if (action != null) {
+                action(spanModel)
+            }
+            processor?.onStart(ReadWriteSpanImpl(spanModel), ctx)
+            CreatedSpan(spanModel)
         }
-
-        val spanContext = calculateSpanContext(parentSpanContext)
-
-        val spanModel = SpanModel(
-            clock = clock,
-            processor = processor,
-            name = name,
-            spanKind = spanKind,
-            startTimestamp = startTimestamp ?: clock.now(),
-            instrumentationScopeInfo = scope,
-            resource = resource,
-            parent = parentSpanContext,
-            spanContext = spanContext,
-            spanLimitConfig = spanLimitConfig
-        )
-        if (action != null) {
-            action(spanModel)
-        }
-        processor?.onStart(ReadWriteSpanImpl(spanModel), ctx)
-        return CreatedSpan(spanModel)
-    }
 
     private fun calculateSpanContext(parent: SpanContext): SpanContext {
         val factory = tracingIdFactory
