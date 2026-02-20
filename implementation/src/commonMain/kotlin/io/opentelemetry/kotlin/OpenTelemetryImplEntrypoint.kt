@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.SdkFactory
 import io.opentelemetry.kotlin.factory.createSdkFactory
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
@@ -43,9 +44,10 @@ internal fun createOpenTelemetryImpl(
     val cfg = OpenTelemetryConfigImpl(clock).apply(config)
     val tracingConfig = cfg.tracingConfig.generateTracingConfig()
     val loggingConfig = cfg.loggingConfig.generateLoggingConfig()
+    val shutdownState = MutableShutdownState()
     return CloseableOpenTelemetryImpl(
-        tracerProvider = TracerProviderImpl(clock, tracingConfig, sdkFactory),
-        loggerProvider = LoggerProviderImpl(clock, loggingConfig, sdkFactory),
+        tracerProvider = TracerProviderImpl(clock, tracingConfig, sdkFactory, shutdownState),
+        loggerProvider = LoggerProviderImpl(clock, loggingConfig, sdkFactory, shutdownState),
         clock = clock,
         sdkFactory = sdkFactory
     )
