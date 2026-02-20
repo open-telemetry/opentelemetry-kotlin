@@ -28,6 +28,12 @@
   ([#91](https://github.com/open-telemetry/opentelemetry-kotlin/pull/91))
 - Provided syntactic sugar for tracing an operation with a `Span`
   ([#55](https://github.com/open-telemetry/opentelemetry-kotlin/pull/55))
+- The `api` module has been split into `api` and `sdk`. `api` is intended for instrumentation
+  authors; `sdk` is intended for application developers who instantiate OpenTelemetry. Several APIs
+  have been moved to the `sdk` module in this release.
+  ([#120](https://github.com/open-telemetry/opentelemetry-kotlin/pull/120))
+- `createNoopTelemetry()` is deprecated in favor of `NoopOpenTelemetry`
+  ([#130](https://github.com/open-telemetry/opentelemetry-kotlin/pull/130))
 
 ## Legacy release notes made under io.embrace coordinates
 
