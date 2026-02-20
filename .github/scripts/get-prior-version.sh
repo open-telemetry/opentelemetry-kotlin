@@ -24,7 +24,7 @@ else
   fi
 fi
 
-if ! git rev-parse "v$prior_version" >/dev/null 2>&1; then
+if [ "$prior_version" != "0.0.0" ] && ! git rev-parse "v$prior_version" >/dev/null 2>&1; then
   echo "Error: prior version tag 'v$prior_version' does not exist" >&2
   exit 1
 fi
