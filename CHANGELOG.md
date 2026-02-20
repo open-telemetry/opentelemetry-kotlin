@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 0.1.0 (2026-02-20)
+
 - Initial donation of code to opentelemetry-kotlin. The project now uses io.opentelemetry
   coordinates
   ([#3](https://github.com/open-telemetry/opentelemetry-kotlin/pull/3))
