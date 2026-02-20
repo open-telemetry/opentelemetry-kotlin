@@ -1,10 +1,13 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
+import io.opentelemetry.kotlin.logging.model.SeverityNumber
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -20,18 +23,32 @@ internal class SimpleLogRecordProcessor(
 ) : LogRecordProcessor {
 
     private val lock = ReentrantReadWriteLock()
+    private val shutdownState = MutableShutdownState()
 
     override fun onEmit(
         log: ReadWriteLogRecord,
         context: Context
     ) {
-        scope.launch {
-            lock.write {
-                exporter.export(listOf(log))
+        shutdownState.execute {
+            scope.launch {
+                lock.write {
+                    exporter.export(listOf(log))
+                }
             }
         }
     }
 
-    override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
-    override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
+    override fun enabled(
+        context: Context,
+        instrumentationScopeInfo: InstrumentationScopeInfo,
+        severityNumber: SeverityNumber?,
+        eventName: String?,
+    ): Boolean = !shutdownState.isShutdown
+
+    override suspend fun forceFlush(): OperationResultCode = exporter.forceFlush()
+
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownState.shutdown {
+            exporter.shutdown()
+        }
 }

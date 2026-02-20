@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.export.FakeTelemetryRepository
+import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
@@ -72,5 +73,31 @@ internal class PersistingLogRecordExporterTest {
 
         val result = exporter.export(telemetry)
         assertEquals(Failure, result)
+    }
+
+    @Test
+    fun testExportReturnsFailureAfterShutdown() = runTest {
+        val repository = FakeTelemetryRepository<ReadableLogRecord>()
+        val exporter = PersistingLogRecordExporter(listOf(FakeLogRecordExporter()), repository)
+        exporter.shutdown()
+
+        val result = exporter.export(telemetry)
+        assertEquals(Failure, result)
+    }
+
+    @Test
+    fun testShutdownReturnsSuccessOnSecondCall() = runTest {
+        val repository = FakeTelemetryRepository<ReadableLogRecord>()
+        val exporter = PersistingLogRecordExporter(listOf(FakeLogRecordExporter()), repository)
+        assertEquals(Success, exporter.shutdown())
+        assertEquals(Success, exporter.shutdown())
+    }
+
+    @Test
+    fun testForceFlushWorksAfterShutdown() = runTest {
+        val repository = FakeTelemetryRepository<ReadableLogRecord>()
+        val exporter = PersistingLogRecordExporter(listOf(FakeLogRecordExporter()), repository)
+        exporter.shutdown()
+        assertEquals(OperationResultCode.Success, exporter.forceFlush())
     }
 }
