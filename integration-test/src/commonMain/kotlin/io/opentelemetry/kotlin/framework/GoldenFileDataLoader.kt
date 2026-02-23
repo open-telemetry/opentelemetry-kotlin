@@ -2,8 +2,6 @@ package io.opentelemetry.kotlin.framework
 
 import kotlinx.serialization.json.Json
 
-expect fun loadTestFixture(fixtureName: String): String
-
 internal inline fun <reified T> compareGoldenFile(
     observed: List<T>,
     goldenFileName: String
