@@ -30,8 +30,8 @@ import kotlinx.coroutines.Dispatchers
  */
 @OptIn(ExperimentalApi::class)
 internal class PersistingLogRecordProcessor(
-    processors: List<LogRecordProcessor>,
-    exporters: List<LogRecordExporter>,
+    processor: LogRecordProcessor,
+    exporter: LogRecordExporter,
     fileSystem: TelemetryFileSystem,
     clock: Clock,
     config: PersistedTelemetryConfig,
@@ -54,11 +54,11 @@ internal class PersistingLogRecordProcessor(
         clock = clock,
     )
 
-    private val exporter = PersistingLogRecordExporter(exporters, repository)
+    private val persistingExporter = PersistingLogRecordExporter(exporter, repository)
 
     @Suppress("DEPRECATION")
     private val batchingProcessor = createBatchLogRecordProcessor(
-        exporter,
+        persistingExporter,
         maxQueueSize,
         scheduleDelayMs,
         exportTimeoutMs,
@@ -67,12 +67,12 @@ internal class PersistingLogRecordProcessor(
     )
 
     @Suppress("DEPRECATION")
-    private val processor = createCompositeLogRecordProcessor(processors + batchingProcessor)
-    private val telemetryCloseable: TelemetryCloseable = TimeoutTelemetryCloseable(processor)
+    private val composite = createCompositeLogRecordProcessor(listOf(processor, batchingProcessor))
+    private val telemetryCloseable: TelemetryCloseable = TimeoutTelemetryCloseable(composite)
 
     override fun onEmit(log: ReadWriteLogRecord, context: Context) {
         try {
-            processor.onEmit(log, context)
+            composite.onEmit(log, context)
         } catch (e: Throwable) {
             sdkErrorHandler.onUserCodeError(
                 e,

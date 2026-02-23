@@ -21,6 +21,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
@@ -34,6 +35,7 @@ internal class PersistingLogRecordProcessorTest {
         val exporter2 = FakeLogRecordExporter()
         val processor = createProcessor(
             exporters = listOf(exporter1, exporter2),
+            processors = listOf(FakeLogRecordProcessor()),
         )
 
         val body = "log"
@@ -83,6 +85,7 @@ internal class PersistingLogRecordProcessorTest {
         )
         val processor = createProcessor(
             exporters = listOf(exporter),
+            processors = listOf(FakeLogRecordProcessor()),
             maxExportBatchSize = 2,
             scheduleDelayMs = 1,
         )
@@ -101,6 +104,7 @@ internal class PersistingLogRecordProcessorTest {
     fun testExportAfterShutdown() = runTest {
         val exporter = FakeLogRecordExporter()
         val processor = createProcessor(
+            processors = listOf(FakeLogRecordProcessor()),
             exporters = listOf(exporter),
             maxExportBatchSize = 1,
             scheduleDelayMs = 1,
@@ -117,29 +121,21 @@ internal class PersistingLogRecordProcessorTest {
     @Test
     fun testEmptyProcessorsList() = runTest {
         val exporter = FakeLogRecordExporter()
-        val processor = createProcessor(
-            exporters = listOf(exporter),
-        )
-
-        val body = "log"
-        processor.onEmit(FakeReadWriteLogRecord(body = body), context)
-        assertEquals(Success, processor.forceFlush())
-        assertEquals(Success, processor.shutdown())
-        assertEquals(body, exporter.logs.single().body)
+        assertFailsWith(UnsupportedOperationException::class) {
+            createProcessor(
+                exporters = listOf(exporter),
+            )
+        }
     }
 
     @Test
     fun testEmptyExportersList() = runTest {
         val mutatingProcessor = FakeLogRecordProcessor()
-        val processor = createProcessor(
-            processors = listOf(mutatingProcessor),
-        )
-
-        val body = "log"
-        processor.onEmit(FakeReadWriteLogRecord(body = body), context)
-        assertEquals(Success, processor.forceFlush())
-        assertEquals(Success, processor.shutdown())
-        assertEquals(body, mutatingProcessor.logs.single().body)
+        assertFailsWith(UnsupportedOperationException::class) {
+            createProcessor(
+                processors = listOf(mutatingProcessor),
+            )
+        }
     }
 
     @Test
@@ -149,6 +145,7 @@ internal class PersistingLogRecordProcessorTest {
         )
         val processor = createProcessor(
             exporters = listOf(failingExporter),
+            processors = listOf(FakeLogRecordProcessor()),
         )
 
         val body = "log"
@@ -311,9 +308,20 @@ internal class PersistingLogRecordProcessorTest {
         scheduleDelayMs: Long = 5000,
     ): LogRecordProcessor {
         val dispatcher = StandardTestDispatcher(testScheduler)
-        return FakeLogExportConfig().persistingLogRecordProcessor(
-            processors = processors,
-            exporters = exporters,
+        val cfg = FakeLogExportConfig()
+        val processor = when {
+            processors.isEmpty() -> throw UnsupportedOperationException("Processors cannot be empty")
+            processors.size == 1 -> processors.single()
+            else -> cfg.compositeLogRecordProcessor(*processors.toTypedArray())
+        }
+        val exporter = when {
+            exporters.isEmpty() -> throw UnsupportedOperationException("Exporters cannot be empty")
+            exporters.size == 1 -> exporters.single()
+            else -> cfg.compositeLogRecordExporter(*exporters.toTypedArray())
+        }
+        return cfg.persistingLogRecordProcessorImpl(
+            processor = processor,
+            exporter = exporter,
             fileSystem = FakeTelemetryFileSystem(),
             clock = FakeClock(),
             maxExportBatchSize = maxExportBatchSize,

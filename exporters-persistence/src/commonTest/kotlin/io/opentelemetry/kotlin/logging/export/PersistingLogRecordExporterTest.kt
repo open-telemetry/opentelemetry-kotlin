@@ -19,7 +19,7 @@ internal class PersistingLogRecordExporterTest {
     @Test
     fun testStoreCalledOnExport() = runTest {
         val repository = FakeTelemetryRepository<ReadableLogRecord>()
-        val exporter = PersistingLogRecordExporter(listOf(FakeLogRecordExporter()), repository)
+        val exporter = PersistingLogRecordExporter(FakeLogRecordExporter(), repository)
         exporter.export(telemetry)
 
         assertEquals(1, repository.storeCalls)
@@ -30,7 +30,7 @@ internal class PersistingLogRecordExporterTest {
     fun testDeleteCalledOnSuccess() = runTest {
         val repository = FakeTelemetryRepository<ReadableLogRecord>()
         val exporter = PersistingLogRecordExporter(
-            listOf(FakeLogRecordExporter(action = { Success })),
+            FakeLogRecordExporter(action = { Success }),
             repository,
         )
 
@@ -42,7 +42,7 @@ internal class PersistingLogRecordExporterTest {
     fun testDeleteNotCalledOnFailure() = runTest {
         val repository = FakeTelemetryRepository<ReadableLogRecord>()
         val exporter = PersistingLogRecordExporter(
-            listOf(FakeLogRecordExporter(action = { Failure })),
+            FakeLogRecordExporter(action = { Failure }),
             repository,
         )
 
@@ -54,7 +54,7 @@ internal class PersistingLogRecordExporterTest {
     fun testExportStillWorksIfStoreFails() = runTest {
         val repository = FakeTelemetryRepository<ReadableLogRecord>(storeFails = true)
         val delegate = FakeLogRecordExporter()
-        val exporter = PersistingLogRecordExporter(listOf(delegate), repository)
+        val exporter = PersistingLogRecordExporter(delegate, repository)
 
         val result = exporter.export(telemetry)
         assertEquals(Success, result)
@@ -66,7 +66,7 @@ internal class PersistingLogRecordExporterTest {
     fun testExportResultPropagated() = runTest {
         val repository = FakeTelemetryRepository<ReadableLogRecord>()
         val exporter = PersistingLogRecordExporter(
-            listOf(FakeLogRecordExporter(action = { Failure })),
+            FakeLogRecordExporter(action = { Failure }),
             repository,
         )
 

@@ -17,9 +17,9 @@ internal expect fun getCacheDirectory(): Path
 internal expect fun getFileSystem(): FileSystem
 
 /**
- * Returns the directory used to store telemetry with a specified subdirectory appended (e.g. 'logs').
+ * Returns the directory used to store telemetry for the given [PersistedTelemetryType].
  */
 @ExperimentalApi
-internal fun getTelemetryStorageDirectory(subdirectory: String): Path {
-    return getCacheDirectory() / "/opentelemetry-kotlin/persisted-telemetry" / subdirectory
+internal fun getTelemetryStorageDirectory(type: PersistedTelemetryType): Path {
+    return getCacheDirectory() / "/opentelemetry-kotlin/persisted-telemetry" / type.directoryName
 }

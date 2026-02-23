@@ -8,12 +8,9 @@ import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 
 @ExperimentalApi
 internal class PersistingLogRecordExporter(
-    exporters: List<LogRecordExporter>,
+    private val exporter: LogRecordExporter,
     private val repository: TelemetryRepository<ReadableLogRecord>,
 ) : LogRecordExporter {
-
-    @Suppress("DEPRECATION")
-    private val exporter = createCompositeLogRecordExporter(exporters)
 
     override suspend fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {
         val record = repository.store(telemetry)

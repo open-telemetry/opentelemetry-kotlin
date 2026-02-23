@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.PersistedTelemetryConfig
+import io.opentelemetry.kotlin.export.PersistedTelemetryType
 import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryFileSystemImpl
 import io.opentelemetry.kotlin.export.getFileSystem
@@ -21,9 +22,9 @@ import kotlinx.coroutines.Dispatchers
  * Creates a processor that persists telemetry before exporting it. This avoids
  * data loss if the process terminates before export completes.
  *
- * @param processors a list of processors. This MUST NOT contain exporters. It
+ * @param processor a processor. This MUST NOT call exporters. It
  * should only contain processors that mutate the log record.
- * @param exporters a list of exporters. These will be invoked after telemetry has been
+ * @param exporter an exporter. This will be invoked after telemetry has been
  * queued on disk. This may include telemetry from previous process launches.
  *
  * This processor is not supported on JS platforms currently.
@@ -31,12 +32,33 @@ import kotlinx.coroutines.Dispatchers
 @ExperimentalApi
 @ConfigDsl
 internal fun LogExportConfigDsl.persistingLogRecordProcessor(
-    processors: List<LogRecordProcessor>,
-    exporters: List<LogRecordExporter>,
-    fileSystem: TelemetryFileSystem = TelemetryFileSystemImpl(
-        getFileSystem(),
-        getTelemetryStorageDirectory("logs"),
-    ),
+    processor: LogRecordProcessor,
+    exporter: LogRecordExporter,
+    maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
+    scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
+    exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
+    maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
+): LogRecordProcessor {
+    return persistingLogRecordProcessorImpl(
+        processor = processor,
+        exporter = exporter,
+        fileSystem = TelemetryFileSystemImpl(
+            getFileSystem(),
+            getTelemetryStorageDirectory(PersistedTelemetryType.LOGS),
+        ),
+        maxQueueSize = maxQueueSize,
+        scheduleDelayMs = scheduleDelayMs,
+        exportTimeoutMs = exportTimeoutMs,
+        maxExportBatchSize = maxExportBatchSize,
+    )
+}
+
+@ExperimentalApi
+@ConfigDsl
+internal fun LogExportConfigDsl.persistingLogRecordProcessorImpl(
+    processor: LogRecordProcessor,
+    exporter: LogRecordExporter,
+    fileSystem: TelemetryFileSystem,
     clock: Clock = this.clock,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
@@ -46,8 +68,8 @@ internal fun LogExportConfigDsl.persistingLogRecordProcessor(
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ): LogRecordProcessor {
     return PersistingLogRecordProcessor(
-        processors = processors,
-        exporters = exporters,
+        processor = processor,
+        exporter = exporter,
         fileSystem = fileSystem,
         clock = clock,
         serializer = { it.toProtobufByteArray() },
