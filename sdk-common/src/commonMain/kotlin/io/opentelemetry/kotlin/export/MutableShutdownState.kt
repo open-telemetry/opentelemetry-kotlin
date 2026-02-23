@@ -9,18 +9,22 @@ import kotlin.concurrent.Volatile
  * the shutdown state should use [ShutdownState] instead of this.
  */
 @ThreadSafe
-@OptIn(ExperimentalApi::class)
+@ExperimentalApi
 public class MutableShutdownState : ShutdownState() {
     @Volatile
     override var isShutdown: Boolean = false
         private set
 
-    public fun shutdown() {
+    /**
+     * Perform shutdown upon invocation
+     */
+    public fun shutdownNow() {
         isShutdown = true
     }
 
     /**
-     * If not already shut down, set the shutdown flag and run [action] to perform cleanup.
+     * If not already shut down, call [shutdownNow] and run [action] to perform additional cleanup.
+     * [action] must be thread-safe and be able to be invoked many times without issue.
      * If already shut down, return [OperationResultCode.Success].
      * This method will not handle exceptions thrown by [action].
      */
@@ -30,7 +34,7 @@ public class MutableShutdownState : ShutdownState() {
         if (isShutdown) {
             OperationResultCode.Success
         } else {
-            shutdown()
+            shutdownNow()
             action()
         }
 }

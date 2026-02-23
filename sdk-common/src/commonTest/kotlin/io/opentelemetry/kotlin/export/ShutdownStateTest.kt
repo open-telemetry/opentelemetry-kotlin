@@ -26,15 +26,15 @@ internal class ShutdownStateTest {
 
     @Test
     fun testShutdownTransitionsState() {
-        state.shutdown()
+        state.shutdownNow()
         assertTrue(state.isShutdown)
     }
 
     @Test
     fun testIsShutdownRemainsTrue() {
-        state.shutdown()
+        state.shutdownNow()
         assertTrue(state.isShutdown)
-        state.shutdown()
+        state.shutdownNow()
         assertTrue(state.isShutdown)
     }
 
@@ -46,7 +46,7 @@ internal class ShutdownStateTest {
 
     @Test
     fun testIfActiveOrElseReturnsDefaultWhenShutdown() {
-        state.shutdown()
+        state.shutdownNow()
         val result = state.ifActiveOrElse("default") { "active" }
         assertEquals("default", result)
     }
@@ -60,7 +60,7 @@ internal class ShutdownStateTest {
 
     @Test
     fun testExecuteSkipsActionWhenShutdown() {
-        state.shutdown()
+        state.shutdownNow()
         var called = false
         state.execute { called = true }
         assertFalse(called)
@@ -74,7 +74,7 @@ internal class ShutdownStateTest {
 
     @Test
     fun testIfActiveResultReturnsFailureWhenShutdown() {
-        state.shutdown()
+        state.shutdownNow()
         val result = state.ifActive { Success }
         assertEquals(Failure, result)
     }
@@ -89,7 +89,7 @@ internal class ShutdownStateTest {
     @Test
     fun testReadOnlyIfActiveOrElseReturnsDefaultWhenShutdown() {
         val readOnly: ShutdownState = state
-        state.shutdown()
+        state.shutdownNow()
         val result = readOnly.ifActiveOrElse("default") { "active" }
         assertEquals("default", result)
     }
@@ -105,7 +105,7 @@ internal class ShutdownStateTest {
     @Test
     fun testReadOnlyExecuteSkipsActionWhenShutdown() {
         val readOnly: ShutdownState = state
-        state.shutdown()
+        state.shutdownNow()
         var called = false
         readOnly.execute { called = true }
         assertFalse(called)
@@ -121,7 +121,7 @@ internal class ShutdownStateTest {
     @Test
     fun testReadOnlyIfActiveReturnsFailureWhenShutdown() {
         val readOnly: ShutdownState = state
-        state.shutdown()
+        state.shutdownNow()
         val result = readOnly.ifActive { Success }
         assertEquals(Failure, result)
     }
@@ -140,7 +140,7 @@ internal class ShutdownStateTest {
 
     @Test
     fun testShutdownWithActionReturnsSuccessWhenAlreadyShutdown() {
-        state.shutdown()
+        state.shutdownNow()
         var actionCalled = false
         val result = state.shutdown {
             actionCalled = true

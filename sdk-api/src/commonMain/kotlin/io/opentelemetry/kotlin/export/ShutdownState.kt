@@ -5,8 +5,12 @@ import io.opentelemetry.kotlin.ExperimentalApi
 /**
  * Execute code or return defaults depending on whether this is shutdown or not, respectively.
  */
-@OptIn(ExperimentalApi::class)
+@ExperimentalApi
 public abstract class ShutdownState {
+
+    /**
+     * Whether this is shutdown or not
+     */
     public abstract val isShutdown: Boolean
 
     /**
