@@ -24,12 +24,12 @@ public final class io/opentelemetry/kotlin/logging/export/CoreLogRecordExporterA
 }
 
 public final class io/opentelemetry/kotlin/tracing/export/CoreSpanExporterApiKt {
-	public static final fun batchSpanProcessor (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJI)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
-	public static synthetic fun batchSpanProcessor$default (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJIILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
+	public static final fun batchSpanProcessor (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJILkotlinx/coroutines/CoroutineDispatcher;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
+	public static synthetic fun batchSpanProcessor$default (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJILkotlinx/coroutines/CoroutineDispatcher;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
 	public static final fun compositeSpanExporter (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;[Lio/opentelemetry/kotlin/tracing/export/SpanExporter;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
 	public static final fun compositeSpanProcessor (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;[Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
-	public static final fun createBatchSpanProcessor (Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJI)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
-	public static synthetic fun createBatchSpanProcessor$default (Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJIILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
+	public static final fun createBatchSpanProcessor (Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJILkotlinx/coroutines/CoroutineDispatcher;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
+	public static synthetic fun createBatchSpanProcessor$default (Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJILkotlinx/coroutines/CoroutineDispatcher;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
 	public static final fun createCompositeSpanExporter (Ljava/util/List;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
 	public static final fun createCompositeSpanProcessor (Ljava/util/List;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
 	public static final fun createSimpleSpanProcessor (Lio/opentelemetry/kotlin/tracing/export/SpanExporter;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;

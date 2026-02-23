@@ -1,51 +1,40 @@
 @file:OptIn(ExperimentalApi::class)
 
-package io.opentelemetry.kotlin.logging.export
+package io.opentelemetry.kotlin.tracing.export
 
+import android.content.Context
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
-import io.opentelemetry.kotlin.export.PersistedTelemetryConfig
 import io.opentelemetry.kotlin.export.PersistedTelemetryType
-import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryFileSystemImpl
 import io.opentelemetry.kotlin.export.getFileSystem
-import io.opentelemetry.kotlin.export.getTelemetryStorageDirectory
 import io.opentelemetry.kotlin.init.ConfigDsl
-import io.opentelemetry.kotlin.init.LogExportConfigDsl
+import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import okio.Path.Companion.toPath
 
 /**
- * Creates a processor that persists telemetry before exporting it. This avoids
- * data loss if the process terminates before export completes.
- *
- * @param processor a processor. This MUST NOT call exporters. It
- * should only consist of a processor that mutates the log record.
- * @param exporter an exporter. This will be invoked after telemetry has been
- * queued on disk. This may include telemetry from previous process launches.
- *
- * This processor is not supported on JS platforms currently.
+ * See [persistingSpanProcessor].
  */
 @ExperimentalApi
 @ConfigDsl
-internal fun LogExportConfigDsl.persistingLogRecordProcessor(
-    processor: LogRecordProcessor,
-    exporter: LogRecordExporter,
+public fun TraceExportConfigDsl.persistingSpanProcessor(
+    context: Context,
+    processor: SpanProcessor,
+    exporter: SpanExporter,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
-): LogRecordProcessor {
-    return persistingLogRecordProcessorImpl(
+): SpanProcessor {
+    return persistingSpanProcessorImpl(
+        context = context,
         processor = processor,
         exporter = exporter,
-        fileSystem = TelemetryFileSystemImpl(
-            getFileSystem(),
-            getTelemetryStorageDirectory(PersistedTelemetryType.LOGS),
-        ),
         maxQueueSize = maxQueueSize,
         scheduleDelayMs = scheduleDelayMs,
         exportTimeoutMs = exportTimeoutMs,
@@ -55,10 +44,10 @@ internal fun LogExportConfigDsl.persistingLogRecordProcessor(
 
 @ExperimentalApi
 @ConfigDsl
-internal fun LogExportConfigDsl.persistingLogRecordProcessorImpl(
-    processor: LogRecordProcessor,
-    exporter: LogRecordExporter,
-    fileSystem: TelemetryFileSystem,
+internal fun TraceExportConfigDsl.persistingSpanProcessorImpl(
+    context: Context,
+    processor: SpanProcessor,
+    exporter: SpanExporter,
     clock: Clock = this.clock,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
@@ -66,15 +55,19 @@ internal fun LogExportConfigDsl.persistingLogRecordProcessorImpl(
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
     sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
-): LogRecordProcessor {
-    return PersistingLogRecordProcessor(
+): SpanProcessor {
+    val appContext = context.applicationContext
+    val storagePath = "${appContext.cacheDir}/opentelemetry-kotlin/${PersistedTelemetryType.SPANS.directoryName}".toPath()
+
+    val fileSystem = TelemetryFileSystemImpl(
+        getFileSystem(),
+        storagePath
+    )
+    return persistingSpanProcessorImpl(
         processor = processor,
         exporter = exporter,
         fileSystem = fileSystem,
         clock = clock,
-        serializer = { it.toProtobufByteArray() },
-        deserializer = { it.toReadableLogRecordList() },
-        config = PersistedTelemetryConfig(),
         maxQueueSize = maxQueueSize,
         scheduleDelayMs = scheduleDelayMs,
         exportTimeoutMs = exportTimeoutMs,
