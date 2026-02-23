@@ -57,7 +57,7 @@ internal fun TraceExportConfigDsl.persistingSpanProcessorImpl(
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ): SpanProcessor {
     val appContext = context.applicationContext
-    val storagePath = "${appContext.cacheDir}/opentelemetry-kotlin/${PersistedTelemetryType.SPANS.name.lowercase()}".toPath()
+    val storagePath = "${appContext.cacheDir}/opentelemetry-kotlin/${PersistedTelemetryType.SPANS.directoryName}".toPath()
 
     val fileSystem = TelemetryFileSystemImpl(
         getFileSystem(),

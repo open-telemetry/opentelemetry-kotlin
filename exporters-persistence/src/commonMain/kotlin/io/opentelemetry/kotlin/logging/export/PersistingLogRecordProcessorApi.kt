@@ -23,7 +23,7 @@ import kotlinx.coroutines.Dispatchers
  * data loss if the process terminates before export completes.
  *
  * @param processor a processor. This MUST NOT call exporters. It
- * should only contain processors that mutate the log record.
+ * should only consist of a processor that mutates the log record.
  * @param exporter an exporter. This will be invoked after telemetry has been
  * queued on disk. This may include telemetry from previous process launches.
  *
