@@ -8,15 +8,14 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.PersistedTelemetryConfig
-import io.opentelemetry.kotlin.export.PersistedTelemetryType
 import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryFileSystemImpl
 import io.opentelemetry.kotlin.export.getFileSystem
-import io.opentelemetry.kotlin.export.getTelemetryStorageDirectory
 import io.opentelemetry.kotlin.init.ConfigDsl
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import okio.Path
 
 /**
  * Creates a processor that persists telemetry before exporting it. This avoids
@@ -26,6 +25,8 @@ import kotlinx.coroutines.Dispatchers
  * should only consist of a processor that mutates the span.
  * @param exporter an exporter. This will be invoked after telemetry has been
  * queued on disk. This may include telemetry from previous process launches.
+ * @param cacheDirectory the directory to use for caching telemetry. Telemetry will be stored
+ * within this location.
  *
  * This processor is not supported on JS platforms currently.
  */
@@ -34,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 internal fun TraceExportConfigDsl.persistingSpanProcessor(
     processor: SpanProcessor,
     exporter: SpanExporter,
+    cacheDirectory: Path,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
@@ -42,10 +44,7 @@ internal fun TraceExportConfigDsl.persistingSpanProcessor(
     return persistingSpanProcessorImpl(
         processor = processor,
         exporter = exporter,
-        fileSystem = TelemetryFileSystemImpl(
-            getFileSystem(),
-            getTelemetryStorageDirectory(PersistedTelemetryType.SPANS),
-        ),
+        fileSystem = TelemetryFileSystemImpl(getFileSystem(), cacheDirectory),
         maxQueueSize = maxQueueSize,
         scheduleDelayMs = scheduleDelayMs,
         exportTimeoutMs = exportTimeoutMs,
