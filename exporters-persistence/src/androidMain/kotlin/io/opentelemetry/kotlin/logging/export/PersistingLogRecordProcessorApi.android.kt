@@ -57,7 +57,7 @@ internal fun LogExportConfigDsl.persistingLogRecordProcessorImpl(
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ): LogRecordProcessor {
     val appContext = context.applicationContext
-    val storagePath = "${appContext.cacheDir}/opentelemetry-kotlin/${PersistedTelemetryType.LOGS.name.lowercase()}".toPath()
+    val storagePath = "${appContext.cacheDir}/opentelemetry-kotlin/${PersistedTelemetryType.LOGS.directoryName}".toPath()
 
     val fileSystem = TelemetryFileSystemImpl(
         getFileSystem(),
