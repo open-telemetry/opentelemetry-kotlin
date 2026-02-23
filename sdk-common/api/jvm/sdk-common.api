@@ -5,3 +5,9 @@ public final class io/opentelemetry/kotlin/export/MutableShutdownState : io/open
 	public final fun shutdownNow ()V
 }
 
+public final class io/opentelemetry/kotlin/export/ShutdownStateExtKt {
+	public static final fun execute (Lio/opentelemetry/kotlin/export/ShutdownState;Lkotlin/jvm/functions/Function0;)V
+	public static final fun ifActive (Lio/opentelemetry/kotlin/export/ShutdownState;Lkotlin/jvm/functions/Function0;)Lio/opentelemetry/kotlin/export/OperationResultCode;
+	public static final fun ifActiveOrElse (Lio/opentelemetry/kotlin/export/ShutdownState;Ljava/lang/Object;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
