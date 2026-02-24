@@ -5,7 +5,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @OptIn(ExperimentalApi::class)
-internal class MutableAttributeContainerImplTest {
+internal class AttributesModelTest {
 
     private val attributeLimit = 8
     private val expected = mapOf(
@@ -21,7 +21,7 @@ internal class MutableAttributeContainerImplTest {
 
     @Test
     fun testAttributes() {
-        val attrs = MutableAttributeContainerImpl(attributeLimit).apply {
+        val attrs = AttributesModel(attributeLimit).apply {
             addTestAttributes()
         }.attributes
         assertEquals(expected, attrs)
@@ -29,7 +29,7 @@ internal class MutableAttributeContainerImplTest {
 
     @Test
     fun testAttributesDoNotExceedLimit() {
-        val attrs = MutableAttributeContainerImpl(attributeLimit).apply {
+        val attrs = AttributesModel(attributeLimit).apply {
             addTestAttributesAlternateValues()
             addTestAttributes("xyz")
             addTestAttributes()

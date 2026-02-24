@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
+import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
@@ -340,7 +341,8 @@ internal class SpanExportTest {
     }
 
     private fun MutableAttributeContainer.assertAttributes() {
-        assertTrue(attributes.isEmpty())
+        val reader = this as AttributeContainer
+        assertTrue(reader.attributes.isEmpty())
 
         // set attributes
         setStringAttribute("string_key", "value")
@@ -353,7 +355,7 @@ internal class SpanExportTest {
         setLongListAttribute("long_list_key", listOf(42))
         setDoubleListAttribute("double_list_key", listOf(3.14))
 
-        val observed = attributes
+        val observed = reader.attributes
         val expected = mapOf(
             "string_key" to "second_value",
             "bool_key" to true,

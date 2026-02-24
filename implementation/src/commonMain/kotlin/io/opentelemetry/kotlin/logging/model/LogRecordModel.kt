@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.logging.model
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainerImpl
+import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.model.SpanContext
@@ -91,7 +91,7 @@ internal class LogRecordModel(
         }
 
     private val attrs by lazy {
-        MutableAttributeContainerImpl(logLimitConfig.attributeCountLimit, mutableMapOf())
+        AttributesModel(logLimitConfig.attributeCountLimit, mutableMapOf())
     }
 
     override val attributes: Map<String, Any>
