@@ -6,6 +6,18 @@ public abstract interface class io/opentelemetry/kotlin/OpenTelemetrySdk : io/op
 	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
 }
 
+public abstract interface class io/opentelemetry/kotlin/context/ImplicitContextStorage {
+	public abstract fun implicitContext ()Lio/opentelemetry/kotlin/context/Context;
+	public abstract fun setImplicitContext (Lio/opentelemetry/kotlin/context/Context;)V
+}
+
+public final class io/opentelemetry/kotlin/context/ImplicitContextStorageMode : java/lang/Enum {
+	public static final field GLOBAL Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
+	public static fun values ()[Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
+}
+
 public abstract class io/opentelemetry/kotlin/export/OperationResultCode {
 }
 
