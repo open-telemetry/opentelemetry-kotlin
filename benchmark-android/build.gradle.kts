@@ -37,7 +37,6 @@ kotlin {
 dependencies {
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.junit)
-    androidTestImplementation(libs.junit4)
     androidTestImplementation(libs.androidx.benchmark.junit4)
     androidTestImplementation(project.dependencies.platform(libs.opentelemetry.bom))
     androidTestImplementation(libs.opentelemetry.api)
