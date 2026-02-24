@@ -1,0 +1,14 @@
+public final class io/opentelemetry/kotlin/export/PlatformTelemetryPath_jvmKt {
+	public static final fun platformDefaultCacheDirectory ()Lokio/Path;
+}
+
+public final class io/opentelemetry/kotlin/logging/export/PersistingLogRecordProcessorApiKt {
+	public static final fun persistingLogRecordProcessor (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;Lokio/Path;IJJI)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
+	public static synthetic fun persistingLogRecordProcessor$default (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;Lokio/Path;IJJIILjava/lang/Object;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
+}
+
+public final class io/opentelemetry/kotlin/tracing/export/PersistingSpanProcessorApiKt {
+	public static final fun persistingSpanProcessor (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;Lokio/Path;IJJI)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
+	public static synthetic fun persistingSpanProcessor$default (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;Lokio/Path;IJJIILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
+}
+

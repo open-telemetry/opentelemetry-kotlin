@@ -32,7 +32,7 @@ import okio.Path
  */
 @ExperimentalApi
 @ConfigDsl
-internal fun LogExportConfigDsl.persistingLogRecordProcessor(
+public fun LogExportConfigDsl.persistingLogRecordProcessor(
     processor: LogRecordProcessor,
     exporter: LogRecordExporter,
     cacheDirectory: Path,

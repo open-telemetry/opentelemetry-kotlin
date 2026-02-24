@@ -32,7 +32,7 @@ import okio.Path
  */
 @ExperimentalApi
 @ConfigDsl
-internal fun TraceExportConfigDsl.persistingSpanProcessor(
+public fun TraceExportConfigDsl.persistingSpanProcessor(
     processor: SpanProcessor,
     exporter: SpanExporter,
     cacheDirectory: Path,
