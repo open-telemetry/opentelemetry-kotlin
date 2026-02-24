@@ -15,21 +15,21 @@ internal class ContextFactoryImplTest {
 
     @Test
     fun `test root`() {
-        assertSame(OtelJavaContext.root(), factory.contextFactory.root().toOtelJavaContext())
+        assertSame(OtelJavaContext.root(), factory.context.root().toOtelJavaContext())
     }
 
     @Test
     fun `test store span`() {
         val tracer = createCompatOpenTelemetry().tracerProvider.getTracer("tracer")
         val span = tracer.startSpan("span")
-        val contextFactory = factory.contextFactory
+        val contextFactory = factory.context
         val ctx = contextFactory.storeSpan(contextFactory.root(), span)
-        val retrievedSpan = factory.spanFactory.fromContext(ctx)
+        val retrievedSpan = factory.span.fromContext(ctx)
         assertSpanContextsMatch(span.spanContext, retrievedSpan.spanContext)
     }
 
     @Test
     fun `test current`() {
-        assertSame(OtelJavaContext.current(), factory.contextFactory.implicitContext().toOtelJavaContext())
+        assertSame(OtelJavaContext.current(), factory.context.implicit().toOtelJavaContext())
     }
 }

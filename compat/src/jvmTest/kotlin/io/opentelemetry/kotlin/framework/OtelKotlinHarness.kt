@@ -22,7 +22,7 @@ internal class OtelKotlinHarness(scheduler: TestCoroutineScheduler) :
                 tracerProvider { tracerProviderConfig() }
                 loggerProvider { loggerProviderConfig() }
             },
-            sdkFactory = CompatSdkFactory(tracingIdFactory = FakeTracingIdFactory())
+            sdkFactory = CompatSdkFactory(identifier = FakeTracingIdFactory())
         )
     }
 

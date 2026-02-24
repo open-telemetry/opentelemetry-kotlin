@@ -22,7 +22,7 @@ internal class IntegrationTestHarness(scheduler: TestCoroutineScheduler) : OtelK
                 tracerProvider { tracerProviderConfig() }
                 loggerProvider { loggerProviderConfig() }
             },
-            sdkFactory = SdkFactoryImpl(tracingIdFactory = TracingIdFactoryImpl(Random(0)))
+            sdkFactory = SdkFactoryImpl(identifier = TracingIdFactoryImpl(Random(0)))
         )
     }
 }
