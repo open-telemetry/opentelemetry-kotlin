@@ -12,6 +12,8 @@ import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.init.LogExportConfigDsl
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
+import io.opentelemetry.kotlin.logging.model.SeverityNumber
+import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -22,6 +24,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
@@ -33,19 +36,38 @@ internal class PersistingLogRecordProcessorTest {
     fun testLogsExported() = runTest {
         val exporter1 = FakeLogRecordExporter()
         val exporter2 = FakeLogRecordExporter()
+
+        val spanContext = FakeSpanContext.VALID
+        val log = FakeReadWriteLogRecord(
+            body = "log",
+            timestamp = 1_000_000L,
+            observedTimestamp = 2_000_000L,
+            severityNumber = SeverityNumber.WARN,
+            severityText = "warning",
+            attributes = mapOf("key" to "value"),
+            spanContext = spanContext,
+        )
+
         val processor = createProcessor(
             exporters = listOf(exporter1, exporter2),
             processors = listOf(FakeLogRecordProcessor()),
         )
-
-        val body = "log"
-        val log = FakeReadWriteLogRecord(body = body)
         processor.onEmit(log, context)
 
         assertEquals(Success, processor.forceFlush())
         assertEquals(Success, processor.shutdown())
-        assertEquals(body, exporter1.logs.single().body)
-        assertEquals(body, exporter2.logs.single().body)
+
+        listOf(exporter1, exporter2).forEach { exporter ->
+            val exported = exporter.logs.single()
+            assertEquals("log", exported.body)
+            assertEquals(1_000_000L, exported.timestamp)
+            assertEquals(2_000_000L, exported.observedTimestamp)
+            assertEquals(SeverityNumber.WARN, exported.severityNumber)
+            assertEquals("warning", exported.severityText)
+            assertEquals("value", exported.attributes["key"])
+            assertEquals(spanContext.traceId, exported.spanContext.traceId)
+            assertEquals(spanContext.spanId, exported.spanContext.spanId)
+        }
     }
 
     @Test
@@ -90,14 +112,14 @@ internal class PersistingLogRecordProcessorTest {
             scheduleDelayMs = 1,
         )
 
-        repeat(4) {
+        repeat(5) {
             processor.onEmit(FakeReadWriteLogRecord(body = "log"), context)
         }
         assertEquals(Success, processor.forceFlush())
         assertEquals(Success, processor.shutdown())
 
-        assertTrue(exporter.logs.isNotEmpty())
         assertTrue(batchCounts.all { it <= 2 })
+        assertEquals(5, exporter.logs.size)
     }
 
     @Test
@@ -140,10 +162,12 @@ internal class PersistingLogRecordProcessorTest {
 
     @Test
     fun testExporterFailurePropagates() = runTest {
+        val fileSystem = FakeTelemetryFileSystem()
         val failingExporter = FakeLogRecordExporter(
             action = { Failure }
         )
         val processor = createProcessor(
+            fileSystem = fileSystem,
             exporters = listOf(failingExporter),
             processors = listOf(FakeLogRecordProcessor()),
         )
@@ -153,6 +177,10 @@ internal class PersistingLogRecordProcessorTest {
         assertEquals(Success, processor.forceFlush())
         assertEquals(Success, processor.shutdown())
         assertEquals(body, failingExporter.logs.single().body)
+        assertTrue(
+            fileSystem.list().isNotEmpty(),
+            "Persisted file should be retained when the export fails",
+        )
     }
 
     @Test
@@ -301,7 +329,94 @@ internal class PersistingLogRecordProcessorTest {
         assertEquals(Failure, result)
     }
 
+    /**
+     * Checks that when the filesystem cannot be written telemetry is still exported
+     * in a best-effort attempt
+     */
+    @Test
+    fun testFilesystemUnwritable() = runTest {
+        val fileSystem = FakeTelemetryFileSystem().apply { failWrites = true }
+        val exporter = FakeLogRecordExporter()
+        val processor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(exporter),
+            processors = listOf(FakeLogRecordProcessor()),
+        )
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log"), context)
+        assertEquals(Success, processor.forceFlush())
+        assertEquals(Success, processor.shutdown())
+        assertTrue(exporter.logs.isNotEmpty())
+        assertTrue(fileSystem.list().isEmpty())
+    }
+
+    /**
+     * Asserts that the filesystem write happens before export.
+     */
+    @Test
+    fun testWriteBeforeExportOrdering() = runTest {
+        val fileSystem = FakeTelemetryFileSystem()
+        var files: List<String> = emptyList()
+        val exporter = FakeLogRecordExporter(
+            action = { _ ->
+                files = fileSystem.list()
+                Success
+            },
+        )
+        val processor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(exporter),
+            processors = listOf(FakeLogRecordProcessor()),
+        )
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log"), context)
+        assertEquals(Success, processor.forceFlush())
+        assertEquals(Success, processor.shutdown())
+        assertTrue(files.isNotEmpty())
+    }
+
+    /**
+     * Asserts that data persisted by one processor can be recovered by another processor that
+     * shares the file system. This effectively simulates what happens after process termination.
+     */
+    @Test
+    fun testProcessTerminationRecovery() = runTest {
+        val fileSystem = FakeTelemetryFileSystem()
+
+        // emit telemetry but fail to export
+        val exporter = FakeLogRecordExporter(action = { Failure })
+        val processor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(exporter),
+            processors = listOf(FakeLogRecordProcessor()),
+        )
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log"), context)
+        assertEquals(Success, processor.forceFlush())
+        assertEquals(Success, processor.shutdown())
+        assertTrue(fileSystem.list().isNotEmpty())
+
+        // create new processor with succeeding export
+        val otherExporter = FakeLogRecordExporter()
+        val otherProcessor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(otherExporter),
+            processors = listOf(FakeLogRecordProcessor()),
+        )
+
+        otherProcessor.onEmit(FakeReadWriteLogRecord(body = "other"), context)
+        assertEquals(Success, otherProcessor.forceFlush())
+        assertEquals(Success, otherProcessor.shutdown())
+
+        val exportedBodies = otherExporter.logs.map { it.body }
+        assertTrue("other" in exportedBodies)
+
+        // TODO: future: alter the assertion when persisted records are exported.
+        assertFalse("log" in exportedBodies)
+    }
+
     private fun TestScope.createProcessor(
+        fileSystem: FakeTelemetryFileSystem = FakeTelemetryFileSystem(),
         processors: List<LogRecordProcessor> = emptyList(),
         exporters: List<LogRecordExporter> = emptyList(),
         maxExportBatchSize: Int = 512,
@@ -322,7 +437,7 @@ internal class PersistingLogRecordProcessorTest {
         return cfg.persistingLogRecordProcessorImpl(
             processor = processor,
             exporter = exporter,
-            fileSystem = FakeTelemetryFileSystem(),
+            fileSystem = fileSystem,
             clock = FakeClock(),
             maxExportBatchSize = maxExportBatchSize,
             scheduleDelayMs = scheduleDelayMs,

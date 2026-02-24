@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
+import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -22,6 +23,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
@@ -31,19 +33,40 @@ internal class PersistingSpanProcessorTest {
     fun testSpansExported() = runTest {
         val exporter1 = FakeSpanExporter()
         val exporter2 = FakeSpanExporter()
+
+        val spanContext = FakeSpanContext.VALID
+        val parentContext = FakeSpanContext(
+            traceIdBytes = FakeSpanContext.VALID.traceIdBytes,
+            spanIdBytes = ByteArray(8) { (it + 1).toByte() },
+        )
+        val span = FakeReadWriteSpan(
+            name = "span",
+            spanContext = spanContext,
+            parent = parentContext,
+            startTimestamp = 1_000_000L,
+            endTimestamp = 2_000_000L,
+            attributes = mapOf("key" to "value"),
+        )
+
         val processor = createProcessor(
             exporters = listOf(exporter1, exporter2),
             processors = listOf(FakeSpanProcessor()),
         )
-
-        val name = "span"
-        val span = FakeReadWriteSpan(name = name)
         processor.onEnd(span)
 
         assertEquals(Success, processor.forceFlush())
         assertEquals(Success, processor.shutdown())
-        assertEquals(name, exporter1.exports.single().name)
-        assertEquals(name, exporter2.exports.single().name)
+
+        listOf(exporter1, exporter2).forEach { exporter ->
+            val exported = exporter.exports.single()
+            assertEquals("span", exported.name)
+            assertEquals(spanContext.traceId, exported.spanContext.traceId)
+            assertEquals(spanContext.spanId, exported.spanContext.spanId)
+            assertEquals(parentContext.spanId, exported.parent.spanId)
+            assertEquals(1_000_000L, exported.startTimestamp)
+            assertEquals(2_000_000L, exported.endTimestamp)
+            assertEquals("value", exported.attributes["key"])
+        }
     }
 
     @Test
@@ -85,14 +108,14 @@ internal class PersistingSpanProcessorTest {
             scheduleDelayMs = 1,
         )
 
-        repeat(4) {
+        repeat(5) {
             processor.onEnd(FakeReadWriteSpan(name = "span"))
         }
         assertEquals(Success, processor.forceFlush())
         assertEquals(Success, processor.shutdown())
 
-        assertTrue(exporter.exports.isNotEmpty())
         assertTrue(batchCounts.all { it <= 2 })
+        assertEquals(5, exporter.exports.size)
     }
 
     @Test
@@ -135,10 +158,12 @@ internal class PersistingSpanProcessorTest {
 
     @Test
     fun testExporterFailurePropagates() = runTest {
+        val fileSystem = FakeTelemetryFileSystem()
         val failingExporter = FakeSpanExporter(
             exportReturnValue = { Failure }
         )
         val processor = createProcessor(
+            fileSystem = fileSystem,
             exporters = listOf(failingExporter),
             processors = listOf(FakeSpanProcessor()),
         )
@@ -148,6 +173,7 @@ internal class PersistingSpanProcessorTest {
         assertEquals(Success, processor.forceFlush())
         assertEquals(Success, processor.shutdown())
         assertEquals(name, failingExporter.exports.single().name)
+        assertTrue(fileSystem.list().isNotEmpty())
     }
 
     @Test
@@ -296,7 +322,95 @@ internal class PersistingSpanProcessorTest {
         assertEquals(Failure, result)
     }
 
+    /**
+     * Checks that when the filesystem cannot be written telemetry is still exported
+     * in a best-effort attempt
+     */
+    @Test
+    fun testFilesystemUnwritable() = runTest {
+        val fileSystem = FakeTelemetryFileSystem().apply { failWrites = true }
+        val exporter = FakeSpanExporter()
+        val processor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(exporter),
+            processors = listOf(FakeSpanProcessor()),
+        )
+
+        processor.onEnd(FakeReadWriteSpan(name = "span"))
+        assertEquals(Success, processor.forceFlush())
+        assertEquals(Success, processor.shutdown())
+        assertTrue(exporter.exports.isNotEmpty())
+        assertTrue(fileSystem.list().isEmpty())
+    }
+
+    /**
+     * Asserts that the filesystem write happens before export.
+     */
+    @Test
+    fun testWriteBeforeExportOrdering() = runTest {
+        val fileSystem = FakeTelemetryFileSystem()
+        var files: List<String> = emptyList()
+        val exporter = FakeSpanExporter(
+            exportReturnValue = { _ ->
+                files = fileSystem.list()
+                Success
+            },
+        )
+        val processor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(exporter),
+            processors = listOf(FakeSpanProcessor()),
+        )
+
+        processor.onEnd(FakeReadWriteSpan(name = "span"))
+        assertEquals(Success, processor.forceFlush())
+        assertEquals(Success, processor.shutdown())
+        assertTrue(files.isNotEmpty())
+    }
+
+    /**
+     * Asserts that data persisted by one processor can be recovered by another processor that
+     * shares the file system. This effectively simulates what happens after process termination.
+     */
+    @Test
+    fun testProcessTerminationRecovery() = runTest {
+        val fileSystem = FakeTelemetryFileSystem()
+
+        // emit telemetry but fail to export
+        val exporter = FakeSpanExporter(exportReturnValue = { Failure })
+        val processor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(exporter),
+            processors = listOf(FakeSpanProcessor()),
+        )
+
+        processor.onEnd(FakeReadWriteSpan(name = "span"))
+        assertEquals(Success, processor.forceFlush())
+        assertEquals(Success, processor.shutdown())
+
+        assertTrue(fileSystem.list().isNotEmpty())
+
+        // create new processor with succeeding export
+        val session2Exporter = FakeSpanExporter()
+        val session2Processor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(session2Exporter),
+            processors = listOf(FakeSpanProcessor()),
+        )
+
+        session2Processor.onEnd(FakeReadWriteSpan(name = "other"))
+        assertEquals(Success, session2Processor.forceFlush())
+        assertEquals(Success, session2Processor.shutdown())
+
+        val exportedNames = session2Exporter.exports.map { it.name }
+        assertTrue("other" in exportedNames)
+
+        // TODO: future: alter the assertion when persisted records are exported.
+        assertFalse("span" in exportedNames)
+    }
+
     private fun TestScope.createProcessor(
+        fileSystem: FakeTelemetryFileSystem = FakeTelemetryFileSystem(),
         processors: List<SpanProcessor> = emptyList(),
         exporters: List<SpanExporter> = emptyList(),
         maxExportBatchSize: Int = 512,
@@ -317,7 +431,7 @@ internal class PersistingSpanProcessorTest {
         return cfg.persistingSpanProcessorImpl(
             processor = processor,
             exporter = exporter,
-            fileSystem = FakeTelemetryFileSystem(),
+            fileSystem = fileSystem,
             clock = FakeClock(),
             maxExportBatchSize = maxExportBatchSize,
             scheduleDelayMs = scheduleDelayMs,
@@ -325,7 +439,8 @@ internal class PersistingSpanProcessorTest {
         )
     }
 
-    private class FakeTraceExportConfig(override val clock: Clock = FakeClock()) : TraceExportConfigDsl
+    private class FakeTraceExportConfig(override val clock: Clock = FakeClock()) :
+        TraceExportConfigDsl
 
     @OptIn(ExperimentalApi::class)
     private class DelayingSpanProcessor(
