@@ -19,6 +19,6 @@ internal class ContextKeyAdapterTest {
 
         assertEquals(key, a.name)
         assertNotEquals(a, b)
-        assertNotEquals(b, c)
+        assertEquals(b, c)
     }
 }

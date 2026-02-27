@@ -72,5 +72,5 @@ internal class ContextExtTest {
         assertTrue(detached)
     }
 
-    private fun FakeContext.findAttrs(): Map<String, Any?> = attrs.mapKeys { it.key.name }
+    private fun FakeContext.findAttrs(): Map<String, Any?> = attrs.mapKeys { it.key.toString() }
 }

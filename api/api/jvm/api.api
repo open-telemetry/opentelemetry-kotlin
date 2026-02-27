@@ -32,7 +32,6 @@ public abstract interface class io/opentelemetry/kotlin/context/Context {
 }
 
 public abstract interface class io/opentelemetry/kotlin/context/ContextKey {
-	public abstract fun getName ()Ljava/lang/String;
 }
 
 public abstract interface class io/opentelemetry/kotlin/context/ImplicitContextStorage {
