@@ -2,6 +2,13 @@ public abstract interface class io/opentelemetry/kotlin/Clock {
 	public abstract fun now ()J
 }
 
+public abstract interface class io/opentelemetry/kotlin/InstrumentationScopeInfo {
+	public abstract fun getAttributes ()Ljava/util/Map;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getSchemaUrl ()Ljava/lang/String;
+	public abstract fun getVersion ()Ljava/lang/String;
+}
+
 public abstract interface class io/opentelemetry/kotlin/OpenTelemetrySdk : io/opentelemetry/kotlin/OpenTelemetry {
 	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
 }
