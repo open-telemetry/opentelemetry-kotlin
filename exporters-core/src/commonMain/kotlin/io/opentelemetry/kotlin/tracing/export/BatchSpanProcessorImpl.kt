@@ -6,6 +6,8 @@ import io.opentelemetry.kotlin.export.BatchTelemetryProcessor
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 
 @OptIn(ExperimentalApi::class)
 internal class BatchSpanProcessorImpl(
@@ -14,6 +16,7 @@ internal class BatchSpanProcessorImpl(
     private val scheduleDelayMs: Long,
     private val exportTimeoutMs: Long,
     private val maxExportBatchSize: Int,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : SpanProcessor {
 
     private val processor =
@@ -22,6 +25,7 @@ internal class BatchSpanProcessorImpl(
             scheduleDelayMs = scheduleDelayMs,
             exportTimeoutMs = exportTimeoutMs,
             maxExportBatchSize = maxExportBatchSize,
+            dispatcher = dispatcher,
             exportAction = exporter::export
         )
 

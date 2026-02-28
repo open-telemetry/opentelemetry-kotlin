@@ -19,7 +19,6 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(project(":test-fakes"))
-                implementation(project(":integration-test"))
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
             }

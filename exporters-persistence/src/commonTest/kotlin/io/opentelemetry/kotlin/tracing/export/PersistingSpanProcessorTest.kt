@@ -1,17 +1,17 @@
-package io.opentelemetry.kotlin.logging.export
+package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.export.FakeTelemetryFileSystem
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
-import io.opentelemetry.kotlin.init.LogExportConfigDsl
-import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
-import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
+import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
+import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
+import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -25,102 +25,97 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
-internal class PersistingLogRecordProcessorTest {
-
-    private val context = FakeContext()
+internal class PersistingSpanProcessorTest {
 
     @Test
-    fun testLogsExported() = runTest {
-        val exporter1 = FakeLogRecordExporter()
-        val exporter2 = FakeLogRecordExporter()
+    fun testSpansExported() = runTest {
+        val exporter1 = FakeSpanExporter()
+        val exporter2 = FakeSpanExporter()
         val processor = createProcessor(
             exporters = listOf(exporter1, exporter2),
-            processors = listOf(FakeLogRecordProcessor()),
+            processors = listOf(FakeSpanProcessor()),
         )
 
-        val body = "log"
-        val log = FakeReadWriteLogRecord(body = body)
-        processor.onEmit(log, context)
+        val name = "span"
+        val span = FakeReadWriteSpan(name = name)
+        processor.onEnd(span)
 
         assertEquals(Success, processor.forceFlush())
         assertEquals(Success, processor.shutdown())
-        assertEquals(body, exporter1.logs.single().body)
-        assertEquals(body, exporter2.logs.single().body)
+        assertEquals(name, exporter1.exports.single().name)
+        assertEquals(name, exporter2.exports.single().name)
     }
 
     @Test
     fun testProcessorMutation() = runTest {
         val expected = "override"
-        val processor1 = FakeLogRecordProcessor(
-            action = { log, _ ->
-                log.body = "flibbet"
-            }
+        val processor1 = FakeSpanProcessor(
+            endingAction = { span -> span.name = "flibbet" }
         )
-        val processor2 = FakeLogRecordProcessor(
-            action = { log, _ ->
-                log.body = expected
-            }
+        val processor2 = FakeSpanProcessor(
+            endingAction = { span -> span.name = expected }
         )
-        val exporter = FakeLogRecordExporter()
+        val exporter = FakeSpanExporter()
         val processor = createProcessor(
             processors = listOf(processor1, processor2),
             exporters = listOf(exporter),
         )
 
-        val log = FakeReadWriteLogRecord(body = "test")
-        processor.onEmit(log, context)
+        val span = FakeReadWriteSpan(name = "test")
+        processor.onEnding(span)
+        processor.onEnd(span)
         assertEquals(Success, processor.forceFlush())
         assertEquals(Success, processor.shutdown())
-        assertEquals(expected, exporter.logs.single().body)
+        assertEquals(expected, exporter.exports.single().name)
     }
 
     @Test
-    fun testLogBatching() = runTest {
+    fun testSpanBatching() = runTest {
         val batchCounts = mutableListOf<Int>()
-        val exporter = FakeLogRecordExporter(
-            action = { batch ->
+        val exporter = FakeSpanExporter(
+            exportReturnValue = { batch ->
                 batchCounts.add(batch.size)
                 Success
             }
         )
         val processor = createProcessor(
             exporters = listOf(exporter),
-            processors = listOf(FakeLogRecordProcessor()),
+            processors = listOf(FakeSpanProcessor()),
             maxExportBatchSize = 2,
             scheduleDelayMs = 1,
         )
 
         repeat(4) {
-            processor.onEmit(FakeReadWriteLogRecord(body = "log"), context)
+            processor.onEnd(FakeReadWriteSpan(name = "span"))
         }
         assertEquals(Success, processor.forceFlush())
         assertEquals(Success, processor.shutdown())
 
-        assertTrue(exporter.logs.isNotEmpty())
+        assertTrue(exporter.exports.isNotEmpty())
         assertTrue(batchCounts.all { it <= 2 })
     }
 
     @Test
     fun testExportAfterShutdown() = runTest {
-        val exporter = FakeLogRecordExporter()
+        val exporter = FakeSpanExporter()
         val processor = createProcessor(
-            processors = listOf(FakeLogRecordProcessor()),
+            processors = listOf(FakeSpanProcessor()),
             exporters = listOf(exporter),
             maxExportBatchSize = 1,
             scheduleDelayMs = 1,
         )
 
-        val body = "log"
-        processor.onEmit(FakeReadWriteLogRecord(body = body), context)
+        val name = "span"
+        processor.onEnd(FakeReadWriteSpan(name = name))
         assertEquals(Success, processor.forceFlush())
         assertEquals(Success, processor.shutdown())
-        processor.onEmit(FakeReadWriteLogRecord(body = "after shutdown"), context)
-        assertEquals(body, exporter.logs.first().body)
+        processor.onEnd(FakeReadWriteSpan(name = "after shutdown"))
+        assertEquals(name, exporter.exports.first().name)
     }
 
     @Test
     fun testEmptyProcessorsList() = runTest {
-        val exporter = FakeLogRecordExporter()
+        val exporter = FakeSpanExporter()
         assertFailsWith(UnsupportedOperationException::class) {
             createProcessor(
                 exporters = listOf(exporter),
@@ -130,7 +125,7 @@ internal class PersistingLogRecordProcessorTest {
 
     @Test
     fun testEmptyExportersList() = runTest {
-        val mutatingProcessor = FakeLogRecordProcessor()
+        val mutatingProcessor = FakeSpanProcessor()
         assertFailsWith(UnsupportedOperationException::class) {
             createProcessor(
                 processors = listOf(mutatingProcessor),
@@ -140,27 +135,27 @@ internal class PersistingLogRecordProcessorTest {
 
     @Test
     fun testExporterFailurePropagates() = runTest {
-        val failingExporter = FakeLogRecordExporter(
-            action = { Failure }
+        val failingExporter = FakeSpanExporter(
+            exportReturnValue = { Failure }
         )
         val processor = createProcessor(
             exporters = listOf(failingExporter),
-            processors = listOf(FakeLogRecordProcessor()),
+            processors = listOf(FakeSpanProcessor()),
         )
 
-        val body = "log"
-        processor.onEmit(FakeReadWriteLogRecord(body = body), context)
+        val name = "span"
+        processor.onEnd(FakeReadWriteSpan(name = name))
         assertEquals(Success, processor.forceFlush())
         assertEquals(Success, processor.shutdown())
-        assertEquals(body, failingExporter.logs.single().body)
+        assertEquals(name, failingExporter.exports.single().name)
     }
 
     @Test
     fun testProcessorFlushFailurePropagates() = runTest {
-        val failingProcessor = FakeLogRecordProcessor(
+        val failingProcessor = FakeSpanProcessor(
             flushCode = { Failure }
         )
-        val exporter = FakeLogRecordExporter()
+        val exporter = FakeSpanExporter()
         val processor = createProcessor(
             processors = listOf(failingProcessor),
             exporters = listOf(exporter),
@@ -172,10 +167,10 @@ internal class PersistingLogRecordProcessorTest {
 
     @Test
     fun testProcessorShutdownFailurePropagates() = runTest {
-        val failingProcessor = FakeLogRecordProcessor(
+        val failingProcessor = FakeSpanProcessor(
             shutdownCode = { Failure }
         )
-        val exporter = FakeLogRecordExporter()
+        val exporter = FakeSpanExporter()
         val processor = createProcessor(
             processors = listOf(failingProcessor),
             exporters = listOf(exporter),
@@ -187,10 +182,10 @@ internal class PersistingLogRecordProcessorTest {
 
     @Test
     fun testProcessorFlushExceptionReturnsFailure() = runTest {
-        val throwingProcessor = FakeLogRecordProcessor(
+        val throwingProcessor = FakeSpanProcessor(
             flushCode = { error("flush exception") }
         )
-        val exporter = FakeLogRecordExporter()
+        val exporter = FakeSpanExporter()
         val processor = createProcessor(
             processors = listOf(throwingProcessor),
             exporters = listOf(exporter),
@@ -202,10 +197,10 @@ internal class PersistingLogRecordProcessorTest {
 
     @Test
     fun testProcessorShutdownExceptionReturnsFailure() = runTest {
-        val throwingProcessor = FakeLogRecordProcessor(
+        val throwingProcessor = FakeSpanProcessor(
             shutdownCode = { error("shutdown exception") }
         )
-        val exporter = FakeLogRecordExporter()
+        val exporter = FakeSpanExporter()
         val processor = createProcessor(
             processors = listOf(throwingProcessor),
             exporters = listOf(exporter),
@@ -216,11 +211,11 @@ internal class PersistingLogRecordProcessorTest {
     }
 
     @Test
-    fun testOnEmitExceptionInProcessorDoesNotCrash() = runTest {
-        val throwingProcessor = FakeLogRecordProcessor(
-            action = { _, _ -> error("onEmit exception") }
+    fun testOnEndExceptionInProcessorDoesNotCrash() = runTest {
+        val throwingProcessor = FakeSpanProcessor(
+            endAction = { _ -> error("onEnd exception") }
         )
-        val exporter = FakeLogRecordExporter()
+        val exporter = FakeSpanExporter()
         val processor = createProcessor(
             processors = listOf(throwingProcessor),
             exporters = listOf(exporter),
@@ -228,17 +223,17 @@ internal class PersistingLogRecordProcessorTest {
             scheduleDelayMs = 1,
         )
 
-        processor.onEmit(FakeReadWriteLogRecord(body = "first"), context)
-        processor.onEmit(FakeReadWriteLogRecord(body = "second"), context)
+        processor.onEnd(FakeReadWriteSpan(name = "first"))
+        processor.onEnd(FakeReadWriteSpan(name = "second"))
         assertEquals(Success, processor.forceFlush())
         assertEquals(Success, processor.shutdown())
-        assertEquals(2, throwingProcessor.logs.size)
+        assertEquals(2, throwingProcessor.endCalls.size)
     }
 
     @Test
     fun testForceFlushWithinTimeout() = runTest {
-        val delayingProcessor = DelayingLogRecordProcessor(flushDelayMs = 1000)
-        val exporter = FakeLogRecordExporter()
+        val delayingProcessor = DelayingSpanProcessor(flushDelayMs = 1000)
+        val exporter = FakeSpanExporter()
         val processor = createProcessor(
             processors = listOf(delayingProcessor),
             exporters = listOf(exporter),
@@ -254,8 +249,8 @@ internal class PersistingLogRecordProcessorTest {
 
     @Test
     fun testForceFlushOverTimeout() = runTest {
-        val delayingProcessor = DelayingLogRecordProcessor(flushDelayMs = 3000)
-        val exporter = FakeLogRecordExporter()
+        val delayingProcessor = DelayingSpanProcessor(flushDelayMs = 3000)
+        val exporter = FakeSpanExporter()
         val processor = createProcessor(
             processors = listOf(delayingProcessor),
             exporters = listOf(exporter),
@@ -271,8 +266,8 @@ internal class PersistingLogRecordProcessorTest {
 
     @Test
     fun testShutdownWithinTimeout() = runTest {
-        val delayingProcessor = DelayingLogRecordProcessor(shutdownDelayMs = 3000)
-        val exporter = FakeLogRecordExporter()
+        val delayingProcessor = DelayingSpanProcessor(shutdownDelayMs = 3000)
+        val exporter = FakeSpanExporter()
         val processor = createProcessor(
             processors = listOf(delayingProcessor),
             exporters = listOf(exporter),
@@ -287,8 +282,8 @@ internal class PersistingLogRecordProcessorTest {
 
     @Test
     fun testShutdownOverTimeout() = runTest {
-        val delayingProcessor = DelayingLogRecordProcessor(shutdownDelayMs = 6000)
-        val exporter = FakeLogRecordExporter()
+        val delayingProcessor = DelayingSpanProcessor(shutdownDelayMs = 6000)
+        val exporter = FakeSpanExporter()
         val processor = createProcessor(
             processors = listOf(delayingProcessor),
             exporters = listOf(exporter),
@@ -302,24 +297,24 @@ internal class PersistingLogRecordProcessorTest {
     }
 
     private fun TestScope.createProcessor(
-        processors: List<LogRecordProcessor> = emptyList(),
-        exporters: List<LogRecordExporter> = emptyList(),
+        processors: List<SpanProcessor> = emptyList(),
+        exporters: List<SpanExporter> = emptyList(),
         maxExportBatchSize: Int = 512,
         scheduleDelayMs: Long = 5000,
-    ): LogRecordProcessor {
+    ): SpanProcessor {
         val dispatcher = StandardTestDispatcher(testScheduler)
-        val cfg = FakeLogExportConfig()
+        val cfg = FakeTraceExportConfig()
         val processor = when {
             processors.isEmpty() -> throw UnsupportedOperationException("Processors cannot be empty")
             processors.size == 1 -> processors.single()
-            else -> cfg.compositeLogRecordProcessor(*processors.toTypedArray())
+            else -> cfg.compositeSpanProcessor(*processors.toTypedArray())
         }
         val exporter = when {
             exporters.isEmpty() -> throw UnsupportedOperationException("Exporters cannot be empty")
             exporters.size == 1 -> exporters.single()
-            else -> cfg.compositeLogRecordExporter(*exporters.toTypedArray())
+            else -> cfg.compositeSpanExporter(*exporters.toTypedArray())
         }
-        return cfg.persistingLogRecordProcessorImpl(
+        return cfg.persistingSpanProcessorImpl(
             processor = processor,
             exporter = exporter,
             fileSystem = FakeTelemetryFileSystem(),
@@ -330,19 +325,19 @@ internal class PersistingLogRecordProcessorTest {
         )
     }
 
-    private class FakeLogExportConfig(override val clock: Clock = FakeClock()) : LogExportConfigDsl
+    private class FakeTraceExportConfig(override val clock: Clock = FakeClock()) : TraceExportConfigDsl
 
     @OptIn(ExperimentalApi::class)
-    private class DelayingLogRecordProcessor(
+    private class DelayingSpanProcessor(
         private val flushDelayMs: Long = 0,
         private val shutdownDelayMs: Long = 0,
-    ) : LogRecordProcessor {
+    ) : SpanProcessor {
 
-        val logs = mutableListOf<ReadWriteLogRecord>()
-
-        override fun onEmit(log: ReadWriteLogRecord, context: Context) {
-            logs.add(log)
-        }
+        override fun onStart(span: ReadWriteSpan, parentContext: Context) {}
+        override fun onEnding(span: ReadWriteSpan) {}
+        override fun onEnd(span: ReadableSpan) {}
+        override fun isStartRequired(): Boolean = false
+        override fun isEndRequired(): Boolean = true
 
         override suspend fun forceFlush(): OperationResultCode {
             if (flushDelayMs > 0) {

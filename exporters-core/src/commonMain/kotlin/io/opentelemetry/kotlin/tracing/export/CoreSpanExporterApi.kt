@@ -79,26 +79,32 @@ public fun TraceExportConfigDsl.batchSpanProcessor(
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
-    maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE
+    maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ): SpanProcessor {
     @Suppress("DEPRECATION")
-    return createBatchSpanProcessor(exporter, maxQueueSize, scheduleDelayMs, exportTimeoutMs, maxExportBatchSize)
+    return createBatchSpanProcessor(exporter, maxQueueSize, scheduleDelayMs, exportTimeoutMs, maxExportBatchSize, dispatcher)
 }
 
 @ExperimentalApi
-@Deprecated("Deprecated.", ReplaceWith("batchSpanProcessor(exporter, maxQueueSize, scheduleDelayMs, exportTimeoutMs, maxExportBatchSize)"))
+@Deprecated(
+    "Deprecated.",
+    ReplaceWith("batchSpanProcessor(exporter, maxQueueSize, scheduleDelayMs, exportTimeoutMs, maxExportBatchSize, dispatcher)")
+)
 public fun createBatchSpanProcessor(
     exporter: SpanExporter,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
-    maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE
+    maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ): SpanProcessor = BatchSpanProcessorImpl(
     exporter,
     maxQueueSize,
     scheduleDelayMs,
     exportTimeoutMs,
-    maxExportBatchSize
+    maxExportBatchSize,
+    dispatcher,
 )
 
 /**
