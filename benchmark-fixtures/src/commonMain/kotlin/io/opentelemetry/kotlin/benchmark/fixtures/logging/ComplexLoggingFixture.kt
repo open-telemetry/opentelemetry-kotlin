@@ -18,7 +18,7 @@ class ComplexLoggingFixture(
             body = "Hello world!",
             timestamp = 500,
             observedTimestamp = 1000,
-            context = otel.contextFactory.root(),
+            context = otel.context.root(),
             severityNumber = SeverityNumber.DEBUG3,
             severityText = "debug3"
         ) { setStringAttribute("key", "value") }

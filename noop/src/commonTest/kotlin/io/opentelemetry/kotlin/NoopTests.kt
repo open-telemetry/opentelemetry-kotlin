@@ -127,7 +127,7 @@ internal class NoopTests {
     @Test
     fun testNoopExplicitContext() {
         val otel = NoopOpenTelemetry
-        val ctx = otel.contextFactory.root()
+        val ctx = otel.context.root()
 
         val key = ctx.createKey<String>("key")
         assertTrue(key is NoopContextKey)
@@ -141,25 +141,25 @@ internal class NoopTests {
     @Test
     fun testNoopImplicitContext() {
         val otel = NoopOpenTelemetry
-        val ctx = otel.contextFactory.root()
+        val ctx = otel.context.root()
 
         // implicit context
         ctx.attach().detach()
-        assertNotNull(otel.contextFactory.implicitContext())
+        assertNotNull(otel.context.implicit())
     }
 
     @Test
     fun testNoopSpanContext() {
         val otel = NoopOpenTelemetry
-        val invalid = otel.spanContextFactory.invalid
+        val invalid = otel.spanContext.invalid
         assertTrue(invalid is NoopSpanContext)
         assertFalse(invalid.isValid)
 
-        val other = otel.spanContextFactory.create(
+        val other = otel.spanContext.create(
             otel.tracingIdFactory.generateTraceIdBytes(),
             otel.tracingIdFactory.generateSpanIdBytes(),
-            otel.traceFlagsFactory.default,
-            otel.traceStateFactory.default
+            otel.traceFlags.default,
+            otel.traceState.default
         )
         assertSame(invalid, other)
     }
@@ -168,14 +168,14 @@ internal class NoopTests {
     fun testStoreSpan() {
         val otel = NoopOpenTelemetry
         val span = otel.tracerProvider.getTracer("tracer").startSpan("span")
-        val ctx = otel.contextFactory.storeSpan(otel.contextFactory.root(), span)
+        val ctx = otel.context.storeSpan(otel.context.root(), span)
         assertTrue(ctx is NoopContext)
     }
 
     @Test
     fun testNoopTraceFlagsFactory() {
         val otel = NoopOpenTelemetry
-        val traceFlagsFactory = otel.traceFlagsFactory
+        val traceFlagsFactory = otel.traceFlags
         assertTrue(traceFlagsFactory.create(true, random = false) is NoopTraceFlags)
         assertTrue(traceFlagsFactory.fromHex("01") is NoopTraceFlags)
     }
@@ -184,14 +184,14 @@ internal class NoopTests {
     fun testNoopSpan() {
         val otel = NoopOpenTelemetry
 
-        val first = otel.spanFactory.invalid
+        val first = otel.span.invalid
         assertTrue(first is NoopSpan)
         assertFalse(first.isRecording())
 
-        val second = otel.spanFactory.fromSpanContext(otel.spanContextFactory.invalid)
+        val second = otel.span.fromSpanContext(otel.spanContext.invalid)
         assertTrue(second is NoopSpan)
 
-        val third = otel.spanFactory.fromContext(otel.contextFactory.root())
+        val third = otel.span.fromContext(otel.context.root())
         assertTrue(third is NoopSpan)
     }
 

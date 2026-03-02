@@ -35,7 +35,7 @@ public interface Tracer {
      * Creates a new span. A span must have a non-empty name, and can optionally include:
      *
      * @param parentContext - a context object containing the parent span. If this is not set
-     * explicitly, the implicit context via [io.opentelemetry.kotlin.factory.ContextFactory.implicitContext] will be used.
+     * explicitly, the implicit context via [io.opentelemetry.kotlin.factory.ContextFactory.implicit] will be used.
      * @param spanKind - the kind of span. Defaults to [SpanKind.INTERNAL].
      * @param startTimestamp - the start time of the span in nanoseconds. Defaults to the current time.
      * @param action - an action that allows attributes, links, and events to be added to the span. It

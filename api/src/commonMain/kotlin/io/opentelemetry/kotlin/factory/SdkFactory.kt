@@ -11,27 +11,27 @@ public interface SdkFactory {
     /**
      * Factory that constructs SpanContext objects.
      */
-    public val spanContextFactory: SpanContextFactory
+    public val spanContext: SpanContextFactory
 
     /**
      * Factory that constructs TraceFlags objects.
      */
-    public val traceFlagsFactory: TraceFlagsFactory
+    public val traceFlags: TraceFlagsFactory
 
     /**
      * Factory that constructs TraceState objects.
      */
-    public val traceStateFactory: TraceStateFactory
+    public val traceState: TraceStateFactory
 
     /**
      * Factory that constructs Context objects.
      */
-    public val contextFactory: ContextFactory
+    public val context: ContextFactory
 
     /**
      * Factory that constructs Span objects.
      */
-    public val spanFactory: SpanFactory
+    public val span: SpanFactory
 
     /**
      * Factory that constructs tracing IDs.

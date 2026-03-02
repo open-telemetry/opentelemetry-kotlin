@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaLogger
-import io.opentelemetry.kotlin.attributes.CompatMutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.OtelJavaContextAdapter
@@ -139,7 +139,7 @@ internal class LoggerAdapter(
         }
 
         if (attributes != null) {
-            val container = CompatMutableAttributeContainer()
+            val container = CompatAttributesModel()
             attributes(container)
             builder.setAllAttributes(container.otelJavaAttributes())
         }
