@@ -1,11 +1,9 @@
 package io.opentelemetry.kotlin.attributes
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributesBuilder
 
-@OptIn(ExperimentalApi::class)
 internal class CompatMutableAttributeContainer(
     private val attrs: OtelJavaAttributesBuilder = OtelJavaAttributes.builder()
 ) : MutableAttributeContainer {

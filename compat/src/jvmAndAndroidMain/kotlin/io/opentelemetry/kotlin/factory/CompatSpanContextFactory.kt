@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.SpanContextImpl
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceFlags
@@ -12,7 +11,6 @@ import io.opentelemetry.kotlin.tracing.model.TraceFlagsAdapter
 import io.opentelemetry.kotlin.tracing.model.TraceState
 import io.opentelemetry.kotlin.tracing.model.TraceStateAdapter
 
-@OptIn(ExperimentalApi::class)
 internal class CompatSpanContextFactory : SpanContextFactory {
 
     override val invalid: SpanContext by lazy {

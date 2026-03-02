@@ -1,13 +1,11 @@
 package io.opentelemetry.kotlin.tracing.ext
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceFlags
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-@OptIn(ExperimentalApi::class)
 internal class OtelJavaSpanContextExtTest {
 
     @Test

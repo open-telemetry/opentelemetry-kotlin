@@ -1,11 +1,9 @@
 package io.opentelemetry.kotlin.tracing.model
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.tracing.FakeTraceFlags
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
 internal class TraceFlagsExtTest {
 
     @Test

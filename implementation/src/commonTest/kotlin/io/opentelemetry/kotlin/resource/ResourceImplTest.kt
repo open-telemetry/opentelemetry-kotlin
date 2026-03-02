@@ -1,13 +1,11 @@
 package io.opentelemetry.kotlin.resource
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainerImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-@OptIn(ExperimentalApi::class)
 internal class ResourceImplTest {
 
     @Test

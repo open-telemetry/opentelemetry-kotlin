@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.BatchTelemetryProcessor
 import io.opentelemetry.kotlin.export.OperationResultCode
@@ -9,7 +8,6 @@ import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
-@OptIn(ExperimentalApi::class)
 internal class BatchSpanProcessorImpl(
     private val exporter: SpanExporter,
     private val maxQueueSize: Int,

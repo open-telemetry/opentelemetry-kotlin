@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.logging
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordBuilder
@@ -10,7 +9,6 @@ import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalApi::class)
 internal class OtelJavaLogRecordBuilderAdapter(private val impl: Logger) :
     OtelJavaLogRecordBuilder {
 

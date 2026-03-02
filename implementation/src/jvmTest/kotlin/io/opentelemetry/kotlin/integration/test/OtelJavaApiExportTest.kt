@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.integration.test
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
@@ -9,7 +8,6 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-@OptIn(ExperimentalApi::class)
 internal class OtelJavaApiExportTest {
 
     private lateinit var harness: IntegrationTestHarness

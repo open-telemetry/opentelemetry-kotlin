@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.context
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
@@ -20,7 +19,6 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-@OptIn(ExperimentalApi::class)
 internal class ContextRetrievalTest {
 
     private lateinit var impl: OtelJavaContext

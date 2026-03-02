@@ -1,8 +1,4 @@
 package io.opentelemetry.kotlin.context
-
-import io.opentelemetry.kotlin.ExperimentalApi
-
-@OptIn(ExperimentalApi::class)
 class FakeContext(
     val attrs: Map<ContextKey<*>, Any?> = emptyMap(),
     private val onAttach: () -> Unit = {},

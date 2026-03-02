@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.FakeTelemetryFileSystem
@@ -24,7 +23,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class PersistingSpanProcessorTest {
 
     @Test
@@ -327,7 +326,6 @@ internal class PersistingSpanProcessorTest {
 
     private class FakeTraceExportConfig(override val clock: Clock = FakeClock()) : TraceExportConfigDsl
 
-    @OptIn(ExperimentalApi::class)
     private class DelayingSpanProcessor(
         private val flushDelayMs: Long = 0,
         private val shutdownDelayMs: Long = 0,

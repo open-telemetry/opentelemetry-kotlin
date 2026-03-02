@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.integration.test.tracing.model
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
@@ -11,7 +10,6 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 internal class SpanModelTest {
 
     @Test

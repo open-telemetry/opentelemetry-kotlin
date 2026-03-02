@@ -1,6 +1,5 @@
 package io.opentelemetry.example.app
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.logging.model.SeverityNumber
 import io.opentelemetry.kotlin.tracing.model.SpanKind
 
@@ -20,7 +19,6 @@ data class EventEntry(
     val attributes: List<AttributeEntry> = emptyList(),
 )
 
-@OptIn(ExperimentalApi::class)
 data class SpanFormState(
     val name: String = "example-span",
     val spanKind: String = SpanKind.INTERNAL.name,
@@ -30,7 +28,6 @@ data class SpanFormState(
     val setAsImplicitContext: Boolean = false,
 )
 
-@OptIn(ExperimentalApi::class)
 data class LogFormState(
     val body: String = "Hello, world!",
     val severityNumber: String = SeverityNumber.INFO.name,

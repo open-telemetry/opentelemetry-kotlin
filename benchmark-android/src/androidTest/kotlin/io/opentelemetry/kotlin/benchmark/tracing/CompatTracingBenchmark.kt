@@ -10,13 +10,11 @@ import io.opentelemetry.kotlin.benchmark.fixtures.tracing.ComplexSpanCreationFix
 import io.opentelemetry.kotlin.benchmark.fixtures.tracing.SpanCreationFixture
 import io.opentelemetry.kotlin.benchmark.fixtures.tracing.SpanEndFixture
 import io.opentelemetry.kotlin.benchmark.fixtures.tracing.TracerCreationFixture
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalApi::class)
 @RunWith(AndroidJUnit4::class)
 class CompatTracingBenchmark {
 

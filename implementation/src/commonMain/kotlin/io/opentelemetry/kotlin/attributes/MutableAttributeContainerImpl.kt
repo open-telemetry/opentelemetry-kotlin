@@ -1,10 +1,8 @@
 package io.opentelemetry.kotlin.attributes
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.threadSafeMap
 
-@OptIn(ExperimentalApi::class)
 @ThreadSafe
 internal class MutableAttributeContainerImpl(
     private val attributeLimit: Int = DEFAULT_ATTRIBUTE_LIMIT,

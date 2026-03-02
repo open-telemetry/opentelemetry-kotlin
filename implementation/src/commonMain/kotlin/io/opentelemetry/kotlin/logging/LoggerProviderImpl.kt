@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.export.DelegatingTelemetryCloseable
 import io.opentelemetry.kotlin.export.TelemetryCloseable
@@ -10,7 +9,6 @@ import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.export.createCompositeLogRecordProcessor
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
 
-@OptIn(ExperimentalApi::class)
 internal class LoggerProviderImpl(
     private val clock: Clock,
     loggingConfig: LoggingConfig,

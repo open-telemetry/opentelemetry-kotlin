@@ -1,11 +1,9 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceFlags
 import io.opentelemetry.kotlin.tracing.model.TraceFlags
 import io.opentelemetry.kotlin.tracing.model.TraceFlagsAdapter
 
-@OptIn(ExperimentalApi::class)
 internal class CompatTraceFlagsFactory : TraceFlagsFactory {
     override val default: TraceFlags by lazy { TraceFlagsAdapter(OtelJavaTraceFlags.getDefault()) }
 

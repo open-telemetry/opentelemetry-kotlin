@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.context
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -9,7 +8,6 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
-@OptIn(ExperimentalApi::class)
 internal class ContextImplTest {
 
     private lateinit var factory: ContextFactoryImpl

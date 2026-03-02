@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.model
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
@@ -15,7 +14,6 @@ import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
 import io.opentelemetry.kotlin.tracing.recordException
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalApi::class)
 internal class OtelJavaSpanAdapter(private val span: Span) : OtelJavaSpan, OtelJavaImplicitContextKeyed {
 
     override fun <T : Any?> setAttribute(key: OtelJavaAttributeKey<T?>, value: T?): OtelJavaSpan {

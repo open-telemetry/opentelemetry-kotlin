@@ -2,7 +2,6 @@
 
 package io.opentelemetry.kotlin.logging.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaBody
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordData
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
@@ -14,7 +13,6 @@ import io.opentelemetry.kotlin.logging.toOtelJavaSeverityNumber
 import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 
-@OptIn(ExperimentalApi::class)
 internal fun ReadableLogRecord.toLogRecordData(): OtelJavaLogRecordData {
     return OtelJavaLogRecordDataImpl(
         timestampNanos = timestamp ?: 0,

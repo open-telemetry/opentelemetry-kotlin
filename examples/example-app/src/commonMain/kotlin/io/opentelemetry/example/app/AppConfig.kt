@@ -1,14 +1,12 @@
 package io.opentelemetry.example.app
 
 import io.opentelemetry.example.app.AppConfig.url
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 
 /**
  * Controls how the example app behaves.
  */
-@OptIn(ExperimentalApi::class)
 object AppConfig {
 
     /**

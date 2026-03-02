@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.tracing.data.EventData
 import io.opentelemetry.kotlin.tracing.data.LinkData
@@ -14,7 +13,6 @@ import io.opentelemetry.kotlin.tracing.model.SpanKind
  * propagating traces where it's not necessary to mutate the span - e.g. if a caller only needs to
  * know the trace/span IDs for a parent span.
  */
-@OptIn(ExperimentalApi::class)
 class NonRecordingSpan(
     override val parent: SpanContext,
     override val spanContext: SpanContext,

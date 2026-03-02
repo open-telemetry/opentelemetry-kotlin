@@ -1,4 +1,3 @@
-@file:OptIn(ExperimentalApi::class)
 
 package io.opentelemetry.kotlin.tracing.export
 

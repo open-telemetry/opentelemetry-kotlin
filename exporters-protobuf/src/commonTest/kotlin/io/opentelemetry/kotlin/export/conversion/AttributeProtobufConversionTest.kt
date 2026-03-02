@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.export.conversion
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.proto.common.v1.AnyValue
 import io.opentelemetry.proto.common.v1.ArrayValue
 import io.opentelemetry.proto.common.v1.KeyValue
@@ -10,7 +9,6 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 class AttributeProtobufConversionTest {
 
     @Test

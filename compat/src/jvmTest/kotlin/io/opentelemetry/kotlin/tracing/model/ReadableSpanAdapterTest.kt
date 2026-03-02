@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.tracing.model
 import fakeInProgressOtelJavaSpanData
 import fakeOtelJavaEventData
 import fakeOtelJavaLinkData
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanData
 import io.opentelemetry.kotlin.aliases.OtelJavaStatusData
 import io.opentelemetry.kotlin.attributes.attrsFromMap
@@ -20,7 +19,6 @@ import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
 internal class ReadableSpanAdapterTest {
 
     private lateinit var adapter: ReadableSpanAdapter

@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -29,7 +28,6 @@ import kotlinx.coroutines.Dispatchers
  * telemetry when it has been sent. [PersistingSpanExporter] is responsible for initiating
  * retries of unsent telemetry from previous process launches sent on disk.
  */
-@OptIn(ExperimentalApi::class)
 internal class PersistingSpanProcessor(
     processor: SpanProcessor,
     exporter: SpanExporter,

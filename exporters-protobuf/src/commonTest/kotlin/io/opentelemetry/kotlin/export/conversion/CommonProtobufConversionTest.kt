@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.export.conversion
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -13,7 +12,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 class CommonProtobufConversionTest {
 
     @Test

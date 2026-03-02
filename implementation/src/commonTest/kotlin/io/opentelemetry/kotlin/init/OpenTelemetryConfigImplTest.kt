@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.init
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.ImplicitContextStorageMode
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
@@ -10,7 +9,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 internal class OpenTelemetryConfigImplTest {
 
     private val clock = FakeClock()

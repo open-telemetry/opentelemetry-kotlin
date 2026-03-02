@@ -1,10 +1,8 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
 internal class TracingIdFactoryTest {
 
     private val factory = createCompatSdkFactory().tracingIdFactory

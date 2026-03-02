@@ -1,11 +1,9 @@
 package io.opentelemetry.kotlin.resource
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.aliases.OtelJavaResourceBuilder
 import io.opentelemetry.kotlin.attributes.convertToMap
 
-@OptIn(ExperimentalApi::class)
 internal class ResourceAdapter(
     impl: OtelJavaResource
 ) : Resource {

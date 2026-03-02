@@ -10,7 +10,6 @@ import io.ktor.client.statement.bodyAsBytes
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.export.OtlpResponse.ClientError
 import io.opentelemetry.kotlin.export.OtlpResponse.ServerError
 import io.opentelemetry.kotlin.export.OtlpResponse.Success
@@ -22,7 +21,6 @@ import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.export.deserializeTraceRecordErrorMessage
 import io.opentelemetry.kotlin.tracing.export.toProtobufByteArray
 
-@OptIn(ExperimentalApi::class)
 internal class OtlpClient(
     private val baseUrl: String,
     private val httpClient: HttpClient = defaultHttpClient

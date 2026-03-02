@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaTracer
 import io.opentelemetry.kotlin.context.Context
@@ -15,7 +14,6 @@ import io.opentelemetry.kotlin.tracing.model.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalApi::class)
 internal class TracerAdapter(
     private val tracer: OtelJavaTracer,
     private val clock: Clock,

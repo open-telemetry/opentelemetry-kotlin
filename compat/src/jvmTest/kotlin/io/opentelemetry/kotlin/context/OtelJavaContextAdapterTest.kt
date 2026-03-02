@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.context
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaContextKey
 import io.opentelemetry.kotlin.factory.createCompatSdkFactory
 import org.junit.Test
@@ -8,7 +7,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotSame
 import kotlin.test.assertNull
 
-@OptIn(ExperimentalApi::class)
 internal class OtelJavaContextAdapterTest {
 
     @Test

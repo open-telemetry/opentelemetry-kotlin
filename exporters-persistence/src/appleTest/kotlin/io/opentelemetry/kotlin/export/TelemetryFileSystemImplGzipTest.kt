@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -13,7 +12,6 @@ import okio.buffer
 import okio.fakefilesystem.FakeFileSystem
 import okio.use
 
-@OptIn(ExperimentalApi::class)
 internal class TelemetryFileSystemImplGzipTest {
 
     private lateinit var fakeFileSystem: FakeFileSystem

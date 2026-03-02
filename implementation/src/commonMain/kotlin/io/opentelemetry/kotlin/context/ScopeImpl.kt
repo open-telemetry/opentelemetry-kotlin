@@ -1,9 +1,7 @@
 package io.opentelemetry.kotlin.context
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import kotlin.concurrent.Volatile
 
-@OptIn(ExperimentalApi::class)
 internal class ScopeImpl(
     private val previousContext: Context,
     private val currentContext: Context,

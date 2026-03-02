@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.FakeMutableAttributeContainer
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.tracing.data.EventData
@@ -12,7 +11,6 @@ import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanKind
 
 @Suppress("UNUSED_PARAMETER")
-@OptIn(ExperimentalApi::class)
 class FakeSpan(
     override var name: String = "",
     override val spanContext: SpanContext = FakeSpanContext.INVALID,

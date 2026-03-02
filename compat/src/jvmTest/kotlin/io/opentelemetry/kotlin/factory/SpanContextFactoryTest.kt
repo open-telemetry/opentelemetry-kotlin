@@ -1,11 +1,9 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
-@OptIn(ExperimentalApi::class)
 internal class SpanContextFactoryTest {
 
     private val factory = createCompatSdkFactory()

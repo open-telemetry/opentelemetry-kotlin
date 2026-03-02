@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.factory.SdkFactory
@@ -16,7 +15,6 @@ import io.opentelemetry.kotlin.tracing.model.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanModel
 import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 
-@OptIn(ExperimentalApi::class)
 internal class TracerImpl(
     private val clock: Clock,
     private val processor: SpanProcessor?,

@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.data
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -9,7 +8,6 @@ import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanKind
 
-@OptIn(ExperimentalApi::class)
 class FakeSpanData(
     override val name: String = "span",
     override val status: StatusData = StatusData.Ok,

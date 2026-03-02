@@ -1,10 +1,8 @@
 package io.opentelemetry.kotlin.context
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaContextKey
 
-@OptIn(ExperimentalApi::class)
 internal class ContextAdapter(
     val impl: OtelJavaContext,
     private val repository: ContextKeyRepository = ContextKeyRepository.INSTANCE

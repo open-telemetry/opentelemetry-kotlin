@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing.model
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaImplicitContextKeyed
@@ -22,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalApi::class)
 internal class SpanAdapter(
     val impl: OtelJavaSpan,
     private val clock: Clock,

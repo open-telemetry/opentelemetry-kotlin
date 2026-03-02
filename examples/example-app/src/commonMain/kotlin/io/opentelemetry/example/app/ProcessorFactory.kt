@@ -1,8 +1,6 @@
-@file:OptIn(ExperimentalApi::class)
 
 package io.opentelemetry.example.app
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.createBatchLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.createOtlpHttpLogRecordExporter

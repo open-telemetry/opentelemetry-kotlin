@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.data
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanData
 import io.opentelemetry.kotlin.attributes.convertToMap
@@ -13,7 +12,6 @@ import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanContextAdapter
 import io.opentelemetry.kotlin.tracing.model.SpanKind
 
-@OptIn(ExperimentalApi::class)
 internal class SpanDataAdapter(
     val impl: OtelJavaSpanData,
 ) : SpanData {

@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanProcessor
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
@@ -11,7 +10,6 @@ import io.opentelemetry.kotlin.tracing.model.ReadWriteSpanAdapter
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpanAdapter
 
-@OptIn(ExperimentalApi::class)
 internal class SpanProcessorAdapter(
     private val impl: OtelJavaSpanProcessor
 ) : SpanProcessor {

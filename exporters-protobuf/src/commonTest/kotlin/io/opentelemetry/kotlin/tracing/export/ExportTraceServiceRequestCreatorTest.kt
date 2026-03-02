@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.factory.toHexString
@@ -19,7 +18,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 class ExportTraceServiceRequestCreatorTest {
 
     private val telemetry = FakeSpanData(

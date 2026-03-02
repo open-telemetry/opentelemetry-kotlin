@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin
 import org.junit.Assert
 import org.junit.Test
 
-@OptIn(ExperimentalApi::class)
 internal class OpenTelemetrySdkTest {
 
     @Test

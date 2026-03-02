@@ -1,13 +1,11 @@
 package io.opentelemetry.kotlin.logging.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
 import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-@OptIn(ExperimentalApi::class)
 internal class ReadableLogRecordExtTest {
 
     @Test
