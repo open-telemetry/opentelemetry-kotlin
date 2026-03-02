@@ -66,11 +66,11 @@ public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
 
 public abstract interface class io/opentelemetry/kotlin/factory/SdkFactory {
 	public abstract fun getContext ()Lio/opentelemetry/kotlin/factory/ContextFactory;
-	public abstract fun getIdentifier ()Lio/opentelemetry/kotlin/factory/TracingIdFactory;
 	public abstract fun getSpan ()Lio/opentelemetry/kotlin/factory/SpanFactory;
 	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/factory/SpanContextFactory;
 	public abstract fun getTraceFlags ()Lio/opentelemetry/kotlin/factory/TraceFlagsFactory;
 	public abstract fun getTraceState ()Lio/opentelemetry/kotlin/factory/TraceStateFactory;
+	public abstract fun getTracingIdFactory ()Lio/opentelemetry/kotlin/factory/TracingIdFactory;
 }
 
 public abstract interface class io/opentelemetry/kotlin/factory/SpanContextFactory {

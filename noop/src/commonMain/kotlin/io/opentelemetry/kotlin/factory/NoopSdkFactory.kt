@@ -9,5 +9,5 @@ internal object NoopSdkFactory : SdkFactory {
     override val traceState: TraceStateFactory = NoopTraceStateFactory
     override val context: ContextFactory = NoopContextFactory
     override val span: SpanFactory = NoopSpanFactory
-    override val identifier: TracingIdFactory = NoopTracingIdFactory
+    override val tracingIdFactory: TracingIdFactory = NoopTracingIdFactory
 }

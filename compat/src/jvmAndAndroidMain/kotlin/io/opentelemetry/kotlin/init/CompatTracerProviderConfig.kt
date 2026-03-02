@@ -25,7 +25,7 @@ internal class CompatTracerProviderConfig(
     private val spanLimitsConfig = CompatSpanLimitsConfig()
 
     init {
-        val idGenerator = sdkFactory.identifier
+        val idGenerator = sdkFactory.tracingIdFactory
         if (idGenerator is OtelJavaIdGenerator) {
             builder.setIdGenerator(idGenerator)
         }
