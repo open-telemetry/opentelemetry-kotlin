@@ -156,8 +156,8 @@ internal class NoopTests {
         assertFalse(invalid.isValid)
 
         val other = otel.spanContext.create(
-            otel.tracingIdFactory.generateTraceIdBytes(),
-            otel.tracingIdFactory.generateSpanIdBytes(),
+            otel.idGenerator.generateTraceIdBytes(),
+            otel.idGenerator.generateSpanIdBytes(),
             otel.traceFlags.default,
             otel.traceState.default
         )

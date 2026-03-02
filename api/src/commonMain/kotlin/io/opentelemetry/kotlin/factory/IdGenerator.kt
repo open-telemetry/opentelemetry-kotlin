@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.factory
 import io.opentelemetry.kotlin.ExperimentalApi
 
 @ExperimentalApi
-public interface TracingIdFactory {
+public interface IdGenerator {
 
     /**
      * Generates a new ID for a span.

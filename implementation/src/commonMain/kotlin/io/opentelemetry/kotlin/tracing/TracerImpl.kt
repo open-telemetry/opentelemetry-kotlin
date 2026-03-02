@@ -32,7 +32,7 @@ internal class TracerImpl(
     private val traceFlagsDefault = sdkFactory.traceFlags.default
     private val traceStateDefault = sdkFactory.traceState.default
     private val spanFactory = sdkFactory.span
-    private val tracingIdFactory = sdkFactory.tracingIdFactory
+    private val tracingIdFactory = sdkFactory.idGenerator
 
     @Suppress("DEPRECATION")
     @Deprecated(

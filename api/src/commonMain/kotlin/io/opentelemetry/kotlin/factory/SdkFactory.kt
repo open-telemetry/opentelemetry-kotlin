@@ -36,5 +36,5 @@ public interface SdkFactory {
     /**
      * Factory that constructs tracing IDs.
      */
-    public val tracingIdFactory: TracingIdFactory
+    public val idGenerator: IdGenerator
 }

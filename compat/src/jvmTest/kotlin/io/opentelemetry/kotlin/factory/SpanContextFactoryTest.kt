@@ -17,7 +17,7 @@ internal class SpanContextFactoryTest {
 
     @Test
     fun `test valid`() {
-        val generator = CompatTracingIdFactory()
+        val generator = CompatIdGenerator()
         val traceId = generator.generateTraceIdBytes()
         val spanId = generator.generateSpanIdBytes()
         val traceFlags = factory.traceFlags.default

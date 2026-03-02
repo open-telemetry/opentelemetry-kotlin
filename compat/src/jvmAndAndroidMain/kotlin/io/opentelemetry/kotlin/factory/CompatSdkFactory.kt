@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 
 @OptIn(ExperimentalApi::class)
 internal class CompatSdkFactory(
-    override val tracingIdFactory: TracingIdFactory = CompatTracingIdFactory()
+    override val idGenerator: IdGenerator = CompatIdGenerator()
 ) : SdkFactory {
     override val spanContext: SpanContextFactory by lazy { CompatSpanContextFactory() }
     override val traceFlags: TraceFlagsFactory by lazy { CompatTraceFlagsFactory() }

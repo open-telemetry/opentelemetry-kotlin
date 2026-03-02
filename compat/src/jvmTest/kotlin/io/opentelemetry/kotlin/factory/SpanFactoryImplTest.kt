@@ -25,7 +25,7 @@ internal class SpanFactoryImplTest {
 
     @Test
     fun `test from span context`() {
-        val generator = CompatTracingIdFactory()
+        val generator = CompatIdGenerator()
         val spanContext = factory.spanContext.create(
             traceIdBytes = generator.generateTraceIdBytes(),
             spanIdBytes = generator.generateSpanIdBytes(),

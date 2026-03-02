@@ -4,9 +4,9 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.aliases.OtelJavaIdGenerator
 import io.opentelemetry.kotlin.createCompatOpenTelemetryImpl
+import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.CompatSdkFactory
-import io.opentelemetry.kotlin.factory.CompatTracingIdFactory
-import io.opentelemetry.kotlin.factory.TracingIdFactory
+import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.toOtelJavaApi
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlin.random.Random
@@ -22,7 +22,7 @@ internal class OtelKotlinHarness(scheduler: TestCoroutineScheduler) :
                 tracerProvider { tracerProviderConfig() }
                 loggerProvider { loggerProviderConfig() }
             },
-            sdkFactory = CompatSdkFactory(tracingIdFactory = FakeTracingIdFactory())
+            sdkFactory = CompatSdkFactory(idGenerator = FakeIdGenerator())
         )
     }
 
@@ -32,9 +32,9 @@ internal class OtelKotlinHarness(scheduler: TestCoroutineScheduler) :
 }
 
 @OptIn(ExperimentalApi::class, ExperimentalStdlibApi::class)
-private class FakeTracingIdFactory(
-    private val impl: TracingIdFactory = CompatTracingIdFactory(),
-) : TracingIdFactory by impl, OtelJavaIdGenerator {
+private class FakeIdGenerator(
+    private val impl: IdGenerator = CompatIdGenerator(),
+) : IdGenerator by impl, OtelJavaIdGenerator {
 
     private val random: Random = Random(0)
 
