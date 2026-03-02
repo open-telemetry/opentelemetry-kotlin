@@ -11,8 +11,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
-import io.opentelemetry.kotlin.tracing.SpanLinkCompatImpl
 import io.opentelemetry.kotlin.tracing.SpanEventCompatImpl
+import io.opentelemetry.kotlin.tracing.SpanLinkCompatImpl
 import io.opentelemetry.kotlin.tracing.data.EventData
 import io.opentelemetry.kotlin.tracing.data.LinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
