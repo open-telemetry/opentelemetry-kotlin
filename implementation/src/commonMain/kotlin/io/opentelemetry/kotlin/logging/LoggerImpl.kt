@@ -23,10 +23,10 @@ internal class LoggerImpl(
     private val logLimitConfig: LogLimitConfig,
 ) : Logger {
 
-    private val contextFactory = sdkFactory.contextFactory
+    private val contextFactory = sdkFactory.context
     private val root = contextFactory.root()
-    private val invalidSpanContext = sdkFactory.spanContextFactory.invalid
-    private val spanFactory = sdkFactory.spanFactory
+    private val invalidSpanContext = sdkFactory.spanContext.invalid
+    private val spanFactory = sdkFactory.span
 
     override fun enabled(
         context: Context?,
@@ -36,7 +36,7 @@ internal class LoggerImpl(
         if (processor == null) {
             return false
         }
-        val ctx = context ?: contextFactory.implicitContext()
+        val ctx = context ?: contextFactory.implicit()
         return processor.enabled(ctx, key, severityNumber, eventName)
     }
 
@@ -129,7 +129,7 @@ internal class LoggerImpl(
         severityNumber: SeverityNumber?,
         attributes: (MutableAttributeContainer.() -> Unit)?
     ) {
-        val ctx = context ?: contextFactory.implicitContext()
+        val ctx = context ?: contextFactory.implicit()
         val spanContext = when (ctx) {
             root -> invalidSpanContext
             else -> spanFactory.fromContext(ctx).spanContext

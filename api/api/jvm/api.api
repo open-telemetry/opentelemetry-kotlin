@@ -52,17 +52,17 @@ public abstract interface class io/opentelemetry/kotlin/context/Scope {
 }
 
 public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
-	public abstract fun implicitContext ()Lio/opentelemetry/kotlin/context/Context;
+	public abstract fun implicit ()Lio/opentelemetry/kotlin/context/Context;
 	public abstract fun root ()Lio/opentelemetry/kotlin/context/Context;
 	public abstract fun storeSpan (Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/model/Span;)Lio/opentelemetry/kotlin/context/Context;
 }
 
 public abstract interface class io/opentelemetry/kotlin/factory/SdkFactory {
-	public abstract fun getContextFactory ()Lio/opentelemetry/kotlin/factory/ContextFactory;
-	public abstract fun getSpanContextFactory ()Lio/opentelemetry/kotlin/factory/SpanContextFactory;
-	public abstract fun getSpanFactory ()Lio/opentelemetry/kotlin/factory/SpanFactory;
-	public abstract fun getTraceFlagsFactory ()Lio/opentelemetry/kotlin/factory/TraceFlagsFactory;
-	public abstract fun getTraceStateFactory ()Lio/opentelemetry/kotlin/factory/TraceStateFactory;
+	public abstract fun getContext ()Lio/opentelemetry/kotlin/factory/ContextFactory;
+	public abstract fun getSpan ()Lio/opentelemetry/kotlin/factory/SpanFactory;
+	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/factory/SpanContextFactory;
+	public abstract fun getTraceFlags ()Lio/opentelemetry/kotlin/factory/TraceFlagsFactory;
+	public abstract fun getTraceState ()Lio/opentelemetry/kotlin/factory/TraceStateFactory;
 	public abstract fun getTracingIdFactory ()Lio/opentelemetry/kotlin/factory/TracingIdFactory;
 }
 

@@ -87,12 +87,12 @@ internal class ContextImplTest {
     fun testAttach() {
         val ctx = factory.root()
         ctx.attach()
-        assertSame(ctx, factory.implicitContext())
+        assertSame(ctx, factory.implicit())
     }
 
     @Test
     fun testImplicitContext() {
         val ctx = factory.root()
-        assertSame(ctx, factory.implicitContext())
+        assertSame(ctx, factory.implicit())
     }
 }
