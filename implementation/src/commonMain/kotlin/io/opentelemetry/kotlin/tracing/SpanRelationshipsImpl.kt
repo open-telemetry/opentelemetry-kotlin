@@ -30,7 +30,7 @@ internal class SpanRelationshipsImpl(
             if (attributes != null) {
                 attributes(container)
             }
-            links.add(LinkImpl(spanContext, container))
+            links.add(SpanLinkImpl(spanContext, container))
         }
     }
 

@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.Resource
-import io.opentelemetry.kotlin.tracing.LinkImpl
+import io.opentelemetry.kotlin.tracing.SpanLinkImpl
 import io.opentelemetry.kotlin.tracing.SpanDataImpl
 import io.opentelemetry.kotlin.tracing.SpanEventImpl
 import io.opentelemetry.kotlin.tracing.data.EventData
@@ -118,7 +118,7 @@ internal class SpanModel(
                 if (attributes != null) {
                     attributes(container)
                 }
-                val link = LinkImpl(spanContext, container)
+                val link = SpanLinkImpl(spanContext, container)
                 linksList.add(link)
             }
         }

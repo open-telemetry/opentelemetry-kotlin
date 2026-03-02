@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
-import io.opentelemetry.kotlin.tracing.LinkCompatImpl
+import io.opentelemetry.kotlin.tracing.SpanLinkCompatImpl
 import io.opentelemetry.kotlin.tracing.SpanEventCompatImpl
 import io.opentelemetry.kotlin.tracing.data.EventData
 import io.opentelemetry.kotlin.tracing.data.LinkData
@@ -90,7 +90,7 @@ internal class SpanAdapter(
             attributes(container)
         }
         if (linksImpl.size < spanLimitsConfig.linkCountLimit) {
-            linksImpl.add(LinkCompatImpl(spanContext, container))
+            linksImpl.add(SpanLinkCompatImpl(spanContext, container))
         }
         impl.addLink(spanContext.toOtelJavaSpanContext(), container.otelJavaAttributes())
     }
