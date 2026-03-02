@@ -59,7 +59,7 @@ class OpenTelemetryExtension : BeforeEachCallback {
         return openTelemetry.tracerProvider.getTracer(name)
     }
 
-    override fun beforeEach(context: ExtensionContext?) {
+    override fun beforeEach(context: ExtensionContext) {
         spanExporter.reset()
     }
 }

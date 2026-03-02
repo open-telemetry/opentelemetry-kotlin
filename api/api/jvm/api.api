@@ -1,13 +1,6 @@
 public abstract interface annotation class io/opentelemetry/kotlin/ExperimentalApi : java/lang/annotation/Annotation {
 }
 
-public abstract interface class io/opentelemetry/kotlin/InstrumentationScopeInfo {
-	public abstract fun getAttributes ()Ljava/util/Map;
-	public abstract fun getName ()Ljava/lang/String;
-	public abstract fun getSchemaUrl ()Ljava/lang/String;
-	public abstract fun getVersion ()Ljava/lang/String;
-}
-
 public abstract interface class io/opentelemetry/kotlin/OpenTelemetry : io/opentelemetry/kotlin/factory/SdkFactory {
 	public abstract fun getLoggerProvider ()Lio/opentelemetry/kotlin/logging/LoggerProvider;
 	public abstract fun getTracerProvider ()Lio/opentelemetry/kotlin/tracing/TracerProvider;
