@@ -105,7 +105,7 @@ public final class io/opentelemetry/kotlin/logging/export/LogRecordProcessor$Def
 	public static fun enabled (Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/InstrumentationScopeInfo;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;)Z
 }
 
-public abstract interface class io/opentelemetry/kotlin/logging/model/ReadWriteLogRecord : io/opentelemetry/kotlin/attributes/MutableAttributeContainer, io/opentelemetry/kotlin/logging/model/ReadableLogRecord {
+public abstract interface class io/opentelemetry/kotlin/logging/model/ReadWriteLogRecord : io/opentelemetry/kotlin/attributes/AttributeContainer, io/opentelemetry/kotlin/attributes/MutableAttributeContainer, io/opentelemetry/kotlin/logging/model/ReadableLogRecord {
 	public abstract fun getBody ()Ljava/lang/String;
 	public abstract fun getEventName ()Ljava/lang/String;
 	public abstract fun getObservedTimestamp ()Ljava/lang/Long;
@@ -164,7 +164,7 @@ public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanProce
 	public abstract fun onStart (Lio/opentelemetry/kotlin/tracing/model/ReadWriteSpan;Lio/opentelemetry/kotlin/context/Context;)V
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadWriteSpan : io/opentelemetry/kotlin/tracing/model/ReadableSpan, io/opentelemetry/kotlin/tracing/model/Span {
+public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadWriteSpan : io/opentelemetry/kotlin/attributes/AttributeContainer, io/opentelemetry/kotlin/tracing/model/ReadableSpan, io/opentelemetry/kotlin/tracing/model/Span {
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadableSpan : io/opentelemetry/kotlin/tracing/data/SpanData {

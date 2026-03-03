@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaIdGenerator
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProviderBuilder
-import io.opentelemetry.kotlin.attributes.CompatMutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.factory.SdkFactory
@@ -32,7 +32,7 @@ internal class CompatTracerProviderConfig(
     }
 
     override fun resource(schemaUrl: String?, attributes: MutableAttributeContainer.() -> Unit) {
-        val attrs = CompatMutableAttributeContainer().apply(attributes).otelJavaAttributes()
+        val attrs = CompatAttributesModel().apply(attributes).otelJavaAttributes()
         builder.setResource(OtelJavaResource.create(attrs, schemaUrl))
     }
 

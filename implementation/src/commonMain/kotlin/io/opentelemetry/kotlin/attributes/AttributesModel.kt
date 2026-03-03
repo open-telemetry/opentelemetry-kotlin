@@ -6,10 +6,10 @@ import io.opentelemetry.kotlin.threadSafeMap
 
 @OptIn(ExperimentalApi::class)
 @ThreadSafe
-internal class MutableAttributeContainerImpl(
+internal class AttributesModel(
     private val attributeLimit: Int = DEFAULT_ATTRIBUTE_LIMIT,
     private val attrs: MutableMap<String, Any> = threadSafeMap()
-) : MutableAttributeContainer {
+) : MutableAttributeContainer, AttributeContainer {
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
         if (canAddAttribute(key)) {
