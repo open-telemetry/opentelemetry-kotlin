@@ -120,6 +120,19 @@ val logger = otelKotlin.loggerProvider.getLogger("my_logger")
 logger.log("Hello, World!")
 ```
 
+### API stability
+
+The API is subject to breaking change without notice and most symbols require an opt-in. You can
+opt-in on a case-by-case basis by adding `@OptIn(ExperimentalApi::class)` at each call site.
+Alternatively, you can opt-in for your whole module or project by altering Kotlin's compiler
+arguments:
+
+```kotlin
+kotlin {
+    optIn.add("io.opentelemetry.kotlin.ExperimentalApi")
+}
+```
+
 ### Example Apps
 
 Example usage of the library can be found [here](examples).
