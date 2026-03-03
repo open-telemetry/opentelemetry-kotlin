@@ -20,5 +20,5 @@ internal class ContextFactoryImpl : ContextFactory {
         return context.set(spanKey, span)
     }
 
-    override fun implicitContext(): Context = storage.implicitContext()
+    override fun implicit(): Context = storage.implicitContext()
 }

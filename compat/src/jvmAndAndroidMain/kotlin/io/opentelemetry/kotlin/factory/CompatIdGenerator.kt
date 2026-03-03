@@ -6,9 +6,9 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanId
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceId
 
 @OptIn(ExperimentalApi::class)
-internal class CompatTracingIdFactory(
+internal class CompatIdGenerator(
     private val generator: OtelJavaIdGenerator = OtelJavaIdGenerator.random()
-) : TracingIdFactory {
+) : IdGenerator {
     override fun generateSpanIdBytes(): ByteArray = generator.generateSpanId().hexToByteArray()
     override fun generateTraceIdBytes(): ByteArray = generator.generateTraceId().hexToByteArray()
     override val invalidTraceId: ByteArray = OtelJavaTraceId.getInvalid().hexToByteArray()

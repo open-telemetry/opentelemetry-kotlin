@@ -4,15 +4,15 @@ import io.opentelemetry.kotlin.ExperimentalApi
 
 @OptIn(ExperimentalApi::class)
 internal class SdkFactoryImpl(
-    override val tracingIdFactory: TracingIdFactory = TracingIdFactoryImpl()
+    override val idGenerator: IdGenerator = IdGeneratorImpl()
 ) : SdkFactory {
-    override val traceFlagsFactory: TraceFlagsFactory by lazy { TraceFlagsFactoryImpl() }
-    override val traceStateFactory: TraceStateFactory by lazy { TraceStateFactoryImpl() }
-    override val spanContextFactory: SpanContextFactory by lazy {
-        SpanContextFactoryImpl(tracingIdFactory, traceFlagsFactory, traceStateFactory)
+    override val traceFlags: TraceFlagsFactory by lazy { TraceFlagsFactoryImpl() }
+    override val traceState: TraceStateFactory by lazy { TraceStateFactoryImpl() }
+    override val spanContext: SpanContextFactory by lazy {
+        SpanContextFactoryImpl(idGenerator, traceFlags, traceState)
     }
-    override val contextFactory: ContextFactory by lazy { ContextFactoryImpl() }
-    override val spanFactory: SpanFactory by lazy {
-        SpanFactoryImpl(spanContextFactory, (contextFactory as ContextFactoryImpl).spanKey)
+    override val context: ContextFactory by lazy { ContextFactoryImpl() }
+    override val span: SpanFactory by lazy {
+        SpanFactoryImpl(spanContext, (context as ContextFactoryImpl).spanKey)
     }
 }

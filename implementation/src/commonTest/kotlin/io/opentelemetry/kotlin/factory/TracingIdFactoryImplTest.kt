@@ -15,11 +15,11 @@ internal class TracingIdFactoryImplTest {
         private const val TRACE_ID_PATTERN = "^[0-9a-f]{32}$"
     }
 
-    private lateinit var factory: TracingIdFactory
+    private lateinit var factory: IdGenerator
 
     @BeforeTest
     fun setUp() {
-        factory = TracingIdFactoryImpl(Random(0))
+        factory = IdGeneratorImpl(Random(0))
     }
 
     @Test

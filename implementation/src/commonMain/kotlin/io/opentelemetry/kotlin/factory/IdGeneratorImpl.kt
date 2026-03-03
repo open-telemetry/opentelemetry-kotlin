@@ -13,9 +13,9 @@ import kotlin.random.Random
  * put the ByteArray directly in the Protobuf payload without any serialization/deserialization.
  */
 @OptIn(ExperimentalApi::class)
-internal class TracingIdFactoryImpl(
+internal class IdGeneratorImpl(
     private val random: Random = Random.Default
-) : TracingIdFactory {
+) : IdGenerator {
 
     private companion object {
         private const val TRACE_ID_BYTES = 16
