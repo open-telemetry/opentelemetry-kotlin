@@ -18,7 +18,7 @@ public interface ContextFactory {
     /**
      * Retrieves the implicit Context, or [root] if none is currently set.
      */
-    public fun implicitContext(): Context
+    public fun implicit(): Context
 
     /**
      * Stores a span and returns a new [Context], using a pre-defined key.

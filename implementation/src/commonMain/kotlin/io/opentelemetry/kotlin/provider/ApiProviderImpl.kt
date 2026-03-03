@@ -4,9 +4,9 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.ThreadSafe
+import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainerImpl
 import io.opentelemetry.kotlin.threadSafeMap
 
 /**
@@ -37,7 +37,7 @@ internal class ApiProviderImpl<T>(
         schemaUrl: String?,
         attributes: (MutableAttributeContainer.() -> Unit)?
     ): InstrumentationScopeInfo {
-        val container = MutableAttributeContainerImpl(DEFAULT_ATTRIBUTE_LIMIT, mutableMapOf())
+        val container = AttributesModel(DEFAULT_ATTRIBUTE_LIMIT, mutableMapOf())
         if (attributes != null) {
             attributes(container)
         }

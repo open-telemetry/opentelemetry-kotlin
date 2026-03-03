@@ -2,8 +2,8 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainerImpl
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.threadSafeList
 import io.opentelemetry.kotlin.tracing.data.EventData
@@ -15,7 +15,7 @@ import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 internal class SpanRelationshipsImpl(
     val clock: Clock,
     val spanLimitConfig: SpanLimitConfig,
-    val attrs: MutableAttributeContainer = MutableAttributeContainerImpl(spanLimitConfig.attributeCountLimit),
+    val attrs: MutableAttributeContainer = AttributesModel(spanLimitConfig.attributeCountLimit),
 ) : SpanRelationships, MutableAttributeContainer by attrs {
 
     val links = threadSafeList<LinkData>()
@@ -26,11 +26,11 @@ internal class SpanRelationshipsImpl(
         attributes: (MutableAttributeContainer.() -> Unit)?
     ) {
         if (links.size < spanLimitConfig.linkCountLimit) {
-            val container = MutableAttributeContainerImpl(spanLimitConfig.attributeCountPerLinkLimit)
+            val container = AttributesModel(spanLimitConfig.attributeCountPerLinkLimit)
             if (attributes != null) {
                 attributes(container)
             }
-            links.add(LinkImpl(spanContext, container))
+            links.add(SpanLinkImpl(spanContext, container))
         }
     }
 
@@ -40,7 +40,7 @@ internal class SpanRelationshipsImpl(
         attributes: (MutableAttributeContainer.() -> Unit)?
     ) {
         if (events.size < spanLimitConfig.eventCountLimit) {
-            val container = MutableAttributeContainerImpl(spanLimitConfig.attributeCountPerEventLimit)
+            val container = AttributesModel(spanLimitConfig.attributeCountPerEventLimit)
             if (attributes != null) {
                 attributes(container)
             }
