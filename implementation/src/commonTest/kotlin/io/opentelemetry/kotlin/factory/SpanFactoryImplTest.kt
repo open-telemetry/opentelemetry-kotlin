@@ -7,8 +7,8 @@ import kotlin.test.assertFalse
 
 internal class SpanFactoryImplTest {
 
-    private val sdkFactory = createSdkFactory()
-    private val factory = sdkFactory.span
+    private val contextFactory = ContextFactoryImpl()
+    private val factory = SpanFactoryImpl(SpanContextFactoryImpl(IdGeneratorImpl()), contextFactory.spanKey)
 
     @Test
     fun testInvalidSpan() {

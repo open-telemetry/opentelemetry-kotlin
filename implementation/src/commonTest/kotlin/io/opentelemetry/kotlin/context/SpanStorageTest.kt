@@ -1,26 +1,17 @@
 package io.opentelemetry.kotlin.context
 
-import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.factory.SdkFactory
-import io.opentelemetry.kotlin.factory.SpanFactory
-import io.opentelemetry.kotlin.factory.createSdkFactory
+import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.factory.IdGeneratorImpl
+import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
+import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.tracing.FakeSpan
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertSame
 
 internal class SpanStorageTest {
 
-    private lateinit var sdkFactory: SdkFactory
-    private lateinit var spanFactory: SpanFactory
-    private lateinit var contextFactory: ContextFactory
-
-    @BeforeTest
-    fun setUp() {
-        sdkFactory = createSdkFactory()
-        spanFactory = sdkFactory.span
-        contextFactory = sdkFactory.context
-    }
+    private val contextFactory = ContextFactoryImpl()
+    private val spanFactory = SpanFactoryImpl(SpanContextFactoryImpl(IdGeneratorImpl()), contextFactory.spanKey)
 
     @Test
     fun testSpanStorage() {

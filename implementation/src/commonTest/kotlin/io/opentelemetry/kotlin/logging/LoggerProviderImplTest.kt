@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.factory.createSdkFactory
+import io.opentelemetry.kotlin.factory.SdkFactoryImpl
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
@@ -24,7 +24,7 @@ internal class LoggerProviderImplTest {
         LogLimitConfig(100, 100),
         ResourceImpl(AttributesModel(), null)
     )
-    private val factory = createSdkFactory()
+    private val factory = SdkFactoryImpl()
 
     @Test
     fun testMinimalLoggerProvider() {

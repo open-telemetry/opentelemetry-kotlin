@@ -9,25 +9,25 @@ import kotlin.test.assertSame
 
 internal class ContextFactoryImplTest {
 
-    private val factory = createCompatSdkFactory()
+    private val contextFactory = CompatContextFactory()
+    private val spanFactory = CompatSpanFactory(CompatSpanContextFactory())
 
     @Test
     fun `test root`() {
-        assertSame(OtelJavaContext.root(), factory.context.root().toOtelJavaContext())
+        assertSame(OtelJavaContext.root(), contextFactory.root().toOtelJavaContext())
     }
 
     @Test
     fun `test store span`() {
         val tracer = createCompatOpenTelemetry().tracerProvider.getTracer("tracer")
         val span = tracer.startSpan("span")
-        val contextFactory = factory.context
         val ctx = contextFactory.storeSpan(contextFactory.root(), span)
-        val retrievedSpan = factory.span.fromContext(ctx)
+        val retrievedSpan = spanFactory.fromContext(ctx)
         assertSpanContextsMatch(span.spanContext, retrievedSpan.spanContext)
     }
 
     @Test
     fun `test current`() {
-        assertSame(OtelJavaContext.current(), factory.context.implicit().toOtelJavaContext())
+        assertSame(OtelJavaContext.current(), contextFactory.implicit().toOtelJavaContext())
     }
 }

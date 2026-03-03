@@ -3,8 +3,8 @@ package io.opentelemetry.kotlin
 import io.opentelemetry.kotlin.aliases.OtelJavaClock
 import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
 import io.opentelemetry.kotlin.clock.ClockAdapter
+import io.opentelemetry.kotlin.factory.CompatSdkFactory
 import io.opentelemetry.kotlin.factory.SdkFactory
-import io.opentelemetry.kotlin.factory.createCompatSdkFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.logging.LoggerProviderAdapter
 import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
@@ -21,7 +21,7 @@ import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
  */
 @ExperimentalApi
 public fun OtelJavaOpenTelemetry.toOtelKotlinApi(): OpenTelemetry {
-    val sdkFactory: SdkFactory = createCompatSdkFactory()
+    val sdkFactory: SdkFactory = CompatSdkFactory()
     val clock = ClockAdapter(OtelJavaClock.getDefault())
     return OpenTelemetryImpl(
         tracerProvider = TracerProviderAdapter(tracerProvider, clock, CompatSpanLimitsConfig()),

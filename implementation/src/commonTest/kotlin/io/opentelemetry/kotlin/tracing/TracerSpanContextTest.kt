@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.factory.SdkFactory
-import io.opentelemetry.kotlin.factory.createSdkFactory
+import io.opentelemetry.kotlin.factory.SdkFactoryImpl
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -29,7 +29,7 @@ internal class TracerSpanContextTest {
     fun setUp() {
         clock = FakeClock()
         processor = FakeSpanProcessor()
-        sdkFactory = createSdkFactory()
+        sdkFactory = SdkFactoryImpl()
         tracer = TracerImpl(
             clock,
             processor,

@@ -1,7 +1,9 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.factory.IdGenerator
+import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SdkFactory
-import io.opentelemetry.kotlin.factory.createSdkFactory
+import io.opentelemetry.kotlin.factory.SdkFactoryImpl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
 import io.opentelemetry.kotlin.logging.LoggerProviderImpl
@@ -23,11 +25,7 @@ public fun createOpenTelemetry(
      */
     config: OpenTelemetryConfigDsl.() -> Unit = {}
 ): OpenTelemetry {
-    return createOpenTelemetryImpl(
-        clock,
-        config,
-        createSdkFactory(),
-    )
+    return createOpenTelemetryImpl(clock, config)
 }
 
 /**
@@ -38,8 +36,9 @@ public fun createOpenTelemetry(
 internal fun createOpenTelemetryImpl(
     clock: Clock,
     config: OpenTelemetryConfigDsl.() -> Unit,
-    sdkFactory: SdkFactory,
+    idGenerator: IdGenerator = IdGeneratorImpl(),
 ): OpenTelemetry {
+    val sdkFactory = SdkFactoryImpl(idGenerator)
     val cfg = OpenTelemetryConfigImpl(clock).apply(config)
     val tracingConfig = cfg.tracingConfig.generateTracingConfig()
     val loggingConfig = cfg.loggingConfig.generateLoggingConfig()

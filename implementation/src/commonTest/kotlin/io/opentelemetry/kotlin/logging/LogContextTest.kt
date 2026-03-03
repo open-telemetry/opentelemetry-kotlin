@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.factory.SdkFactory
-import io.opentelemetry.kotlin.factory.createSdkFactory
+import io.opentelemetry.kotlin.factory.SdkFactoryImpl
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.TracerImpl
@@ -28,7 +28,7 @@ internal class LogContextTest {
     fun setUp() {
         clock = FakeClock()
         processor = FakeLogRecordProcessor()
-        sdkFactory = createSdkFactory()
+        sdkFactory = SdkFactoryImpl()
         logger = LoggerImpl(
             clock,
             processor,

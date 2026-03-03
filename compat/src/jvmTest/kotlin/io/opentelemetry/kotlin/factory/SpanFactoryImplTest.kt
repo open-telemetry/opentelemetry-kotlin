@@ -7,30 +7,34 @@ import kotlin.test.assertTrue
 
 internal class SpanFactoryImplTest {
 
-    private val factory = createCompatSdkFactory()
+    private val spanContextFactory = CompatSpanContextFactory()
+    private val traceStateFactory = CompatTraceStateFactory()
+    private val traceFlagsFactory = CompatTraceFlagsFactory()
+    private val contextFactory = CompatContextFactory()
+    private val spanFactory = CompatSpanFactory(spanContextFactory)
 
     @Test
     fun `test invalid`() {
-        assertSame(factory.spanContext.invalid, factory.spanContext.invalid)
+        assertSame(spanContextFactory.invalid, spanContextFactory.invalid)
     }
 
     @Test
     fun `test from context`() {
-        val ctx = factory.context.root()
-        val span = factory.span.fromContext(ctx)
+        val ctx = contextFactory.root()
+        val span = spanFactory.fromContext(ctx)
         assertFalse(span.spanContext.isValid)
     }
 
     @Test
     fun `test from span context`() {
         val generator = CompatIdGenerator()
-        val spanContext = factory.spanContext.create(
+        val spanContext = spanContextFactory.create(
             traceIdBytes = generator.generateTraceIdBytes(),
             spanIdBytes = generator.generateSpanIdBytes(),
-            traceState = factory.traceState.default,
-            traceFlags = factory.traceFlags.default,
+            traceState = traceStateFactory.default,
+            traceFlags = traceFlagsFactory.default,
         )
-        val span = factory.span.fromSpanContext(spanContext)
+        val span = spanFactory.fromSpanContext(spanContext)
         assertTrue(span.spanContext.isValid)
     }
 }

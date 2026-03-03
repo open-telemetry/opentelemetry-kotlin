@@ -6,11 +6,13 @@ import kotlin.test.assertSame
 
 internal class SpanContextFactoryTest {
 
-    private val factory = createCompatSdkFactory()
+    private val spanContextFactory = CompatSpanContextFactory()
+    private val traceFlagsFactory = CompatTraceFlagsFactory()
+    private val traceStateFactory = CompatTraceStateFactory()
 
     @Test
     fun `test invalid`() {
-        assertSame(factory.spanContext.invalid, factory.spanContext.invalid)
+        assertSame(spanContextFactory.invalid, spanContextFactory.invalid)
     }
 
     @Test
@@ -18,9 +20,9 @@ internal class SpanContextFactoryTest {
         val generator = CompatIdGenerator()
         val traceId = generator.generateTraceIdBytes()
         val spanId = generator.generateSpanIdBytes()
-        val traceFlags = factory.traceFlags.default
-        val traceState = factory.traceState.default
-        val spanContext = factory.spanContext.create(
+        val traceFlags = traceFlagsFactory.default
+        val traceState = traceStateFactory.default
+        val spanContext = spanContextFactory.create(
             traceId,
             spanId,
             traceFlags,

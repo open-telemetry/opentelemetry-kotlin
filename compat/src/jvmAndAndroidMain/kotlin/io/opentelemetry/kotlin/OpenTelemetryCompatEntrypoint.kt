@@ -1,8 +1,10 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.clock.ClockAdapter
+import io.opentelemetry.kotlin.factory.CompatIdGenerator
+import io.opentelemetry.kotlin.factory.CompatSdkFactory
+import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.SdkFactory
-import io.opentelemetry.kotlin.factory.createCompatSdkFactory
 import io.opentelemetry.kotlin.init.CompatOpenTelemetryConfig
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 
@@ -20,11 +22,7 @@ public fun createCompatOpenTelemetry(
     clock: Clock = ClockAdapter(io.opentelemetry.sdk.common.Clock.getDefault()),
     config: OpenTelemetryConfigDsl.() -> Unit = {}
 ): OpenTelemetry {
-    return createCompatOpenTelemetryImpl(
-        clock,
-        config,
-        createCompatSdkFactory(),
-    )
+    return createCompatOpenTelemetryImpl(clock, config)
 }
 
 /**
@@ -35,8 +33,9 @@ public fun createCompatOpenTelemetry(
 internal fun createCompatOpenTelemetryImpl(
     clock: Clock,
     config: OpenTelemetryConfigDsl.() -> Unit,
-    sdkFactory: SdkFactory,
+    idGenerator: IdGenerator = CompatIdGenerator(),
 ): OpenTelemetry {
+    val sdkFactory = CompatSdkFactory(idGenerator)
     val cfg = CompatOpenTelemetryConfig(clock, sdkFactory).apply(config)
     return OpenTelemetryImpl(
         tracerProvider = cfg.tracerProviderConfig.build(clock),

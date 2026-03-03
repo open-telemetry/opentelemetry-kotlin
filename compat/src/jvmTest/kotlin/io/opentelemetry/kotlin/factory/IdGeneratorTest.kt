@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 
 internal class IdGeneratorTest {
 
-    private val idGenerator = createCompatSdkFactory().idGenerator
+    private val idGenerator = CompatIdGenerator()
 
     @Test
     fun `test invalid`() {
