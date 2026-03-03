@@ -13,5 +13,5 @@ internal class FakeContextFactory : ContextFactory {
         span: Span
     ): Context = FakeContext()
 
-    override fun implicitContext(): Context = FakeContext()
+    override fun implicit(): Context = FakeContext()
 }

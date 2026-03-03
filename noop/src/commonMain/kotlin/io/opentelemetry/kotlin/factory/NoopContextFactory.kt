@@ -13,5 +13,5 @@ internal object NoopContextFactory : ContextFactory {
         span: Span
     ): Context = NoopContext
 
-    override fun implicitContext(): Context = NoopContext
+    override fun implicit(): Context = NoopContext
 }

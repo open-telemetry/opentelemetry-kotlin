@@ -47,6 +47,6 @@ class FakeMutableAttributeContainer(
         map[key] = value
     }
 
-    override val attributes: Map<String, Any>
+    val attributes: Map<String, Any>
         get() = map.toMap()
 }

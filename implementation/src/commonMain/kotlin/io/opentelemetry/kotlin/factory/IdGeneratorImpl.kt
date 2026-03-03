@@ -11,9 +11,9 @@ import kotlin.random.Random
  * In the happy path, a string will never need to be constructed & the library will happily
  * put the ByteArray directly in the Protobuf payload without any serialization/deserialization.
  */
-internal class TracingIdFactoryImpl(
+internal class IdGeneratorImpl(
     private val random: Random = Random.Default
-) : TracingIdFactory {
+) : IdGenerator {
 
     private companion object {
         private const val TRACE_ID_BYTES = 16

@@ -1,4 +1,5 @@
 package io.opentelemetry.kotlin.context
-internal class NoopContextKey<T> : ContextKey<T> {
-    override val name: String = ""
+
+internal data class NoopContextKey<T>(internal val name: String) : ContextKey<T> {
+    override fun toString() = name
 }

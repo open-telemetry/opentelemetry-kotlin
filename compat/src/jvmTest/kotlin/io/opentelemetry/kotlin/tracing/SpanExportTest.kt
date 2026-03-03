@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
+import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
@@ -120,7 +121,7 @@ internal class SpanExportTest {
 
     @Test
     fun `test span context parent`() = runTest {
-        val root = harness.kotlinApi.contextFactory.root()
+        val root = harness.kotlinApi.context.root()
 
         val a = harness.tracer.startSpan("a", parentContext = root)
         val ctxa = a.storeInContext(root)
@@ -130,7 +131,7 @@ internal class SpanExportTest {
 
         val c = harness.tracer.startSpan("c", parentContext = ctxb)
 
-        assertSpanContextsMatch(harness.kotlinApi.spanContextFactory.invalid, a.parent)
+        assertSpanContextsMatch(harness.kotlinApi.spanContext.invalid, a.parent)
         assertNotNull(a.spanContext)
         assertSpanContextsMatch(a.spanContext, b.parent)
         assertSpanContextsMatch(b.spanContext, c.parent)
@@ -164,7 +165,7 @@ internal class SpanExportTest {
 
     @Test
     fun `test invalid span context`() {
-        val invalidContext = harness.kotlinApi.spanContextFactory.invalid
+        val invalidContext = harness.kotlinApi.spanContext.invalid
 
         // Test invalid context properties
         assertFalse(invalidContext.isValid)
@@ -174,7 +175,7 @@ internal class SpanExportTest {
         // Test span creation with invalid parent
         val span = harness.tracer.startSpan(
             "test_span",
-            parentContext = harness.kotlinApi.contextFactory.root()
+            parentContext = harness.kotlinApi.context.root()
         )
 
         // Child span should be created with a valid context
@@ -288,7 +289,7 @@ internal class SpanExportTest {
     fun `test trace and span id validation without sanitization`() = runTest {
         val span1 = harness.tracer.startSpan("validation_span_1")
         val span2 = harness.tracer.startSpan("validation_span_2")
-        val ctx = span1.storeInContext(harness.kotlinApi.contextFactory.root())
+        val ctx = span1.storeInContext(harness.kotlinApi.context.root())
         val span3 = harness.tracer.startSpan("validation_span_3", ctx)
 
         span1.end()
@@ -338,7 +339,8 @@ internal class SpanExportTest {
     }
 
     private fun MutableAttributeContainer.assertAttributes() {
-        assertTrue(attributes.isEmpty())
+        val reader = this as AttributeContainer
+        assertTrue(reader.attributes.isEmpty())
 
         // set attributes
         setStringAttribute("string_key", "value")
@@ -351,7 +353,7 @@ internal class SpanExportTest {
         setLongListAttribute("long_list_key", listOf(42))
         setDoubleListAttribute("double_list_key", listOf(3.14))
 
-        val observed = attributes
+        val observed = reader.attributes
         val expected = mapOf(
             "string_key" to "second_value",
             "bool_key" to true,
@@ -395,7 +397,7 @@ internal class SpanExportTest {
         harness.config.spanProcessors.add(contextCapturingProcessor)
 
         // Create a context key and add a test value
-        val currentContext = harness.kotlinApi.contextFactory.implicitContext()
+        val currentContext = harness.kotlinApi.context.implicit()
         val contextKey = currentContext.createKey<String>("best_team")
         val testContextValue = "independiente"
         val testContext = currentContext.set(contextKey, testContextValue)

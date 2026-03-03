@@ -24,13 +24,13 @@ internal class TracerImpl(
     private val spanLimitConfig: SpanLimitConfig,
 ) : Tracer {
 
-    private val contextFactory = sdkFactory.contextFactory
+    private val contextFactory = sdkFactory.context
     private val root = contextFactory.root()
-    private val invalidSpanContext = sdkFactory.spanContextFactory.invalid
-    private val traceFlagsDefault = sdkFactory.traceFlagsFactory.default
-    private val traceStateDefault = sdkFactory.traceStateFactory.default
-    private val spanFactory = sdkFactory.spanFactory
-    private val tracingIdFactory = sdkFactory.tracingIdFactory
+    private val invalidSpanContext = sdkFactory.spanContext.invalid
+    private val traceFlagsDefault = sdkFactory.traceFlags.default
+    private val traceStateDefault = sdkFactory.traceState.default
+    private val spanFactory = sdkFactory.span
+    private val tracingIdFactory = sdkFactory.idGenerator
 
     @Suppress("DEPRECATION")
     @Deprecated(
@@ -52,7 +52,7 @@ internal class TracerImpl(
         startTimestamp: Long?,
         action: (SpanRelationships.() -> Unit)?
     ): Span {
-        val ctx = parentContext ?: contextFactory.implicitContext()
+        val ctx = parentContext ?: contextFactory.implicit()
 
         val parentSpanContext = when (ctx) {
             root -> invalidSpanContext

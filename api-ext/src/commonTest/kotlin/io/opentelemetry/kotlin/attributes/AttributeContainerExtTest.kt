@@ -40,7 +40,7 @@ internal class AttributeContainerExtTest {
     }
 
     private class FakeMutableAttributeContainer(
-        override val attributes: MutableMap<String, Any> = mutableMapOf()
+        val attributes: MutableMap<String, Any> = mutableMapOf()
     ) : MutableAttributeContainer {
         override fun setBooleanAttribute(key: String, value: Boolean) {
             attributes[key] = value

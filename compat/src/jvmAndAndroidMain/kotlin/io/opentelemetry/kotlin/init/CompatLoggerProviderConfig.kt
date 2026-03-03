@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProviderBuilder
-import io.opentelemetry.kotlin.attributes.CompatMutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.logging.LoggerProvider
@@ -21,7 +21,7 @@ internal class CompatLoggerProviderConfig(
     private val builder: OtelJavaSdkLoggerProviderBuilder = OtelJavaSdkLoggerProvider.builder()
 
     override fun resource(schemaUrl: String?, attributes: MutableAttributeContainer.() -> Unit) {
-        val attrs = CompatMutableAttributeContainer().apply(attributes).otelJavaAttributes()
+        val attrs = CompatAttributesModel().apply(attributes).otelJavaAttributes()
         builder.setResource(OtelJavaResource.create(attrs, schemaUrl))
     }
 

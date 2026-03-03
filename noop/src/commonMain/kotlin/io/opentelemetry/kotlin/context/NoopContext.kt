@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.context
 internal object NoopContext : Context {
 
-    override fun <T> createKey(name: String): ContextKey<T> = NoopContextKey()
+    override fun <T> createKey(name: String): ContextKey<T> = NoopContextKey(name)
 
     override fun <T> set(key: ContextKey<T>, value: T?): Context {
         return this

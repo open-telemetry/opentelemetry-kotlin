@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.factory
-internal object NoopTracingIdFactory : TracingIdFactory {
+
+internal object NoopIdGenerator : IdGenerator {
     private val empty = ByteArray(0)
     override fun generateSpanIdBytes(): ByteArray = empty
     override fun generateTraceIdBytes(): ByteArray = empty

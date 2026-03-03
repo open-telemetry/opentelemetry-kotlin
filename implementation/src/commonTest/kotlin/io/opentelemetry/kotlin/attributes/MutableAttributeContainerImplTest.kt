@@ -19,7 +19,7 @@ internal class MutableAttributeContainerImplTest {
 
     @Test
     fun testAttributes() {
-        val attrs = MutableAttributeContainerImpl(attributeLimit).apply {
+        val attrs = AttributesModel(attributeLimit).apply {
             addTestAttributes()
         }.attributes
         assertEquals(expected, attrs)
@@ -27,7 +27,7 @@ internal class MutableAttributeContainerImplTest {
 
     @Test
     fun testAttributesDoNotExceedLimit() {
-        val attrs = MutableAttributeContainerImpl(attributeLimit).apply {
+        val attrs = AttributesModel(attributeLimit).apply {
             addTestAttributesAlternateValues()
             addTestAttributes("xyz")
             addTestAttributes()

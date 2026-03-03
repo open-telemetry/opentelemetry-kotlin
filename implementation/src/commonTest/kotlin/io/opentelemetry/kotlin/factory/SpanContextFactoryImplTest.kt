@@ -7,7 +7,7 @@ import kotlin.test.assertTrue
 
 internal class SpanContextFactoryImplTest {
 
-    private val idFactory = TracingIdFactoryImpl()
+    private val idFactory = IdGeneratorImpl()
     private val traceFlagsFactory = TraceFlagsFactoryImpl()
     private val traceStateFactory = TraceStateFactoryImpl()
     private val factory = SpanContextFactoryImpl(idFactory, traceFlagsFactory, traceStateFactory)

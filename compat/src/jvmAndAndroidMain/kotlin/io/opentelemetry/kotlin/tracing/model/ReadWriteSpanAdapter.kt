@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing.model
 
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteSpan
-import io.opentelemetry.kotlin.attributes.CompatMutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusData
@@ -44,7 +44,7 @@ internal class ReadWriteSpanAdapter(
         spanContext: SpanContext,
         attributes: (MutableAttributeContainer.() -> Unit)?
     ) {
-        val container = CompatMutableAttributeContainer()
+        val container = CompatAttributesModel()
         if (attributes != null) {
             attributes(container)
         }
@@ -57,7 +57,7 @@ internal class ReadWriteSpanAdapter(
         timestamp: Long?,
         attributes: (MutableAttributeContainer.() -> Unit)?
     ) {
-        val container = CompatMutableAttributeContainer()
+        val container = CompatAttributesModel()
         if (attributes != null) {
             attributes(container)
         }

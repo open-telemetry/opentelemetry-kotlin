@@ -1,4 +1,5 @@
 package io.opentelemetry.kotlin.context
-class FakeContextKey<T>(
-    override val name: String = "key"
-) : ContextKey<T>
+
+data class FakeContextKey<T>(val name: String = "key") : ContextKey<T> {
+    override fun toString() = name
+}
