@@ -21,7 +21,7 @@ internal class ContextKeyRepository {
             if (key is ContextKeyAdapter) {
                 key.impl
             } else {
-                OtelJavaContextKey.named(key.name)
+                OtelJavaContextKey.named(key.toString())
             }
         } as OtelJavaContextKey<T>
     }
