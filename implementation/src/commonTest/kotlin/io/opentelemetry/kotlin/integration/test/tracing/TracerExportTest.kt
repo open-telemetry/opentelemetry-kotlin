@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.integration.test.tracing
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.SpanKind
@@ -11,7 +10,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 internal class TracerExportTest {
 
     private val spanAttributeLimit = 5

@@ -1,10 +1,8 @@
 package io.opentelemetry.kotlin.logging
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaLogger
 import io.opentelemetry.kotlin.aliases.OtelJavaLoggerBuilder
 
-@OptIn(ExperimentalApi::class)
 internal class OtelJavaLoggerBuilderAdapter(
     private val loggerProvider: LoggerProvider,
     private val instrumentationScopeName: String

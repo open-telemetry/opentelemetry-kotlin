@@ -1,9 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 
-@OptIn(ExperimentalApi::class)
 class FakeTracerProvider : TracerProvider {
 
     val map = mutableMapOf<String, FakeTracer>()

@@ -1,8 +1,4 @@
 package io.opentelemetry.kotlin.context
-
-import io.opentelemetry.kotlin.ExperimentalApi
-
-@OptIn(ExperimentalApi::class)
 internal class ContextImpl(
     private val storage: ImplicitContextStorage,
     private val impl: Map<ContextKey<*>, Any?> = emptyMap()

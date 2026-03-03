@@ -7,7 +7,6 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.toMap
 import io.ktor.utils.io.ByteReadChannel
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.logging.export.toProtobufByteArray
 import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
 import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
@@ -22,7 +21,6 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
 internal class OtlpClientTest {
 
     private val logRecords = listOf(FakeReadableLogRecord())

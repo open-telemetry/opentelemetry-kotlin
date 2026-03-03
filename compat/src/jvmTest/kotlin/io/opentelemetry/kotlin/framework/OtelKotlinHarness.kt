@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.framework
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.aliases.OtelJavaIdGenerator
 import io.opentelemetry.kotlin.createCompatOpenTelemetryImpl
@@ -11,7 +10,6 @@ import io.opentelemetry.kotlin.toOtelJavaApi
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlin.random.Random
 
-@OptIn(ExperimentalApi::class)
 internal class OtelKotlinHarness(scheduler: TestCoroutineScheduler) :
     OtelKotlinTestRule(scheduler) {
 
@@ -31,15 +29,18 @@ internal class OtelKotlinHarness(scheduler: TestCoroutineScheduler) :
     }
 }
 
-@OptIn(ExperimentalApi::class, ExperimentalStdlibApi::class)
 private class FakeIdGenerator(
     private val impl: IdGenerator = CompatIdGenerator(),
 ) : IdGenerator by impl, OtelJavaIdGenerator {
 
     private val random: Random = Random(0)
 
+    @OptIn(ExperimentalStdlibApi::class)
     override fun generateSpanIdBytes(): ByteArray = generateTraceId().hexToByteArray()
+
+    @OptIn(ExperimentalStdlibApi::class)
     override fun generateTraceIdBytes(): ByteArray = generateSpanId().hexToByteArray()
+
     override fun generateSpanId(): String = randomHex(16)
     override fun generateTraceId(): String = randomHex(32)
 

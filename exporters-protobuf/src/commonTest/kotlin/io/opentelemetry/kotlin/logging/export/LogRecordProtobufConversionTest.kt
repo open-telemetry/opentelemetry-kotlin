@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.logging.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.export.assertAttributesMatch
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
@@ -8,7 +7,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-@OptIn(ExperimentalApi::class)
 class LogRecordProtobufConversionTest {
 
     @Test

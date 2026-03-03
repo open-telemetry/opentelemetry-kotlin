@@ -1,11 +1,9 @@
 package io.opentelemetry.kotlin.benchmark.fixtures.logging
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaLogger
 import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
 import io.opentelemetry.kotlin.benchmark.fixtures.BenchmarkFixture
 
-@OptIn(ExperimentalApi::class)
 class OtelJavaSimpleLoggingFixture(
     otel: OtelJavaOpenTelemetry
 ) : BenchmarkFixture {

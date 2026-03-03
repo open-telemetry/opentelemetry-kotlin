@@ -1,8 +1,4 @@
 package io.opentelemetry.kotlin.factory
-
-import io.opentelemetry.kotlin.ExperimentalApi
-
-@OptIn(ExperimentalApi::class)
 internal class SdkFactoryImpl(
     override val idGenerator: IdGenerator = IdGeneratorImpl()
 ) : SdkFactory {

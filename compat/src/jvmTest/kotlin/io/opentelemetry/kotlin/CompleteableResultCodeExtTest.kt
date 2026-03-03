@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-@OptIn(ExperimentalApi::class)
 internal class CompleteableResultCodeExtTest {
 
     @Test

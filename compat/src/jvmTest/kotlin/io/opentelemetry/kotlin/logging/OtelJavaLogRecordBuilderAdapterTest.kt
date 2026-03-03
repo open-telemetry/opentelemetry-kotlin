@@ -1,13 +1,11 @@
 package io.opentelemetry.kotlin.logging
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaContextKey
 import org.junit.Test
 import java.time.Instant
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
 internal class OtelJavaLogRecordBuilderAdapterTest {
 
     @Test

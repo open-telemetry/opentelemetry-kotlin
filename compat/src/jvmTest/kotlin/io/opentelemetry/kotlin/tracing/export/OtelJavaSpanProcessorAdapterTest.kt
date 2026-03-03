@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import fakeInProgressOtelJavaSpanData
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.context.Context
@@ -20,7 +19,6 @@ import org.junit.Test
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
 internal class OtelJavaSpanProcessorAdapterTest {
     private val rootContext = OtelJavaContext.root().toOtelKotlinContext()
     private lateinit var harness: OtelKotlinHarness

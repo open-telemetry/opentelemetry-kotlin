@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -9,7 +8,6 @@ import io.opentelemetry.kotlin.tracing.data.StatusData
 /**
  * A [SpanExporter] that outputs span data to stdout.
  */
-@OptIn(ExperimentalApi::class)
 internal class StdoutSpanExporter(
     private val logger: (String) -> Unit = ::platformLog
 ) : SpanExporter {

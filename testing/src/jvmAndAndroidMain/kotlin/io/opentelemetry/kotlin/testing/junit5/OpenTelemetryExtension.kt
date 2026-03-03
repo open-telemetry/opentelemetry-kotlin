@@ -1,8 +1,6 @@
-@file:OptIn(ExperimentalApi::class)
 
 package io.opentelemetry.kotlin.testing.junit5
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetrySdk
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider

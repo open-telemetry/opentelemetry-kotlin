@@ -1,8 +1,6 @@
-@file:OptIn(ExperimentalApi::class)
 
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.tracing.model.SpanContext

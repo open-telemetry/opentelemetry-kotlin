@@ -1,8 +1,4 @@
 package io.opentelemetry.kotlin.factory
-
-import io.opentelemetry.kotlin.ExperimentalApi
-
-@OptIn(ExperimentalApi::class)
 internal object NoopSdkFactory : SdkFactory {
     override val spanContext: SpanContextFactory = NoopSpanContextFactory
     override val traceFlags: TraceFlagsFactory = NoopTraceFlagsFactory

@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 
@@ -8,7 +7,6 @@ import io.opentelemetry.kotlin.error.SdkErrorSeverity
  * Performs an export operation on each element in a List and returns a success code if each
  * operation is successful, or a failure code if any operation fails.
  */
-@OptIn(ExperimentalApi::class)
 internal fun <T> batchExportOperation(
     elements: List<T>,
     sdkErrorHandler: SdkErrorHandler,
@@ -39,7 +37,6 @@ internal fun <T> batchExportOperation(
  * Performs an export operation on each element in a List and returns a success code if each
  * operation is successful, or a failure code if any operation fails.
  */
-@OptIn(ExperimentalApi::class)
 internal suspend fun <T> batchExportOperationSuspend(
     elements: List<T>,
     sdkErrorHandler: SdkErrorHandler,

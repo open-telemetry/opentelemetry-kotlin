@@ -15,7 +15,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 internal class NoopTests {
 
     @Test

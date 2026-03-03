@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.logging.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteLogRecord
@@ -15,7 +14,6 @@ import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanContextAdapter
 
 @Suppress("UNUSED_PARAMETER")
-@OptIn(ExperimentalApi::class)
 internal class ReadWriteLogRecordAdapter(
     val impl: OtelJavaReadWriteLogRecord
 ) : ReadWriteLogRecord {

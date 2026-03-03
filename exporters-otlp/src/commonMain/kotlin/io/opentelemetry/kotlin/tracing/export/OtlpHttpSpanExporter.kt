@@ -1,12 +1,10 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpClient
 import io.opentelemetry.kotlin.export.TelemetryExporter
 import io.opentelemetry.kotlin.tracing.data.SpanData
 
-@OptIn(ExperimentalApi::class)
 internal class OtlpHttpSpanExporter(
     private val otlpClient: OtlpClient,
     initialDelayMs: Long,

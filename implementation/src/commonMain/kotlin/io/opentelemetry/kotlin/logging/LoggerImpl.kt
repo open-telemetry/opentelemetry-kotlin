@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.context.Context
@@ -13,7 +12,6 @@ import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecordImpl
 import io.opentelemetry.kotlin.logging.model.SeverityNumber
 import io.opentelemetry.kotlin.resource.Resource
 
-@OptIn(ExperimentalApi::class)
 internal class LoggerImpl(
     private val clock: Clock,
     private val processor: LogRecordProcessor?,

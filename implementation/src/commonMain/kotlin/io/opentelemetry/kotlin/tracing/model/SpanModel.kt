@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing.model
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.attributes.AttributesModel
@@ -21,7 +20,6 @@ import io.opentelemetry.kotlin.tracing.export.SpanProcessor
  * The single source of truth for span state. This is not exposed to consumers of the API - they
  * are presented with views such as [CreatedSpan], depending on which API call they make.
  */
-@OptIn(ExperimentalApi::class)
 internal class SpanModel(
     private val clock: Clock,
     private val processor: SpanProcessor?,

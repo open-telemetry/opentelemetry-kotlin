@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import okio.Buffer
 import okio.BufferedSource
 
@@ -12,7 +11,6 @@ import okio.BufferedSource
  * 2. This fake provides explicit controls for simulating failure scenarios (failWrites,
  *    failReads, failDeletes) which are difficult to achieve with the real implementation
  */
-@OptIn(ExperimentalApi::class)
 internal class FakeTelemetryFileSystem : TelemetryFileSystem {
     private val files = mutableMapOf<String, ByteArray>()
     var failWrites = false

@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.integration.test.logging
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
 import io.opentelemetry.kotlin.logging.model.SeverityNumber
 import kotlinx.coroutines.test.runTest
@@ -8,7 +7,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
 internal class LoggerExportTest {
 
     private val logAttributeLimit = 5

@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.logging.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.export.conversion.DeserializedSpanContext
 import io.opentelemetry.kotlin.export.conversion.createKeyValues
@@ -40,7 +39,6 @@ import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN4
 import okio.ByteString.Companion.toByteString
 
 
-@OptIn(ExperimentalApi::class)
 internal fun ReadableLogRecord.toProtobuf(): LogRecord = LogRecord(
     trace_id = spanContext.traceIdBytes.toByteString(),
     span_id = spanContext.spanIdBytes.toByteString(),
@@ -54,7 +52,6 @@ internal fun ReadableLogRecord.toProtobuf(): LogRecord = LogRecord(
     event_name = eventName ?: "",
 )
 
-@OptIn(ExperimentalApi::class)
 internal fun LogRecord.toReadableLogRecord(
     resource: Resource,
     instrumentationScopeInfo: InstrumentationScopeInfo
@@ -75,7 +72,6 @@ internal fun LogRecord.toReadableLogRecord(
     instrumentationScopeInfo = instrumentationScopeInfo
 )
 
-@OptIn(ExperimentalApi::class)
 private fun SeverityNumber.convertSeverityNumber(): io.opentelemetry.proto.logs.v1.SeverityNumber =
     when (this) {
         SeverityNumber.UNKNOWN -> SEVERITY_NUMBER_UNSPECIFIED
@@ -105,7 +101,6 @@ private fun SeverityNumber.convertSeverityNumber(): io.opentelemetry.proto.logs.
         SeverityNumber.FATAL4 -> SEVERITY_NUMBER_FATAL4
     }
 
-@OptIn(ExperimentalApi::class)
 private fun io.opentelemetry.proto.logs.v1.SeverityNumber.toSeverityNumber(): SeverityNumber? =
     when (this) {
         SEVERITY_NUMBER_UNSPECIFIED -> null
@@ -135,7 +130,6 @@ private fun io.opentelemetry.proto.logs.v1.SeverityNumber.toSeverityNumber(): Se
         SEVERITY_NUMBER_FATAL4 -> SeverityNumber.FATAL4
     }
 
-@OptIn(ExperimentalApi::class)
 private class DeserializedReadableLogRecord(
     override val timestamp: Long?,
     override val observedTimestamp: Long?,

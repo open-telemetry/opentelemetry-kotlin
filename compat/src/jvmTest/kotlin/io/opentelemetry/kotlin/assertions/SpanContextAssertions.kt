@@ -1,10 +1,8 @@
 package io.opentelemetry.kotlin.assertions
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
 internal fun assertSpanContextsMatch(lhs: SpanContext, rhs: SpanContext) {
     assertEquals(lhs.spanId, rhs.spanId)
     assertEquals(lhs.traceId, rhs.traceId)

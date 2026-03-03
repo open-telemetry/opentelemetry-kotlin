@@ -2,7 +2,6 @@
 
 package io.opentelemetry.kotlin.tracing.ext
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaInstrumentationLibraryInfo
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanData
 import io.opentelemetry.kotlin.aliases.OtelJavaStatusData
@@ -11,7 +10,6 @@ import io.opentelemetry.kotlin.attributes.resourceFromMap
 import io.opentelemetry.kotlin.tracing.data.OtelJavaSpanDataImpl
 import io.opentelemetry.kotlin.tracing.data.SpanData
 
-@OptIn(ExperimentalApi::class)
 internal fun SpanData.toOtelJavaSpanData(): OtelJavaSpanData {
     return OtelJavaSpanDataImpl(
         nameImpl = name,

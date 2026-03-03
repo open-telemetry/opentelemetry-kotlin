@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.provider
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.ThreadSafe
@@ -19,7 +18,6 @@ import io.opentelemetry.kotlin.threadSafeMap
  * https://opentelemetry.io/docs/specs/otel/trace/api/#tracerprovider
  * https://opentelemetry.io/docs/specs/otel/logs/api/#loggerprovider
  */
-@OptIn(ExperimentalApi::class)
 @ThreadSafe
 internal class ApiProviderImpl<T>(
     val supplier: (key: InstrumentationScopeInfo) -> T

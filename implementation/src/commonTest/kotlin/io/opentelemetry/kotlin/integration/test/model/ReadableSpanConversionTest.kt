@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.integration.test.model
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.framework.serialization.SerializableSpanContext
 import io.opentelemetry.kotlin.framework.serialization.SerializableSpanData
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -15,7 +14,6 @@ import io.opentelemetry.kotlin.tracing.model.hex
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
 internal class ReadableSpanConversionTest {
 
     @Test

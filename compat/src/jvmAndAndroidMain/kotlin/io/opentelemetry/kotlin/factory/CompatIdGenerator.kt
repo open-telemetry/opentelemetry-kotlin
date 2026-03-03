@@ -1,11 +1,9 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaIdGenerator
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanId
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceId
 
-@OptIn(ExperimentalApi::class)
 internal class CompatIdGenerator(
     private val generator: OtelJavaIdGenerator = OtelJavaIdGenerator.random()
 ) : IdGenerator {

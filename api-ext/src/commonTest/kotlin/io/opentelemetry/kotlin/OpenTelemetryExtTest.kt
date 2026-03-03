@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin
 import kotlin.test.Test
 import kotlin.test.assertSame
 
-@OptIn(ExperimentalApi::class)
 internal class OpenTelemetryExtTest {
 
     @Test

@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import kotlin.random.Random
 
 /**
@@ -12,7 +11,6 @@ import kotlin.random.Random
  * In the happy path, a string will never need to be constructed & the library will happily
  * put the ByteArray directly in the Protobuf payload without any serialization/deserialization.
  */
-@OptIn(ExperimentalApi::class)
 internal class IdGeneratorImpl(
     private val random: Random = Random.Default
 ) : IdGenerator {

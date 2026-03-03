@@ -1,8 +1,6 @@
-@file:OptIn(ExperimentalApi::class)
 
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.data.EventData

@@ -1,11 +1,9 @@
 package io.opentelemetry.kotlin.resource
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 
-@OptIn(ExperimentalApi::class)
 internal class ResourceImpl(
     container: AttributeContainer,
     override val schemaUrl: String?,

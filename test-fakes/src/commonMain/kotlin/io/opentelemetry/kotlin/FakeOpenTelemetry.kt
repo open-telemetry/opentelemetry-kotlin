@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.tracing.FakeTracerProvider
 import io.opentelemetry.kotlin.tracing.TracerProvider
 
-@OptIn(ExperimentalApi::class)
 class FakeOpenTelemetry(
     private val sdkFactory: SdkFactory = FakeSdkFactory()
 ) : OpenTelemetrySdk, SdkFactory by sdkFactory {

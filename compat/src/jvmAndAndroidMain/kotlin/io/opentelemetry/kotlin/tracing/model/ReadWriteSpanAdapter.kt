@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.model
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteSpan
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
@@ -9,7 +8,6 @@ import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusData
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalApi::class)
 internal class ReadWriteSpanAdapter(
     val impl: OtelJavaReadWriteSpan,
     private val readableSpan: ReadableSpanAdapter = ReadableSpanAdapter(impl)

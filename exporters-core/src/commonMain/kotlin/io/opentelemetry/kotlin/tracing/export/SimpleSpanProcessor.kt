@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
@@ -14,7 +13,6 @@ import kotlinx.coroutines.launch
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#built-in-span-processors
  */
-@OptIn(ExperimentalApi::class)
 internal class SimpleSpanProcessor(
     private val exporter: SpanExporter,
     private val scope: CoroutineScope,

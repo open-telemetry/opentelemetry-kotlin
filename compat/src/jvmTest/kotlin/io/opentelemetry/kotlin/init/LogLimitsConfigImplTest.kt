@@ -1,10 +1,8 @@
 package io.opentelemetry.kotlin.init
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import org.junit.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
 internal class LogLimitsConfigImplTest {
 
     @Test

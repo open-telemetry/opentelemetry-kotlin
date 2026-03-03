@@ -1,8 +1,4 @@
 package io.opentelemetry.kotlin.context
-
-import io.opentelemetry.kotlin.ExperimentalApi
-
-@OptIn(ExperimentalApi::class)
 internal object NoopContext : Context {
 
     override fun <T> createKey(name: String): ContextKey<T> = NoopContextKey(name)

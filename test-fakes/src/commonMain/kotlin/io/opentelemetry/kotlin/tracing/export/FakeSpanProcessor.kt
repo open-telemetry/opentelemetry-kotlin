@@ -1,12 +1,10 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 
-@OptIn(ExperimentalApi::class)
 class FakeSpanProcessor(
     var startRequired: Boolean = true,
     var endRequired: Boolean = true,

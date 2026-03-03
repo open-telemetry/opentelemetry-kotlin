@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.logging.model
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -8,7 +7,6 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 
-@OptIn(ExperimentalApi::class)
 class FakeReadWriteLogRecord(
     override var timestamp: Long? = null,
     override var observedTimestamp: Long? = null,

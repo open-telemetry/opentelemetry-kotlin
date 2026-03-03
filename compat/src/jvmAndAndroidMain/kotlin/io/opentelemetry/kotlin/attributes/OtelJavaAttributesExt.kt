@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.attributes
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.resource.Resource
@@ -17,7 +16,6 @@ internal fun attrsFromMap(map: Map<String, Any>): OtelJavaAttributes {
     return builder.build()
 }
 
-@OptIn(ExperimentalApi::class)
 internal fun resourceFromMap(resource: Resource): OtelJavaResource {
     val map = resource.attributes
     val schemaUrl = resource.schemaUrl

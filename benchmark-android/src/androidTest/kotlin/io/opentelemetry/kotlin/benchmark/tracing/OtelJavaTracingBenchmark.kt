@@ -11,12 +11,10 @@ import io.opentelemetry.kotlin.benchmark.fixtures.tracing.OtelJavaComplexSpanCre
 import io.opentelemetry.kotlin.benchmark.fixtures.tracing.OtelJavaSpanCreationFixture
 import io.opentelemetry.kotlin.benchmark.fixtures.tracing.OtelJavaSpanEndFixture
 import io.opentelemetry.kotlin.benchmark.fixtures.tracing.OtelJavaTracerCreationFixture
-import io.opentelemetry.kotlin.ExperimentalApi
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalApi::class)
 @RunWith(AndroidJUnit4::class)
 class OtelJavaTracingBenchmark {
 

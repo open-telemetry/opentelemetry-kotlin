@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.export.conversion
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.resource.MutableResource
@@ -11,18 +10,15 @@ import io.opentelemetry.kotlin.tracing.model.TraceState
 import io.opentelemetry.kotlin.tracing.model.hex
 import io.opentelemetry.proto.common.v1.InstrumentationScope
 
-@OptIn(ExperimentalApi::class)
 fun InstrumentationScopeInfo.toProtobuf(): InstrumentationScope = InstrumentationScope(
     name = name,
     version = version ?: "",
     attributes = attributes.createKeyValues(),
 )
 
-@OptIn(ExperimentalApi::class)
 internal fun Resource.toProtobuf() =
     io.opentelemetry.proto.resource.v1.Resource(attributes = attributes.createKeyValues())
 
-@OptIn(ExperimentalApi::class)
 internal fun InstrumentationScope.toInstrumentationScopeInfo(
     schemaUrl: String?
 ): InstrumentationScopeInfo = DeserializedInstrumentationScopeInfo(
@@ -32,18 +28,14 @@ internal fun InstrumentationScope.toInstrumentationScopeInfo(
     attributes = attributes.toAttributeMap()
 )
 
-@OptIn(ExperimentalApi::class)
 internal fun io.opentelemetry.proto.resource.v1.Resource.toResource(): Resource =
     DeserializedResource(attributes = attributes.toAttributeMap())
 
-@OptIn(ExperimentalApi::class)
 internal fun TraceFlags.toFlagsInt(): Int = hex.toInt(16)
 
-@OptIn(ExperimentalApi::class)
 internal fun TraceState.toW3CString(): String =
     asMap().entries.joinToString(",") { "${it.key}=${it.value}" }
 
-@OptIn(ExperimentalApi::class)
 private class DeserializedInstrumentationScopeInfo(
     override val name: String,
     override val version: String?,
@@ -51,7 +43,6 @@ private class DeserializedInstrumentationScopeInfo(
     override val attributes: Map<String, Any>,
 ) : InstrumentationScopeInfo
 
-@OptIn(ExperimentalApi::class)
 private class DeserializedResource(
     override val attributes: Map<String, Any>,
     override val schemaUrl: String? = null
@@ -61,7 +52,6 @@ private class DeserializedResource(
     }
 }
 
-@OptIn(ExperimentalApi::class)
 internal class DeserializedSpanContext(
     override val traceIdBytes: ByteArray,
     override val spanIdBytes: ByteArray,
@@ -76,13 +66,11 @@ internal class DeserializedSpanContext(
     override val traceState: TraceState = parseTraceState(traceStateString)
 }
 
-@OptIn(ExperimentalApi::class)
 private class DeserializedTraceFlags(private val value: Int) : TraceFlags {
     override val isSampled: Boolean = (value and 0x01) != 0
     override val isRandom: Boolean = (value and 0x02) != 0
 }
 
-@OptIn(ExperimentalApi::class)
 private fun parseTraceState(traceStateString: String): TraceState {
     if (traceStateString.isEmpty()) return DeserializedTraceState(emptyMap())
     val map = traceStateString.split(",").associate { entry ->
@@ -92,7 +80,6 @@ private fun parseTraceState(traceStateString: String): TraceState {
     return DeserializedTraceState(map)
 }
 
-@OptIn(ExperimentalApi::class)
 private class DeserializedTraceState(private val entries: Map<String, String>) : TraceState {
     override fun get(key: String): String? = entries[key]
     override fun asMap(): Map<String, String> = entries

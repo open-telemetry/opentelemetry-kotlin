@@ -1,12 +1,10 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.tracing.SpanContextImpl
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.TraceFlags
 import io.opentelemetry.kotlin.tracing.model.TraceState
 
-@OptIn(ExperimentalApi::class)
 internal class SpanContextFactoryImpl(
     private val idGenerator: IdGenerator,
     private val traceFlagsFactory: TraceFlagsFactory = TraceFlagsFactoryImpl(),

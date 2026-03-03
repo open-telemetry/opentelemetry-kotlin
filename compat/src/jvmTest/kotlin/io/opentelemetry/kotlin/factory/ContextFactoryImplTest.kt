@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
 import io.opentelemetry.kotlin.context.toOtelJavaContext
@@ -8,7 +7,6 @@ import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import org.junit.Test
 import kotlin.test.assertSame
 
-@OptIn(ExperimentalApi::class)
 internal class ContextFactoryImplTest {
 
     private val factory = createCompatSdkFactory()

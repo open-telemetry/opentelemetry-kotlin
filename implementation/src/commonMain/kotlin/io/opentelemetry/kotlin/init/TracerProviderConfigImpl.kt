@@ -1,12 +1,10 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 
-@OptIn(ExperimentalApi::class)
 internal class TracerProviderConfigImpl(
     private val clock: Clock,
     private val resourceConfigImpl: ResourceConfigImpl = ResourceConfigImpl()

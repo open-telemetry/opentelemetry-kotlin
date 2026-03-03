@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.export.PersistedTelemetryType.LOGS
 import kotlin.test.BeforeTest
@@ -10,7 +9,6 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-@OptIn(ExperimentalApi::class)
 internal class TelemetryRepositoryImplTest {
 
     private val fakeTelemetry = listOf(FakeTelemetryObject("item"))

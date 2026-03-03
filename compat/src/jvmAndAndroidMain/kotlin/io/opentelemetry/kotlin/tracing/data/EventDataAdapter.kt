@@ -1,10 +1,8 @@
 package io.opentelemetry.kotlin.tracing.data
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaEventData
 import io.opentelemetry.kotlin.attributes.convertToMap
 
-@OptIn(ExperimentalApi::class)
 internal class EventDataAdapter(
     impl: OtelJavaEventData,
 ) : EventData {

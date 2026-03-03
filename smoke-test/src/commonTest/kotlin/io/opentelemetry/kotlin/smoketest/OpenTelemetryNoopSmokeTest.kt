@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.smoketest
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.OpenTelemetry
 import kotlinx.coroutines.delay
@@ -11,7 +10,6 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalApi::class)
 class OpenTelemetryNoopSmokeTest {
 
     private lateinit var server: FakeOtlpServer

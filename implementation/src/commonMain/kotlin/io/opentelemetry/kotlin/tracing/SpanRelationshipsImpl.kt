@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
@@ -11,7 +10,6 @@ import io.opentelemetry.kotlin.tracing.data.LinkData
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 
-@OptIn(ExperimentalApi::class)
 internal class SpanRelationshipsImpl(
     val clock: Clock,
     val spanLimitConfig: SpanLimitConfig,

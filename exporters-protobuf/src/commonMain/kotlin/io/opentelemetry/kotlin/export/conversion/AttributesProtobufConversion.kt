@@ -1,14 +1,11 @@
 package io.opentelemetry.kotlin.export.conversion
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.proto.common.v1.AnyValue
 import io.opentelemetry.proto.common.v1.ArrayValue
 import io.opentelemetry.proto.common.v1.KeyValue
 
-@OptIn(ExperimentalApi::class)
 fun Map<String, Any>.createKeyValues(): List<KeyValue> = map(::createKeyValue)
 
-@OptIn(ExperimentalApi::class)
 internal fun List<KeyValue>.toAttributeMap(): Map<String, Any> {
     val map = mutableMapOf<String, Any>()
     forEach { entry ->

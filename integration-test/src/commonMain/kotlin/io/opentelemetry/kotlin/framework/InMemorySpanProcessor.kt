@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.framework
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
@@ -9,7 +8,6 @@ import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalApi::class)
 internal class InMemorySpanProcessor(
     private val exporter: InMemorySpanExporter,
     private val scope: CoroutineScope,
