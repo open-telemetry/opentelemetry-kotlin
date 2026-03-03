@@ -15,7 +15,7 @@ internal class OtelJavaContextAdapterTest {
     fun `test context`() {
         val factory = createCompatSdkFactory()
         val repository = OtelJavaContextKeyRepository()
-        val ctx = OtelJavaContextAdapter(factory.contextFactory.root(), repository)
+        val ctx = OtelJavaContextAdapter(factory.context.root(), repository)
         val key1 = OtelJavaContextKey.named<String>("foo")
         val key2 = OtelJavaContextKey.named<String>("foo")
         val key3 = OtelJavaContextKey.named<String>("bar")

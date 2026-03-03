@@ -8,12 +8,4 @@ import io.opentelemetry.kotlin.ThreadSafe
  */
 @ExperimentalApi
 @ThreadSafe
-public interface ContextKey<T> {
-
-    /**
-     * The name of the key. This property does NOT uniquely identify the key in a [Context] object - pass the
-     * [ContextKey] instead. The OTel specification exposes this property for debugging purposes only.
-     */
-    @ThreadSafe
-    public val name: String
-}
+public interface ContextKey<T>
