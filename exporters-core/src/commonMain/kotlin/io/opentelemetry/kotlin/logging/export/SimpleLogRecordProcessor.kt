@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.logging.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
@@ -13,7 +12,6 @@ import kotlinx.coroutines.launch
  *
  * https://opentelemetry.io/docs/specs/otel/logs/sdk/#built-in-processors
  */
-@OptIn(ExperimentalApi::class)
 internal class SimpleLogRecordProcessor(
     private val exporter: LogRecordExporter,
     private val scope: CoroutineScope,

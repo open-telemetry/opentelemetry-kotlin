@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.export.DelegatingTelemetryCloseable
 import io.opentelemetry.kotlin.export.TelemetryCloseable
@@ -10,7 +9,6 @@ import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
 import io.opentelemetry.kotlin.tracing.export.createCompositeSpanProcessor
 
-@OptIn(ExperimentalApi::class)
 internal class TracerProviderImpl(
     private val clock: Clock,
     tracingConfig: TracingConfig,

@@ -1,22 +1,20 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.tracing.SpanContextImpl
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.TraceFlags
 import io.opentelemetry.kotlin.tracing.model.TraceState
 
-@OptIn(ExperimentalApi::class)
 internal class SpanContextFactoryImpl(
-    private val tracingIdFactory: TracingIdFactory,
+    private val idGenerator: IdGenerator,
     private val traceFlagsFactory: TraceFlagsFactory = TraceFlagsFactoryImpl(),
     private val traceStateFactory: TraceStateFactory = TraceStateFactoryImpl()
 ) : SpanContextFactory {
 
     override val invalid: SpanContext by lazy {
         SpanContextImpl(
-            traceIdBytes = tracingIdFactory.invalidTraceId,
-            spanIdBytes = tracingIdFactory.invalidSpanId,
+            traceIdBytes = idGenerator.invalidTraceId,
+            spanIdBytes = idGenerator.invalidSpanId,
             traceFlags = traceFlagsFactory.default,
             isValid = false,
             isRemote = false,
@@ -36,11 +34,11 @@ internal class SpanContextFactoryImpl(
         return SpanContextImpl(
             traceIdBytes = when {
                 isValidTraceId -> traceId.hexToByteArray()
-                else -> tracingIdFactory.invalidTraceId
+                else -> idGenerator.invalidTraceId
             },
             spanIdBytes = when {
                 isValidSpanId -> spanId.hexToByteArray()
-                else -> tracingIdFactory.invalidSpanId
+                else -> idGenerator.invalidSpanId
             },
             traceFlags = traceFlags,
             isValid = isValidTraceId && isValidSpanId,

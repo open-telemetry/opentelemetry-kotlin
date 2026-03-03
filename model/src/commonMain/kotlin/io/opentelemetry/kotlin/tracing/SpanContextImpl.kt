@@ -1,12 +1,10 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.TraceFlags
 import io.opentelemetry.kotlin.tracing.model.TraceState
 
-@OptIn(ExperimentalApi::class)
 class SpanContextImpl(
     override val traceIdBytes: ByteArray,
     override val spanIdBytes: ByteArray,

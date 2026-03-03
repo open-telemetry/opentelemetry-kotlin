@@ -1,12 +1,10 @@
 package io.opentelemetry.kotlin.framework
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.export.SpanExporter
 import kotlin.collections.plusAssign
 
-@OptIn(ExperimentalApi::class)
 internal class InMemorySpanExporter : SpanExporter {
 
     private val impl = mutableListOf<SpanData>()

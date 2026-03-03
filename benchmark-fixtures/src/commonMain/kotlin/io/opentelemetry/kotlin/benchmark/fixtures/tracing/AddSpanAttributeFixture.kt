@@ -1,10 +1,8 @@
 package io.opentelemetry.kotlin.benchmark.fixtures.tracing
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.benchmark.fixtures.BenchmarkFixture
 
-@OptIn(ExperimentalApi::class)
 class AddSpanAttributeFixture(
     otel: OpenTelemetry
 ) : BenchmarkFixture {

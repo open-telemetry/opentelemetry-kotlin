@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.model
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.aliases.OtelJavaReadableSpan
 import io.opentelemetry.kotlin.attributes.convertToMap
@@ -17,7 +16,6 @@ import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
 
-@OptIn(ExperimentalApi::class)
 internal class ReadableSpanAdapter(
     val impl: OtelJavaReadableSpan
 ) : ReadableSpan {

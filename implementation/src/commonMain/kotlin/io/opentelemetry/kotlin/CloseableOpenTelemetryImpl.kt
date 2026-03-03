@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.tracing.TracerProvider
 import kotlinx.coroutines.withTimeout
 
-@OptIn(ExperimentalApi::class)
 internal class CloseableOpenTelemetryImpl(
     override val tracerProvider: TracerProvider,
     override val loggerProvider: LoggerProvider,

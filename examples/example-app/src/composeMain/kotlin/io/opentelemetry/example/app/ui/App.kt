@@ -17,13 +17,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import io.opentelemetry.example.app.initializeOtelSdk
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.tracing.model.Span
 
-@OptIn(ExperimentalApi::class)
 private val otel = initializeOtelSdk()
 
-@OptIn(ExperimentalApi::class)
 @Composable
 fun App() {
     MaterialTheme {

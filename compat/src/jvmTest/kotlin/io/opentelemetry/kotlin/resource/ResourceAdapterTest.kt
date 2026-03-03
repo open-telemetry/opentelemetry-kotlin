@@ -1,11 +1,9 @@
 package io.opentelemetry.kotlin.resource
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-@OptIn(ExperimentalApi::class)
 internal class ResourceAdapterTest {
 
     @Test

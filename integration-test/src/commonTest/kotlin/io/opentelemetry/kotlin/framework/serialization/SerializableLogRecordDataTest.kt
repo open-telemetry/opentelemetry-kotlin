@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.framework.serialization
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.framework.serialization.conversion.toSerializable
 import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
@@ -10,7 +9,6 @@ import io.opentelemetry.kotlin.tracing.model.hex
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
 internal class SerializableLogRecordDataTest {
 
     @Test

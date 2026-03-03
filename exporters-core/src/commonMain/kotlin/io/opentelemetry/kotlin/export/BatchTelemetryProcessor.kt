@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +12,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import kotlin.concurrent.Volatile
 
-@OptIn(ExperimentalApi::class)
 internal class BatchTelemetryProcessor<T>(
     private val maxQueueSize: Int,
     private val scheduleDelayMs: Long,

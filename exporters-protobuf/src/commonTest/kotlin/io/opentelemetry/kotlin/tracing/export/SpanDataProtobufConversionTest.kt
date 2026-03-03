@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.export.assertAttributesMatch
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.tracing.data.EventData
@@ -11,7 +10,6 @@ import io.opentelemetry.proto.trace.v1.Span
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
 class SpanDataProtobufConversionTest {
 
     @Test

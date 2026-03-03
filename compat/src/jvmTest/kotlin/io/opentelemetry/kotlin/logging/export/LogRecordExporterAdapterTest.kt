@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.logging.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordExporter
@@ -10,7 +9,6 @@ import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
 internal class LogRecordExporterAdapterTest {
 
     private lateinit var impl: FakeOtelJavaLogRecordExporter

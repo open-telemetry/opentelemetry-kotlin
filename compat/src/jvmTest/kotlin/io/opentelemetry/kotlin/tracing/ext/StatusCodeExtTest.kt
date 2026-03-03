@@ -1,12 +1,10 @@
 package io.opentelemetry.kotlin.tracing.ext
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaStatusCode
 import io.opentelemetry.kotlin.tracing.StatusCode
 import org.junit.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
 internal class StatusCodeExtTest {
 
     @Test

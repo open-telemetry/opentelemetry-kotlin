@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.logging
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.factory.SdkFactory
@@ -16,7 +15,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
-@OptIn(ExperimentalApi::class)
 internal class LogContextTest {
 
     private val key = InstrumentationScopeInfoImpl("key", null, null, emptyMap())
@@ -53,14 +51,14 @@ internal class LogContextTest {
     fun testDefaultContext() {
         logger.emit()
         val log = processor.logs.single()
-        val root = sdkFactory.spanFactory.fromContext(sdkFactory.contextFactory.root()).spanContext
+        val root = sdkFactory.span.fromContext(sdkFactory.context.root()).spanContext
         assertSame(root, log.spanContext)
     }
 
     @Test
     fun testOverrideContext() {
         val span = tracer.startSpan("span")
-        val ctx = sdkFactory.contextFactory.storeSpan(sdkFactory.contextFactory.root(), span)
+        val ctx = sdkFactory.context.storeSpan(sdkFactory.context.root(), span)
         logger.emit(
             context = ctx,
         )
@@ -72,7 +70,7 @@ internal class LogContextTest {
     @Test
     fun testImplicitContext() {
         val span = tracer.startSpan("span")
-        val ctx = sdkFactory.contextFactory.storeSpan(sdkFactory.contextFactory.root(), span)
+        val ctx = sdkFactory.context.storeSpan(sdkFactory.context.root(), span)
         val scope = ctx.attach()
         logger.emit()
 
@@ -81,6 +79,6 @@ internal class LogContextTest {
 
         assertEquals(2, processor.logs.size)
         assertSame(span.spanContext, processor.logs[0].spanContext)
-        assertSame(sdkFactory.spanContextFactory.invalid, processor.logs[1].spanContext)
+        assertSame(sdkFactory.spanContext.invalid, processor.logs[1].spanContext)
     }
 }

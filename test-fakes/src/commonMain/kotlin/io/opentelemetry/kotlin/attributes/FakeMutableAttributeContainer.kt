@@ -1,8 +1,4 @@
 package io.opentelemetry.kotlin.attributes
-
-import io.opentelemetry.kotlin.ExperimentalApi
-
-@OptIn(ExperimentalApi::class)
 class FakeMutableAttributeContainer(
     private val map: MutableMap<String, Any> = mutableMapOf()
 ) : MutableAttributeContainer {
@@ -51,6 +47,6 @@ class FakeMutableAttributeContainer(
         map[key] = value
     }
 
-    override val attributes: Map<String, Any>
+    val attributes: Map<String, Any>
         get() = map.toMap()
 }

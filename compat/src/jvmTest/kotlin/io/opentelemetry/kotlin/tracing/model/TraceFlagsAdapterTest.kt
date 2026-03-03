@@ -1,12 +1,10 @@
 package io.opentelemetry.kotlin.tracing.model
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceFlags
 import org.junit.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 internal class TraceFlagsAdapterTest {
 
     @Test

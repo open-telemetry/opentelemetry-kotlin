@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.logging
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaContextKey
 import io.opentelemetry.kotlin.aliases.OtelJavaLogger
@@ -17,7 +16,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertSame
 
-@OptIn(ExperimentalApi::class)
 internal class OtelJavaLogExportTest {
 
     private lateinit var harness: OtelKotlinHarness

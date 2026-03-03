@@ -1,12 +1,10 @@
 package io.opentelemetry.kotlin.context
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 internal class ContextExtTest {
 
     @Test
@@ -72,5 +70,5 @@ internal class ContextExtTest {
         assertTrue(detached)
     }
 
-    private fun FakeContext.findAttrs(): Map<String, Any?> = attrs.mapKeys { it.key.name }
+    private fun FakeContext.findAttrs(): Map<String, Any?> = attrs.mapKeys { it.key.toString() }
 }

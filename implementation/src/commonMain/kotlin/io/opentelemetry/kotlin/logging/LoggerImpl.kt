@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.context.Context
@@ -13,7 +12,6 @@ import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecordImpl
 import io.opentelemetry.kotlin.logging.model.SeverityNumber
 import io.opentelemetry.kotlin.resource.Resource
 
-@OptIn(ExperimentalApi::class)
 internal class LoggerImpl(
     private val clock: Clock,
     private val processor: LogRecordProcessor?,
@@ -23,10 +21,10 @@ internal class LoggerImpl(
     private val logLimitConfig: LogLimitConfig,
 ) : Logger {
 
-    private val contextFactory = sdkFactory.contextFactory
+    private val contextFactory = sdkFactory.context
     private val root = contextFactory.root()
-    private val invalidSpanContext = sdkFactory.spanContextFactory.invalid
-    private val spanFactory = sdkFactory.spanFactory
+    private val invalidSpanContext = sdkFactory.spanContext.invalid
+    private val spanFactory = sdkFactory.span
 
     override fun enabled(
         context: Context?,
@@ -36,7 +34,7 @@ internal class LoggerImpl(
         if (processor == null) {
             return false
         }
-        val ctx = context ?: contextFactory.implicitContext()
+        val ctx = context ?: contextFactory.implicit()
         return processor.enabled(ctx, key, severityNumber, eventName)
     }
 
@@ -129,7 +127,7 @@ internal class LoggerImpl(
         severityNumber: SeverityNumber?,
         attributes: (MutableAttributeContainer.() -> Unit)?
     ) {
-        val ctx = context ?: contextFactory.implicitContext()
+        val ctx = context ?: contextFactory.implicit()
         val spanContext = when (ctx) {
             root -> invalidSpanContext
             else -> spanFactory.fromContext(ctx).spanContext

@@ -1,10 +1,8 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaTracer
 import io.opentelemetry.kotlin.aliases.OtelJavaTracerBuilder
 
-@OptIn(ExperimentalApi::class)
 internal class OtelJavaTracerBuilderAdapter(
     private val tracerProvider: TracerProvider,
     private val instrumentationScopeName: String

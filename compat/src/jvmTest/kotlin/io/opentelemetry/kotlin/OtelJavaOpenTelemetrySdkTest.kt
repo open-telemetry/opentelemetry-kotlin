@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.tracing.OtelJavaTracerProviderAdapter
 import org.junit.Test
 import kotlin.test.assertSame
 
-@OptIn(ExperimentalApi::class)
 internal class OtelJavaOpenTelemetrySdkTest {
 
     @Test

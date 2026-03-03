@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.exceptionType
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import kotlin.test.Test
@@ -10,7 +9,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 internal class SpanExtTest {
 
     @Test

@@ -1,11 +1,9 @@
 package io.opentelemetry.kotlin.logging
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
 import io.opentelemetry.kotlin.logging.model.SeverityNumber
 import org.junit.Test
 
-@OptIn(ExperimentalApi::class)
 internal class SeverityNumberExtTest {
 
     @Test

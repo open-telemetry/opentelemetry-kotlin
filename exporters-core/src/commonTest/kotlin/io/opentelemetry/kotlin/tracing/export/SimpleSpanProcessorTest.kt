@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.export.FakeTraceExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
@@ -13,7 +12,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 internal class SimpleSpanProcessorTest {
 
     @Test

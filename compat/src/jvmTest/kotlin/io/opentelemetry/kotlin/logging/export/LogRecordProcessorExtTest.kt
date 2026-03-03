@@ -1,13 +1,11 @@
 package io.opentelemetry.kotlin.logging.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordProcessor
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-@OptIn(ExperimentalApi::class)
 internal class LogRecordProcessorExtTest {
 
     @Test

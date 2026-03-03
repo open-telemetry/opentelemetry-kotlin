@@ -1,9 +1,8 @@
 package io.opentelemetry.kotlin.logging.model
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainerImpl
+import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.model.SpanContext
@@ -12,7 +11,6 @@ import io.opentelemetry.kotlin.tracing.model.SpanContext
  * The single source of truth for log record state. This is not exposed to consumers of the API - they
  * are presented with views such as [ReadableLogRecordImpl], depending on which API call they make.
  */
-@OptIn(ExperimentalApi::class)
 internal class LogRecordModel(
     override val resource: Resource,
     override val instrumentationScopeInfo: InstrumentationScopeInfo,
@@ -91,7 +89,7 @@ internal class LogRecordModel(
         }
 
     private val attrs by lazy {
-        MutableAttributeContainerImpl(logLimitConfig.attributeCountLimit, mutableMapOf())
+        AttributesModel(logLimitConfig.attributeCountLimit, mutableMapOf())
     }
 
     override val attributes: Map<String, Any>

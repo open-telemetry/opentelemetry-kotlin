@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.logging
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
@@ -13,7 +12,6 @@ import kotlin.test.Test
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 internal class LogExportTest {
 
     private lateinit var harness: OtelKotlinHarness
@@ -91,7 +89,7 @@ internal class LogExportTest {
         harness.config.logRecordProcessors.add(contextCapturingProcessor)
 
         // Create a context key and add a test value
-        val currentContext = harness.kotlinApi.contextFactory.implicitContext()
+        val currentContext = harness.kotlinApi.context.implicit()
         val contextKey = currentContext.createKey<String>("best_team")
         val testContextValue = "independiente"
         val testContext = currentContext.set(contextKey, testContextValue)

@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.export.FakeTelemetryRepository
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
@@ -11,7 +10,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
-@OptIn(ExperimentalApi::class)
 internal class PersistingSpanExporterTest {
 
     private val telemetry = listOf<SpanData>(FakeSpanData(name = "test"))

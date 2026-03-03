@@ -1,10 +1,8 @@
 package io.opentelemetry.kotlin.attributes
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
 internal class AttributeContainerExtTest {
 
     @Test
@@ -42,7 +40,7 @@ internal class AttributeContainerExtTest {
     }
 
     private class FakeMutableAttributeContainer(
-        override val attributes: MutableMap<String, Any> = mutableMapOf()
+        val attributes: MutableMap<String, Any> = mutableMapOf()
     ) : MutableAttributeContainer {
         override fun setBooleanAttribute(key: String, value: Boolean) {
             attributes[key] = value

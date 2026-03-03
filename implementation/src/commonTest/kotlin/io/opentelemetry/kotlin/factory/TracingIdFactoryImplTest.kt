@@ -1,13 +1,11 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import kotlin.random.Random
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 internal class TracingIdFactoryImplTest {
 
     private companion object {
@@ -15,11 +13,11 @@ internal class TracingIdFactoryImplTest {
         private const val TRACE_ID_PATTERN = "^[0-9a-f]{32}$"
     }
 
-    private lateinit var factory: TracingIdFactory
+    private lateinit var factory: IdGenerator
 
     @BeforeTest
     fun setUp() {
-        factory = TracingIdFactoryImpl(Random(0))
+        factory = IdGeneratorImpl(Random(0))
     }
 
     @Test

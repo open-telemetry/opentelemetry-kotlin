@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.integration.test.tracing
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
@@ -18,7 +17,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 internal class SpanProcessOnEndReadTest {
 
     private lateinit var harness: IntegrationTestHarness

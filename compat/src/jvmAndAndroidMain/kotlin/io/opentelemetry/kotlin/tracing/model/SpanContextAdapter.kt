@@ -1,10 +1,8 @@
 package io.opentelemetry.kotlin.tracing.model
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.factory.hexToByteArray
 
-@OptIn(ExperimentalApi::class)
 internal class SpanContextAdapter(
     val impl: OtelJavaSpanContext
 ) : SpanContext {

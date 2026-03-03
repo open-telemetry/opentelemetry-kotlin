@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -11,7 +10,6 @@ import kotlin.concurrent.Volatile
 /**
  * Delegates to multiple [TelemetryCloseable]s.
  */
-@OptIn(ExperimentalApi::class)
 internal class DelegatingTelemetryCloseable(
     private val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler
 ) : TelemetryCloseable {

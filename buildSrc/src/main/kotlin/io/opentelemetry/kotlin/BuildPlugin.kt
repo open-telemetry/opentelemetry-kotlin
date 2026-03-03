@@ -15,6 +15,7 @@ class BuildPlugin : Plugin<Project> {
             project.configureDetekt()
             project.configureBinaryCompatValidation()
             project.configureExplicitApiMode(kotlin)
+            project.configureOptIn(kotlin)
             project.configureTest()
 
             project.pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {

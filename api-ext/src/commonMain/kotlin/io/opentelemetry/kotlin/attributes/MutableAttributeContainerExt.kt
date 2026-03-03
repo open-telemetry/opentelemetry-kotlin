@@ -27,7 +27,6 @@ public fun MutableAttributeContainer.setAttributes(attributes: Map<String, Any>)
 }
 
 @Suppress("UNCHECKED_CAST")
-@OptIn(ExperimentalApi::class)
 private fun MutableAttributeContainer.handleCollection(key: String, input: List<*>) {
     when {
         input.all { it is String } -> setStringListAttribute(key, input as List<String>)

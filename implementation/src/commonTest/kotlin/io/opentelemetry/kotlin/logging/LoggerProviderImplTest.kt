@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.logging
 
-import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainerImpl
+import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.createSdkFactory
@@ -17,14 +16,13 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
 
-@OptIn(ExperimentalApi::class)
 internal class LoggerProviderImplTest {
 
     private val clock = FakeClock()
     private val loggingConfig = LoggingConfig(
         emptyList(),
         LogLimitConfig(100, 100),
-        ResourceImpl(MutableAttributeContainerImpl(), null)
+        ResourceImpl(AttributesModel(), null)
     )
     private val factory = createSdkFactory()
 

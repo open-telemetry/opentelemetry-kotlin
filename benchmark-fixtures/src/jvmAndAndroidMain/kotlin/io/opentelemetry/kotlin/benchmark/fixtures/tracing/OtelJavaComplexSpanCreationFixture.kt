@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.benchmark.fixtures.tracing
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
@@ -8,7 +7,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.benchmark.fixtures.BenchmarkFixture
 
-@OptIn(ExperimentalApi::class)
 class OtelJavaComplexSpanCreationFixture(
     otel: OtelJavaOpenTelemetry
 ) : BenchmarkFixture {

@@ -1,10 +1,8 @@
 package io.opentelemetry.kotlin.framework.serialization.conversion
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.framework.serialization.SerializableLogRecordData
 import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 
-@OptIn(ExperimentalApi::class)
 fun ReadableLogRecord.toSerializable() =
     SerializableLogRecordData(
         resource = resource.toSerializable(),

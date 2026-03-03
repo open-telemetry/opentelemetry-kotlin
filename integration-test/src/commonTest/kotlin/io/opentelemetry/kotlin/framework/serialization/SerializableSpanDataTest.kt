@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.framework.serialization
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.framework.serialization.conversion.toSerializable
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.data.EventData
@@ -13,7 +12,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 internal class SerializableSpanDataTest {
 
     @Test

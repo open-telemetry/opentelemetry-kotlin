@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.FakeContext
@@ -27,7 +26,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class PersistingLogRecordProcessorTest {
 
     private val context = FakeContext()
@@ -447,7 +446,6 @@ internal class PersistingLogRecordProcessorTest {
 
     private class FakeLogExportConfig(override val clock: Clock = FakeClock()) : LogExportConfigDsl
 
-    @OptIn(ExperimentalApi::class)
     private class DelayingLogRecordProcessor(
         private val flushDelayMs: Long = 0,
         private val shutdownDelayMs: Long = 0,

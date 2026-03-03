@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -11,7 +10,6 @@ import io.opentelemetry.kotlin.export.batchExportOperation
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 
-@OptIn(ExperimentalApi::class)
 internal class CompositeSpanProcessor(
     private val processors: List<SpanProcessor>,
     private val sdkErrorHandler: SdkErrorHandler,

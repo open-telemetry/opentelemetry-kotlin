@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -8,7 +7,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalApi::class)
 internal class TelemetryExporter<T>(
     private val initialDelayMs: Long,
     private val maxAttemptIntervalMs: Long,

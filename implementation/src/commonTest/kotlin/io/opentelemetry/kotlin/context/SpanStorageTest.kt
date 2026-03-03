@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.context
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.SdkFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
@@ -10,7 +9,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertSame
 
-@OptIn(ExperimentalApi::class)
 internal class SpanStorageTest {
 
     private lateinit var sdkFactory: SdkFactory
@@ -20,8 +18,8 @@ internal class SpanStorageTest {
     @BeforeTest
     fun setUp() {
         sdkFactory = createSdkFactory()
-        spanFactory = sdkFactory.spanFactory
-        contextFactory = sdkFactory.contextFactory
+        spanFactory = sdkFactory.span
+        contextFactory = sdkFactory.context
     }
 
     @Test

@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.ExperimentalApi
 import okio.Buffer
 import okio.use
 
@@ -13,7 +12,6 @@ private fun generateUid(): String {
     return (1..UID_LENGTH).map { UID_CHARS.random() }.joinToString("")
 }
 
-@OptIn(ExperimentalApi::class)
 internal class TelemetryRepositoryImpl<T>(
     private val type: PersistedTelemetryType,
     private val config: PersistedTelemetryConfig,

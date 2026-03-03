@@ -1,11 +1,9 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 internal class TraceFlagsFactoryImplTest {
 
     private val factory = TraceFlagsFactoryImpl()

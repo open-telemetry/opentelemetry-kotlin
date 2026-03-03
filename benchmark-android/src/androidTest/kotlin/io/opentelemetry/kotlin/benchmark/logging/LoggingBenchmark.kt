@@ -6,13 +6,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.opentelemetry.kotlin.benchmark.fixtures.logging.ComplexLoggingFixture
 import io.opentelemetry.kotlin.benchmark.fixtures.logging.LoggerCreationFixture
 import io.opentelemetry.kotlin.benchmark.fixtures.logging.SimpleLoggingFixture
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.createOpenTelemetry
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalApi::class)
 @RunWith(AndroidJUnit4::class)
 class LoggingBenchmark {
 

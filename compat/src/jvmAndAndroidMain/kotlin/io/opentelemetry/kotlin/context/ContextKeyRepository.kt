@@ -1,11 +1,9 @@
 package io.opentelemetry.kotlin.context
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaContextKey
 import java.util.Collections
 import java.util.WeakHashMap
 
-@OptIn(ExperimentalApi::class)
 internal class ContextKeyRepository {
 
     companion object {
@@ -21,7 +19,7 @@ internal class ContextKeyRepository {
             if (key is ContextKeyAdapter) {
                 key.impl
             } else {
-                OtelJavaContextKey.named(key.name)
+                OtelJavaContextKey.named(key.toString())
             }
         } as OtelJavaContextKey<T>
     }

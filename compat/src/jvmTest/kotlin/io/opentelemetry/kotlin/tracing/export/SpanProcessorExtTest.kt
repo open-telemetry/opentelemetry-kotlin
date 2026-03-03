@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanProcessor
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import kotlinx.coroutines.test.runTest
@@ -9,7 +8,6 @@ import org.junit.Test
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 internal class SpanProcessorExtTest {
 
     @Test

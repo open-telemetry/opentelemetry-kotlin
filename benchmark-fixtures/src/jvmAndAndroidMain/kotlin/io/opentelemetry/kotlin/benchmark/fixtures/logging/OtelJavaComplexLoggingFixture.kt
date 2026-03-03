@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.benchmark.fixtures.logging
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaLogger
 import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
@@ -8,7 +7,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
 import io.opentelemetry.kotlin.benchmark.fixtures.BenchmarkFixture
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalApi::class)
 class OtelJavaComplexLoggingFixture(
     otel: OtelJavaOpenTelemetry
 ) : BenchmarkFixture {

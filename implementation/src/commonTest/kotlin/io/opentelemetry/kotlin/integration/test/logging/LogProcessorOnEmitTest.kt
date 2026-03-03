@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.integration.test.logging
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
@@ -13,7 +12,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class)
 internal class LogProcessorOnEmitTest {
 
     private lateinit var harness: IntegrationTestHarness
@@ -55,7 +53,7 @@ internal class LogProcessorOnEmitTest {
 
     private fun prepareContext(): Context {
         val span = harness.tracer.startSpan("span")
-        val contextFactory = harness.kotlinApi.contextFactory
+        val contextFactory = harness.kotlinApi.context
         val ctx = contextFactory.storeSpan(contextFactory.root(), span)
         return ctx
     }
