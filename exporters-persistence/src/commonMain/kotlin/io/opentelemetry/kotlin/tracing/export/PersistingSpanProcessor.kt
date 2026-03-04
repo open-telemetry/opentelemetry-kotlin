@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.PersistedTelemetryConfig
 import io.opentelemetry.kotlin.export.PersistedTelemetryType
@@ -44,6 +45,7 @@ internal class PersistingSpanProcessor(
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : SpanProcessor {
 
+    private val shutdownState: MutableShutdownState = MutableShutdownState()
     private val repository = TelemetryRepositoryImpl(
         type = PersistedTelemetryType.SPANS,
         config = config,
@@ -67,7 +69,7 @@ internal class PersistingSpanProcessor(
     private val composite = dsl.compositeSpanProcessor(processor, batchingProcessor)
     private val telemetryCloseable: TelemetryCloseable = TimeoutTelemetryCloseable(composite)
 
-    override fun onStart(span: ReadWriteSpan, parentContext: Context) {
+    override fun onStart(span: ReadWriteSpan, parentContext: Context) = shutdownState.execute {
         try {
             composite.onStart(span, parentContext)
         } catch (e: Throwable) {
@@ -79,7 +81,7 @@ internal class PersistingSpanProcessor(
         }
     }
 
-    override fun onEnding(span: ReadWriteSpan) {
+    override fun onEnding(span: ReadWriteSpan) = shutdownState.execute {
         try {
             composite.onEnding(span)
         } catch (e: Throwable) {
@@ -91,7 +93,7 @@ internal class PersistingSpanProcessor(
         }
     }
 
-    override fun onEnd(span: ReadableSpan) {
+    override fun onEnd(span: ReadableSpan) = shutdownState.execute {
         try {
             composite.onEnd(span)
         } catch (e: Throwable) {
@@ -107,5 +109,8 @@ internal class PersistingSpanProcessor(
     override fun isEndRequired(): Boolean = composite.isEndRequired()
 
     override suspend fun forceFlush(): OperationResultCode = telemetryCloseable.forceFlush()
-    override suspend fun shutdown(): OperationResultCode = telemetryCloseable.shutdown()
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownState.shutdown {
+            telemetryCloseable.shutdown()
+        }
 }

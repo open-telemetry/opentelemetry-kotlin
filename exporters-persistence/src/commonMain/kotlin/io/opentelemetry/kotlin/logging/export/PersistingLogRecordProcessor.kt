@@ -1,8 +1,10 @@
 package io.opentelemetry.kotlin.logging.export
 
+import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.PersistedTelemetryConfig
 import io.opentelemetry.kotlin.export.PersistedTelemetryType
@@ -13,6 +15,7 @@ import io.opentelemetry.kotlin.export.TimeoutTelemetryCloseable
 import io.opentelemetry.kotlin.init.LogExportConfigDsl
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
+import io.opentelemetry.kotlin.logging.model.SeverityNumber
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
@@ -43,6 +46,7 @@ internal class PersistingLogRecordProcessor(
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : LogRecordProcessor {
 
+    private val shutdownState: MutableShutdownState = MutableShutdownState()
     private val repository = TelemetryRepositoryImpl(
         type = PersistedTelemetryType.LOGS,
         config = config,
@@ -67,17 +71,30 @@ internal class PersistingLogRecordProcessor(
     private val telemetryCloseable: TelemetryCloseable = TimeoutTelemetryCloseable(composite)
 
     override fun onEmit(log: ReadWriteLogRecord, context: Context) {
-        try {
-            composite.onEmit(log, context)
-        } catch (e: Throwable) {
-            sdkErrorHandler.onUserCodeError(
-                e,
-                "LogRecordProcessor.onEmit failed",
-                SdkErrorSeverity.WARNING
-            )
+        shutdownState.execute {
+            try {
+                composite.onEmit(log, context)
+            } catch (e: Throwable) {
+                sdkErrorHandler.onUserCodeError(
+                    e,
+                    "LogRecordProcessor.onEmit failed",
+                    SdkErrorSeverity.WARNING
+                )
+            }
         }
     }
 
+    override fun enabled(
+        context: Context,
+        instrumentationScopeInfo: InstrumentationScopeInfo,
+        severityNumber: SeverityNumber?,
+        eventName: String?,
+    ): Boolean = !shutdownState.isShutdown
+
     override suspend fun forceFlush(): OperationResultCode = telemetryCloseable.forceFlush()
-    override suspend fun shutdown(): OperationResultCode = telemetryCloseable.shutdown()
+
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownState.shutdown {
+            telemetryCloseable.shutdown()
+        }
 }

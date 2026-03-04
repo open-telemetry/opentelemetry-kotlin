@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.FakeContext
@@ -412,6 +413,61 @@ internal class PersistingLogRecordProcessorTest {
 
         // TODO: future: alter the assertion when persisted records are exported.
         assertFalse("log" in exportedBodies)
+    }
+
+    @Test
+    fun testShutdown() = runTest {
+        val delayingProcessor = DelayingLogRecordProcessor(shutdownDelayMs = 3000)
+        val exporter = FakeLogRecordExporter()
+        val processor = createProcessor(
+            processors = listOf(delayingProcessor),
+            exporters = listOf(exporter),
+        )
+
+        processor.onEmit(FakeReadWriteLogRecord(), context)
+        advanceTimeBy(5000)
+        assertEquals(1, delayingProcessor.logs.size)
+        advanceTimeBy(5000)
+        assertEquals(1, exporter.logs.size)
+        val resultDeferred = async { processor.shutdown() }
+        advanceTimeBy(4000)
+        val result = resultDeferred.await()
+        assertEquals(Success, result)
+
+        processor.onEmit(FakeReadWriteLogRecord(), context)
+        advanceTimeBy(5000)
+        assertEquals(1, delayingProcessor.logs.size)
+        advanceTimeBy(5000)
+        assertEquals(1, exporter.logs.size)
+    }
+
+    @Test
+    fun testEnabledReturnsFalseAfterShutdown() = runTest {
+        val processor = createProcessor(
+            processors = listOf(FakeLogRecordProcessor()),
+            exporters = listOf(FakeLogRecordExporter()),
+        )
+
+        processor.shutdown()
+        assertFalse(
+            processor.enabled(
+                FakeContext(),
+                FakeInstrumentationScopeInfo(),
+                null,
+                null,
+            )
+        )
+    }
+
+    @Test
+    fun testForceFlushWorksAfterShutdown() = runTest {
+        val processor = createProcessor(
+            processors = listOf(FakeLogRecordProcessor()),
+            exporters = listOf(FakeLogRecordExporter()),
+        )
+
+        processor.shutdown()
+        assertEquals(Success, processor.forceFlush())
     }
 
     private fun TestScope.createProcessor(
