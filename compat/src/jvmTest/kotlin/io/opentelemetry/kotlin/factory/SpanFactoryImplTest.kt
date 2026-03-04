@@ -14,7 +14,7 @@ internal class SpanFactoryImplTest {
     private val spanFactory = CompatSpanFactory(spanContextFactory)
 
     @Test
-    fun `test invalid`() {
+    fun `test invalid is the same instance`() {
         assertSame(spanContextFactory.invalid, spanContextFactory.invalid)
     }
 
