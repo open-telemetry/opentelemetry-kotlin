@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.tracing.data.EventData
-import io.opentelemetry.kotlin.tracing.data.LinkData
+import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.Span
 import io.opentelemetry.kotlin.tracing.model.SpanContext
@@ -33,7 +33,7 @@ class NonRecordingSpan(
     override val events: List<EventData>
         get() = emptyList()
 
-    override val links: List<LinkData>
+    override val links: List<SpanLinkData>
         get() = emptyList()
 
     override fun setBooleanAttribute(key: String, value: Boolean) {

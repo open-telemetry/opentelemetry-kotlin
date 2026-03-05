@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.framework.serialization.conversion.toSerializable
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.data.EventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
-import io.opentelemetry.kotlin.tracing.data.LinkData
+import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.hex
@@ -63,7 +63,7 @@ internal class SerializableSpanDataTest {
         }
     }
 
-    private fun compareLinks(expected: List<LinkData>, observed: List<SerializableLinkData>) {
+    private fun compareLinks(expected: List<SpanLinkData>, observed: List<SerializableLinkData>) {
         assertEquals(expected.size, observed.size)
 
         expected.forEachIndexed { index, data ->

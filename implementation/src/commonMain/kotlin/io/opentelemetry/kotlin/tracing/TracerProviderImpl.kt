@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.export.DelegatingTelemetryCloseable
 import io.opentelemetry.kotlin.export.TelemetryCloseable
+import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.SdkFactory
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
@@ -13,6 +14,7 @@ internal class TracerProviderImpl(
     private val clock: Clock,
     tracingConfig: TracingConfig,
     sdkFactory: SdkFactory,
+    private val idGenerator: IdGenerator,
     private val closeable: DelegatingTelemetryCloseable = DelegatingTelemetryCloseable()
 ) : TracerProvider, TelemetryCloseable by closeable {
 
@@ -31,7 +33,8 @@ internal class TracerProviderImpl(
             sdkFactory = sdkFactory,
             scope = key,
             resource = tracingConfig.resource,
-            spanLimitConfig = tracingConfig.spanLimits
+            spanLimitConfig = tracingConfig.spanLimits,
+            idGenerator = idGenerator,
         )
     }
 

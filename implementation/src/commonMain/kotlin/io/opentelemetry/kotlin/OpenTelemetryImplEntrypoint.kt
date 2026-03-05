@@ -43,9 +43,10 @@ internal fun createOpenTelemetryImpl(
     val tracingConfig = cfg.tracingConfig.generateTracingConfig()
     val loggingConfig = cfg.loggingConfig.generateLoggingConfig()
     return CloseableOpenTelemetryImpl(
-        tracerProvider = TracerProviderImpl(clock, tracingConfig, sdkFactory),
+        tracerProvider = TracerProviderImpl(clock, tracingConfig, sdkFactory, idGenerator),
         loggerProvider = LoggerProviderImpl(clock, loggingConfig, sdkFactory),
         clock = clock,
+        idGenerator = idGenerator,
         sdkFactory = sdkFactory
     )
 }

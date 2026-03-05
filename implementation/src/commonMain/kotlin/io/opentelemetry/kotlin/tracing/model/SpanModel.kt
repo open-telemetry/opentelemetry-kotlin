@@ -11,8 +11,8 @@ import io.opentelemetry.kotlin.tracing.SpanDataImpl
 import io.opentelemetry.kotlin.tracing.SpanEventImpl
 import io.opentelemetry.kotlin.tracing.SpanLinkImpl
 import io.opentelemetry.kotlin.tracing.data.EventData
-import io.opentelemetry.kotlin.tracing.data.LinkData
 import io.opentelemetry.kotlin.tracing.data.SpanData
+import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 
@@ -99,9 +99,9 @@ internal class SpanModel(
             eventsList.toList()
         }
 
-    private val linksList = mutableListOf<LinkData>()
+    private val linksList = mutableListOf<SpanLinkData>()
 
-    override val links: List<LinkData>
+    override val links: List<SpanLinkData>
         get() = lock.read {
             linksList.toList()
         }

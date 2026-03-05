@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.SdkFactory
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.Resource
@@ -22,6 +23,7 @@ internal class TracerImpl(
     private val scope: InstrumentationScopeInfo,
     private val resource: Resource,
     private val spanLimitConfig: SpanLimitConfig,
+    idGenerator: IdGenerator,
 ) : Tracer {
 
     private val contextFactory = sdkFactory.context
@@ -30,7 +32,7 @@ internal class TracerImpl(
     private val traceFlagsDefault = sdkFactory.traceFlags.default
     private val traceStateDefault = sdkFactory.traceState.default
     private val spanFactory = sdkFactory.span
-    private val tracingIdFactory = sdkFactory.idGenerator
+    private val tracingIdFactory = idGenerator
 
     @Suppress("DEPRECATION")
     @Deprecated(

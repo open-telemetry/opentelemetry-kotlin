@@ -149,7 +149,7 @@ internal class NoopTests {
 
     @Test
     fun testNoopSpanContext() {
-        val otel = NoopOpenTelemetry
+        val otel = NoopOpenTelemetry as OpenTelemetrySdk
         val invalid = otel.spanContext.invalid
         assertTrue(invalid is NoopSpanContext)
         assertFalse(invalid.isValid)

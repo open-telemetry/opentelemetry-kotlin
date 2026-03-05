@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.export.TelemetryCloseable
+import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.SdkFactory
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.tracing.TracerProvider
@@ -13,6 +14,7 @@ internal class CloseableOpenTelemetryImpl(
     override val tracerProvider: TracerProvider,
     override val loggerProvider: LoggerProvider,
     override val clock: Clock,
+    override val idGenerator: IdGenerator,
     private val sdkFactory: SdkFactory,
     private val timeoutMs: Long = 3000,
 ) : OpenTelemetrySdk, SdkFactory by sdkFactory, TelemetryCloseable {

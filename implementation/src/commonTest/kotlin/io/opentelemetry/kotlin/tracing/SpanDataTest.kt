@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.FakeSdkFactory
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -35,7 +36,8 @@ internal class SpanDataTest {
             FakeSdkFactory(),
             key,
             fakeResource,
-            fakeSpanLimitsConfig
+            fakeSpanLimitsConfig,
+            FakeIdGenerator(),
         )
     }
 

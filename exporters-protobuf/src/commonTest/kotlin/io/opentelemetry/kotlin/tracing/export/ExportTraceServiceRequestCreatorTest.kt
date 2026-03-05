@@ -8,9 +8,9 @@ import io.opentelemetry.kotlin.tracing.FakeTraceFlags
 import io.opentelemetry.kotlin.tracing.FakeTraceState
 import io.opentelemetry.kotlin.tracing.data.EventData
 import io.opentelemetry.kotlin.tracing.data.FakeEventData
-import io.opentelemetry.kotlin.tracing.data.FakeLinkData
+import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
-import io.opentelemetry.kotlin.tracing.data.LinkData
+import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import kotlin.test.Test
@@ -117,14 +117,14 @@ class ExportTraceServiceRequestCreatorTest {
     @Test
     fun testMultipleLinksRoundTrip() {
         val links = listOf(
-            FakeLinkData(
+            FakeSpanLinkData(
                 spanContext = FakeSpanContext(
                     traceIdBytes = "11111111111111111111111111111111".hexToByteArray(),
                     spanIdBytes = "1111111111111111".hexToByteArray()
                 ),
                 attributes = mapOf("link1" to "value1")
             ),
-            FakeLinkData(
+            FakeSpanLinkData(
                 spanContext = FakeSpanContext(
                     traceIdBytes = "22222222222222222222222222222222".hexToByteArray(),
                     spanIdBytes = "2222222222222222".hexToByteArray()
@@ -188,8 +188,8 @@ class ExportTraceServiceRequestCreatorTest {
     }
 
     private fun assertLinkMatches(
-        expectedLink: LinkData,
-        observedLink: LinkData
+        expectedLink: SpanLinkData,
+        observedLink: SpanLinkData
     ) {
         assertEquals(expectedLink.spanContext.traceId, observedLink.spanContext.traceId)
         assertEquals(expectedLink.spanContext.spanId, observedLink.spanContext.spanId)

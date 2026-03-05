@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.data.FakeEventData
-import io.opentelemetry.kotlin.tracing.data.FakeLinkData
+import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanKind
@@ -25,7 +25,7 @@ internal class ReadableSpanConversionTest {
             endTimestamp = 1000,
             attributes = mapOf("foo" to "bar"),
             links = listOf(
-                FakeLinkData(
+                FakeSpanLinkData(
                     FakeSpanContext.INVALID,
                     mapOf("foo" to "bar")
                 )

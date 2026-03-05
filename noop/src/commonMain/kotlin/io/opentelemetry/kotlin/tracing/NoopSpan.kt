@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.tracing.data.EventData
-import io.opentelemetry.kotlin.tracing.data.LinkData
+import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.Span
 import io.opentelemetry.kotlin.tracing.model.SpanContext
@@ -20,7 +20,7 @@ internal object NoopSpan : Span {
     override val startTimestamp: Long = -1L
     override val attributes: Map<String, Any> = emptyMap()
     override val events: List<EventData> = emptyList()
-    override val links: List<LinkData> = emptyList()
+    override val links: List<SpanLinkData> = emptyList()
 
     override fun end() {
     }

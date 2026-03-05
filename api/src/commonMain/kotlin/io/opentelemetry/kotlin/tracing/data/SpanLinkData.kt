@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.tracing.model.SpanContext
  * A read-only representation of a Link
  */
 @ExperimentalApi
-public interface LinkData : AttributeContainer {
+public interface SpanLinkData : AttributeContainer {
 
     /**
      * The span context of the link.

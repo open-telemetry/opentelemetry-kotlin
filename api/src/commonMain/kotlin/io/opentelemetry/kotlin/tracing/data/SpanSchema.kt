@@ -59,5 +59,5 @@ public interface SpanSchema : AttributeContainer {
      * A list of links associated with the span.
      */
     @ThreadSafe
-    public val links: List<LinkData>
+    public val links: List<SpanLinkData>
 }

@@ -5,9 +5,9 @@ import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanContextAdapter
 
-internal class LinkDataAdapter(
+internal class SpanLinkDataAdapter(
     impl: OtelJavaLinkData,
-) : LinkData {
+) : SpanLinkData {
     override val spanContext: SpanContext = SpanContextAdapter(impl.spanContext)
     override val attributes: Map<String, Any> = impl.attributes.convertToMap()
 }
