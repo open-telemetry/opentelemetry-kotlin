@@ -32,9 +32,4 @@ public interface SdkFactory {
      * Factory that constructs Span objects.
      */
     public val span: SpanFactory
-
-    /**
-     * Factory that constructs tracing IDs.
-     */
-    public val idGenerator: IdGenerator
 }

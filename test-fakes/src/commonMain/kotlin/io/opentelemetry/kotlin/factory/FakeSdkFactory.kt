@@ -5,5 +5,4 @@ class FakeSdkFactory : SdkFactory {
     override val traceState: TraceStateFactory = FakeTraceStateFactory()
     override val context: ContextFactory = FakeContextFactory()
     override val span: SpanFactory = FakeSpanFactory()
-    override val idGenerator: IdGenerator = FakeIdGenerator()
 }

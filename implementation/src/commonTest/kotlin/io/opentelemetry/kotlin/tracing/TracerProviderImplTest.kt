@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.FakeSdkFactory
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -28,7 +29,7 @@ internal class TracerProviderImplTest {
 
     @BeforeTest
     fun setUp() {
-        impl = TracerProviderImpl(FakeClock(), tracingConfig, FakeSdkFactory())
+        impl = TracerProviderImpl(FakeClock(), tracingConfig, FakeSdkFactory(), FakeIdGenerator())
     }
 
     @Test
@@ -116,7 +117,7 @@ internal class TracerProviderImplTest {
             fakeSpanLimitsConfig,
             FakeResource(),
         )
-        val provider = TracerProviderImpl(FakeClock(), config, FakeSdkFactory())
+        val provider = TracerProviderImpl(FakeClock(), config, FakeSdkFactory(), FakeIdGenerator())
         provider.getTracer(name = "test")
 
         val result = provider.forceFlush()
@@ -138,7 +139,7 @@ internal class TracerProviderImplTest {
             fakeSpanLimitsConfig,
             FakeResource(),
         )
-        val provider = TracerProviderImpl(FakeClock(), config, FakeSdkFactory())
+        val provider = TracerProviderImpl(FakeClock(), config, FakeSdkFactory(), FakeIdGenerator())
         provider.getTracer(name = "test")
 
         val result = provider.shutdown()

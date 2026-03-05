@@ -44,21 +44,8 @@ public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
 	public abstract fun storeSpan (Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/model/Span;)Lio/opentelemetry/kotlin/context/Context;
 }
 
-public abstract interface class io/opentelemetry/kotlin/factory/IdGenerator {
-	public abstract fun generateSpanIdBytes ()[B
-	public abstract fun generateTraceIdBytes ()[B
-	public abstract fun getInvalidSpanId ()[B
-	public abstract fun getInvalidTraceId ()[B
-}
-
-public final class io/opentelemetry/kotlin/factory/IdGeneratorKt {
-	public static final fun hexToByteArray (Ljava/lang/String;)[B
-	public static final fun toHexString ([B)Ljava/lang/String;
-}
-
 public abstract interface class io/opentelemetry/kotlin/factory/SdkFactory {
 	public abstract fun getContext ()Lio/opentelemetry/kotlin/factory/ContextFactory;
-	public abstract fun getIdGenerator ()Lio/opentelemetry/kotlin/factory/IdGenerator;
 	public abstract fun getSpan ()Lio/opentelemetry/kotlin/factory/SpanFactory;
 	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/factory/SpanContextFactory;
 	public abstract fun getTraceFlags ()Lio/opentelemetry/kotlin/factory/TraceFlagsFactory;

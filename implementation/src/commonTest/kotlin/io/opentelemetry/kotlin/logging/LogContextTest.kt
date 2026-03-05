@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.SdkFactory
 import io.opentelemetry.kotlin.factory.SdkFactoryImpl
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
@@ -43,7 +44,8 @@ internal class LogContextTest {
             sdkFactory,
             key,
             FakeResource(),
-            fakeSpanLimitsConfig
+            fakeSpanLimitsConfig,
+            FakeIdGenerator(),
         )
     }
 

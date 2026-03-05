@@ -1,5 +1,7 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.factory.IdGenerator
+
 /**
  * The main entry point for the OpenTelemetry API.
  *
@@ -13,4 +15,9 @@ public interface OpenTelemetrySdk : OpenTelemetry {
      * The [Clock] that will be used for obtaining timestamps by this instance.
      */
     public val clock: Clock
+
+    /**
+     * The [IdGenerator] that will be used for generating span and trace IDs.
+     */
+    public val idGenerator: IdGenerator
 }
