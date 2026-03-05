@@ -2,6 +2,8 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.factory.IdGenerator
+import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SdkFactory
 import io.opentelemetry.kotlin.factory.SdkFactoryImpl
 import io.opentelemetry.kotlin.factory.toHexString
@@ -24,12 +26,14 @@ internal class TracerSpanContextTest {
     private lateinit var clock: FakeClock
     private lateinit var processor: FakeSpanProcessor
     private lateinit var sdkFactory: SdkFactory
+    private lateinit var idGenerator: IdGenerator
 
     @BeforeTest
     fun setUp() {
         clock = FakeClock()
         processor = FakeSpanProcessor()
-        sdkFactory = SdkFactoryImpl()
+        idGenerator = IdGeneratorImpl()
+        sdkFactory = SdkFactoryImpl(idGenerator)
         tracer = TracerImpl(
             clock,
             processor,
@@ -37,6 +41,7 @@ internal class TracerSpanContextTest {
             key,
             FakeResource(),
             fakeSpanLimitsConfig,
+            idGenerator,
         )
     }
 
@@ -100,8 +105,8 @@ internal class TracerSpanContextTest {
     private fun assertValidSpanContext(spanContext: SpanContext) {
         assertTrue(spanContext.isValid)
         assertFalse(spanContext.isRemote)
-        assertNotEquals(sdkFactory.idGenerator.invalidTraceId.toHexString(), spanContext.traceId)
-        assertNotEquals(sdkFactory.idGenerator.invalidSpanId.toHexString(), spanContext.spanId)
+        assertNotEquals(idGenerator.invalidTraceId.toHexString(), spanContext.traceId)
+        assertNotEquals(idGenerator.invalidSpanId.toHexString(), spanContext.spanId)
         assertEquals(emptyMap(), spanContext.traceState.asMap())
         assertEquals("01", spanContext.traceFlags.hex)
     }

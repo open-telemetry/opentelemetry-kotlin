@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.export.TelemetryCloseable
+import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.FakeSdkFactory
 import io.opentelemetry.kotlin.logging.FakeLoggerProvider
 import io.opentelemetry.kotlin.logging.LoggerProvider
@@ -152,6 +153,7 @@ internal class CloseableOpenTelemetryImplTest {
         tracerProvider = tracerProvider,
         loggerProvider = loggerProvider,
         clock = FakeClock(),
+        idGenerator = FakeIdGenerator(),
         sdkFactory = FakeSdkFactory(),
     )
 

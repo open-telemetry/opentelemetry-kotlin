@@ -2,15 +2,15 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.factory.SdkFactory
+import io.opentelemetry.kotlin.factory.IdGenerator
 
 @ExperimentalApi
 internal class CompatOpenTelemetryConfig(
     clock: Clock,
-    sdkFactory: SdkFactory,
+    idGenerator: IdGenerator,
 ) : OpenTelemetryConfigDsl {
 
-    internal val tracerProviderConfig = CompatTracerProviderConfig(clock, sdkFactory)
+    internal val tracerProviderConfig = CompatTracerProviderConfig(clock, idGenerator)
     internal val loggerProviderConfig = CompatLoggerProviderConfig(clock)
 
     override fun context(action: ContextConfigDsl.() -> Unit) {

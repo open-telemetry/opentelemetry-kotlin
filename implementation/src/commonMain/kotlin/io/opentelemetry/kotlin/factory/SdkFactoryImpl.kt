@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.factory
 internal class SdkFactoryImpl(
-    override val idGenerator: IdGenerator = IdGeneratorImpl()
+    val idGenerator: IdGenerator = IdGeneratorImpl()
 ) : SdkFactory {
     override val traceFlags: TraceFlagsFactory by lazy { TraceFlagsFactoryImpl() }
     override val traceState: TraceStateFactory by lazy { TraceStateFactoryImpl() }
