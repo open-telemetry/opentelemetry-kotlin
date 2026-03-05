@@ -3,7 +3,9 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.clock.FakeClock
-import io.opentelemetry.kotlin.factory.FakeSdkFactory
+import io.opentelemetry.kotlin.factory.FakeContextFactory
+import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
+import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -33,15 +35,17 @@ internal class LogAttributesTest {
     @BeforeTest
     fun setUp() {
         logger = LoggerImpl(
-            FakeClock(),
-            processor,
-            FakeSdkFactory(),
-            key,
-            FakeResource(),
-            LogLimitConfig(
+            clock = FakeClock(),
+            processor = processor,
+            contextFactory = FakeContextFactory(),
+            spanContextFactory = FakeSpanContextFactory(),
+            spanFactory = FakeSpanFactory(),
+            key = key,
+            resource = FakeResource(),
+            logLimitConfig = LogLimitConfig(
                 attributeCountLimit = 8,
                 attributeValueLengthLimit = fakeLogLimitsConfig.attributeValueLengthLimit
-            )
+            ),
         )
     }
 

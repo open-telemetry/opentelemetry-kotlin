@@ -3,7 +3,12 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.factory.FakeSdkFactory
+import io.opentelemetry.kotlin.factory.FakeContextFactory
+import io.opentelemetry.kotlin.factory.FakeIdGenerator
+import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
+import io.opentelemetry.kotlin.factory.FakeSpanFactory
+import io.opentelemetry.kotlin.factory.FakeTraceFlagsFactory
+import io.opentelemetry.kotlin.factory.FakeTraceStateFactory
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.ResourceImpl
@@ -28,7 +33,16 @@ internal class TracerProviderImplTest {
 
     @BeforeTest
     fun setUp() {
-        impl = TracerProviderImpl(FakeClock(), tracingConfig, FakeSdkFactory())
+        impl = TracerProviderImpl(
+            clock = FakeClock(),
+            tracingConfig = tracingConfig,
+            contextFactory = FakeContextFactory(),
+            spanContextFactory = FakeSpanContextFactory(),
+            traceFlagsFactory = FakeTraceFlagsFactory(),
+            traceStateFactory = FakeTraceStateFactory(),
+            spanFactory = FakeSpanFactory(),
+            idGenerator = FakeIdGenerator(),
+        )
     }
 
     @Test
@@ -116,7 +130,16 @@ internal class TracerProviderImplTest {
             fakeSpanLimitsConfig,
             FakeResource(),
         )
-        val provider = TracerProviderImpl(FakeClock(), config, FakeSdkFactory())
+        val provider = TracerProviderImpl(
+            clock = FakeClock(),
+            tracingConfig = config,
+            contextFactory = FakeContextFactory(),
+            spanContextFactory = FakeSpanContextFactory(),
+            traceFlagsFactory = FakeTraceFlagsFactory(),
+            traceStateFactory = FakeTraceStateFactory(),
+            spanFactory = FakeSpanFactory(),
+            idGenerator = FakeIdGenerator(),
+        )
         provider.getTracer(name = "test")
 
         val result = provider.forceFlush()
@@ -138,7 +161,16 @@ internal class TracerProviderImplTest {
             fakeSpanLimitsConfig,
             FakeResource(),
         )
-        val provider = TracerProviderImpl(FakeClock(), config, FakeSdkFactory())
+        val provider = TracerProviderImpl(
+            clock = FakeClock(),
+            tracingConfig = config,
+            contextFactory = FakeContextFactory(),
+            spanContextFactory = FakeSpanContextFactory(),
+            traceFlagsFactory = FakeTraceFlagsFactory(),
+            traceStateFactory = FakeTraceStateFactory(),
+            spanFactory = FakeSpanFactory(),
+            idGenerator = FakeIdGenerator(),
+        )
         provider.getTracer(name = "test")
 
         val result = provider.shutdown()

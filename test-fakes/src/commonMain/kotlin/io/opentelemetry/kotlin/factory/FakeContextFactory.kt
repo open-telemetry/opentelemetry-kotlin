@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.tracing.model.Span
 
-internal class FakeContextFactory : ContextFactory {
+class FakeContextFactory : ContextFactory {
 
     override fun root(): Context = FakeContext()
 

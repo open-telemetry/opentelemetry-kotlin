@@ -2,7 +2,12 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
-import io.opentelemetry.kotlin.factory.FakeSdkFactory
+import io.opentelemetry.kotlin.factory.FakeContextFactory
+import io.opentelemetry.kotlin.factory.FakeIdGenerator
+import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
+import io.opentelemetry.kotlin.factory.FakeSpanFactory
+import io.opentelemetry.kotlin.factory.FakeTraceFlagsFactory
+import io.opentelemetry.kotlin.factory.FakeTraceStateFactory
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -21,12 +26,17 @@ internal class SpanSimplePropertiesTest {
     fun setUp() {
         clock = FakeClock()
         tracer = TracerImpl(
-            clock,
-            FakeSpanProcessor(),
-            FakeSdkFactory(),
-            key,
-            FakeResource(),
-            fakeSpanLimitsConfig
+            clock = clock,
+            processor = FakeSpanProcessor(),
+            contextFactory = FakeContextFactory(),
+            spanContextFactory = FakeSpanContextFactory(),
+            traceFlagsFactory = FakeTraceFlagsFactory(),
+            traceStateFactory = FakeTraceStateFactory(),
+            spanFactory = FakeSpanFactory(),
+            tracingIdFactory = FakeIdGenerator(),
+            scope = key,
+            resource = FakeResource(),
+            spanLimitConfig = fakeSpanLimitsConfig,
         )
     }
 

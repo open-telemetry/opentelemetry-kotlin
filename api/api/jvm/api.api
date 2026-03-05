@@ -1,8 +1,14 @@
 public abstract interface annotation class io/opentelemetry/kotlin/ExperimentalApi : java/lang/annotation/Annotation {
 }
 
-public abstract interface class io/opentelemetry/kotlin/OpenTelemetry : io/opentelemetry/kotlin/factory/SdkFactory {
+public abstract interface class io/opentelemetry/kotlin/OpenTelemetry {
+	public abstract fun getContext ()Lio/opentelemetry/kotlin/factory/ContextFactory;
+	public abstract fun getIdGenerator ()Lio/opentelemetry/kotlin/factory/IdGenerator;
 	public abstract fun getLoggerProvider ()Lio/opentelemetry/kotlin/logging/LoggerProvider;
+	public abstract fun getSpan ()Lio/opentelemetry/kotlin/factory/SpanFactory;
+	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/factory/SpanContextFactory;
+	public abstract fun getTraceFlags ()Lio/opentelemetry/kotlin/factory/TraceFlagsFactory;
+	public abstract fun getTraceState ()Lio/opentelemetry/kotlin/factory/TraceStateFactory;
 	public abstract fun getTracerProvider ()Lio/opentelemetry/kotlin/tracing/TracerProvider;
 }
 
@@ -54,15 +60,6 @@ public abstract interface class io/opentelemetry/kotlin/factory/IdGenerator {
 public final class io/opentelemetry/kotlin/factory/IdGeneratorKt {
 	public static final fun hexToByteArray (Ljava/lang/String;)[B
 	public static final fun toHexString ([B)Ljava/lang/String;
-}
-
-public abstract interface class io/opentelemetry/kotlin/factory/SdkFactory {
-	public abstract fun getContext ()Lio/opentelemetry/kotlin/factory/ContextFactory;
-	public abstract fun getIdGenerator ()Lio/opentelemetry/kotlin/factory/IdGenerator;
-	public abstract fun getSpan ()Lio/opentelemetry/kotlin/factory/SpanFactory;
-	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/factory/SpanContextFactory;
-	public abstract fun getTraceFlags ()Lio/opentelemetry/kotlin/factory/TraceFlagsFactory;
-	public abstract fun getTraceState ()Lio/opentelemetry/kotlin/factory/TraceStateFactory;
 }
 
 public abstract interface class io/opentelemetry/kotlin/factory/SpanContextFactory {
