@@ -4,11 +4,11 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
-import io.opentelemetry.kotlin.tracing.model.Link
 import io.opentelemetry.kotlin.tracing.model.SpanContext
+import io.opentelemetry.kotlin.tracing.model.SpanLink
 
 @OptIn(ExperimentalApi::class)
 internal class SpanLinkCompatImpl(
     override val spanContext: SpanContext,
     private val attrs: CompatAttributesModel
-) : Link, MutableAttributeContainer by attrs, AttributeContainer by attrs
+) : SpanLink, MutableAttributeContainer by attrs, AttributeContainer by attrs

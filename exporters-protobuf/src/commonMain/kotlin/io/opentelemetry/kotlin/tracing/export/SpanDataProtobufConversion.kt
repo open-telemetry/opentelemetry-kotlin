@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.export.conversion.toFlagsInt
 import io.opentelemetry.kotlin.export.conversion.toW3CString
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.data.EventData
-import io.opentelemetry.kotlin.tracing.data.LinkData
+import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.SpanContext
@@ -71,9 +71,9 @@ private fun EventData.toSpanEvent(): Span.Event = Span.Event(
     attributes = attributes.createKeyValues()
 )
 
-private fun List<LinkData>.toSpanLink() = map { it.toLinkData() }
+private fun List<SpanLinkData>.toSpanLink() = map { it.toLinkData() }
 
-private fun LinkData.toLinkData() = Span.Link(
+private fun SpanLinkData.toLinkData() = Span.Link(
     trace_id = spanContext.traceIdBytes.toByteString(),
     span_id = spanContext.spanIdBytes.toByteString(),
     attributes = attributes.createKeyValues()
@@ -91,7 +91,7 @@ private fun Span.Event.toEventData(): EventData = DeserializedEventData(
     attributes = attributes.toAttributeMap()
 )
 
-private fun Span.Link.toLinkData(): LinkData = DeserializedLinkData(
+private fun Span.Link.toLinkData(): SpanLinkData = DeserializedSpanLinkData(
     spanContext = DeserializedSpanContext(
         traceIdBytes = trace_id.toByteArray(),
         spanIdBytes = span_id.toByteArray()
@@ -111,7 +111,7 @@ private class DeserializedSpanData(
     override val instrumentationScopeInfo: InstrumentationScopeInfo,
     override val attributes: Map<String, Any>,
     override val events: List<EventData>,
-    override val links: List<LinkData>,
+    override val links: List<SpanLinkData>,
     override val hasEnded: Boolean
 ) : SpanData
 
@@ -121,7 +121,7 @@ private class DeserializedEventData(
     override val attributes: Map<String, Any>
 ) : EventData
 
-private class DeserializedLinkData(
+private class DeserializedSpanLinkData(
     override val spanContext: SpanContext,
     override val attributes: Map<String, Any>
-) : LinkData
+) : SpanLinkData

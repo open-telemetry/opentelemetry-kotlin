@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.data.FakeEventData
-import io.opentelemetry.kotlin.tracing.data.FakeLinkData
+import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.SpanKind
 import kotlinx.coroutines.test.runTest
@@ -58,7 +58,7 @@ internal class StdoutSpanExporterTest {
                 FakeEventData(name = "request.completed", timestamp = 1900000000L)
             ),
             links = listOf(
-                FakeLinkData()
+                FakeSpanLinkData()
             ),
             resource = FakeResource(attributes = mapOf("service.name" to "test-service")),
             instrumentationScopeInfo = FakeInstrumentationScopeInfo(

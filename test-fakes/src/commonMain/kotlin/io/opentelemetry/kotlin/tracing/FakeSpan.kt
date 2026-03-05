@@ -3,8 +3,8 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.attributes.FakeMutableAttributeContainer
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.tracing.data.EventData
-import io.opentelemetry.kotlin.tracing.data.FakeLinkData
-import io.opentelemetry.kotlin.tracing.data.LinkData
+import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
+import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.Span
 import io.opentelemetry.kotlin.tracing.model.SpanContext
@@ -17,7 +17,7 @@ class FakeSpan(
 ) : Span {
 
     override val events: MutableList<EventData> = mutableListOf()
-    override val links: MutableList<LinkData> = mutableListOf()
+    override val links: MutableList<SpanLinkData> = mutableListOf()
 
     private var recording: Boolean = true
 
@@ -51,7 +51,7 @@ class FakeSpan(
             attributes(container)
         }
         val attrs = container.attributes
-        links.add(FakeLinkData(spanContext, attrs))
+        links.add(FakeSpanLinkData(spanContext, attrs))
     }
 
     override fun addEvent(

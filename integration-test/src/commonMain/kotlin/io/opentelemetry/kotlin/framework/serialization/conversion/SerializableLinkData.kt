@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.framework.serialization.conversion
 
 import io.opentelemetry.kotlin.framework.serialization.SerializableLinkData
-import io.opentelemetry.kotlin.tracing.data.LinkData
+import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 
-fun LinkData.toSerializable() =
+fun SpanLinkData.toSerializable() =
     SerializableLinkData(
         spanContext = spanContext.toSerializable(),
         attributes = attributes.toSerializable(),

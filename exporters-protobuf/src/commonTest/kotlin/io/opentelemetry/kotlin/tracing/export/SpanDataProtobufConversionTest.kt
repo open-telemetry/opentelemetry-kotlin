@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.export.assertAttributesMatch
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.tracing.data.EventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
-import io.opentelemetry.kotlin.tracing.data.LinkData
+import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.proto.trace.v1.Span
 import kotlin.test.Test
@@ -54,7 +54,7 @@ class SpanDataProtobufConversionTest {
     }
 
     private fun assertLinksMatch(
-        links: List<LinkData>, linksList: List<Span.Link>
+        links: List<SpanLinkData>, linksList: List<Span.Link>
     ) {
         assertEquals(links.size, linksList.size)
         links.forEachIndexed { index, link ->

@@ -176,7 +176,7 @@ public abstract interface class io/opentelemetry/kotlin/tracing/data/EventData :
 	public abstract fun getTimestamp ()J
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/data/LinkData : io/opentelemetry/kotlin/attributes/AttributeContainer {
+public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanLinkData : io/opentelemetry/kotlin/attributes/AttributeContainer {
 	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
 }
 
@@ -207,9 +207,6 @@ public final class io/opentelemetry/kotlin/tracing/data/StatusData$Ok : io/opent
 
 public final class io/opentelemetry/kotlin/tracing/data/StatusData$Unset : io/opentelemetry/kotlin/tracing/data/StatusData {
 	public static final field INSTANCE Lio/opentelemetry/kotlin/tracing/data/StatusData$Unset;
-}
-
-public abstract interface class io/opentelemetry/kotlin/tracing/model/Link : io/opentelemetry/kotlin/attributes/MutableAttributeContainer, io/opentelemetry/kotlin/tracing/data/LinkData {
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/Span : io/opentelemetry/kotlin/tracing/data/SpanSchema, io/opentelemetry/kotlin/tracing/model/SpanRelationships {
@@ -245,6 +242,9 @@ public final class io/opentelemetry/kotlin/tracing/model/SpanKind : java/lang/En
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/model/SpanKind;
 	public static fun values ()[Lio/opentelemetry/kotlin/tracing/model/SpanKind;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLink : io/opentelemetry/kotlin/attributes/MutableAttributeContainer, io/opentelemetry/kotlin/tracing/data/SpanLinkData {
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanRelationships : io/opentelemetry/kotlin/attributes/MutableAttributeContainer {

@@ -16,7 +16,7 @@ import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanData
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
 import io.opentelemetry.kotlin.tracing.data.EventData
-import io.opentelemetry.kotlin.tracing.data.LinkData
+import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaEventData
@@ -139,7 +139,7 @@ internal class ReadWriteSpanAdapterTest {
         expectedStatus: StatusData? = null,
         expectedAttributes: Map<String, Any>? = null,
         expectedEvents: List<EventData>? = null,
-        expectedLinks: List<LinkData>? = null,
+        expectedLinks: List<SpanLinkData>? = null,
     ): (span: ReadWriteSpan, _: Context) -> Unit {
         return fun(span: ReadWriteSpan, context: Context) {
             updateCode(span)
@@ -162,7 +162,7 @@ internal class ReadWriteSpanAdapterTest {
         expectedStatus: StatusData? = null,
         expectedAttributes: Map<String, Any>? = null,
         expectedEvents: List<EventData>? = null,
-        expectedLinks: List<LinkData>? = null,
+        expectedLinks: List<SpanLinkData>? = null,
     ): (span: ReadableSpan) -> Unit {
         return fun(readableSpan: ReadableSpan) {
             with(readableSpan) {

@@ -3,8 +3,8 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.tracing.model.Link
 import io.opentelemetry.kotlin.tracing.model.SpanKind
+import io.opentelemetry.kotlin.tracing.model.SpanLink
 
 /**
  * Decides whether a [io.opentelemetry.kotlin.tracing.model.Span] should be sampled or not
@@ -31,7 +31,7 @@ public interface Sampler {
         name: String,
         spanKind: SpanKind,
         attributes: AttributeContainer,
-        links: List<Link>,
+        links: List<SpanLink>,
     ): SamplingResult
 
     /**

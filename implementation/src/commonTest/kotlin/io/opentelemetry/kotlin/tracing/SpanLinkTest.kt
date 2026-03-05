@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.factory.FakeSdkFactory
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.FakeResource
-import io.opentelemetry.kotlin.tracing.data.LinkData
+import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import kotlin.test.BeforeTest
@@ -158,14 +158,14 @@ internal class SpanLinkTest {
         assertEquals(fakeSpanLimitsConfig.attributeCountLimit, link.attributes.size)
     }
 
-    private fun retrieveLinks(expected: Int): List<LinkData> {
+    private fun retrieveLinks(expected: Int): List<SpanLinkData> {
         val links = processor.endCalls.single().links
         assertEquals(expected, links.size)
         return links
     }
 
     private fun assertLinkData(
-        link: LinkData,
+        link: SpanLinkData,
         spanContext: SpanContext,
         attrs: Map<String, Any>
     ) {
