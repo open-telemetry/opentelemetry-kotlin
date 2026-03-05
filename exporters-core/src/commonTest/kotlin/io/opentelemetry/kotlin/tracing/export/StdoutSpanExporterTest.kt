@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.framework.loadTestFixture
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
-import io.opentelemetry.kotlin.tracing.data.FakeEventData
+import io.opentelemetry.kotlin.tracing.data.FakeSpanEventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.SpanKind
@@ -54,8 +54,8 @@ internal class StdoutSpanExporterTest {
             endTimestamp = 2000000000L,
             attributes = mapOf("http.method" to "GET", "http.status_code" to 200),
             events = listOf(
-                FakeEventData(name = "request.started", timestamp = 1100000000L),
-                FakeEventData(name = "request.completed", timestamp = 1900000000L)
+                FakeSpanEventData(name = "request.started", timestamp = 1100000000L),
+                FakeSpanEventData(name = "request.completed", timestamp = 1900000000L)
             ),
             links = listOf(
                 FakeSpanLinkData()

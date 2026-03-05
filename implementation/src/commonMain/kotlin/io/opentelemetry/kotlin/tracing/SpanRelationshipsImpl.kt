@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.threadSafeList
-import io.opentelemetry.kotlin.tracing.data.EventData
+import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanRelationships
@@ -17,7 +17,7 @@ internal class SpanRelationshipsImpl(
 ) : SpanRelationships, MutableAttributeContainer by attrs {
 
     val links = threadSafeList<SpanLinkData>()
-    val events = threadSafeList<EventData>()
+    val events = threadSafeList<SpanEventData>()
 
     override fun addLink(
         spanContext: SpanContext,

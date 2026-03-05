@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.export.assertAttributesMatch
 import io.opentelemetry.kotlin.factory.toHexString
-import io.opentelemetry.kotlin.tracing.data.EventData
+import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
@@ -42,7 +42,7 @@ class SpanDataProtobufConversionTest {
     }
 
     private fun assertEventsMatch(
-        events: List<EventData>, eventsList: List<Span.Event>
+        events: List<SpanEventData>, eventsList: List<Span.Event>
     ) {
         assertEquals(events.size, eventsList.size)
         events.forEachIndexed { index, event ->

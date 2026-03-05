@@ -5,8 +5,8 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.Resource
-import io.opentelemetry.kotlin.tracing.data.EventData
 import io.opentelemetry.kotlin.tracing.data.SpanData
+import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
@@ -20,7 +20,7 @@ class FakeReadWriteSpan(
     override val spanContext: SpanContext = FakeSpanContext.INVALID,
     override val spanKind: SpanKind = SpanKind.INTERNAL,
     override val startTimestamp: Long = 0,
-    override val events: List<EventData> = emptyList(),
+    override val events: List<SpanEventData> = emptyList(),
     override val links: List<SpanLinkData> = emptyList(),
     override val attributes: Map<String, Any> = emptyMap(),
     override val endTimestamp: Long? = 0,

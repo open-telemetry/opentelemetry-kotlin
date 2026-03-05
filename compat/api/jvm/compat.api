@@ -52,7 +52,7 @@ public final class io/opentelemetry/kotlin/tracing/ext/SpanContextStorageExtKt {
 }
 
 public final class io/opentelemetry/kotlin/tracing/ext/SpanEventDataExtKt {
-	public static final fun toOtelJavaEventData (Lio/opentelemetry/kotlin/tracing/data/EventData;)Lio/opentelemetry/sdk/trace/data/EventData;
+	public static final fun toOtelJavaEventData (Lio/opentelemetry/kotlin/tracing/data/SpanEventData;)Lio/opentelemetry/sdk/trace/data/EventData;
 }
 
 public final class io/opentelemetry/kotlin/tracing/ext/SpanLinkDataExtKt {

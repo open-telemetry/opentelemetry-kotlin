@@ -53,7 +53,7 @@ public interface SpanSchema : AttributeContainer {
      * A list of events associated with the span.
      */
     @ThreadSafe
-    public val events: List<EventData>
+    public val events: List<SpanEventData>
 
     /**
      * A list of links associated with the span.

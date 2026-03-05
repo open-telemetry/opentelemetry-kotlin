@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.framework.serialization.SerializableSpanContext
 import io.opentelemetry.kotlin.framework.serialization.SerializableSpanData
 import io.opentelemetry.kotlin.framework.serialization.SerializableSpanStatusData
 import io.opentelemetry.kotlin.resource.Resource
-import io.opentelemetry.kotlin.tracing.data.EventData
+import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
@@ -25,7 +25,7 @@ internal fun ReadableSpan.toSerializable(): SerializableSpanData =
         parentSpanContext = spanContext.toSerializable(),
         startTimestamp = startTimestamp,
         attributes = attributes.toSerializable(),
-        events = events.map(EventData::toSerializable),
+        events = events.map(SpanEventData::toSerializable),
         links = links.map(SpanLinkData::toSerializable),
         endTimestamp = endTimestamp ?: -1,
         ended = hasEnded,
@@ -59,7 +59,7 @@ private fun InstrumentationScopeInfo.toSerializable(): SerializableInstrumentati
         attributes.toSerializable()
     )
 
-private fun EventData.toSerializable(): SerializableEventData =
+private fun SpanEventData.toSerializable(): SerializableEventData =
     SerializableEventData(
         name,
         attributes.toSerializable(),

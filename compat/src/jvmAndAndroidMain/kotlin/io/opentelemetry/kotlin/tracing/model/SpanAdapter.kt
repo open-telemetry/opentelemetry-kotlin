@@ -12,7 +12,7 @@ import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.SpanEventCompatImpl
 import io.opentelemetry.kotlin.tracing.SpanLinkCompatImpl
-import io.opentelemetry.kotlin.tracing.data.EventData
+import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
@@ -31,7 +31,7 @@ internal class SpanAdapter(
 ) : Span, OtelJavaImplicitContextKeyed {
 
     private val attrs: MutableMap<String, Any> = ConcurrentHashMap()
-    private val eventsImpl: ConcurrentLinkedQueue<EventData> = ConcurrentLinkedQueue()
+    private val eventsImpl: ConcurrentLinkedQueue<SpanEventData> = ConcurrentLinkedQueue()
     private val linksImpl: ConcurrentLinkedQueue<SpanLink> = ConcurrentLinkedQueue()
 
     private var implName: String = ""
@@ -63,7 +63,7 @@ internal class SpanAdapter(
     override val attributes: Map<String, Any>
         get() = attrs.toMap()
 
-    override val events: List<EventData>
+    override val events: List<SpanEventData>
         get() = eventsImpl.toList()
 
     override val links: List<SpanLinkData>

@@ -2,8 +2,8 @@ package io.opentelemetry.kotlin.framework.serialization
 
 import io.opentelemetry.kotlin.framework.serialization.conversion.toSerializable
 import io.opentelemetry.kotlin.resource.Resource
-import io.opentelemetry.kotlin.tracing.data.EventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
+import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.SpanContext
@@ -52,7 +52,7 @@ internal class SerializableSpanDataTest {
         assertEquals(expected.mapValues { it.value.toString() }, observed)
     }
 
-    private fun compareEvents(expected: List<EventData>, observed: List<SerializableEventData>) {
+    private fun compareEvents(expected: List<SpanEventData>, observed: List<SerializableEventData>) {
         assertEquals(expected.size, observed.size)
 
         expected.forEachIndexed { index, data ->

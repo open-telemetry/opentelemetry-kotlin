@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.export.conversion.toAttributeMap
 import io.opentelemetry.kotlin.export.conversion.toFlagsInt
 import io.opentelemetry.kotlin.export.conversion.toW3CString
 import io.opentelemetry.kotlin.resource.Resource
-import io.opentelemetry.kotlin.tracing.data.EventData
+import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.data.StatusData
@@ -63,9 +63,9 @@ internal fun Span.toSpanData(
     hasEnded = true
 )
 
-private fun List<EventData>.toSpanEvent(): List<Span.Event> = map { it.toSpanEvent() }
+private fun List<SpanEventData>.toSpanEvent(): List<Span.Event> = map { it.toSpanEvent() }
 
-private fun EventData.toSpanEvent(): Span.Event = Span.Event(
+private fun SpanEventData.toSpanEvent(): Span.Event = Span.Event(
     name = name,
     time_unix_nano = timestamp,
     attributes = attributes.createKeyValues()
@@ -85,7 +85,7 @@ private fun Status.toStatusData(): StatusData = when (code) {
     else -> StatusData.Unset
 }
 
-private fun Span.Event.toEventData(): EventData = DeserializedEventData(
+private fun Span.Event.toEventData(): SpanEventData = DeserializedSpanEventData(
     name = name,
     timestamp = time_unix_nano,
     attributes = attributes.toAttributeMap()
@@ -110,16 +110,16 @@ private class DeserializedSpanData(
     override val resource: Resource,
     override val instrumentationScopeInfo: InstrumentationScopeInfo,
     override val attributes: Map<String, Any>,
-    override val events: List<EventData>,
+    override val events: List<SpanEventData>,
     override val links: List<SpanLinkData>,
     override val hasEnded: Boolean
 ) : SpanData
 
-private class DeserializedEventData(
+private class DeserializedSpanEventData(
     override val name: String,
     override val timestamp: Long,
     override val attributes: Map<String, Any>
-) : EventData
+) : SpanEventData
 
 private class DeserializedSpanLinkData(
     override val spanContext: SpanContext,

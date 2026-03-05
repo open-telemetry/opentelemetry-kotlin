@@ -10,8 +10,8 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanDataImpl
 import io.opentelemetry.kotlin.tracing.SpanEventImpl
 import io.opentelemetry.kotlin.tracing.SpanLinkImpl
-import io.opentelemetry.kotlin.tracing.data.EventData
 import io.opentelemetry.kotlin.tracing.data.SpanData
+import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
@@ -92,9 +92,9 @@ internal class SpanModel(
 
     override fun isRecording(): Boolean = state != State.ENDED
 
-    private val eventsList = mutableListOf<EventData>()
+    private val eventsList = mutableListOf<SpanEventData>()
 
-    override val events: List<EventData>
+    override val events: List<SpanEventData>
         get() = lock.read {
             eventsList.toList()
         }

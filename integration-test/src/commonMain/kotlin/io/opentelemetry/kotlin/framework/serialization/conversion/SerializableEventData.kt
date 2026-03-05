@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.framework.serialization.conversion
 
 import io.opentelemetry.kotlin.framework.serialization.SerializableEventData
-import io.opentelemetry.kotlin.tracing.data.EventData
+import io.opentelemetry.kotlin.tracing.data.SpanEventData
 
-fun EventData.toSerializable() =
+fun SpanEventData.toSerializable() =
     SerializableEventData(
         name = name,
         attributes = attributes.toSerializable(),
