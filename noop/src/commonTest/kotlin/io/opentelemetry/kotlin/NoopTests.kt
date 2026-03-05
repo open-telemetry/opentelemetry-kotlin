@@ -175,7 +175,7 @@ internal class NoopTests {
     fun testNoopTraceFlagsFactory() {
         val otel = NoopOpenTelemetry
         val traceFlagsFactory = otel.traceFlags
-        assertTrue(traceFlagsFactory.create(true, random = false) is NoopTraceFlags)
+        assertTrue(traceFlagsFactory.fromHex("01") is NoopTraceFlags)
         assertTrue(traceFlagsFactory.fromHex("01") is NoopTraceFlags)
     }
 

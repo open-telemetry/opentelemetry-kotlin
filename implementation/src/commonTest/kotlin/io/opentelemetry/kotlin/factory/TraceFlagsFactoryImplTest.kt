@@ -18,7 +18,7 @@ internal class TraceFlagsFactoryImplTest {
 
     @Test
     fun testSampledOnly() {
-        val flags = factory.create(sampled = true, random = false)
+        val flags = factory.fromHex("01")
 
         assertTrue(flags.isSampled)
         assertFalse(flags.isRandom)
@@ -26,7 +26,7 @@ internal class TraceFlagsFactoryImplTest {
 
     @Test
     fun testRandomOnly() {
-        val flags = factory.create(sampled = false, random = true)
+        val flags = factory.fromHex("02")
 
         assertFalse(flags.isSampled)
         assertTrue(flags.isRandom)
@@ -34,7 +34,7 @@ internal class TraceFlagsFactoryImplTest {
 
     @Test
     fun testSampledAndRandom() {
-        val flags = factory.create(sampled = true, random = true)
+        val flags = factory.fromHex("03")
 
         assertTrue(flags.isSampled)
         assertTrue(flags.isRandom)
@@ -42,7 +42,7 @@ internal class TraceFlagsFactoryImplTest {
 
     @Test
     fun testDefault() {
-        val flags = factory.create(sampled = false, random = false)
+        val flags = factory.fromHex("00")
 
         assertFalse(flags.isSampled)
         assertFalse(flags.isRandom)

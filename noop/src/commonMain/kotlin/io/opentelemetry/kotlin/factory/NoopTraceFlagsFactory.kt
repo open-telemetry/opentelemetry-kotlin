@@ -5,6 +5,5 @@ import io.opentelemetry.kotlin.tracing.model.TraceFlags
 
 internal object NoopTraceFlagsFactory : TraceFlagsFactory {
     override val default: TraceFlags = NoopTraceFlags
-    override fun create(sampled: Boolean, random: Boolean): TraceFlags = NoopTraceFlags
     override fun fromHex(hex: String): TraceFlags = NoopTraceFlags
 }

@@ -107,7 +107,6 @@ public abstract interface class io/opentelemetry/kotlin/factory/SpanFactory {
 }
 
 public abstract interface class io/opentelemetry/kotlin/factory/TraceFlagsFactory {
-	public abstract fun create (ZZ)Lio/opentelemetry/kotlin/tracing/model/TraceFlags;
 	public abstract fun fromHex (Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/model/TraceFlags;
 	public abstract fun getDefault ()Lio/opentelemetry/kotlin/tracing/model/TraceFlags;
 }
