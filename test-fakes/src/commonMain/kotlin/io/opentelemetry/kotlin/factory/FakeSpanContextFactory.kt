@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.TraceFlags
 import io.opentelemetry.kotlin.tracing.model.TraceState
 
-internal class FakeSpanContextFactory : SpanContextFactory {
+class FakeSpanContextFactory : SpanContextFactory {
 
     override val invalid: SpanContext = FakeSpanContext.INVALID
 

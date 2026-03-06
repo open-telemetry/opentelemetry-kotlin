@@ -3,8 +3,12 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
-import io.opentelemetry.kotlin.factory.SdkFactory
+import io.opentelemetry.kotlin.factory.SpanContextFactory
+import io.opentelemetry.kotlin.factory.SpanFactory
+import io.opentelemetry.kotlin.factory.TraceFlagsFactory
+import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
@@ -19,20 +23,21 @@ import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 internal class TracerImpl(
     private val clock: Clock,
     private val processor: SpanProcessor?,
-    sdkFactory: SdkFactory,
+    private val contextFactory: ContextFactory,
+    spanContextFactory: SpanContextFactory,
+    traceFlagsFactory: TraceFlagsFactory,
+    traceStateFactory: TraceStateFactory,
+    private val spanFactory: SpanFactory,
+    private val idGenerator: IdGenerator,
     private val scope: InstrumentationScopeInfo,
     private val resource: Resource,
     private val spanLimitConfig: SpanLimitConfig,
-    idGenerator: IdGenerator,
 ) : Tracer {
 
-    private val contextFactory = sdkFactory.context
     private val root = contextFactory.root()
-    private val invalidSpanContext = sdkFactory.spanContext.invalid
-    private val traceFlagsDefault = sdkFactory.traceFlags.default
-    private val traceStateDefault = sdkFactory.traceState.default
-    private val spanFactory = sdkFactory.span
-    private val tracingIdFactory = idGenerator
+    private val invalidSpanContext = spanContextFactory.invalid
+    private val traceFlagsDefault = traceFlagsFactory.default
+    private val traceStateDefault = traceStateFactory.default
 
     @Suppress("DEPRECATION")
     @Deprecated(
@@ -83,14 +88,12 @@ internal class TracerImpl(
     }
 
     private fun calculateSpanContext(parent: SpanContext): SpanContext {
-        val factory = tracingIdFactory
-
         val traceId = if (parent.isValid) {
             parent.traceIdBytes
         } else {
-            factory.generateTraceIdBytes()
+            idGenerator.generateTraceIdBytes()
         }
-        val spanId = factory.generateSpanIdBytes()
+        val spanId = idGenerator.generateSpanIdBytes()
 
         return SpanContextImpl(
             traceIdBytes = traceId,

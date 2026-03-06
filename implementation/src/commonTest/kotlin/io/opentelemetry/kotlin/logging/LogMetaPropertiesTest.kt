@@ -2,7 +2,9 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
-import io.opentelemetry.kotlin.factory.FakeSdkFactory
+import io.opentelemetry.kotlin.factory.FakeContextFactory
+import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
+import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
@@ -23,12 +25,14 @@ internal class LogMetaPropertiesTest {
         clock = FakeClock()
         processor = FakeLogRecordProcessor()
         logger = LoggerImpl(
-            clock,
-            processor,
-            FakeSdkFactory(),
-            key,
-            fakeResource,
-            fakeLogLimitsConfig
+            clock = clock,
+            processor = processor,
+            contextFactory = FakeContextFactory(),
+            spanContextFactory = FakeSpanContextFactory(),
+            spanFactory = FakeSpanFactory(),
+            key = key,
+            resource = fakeResource,
+            logLimitConfig = fakeLogLimitsConfig,
         )
     }
 

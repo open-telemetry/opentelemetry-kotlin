@@ -2,9 +2,16 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.factory.ContextFactory
+import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
-import io.opentelemetry.kotlin.factory.SdkFactory
-import io.opentelemetry.kotlin.factory.SdkFactoryImpl
+import io.opentelemetry.kotlin.factory.IdGeneratorImpl
+import io.opentelemetry.kotlin.factory.SpanContextFactory
+import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
+import io.opentelemetry.kotlin.factory.SpanFactory
+import io.opentelemetry.kotlin.factory.SpanFactoryImpl
+import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
+import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.TracerImpl
@@ -23,29 +30,43 @@ internal class LogContextTest {
     private lateinit var tracer: TracerImpl
     private lateinit var clock: FakeClock
     private lateinit var processor: FakeLogRecordProcessor
-    private lateinit var sdkFactory: SdkFactory
+    private lateinit var contextFactory: ContextFactory
+    private lateinit var spanContextFactory: SpanContextFactory
+    private lateinit var spanFactory: SpanFactory
 
     @BeforeTest
     fun setUp() {
         clock = FakeClock()
         processor = FakeLogRecordProcessor()
-        sdkFactory = SdkFactoryImpl()
+        val idGenerator = IdGeneratorImpl()
+        val traceFlags = TraceFlagsFactoryImpl()
+        val traceState = TraceStateFactoryImpl()
+        spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlags, traceState)
+        contextFactory = ContextFactoryImpl()
+        spanFactory =
+            SpanFactoryImpl(spanContextFactory, (contextFactory as ContextFactoryImpl).spanKey)
         logger = LoggerImpl(
             clock,
             processor,
-            sdkFactory,
+            contextFactory,
+            spanContextFactory,
+            spanFactory,
             key,
             FakeResource(),
             fakeLogLimitsConfig
         )
         tracer = TracerImpl(
-            clock,
-            FakeSpanProcessor(),
-            sdkFactory,
-            key,
-            FakeResource(),
-            fakeSpanLimitsConfig,
-            FakeIdGenerator(),
+            clock = clock,
+            processor = FakeSpanProcessor(),
+            contextFactory = contextFactory,
+            spanContextFactory = spanContextFactory,
+            traceFlagsFactory = traceFlags,
+            traceStateFactory = traceState,
+            spanFactory = spanFactory,
+            scope = key,
+            resource = FakeResource(),
+            idGenerator = FakeIdGenerator(),
+            spanLimitConfig = fakeSpanLimitsConfig
         )
     }
 
@@ -53,14 +74,14 @@ internal class LogContextTest {
     fun testDefaultContext() {
         logger.emit()
         val log = processor.logs.single()
-        val root = sdkFactory.span.fromContext(sdkFactory.context.root()).spanContext
+        val root = spanFactory.fromContext(contextFactory.root()).spanContext
         assertSame(root, log.spanContext)
     }
 
     @Test
     fun testOverrideContext() {
         val span = tracer.startSpan("span")
-        val ctx = sdkFactory.context.storeSpan(sdkFactory.context.root(), span)
+        val ctx = contextFactory.storeSpan(contextFactory.root(), span)
         logger.emit(
             context = ctx,
         )
@@ -72,7 +93,7 @@ internal class LogContextTest {
     @Test
     fun testImplicitContext() {
         val span = tracer.startSpan("span")
-        val ctx = sdkFactory.context.storeSpan(sdkFactory.context.root(), span)
+        val ctx = contextFactory.storeSpan(contextFactory.root(), span)
         val scope = ctx.attach()
         logger.emit()
 
@@ -81,6 +102,6 @@ internal class LogContextTest {
 
         assertEquals(2, processor.logs.size)
         assertSame(span.spanContext, processor.logs[0].spanContext)
-        assertSame(sdkFactory.spanContext.invalid, processor.logs[1].spanContext)
+        assertSame(spanContextFactory.invalid, processor.logs[1].spanContext)
     }
 }
