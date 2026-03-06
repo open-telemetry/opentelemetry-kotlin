@@ -16,9 +16,9 @@ import io.opentelemetry.kotlin.tracing.model.CreatedSpan
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpanImpl
 import io.opentelemetry.kotlin.tracing.model.Span
 import io.opentelemetry.kotlin.tracing.model.SpanContext
+import io.opentelemetry.kotlin.tracing.model.SpanCreationAction
 import io.opentelemetry.kotlin.tracing.model.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanModel
-import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 
 internal class TracerImpl(
     private val clock: Clock,
@@ -49,7 +49,7 @@ internal class TracerImpl(
         parentContext: Context?,
         spanKind: SpanKind,
         startTimestamp: Long?,
-        action: (SpanRelationships.() -> Unit)?
+        action: (SpanCreationAction.() -> Unit)?
     ): Span = startSpan(name, parentContext, spanKind, startTimestamp, action)
 
     override fun startSpan(
@@ -57,7 +57,7 @@ internal class TracerImpl(
         parentContext: Context?,
         spanKind: SpanKind,
         startTimestamp: Long?,
-        action: (SpanRelationships.() -> Unit)?
+        action: (SpanCreationAction.() -> Unit)?
     ): Span {
         val ctx = parentContext ?: contextFactory.implicit()
 

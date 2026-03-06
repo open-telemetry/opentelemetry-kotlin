@@ -3,8 +3,8 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.tracing.model.Span
+import io.opentelemetry.kotlin.tracing.model.SpanCreationAction
 import io.opentelemetry.kotlin.tracing.model.SpanKind
-import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 
 @ExperimentalApi
 internal object NoopTracer : Tracer {
@@ -18,7 +18,7 @@ internal object NoopTracer : Tracer {
         parentContext: Context?,
         spanKind: SpanKind,
         startTimestamp: Long?,
-        action: (SpanRelationships.() -> Unit)?
+        action: (SpanCreationAction.() -> Unit)?
     ): Span = NoopSpan
 
     override fun startSpan(
@@ -26,6 +26,6 @@ internal object NoopTracer : Tracer {
         parentContext: Context?,
         spanKind: SpanKind,
         startTimestamp: Long?,
-        action: (SpanRelationships.() -> Unit)?
+        action: (SpanCreationAction.() -> Unit)?
     ): Span = NoopSpan
 }

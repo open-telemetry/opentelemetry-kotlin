@@ -4,8 +4,8 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.tracing.model.Span
+import io.opentelemetry.kotlin.tracing.model.SpanCreationAction
 import io.opentelemetry.kotlin.tracing.model.SpanKind
-import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 
 /**
  * A Tracer is responsible for creating spans.
@@ -28,7 +28,7 @@ public interface Tracer {
         parentContext: Context? = null,
         spanKind: SpanKind = SpanKind.INTERNAL,
         startTimestamp: Long? = null,
-        action: (SpanRelationships.() -> Unit)? = null
+        action: (SpanCreationAction.() -> Unit)? = null
     ): Span
 
     /**
@@ -49,6 +49,6 @@ public interface Tracer {
         parentContext: Context? = null,
         spanKind: SpanKind = SpanKind.INTERNAL,
         startTimestamp: Long? = null,
-        action: (SpanRelationships.() -> Unit)? = null
+        action: (SpanCreationAction.() -> Unit)? = null
     ): Span
 }

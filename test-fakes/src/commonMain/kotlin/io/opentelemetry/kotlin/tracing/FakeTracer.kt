@@ -2,8 +2,8 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.tracing.model.Span
+import io.opentelemetry.kotlin.tracing.model.SpanCreationAction
 import io.opentelemetry.kotlin.tracing.model.SpanKind
-import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 
 class FakeTracer(
     val name: String
@@ -18,7 +18,7 @@ class FakeTracer(
         parentContext: Context?,
         spanKind: SpanKind,
         startTimestamp: Long?,
-        action: (SpanRelationships.() -> Unit)?
+        action: (SpanCreationAction.() -> Unit)?
     ): Span = FakeSpan()
 
     override fun startSpan(
@@ -26,6 +26,6 @@ class FakeTracer(
         parentContext: Context?,
         spanKind: SpanKind,
         startTimestamp: Long?,
-        action: (SpanRelationships.() -> Unit)?
+        action: (SpanCreationAction.() -> Unit)?
     ): Span = FakeSpan()
 }
