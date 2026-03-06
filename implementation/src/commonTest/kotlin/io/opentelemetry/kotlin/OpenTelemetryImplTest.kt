@@ -5,8 +5,12 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.export.TelemetryCloseable
+import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
-import io.opentelemetry.kotlin.factory.FakeSdkFactory
+import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
+import io.opentelemetry.kotlin.factory.FakeSpanFactory
+import io.opentelemetry.kotlin.factory.FakeTraceFlagsFactory
+import io.opentelemetry.kotlin.factory.FakeTraceStateFactory
 import io.opentelemetry.kotlin.logging.FakeLoggerProvider
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.tracing.FakeTracerProvider
@@ -16,7 +20,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-internal class CloseableOpenTelemetryImplTest {
+internal class OpenTelemetryImplTest {
 
     @Test
     fun testNoTelemetryCloseables() = runTest {
@@ -149,12 +153,16 @@ internal class CloseableOpenTelemetryImplTest {
     private fun createOpenTelemetry(
         tracerProvider: TracerProvider,
         loggerProvider: LoggerProvider
-    ): TelemetryCloseable = CloseableOpenTelemetryImpl(
+    ): TelemetryCloseable = OpenTelemetryImpl(
         tracerProvider = tracerProvider,
         loggerProvider = loggerProvider,
         clock = FakeClock(),
+        spanContext = FakeSpanContextFactory(),
+        traceFlags = FakeTraceFlagsFactory(),
+        traceState = FakeTraceStateFactory(),
+        context = FakeContextFactory(),
+        span = FakeSpanFactory(),
         idGenerator = FakeIdGenerator(),
-        sdkFactory = FakeSdkFactory(),
     )
 
     private class FakeCloseableTracerProvider(

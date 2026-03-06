@@ -4,7 +4,9 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.factory.SdkFactory
+import io.opentelemetry.kotlin.factory.ContextFactory
+import io.opentelemetry.kotlin.factory.SpanContextFactory
+import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.LogRecordModel
@@ -15,16 +17,18 @@ import io.opentelemetry.kotlin.resource.Resource
 internal class LoggerImpl(
     private val clock: Clock,
     private val processor: LogRecordProcessor?,
-    sdkFactory: SdkFactory,
+    contextFactory: ContextFactory,
+    spanContextFactory: SpanContextFactory,
+    spanFactory: SpanFactory,
     private val key: InstrumentationScopeInfo,
     private val resource: Resource,
     private val logLimitConfig: LogLimitConfig,
 ) : Logger {
 
-    private val contextFactory = sdkFactory.context
+    private val contextFactory = contextFactory
     private val root = contextFactory.root()
-    private val invalidSpanContext = sdkFactory.spanContext.invalid
-    private val spanFactory = sdkFactory.span
+    private val invalidSpanContext = spanContextFactory.invalid
+    private val spanFactory = spanFactory
 
     override fun enabled(
         context: Context?,
