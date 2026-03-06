@@ -39,19 +39,6 @@ internal class TracerImpl(
     private val traceFlagsDefault = traceFlagsFactory.default
     private val traceStateDefault = traceStateFactory.default
 
-    @Suppress("DEPRECATION")
-    @Deprecated(
-        "Deprecated.",
-        replaceWith = ReplaceWith("startSpan(name, parentContext, spanKind, startTimestamp, action)")
-    )
-    override fun createSpan(
-        name: String,
-        parentContext: Context?,
-        spanKind: SpanKind,
-        startTimestamp: Long?,
-        action: (SpanRelationships.() -> Unit)?
-    ): Span = startSpan(name, parentContext, spanKind, startTimestamp, action)
-
     override fun startSpan(
         name: String,
         parentContext: Context?,

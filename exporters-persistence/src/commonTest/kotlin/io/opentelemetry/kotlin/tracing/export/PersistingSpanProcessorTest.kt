@@ -431,7 +431,6 @@ internal class PersistingSpanProcessorTest {
             processor = processor,
             exporter = exporter,
             fileSystem = fileSystem,
-            clock = FakeClock(),
             maxExportBatchSize = maxExportBatchSize,
             scheduleDelayMs = scheduleDelayMs,
             dispatcher = dispatcher,

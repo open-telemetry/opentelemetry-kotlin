@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.logging.export
 
-import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -11,6 +10,7 @@ import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryRepositoryImpl
 import io.opentelemetry.kotlin.export.TimeoutTelemetryCloseable
+import io.opentelemetry.kotlin.init.LogExportConfigDsl
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import kotlinx.coroutines.CoroutineDispatcher
@@ -31,7 +31,7 @@ internal class PersistingLogRecordProcessor(
     processor: LogRecordProcessor,
     exporter: LogRecordExporter,
     fileSystem: TelemetryFileSystem,
-    clock: Clock,
+    dsl: LogExportConfigDsl,
     config: PersistedTelemetryConfig,
     serializer: (List<ReadableLogRecord>) -> ByteArray,
     deserializer: (ByteArray) -> List<ReadableLogRecord>,
@@ -49,13 +49,12 @@ internal class PersistingLogRecordProcessor(
         fileSystem = fileSystem,
         serializer = serializer,
         deserializer = deserializer,
-        clock = clock,
+        clock = dsl.clock,
     )
 
     private val persistingExporter = PersistingLogRecordExporter(exporter, repository)
 
-    @Suppress("DEPRECATION")
-    private val batchingProcessor = createBatchLogRecordProcessor(
+    private val batchingProcessor = dsl.batchLogRecordProcessor(
         persistingExporter,
         maxQueueSize,
         scheduleDelayMs,
@@ -64,8 +63,7 @@ internal class PersistingLogRecordProcessor(
         dispatcher,
     )
 
-    @Suppress("DEPRECATION")
-    private val composite = createCompositeLogRecordProcessor(listOf(processor, batchingProcessor))
+    private val composite = dsl.compositeLogRecordProcessor(processor, batchingProcessor)
     private val telemetryCloseable: TelemetryCloseable = TimeoutTelemetryCloseable(composite)
 
     override fun onEmit(log: ReadWriteLogRecord, context: Context) {

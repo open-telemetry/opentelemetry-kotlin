@@ -39,10 +39,8 @@ suspend fun runAllExamples(platform: String) {
     demonstrateComplexLogging(logger)
 
     // flush all pending telemetry before terminating
-    AppConfig.spanProcessor.forceFlush()
-    AppConfig.logRecordProcessor.forceFlush()
-    AppConfig.spanProcessor.shutdown()
-    AppConfig.logRecordProcessor.shutdown()
+    AppConfig.forceFlush()
+    AppConfig.shutdown()
 
     // give HTTP client time to complete requests before process exits.
     // in future the SDK needs to be updated to handle this automatically.

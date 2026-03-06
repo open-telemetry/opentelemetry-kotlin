@@ -17,17 +17,7 @@ import kotlinx.coroutines.SupervisorJob
 @ConfigDsl
 public fun TraceExportConfigDsl.compositeSpanProcessor(vararg processors: SpanProcessor): SpanProcessor {
     require(processors.isNotEmpty()) { "At least one processor must be provided" }
-    @Suppress("DEPRECATION")
-    return createCompositeSpanProcessor(processors.toList())
-}
-
-@ExperimentalApi
-@Deprecated("Deprecated.", ReplaceWith("compositeSpanProcessor(processors)"))
-public fun createCompositeSpanProcessor(processors: List<SpanProcessor>): SpanProcessor {
-    return CompositeSpanProcessor(
-        processors,
-        NoopSdkErrorHandler
-    )
+    return CompositeSpanProcessor(processors.toList(), NoopSdkErrorHandler)
 }
 
 /**
@@ -36,13 +26,6 @@ public fun createCompositeSpanProcessor(processors: List<SpanProcessor>): SpanPr
 @ConfigDsl
 @ExperimentalApi
 public fun TraceExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): SpanProcessor {
-    @Suppress("DEPRECATION")
-    return createSimpleSpanProcessor(exporter)
-}
-
-@ExperimentalApi
-@Deprecated("Deprecated.", ReplaceWith("simpleSpanProcessor(exporter)"))
-public fun createSimpleSpanProcessor(exporter: SpanExporter): SpanProcessor {
     val dispatcher: CoroutineDispatcher = Dispatchers.Default
     val scope = CoroutineScope(SupervisorJob() + dispatcher)
     return SimpleSpanProcessor(exporter, scope)
@@ -55,17 +38,7 @@ public fun createSimpleSpanProcessor(exporter: SpanExporter): SpanProcessor {
 @ConfigDsl
 public fun TraceExportConfigDsl.compositeSpanExporter(vararg exporters: SpanExporter): SpanExporter {
     require(exporters.isNotEmpty()) { "At least one exporter must be provided" }
-    @Suppress("DEPRECATION")
-    return createCompositeSpanExporter(exporters.toList())
-}
-
-@ExperimentalApi
-@Deprecated("Deprecated.", ReplaceWith("compositeSpanExporter(exporters)"))
-public fun createCompositeSpanExporter(exporters: List<SpanExporter>): SpanExporter {
-    return CompositeSpanExporter(
-        exporters,
-        NoopSdkErrorHandler
-    )
+    return CompositeSpanExporter(exporters.toList(), NoopSdkErrorHandler)
 }
 
 /**
@@ -75,23 +48,6 @@ public fun createCompositeSpanExporter(exporters: List<SpanExporter>): SpanExpor
 @ExperimentalApi
 @ConfigDsl
 public fun TraceExportConfigDsl.batchSpanProcessor(
-    exporter: SpanExporter,
-    maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
-    scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
-    exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
-    maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
-): SpanProcessor {
-    @Suppress("DEPRECATION")
-    return createBatchSpanProcessor(exporter, maxQueueSize, scheduleDelayMs, exportTimeoutMs, maxExportBatchSize, dispatcher)
-}
-
-@ExperimentalApi
-@Deprecated(
-    "Deprecated.",
-    ReplaceWith("batchSpanProcessor(exporter, maxQueueSize, scheduleDelayMs, exportTimeoutMs, maxExportBatchSize, dispatcher)")
-)
-public fun createBatchSpanProcessor(
     exporter: SpanExporter,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
@@ -117,14 +73,5 @@ public fun createBatchSpanProcessor(
 @ExperimentalApi
 @ConfigDsl
 public fun TraceExportConfigDsl.stdoutSpanExporter(
-    logger: (String) -> Unit = ::println
-): SpanExporter {
-    @Suppress("DEPRECATION")
-    return createStdoutSpanExporter(logger)
-}
-
-@ExperimentalApi
-@Deprecated("Deprecated.", ReplaceWith("stdoutSpanExporter(logger)"))
-public fun createStdoutSpanExporter(
     logger: (String) -> Unit = ::println
 ): SpanExporter = StdoutSpanExporter(logger)

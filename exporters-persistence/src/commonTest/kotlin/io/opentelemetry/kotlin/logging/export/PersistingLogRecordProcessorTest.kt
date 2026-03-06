@@ -437,7 +437,6 @@ internal class PersistingLogRecordProcessorTest {
             processor = processor,
             exporter = exporter,
             fileSystem = fileSystem,
-            clock = FakeClock(),
             maxExportBatchSize = maxExportBatchSize,
             scheduleDelayMs = scheduleDelayMs,
             dispatcher = dispatcher,

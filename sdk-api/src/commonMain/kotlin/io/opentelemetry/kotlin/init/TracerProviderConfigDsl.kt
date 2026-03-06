@@ -17,12 +17,6 @@ public interface TracerProviderConfigDsl : ResourceConfigDsl {
     public fun spanLimits(action: SpanLimitsConfigDsl.() -> Unit)
 
     /**
-     * Adds a [SpanProcessor] to the tracer provider.
-     */
-    @Deprecated("Deprecated.", ReplaceWith("export {processor}"))
-    public fun addSpanProcessor(processor: SpanProcessor)
-
-    /**
      * Configures how spans should be processed and exported.
      */
     public fun export(action: TraceExportConfigDsl.() -> SpanProcessor)
