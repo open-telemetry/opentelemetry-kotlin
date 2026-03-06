@@ -6,12 +6,12 @@ import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
 import io.opentelemetry.kotlin.scope.toOtelKotlinInstrumentationScopeInfo
-import io.opentelemetry.kotlin.tracing.data.EventData
-import io.opentelemetry.kotlin.tracing.data.EventDataAdapter
-import io.opentelemetry.kotlin.tracing.data.LinkData
-import io.opentelemetry.kotlin.tracing.data.LinkDataAdapter
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.data.SpanDataAdapter
+import io.opentelemetry.kotlin.tracing.data.SpanEventData
+import io.opentelemetry.kotlin.tracing.data.SpanEventDataAdapter
+import io.opentelemetry.kotlin.tracing.data.SpanLinkData
+import io.opentelemetry.kotlin.tracing.data.SpanLinkDataAdapter
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
@@ -34,10 +34,10 @@ internal class ReadableSpanAdapter(
         get() = impl.toSpanData().endEpochNanos
     override val attributes: Map<String, Any>
         get() = impl.attributes.convertToMap()
-    override val events: List<EventData>
-        get() = impl.toSpanData().events.map(::EventDataAdapter)
-    override val links: List<LinkData>
-        get() = impl.toSpanData().links.map(::LinkDataAdapter)
+    override val events: List<SpanEventData>
+        get() = impl.toSpanData().events.map(::SpanEventDataAdapter)
+    override val links: List<SpanLinkData>
+        get() = impl.toSpanData().links.map(::SpanLinkDataAdapter)
     override val hasEnded: Boolean
         get() = impl.hasEnded()
 

@@ -43,10 +43,10 @@ internal class TracerProviderImpl(
             traceFlagsFactory = traceFlagsFactory,
             traceStateFactory = traceStateFactory,
             spanFactory = spanFactory,
-            tracingIdFactory = idGenerator,
             scope = key,
             resource = tracingConfig.resource,
-            spanLimitConfig = tracingConfig.spanLimits
+            spanLimitConfig = tracingConfig.spanLimits,
+            idGenerator = idGenerator,
         )
     }
 

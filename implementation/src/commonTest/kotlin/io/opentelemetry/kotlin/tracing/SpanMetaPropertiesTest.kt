@@ -34,7 +34,7 @@ internal class SpanMetaPropertiesTest {
             traceFlagsFactory = FakeTraceFlagsFactory(),
             traceStateFactory = FakeTraceStateFactory(),
             spanFactory = FakeSpanFactory(),
-            tracingIdFactory = FakeIdGenerator(),
+            idGenerator = FakeIdGenerator(),
             scope = key,
             resource = fakeResource,
             spanLimitConfig = fakeSpanLimitsConfig,

@@ -8,10 +8,6 @@ import io.opentelemetry.kotlin.tracing.model.TraceFlags
 internal class TraceFlagsFactoryImpl : TraceFlagsFactory {
     override val default: TraceFlags by lazy { TraceFlagsImpl(isSampled = true, isRandom = false) }
 
-    override fun create(sampled: Boolean, random: Boolean): TraceFlags {
-        return TraceFlagsImpl(isSampled = sampled, isRandom = random)
-    }
-
     override fun fromHex(hex: String): TraceFlags {
         if (!hex.isValid()) {
             return TraceFlagsImpl(isSampled = false, isRandom = false)

@@ -5,10 +5,5 @@ import io.opentelemetry.kotlin.tracing.model.TraceFlags
 
 class FakeTraceFlagsFactory : TraceFlagsFactory {
     override val default: TraceFlags = FakeTraceFlags()
-    override fun create(
-        sampled: Boolean,
-        random: Boolean
-    ): TraceFlags = FakeTraceFlags()
-
     override fun fromHex(hex: String): TraceFlags = FakeTraceFlags()
 }

@@ -54,7 +54,7 @@ internal class TracerSpanContextTest {
             traceFlagsFactory = traceFlags,
             traceStateFactory = traceState,
             spanFactory = spanFactory,
-            tracingIdFactory = idGenerator,
+            idGenerator = idGenerator,
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

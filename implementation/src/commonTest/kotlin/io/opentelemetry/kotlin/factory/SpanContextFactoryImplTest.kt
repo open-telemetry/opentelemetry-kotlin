@@ -141,7 +141,7 @@ internal class SpanContextFactoryImplTest {
     internal fun testCreateWithCustomTraceFlagsAndState() {
         val traceId = "12345678901234567890123456789012"
         val spanId = "1234567890123456"
-        val customTraceFlags = traceFlagsFactory.create(sampled = true, random = true)
+        val customTraceFlags = traceFlagsFactory.fromHex("03")
         val customTraceState = traceStateFactory.default
             .put("key1", "value1")
             .put("key2", "value2")
@@ -160,7 +160,7 @@ internal class SpanContextFactoryImplTest {
     internal fun testStatePreservedWithInvalidIds() {
         val invalidTraceId = "invalid"
         val invalidSpanId = "bad"
-        val customTraceFlags = traceFlagsFactory.create(sampled = true, random = false)
+        val customTraceFlags = traceFlagsFactory.fromHex("01")
         val customTraceState = traceStateFactory.default.put("key", "value")
 
         val spanContext = factory.create(invalidTraceId, invalidSpanId, customTraceFlags, customTraceState)

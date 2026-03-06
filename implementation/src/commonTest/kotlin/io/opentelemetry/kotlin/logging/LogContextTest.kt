@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
@@ -62,9 +63,9 @@ internal class LogContextTest {
             traceFlagsFactory = traceFlags,
             traceStateFactory = traceState,
             spanFactory = spanFactory,
-            tracingIdFactory = idGenerator,
             scope = key,
             resource = FakeResource(),
+            idGenerator = FakeIdGenerator(),
             spanLimitConfig = fakeSpanLimitsConfig
         )
     }

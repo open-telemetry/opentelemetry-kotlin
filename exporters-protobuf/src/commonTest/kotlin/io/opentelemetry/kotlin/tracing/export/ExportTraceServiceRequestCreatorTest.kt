@@ -6,11 +6,11 @@ import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.FakeTraceFlags
 import io.opentelemetry.kotlin.tracing.FakeTraceState
-import io.opentelemetry.kotlin.tracing.data.EventData
-import io.opentelemetry.kotlin.tracing.data.FakeEventData
-import io.opentelemetry.kotlin.tracing.data.FakeLinkData
+import io.opentelemetry.kotlin.tracing.data.SpanEventData
+import io.opentelemetry.kotlin.tracing.data.FakeSpanEventData
+import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
-import io.opentelemetry.kotlin.tracing.data.LinkData
+import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import kotlin.test.Test
@@ -97,9 +97,9 @@ class ExportTraceServiceRequestCreatorTest {
     @Test
     fun testMultipleEventsRoundTrip() {
         val events = listOf(
-            FakeEventData(name = "event1", timestamp = 1000L, attributes = mapOf("key1" to "val1")),
-            FakeEventData(name = "event2", timestamp = 2000L, attributes = mapOf("key2" to "val2")),
-            FakeEventData(name = "event3", timestamp = 3000L, attributes = emptyMap())
+            FakeSpanEventData(name = "event1", timestamp = 1000L, attributes = mapOf("key1" to "val1")),
+            FakeSpanEventData(name = "event2", timestamp = 2000L, attributes = mapOf("key2" to "val2")),
+            FakeSpanEventData(name = "event3", timestamp = 3000L, attributes = emptyMap())
         )
         val spanData = FakeSpanData(events = events)
         val byteArray = listOf(spanData).toProtobufByteArray()
@@ -117,14 +117,14 @@ class ExportTraceServiceRequestCreatorTest {
     @Test
     fun testMultipleLinksRoundTrip() {
         val links = listOf(
-            FakeLinkData(
+            FakeSpanLinkData(
                 spanContext = FakeSpanContext(
                     traceIdBytes = "11111111111111111111111111111111".hexToByteArray(),
                     spanIdBytes = "1111111111111111".hexToByteArray()
                 ),
                 attributes = mapOf("link1" to "value1")
             ),
-            FakeLinkData(
+            FakeSpanLinkData(
                 spanContext = FakeSpanContext(
                     traceIdBytes = "22222222222222222222222222222222".hexToByteArray(),
                     spanIdBytes = "2222222222222222".hexToByteArray()
@@ -179,8 +179,8 @@ class ExportTraceServiceRequestCreatorTest {
     }
 
     private fun assertEventMatches(
-        expectedEvent: EventData,
-        observedEvent: EventData
+        expectedEvent: SpanEventData,
+        observedEvent: SpanEventData
     ) {
         assertEquals(expectedEvent.name, observedEvent.name)
         assertEquals(expectedEvent.timestamp, observedEvent.timestamp)
@@ -188,8 +188,8 @@ class ExportTraceServiceRequestCreatorTest {
     }
 
     private fun assertLinkMatches(
-        expectedLink: LinkData,
-        observedLink: LinkData
+        expectedLink: SpanLinkData,
+        observedLink: SpanLinkData
     ) {
         assertEquals(expectedLink.spanContext.traceId, observedLink.spanContext.traceId)
         assertEquals(expectedLink.spanContext.spanId, observedLink.spanContext.spanId)

@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.factory.FakeTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.FakeTraceStateFactory
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.FakeResource
-import io.opentelemetry.kotlin.tracing.data.EventData
+import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -44,7 +44,7 @@ internal class SpanEventTest {
             traceFlagsFactory = FakeTraceFlagsFactory(),
             traceStateFactory = FakeTraceStateFactory(),
             spanFactory = FakeSpanFactory(),
-            tracingIdFactory = FakeIdGenerator(),
+            idGenerator = FakeIdGenerator(),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = spanLimitConfig,
@@ -160,14 +160,14 @@ internal class SpanEventTest {
         assertEquals(fakeSpanLimitsConfig.attributeCountLimit, event.attributes.size)
     }
 
-    private fun retrieveEvents(expected: Int): List<EventData> {
+    private fun retrieveEvents(expected: Int): List<SpanEventData> {
         val events = processor.endCalls.single().events
         assertEquals(expected, events.size)
         return events
     }
 
     private fun assertEventData(
-        event: EventData,
+        event: SpanEventData,
         name: String,
         time: Long,
         attrs: Map<String, Any>

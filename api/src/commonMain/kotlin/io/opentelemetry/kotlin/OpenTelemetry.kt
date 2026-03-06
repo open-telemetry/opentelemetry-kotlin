@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
@@ -54,9 +53,4 @@ public interface OpenTelemetry {
      * Factory that constructs Span objects.
      */
     public val span: SpanFactory
-
-    /**
-     * Factory that constructs tracing IDs.
-     */
-    public val idGenerator: IdGenerator
 }

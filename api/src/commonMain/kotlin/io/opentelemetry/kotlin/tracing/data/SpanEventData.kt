@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.attributes.AttributeContainer
  * A read-only representation of a span event
  */
 @ExperimentalApi
-public interface EventData : AttributeContainer {
+public interface SpanEventData : AttributeContainer {
 
     /**
      * The name of the event

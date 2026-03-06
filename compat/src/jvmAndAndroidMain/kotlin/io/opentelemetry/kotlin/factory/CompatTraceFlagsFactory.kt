@@ -7,15 +7,6 @@ import io.opentelemetry.kotlin.tracing.model.TraceFlagsAdapter
 internal class CompatTraceFlagsFactory : TraceFlagsFactory {
     override val default: TraceFlags by lazy { TraceFlagsAdapter(OtelJavaTraceFlags.getDefault()) }
 
-    override fun create(sampled: Boolean, random: Boolean): TraceFlags {
-        return when {
-            sampled && random -> TraceFlagsAdapter(OtelJavaTraceFlags.fromByte(0b00000011.toByte()))
-            sampled && !random -> TraceFlagsAdapter(OtelJavaTraceFlags.getSampled())
-            !sampled && random -> TraceFlagsAdapter(OtelJavaTraceFlags.fromByte(0b00000010.toByte()))
-            else -> TraceFlagsAdapter(OtelJavaTraceFlags.getDefault())
-        }
-    }
-
     override fun fromHex(hex: String): TraceFlags {
         if (!hex.isValid()) {
             return TraceFlagsAdapter(OtelJavaTraceFlags.getDefault())

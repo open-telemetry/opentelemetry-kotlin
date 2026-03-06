@@ -23,23 +23,21 @@ import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 internal class TracerImpl(
     private val clock: Clock,
     private val processor: SpanProcessor?,
-    contextFactory: ContextFactory,
+    private val contextFactory: ContextFactory,
     spanContextFactory: SpanContextFactory,
     traceFlagsFactory: TraceFlagsFactory,
     traceStateFactory: TraceStateFactory,
-    spanFactory: SpanFactory,
-    private val tracingIdFactory: IdGenerator,
+    private val spanFactory: SpanFactory,
+    private val idGenerator: IdGenerator,
     private val scope: InstrumentationScopeInfo,
     private val resource: Resource,
     private val spanLimitConfig: SpanLimitConfig,
 ) : Tracer {
 
-    private val contextFactory = contextFactory
     private val root = contextFactory.root()
     private val invalidSpanContext = spanContextFactory.invalid
     private val traceFlagsDefault = traceFlagsFactory.default
     private val traceStateDefault = traceStateFactory.default
-    private val spanFactory = spanFactory
 
     @Suppress("DEPRECATION")
     @Deprecated(
@@ -90,14 +88,12 @@ internal class TracerImpl(
     }
 
     private fun calculateSpanContext(parent: SpanContext): SpanContext {
-        val factory = tracingIdFactory
-
         val traceId = if (parent.isValid) {
             parent.traceIdBytes
         } else {
-            factory.generateTraceIdBytes()
+            idGenerator.generateTraceIdBytes()
         }
-        val spanId = factory.generateSpanIdBytes()
+        val spanId = idGenerator.generateSpanIdBytes()
 
         return SpanContextImpl(
             traceIdBytes = traceId,
