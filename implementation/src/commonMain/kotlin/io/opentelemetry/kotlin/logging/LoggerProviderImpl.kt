@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.NoopOpenTelemetry
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.export.DelegatingTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
@@ -47,7 +47,7 @@ internal class LoggerProviderImpl(
         name: String,
         version: String?,
         schemaUrl: String?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ): Logger =
         shutdownState.ifActiveOrElse(noopLogger) {
             val key = apiProvider.createInstrumentationScopeInfo(name, version, schemaUrl, attributes)

@@ -2,8 +2,8 @@ package io.opentelemetry.kotlin.tracing.model
 
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteSpan
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusData
 import java.util.concurrent.TimeUnit
@@ -42,7 +42,7 @@ internal class ReadWriteSpanAdapter(
 
     override fun addLink(
         spanContext: SpanContext,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ) {
         val container = CompatAttributesModel()
         if (attributes != null) {
@@ -55,7 +55,7 @@ internal class ReadWriteSpanAdapter(
     override fun addEvent(
         name: String,
         timestamp: Long?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ) {
         val container = CompatAttributesModel()
         if (attributes != null) {

@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaAttributesBuilder
 
 internal class CompatAttributesModel(
     private val attrs: OtelJavaAttributesBuilder = OtelJavaAttributes.builder()
-) : MutableAttributeContainer, AttributeContainer {
+) : AttributesMutator, AttributeContainer {
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
         attrs.put(key, value)

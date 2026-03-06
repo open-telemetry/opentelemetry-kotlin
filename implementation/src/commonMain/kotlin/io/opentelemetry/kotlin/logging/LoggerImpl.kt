@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
@@ -52,7 +52,7 @@ internal class LoggerImpl(
         context: Context?,
         severityNumber: SeverityNumber?,
         severityText: String?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ) {
         processTelemetry(
             context = context,
@@ -74,7 +74,7 @@ internal class LoggerImpl(
         eventName: String?,
         severityText: String?,
         severityNumber: SeverityNumber?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ) {
         shutdownState.execute {
             val ctx = context ?: contextFactory.implicit()

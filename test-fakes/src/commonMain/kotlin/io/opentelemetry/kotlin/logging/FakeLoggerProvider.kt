@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.logging
 
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 
 class FakeLoggerProvider : LoggerProvider {
 
@@ -10,7 +10,7 @@ class FakeLoggerProvider : LoggerProvider {
         name: String,
         version: String?,
         schemaUrl: String?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ): Logger = map.getOrPut(name) {
         FakeLogger(name)
     }

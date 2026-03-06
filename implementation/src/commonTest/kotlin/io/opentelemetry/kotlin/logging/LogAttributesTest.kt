@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
@@ -97,7 +97,7 @@ internal class LogAttributesTest {
         assertEquals(expected, log.attributes)
     }
 
-    private fun MutableAttributeContainer.addTestAttributes(keyToken: String = "") {
+    private fun AttributesMutator.addTestAttributes(keyToken: String = "") {
         setStringAttribute("string$keyToken", "value")
         setDoubleAttribute("double$keyToken", 3.14)
         setBooleanAttribute("boolean$keyToken", true)
@@ -108,7 +108,7 @@ internal class LogAttributesTest {
         setLongListAttribute("long_list$keyToken", listOf(90000000000000))
     }
 
-    private fun MutableAttributeContainer.addTestAttributesAlternateValues() {
+    private fun AttributesMutator.addTestAttributesAlternateValues() {
         setStringAttribute("string", "old-value")
         setDoubleAttribute("double", 6.14)
         setBooleanAttribute("boolean", false)

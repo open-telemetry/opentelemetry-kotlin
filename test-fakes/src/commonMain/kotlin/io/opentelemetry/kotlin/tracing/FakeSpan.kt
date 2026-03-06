@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.attributes.FakeMutableAttributeContainer
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.attributes.FakeAttributesMutator
 import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
@@ -44,9 +44,9 @@ class FakeSpan(
 
     override fun addLink(
         spanContext: SpanContext,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ) {
-        val container = FakeMutableAttributeContainer()
+        val container = FakeAttributesMutator()
         if (attributes != null) {
             attributes(container)
         }
@@ -57,7 +57,7 @@ class FakeSpan(
     override fun addEvent(
         name: String,
         timestamp: Long?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ) {
         val fakeSpanEvent = FakeSpanEvent(name, timestamp ?: 0)
         if (attributes != null) {

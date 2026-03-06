@@ -18,7 +18,7 @@ public abstract interface class io/opentelemetry/kotlin/attributes/AttributeCont
 	public abstract fun getAttributes ()Ljava/util/Map;
 }
 
-public abstract interface class io/opentelemetry/kotlin/attributes/MutableAttributeContainer {
+public abstract interface class io/opentelemetry/kotlin/attributes/AttributesMutator {
 	public abstract fun setBooleanAttribute (Ljava/lang/String;Z)V
 	public abstract fun setBooleanListAttribute (Ljava/lang/String;Ljava/util/List;)V
 	public abstract fun setDoubleAttribute (Ljava/lang/String;D)V
@@ -207,7 +207,7 @@ public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanContex
 	public abstract fun isValid ()Z
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEvent : io/opentelemetry/kotlin/attributes/MutableAttributeContainer, io/opentelemetry/kotlin/tracing/data/SpanEventData {
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEvent : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanEventData {
 }
 
 public final class io/opentelemetry/kotlin/tracing/model/SpanKind : java/lang/Enum {
@@ -221,10 +221,10 @@ public final class io/opentelemetry/kotlin/tracing/model/SpanKind : java/lang/En
 	public static fun values ()[Lio/opentelemetry/kotlin/tracing/model/SpanKind;
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLink : io/opentelemetry/kotlin/attributes/MutableAttributeContainer, io/opentelemetry/kotlin/tracing/data/SpanLinkData {
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLink : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanLinkData {
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanRelationships : io/opentelemetry/kotlin/attributes/MutableAttributeContainer {
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanRelationships : io/opentelemetry/kotlin/attributes/AttributesMutator {
 	public abstract fun addEvent (Ljava/lang/String;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun addLink (Lio/opentelemetry/kotlin/tracing/model/SpanContext;Lkotlin/jvm/functions/Function1;)V
 }

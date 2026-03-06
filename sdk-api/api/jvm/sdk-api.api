@@ -128,7 +128,7 @@ public final class io/opentelemetry/kotlin/logging/export/LogRecordProcessor$Def
 	public static fun enabled (Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/InstrumentationScopeInfo;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;)Z
 }
 
-public abstract interface class io/opentelemetry/kotlin/logging/model/ReadWriteLogRecord : io/opentelemetry/kotlin/attributes/MutableAttributeContainer, io/opentelemetry/kotlin/logging/model/ReadableLogRecord {
+public abstract interface class io/opentelemetry/kotlin/logging/model/ReadWriteLogRecord : io/opentelemetry/kotlin/attributes/AttributeContainer, io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/logging/model/ReadableLogRecord {
 	public abstract fun getBody ()Ljava/lang/String;
 	public abstract fun getEventName ()Ljava/lang/String;
 	public abstract fun getObservedTimestamp ()Ljava/lang/Long;

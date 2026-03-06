@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.exceptionType
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.Span
@@ -14,7 +14,7 @@ import io.opentelemetry.kotlin.tracing.model.Span
 @ThreadSafe
 public fun Span.recordException(
     exception: Throwable,
-    attributes: MutableAttributeContainer.() -> Unit = {}
+    attributes: AttributesMutator.() -> Unit = {}
 ) {
     addEvent("exception") {
         setStringAttribute("exception.stacktrace", exception.stackTraceToString())
@@ -33,7 +33,7 @@ public fun Span.recordException(
  */
 @ExperimentalApi
 @ThreadSafe
-public fun Span.addLink(span: Span, attributes: MutableAttributeContainer.() -> Unit = {}) {
+public fun Span.addLink(span: Span, attributes: AttributesMutator.() -> Unit = {}) {
     addLink(span.spanContext, attributes)
 }
 

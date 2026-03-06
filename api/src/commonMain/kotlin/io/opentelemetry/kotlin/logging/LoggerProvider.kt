@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 
 /**
  * Provider for retrieving [Logger] instances.
@@ -24,6 +24,6 @@ public interface LoggerProvider {
         name: String,
         version: String? = null,
         schemaUrl: String? = null,
-        attributes: (MutableAttributeContainer.() -> Unit)? = null,
+        attributes: (AttributesMutator.() -> Unit)? = null,
     ): Logger
 }
