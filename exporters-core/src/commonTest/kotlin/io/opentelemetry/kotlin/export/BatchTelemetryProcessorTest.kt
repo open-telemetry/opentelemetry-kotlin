@@ -112,7 +112,6 @@ internal class BatchTelemetryProcessorTest {
     fun testNoExportAfterShutdown() = runTest {
         val exports = mutableListOf<List<Int>>()
         val dispatcher = StandardTestDispatcher(testScheduler)
-
         val processor = BatchTelemetryProcessor(
             maxQueueSize = 100,
             maxExportBatchSize = 1,
@@ -124,20 +123,46 @@ internal class BatchTelemetryProcessorTest {
                 OperationResultCode.Success
             }
         )
-
         processor.processTelemetry(1)
-
-        // TODO: dry
         advanceTimeBy(10)
         processor.forceFlush()
         processor.shutdown()
         advanceUntilIdle()
-
         processor.processTelemetry(2)
         advanceTimeBy(10)
         advanceUntilIdle()
-
         assertEquals(1, exports.size)
+    }
+
+    @Test
+    fun testShutdownReturnsSuccessOnSecondCall() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val processor = BatchTelemetryProcessor<Int>(
+            maxQueueSize = 100,
+            maxExportBatchSize = 1,
+            scheduleDelayMs = 1,
+            exportTimeoutMs = 1000,
+            dispatcher = dispatcher,
+            exportAction = { OperationResultCode.Success }
+        )
+        assertEquals(OperationResultCode.Success, processor.shutdown())
+        assertEquals(OperationResultCode.Success, processor.shutdown())
+    }
+
+    @Test
+    fun testForceFlushWorksAfterShutdown() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val processor = BatchTelemetryProcessor<Int>(
+            maxQueueSize = 100,
+            maxExportBatchSize = 1,
+            scheduleDelayMs = 1,
+            exportTimeoutMs = 1000,
+            dispatcher = dispatcher,
+            exportAction = { OperationResultCode.Success }
+        )
+        processor.shutdown()
+        advanceUntilIdle()
+        assertEquals(OperationResultCode.Success, processor.forceFlush())
     }
 
     @Test

@@ -12,12 +12,10 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":sdk-api"))
-                implementation(project(":sdk-common"))
             }
         }
         val commonTest by getting {
             dependencies {
-                implementation(project(":test-fakes"))
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
             }
