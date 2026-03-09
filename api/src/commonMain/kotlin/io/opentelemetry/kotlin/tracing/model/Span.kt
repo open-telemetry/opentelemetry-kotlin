@@ -16,7 +16,7 @@ import io.opentelemetry.kotlin.tracing.data.StatusData
 @TracingDsl
 @ExperimentalApi
 @ThreadSafe
-public interface Span : SpanSchema, AttributesMutator, SpanLinkMutator, SpanEventMutator {
+public interface Span : SpanSchema, AttributesMutator, SpanLinkCreator, SpanEventCreator {
 
     /**
      * Sets the name of the span. Must be non-empty.

@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
  */
 @ExperimentalApi
 @ThreadSafe
-public interface SpanEventMutator {
+public interface SpanEventCreator {
 
     /**
      * Adds an event to the span.

@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
  */
 @ExperimentalApi
 @ThreadSafe
-public interface SpanLinkMutator {
+public interface SpanLinkCreator {
 
     /**
      * Adds a link to the span that associates it with another [SpanContext].

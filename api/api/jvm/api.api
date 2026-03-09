@@ -186,7 +186,7 @@ public final class io/opentelemetry/kotlin/tracing/data/StatusData$Unset : io/op
 	public static final field INSTANCE Lio/opentelemetry/kotlin/tracing/data/StatusData$Unset;
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/Span : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanSchema, io/opentelemetry/kotlin/tracing/model/SpanEventMutator, io/opentelemetry/kotlin/tracing/model/SpanLinkMutator {
+public abstract interface class io/opentelemetry/kotlin/tracing/model/Span : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanSchema, io/opentelemetry/kotlin/tracing/model/SpanEventCreator, io/opentelemetry/kotlin/tracing/model/SpanLinkCreator {
 	public abstract fun end ()V
 	public abstract fun end (J)V
 	public abstract fun getName ()Ljava/lang/String;
@@ -207,18 +207,18 @@ public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanContex
 	public abstract fun isValid ()Z
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanCreationAction : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/model/SpanEventMutator, io/opentelemetry/kotlin/tracing/model/SpanLinkMutator {
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanCreationAction : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/model/SpanEventCreator, io/opentelemetry/kotlin/tracing/model/SpanLinkCreator {
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEvent : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanEventData {
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEventMutator {
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEventCreator {
 	public abstract fun addEvent (Ljava/lang/String;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;)V
 }
 
-public final class io/opentelemetry/kotlin/tracing/model/SpanEventMutator$DefaultImpls {
-	public static synthetic fun addEvent$default (Lio/opentelemetry/kotlin/tracing/model/SpanEventMutator;Ljava/lang/String;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+public final class io/opentelemetry/kotlin/tracing/model/SpanEventCreator$DefaultImpls {
+	public static synthetic fun addEvent$default (Lio/opentelemetry/kotlin/tracing/model/SpanEventCreator;Ljava/lang/String;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public final class io/opentelemetry/kotlin/tracing/model/SpanKind : java/lang/Enum {
@@ -235,12 +235,12 @@ public final class io/opentelemetry/kotlin/tracing/model/SpanKind : java/lang/En
 public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLink : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanLinkData {
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLinkMutator {
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLinkCreator {
 	public abstract fun addLink (Lio/opentelemetry/kotlin/tracing/model/SpanContext;Lkotlin/jvm/functions/Function1;)V
 }
 
-public final class io/opentelemetry/kotlin/tracing/model/SpanLinkMutator$DefaultImpls {
-	public static synthetic fun addLink$default (Lio/opentelemetry/kotlin/tracing/model/SpanLinkMutator;Lio/opentelemetry/kotlin/tracing/model/SpanContext;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+public final class io/opentelemetry/kotlin/tracing/model/SpanLinkCreator$DefaultImpls {
+	public static synthetic fun addLink$default (Lio/opentelemetry/kotlin/tracing/model/SpanLinkCreator;Lio/opentelemetry/kotlin/tracing/model/SpanContext;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/TraceFlags {

@@ -9,4 +9,4 @@ import io.opentelemetry.kotlin.tracing.TracingDsl
  */
 @ExperimentalApi
 @TracingDsl
-public interface SpanCreationAction : AttributesMutator, SpanLinkMutator, SpanEventMutator
+public interface SpanCreationAction : AttributesMutator, SpanLinkCreator, SpanEventCreator
