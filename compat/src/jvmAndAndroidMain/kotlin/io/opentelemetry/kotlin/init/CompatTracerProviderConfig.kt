@@ -6,8 +6,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaIdGenerator
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProviderBuilder
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.tracing.TracerProvider
@@ -30,7 +30,7 @@ internal class CompatTracerProviderConfig(
         }
     }
 
-    override fun resource(schemaUrl: String?, attributes: MutableAttributeContainer.() -> Unit) {
+    override fun resource(schemaUrl: String?, attributes: AttributesMutator.() -> Unit) {
         val attrs = CompatAttributesModel().apply(attributes).otelJavaAttributes()
         builder.setResource(OtelJavaResource.create(attrs, schemaUrl))
     }
@@ -45,15 +45,9 @@ internal class CompatTracerProviderConfig(
         builder.setSpanLimits(spanLimitsConfig.apply(action).build())
     }
 
-    @Deprecated("Deprecated.", replaceWith = ReplaceWith("export {processor}"))
-    override fun addSpanProcessor(processor: SpanProcessor) {
-        builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor))
-    }
-
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
         val processor = TraceExportConfigCompat(clock).action()
-        @Suppress("DEPRECATION")
-        addSpanProcessor(processor)
+        builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor))
     }
 
     fun build(clock: Clock): TracerProvider {

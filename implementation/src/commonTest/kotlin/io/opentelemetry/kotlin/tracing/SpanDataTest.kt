@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
@@ -17,7 +18,9 @@ import io.opentelemetry.kotlin.tracing.model.SpanKind
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 internal class SpanDataTest {
 
@@ -27,6 +30,7 @@ internal class SpanDataTest {
     private lateinit var processor: FakeSpanProcessor
     private lateinit var fakeResource: FakeResource
     private lateinit var fakeSpanContext: FakeSpanContext
+    private lateinit var shutdownState: MutableShutdownState
 
     @BeforeTest
     fun setUp() {
@@ -34,6 +38,7 @@ internal class SpanDataTest {
         processor = FakeSpanProcessor()
         fakeResource = FakeResource()
         fakeSpanContext = FakeSpanContext.INVALID
+        shutdownState = MutableShutdownState()
         tracer = TracerImpl(
             clock = clock,
             processor = processor,
@@ -42,10 +47,11 @@ internal class SpanDataTest {
             traceFlagsFactory = FakeTraceFlagsFactory(),
             traceStateFactory = FakeTraceStateFactory(),
             spanFactory = FakeSpanFactory(),
-            idGenerator = FakeIdGenerator(),
             scope = key,
             resource = fakeResource,
             spanLimitConfig = fakeSpanLimitsConfig,
+            idGenerator = FakeIdGenerator(),
+            shutdownState = shutdownState,
         )
     }
 
@@ -61,6 +67,13 @@ internal class SpanDataTest {
         val span = simulateSpan()
         val data = processor.startCalls.single().toSpanData()
         assertSpanData(span, data)
+    }
+
+    @Test
+    fun testSpanDataAfterShutdown() {
+        assertTrue(tracer.startSpan("test").isRecording())
+        shutdownState.shutdownNow()
+        assertFalse(tracer.startSpan("test").isRecording())
     }
 
     private fun simulateSpan(): Span {

@@ -71,4 +71,24 @@ internal class PersistingSpanExporterTest {
         val result = exporter.export(telemetry)
         assertEquals(Failure, result)
     }
+
+    @Test
+    fun testShutdown() = runTest {
+        val repository = FakeTelemetryRepository<SpanData>()
+        val exporter = PersistingSpanExporter(
+            FakeSpanExporter(exportReturnValue = { Success }),
+            repository,
+        )
+
+        assertEquals(Success, exporter.export(telemetry))
+        assertEquals(1, repository.storeCalls)
+        assertEquals(1, repository.deleteCalls)
+        assertEquals(1, repository.storedTelemetry.size)
+        exporter.shutdown()
+
+        assertEquals(Failure, exporter.export(telemetry))
+        assertEquals(1, repository.storeCalls)
+        assertEquals(1, repository.deleteCalls)
+        assertEquals(1, repository.storedTelemetry.size)
+    }
 }

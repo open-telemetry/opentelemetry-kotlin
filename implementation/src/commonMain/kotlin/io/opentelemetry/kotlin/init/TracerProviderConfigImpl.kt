@@ -17,11 +17,6 @@ internal class TracerProviderConfigImpl(
         spanLimitsConfigImpl.action()
     }
 
-    @Deprecated("Deprecated.", replaceWith = ReplaceWith("export {processor}"))
-    override fun addSpanProcessor(processor: SpanProcessor) {
-        processors.add(processor)
-    }
-
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
         require(processors.isEmpty()) { "export() should only be called once." }
         val processor = TraceExportConfigImpl(clock).action()

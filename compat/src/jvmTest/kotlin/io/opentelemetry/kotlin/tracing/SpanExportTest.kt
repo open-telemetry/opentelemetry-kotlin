@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
 import io.opentelemetry.kotlin.attributes.AttributeContainer
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
@@ -338,7 +338,7 @@ internal class SpanExportTest {
         assertTrue(spanId.matches(hexPattern))
     }
 
-    private fun MutableAttributeContainer.assertAttributes() {
+    private fun AttributesMutator.assertAttributes() {
         val reader = this as AttributeContainer
         assertTrue(reader.attributes.isEmpty())
 

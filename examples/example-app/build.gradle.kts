@@ -85,6 +85,7 @@ kotlin {
 
     compilerOptions {
         freeCompilerArgs.addAll("-Xexpect-actual-classes", "-Xsuppress-version-warnings")
+        optIn.add("io.opentelemetry.kotlin.ExperimentalApi")
     }
 }
 

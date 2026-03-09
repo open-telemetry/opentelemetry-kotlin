@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 
 @ExperimentalApi
 internal object NoopTracerProvider : TracerProvider {
@@ -9,6 +9,6 @@ internal object NoopTracerProvider : TracerProvider {
         name: String,
         version: String?,
         schemaUrl: String?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ): Tracer = NoopTracer
 }

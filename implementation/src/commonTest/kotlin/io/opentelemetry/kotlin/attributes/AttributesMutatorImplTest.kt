@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.attributes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-internal class MutableAttributeContainerImplTest {
+internal class AttributesMutatorImplTest {
 
     private val attributeLimit = 8
     private val expected = mapOf(
@@ -35,7 +35,7 @@ internal class MutableAttributeContainerImplTest {
         assertEquals(expected, attrs)
     }
 
-    private fun MutableAttributeContainer.addTestAttributes(keyToken: String = "") {
+    private fun AttributesMutator.addTestAttributes(keyToken: String = "") {
         setStringAttribute("string$keyToken", "value")
         setDoubleAttribute("double$keyToken", 3.14)
         setBooleanAttribute("boolean$keyToken", true)
@@ -46,7 +46,7 @@ internal class MutableAttributeContainerImplTest {
         setLongListAttribute("long_list$keyToken", listOf(90000000000000))
     }
 
-    private fun MutableAttributeContainer.addTestAttributesAlternateValues() {
+    private fun AttributesMutator.addTestAttributesAlternateValues() {
         setStringAttribute("string", "override")
         setDoubleAttribute("double", 5.4)
         setBooleanAttribute("boolean", false)

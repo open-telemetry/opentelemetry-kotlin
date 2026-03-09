@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.PersistedTelemetryConfig
 import io.opentelemetry.kotlin.export.PersistedTelemetryType
@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryRepositoryImpl
 import io.opentelemetry.kotlin.export.TimeoutTelemetryCloseable
+import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
@@ -32,7 +33,7 @@ internal class PersistingSpanProcessor(
     processor: SpanProcessor,
     exporter: SpanExporter,
     fileSystem: TelemetryFileSystem,
-    clock: Clock,
+    dsl: TraceExportConfigDsl,
     config: PersistedTelemetryConfig,
     serializer: (List<SpanData>) -> ByteArray,
     deserializer: (ByteArray) -> List<SpanData>,
@@ -44,19 +45,19 @@ internal class PersistingSpanProcessor(
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : SpanProcessor {
 
+    private val shutdownState: MutableShutdownState = MutableShutdownState()
     private val repository = TelemetryRepositoryImpl(
         type = PersistedTelemetryType.SPANS,
         config = config,
         fileSystem = fileSystem,
         serializer = serializer,
         deserializer = deserializer,
-        clock = clock,
+        clock = dsl.clock,
     )
 
     private val persistingExporter = PersistingSpanExporter(exporter, repository)
 
-    @Suppress("DEPRECATION")
-    private val batchingProcessor = createBatchSpanProcessor(
+    private val batchingProcessor = dsl.batchSpanProcessor(
         persistingExporter,
         maxQueueSize,
         scheduleDelayMs,
@@ -65,11 +66,10 @@ internal class PersistingSpanProcessor(
         dispatcher,
     )
 
-    @Suppress("DEPRECATION")
-    private val composite = createCompositeSpanProcessor(listOf(processor, batchingProcessor))
+    private val composite = dsl.compositeSpanProcessor(processor, batchingProcessor)
     private val telemetryCloseable: TelemetryCloseable = TimeoutTelemetryCloseable(composite)
 
-    override fun onStart(span: ReadWriteSpan, parentContext: Context) {
+    override fun onStart(span: ReadWriteSpan, parentContext: Context) = shutdownState.execute {
         try {
             composite.onStart(span, parentContext)
         } catch (e: Throwable) {
@@ -81,7 +81,7 @@ internal class PersistingSpanProcessor(
         }
     }
 
-    override fun onEnding(span: ReadWriteSpan) {
+    override fun onEnding(span: ReadWriteSpan) = shutdownState.execute {
         try {
             composite.onEnding(span)
         } catch (e: Throwable) {
@@ -93,7 +93,7 @@ internal class PersistingSpanProcessor(
         }
     }
 
-    override fun onEnd(span: ReadableSpan) {
+    override fun onEnd(span: ReadableSpan) = shutdownState.execute {
         try {
             composite.onEnd(span)
         } catch (e: Throwable) {
@@ -109,5 +109,8 @@ internal class PersistingSpanProcessor(
     override fun isEndRequired(): Boolean = composite.isEndRequired()
 
     override suspend fun forceFlush(): OperationResultCode = telemetryCloseable.forceFlush()
-    override suspend fun shutdown(): OperationResultCode = telemetryCloseable.shutdown()
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownState.shutdown {
+            telemetryCloseable.shutdown()
+        }
 }

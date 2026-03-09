@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
@@ -34,10 +35,11 @@ internal class SpanMetaPropertiesTest {
             traceFlagsFactory = FakeTraceFlagsFactory(),
             traceStateFactory = FakeTraceStateFactory(),
             spanFactory = FakeSpanFactory(),
-            idGenerator = FakeIdGenerator(),
             scope = key,
             resource = fakeResource,
             spanLimitConfig = fakeSpanLimitsConfig,
+            idGenerator = FakeIdGenerator(),
+            shutdownState = MutableShutdownState(),
         )
     }
 

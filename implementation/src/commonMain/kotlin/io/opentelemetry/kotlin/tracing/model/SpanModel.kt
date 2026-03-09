@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.attributes.AttributesModel
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanDataImpl
@@ -108,7 +108,7 @@ internal class SpanModel(
 
     override fun addLink(
         spanContext: SpanContext,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ) {
         lock.write {
             if (isRecording() && linksList.size < spanLimitConfig.linkCountLimit && !hasSpanContext(spanContext)) {
@@ -131,7 +131,7 @@ internal class SpanModel(
     override fun addEvent(
         name: String,
         timestamp: Long?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ) {
         lock.write {
             if (isRecording() && eventsList.size < spanLimitConfig.eventCountLimit) {

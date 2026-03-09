@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.attributes.AttributesModel
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.threadSafeList
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
@@ -13,15 +13,15 @@ import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 internal class SpanRelationshipsImpl(
     val clock: Clock,
     val spanLimitConfig: SpanLimitConfig,
-    val attrs: MutableAttributeContainer = AttributesModel(spanLimitConfig.attributeCountLimit),
-) : SpanRelationships, MutableAttributeContainer by attrs {
+    val attrs: AttributesMutator = AttributesModel(spanLimitConfig.attributeCountLimit),
+) : SpanRelationships, AttributesMutator by attrs {
 
     val links = threadSafeList<SpanLinkData>()
     val events = threadSafeList<SpanEventData>()
 
     override fun addLink(
         spanContext: SpanContext,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ) {
         if (links.size < spanLimitConfig.linkCountLimit) {
             val container = AttributesModel(spanLimitConfig.attributeCountPerLinkLimit)
@@ -35,7 +35,7 @@ internal class SpanRelationshipsImpl(
     override fun addEvent(
         name: String,
         timestamp: Long?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ) {
         if (events.size < spanLimitConfig.eventCountLimit) {
             val container = AttributesModel(spanLimitConfig.attributeCountPerEventLimit)

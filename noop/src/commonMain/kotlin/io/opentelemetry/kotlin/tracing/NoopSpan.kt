@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
@@ -28,10 +28,10 @@ internal object NoopSpan : Span {
     override fun end(timestamp: Long) {
     }
 
-    override fun addLink(spanContext: SpanContext, attributes: (MutableAttributeContainer.() -> Unit)?) {
+    override fun addLink(spanContext: SpanContext, attributes: (AttributesMutator.() -> Unit)?) {
     }
 
-    override fun addEvent(name: String, timestamp: Long?, attributes: (MutableAttributeContainer.() -> Unit)?) {
+    override fun addEvent(name: String, timestamp: Long?, attributes: (AttributesMutator.() -> Unit)?) {
     }
 
     override fun isRecording(): Boolean = false

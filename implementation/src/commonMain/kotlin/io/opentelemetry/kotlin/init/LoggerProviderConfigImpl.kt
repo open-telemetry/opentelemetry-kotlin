@@ -13,11 +13,6 @@ internal class LoggerProviderConfigImpl(
     private val processors: MutableList<LogRecordProcessor> = mutableListOf()
     private val logLimitsConfigImpl = LogLimitsConfigImpl()
 
-    @Deprecated("Deprecated.", replaceWith = ReplaceWith("export {processor}"))
-    override fun addLogRecordProcessor(processor: LogRecordProcessor) {
-        processors.add(processor)
-    }
-
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
         require(processors.isEmpty()) { "export() should only be called once." }
         val processor = LogExportConfigImpl(clock).action()
