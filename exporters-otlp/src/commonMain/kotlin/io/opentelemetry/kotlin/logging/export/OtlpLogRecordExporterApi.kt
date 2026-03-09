@@ -20,16 +20,6 @@ import io.opentelemetry.kotlin.init.LogExportConfigDsl
 public fun LogExportConfigDsl.otlpHttpLogRecordExporter(
     baseUrl: String,
     httpClientEngine: HttpClientEngine = createHttpEngine(),
-): LogRecordExporter {
-    @Suppress("DEPRECATION")
-    return createOtlpHttpLogRecordExporter(baseUrl, httpClientEngine)
-}
-
-@ExperimentalApi
-@Deprecated("Deprecated.", ReplaceWith("otlpHttpLogRecordExporter(baseUrl, httpClientEngine)"))
-public fun createOtlpHttpLogRecordExporter(
-    baseUrl: String,
-    httpClientEngine: HttpClientEngine = createHttpEngine(),
 ): LogRecordExporter =
     OtlpHttpLogRecordExporter(
         OtlpClient(baseUrl, createDefaultHttpClient(engine = httpClientEngine)),

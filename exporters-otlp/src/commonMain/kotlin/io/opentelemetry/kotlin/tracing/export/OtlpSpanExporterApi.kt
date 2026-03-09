@@ -19,16 +19,6 @@ import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 public fun TraceExportConfigDsl.otlpHttpSpanExporter(
     baseUrl: String,
     httpClientEngine: HttpClientEngine = createHttpEngine(),
-): SpanExporter {
-    @Suppress("DEPRECATION")
-    return createOtlpHttpSpanExporter(baseUrl, httpClientEngine)
-}
-
-@ExperimentalApi
-@Deprecated("Deprecated.", ReplaceWith("otlpHttpSpanExporter(baseUrl, httpClientEngine)"))
-public fun createOtlpHttpSpanExporter(
-    baseUrl: String,
-    httpClientEngine: HttpClientEngine = createHttpEngine(),
 ): SpanExporter = OtlpHttpSpanExporter(
     OtlpClient(baseUrl, createDefaultHttpClient(engine = httpClientEngine)),
     EXPORT_INITIAL_DELAY_MS,

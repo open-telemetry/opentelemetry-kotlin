@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 internal class LogRecordExporterAdapterTest {
 
@@ -53,5 +54,25 @@ internal class LogRecordExporterAdapterTest {
         assertEquals(originalScope.version, observedScope.version)
         assertEquals(originalScope.schemaUrl, observedScope.schemaUrl)
         assertEquals(originalScope.attributes, observedScope.attributes.convertToMap())
+    }
+
+    @Test
+    fun `test export returns failure after shutdown`() = runTest {
+        wrapper.shutdown()
+        val result = wrapper.export(listOf(FakeReadableLogRecord()))
+        assertEquals(OperationResultCode.Failure, result)
+        assertTrue(impl.exports.isEmpty())
+    }
+
+    @Test
+    fun `test shutdown returns success on second call`() = runTest {
+        assertEquals(OperationResultCode.Success, wrapper.shutdown())
+        assertEquals(OperationResultCode.Success, wrapper.shutdown())
+    }
+
+    @Test
+    fun `test force flush works after shutdown`() = runTest {
+        wrapper.shutdown()
+        assertEquals(OperationResultCode.Success, wrapper.forceFlush())
     }
 }

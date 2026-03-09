@@ -137,6 +137,32 @@ internal class CompositeLogRecordProcessorTest {
         assertTelemetryCapturedFailure(first, second)
     }
 
+    @Test
+    fun testShutdownPropagation() = runTest {
+        var firstShutdown = false
+        var secondShutdown = false
+        val first = FakeLogRecordProcessor(
+            shutdownCode = {
+                firstShutdown = true
+                Success
+            }
+        )
+        val second = FakeLogRecordProcessor(
+            shutdownCode = {
+                secondShutdown = true
+                Success
+            }
+        )
+        val processor =
+            CompositeLogRecordProcessor(
+                listOf(first, second),
+                errorHandler
+            )
+        assertEquals(Success, processor.shutdown())
+        assertTrue(firstShutdown)
+        assertTrue(secondShutdown)
+    }
+
     private suspend fun CompositeLogRecordProcessor.assertReturnValuesMatch(
         flush: OperationResultCode,
         shutdown: OperationResultCode

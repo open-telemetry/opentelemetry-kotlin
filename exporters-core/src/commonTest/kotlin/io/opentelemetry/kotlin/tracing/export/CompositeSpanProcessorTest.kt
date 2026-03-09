@@ -217,6 +217,32 @@ internal class CompositeSpanProcessorTest {
         assertTelemetryCapturedFailure(first, second)
     }
 
+    @Test
+    fun testShutdownPropagation() = runTest {
+        var firstShutdown = false
+        var secondShutdown = false
+        val first = FakeSpanProcessor(
+            shutdownCode = {
+                firstShutdown = true
+                Success
+            }
+        )
+        val second = FakeSpanProcessor(
+            shutdownCode = {
+                secondShutdown = true
+                Success
+            }
+        )
+        val processor =
+            CompositeSpanProcessor(
+                listOf(first, second),
+                errorHandler
+            )
+        assertEquals(Success, processor.shutdown())
+        assertTrue(firstShutdown)
+        assertTrue(secondShutdown)
+    }
+
     private suspend fun CompositeSpanProcessor.assertReturnValuesMatch(
         flush: OperationResultCode,
         shutdown: OperationResultCode

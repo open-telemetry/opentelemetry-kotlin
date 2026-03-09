@@ -12,6 +12,8 @@ internal class TimeoutTelemetryCloseable(
     private val shutdownTimeoutMs: Long = 5000,
 ) : TelemetryCloseable {
 
+    private val shutdownState: MutableShutdownState = MutableShutdownState()
+
     override suspend fun forceFlush(): OperationResultCode {
         return try {
             withTimeout(flushTimeoutMs) {
@@ -22,7 +24,7 @@ internal class TimeoutTelemetryCloseable(
         }
     }
 
-    override suspend fun shutdown(): OperationResultCode {
+    override suspend fun shutdown(): OperationResultCode = shutdownState.shutdown {
         return try {
             withTimeout(shutdownTimeoutMs) {
                 delegate.shutdown()

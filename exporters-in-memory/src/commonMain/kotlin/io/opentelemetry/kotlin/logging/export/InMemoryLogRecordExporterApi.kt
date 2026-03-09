@@ -11,12 +11,5 @@ import io.opentelemetry.kotlin.init.LogExportConfigDsl
  */
 @ExperimentalApi
 @ConfigDsl
-public fun LogExportConfigDsl.inMemoryLogRecordExporter(): InMemoryLogRecordExporter {
-    @Suppress("DEPRECATION")
-    return createInMemoryLogRecordExporter()
-}
-
-@ExperimentalApi
-@Deprecated("Deprecated.", ReplaceWith("inMemoryLogRecordExporter()"))
-public fun createInMemoryLogRecordExporter(): InMemoryLogRecordExporter =
+public fun LogExportConfigDsl.inMemoryLogRecordExporter(): InMemoryLogRecordExporter =
     InMemoryLogRecordExporterImpl()

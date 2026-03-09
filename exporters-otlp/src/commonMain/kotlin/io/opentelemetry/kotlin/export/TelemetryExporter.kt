@@ -14,18 +14,20 @@ internal class TelemetryExporter<T>(
     private val exportAction: suspend (telemetry: List<T>) -> OtlpResponse,
 ) : TelemetryCloseable {
 
+    private val shutdownState: MutableShutdownState = MutableShutdownState()
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
 
     /**
      * Exports telemetry via coroutines and uses exponential backoff when a failure
      * is encountered.
      */
-    fun export(telemetry: List<T>): OperationResultCode {
-        scope.launch {
-            exportTelemetry(telemetry)
+    fun export(telemetry: List<T>): OperationResultCode =
+        shutdownState.ifActive {
+            scope.launch {
+                exportTelemetry(telemetry)
+            }
+            Success
         }
-        return Success
-    }
 
     private suspend fun exportTelemetry(telemetry: List<T>) {
         var delayMs = initialDelayMs
@@ -49,8 +51,9 @@ internal class TelemetryExporter<T>(
 
     override suspend fun forceFlush(): OperationResultCode = Success
 
-    override suspend fun shutdown(): OperationResultCode {
-        scope.cancel()
-        return Success
-    }
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownState.shutdown {
+            scope.cancel()
+            Success
+        }
 }

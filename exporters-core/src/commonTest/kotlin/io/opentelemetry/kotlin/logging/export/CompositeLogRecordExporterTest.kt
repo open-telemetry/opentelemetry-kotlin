@@ -157,6 +157,33 @@ internal class CompositeLogRecordExporterTest {
         assertTelemetryCapturedFailure(first, second)
     }
 
+    @Test
+    fun testShutdownPropagation() = runTest {
+        var firstShutdown = false
+        var secondShutdown = false
+        val first = FakeLogRecordExporter(
+            shutdownCode = {
+                firstShutdown = true
+                Success
+            }
+        )
+        val second = FakeLogRecordExporter(
+            shutdownCode = {
+                secondShutdown = true
+                Success
+            }
+        )
+        val exporter =
+            CompositeLogRecordExporter(
+                listOf(first, second),
+                errorHandler
+            )
+        assertEquals(Success, exporter.shutdown())
+        assertEquals(Success, exporter.export(fakeTelemetry))
+        assertTrue(firstShutdown)
+        assertTrue(secondShutdown)
+    }
+
     private suspend fun CompositeLogRecordExporter.assertReturnValuesMatch(
         export: OperationResultCode,
         flush: OperationResultCode,

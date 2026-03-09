@@ -31,15 +31,9 @@ internal class CompatLoggerProviderConfig(
         }
     }
 
-    @Deprecated("Deprecated.", replaceWith = ReplaceWith("export {processor}"))
-    override fun addLogRecordProcessor(processor: LogRecordProcessor) {
-        builder.addLogRecordProcessor(OtelJavaLogRecordProcessorAdapter(processor))
-    }
-
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
         val processor = LogExportConfigCompat(clock).action()
-        @Suppress("DEPRECATION")
-        addLogRecordProcessor(processor)
+        builder.addLogRecordProcessor(OtelJavaLogRecordProcessorAdapter(processor))
     }
 
     override fun logLimits(action: LogLimitsConfigDsl.() -> Unit) {

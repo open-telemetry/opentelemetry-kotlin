@@ -45,15 +45,9 @@ internal class CompatTracerProviderConfig(
         builder.setSpanLimits(spanLimitsConfig.apply(action).build())
     }
 
-    @Deprecated("Deprecated.", replaceWith = ReplaceWith("export {processor}"))
-    override fun addSpanProcessor(processor: SpanProcessor) {
-        builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor))
-    }
-
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
         val processor = TraceExportConfigCompat(clock).action()
-        @Suppress("DEPRECATION")
-        addSpanProcessor(processor)
+        builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor))
     }
 
     fun build(clock: Clock): TracerProvider {

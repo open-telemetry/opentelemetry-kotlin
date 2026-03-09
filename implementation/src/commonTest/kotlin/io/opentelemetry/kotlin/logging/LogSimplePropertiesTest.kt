@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
@@ -34,6 +35,7 @@ internal class LogSimplePropertiesTest {
             key = key,
             resource = FakeResource(),
             logLimitConfig = fakeLogLimitsConfig,
+            shutdownState = MutableShutdownState(),
         )
     }
 

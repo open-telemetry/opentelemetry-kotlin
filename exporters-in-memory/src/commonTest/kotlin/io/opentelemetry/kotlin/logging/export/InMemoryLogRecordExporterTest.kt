@@ -6,6 +6,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 internal class InMemoryLogRecordExporterTest {
 
@@ -13,9 +14,8 @@ internal class InMemoryLogRecordExporterTest {
     private lateinit var exporter: InMemoryLogRecordExporter
 
     @BeforeTest
-    @Suppress("DEPRECATION")
     fun setUp() {
-        exporter = createInMemoryLogRecordExporter()
+        exporter = InMemoryLogRecordExporterImpl()
     }
 
     @Test
@@ -32,5 +32,25 @@ internal class InMemoryLogRecordExporterTest {
     fun testExport() = runTest {
         exporter.export(fakeTelemetry)
         assertEquals(fakeTelemetry, exporter.exportedLogRecords)
+    }
+
+    @Test
+    fun testExportReturnsFailureAfterShutdown() = runTest {
+        exporter.shutdown()
+        val result = exporter.export(fakeTelemetry)
+        assertEquals(OperationResultCode.Failure, result)
+        assertTrue(exporter.exportedLogRecords.isEmpty())
+    }
+
+    @Test
+    fun testShutdownReturnsSuccessOnSecondCall() = runTest {
+        assertEquals(OperationResultCode.Success, exporter.shutdown())
+        assertEquals(OperationResultCode.Success, exporter.shutdown())
+    }
+
+    @Test
+    fun testForceFlushWorksAfterShutdown() = runTest {
+        exporter.shutdown()
+        assertEquals(OperationResultCode.Success, exporter.forceFlush())
     }
 }

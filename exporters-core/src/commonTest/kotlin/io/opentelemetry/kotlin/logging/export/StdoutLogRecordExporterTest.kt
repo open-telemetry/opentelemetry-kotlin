@@ -82,4 +82,30 @@ internal class StdoutLogRecordExporterTest {
         val exporter = StdoutLogRecordExporter()
         assertEquals(OperationResultCode.Success, exporter.shutdown())
     }
+
+    @Test
+    fun testExportReturnsFailureAfterShutdown() = runTest {
+        val output = mutableListOf<String>()
+        val exporter = StdoutLogRecordExporter(output::add)
+        exporter.shutdown()
+
+        val logRecord = FakeReadableLogRecord()
+        val result = exporter.export(listOf(logRecord))
+        assertEquals(OperationResultCode.Failure, result)
+        assertEquals(0, output.size)
+    }
+
+    @Test
+    fun testShutdownReturnsSuccessOnSecondCall() = runTest {
+        val exporter = StdoutLogRecordExporter()
+        assertEquals(OperationResultCode.Success, exporter.shutdown())
+        assertEquals(OperationResultCode.Success, exporter.shutdown())
+    }
+
+    @Test
+    fun testForceFlushWorksAfterShutdown() = runTest {
+        val exporter = StdoutLogRecordExporter()
+        exporter.shutdown()
+        assertEquals(OperationResultCode.Success, exporter.forceFlush())
+    }
 }
