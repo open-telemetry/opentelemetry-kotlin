@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.logging.model
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 
 /**
@@ -10,7 +9,7 @@ import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
  * https://opentelemetry.io/docs/specs/otel/logs/sdk/#readablelogrecord
  */
 @ExperimentalApi
-public interface ReadWriteLogRecord : ReadableLogRecord, MutableAttributeContainer, AttributeContainer {
+public interface ReadWriteLogRecord : ReadableLogRecord, MutableAttributeContainer {
 
     /**
      * The timestamp in nanoseconds at which the event occurred.

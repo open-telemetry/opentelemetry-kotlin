@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.logging.model
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
+import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 
@@ -11,7 +12,7 @@ import io.opentelemetry.kotlin.tracing.model.SpanContext
  * https://opentelemetry.io/docs/specs/otel/logs/sdk/#readablelogrecord
  */
 @ExperimentalApi
-public interface ReadableLogRecord {
+public interface ReadableLogRecord : AttributeContainer {
 
     /**
      * The timestamp in nanoseconds at which the event occurred.
@@ -43,11 +44,6 @@ public interface ReadableLogRecord {
      * Contains the event name if this is an event, otherwise null
      */
     public val eventName: String?
-
-    /**
-     * A map of attributes associated with the log record.
-     */
-    public val attributes: Map<String, Any>
 
     /**
      * The span context associated with the log record
