@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
@@ -46,6 +47,7 @@ internal class LogAttributesTest {
                 attributeCountLimit = 8,
                 attributeValueLengthLimit = fakeLogLimitsConfig.attributeValueLengthLimit
             ),
+            shutdownState = MutableShutdownState(),
         )
     }
 

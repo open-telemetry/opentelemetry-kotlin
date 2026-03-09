@@ -54,7 +54,8 @@ internal class LogContextTest {
             spanFactory,
             key,
             FakeResource(),
-            fakeLogLimitsConfig
+            fakeLogLimitsConfig,
+            MutableShutdownState(),
         )
         tracer = TracerImpl(
             clock = clock,
