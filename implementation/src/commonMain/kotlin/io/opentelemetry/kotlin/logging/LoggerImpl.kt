@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
@@ -23,6 +24,7 @@ internal class LoggerImpl(
     private val key: InstrumentationScopeInfo,
     private val resource: Resource,
     private val logLimitConfig: LogLimitConfig,
+    private val shutdownState: ShutdownState,
 ) : Logger {
 
     private val contextFactory = contextFactory
@@ -34,70 +36,13 @@ internal class LoggerImpl(
         context: Context?,
         severityNumber: SeverityNumber?,
         eventName: String?,
-    ): Boolean {
-        if (processor == null) {
-            return false
+    ): Boolean =
+        if (shutdownState.isShutdown || processor == null) {
+            false
+        } else {
+            val ctx = context ?: contextFactory.implicit()
+            processor.enabled(ctx, key, severityNumber, eventName)
         }
-        val ctx = context ?: contextFactory.implicit()
-        return processor.enabled(ctx, key, severityNumber, eventName)
-    }
-
-    @Deprecated(
-        "Deprecated",
-        replaceWith = ReplaceWith(
-            "emit(body, eventName, timestamp, observedTimestamp, context, severityNumber, severityText, attributes)",
-            "io.opentelemetry.kotlin.logging.model.SeverityNumber"
-        )
-    )
-    override fun log(
-        body: String?,
-        timestamp: Long?,
-        observedTimestamp: Long?,
-        context: Context?,
-        severityNumber: SeverityNumber?,
-        severityText: String?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
-    ) {
-        processTelemetry(
-            context = context,
-            timestamp = timestamp,
-            observedTimestamp = observedTimestamp,
-            body = body,
-            eventName = null,
-            severityText = severityText,
-            severityNumber = severityNumber,
-            attributes = attributes
-        )
-    }
-
-    @Deprecated(
-        "Deprecated",
-        replaceWith = ReplaceWith(
-            "emit(body, eventName, timestamp, observedTimestamp, context, severityNumber, severityText, attributes)",
-            "io.opentelemetry.kotlin.logging.model.SeverityNumber"
-        )
-    )
-    override fun logEvent(
-        eventName: String,
-        body: String?,
-        timestamp: Long?,
-        observedTimestamp: Long?,
-        context: Context?,
-        severityNumber: SeverityNumber?,
-        severityText: String?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
-    ) {
-        processTelemetry(
-            context = context,
-            timestamp = timestamp,
-            observedTimestamp = observedTimestamp,
-            body = body,
-            eventName = eventName,
-            severityText = severityText,
-            severityNumber = severityNumber,
-            attributes = attributes
-        )
-    }
 
     override fun emit(
         body: String?,
@@ -131,28 +76,30 @@ internal class LoggerImpl(
         severityNumber: SeverityNumber?,
         attributes: (MutableAttributeContainer.() -> Unit)?
     ) {
-        val ctx = context ?: contextFactory.implicit()
-        val spanContext = when (ctx) {
-            root -> invalidSpanContext
-            else -> spanFactory.fromContext(ctx).spanContext
-        }
+        shutdownState.execute {
+            val ctx = context ?: contextFactory.implicit()
+            val spanContext = when (ctx) {
+                root -> invalidSpanContext
+                else -> spanFactory.fromContext(ctx).spanContext
+            }
 
-        val now = clock.now()
-        val log = LogRecordModel(
-            resource = resource,
-            instrumentationScopeInfo = key,
-            timestamp = timestamp ?: now,
-            observedTimestamp = observedTimestamp ?: now,
-            body = body,
-            severityText = severityText,
-            severityNumber = severityNumber ?: SeverityNumber.UNKNOWN,
-            spanContext = spanContext,
-            logLimitConfig = logLimitConfig,
-            eventName = eventName,
-        )
-        if (attributes != null) {
-            attributes(log)
+            val now = clock.now()
+            val log = LogRecordModel(
+                resource = resource,
+                instrumentationScopeInfo = key,
+                timestamp = timestamp ?: now,
+                observedTimestamp = observedTimestamp ?: now,
+                body = body,
+                severityText = severityText,
+                severityNumber = severityNumber ?: SeverityNumber.UNKNOWN,
+                spanContext = spanContext,
+                logLimitConfig = logLimitConfig,
+                eventName = eventName,
+            )
+            if (attributes != null) {
+                attributes(log)
+            }
+            processor?.onEmit(ReadWriteLogRecordImpl(log), ctx)
         }
-        processor?.onEmit(ReadWriteLogRecordImpl(log), ctx)
     }
 }

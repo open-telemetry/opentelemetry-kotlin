@@ -1,0 +1,15 @@
+public final class io/opentelemetry/kotlin/export/MutableShutdownState : io/opentelemetry/kotlin/export/ShutdownState {
+	public fun <init> ()V
+	public fun isShutdown ()Z
+	public final fun shutdown (Lkotlin/jvm/functions/Function0;)Lio/opentelemetry/kotlin/export/OperationResultCode;
+	public final fun shutdownNow ()V
+}
+
+public abstract class io/opentelemetry/kotlin/export/ShutdownState {
+	public fun <init> ()V
+	public final fun execute (Lkotlin/jvm/functions/Function0;)V
+	public final fun ifActive (Lkotlin/jvm/functions/Function0;)Lio/opentelemetry/kotlin/export/OperationResultCode;
+	public final fun ifActiveOrElse (Ljava/lang/Object;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public abstract fun isShutdown ()Z
+}
+

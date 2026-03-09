@@ -1,6 +1,6 @@
 package io.opentelemetry.example.app
 
-import io.opentelemetry.example.app.AppConfig.url
+import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 
@@ -47,17 +47,21 @@ object AppConfig {
      */
     val url: String? = null
 
-    /**
-     * The [io.opentelemetry.kotlin.tracing.export.SpanProcessor] that should be used to export
-     * telemetry. If [url] is set, an OTLP HTTP exporter with batch processing will be used.
-     * Otherwise, telemetry is logged immediately to stdout.
-     */
-    val spanProcessor: SpanProcessor = createSpanProcessor(url)
+    @ExperimentalApi
+    internal var spanProcessor: SpanProcessor? = null
 
-    /**
-     * The [io.opentelemetry.kotlin.logging.export.LogRecordProcessor] that should be used to export
-     * telemetry. If [url] is set, an OTLP HTTP exporter with batch processing will be used.
-     * Otherwise, telemetry is logged immediately to stdout.
-     */
-    val logRecordProcessor: LogRecordProcessor = createLogRecordProcessor(url)
+    @ExperimentalApi
+    internal var logRecordProcessor: LogRecordProcessor? = null
+
+    @ExperimentalApi
+    suspend fun forceFlush() {
+        spanProcessor?.forceFlush()
+        logRecordProcessor?.forceFlush()
+    }
+
+    @ExperimentalApi
+    suspend fun shutdown() {
+        spanProcessor?.shutdown()
+        logRecordProcessor?.shutdown()
+    }
 }

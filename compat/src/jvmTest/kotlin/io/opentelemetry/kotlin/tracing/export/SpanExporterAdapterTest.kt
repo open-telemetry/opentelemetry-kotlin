@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 internal class SpanExporterAdapterTest {
 
@@ -68,5 +69,25 @@ internal class SpanExporterAdapterTest {
         val observedLink = observed.links.single()
         assertEquals(originalLink.spanContext.spanId, observedLink.spanContext.spanId)
         assertEquals(originalLink.attributes, observedLink.attributes.convertToMap())
+    }
+
+    @Test
+    fun `test export returns failure after shutdown`() = runTest {
+        wrapper.shutdown()
+        val result = wrapper.export(listOf(FakeSpanData()))
+        assertEquals(OperationResultCode.Failure, result)
+        assertTrue(impl.exports.isEmpty())
+    }
+
+    @Test
+    fun `test shutdown returns success on second call`() = runTest {
+        assertEquals(OperationResultCode.Success, wrapper.shutdown())
+        assertEquals(OperationResultCode.Success, wrapper.shutdown())
+    }
+
+    @Test
+    fun `test force flush works after shutdown`() = runTest {
+        wrapper.shutdown()
+        assertEquals(OperationResultCode.Success, wrapper.forceFlush())
     }
 }

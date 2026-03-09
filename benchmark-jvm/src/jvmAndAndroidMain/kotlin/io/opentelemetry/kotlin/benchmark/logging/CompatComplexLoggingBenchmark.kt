@@ -24,13 +24,13 @@ class CompatComplexLoggingBenchmark {
 
     @Benchmark
     fun benchmarkComplexLogCompat() {
-        logger.log(
-            "Hello world!",
-            500,
-            1000,
-            otel.contextFactory.root(),
-            SeverityNumber.DEBUG3,
-            "debug3"
+        logger.emit(
+            body = "Hello world!",
+            timestamp = 500,
+            observedTimestamp = 1000,
+            context = otel.contextFactory.root(),
+            severityNumber = SeverityNumber.DEBUG3,
+            severityText = "debug3"
         ) {
             setStringAttribute("key", "value")
         }

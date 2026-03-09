@@ -37,6 +37,7 @@ kotlin {
             }
         }
     }
+    compilerOptions.optIn.add("io.opentelemetry.kotlin.ExperimentalApi")
 }
 
 benchmark {

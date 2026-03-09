@@ -87,4 +87,30 @@ internal class StdoutSpanExporterTest {
         val exporter = StdoutSpanExporter()
         assertEquals(OperationResultCode.Success, exporter.shutdown())
     }
+
+    @Test
+    fun testExportReturnsFailureAfterShutdown() = runTest {
+        val output = mutableListOf<String>()
+        val exporter = StdoutSpanExporter(output::add)
+        exporter.shutdown()
+
+        val span = FakeReadWriteSpan(name = "test-span")
+        val result = exporter.export(listOf(span))
+        assertEquals(OperationResultCode.Failure, result)
+        assertEquals(0, output.size)
+    }
+
+    @Test
+    fun testShutdownReturnsSuccessOnSecondCall() = runTest {
+        val exporter = StdoutSpanExporter()
+        assertEquals(OperationResultCode.Success, exporter.shutdown())
+        assertEquals(OperationResultCode.Success, exporter.shutdown())
+    }
+
+    @Test
+    fun testForceFlushWorksAfterShutdown() = runTest {
+        val exporter = StdoutSpanExporter()
+        exporter.shutdown()
+        assertEquals(OperationResultCode.Success, exporter.forceFlush())
+    }
 }

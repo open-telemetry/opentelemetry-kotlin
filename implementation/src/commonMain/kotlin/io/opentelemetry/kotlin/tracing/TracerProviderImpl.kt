@@ -1,8 +1,11 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.export.DelegatingTelemetryCloseable
+import io.opentelemetry.kotlin.export.MutableShutdownState
+import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
@@ -12,7 +15,6 @@ import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
-import io.opentelemetry.kotlin.tracing.export.createCompositeSpanProcessor
 
 internal class TracerProviderImpl(
     private val clock: Clock,
@@ -22,18 +24,15 @@ internal class TracerProviderImpl(
     traceFlagsFactory: TraceFlagsFactory,
     traceStateFactory: TraceStateFactory,
     spanFactory: SpanFactory,
-    idGenerator: IdGenerator,
+    private val idGenerator: IdGenerator,
+) : TracerProvider, TelemetryCloseable {
+
+    private val shutdownState: MutableShutdownState = MutableShutdownState()
     private val closeable: DelegatingTelemetryCloseable = DelegatingTelemetryCloseable()
-) : TracerProvider, TelemetryCloseable by closeable {
+    private val noopTracer = NoopOpenTelemetry.tracerProvider.getTracer("")
 
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
-        @Suppress("DEPRECATION")
-        val processor = when {
-            tracingConfig.processors.isEmpty() -> null
-            else -> createCompositeSpanProcessor(
-                tracingConfig.processors
-            )
-        }
+        val processor = tracingConfig.processors.firstOrNull()
         processor?.let(closeable::add)
         TracerImpl(
             clock = clock,
@@ -47,6 +46,7 @@ internal class TracerProviderImpl(
             resource = tracingConfig.resource,
             spanLimitConfig = tracingConfig.spanLimits,
             idGenerator = idGenerator,
+            shutdownState = shutdownState,
         )
     }
 
@@ -55,13 +55,21 @@ internal class TracerProviderImpl(
         version: String?,
         schemaUrl: String?,
         attributes: (MutableAttributeContainer.() -> Unit)?
-    ): Tracer {
-        val key = apiProvider.createInstrumentationScopeInfo(
-            name = name,
-            version = version,
-            schemaUrl = schemaUrl,
-            attributes = attributes
-        )
-        return apiProvider.getOrCreate(key)
-    }
+    ): Tracer =
+        shutdownState.ifActiveOrElse(noopTracer) {
+            val key = apiProvider.createInstrumentationScopeInfo(
+                name = name,
+                version = version,
+                schemaUrl = schemaUrl,
+                attributes = attributes
+            )
+            apiProvider.getOrCreate(key)
+        }
+
+    override suspend fun forceFlush(): OperationResultCode = closeable.forceFlush()
+
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownState.shutdown {
+            closeable.shutdown()
+        }
 }

@@ -1,7 +1,6 @@
 
 package io.opentelemetry.kotlin.logging.export
 
-import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -57,7 +56,6 @@ internal fun LogExportConfigDsl.persistingLogRecordProcessorImpl(
     processor: LogRecordProcessor,
     exporter: LogRecordExporter,
     fileSystem: TelemetryFileSystem,
-    clock: Clock = this.clock,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
@@ -69,7 +67,7 @@ internal fun LogExportConfigDsl.persistingLogRecordProcessorImpl(
         processor = processor,
         exporter = exporter,
         fileSystem = fileSystem,
-        clock = clock,
+        dsl = this,
         serializer = { it.toProtobufByteArray() },
         deserializer = { it.toReadableLogRecordList() },
         config = PersistedTelemetryConfig(),
