@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 
 /**
  * Defines configuration for a resource.
@@ -12,7 +12,7 @@ public interface ResourceConfigDsl {
     /**
      * Declares a resource, including an optional schema and any attributes.
      */
-    public fun resource(schemaUrl: String? = null, attributes: MutableAttributeContainer.() -> Unit)
+    public fun resource(schemaUrl: String? = null, attributes: AttributesMutator.() -> Unit)
 
     /**
      * Declares a resource by taking a copy of the supplied Map values.

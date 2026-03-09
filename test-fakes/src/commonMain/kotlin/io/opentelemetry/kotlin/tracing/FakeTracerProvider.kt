@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 
 class FakeTracerProvider : TracerProvider {
 
@@ -10,7 +10,7 @@ class FakeTracerProvider : TracerProvider {
         name: String,
         version: String?,
         schemaUrl: String?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ): Tracer = map.getOrPut(name) {
         FakeTracer(name)
     }

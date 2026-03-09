@@ -7,8 +7,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaImplicitContextKeyed
 import io.opentelemetry.kotlin.aliases.OtelJavaScope
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.SpanEventCompatImpl
 import io.opentelemetry.kotlin.tracing.SpanLinkCompatImpl
@@ -81,7 +81,7 @@ internal class SpanAdapter(
 
     override fun addLink(
         spanContext: SpanContext,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ) {
         val container = CompatAttributesModel()
         if (attributes != null) {
@@ -96,7 +96,7 @@ internal class SpanAdapter(
     override fun addEvent(
         name: String,
         timestamp: Long?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ) {
         val container = CompatAttributesModel()
         if (attributes != null) {

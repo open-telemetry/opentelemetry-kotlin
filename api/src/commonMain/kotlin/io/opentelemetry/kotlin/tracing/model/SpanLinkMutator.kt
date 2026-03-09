@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing.model
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 
 /**
  * Allows links to be added to a span.
@@ -16,5 +16,5 @@ public interface SpanLinkMutator {
     /**
      * Adds a link to the span that associates it with another [SpanContext].
      */
-    public fun addLink(spanContext: SpanContext, attributes: (MutableAttributeContainer.() -> Unit)? = null)
+    public fun addLink(spanContext: SpanContext, attributes: (AttributesMutator.() -> Unit)? = null)
 }

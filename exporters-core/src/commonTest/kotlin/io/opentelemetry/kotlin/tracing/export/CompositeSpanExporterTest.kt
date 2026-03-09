@@ -178,6 +178,33 @@ internal class CompositeSpanExporterTest {
         assertTelemetryCapturedFailure(first, second)
     }
 
+    @Test
+    fun testShutdownPropagation() = runTest {
+        var firstShutdown = false
+        var secondShutdown = false
+        val first = FakeSpanExporter(
+            shutdownReturnValue = {
+                firstShutdown = true
+                Success
+            }
+        )
+        val second = FakeSpanExporter(
+            shutdownReturnValue = {
+                secondShutdown = true
+                Success
+            }
+        )
+        val exporter =
+            CompositeSpanExporter(
+                listOf(first, second),
+                errorHandler
+            )
+        assertEquals(Success, exporter.shutdown())
+        assertEquals(Success, exporter.export(fakeTelemetry))
+        assertTrue(firstShutdown)
+        assertTrue(secondShutdown)
+    }
+
     private suspend fun CompositeSpanExporter.assertReturnValuesMatch(
         export: OperationResultCode,
         flush: OperationResultCode,

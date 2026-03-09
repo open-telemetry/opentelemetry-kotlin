@@ -3,8 +3,8 @@ public final class io/opentelemetry/kotlin/OpenTelemetryExtKt {
 	public static final fun getTracer (Lio/opentelemetry/kotlin/OpenTelemetry;Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/Tracer;
 }
 
-public final class io/opentelemetry/kotlin/attributes/MutableAttributeContainerExtKt {
-	public static final fun setAttributes (Lio/opentelemetry/kotlin/attributes/MutableAttributeContainer;Ljava/util/Map;)V
+public final class io/opentelemetry/kotlin/attributes/AttributesMutatorExtKt {
+	public static final fun setAttributes (Lio/opentelemetry/kotlin/attributes/AttributesMutator;Ljava/util/Map;)V
 }
 
 public final class io/opentelemetry/kotlin/context/ContextApiExtKt {

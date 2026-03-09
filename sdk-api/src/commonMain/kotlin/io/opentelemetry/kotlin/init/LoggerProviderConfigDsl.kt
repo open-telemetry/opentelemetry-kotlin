@@ -11,13 +11,6 @@ import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 public interface LoggerProviderConfigDsl : ResourceConfigDsl {
 
     /**
-     * Adds a [LogRecordProcessor] to the logger provider. Processors will be invoked
-     * in the order in which they were added.
-     */
-    @Deprecated("Deprecated.", ReplaceWith("export {processor}"))
-    public fun addLogRecordProcessor(processor: LogRecordProcessor)
-
-    /**
      * The log limits configuration for this logger provider.
      */
     public fun logLimits(action: LogLimitsConfigDsl.() -> Unit)

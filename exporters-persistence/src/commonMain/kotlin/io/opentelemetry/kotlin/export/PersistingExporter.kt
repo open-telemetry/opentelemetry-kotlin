@@ -14,16 +14,23 @@ internal class PersistingExporter<T>(
     private val repository: TelemetryRepository<T>,
 ) : TelemetryCloseable {
 
-    suspend fun export(telemetry: List<T>): OperationResultCode {
-        val record = repository.store(telemetry)
+    private val shutdownState: MutableShutdownState = MutableShutdownState()
 
-        val result = delegateExport(telemetry)
-        if (result == Success && record != null) {
-            repository.delete(record)
+    suspend fun export(telemetry: List<T>): OperationResultCode =
+        shutdownState.ifActive {
+            val record = repository.store(telemetry)
+
+            val result = delegateExport(telemetry)
+            if (result == Success && record != null) {
+                repository.delete(record)
+            }
+            result
         }
-        return result
-    }
 
-    override suspend fun shutdown(): OperationResultCode = closeable.shutdown()
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownState.shutdown {
+            closeable.shutdown()
+        }
+
     override suspend fun forceFlush(): OperationResultCode = closeable.forceFlush()
 }

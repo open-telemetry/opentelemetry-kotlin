@@ -9,18 +9,6 @@ class FakeTracer(
     val name: String
 ) : Tracer {
 
-    @Deprecated(
-        "Deprecated.",
-        replaceWith = ReplaceWith("startSpan(name, parentContext, spanKind, startTimestamp, action)")
-    )
-    override fun createSpan(
-        name: String,
-        parentContext: Context?,
-        spanKind: SpanKind,
-        startTimestamp: Long?,
-        action: (SpanCreationAction.() -> Unit)?
-    ): Span = FakeSpan()
-
     override fun startSpan(
         name: String,
         parentContext: Context?,

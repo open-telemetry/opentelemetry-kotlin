@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.logging.model.SeverityNumber
 
@@ -13,43 +13,6 @@ internal object NoopLogger : Logger {
         eventName: String?,
     ): Boolean = false
 
-    @Deprecated(
-        "Deprecated",
-        replaceWith = ReplaceWith(
-            "emit(body, eventName, timestamp, observedTimestamp, context, severityNumber, severityText, attributes)",
-            "io.opentelemetry.kotlin.logging.model.SeverityNumber"
-        )
-    )
-    override fun log(
-        body: String?,
-        timestamp: Long?,
-        observedTimestamp: Long?,
-        context: Context?,
-        severityNumber: SeverityNumber?,
-        severityText: String?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
-    ) {
-    }
-
-    @Deprecated(
-        "Deprecated",
-        replaceWith = ReplaceWith(
-            "emit(body, eventName, timestamp, observedTimestamp, context, severityNumber, severityText, attributes)",
-            "io.opentelemetry.kotlin.logging.model.SeverityNumber"
-        )
-    )
-    override fun logEvent(
-        eventName: String,
-        body: String?,
-        timestamp: Long?,
-        observedTimestamp: Long?,
-        context: Context?,
-        severityNumber: SeverityNumber?,
-        severityText: String?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
-    ) {
-    }
-
     override fun emit(
         body: String?,
         eventName: String?,
@@ -58,7 +21,7 @@ internal object NoopLogger : Logger {
         context: Context?,
         severityNumber: SeverityNumber?,
         severityText: String?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ) {
     }
 }

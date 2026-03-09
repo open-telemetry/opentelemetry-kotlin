@@ -1,13 +1,6 @@
 package io.opentelemetry.kotlin
 
 /**
- * Returns a no-op instance of [OpenTelemetry] instance.
- */
-@ExperimentalApi
-@Deprecated("Use NoopOpenTelemetry instead.", ReplaceWith("NoopOpenTelemetry"))
-public fun createNoopOpenTelemetry(): OpenTelemetry = NoopOpenTelemetryImpl
-
-/**
  * A no-op instance of [OpenTelemetry]. This should be used if you want [OpenTelemetry] to perform
  * no action. This can be particularly beneficial if you are a library author and you wish to
  * allow library consumers to opt-in to telemetry, as you can specify a noop instance by default.

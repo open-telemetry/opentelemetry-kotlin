@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.export.FakeTelemetryFileSystem
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
@@ -408,6 +409,36 @@ internal class PersistingSpanProcessorTest {
         assertFalse("span" in exportedNames)
     }
 
+    @Test
+    fun testShutdownStopsSpanProcessing() = runTest {
+        val exporter = FakeSpanExporter()
+        val processor = FakeSpanProcessor()
+
+        val span = FakeReadWriteSpan()
+
+        val persistingProcessor = createProcessor(
+            exporters = listOf(exporter),
+            processors = listOf(processor),
+        )
+
+        persistingProcessor.onStart(span, FakeContext())
+        persistingProcessor.onEnding(span)
+        persistingProcessor.onEnd(span)
+        assertEquals(1, processor.startCalls.size)
+        assertEquals(1, processor.endingCalls.size)
+        assertEquals(1, processor.endCalls.size)
+
+        assertEquals(Success, persistingProcessor.shutdown())
+        assertEquals(Success, persistingProcessor.shutdown())
+
+        persistingProcessor.onStart(span, FakeContext())
+        persistingProcessor.onEnding(span)
+        persistingProcessor.onEnd(span)
+        assertEquals(1, processor.startCalls.size)
+        assertEquals(1, processor.endingCalls.size)
+        assertEquals(1, processor.endCalls.size)
+    }
+
     private fun TestScope.createProcessor(
         fileSystem: FakeTelemetryFileSystem = FakeTelemetryFileSystem(),
         processors: List<SpanProcessor> = emptyList(),
@@ -431,7 +462,6 @@ internal class PersistingSpanProcessorTest {
             processor = processor,
             exporter = exporter,
             fileSystem = fileSystem,
-            clock = FakeClock(),
             maxExportBatchSize = maxExportBatchSize,
             scheduleDelayMs = scheduleDelayMs,
             dispatcher = dispatcher,

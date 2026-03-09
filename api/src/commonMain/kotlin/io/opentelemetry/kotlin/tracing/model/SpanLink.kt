@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing.model
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 
 /**
@@ -12,4 +12,4 @@ import io.opentelemetry.kotlin.tracing.data.SpanLinkData
  */
 @ExperimentalApi
 @ThreadSafe
-public interface SpanLink : SpanLinkData, MutableAttributeContainer
+public interface SpanLink : SpanLinkData, AttributesMutator

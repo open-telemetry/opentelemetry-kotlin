@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -39,7 +39,7 @@ class FakeReadWriteSpan(
 
     override fun addLink(
         spanContext: SpanContext,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ) {
         throw UnsupportedOperationException()
     }
@@ -47,7 +47,7 @@ class FakeReadWriteSpan(
     override fun addEvent(
         name: String,
         timestamp: Long?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
+        attributes: (AttributesMutator.() -> Unit)?
     ) {
         throw UnsupportedOperationException()
     }

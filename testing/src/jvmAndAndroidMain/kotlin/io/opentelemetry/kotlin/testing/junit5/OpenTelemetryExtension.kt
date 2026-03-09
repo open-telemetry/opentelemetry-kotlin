@@ -28,7 +28,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
  *
  *   @Test
  *   fun test(extension: OpenTelemetryExtension) {
- *     tracer.createSpan("hello").end()
+ *     tracer.startSpan("hello").end()
  *     assertTrue(
  *          extension.spans.any  { it.name == "hello" }
  *     )

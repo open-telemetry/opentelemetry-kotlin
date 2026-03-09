@@ -18,17 +18,7 @@ import kotlinx.coroutines.SupervisorJob
 @ConfigDsl
 public fun LogExportConfigDsl.compositeLogRecordProcessor(vararg processors: LogRecordProcessor): LogRecordProcessor {
     require(processors.isNotEmpty()) { "At least one processor must be provided" }
-    @Suppress("DEPRECATION")
-    return createCompositeLogRecordProcessor(processors.toList())
-}
-
-@ExperimentalApi
-@Deprecated("Deprecated.", ReplaceWith("compositeLogRecordProcessor(processors)"))
-public fun createCompositeLogRecordProcessor(processors: List<LogRecordProcessor>): LogRecordProcessor {
-    return CompositeLogRecordProcessor(
-        processors,
-        NoopSdkErrorHandler
-    )
+    return CompositeLogRecordProcessor(processors.toList(), NoopSdkErrorHandler)
 }
 
 /**
@@ -37,13 +27,6 @@ public fun createCompositeLogRecordProcessor(processors: List<LogRecordProcessor
 @ExperimentalApi
 @ConfigDsl
 public fun LogExportConfigDsl.simpleLogRecordProcessor(exporter: LogRecordExporter): LogRecordProcessor {
-    @Suppress("DEPRECATION")
-    return createSimpleLogRecordProcessor(exporter)
-}
-
-@ExperimentalApi
-@Deprecated("Deprecated.", ReplaceWith("simpleLogRecordProcessor(exporter)"))
-public fun createSimpleLogRecordProcessor(exporter: LogRecordExporter): LogRecordProcessor {
     val dispatcher: CoroutineDispatcher = Dispatchers.Default
     val scope = CoroutineScope(SupervisorJob() + dispatcher)
     return SimpleLogRecordProcessor(exporter, scope)
@@ -56,17 +39,7 @@ public fun createSimpleLogRecordProcessor(exporter: LogRecordExporter): LogRecor
 @ConfigDsl
 public fun LogExportConfigDsl.compositeLogRecordExporter(vararg exporters: LogRecordExporter): LogRecordExporter {
     require(exporters.isNotEmpty()) { "At least one exporter must be provided" }
-    @Suppress("DEPRECATION")
-    return createCompositeLogRecordExporter(exporters.toList())
-}
-
-@ExperimentalApi
-@Deprecated("Deprecated.", ReplaceWith("compositeLogRecordExporter(exporters)"))
-public fun createCompositeLogRecordExporter(exporters: List<LogRecordExporter>): LogRecordExporter {
-    return CompositeLogRecordExporter(
-        exporters,
-        NoopSdkErrorHandler
-    )
+    return CompositeLogRecordExporter(exporters.toList(), NoopSdkErrorHandler)
 }
 
 /**
@@ -82,32 +55,14 @@ public fun LogExportConfigDsl.batchLogRecordProcessor(
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
-): LogRecordProcessor {
-    @Suppress("DEPRECATION")
-    return createBatchLogRecordProcessor(exporter, maxQueueSize, scheduleDelayMs, exportTimeoutMs, maxExportBatchSize, dispatcher)
-}
-
-@ExperimentalApi
-@Deprecated(
-    "Deprecated.",
-    ReplaceWith("batchLogRecordProcessor(exporter, maxQueueSize, scheduleDelayMs, exportTimeoutMs, maxExportBatchSize, dispatcher)")
+): LogRecordProcessor = BatchLogRecordProcessorImpl(
+    exporter,
+    maxQueueSize,
+    scheduleDelayMs,
+    exportTimeoutMs,
+    maxExportBatchSize,
+    dispatcher,
 )
-public fun createBatchLogRecordProcessor(
-    exporter: LogRecordExporter,
-    maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
-    scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
-    exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
-    maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
-): LogRecordProcessor =
-    BatchLogRecordProcessorImpl(
-        exporter,
-        maxQueueSize,
-        scheduleDelayMs,
-        exportTimeoutMs,
-        maxExportBatchSize,
-        dispatcher,
-    )
 
 /**
  * Creates a log record exporter that outputs log records to stdout. The destination is configurable
@@ -119,14 +74,5 @@ public fun createBatchLogRecordProcessor(
 @ExperimentalApi
 @ConfigDsl
 public fun LogExportConfigDsl.stdoutLogRecordExporter(
-    logger: (String) -> Unit = ::println
-): LogRecordExporter {
-    @Suppress("DEPRECATION")
-    return createStdoutLogRecordExporter(logger)
-}
-
-@Deprecated("Deprecated.", ReplaceWith("stdoutLogRecordExporter(logger)"))
-@ExperimentalApi
-public fun createStdoutLogRecordExporter(
     logger: (String) -> Unit = ::println
 ): LogRecordExporter = StdoutLogRecordExporter(logger)

@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing.model
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 
 /**
  * Allows events to be added to a span.
@@ -19,6 +19,6 @@ public interface SpanEventMutator {
     public fun addEvent(
         name: String,
         timestamp: Long? = null,
-        attributes: (MutableAttributeContainer.() -> Unit)? = null,
+        attributes: (AttributesMutator.() -> Unit)? = null,
     )
 }

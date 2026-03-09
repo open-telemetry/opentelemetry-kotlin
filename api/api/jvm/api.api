@@ -18,7 +18,7 @@ public abstract interface class io/opentelemetry/kotlin/attributes/AttributeCont
 	public abstract fun getAttributes ()Ljava/util/Map;
 }
 
-public abstract interface class io/opentelemetry/kotlin/attributes/MutableAttributeContainer {
+public abstract interface class io/opentelemetry/kotlin/attributes/AttributesMutator {
 	public abstract fun setBooleanAttribute (Ljava/lang/String;Z)V
 	public abstract fun setBooleanListAttribute (Ljava/lang/String;Ljava/util/List;)V
 	public abstract fun setDoubleAttribute (Ljava/lang/String;D)V
@@ -73,15 +73,11 @@ public abstract interface class io/opentelemetry/kotlin/factory/TraceStateFactor
 public abstract interface class io/opentelemetry/kotlin/logging/Logger {
 	public abstract fun emit (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun enabled (Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;)Z
-	public abstract fun log (Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
-	public abstract fun logEvent (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class io/opentelemetry/kotlin/logging/Logger$DefaultImpls {
 	public static synthetic fun emit$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun enabled$default (Lio/opentelemetry/kotlin/logging/Logger;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;ILjava/lang/Object;)Z
-	public static synthetic fun log$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
-	public static synthetic fun logEvent$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/LoggerProvider {
@@ -134,12 +130,10 @@ public final class io/opentelemetry/kotlin/tracing/StatusCode : java/lang/Enum {
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/Tracer {
-	public abstract fun createSpan (Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/model/SpanKind;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/model/Span;
 	public abstract fun startSpan (Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/model/SpanKind;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/model/Span;
 }
 
 public final class io/opentelemetry/kotlin/tracing/Tracer$DefaultImpls {
-	public static synthetic fun createSpan$default (Lio/opentelemetry/kotlin/tracing/Tracer;Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/model/SpanKind;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/model/Span;
 	public static synthetic fun startSpan$default (Lio/opentelemetry/kotlin/tracing/Tracer;Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/model/SpanKind;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/model/Span;
 }
 
@@ -192,7 +186,7 @@ public final class io/opentelemetry/kotlin/tracing/data/StatusData$Unset : io/op
 	public static final field INSTANCE Lio/opentelemetry/kotlin/tracing/data/StatusData$Unset;
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/Span : io/opentelemetry/kotlin/attributes/MutableAttributeContainer, io/opentelemetry/kotlin/tracing/data/SpanSchema, io/opentelemetry/kotlin/tracing/model/SpanEventMutator, io/opentelemetry/kotlin/tracing/model/SpanLinkMutator {
+public abstract interface class io/opentelemetry/kotlin/tracing/model/Span : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanSchema, io/opentelemetry/kotlin/tracing/model/SpanEventMutator, io/opentelemetry/kotlin/tracing/model/SpanLinkMutator {
 	public abstract fun end ()V
 	public abstract fun end (J)V
 	public abstract fun getName ()Ljava/lang/String;
@@ -213,10 +207,10 @@ public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanContex
 	public abstract fun isValid ()Z
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanCreationAction : io/opentelemetry/kotlin/attributes/MutableAttributeContainer, io/opentelemetry/kotlin/tracing/model/SpanEventMutator, io/opentelemetry/kotlin/tracing/model/SpanLinkMutator {
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanCreationAction : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/model/SpanEventMutator, io/opentelemetry/kotlin/tracing/model/SpanLinkMutator {
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEvent : io/opentelemetry/kotlin/attributes/MutableAttributeContainer, io/opentelemetry/kotlin/tracing/data/SpanEventData {
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEvent : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanEventData {
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEventMutator {
@@ -238,7 +232,7 @@ public final class io/opentelemetry/kotlin/tracing/model/SpanKind : java/lang/En
 	public static fun values ()[Lio/opentelemetry/kotlin/tracing/model/SpanKind;
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLink : io/opentelemetry/kotlin/attributes/MutableAttributeContainer, io/opentelemetry/kotlin/tracing/data/SpanLinkData {
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLink : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanLinkData {
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLinkMutator {

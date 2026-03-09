@@ -1,8 +1,8 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
 import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceImpl
@@ -14,7 +14,7 @@ internal class ResourceConfigImpl : ResourceConfigDsl {
 
     override fun resource(
         schemaUrl: String?,
-        attributes: MutableAttributeContainer.() -> Unit
+        attributes: AttributesMutator.() -> Unit
     ) {
         this.schemaUrl = schemaUrl
         resourceAttrs.attributes()

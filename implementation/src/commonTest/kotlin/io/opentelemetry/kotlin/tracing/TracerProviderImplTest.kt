@@ -17,6 +17,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
@@ -176,5 +177,22 @@ internal class TracerProviderImplTest {
         val result = provider.shutdown()
         assertEquals(OperationResultCode.Success, result)
         assertEquals(true, shutdownCalled)
+    }
+
+    @Test
+    fun testGetTracerAfterShutdownReturnsNoopTracer() = runTest {
+        impl.shutdown()
+        val tracer = impl.getTracer(name = "test")
+        val span = tracer.startSpan("test-span")
+        assertFalse(span.isRecording())
+    }
+
+    @Test
+    fun testExistingTracerReturnsNoopSpanAfterShutdown() = runTest {
+        val tracer = impl.getTracer(name = "test")
+        impl.shutdown()
+        val span = tracer.startSpan("test-span")
+        assertFalse(span.isRecording())
+        assertFalse(span.spanContext.isValid)
     }
 }

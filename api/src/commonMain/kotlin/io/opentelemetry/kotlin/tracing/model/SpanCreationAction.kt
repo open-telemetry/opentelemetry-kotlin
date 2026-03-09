@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.tracing.model
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.tracing.TracingDsl
 
 /**
@@ -9,4 +9,4 @@ import io.opentelemetry.kotlin.tracing.TracingDsl
  */
 @ExperimentalApi
 @TracingDsl
-public interface SpanCreationAction : MutableAttributeContainer, SpanLinkMutator, SpanEventMutator
+public interface SpanCreationAction : AttributesMutator, SpanLinkMutator, SpanEventMutator

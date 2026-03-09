@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
-import io.opentelemetry.kotlin.attributes.MutableAttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.logging.model.SeverityNumber
 
@@ -32,41 +32,6 @@ public interface Logger {
         eventName: String? = null,
     ): Boolean
 
-    @Deprecated(
-        "Deprecated",
-        ReplaceWith(
-            expression = "emit(body, eventName, timestamp, observedTimestamp, context, severityNumber, severityText, attributes)",
-            imports = ["io.opentelemetry.kotlin.logging.model.SeverityNumber"]
-        )
-    )
-    public fun log(
-        body: String? = null,
-        timestamp: Long? = null,
-        observedTimestamp: Long? = null,
-        context: Context? = null,
-        severityNumber: SeverityNumber? = null,
-        severityText: String? = null,
-        attributes: (MutableAttributeContainer.() -> Unit)? = null,
-    )
-
-    @Deprecated(
-        "Deprecated",
-        ReplaceWith(
-            expression = "emit(body, eventName, timestamp, observedTimestamp, context, severityNumber, severityText, attributes)",
-            imports = ["io.opentelemetry.kotlin.logging.model.SeverityNumber"]
-        )
-    )
-    public fun logEvent(
-        eventName: String,
-        body: String? = null,
-        timestamp: Long? = null,
-        observedTimestamp: Long? = null,
-        context: Context? = null,
-        severityNumber: SeverityNumber? = null,
-        severityText: String? = null,
-        attributes: (MutableAttributeContainer.() -> Unit)? = null,
-    )
-
     /**
      * Emits an event with a name and the given optional parameters:
      *
@@ -87,6 +52,6 @@ public interface Logger {
         context: Context? = null,
         severityNumber: SeverityNumber? = null,
         severityText: String? = null,
-        attributes: (MutableAttributeContainer.() -> Unit)? = null,
+        attributes: (AttributesMutator.() -> Unit)? = null,
     )
 }
