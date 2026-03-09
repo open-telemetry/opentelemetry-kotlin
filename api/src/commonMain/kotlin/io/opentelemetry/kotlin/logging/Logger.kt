@@ -32,41 +32,6 @@ public interface Logger {
         eventName: String? = null,
     ): Boolean
 
-    @Deprecated(
-        "Deprecated",
-        ReplaceWith(
-            expression = "emit(body, eventName, timestamp, observedTimestamp, context, severityNumber, severityText, attributes)",
-            imports = ["io.opentelemetry.kotlin.logging.model.SeverityNumber"]
-        )
-    )
-    public fun log(
-        body: String? = null,
-        timestamp: Long? = null,
-        observedTimestamp: Long? = null,
-        context: Context? = null,
-        severityNumber: SeverityNumber? = null,
-        severityText: String? = null,
-        attributes: (MutableAttributeContainer.() -> Unit)? = null,
-    )
-
-    @Deprecated(
-        "Deprecated",
-        ReplaceWith(
-            expression = "emit(body, eventName, timestamp, observedTimestamp, context, severityNumber, severityText, attributes)",
-            imports = ["io.opentelemetry.kotlin.logging.model.SeverityNumber"]
-        )
-    )
-    public fun logEvent(
-        eventName: String,
-        body: String? = null,
-        timestamp: Long? = null,
-        observedTimestamp: Long? = null,
-        context: Context? = null,
-        severityNumber: SeverityNumber? = null,
-        severityText: String? = null,
-        attributes: (MutableAttributeContainer.() -> Unit)? = null,
-    )
-
     /**
      * Emits an event with a name and the given optional parameters:
      *

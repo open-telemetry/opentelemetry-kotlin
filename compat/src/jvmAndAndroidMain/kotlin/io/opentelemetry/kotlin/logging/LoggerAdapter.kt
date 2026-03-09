@@ -25,63 +25,6 @@ internal class LoggerAdapter(
         return true
     }
 
-    @Deprecated(
-        "Deprecated",
-        replaceWith = ReplaceWith(
-            "emit(body, eventName, timestamp, observedTimestamp, context, severityNumber, severityText, attributes)",
-            "io.opentelemetry.kotlin.logging.model.SeverityNumber"
-        )
-    )
-    override fun log(
-        body: String?,
-        timestamp: Long?,
-        observedTimestamp: Long?,
-        context: Context?,
-        severityNumber: SeverityNumber?,
-        severityText: String?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
-    ) {
-        processTelemetry(
-            eventName = null,
-            body = body,
-            timestamp = timestamp,
-            observedTimestamp = observedTimestamp,
-            context = context,
-            severityNumber = severityNumber,
-            severityText = severityText,
-            attributes = attributes
-        )
-    }
-
-    @Deprecated(
-        "Deprecated",
-        replaceWith = ReplaceWith(
-            "emit(body, eventName, timestamp, observedTimestamp, context, severityNumber, severityText, attributes)",
-            "io.opentelemetry.kotlin.logging.model.SeverityNumber"
-        )
-    )
-    override fun logEvent(
-        eventName: String,
-        body: String?,
-        timestamp: Long?,
-        observedTimestamp: Long?,
-        context: Context?,
-        severityNumber: SeverityNumber?,
-        severityText: String?,
-        attributes: (MutableAttributeContainer.() -> Unit)?
-    ) {
-        processTelemetry(
-            eventName = eventName,
-            body = body,
-            timestamp = timestamp,
-            observedTimestamp = observedTimestamp,
-            context = context,
-            severityNumber = severityNumber,
-            severityText = severityText,
-            attributes = attributes
-        )
-    }
-
     override fun emit(
         body: String?,
         eventName: String?,

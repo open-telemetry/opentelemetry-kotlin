@@ -11,11 +11,4 @@ import io.opentelemetry.kotlin.init.TraceExportConfigDsl
  */
 @ExperimentalApi
 @ConfigDsl
-public fun TraceExportConfigDsl.inMemorySpanExporter(): InMemorySpanExporter {
-    @Suppress("DEPRECATION")
-    return createInMemorySpanExporter()
-}
-
-@ExperimentalApi
-@Deprecated("Deprecated.", ReplaceWith("inMemorySpanExporter()"))
-public fun createInMemorySpanExporter(): InMemorySpanExporter = InMemorySpanExporterImpl()
+public fun TraceExportConfigDsl.inMemorySpanExporter(): InMemorySpanExporter = InMemorySpanExporterImpl()

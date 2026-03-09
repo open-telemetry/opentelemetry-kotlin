@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -11,6 +10,7 @@ import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryRepositoryImpl
 import io.opentelemetry.kotlin.export.TimeoutTelemetryCloseable
+import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
@@ -32,7 +32,7 @@ internal class PersistingSpanProcessor(
     processor: SpanProcessor,
     exporter: SpanExporter,
     fileSystem: TelemetryFileSystem,
-    clock: Clock,
+    dsl: TraceExportConfigDsl,
     config: PersistedTelemetryConfig,
     serializer: (List<SpanData>) -> ByteArray,
     deserializer: (ByteArray) -> List<SpanData>,
@@ -50,13 +50,12 @@ internal class PersistingSpanProcessor(
         fileSystem = fileSystem,
         serializer = serializer,
         deserializer = deserializer,
-        clock = clock,
+        clock = dsl.clock,
     )
 
     private val persistingExporter = PersistingSpanExporter(exporter, repository)
 
-    @Suppress("DEPRECATION")
-    private val batchingProcessor = createBatchSpanProcessor(
+    private val batchingProcessor = dsl.batchSpanProcessor(
         persistingExporter,
         maxQueueSize,
         scheduleDelayMs,
@@ -65,8 +64,7 @@ internal class PersistingSpanProcessor(
         dispatcher,
     )
 
-    @Suppress("DEPRECATION")
-    private val composite = createCompositeSpanProcessor(listOf(processor, batchingProcessor))
+    private val composite = dsl.compositeSpanProcessor(processor, batchingProcessor)
     private val telemetryCloseable: TelemetryCloseable = TimeoutTelemetryCloseable(composite)
 
     override fun onStart(span: ReadWriteSpan, parentContext: Context) {

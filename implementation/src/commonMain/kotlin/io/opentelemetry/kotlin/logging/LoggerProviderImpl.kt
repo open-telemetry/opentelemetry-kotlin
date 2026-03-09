@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.config.LoggingConfig
-import io.opentelemetry.kotlin.logging.export.createCompositeLogRecordProcessor
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
 
 internal class LoggerProviderImpl(
@@ -22,13 +21,7 @@ internal class LoggerProviderImpl(
 
     private val apiProvider by lazy {
         ApiProviderImpl<Logger> { key ->
-            @Suppress("DEPRECATION")
-            val processor = when {
-                loggingConfig.processors.isEmpty() -> null
-                else -> createCompositeLogRecordProcessor(
-                    loggingConfig.processors
-                )
-            }
+            val processor = loggingConfig.processors.firstOrNull()
             processor?.let(closeable::add)
             LoggerImpl(
                 clock,

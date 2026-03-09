@@ -12,7 +12,6 @@ import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
-import io.opentelemetry.kotlin.tracing.export.createCompositeSpanProcessor
 
 internal class TracerProviderImpl(
     private val clock: Clock,
@@ -27,13 +26,7 @@ internal class TracerProviderImpl(
 ) : TracerProvider, TelemetryCloseable by closeable {
 
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
-        @Suppress("DEPRECATION")
-        val processor = when {
-            tracingConfig.processors.isEmpty() -> null
-            else -> createCompositeSpanProcessor(
-                tracingConfig.processors
-            )
-        }
+        val processor = tracingConfig.processors.firstOrNull()
         processor?.let(closeable::add)
         TracerImpl(
             clock = clock,
