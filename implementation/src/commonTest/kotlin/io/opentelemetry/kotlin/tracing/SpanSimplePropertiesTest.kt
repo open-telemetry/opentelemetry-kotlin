@@ -12,6 +12,7 @@ import io.opentelemetry.kotlin.factory.FakeTraceStateFactory
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import io.opentelemetry.kotlin.tracing.model.SpanKind
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -46,15 +47,15 @@ internal class SpanSimplePropertiesTest {
     fun testSpanName() {
         val name = "test"
         val span = tracer.startSpan(name)
-        assertEquals(name, span.name)
+        assertEquals(name, (span as ReadableSpan).name)
     }
 
     @Test
     fun testSpanNameOverride() {
         val span = tracer.startSpan("test")
         val override = "another"
-        span.name = override
-        assertEquals(override, span.name)
+        span.setName(override)
+        assertEquals(override, (span as ReadableSpan).name)
     }
 
     @Test
@@ -62,35 +63,35 @@ internal class SpanSimplePropertiesTest {
         val name = "test"
         val span = tracer.startSpan(name)
         span.end()
-        span.name = "another"
-        assertEquals(name, span.name)
+        span.setName("another")
+        assertEquals(name, (span as ReadableSpan).name)
     }
 
     @Test
     fun testSpanStatus() {
         val span = tracer.startSpan("test")
-        assertEquals(StatusData.Unset, span.status)
+        assertEquals(StatusData.Unset, (span as ReadableSpan).status)
     }
 
     @Test
     fun testSpanStatusOverride() {
         val span = tracer.startSpan("test")
-        span.status = StatusData.Ok
-        assertEquals(StatusData.Ok, span.status)
+        span.setStatus(StatusData.Ok)
+        assertEquals(StatusData.Ok, (span as ReadableSpan).status)
     }
 
     @Test
     fun testSpanStatusAfterEnd() {
         val span = tracer.startSpan("test")
         span.end()
-        span.status = StatusData.Ok
-        assertEquals(StatusData.Unset, span.status)
+        span.setStatus(StatusData.Ok)
+        assertEquals(StatusData.Unset, (span as ReadableSpan).status)
     }
 
     @Test
     fun testSpanKind() {
         val span = tracer.startSpan("test")
-        assertEquals(SpanKind.INTERNAL, span.spanKind)
+        assertEquals(SpanKind.INTERNAL, (span as ReadableSpan).spanKind)
     }
 
     @Test
@@ -99,20 +100,20 @@ internal class SpanSimplePropertiesTest {
             "test",
             spanKind = SpanKind.CLIENT,
         )
-        assertEquals(SpanKind.CLIENT, span.spanKind)
+        assertEquals(SpanKind.CLIENT, (span as ReadableSpan).spanKind)
     }
 
     @Test
     fun testSpanStartTimestamp() {
         clock.time = 5
         val span = tracer.startSpan("test")
-        assertEquals(clock.time, span.startTimestamp)
+        assertEquals(clock.time, (span as ReadableSpan).startTimestamp)
     }
 
     @Test
     fun testSpanStartTimestampExplicit() {
         val now = 9L
         val span = tracer.startSpan("test", startTimestamp = now)
-        assertEquals(now, span.startTimestamp)
+        assertEquals(now, (span as ReadableSpan).startTimestamp)
     }
 }

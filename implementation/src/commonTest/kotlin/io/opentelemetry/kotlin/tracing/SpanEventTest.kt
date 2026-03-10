@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -145,7 +146,7 @@ internal class SpanEventTest {
                 }
             }
         })
-        val event = span.events.single()
+        val event = (span as ReadableSpan).events.single()
         assertEquals(fakeSpanLimitsConfig.attributeCountLimit, event.attributes.size)
     }
 
@@ -158,7 +159,7 @@ internal class SpanEventTest {
                 }
             })
         }
-        val event = span.events.single()
+        val event = (span as ReadableSpan).events.single()
         assertEquals(fakeSpanLimitsConfig.attributeCountLimit, event.attributes.size)
     }
 

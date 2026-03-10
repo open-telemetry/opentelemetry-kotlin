@@ -58,7 +58,7 @@ internal class OtelJavaSpanAdapter(private val span: Span) : OtelJavaSpan, OtelJ
     }
 
     override fun setStatus(statusCode: OtelJavaStatusCode, description: String): OtelJavaSpan {
-        span.status = statusCode.toOtelKotlinStatusData(description)
+        span.setStatus(statusCode.toOtelKotlinStatusData(description))
         return this
     }
 
@@ -75,7 +75,7 @@ internal class OtelJavaSpanAdapter(private val span: Span) : OtelJavaSpan, OtelJ
     }
 
     override fun updateName(name: String): OtelJavaSpan {
-        span.name = name
+        span.setName(name)
         return this
     }
 

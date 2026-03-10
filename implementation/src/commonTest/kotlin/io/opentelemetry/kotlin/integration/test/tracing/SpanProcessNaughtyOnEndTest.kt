@@ -75,8 +75,8 @@ internal class SpanProcessNaughtyOnEndTest {
             assertEquals(1, links.size)
 
             // assert subset of properties cannot be written
-            name = "override"
-            status = StatusData.Error("override")
+            setName("override")
+            setStatus(StatusData.Error("override"))
             setStringAttribute("foo", "bar")
             addEvent("test", 5) {
                 setStringAttribute("foo", "bar")

@@ -8,29 +8,35 @@ import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.Span
 import io.opentelemetry.kotlin.tracing.model.SpanContext
-import io.opentelemetry.kotlin.tracing.model.SpanKind
 
-@Suppress("UNUSED_PARAMETER")
 class FakeSpan(
-    override var name: String = "",
+    name: String = "",
     override val spanContext: SpanContext = FakeSpanContext.INVALID,
+    override val parent: SpanContext = FakeSpanContext.INVALID,
 ) : Span {
 
-    override val events: MutableList<SpanEventData> = mutableListOf()
-    override val links: MutableList<SpanLinkData> = mutableListOf()
+    private var nameImpl: String = name
+    val name: String get() = nameImpl
+
+    private var statusImpl: StatusData = StatusData.Unset
+    val status: StatusData get() = statusImpl
+
+    val events: MutableList<SpanEventData> = mutableListOf()
+    val links: MutableList<SpanLinkData> = mutableListOf()
 
     private var recording: Boolean = true
+
+    override fun setName(name: String) {
+        nameImpl = name
+    }
+
+    override fun setStatus(status: StatusData) {
+        statusImpl = status
+    }
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
         TODO("Not yet implemented")
     }
-
-    override var status: StatusData = StatusData.Unset
-    override val parent: SpanContext = FakeSpanContext.INVALID
-    override val spanKind: SpanKind
-        get() = TODO("Not yet implemented")
-    override val startTimestamp: Long
-        get() = TODO("Not yet implemented")
 
     override fun end() {
         recording = false
@@ -93,7 +99,4 @@ class FakeSpan(
     override fun setDoubleListAttribute(key: String, value: List<Double>) {
         TODO("Not yet implemented")
     }
-
-    override val attributes: Map<String, Any>
-        get() = TODO("Not yet implemented")
 }

@@ -83,8 +83,8 @@ internal class ReadWriteSpanAdapterTest {
             startAction = assertReadWriteSpan(
                 updateCode = { span ->
                     span.apply {
-                        name = "new-name"
-                        status = newStatus
+                        setName("new-name")
+                        setStatus(newStatus)
                         setStringAttribute("key", "value")
                     }
                 },

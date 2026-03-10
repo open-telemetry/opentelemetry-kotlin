@@ -16,6 +16,7 @@ import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.hex
 import kotlin.test.BeforeTest
@@ -66,7 +67,7 @@ internal class TracerSpanContextTest {
     @Test
     fun testNoExplicitParentContext() {
         val span = tracer.startSpan("test")
-        assertFalse(span.parent.isValid)
+        assertFalse((span as ReadableSpan).parent.isValid)
         val spanContext = span.spanContext
         assertValidSpanContext(spanContext)
     }
@@ -81,7 +82,7 @@ internal class TracerSpanContextTest {
             parentContext = parentCtx,
         )
 
-        assertFalse(span.parent.isValid)
+        assertFalse((span as ReadableSpan).parent.isValid)
         val spanContext = span.spanContext
         assertValidSpanContext(spanContext)
     }
@@ -95,7 +96,7 @@ internal class TracerSpanContextTest {
             parentContext = parentCtx,
         )
 
-        assertTrue(span.parent.isValid)
+        assertTrue((span as ReadableSpan).parent.isValid)
         val spanContext = span.spanContext
         assertValidSpanContext(spanContext)
         assertEquals(parentSpan.spanContext.traceId, spanContext.traceId)
@@ -116,8 +117,8 @@ internal class TracerSpanContextTest {
         val second = tracer.startSpan("second")
         second.end()
 
-        assertSame(span.spanContext, first.parent)
-        assertSame(spanContextFactory.invalid, second.parent)
+        assertSame(span.spanContext, (first as ReadableSpan).parent)
+        assertSame(spanContextFactory.invalid, (second as ReadableSpan).parent)
     }
 
     private fun assertValidSpanContext(spanContext: SpanContext) {
