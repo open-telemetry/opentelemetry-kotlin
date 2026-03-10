@@ -52,8 +52,8 @@ internal class OtelJavaSpanBuilderAdapter(
         return this
     }
 
-    override fun setAttribute(key: String, value: String): OtelJavaSpanBuilder {
-        attrs.put(key, value)
+    override fun setAttribute(key: String, value: String?): OtelJavaSpanBuilder {
+        if (value != null) { attrs.put(key, value) }
         return this
     }
 
@@ -74,9 +74,9 @@ internal class OtelJavaSpanBuilderAdapter(
 
     override fun <T : Any> setAttribute(
         key: OtelJavaAttributeKey<T>,
-        value: T
+        value: T?
     ): OtelJavaSpanBuilder {
-        attrs.put(key, value)
+        if (value != null) { attrs.put(key, value) }
         return this
     }
 
