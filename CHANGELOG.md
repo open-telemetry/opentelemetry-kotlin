@@ -10,7 +10,7 @@
   ([#223](https://github.com/open-telemetry/opentelemetry-kotlin/pull/223))
   ([#224](https://github.com/open-telemetry/opentelemetry-kotlin/pull/224))
   ([#240](https://github.com/open-telemetry/opentelemetry-kotlin/pull/240))
-- Various breaking API changes to better align with the OpenTelemetry specification
+- Various API changes to better align with the OpenTelemetry specification
   ([#225](https://github.com/open-telemetry/opentelemetry-kotlin/pull/225))
   ([#222](https://github.com/open-telemetry/opentelemetry-kotlin/pull/222))
   ([#228](https://github.com/open-telemetry/opentelemetry-kotlin/pull/228))
