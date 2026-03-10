@@ -13,8 +13,8 @@ import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceFlags
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import io.opentelemetry.kotlin.tracing.model.SpanContext
+import io.opentelemetry.kotlin.tracing.model.SpanCreationAction
 import io.opentelemetry.kotlin.tracing.model.SpanKind
-import io.opentelemetry.kotlin.tracing.model.SpanRelationships
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -463,7 +463,7 @@ internal class SpanExportTest {
         )
     }
 
-    private fun SpanRelationships.addMultipleAttrs() {
+    private fun SpanCreationAction.addMultipleAttrs() {
         setStringAttribute("key1", "value")
         setStringAttribute("key2", "value")
     }

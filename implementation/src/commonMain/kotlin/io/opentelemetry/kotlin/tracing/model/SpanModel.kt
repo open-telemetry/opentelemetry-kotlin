@@ -31,7 +31,7 @@ internal class SpanModel(
     override val parent: SpanContext,
     override val spanContext: SpanContext,
     private val spanLimitConfig: SpanLimitConfig
-) : ReadWriteSpan {
+) : ReadWriteSpan, SpanCreationAction {
 
     private enum class State {
         STARTED,

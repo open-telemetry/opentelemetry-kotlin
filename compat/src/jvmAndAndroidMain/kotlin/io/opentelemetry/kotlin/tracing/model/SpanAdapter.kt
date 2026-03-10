@@ -28,7 +28,7 @@ internal class SpanAdapter(
     override val spanKind: SpanKind,
     override val startTimestamp: Long,
     private val spanLimitsConfig: CompatSpanLimitsConfig,
-) : Span, OtelJavaImplicitContextKeyed {
+) : Span, SpanCreationAction, OtelJavaImplicitContextKeyed {
 
     private val attrs: MutableMap<String, Any> = ConcurrentHashMap()
     private val eventsImpl: ConcurrentLinkedQueue<SpanEventData> = ConcurrentLinkedQueue()

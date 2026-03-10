@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing.model
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.tracing.StatusCode
 import io.opentelemetry.kotlin.tracing.TracingDsl
 import io.opentelemetry.kotlin.tracing.data.SpanSchema
@@ -15,7 +16,7 @@ import io.opentelemetry.kotlin.tracing.data.StatusData
 @TracingDsl
 @ExperimentalApi
 @ThreadSafe
-public interface Span : SpanSchema, SpanRelationships {
+public interface Span : SpanSchema, AttributesMutator, SpanLinkCreator, SpanEventCreator {
 
     /**
      * Sets the name of the span. Must be non-empty.
