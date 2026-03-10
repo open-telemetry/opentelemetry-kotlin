@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+- Set explicit minCompileSdk at 34
+  ([#214](https://github.com/open-telemetry/opentelemetry-kotlin/pull/214))
+- Set minimum supported AGP version of 7.1.3 explicitly
+  ([#219](https://github.com/open-telemetry/opentelemetry-kotlin/pull/219))
+- Move various interfaces to `sdk-api` module to denote they should not be used when writing instrumentation
+  ([#223](https://github.com/open-telemetry/opentelemetry-kotlin/pull/223))
+  ([#224](https://github.com/open-telemetry/opentelemetry-kotlin/pull/224))
+  ([#240](https://github.com/open-telemetry/opentelemetry-kotlin/pull/240))
+- Various breaking API changes to better align with the OpenTelemetry specification
+  ([#225](https://github.com/open-telemetry/opentelemetry-kotlin/pull/225))
+  ([#222](https://github.com/open-telemetry/opentelemetry-kotlin/pull/222))
+  ([#228](https://github.com/open-telemetry/opentelemetry-kotlin/pull/228))
+  ([#233](https://github.com/open-telemetry/opentelemetry-kotlin/pull/233))
+  ([#235](https://github.com/open-telemetry/opentelemetry-kotlin/pull/235))
+  ([#242](https://github.com/open-telemetry/opentelemetry-kotlin/pull/242))
+  ([#239](https://github.com/open-telemetry/opentelemetry-kotlin/pull/239))
+  ([#241](https://github.com/open-telemetry/opentelemetry-kotlin/pull/241))
+  ([#238](https://github.com/open-telemetry/opentelemetry-kotlin/pull/238))
+  ([#248](https://github.com/open-telemetry/opentelemetry-kotlin/pull/248))
+  ([#245](https://github.com/open-telemetry/opentelemetry-kotlin/pull/245))
+  ([#247](https://github.com/open-telemetry/opentelemetry-kotlin/pull/247))
+  ([#246](https://github.com/open-telemetry/opentelemetry-kotlin/pull/246))
+- Include semantic conventions by default as dependency of core module
+  ([#249](https://github.com/open-telemetry/opentelemetry-kotlin/pull/249))
+- Update opentelemetry-java to 1.60.1
+  ([#260](https://github.com/open-telemetry/opentelemetry-kotlin/pull/260))
+
 ## Version 0.1.0 (2026-02-20)
 
 - Initial donation of code to opentelemetry-kotlin. The project now uses io.opentelemetry
