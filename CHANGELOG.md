@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 0.2.0 (2026-03-11)
+
 - Set explicit minCompileSdk at 34
   ([#214](https://github.com/open-telemetry/opentelemetry-kotlin/pull/214))
 - Set minimum supported AGP version of 7.1.3 explicitly
