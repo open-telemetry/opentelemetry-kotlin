@@ -30,7 +30,7 @@ The following targets are supported:
 
 ```kotlin
 dependencies {
-    val otelKotlinVersion = "0.2.0-alpha"
+    val otelKotlinVersion = "0.2.0"
     implementation("io.opentelemetry.kotlin:core:$otelKotlinVersion")
     implementation("io.opentelemetry.kotlin:implementation:$otelKotlinVersion")
 }
@@ -55,7 +55,7 @@ This can be helpful if you already use the Java implementation or don't want to 
 
 ```kotlin
 dependencies {
-    val otelKotlinVersion = "0.2.0-alpha"
+    val otelKotlinVersion = "0.2.0"
     implementation("io.opentelemetry.kotlin:core:$otelKotlinVersion")
     implementation("io.opentelemetry.kotlin:compat:$otelKotlinVersion")
 }
@@ -82,7 +82,7 @@ the `api` and `noop` dependencies are required:
 
 ```kotlin
 dependencies {
-    val otelKotlinVersion = "0.2.0-alpha"
+    val otelKotlinVersion = "0.2.0"
     implementation("io.opentelemetry.kotlin:api:$otelKotlinVersion")
     implementation("io.opentelemetry.kotlin:noop:$otelKotlinVersion")
 }
