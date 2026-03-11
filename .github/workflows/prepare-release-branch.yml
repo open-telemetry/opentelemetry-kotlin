@@ -50,7 +50,7 @@ jobs:
         run: .github/scripts/update-version.sh $VERSION
 
       - name: Update version in README
-        run: sed -Ei "s/(val otelKotlinVersion = \").*\"/\1${VERSION}-alpha\"/" README.md
+        run: sed -Ei "s/(val otelKotlinVersion = \").*\"/\1${VERSION}\"/" README.md
       - name: Update the change log with the approximate release date
         run: |
           date=$(date "+%Y-%m-%d")
@@ -116,7 +116,7 @@ jobs:
         run: .github/scripts/update-version.sh $NEXT_VERSION
 
       - name: Update version in README
-        run: sed -Ei "s/(val otelKotlinVersion = \").*\"/\1${VERSION}-alpha\"/" README.md
+        run: sed -Ei "s/(val otelKotlinVersion = \").*\"/\1${VERSION}\"/" README.md
 
       - name: Update the change log on main
         run: |
