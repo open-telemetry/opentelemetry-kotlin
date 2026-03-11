@@ -13,7 +13,6 @@ import io.opentelemetry.kotlin.factory.FakeTraceStateFactory
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
-import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -65,33 +64,33 @@ internal class SpanAttributesTest {
     @Test
     fun testSpanDefaultAttributes() {
         val span = tracer.startSpan("test")
-        assertTrue((span as ReadableSpan).attributes.isEmpty())
+        assertTrue(span.toReadableSpan().attributes.isEmpty())
 
         // ensure returned values is immutable, and not the underlying implementation
-        assertTrue((span as ReadableSpan).attributes !is MutableMap<*, *>)
+        assertTrue((span.toReadableSpan()).attributes !is MutableMap<*, *>)
     }
 
     @Test
     fun testSpanAddAttributesDuringCreation() {
         val span = tracer.startSpan("test") { addTestAttributes() }
-        assertEquals(expected, (span as ReadableSpan).attributes)
+        assertEquals(expected, (span.toReadableSpan()).attributes)
     }
 
     @Test
     fun testSpanAddAttributesAfterCreation() {
         val span = tracer.startSpan("test")
         span.addTestAttributes()
-        assertEquals(expected, (span as ReadableSpan).attributes)
+        assertEquals(expected, (span.toReadableSpan()).attributes)
     }
 
     @Test
     fun testSpanAddAttributesAfterEnd() {
         val span = tracer.startSpan("test")
         span.addTestAttributes()
-        assertEquals(expected, (span as ReadableSpan).attributes)
+        assertEquals(expected, (span.toReadableSpan()).attributes)
         span.end()
         span.addTestAttributesAlternateValues()
-        assertEquals(expected, (span as ReadableSpan).attributes)
+        assertEquals(expected, (span.toReadableSpan()).attributes)
     }
 
     @Test
@@ -104,7 +103,7 @@ internal class SpanAttributesTest {
             end()
         }
 
-        assertEquals(expected, (span as ReadableSpan).attributes)
+        assertEquals(expected, (span.toReadableSpan()).attributes)
     }
 
     @Test
@@ -116,7 +115,7 @@ internal class SpanAttributesTest {
             end()
         }
 
-        assertEquals(expected, (span as ReadableSpan).attributes)
+        assertEquals(expected, (span.toReadableSpan()).attributes)
     }
 
     private fun AttributesMutator.addTestAttributes(keyToken: String = "") {

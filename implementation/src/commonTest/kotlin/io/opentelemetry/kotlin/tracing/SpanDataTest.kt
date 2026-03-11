@@ -72,7 +72,7 @@ internal class SpanDataTest {
     @Test
     fun testRetrieveSpanData() {
         val span = tracer.startSpan("test")
-        val readableSpan = span as ReadableSpan
+        val readableSpan = span.toReadableSpan()
         val data: SpanData = readableSpan.toSpanData()
         assertEquals("test", data.name)
     }
@@ -99,7 +99,7 @@ internal class SpanDataTest {
                 setStringAttribute("string", "value")
             }
             end()
-        } as ReadableSpan
+        }.toReadableSpan()
     }
 
     private fun assertSpanData(
