@@ -27,4 +27,6 @@ internal class FakeTelemetryRepository<T>(
     override fun delete(record: PersistedTelemetryRecord) {
         deleteCalls++
     }
+
+    override fun listAll(): List<PersistedTelemetryRecord> = emptyList()
 }
