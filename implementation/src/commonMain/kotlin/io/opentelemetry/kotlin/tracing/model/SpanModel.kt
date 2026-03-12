@@ -45,29 +45,30 @@ internal class SpanModel(
 
     private var state: State = State.STARTED
 
-    override var name: String = name
-        get() = lock.read {
-            field
-        }
-        set(value) {
-            lock.write {
-                if (isRecording()) {
-                    field = value
-                }
-            }
-        }
+    private var nameImpl: String = name
+    private var statusImpl: StatusData = StatusData.Unset
 
-    override var status: StatusData = StatusData.Unset
-        get() = lock.read {
-            field
-        }
-        set(value) {
-            lock.write {
-                if (isRecording()) {
-                    field = value
-                }
+    override val name: String
+        get() = lock.read { nameImpl }
+
+    override val status: StatusData
+        get() = lock.read { statusImpl }
+
+    override fun setName(name: String) {
+        lock.write {
+            if (isRecording()) {
+                nameImpl = name
             }
         }
+    }
+
+    override fun setStatus(status: StatusData) {
+        lock.write {
+            if (isRecording()) {
+                statusImpl = status
+            }
+        }
+    }
 
     override fun end() {
         endInternal(clock.now())

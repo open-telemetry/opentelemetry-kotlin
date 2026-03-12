@@ -13,22 +13,18 @@ internal class ReadWriteSpanAdapter(
     private val readableSpan: ReadableSpanAdapter = ReadableSpanAdapter(impl)
 ) : ReadWriteSpan, ReadableSpan by readableSpan {
 
-    override var name: String
-        get() = readableSpan.name
-        set(value) {
-            impl.updateName(value)
-        }
+    override fun setName(name: String) {
+        impl.updateName(name)
+    }
 
-    override var status: StatusData
-        get() = readableSpan.status
-        set(value) {
-            val status = value.toOtelJavaStatusData()
-            if (status.description.isEmpty()) {
-                impl.setStatus(status.statusCode)
-            } else {
-                impl.setStatus(status.statusCode, status.description)
-            }
+    override fun setStatus(status: StatusData) {
+        val javaStatus = status.toOtelJavaStatusData()
+        if (javaStatus.description.isEmpty()) {
+            impl.setStatus(javaStatus.statusCode)
+        } else {
+            impl.setStatus(javaStatus.statusCode, javaStatus.description)
         }
+    }
 
     override fun end() {
         impl.end()

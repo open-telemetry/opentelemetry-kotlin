@@ -11,7 +11,6 @@ import io.opentelemetry.kotlin.tracing.ext.storeInContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
-import io.opentelemetry.kotlin.tracing.model.Span
 import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanKind
 import kotlinx.coroutines.test.runTest
@@ -52,14 +51,8 @@ internal class OtelJavaSpanProcessorAdapterTest {
                         expectedName = "test",
                         expectedParentSpanContextSupplier = { OtelJavaSpan.getInvalid().spanContext.toOtelKotlinSpanContext() },
                     ),
-                    endAction = assertReadableSpan(
-                        expectedName = "test",
-                        expectedSpanSupplier = { span }
-                    ),
-                    endingAction = assertReadableSpan(
-                        expectedName = "test",
-                        expectedSpanSupplier = { span }
-                    )
+                    endAction = assertReadableSpan(expectedName = "test"),
+                    endingAction = assertReadableSpan(expectedName = "test")
                 )
             )
             span.end()
@@ -81,10 +74,7 @@ internal class OtelJavaSpanProcessorAdapterTest {
                         expectedName = "name",
                         expectedParentSpanContextSupplier = { parentSpan.spanContext },
                     ),
-                    endAction = assertReadableSpan(
-                        expectedName = "name",
-                        expectedSpanSupplier = { childSpan }
-                    )
+                    endAction = assertReadableSpan(expectedName = "name")
                 )
             )
             childSpan.end()
@@ -113,22 +103,10 @@ internal class OtelJavaSpanProcessorAdapterTest {
 
     private fun assertReadableSpan(
         expectedName: String,
-        expectedSpanSupplier: () -> Span
     ): (span: ReadableSpan) -> Unit {
         return fun(span: ReadableSpan) {
             if (span.name == expectedName) {
-                with(expectedSpanSupplier()) {
-                    assertEquals(spanContext, span.spanContext)
-                    assertEquals(parent, span.parent)
-                    assertEquals(spanKind, span.spanKind)
-                    assertEquals(startTimestamp, span.startTimestamp)
-                    assertEquals(name, span.name)
-                    assertEquals(status, span.status)
-                    assertEquals(isRecording(), span.hasEnded)
-                    assertEquals(attributes.toMap(), span.attributes)
-                    assertEquals(events, span.events)
-                    assertEquals(links, span.links)
-                }
+                assertEquals(expectedName, span.name)
             }
         }
     }

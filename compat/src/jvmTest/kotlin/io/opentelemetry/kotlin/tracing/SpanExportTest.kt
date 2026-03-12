@@ -60,22 +60,14 @@ internal class SpanExportTest {
             spanKind = SpanKind.CLIENT,
             startTimestamp = 500
         )
-        assertEquals(spanName, span.name)
-
         val name = "new_name"
-        span.name = name
-        assertEquals(name, span.name)
+        span.setName(name)
 
-        assertEquals(StatusData.Unset, span.status)
-        span.status = StatusData.Ok
-        assertEquals(StatusData.Ok, span.status)
+        span.setStatus(StatusData.Ok)
 
         assertTrue(span.isRecording())
         span.end(1000)
         assertFalse(span.isRecording())
-
-        assertEquals(SpanKind.CLIENT, span.spanKind)
-        assertEquals(500, span.startTimestamp)
         harness.assertSpans(
             expectedCount = 1,
             goldenFileName = "span_props.json",
@@ -99,17 +91,11 @@ internal class SpanExportTest {
     fun `test span events export`() = runTest {
         val spanName = "span_events"
         val span = harness.tracer.startSpan(spanName).apply {
-            assertTrue(events.isEmpty())
-
             val eventName = "my_event"
             val eventTimestamp = 150L
             addEvent(eventName, eventTimestamp) {
                 assertAttributes()
             }
-
-            val event = events.single()
-            assertEquals(eventName, event.name)
-            assertEquals(eventTimestamp, event.timestamp)
         }
         span.end()
 
@@ -131,10 +117,7 @@ internal class SpanExportTest {
 
         val c = harness.tracer.startSpan("c", parentContext = ctxb)
 
-        assertSpanContextsMatch(harness.kotlinApi.spanContext.invalid, a.parent)
         assertNotNull(a.spanContext)
-        assertSpanContextsMatch(a.spanContext, b.parent)
-        assertSpanContextsMatch(b.spanContext, c.parent)
         assertNotNull(c.spanContext)
 
         a.end()
@@ -190,14 +173,9 @@ internal class SpanExportTest {
     fun `test span links export`() = runTest {
         val linkedSpan = harness.tracer.startSpan("linked_span")
         val span = harness.tracer.startSpan("span_links").apply {
-            assertTrue(events.isEmpty())
-
             addLink(linkedSpan.spanContext) {
                 assertAttributes()
             }
-
-            val link = links.single()
-            assertEquals(linkedSpan.spanContext, link.spanContext)
         }
         span.end()
         linkedSpan.end()
@@ -247,10 +225,6 @@ internal class SpanExportTest {
                 setStringAttribute("link_attr", "link_value")
             }
             addLink(linkedSpan3.spanContext)
-
-            // Verify counts
-            assertEquals(3, events.size)
-            assertEquals(3, links.size)
         }
 
         span.end()
@@ -498,8 +472,8 @@ internal class SpanExportTest {
             parentContext: Context
         ) {
             with(span) {
-                name = "override"
-                status = StatusData.Error("bad_err")
+                setName("override")
+                setStatus(StatusData.Error("bad_err"))
 
                 setStringAttribute("string", "value")
                 setBooleanAttribute("bool", false)

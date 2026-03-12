@@ -13,7 +13,7 @@ import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
-import io.opentelemetry.kotlin.tracing.model.Span
+import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import io.opentelemetry.kotlin.tracing.model.SpanKind
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -70,19 +70,27 @@ internal class SpanDataTest {
     }
 
     @Test
+    fun testRetrieveSpanData() {
+        val span = tracer.startSpan("test")
+        val readableSpan = span.toReadableSpan()
+        val data: SpanData = readableSpan.toSpanData()
+        assertEquals("test", data.name)
+    }
+
+    @Test
     fun testSpanDataAfterShutdown() {
         assertTrue(tracer.startSpan("test").isRecording())
         shutdownState.shutdownNow()
         assertFalse(tracer.startSpan("test").isRecording())
     }
 
-    private fun simulateSpan(): Span {
+    private fun simulateSpan(): ReadableSpan {
         return tracer.startSpan(
             name = "test",
             spanKind = SpanKind.CLIENT,
             startTimestamp = 5,
         ).apply {
-            status = StatusData.Error("Whoops")
+            setStatus(StatusData.Error("Whoops"))
             setStringAttribute("string", "value")
             addEvent("event", 10) {
                 setStringAttribute("string", "value")
@@ -91,11 +99,11 @@ internal class SpanDataTest {
                 setStringAttribute("string", "value")
             }
             end()
-        }
+        }.toReadableSpan()
     }
 
     private fun assertSpanData(
-        span: Span,
+        span: ReadableSpan,
         data: SpanData
     ) {
         assertEquals(span.name, data.name)

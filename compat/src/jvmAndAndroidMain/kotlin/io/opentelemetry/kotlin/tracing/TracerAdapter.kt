@@ -47,7 +47,7 @@ internal class TracerAdapter(
             startTimestamp = start,
             spanLimitsConfig = spanLimitsConfig,
         ).apply {
-            this.name = name
+            setName(name)
             if (action != null) {
                 action(this)
             }

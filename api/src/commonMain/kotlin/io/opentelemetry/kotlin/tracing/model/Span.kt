@@ -3,9 +3,7 @@ package io.opentelemetry.kotlin.tracing.model
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.tracing.StatusCode
 import io.opentelemetry.kotlin.tracing.TracingDsl
-import io.opentelemetry.kotlin.tracing.data.SpanSchema
 import io.opentelemetry.kotlin.tracing.data.StatusData
 
 /**
@@ -16,19 +14,37 @@ import io.opentelemetry.kotlin.tracing.data.StatusData
 @TracingDsl
 @ExperimentalApi
 @ThreadSafe
-public interface Span : SpanSchema, AttributesMutator, SpanLinkCreator, SpanEventCreator {
+public interface Span : AttributesMutator, SpanLinkCreator, SpanEventCreator {
+
+    /**
+     * The span context that uniquely identifies this span.
+     */
+    @ThreadSafe
+    public val spanContext: SpanContext
+
+    /**
+     * The parent span context, or an invalid SpanContext if this is a root span.
+     */
+    @ThreadSafe
+    public val parent: SpanContext
+
+    /**
+     * Returns true if the span is currently recording.
+     */
+    @ThreadSafe
+    public fun isRecording(): Boolean
 
     /**
      * Sets the name of the span. Must be non-empty.
      */
     @ThreadSafe
-    public override var name: String
+    public fun setName(name: String)
 
     /**
-     * Sets the status of the span. This defaults to [StatusCode.UNSET].
+     * Sets the status of the span.
      */
     @ThreadSafe
-    public override var status: StatusData
+    public fun setStatus(status: StatusData)
 
     /**
      * Ends the span.
@@ -41,10 +57,4 @@ public interface Span : SpanSchema, AttributesMutator, SpanLinkCreator, SpanEven
      */
     @ThreadSafe
     public fun end(timestamp: Long)
-
-    /**
-     * Returns true if the span is currently recording.
-     */
-    @ThreadSafe
-    public fun isRecording(): Boolean
 }

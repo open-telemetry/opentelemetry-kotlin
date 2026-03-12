@@ -14,8 +14,8 @@ import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanKind
 
 class FakeReadWriteSpan(
-    override var name: String = "fake_span",
-    override var status: StatusData = StatusData.Unset,
+    name: String = "fake_span",
+    status: StatusData = StatusData.Unset,
     override val parent: SpanContext = FakeSpanContext.INVALID,
     override val spanContext: SpanContext = FakeSpanContext.INVALID,
     override val spanKind: SpanKind = SpanKind.INTERNAL,
@@ -28,6 +28,20 @@ class FakeReadWriteSpan(
     override val instrumentationScopeInfo: InstrumentationScopeInfo = FakeInstrumentationScopeInfo(),
     override val hasEnded: Boolean = false
 ) : ReadWriteSpan {
+
+    private var nameImpl: String = name
+    override val name: String get() = nameImpl
+
+    private var statusImpl: StatusData = status
+    override val status: StatusData get() = statusImpl
+
+    override fun setName(name: String) {
+        nameImpl = name
+    }
+
+    override fun setStatus(status: StatusData) {
+        statusImpl = status
+    }
 
     override fun end() {
     }

@@ -1,9 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
 import org.junit.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 internal class NonRecordingSpanTest {
 
@@ -13,7 +11,6 @@ internal class NonRecordingSpanTest {
             FakeSpanContext.INVALID,
             FakeSpanContext.INVALID,
         )
-        assertEquals(0, span.startTimestamp)
         assertFalse(span.isRecording())
 
         span.setStringAttribute("string", "value")
@@ -24,12 +21,9 @@ internal class NonRecordingSpanTest {
         span.setBooleanListAttribute("boolList", listOf(true, false))
         span.setLongListAttribute("longList", listOf(1L, 2L))
         span.setDoubleListAttribute("doubleList", listOf(1.1, 2.2))
-        assertEquals(emptyMap(), span.attributes)
 
         span.addEvent("test")
-        assertTrue(span.events.isEmpty())
         span.addLink(FakeSpanContext.INVALID)
-        assertTrue(span.links.isEmpty())
 
         span.end()
         span.end(5)
