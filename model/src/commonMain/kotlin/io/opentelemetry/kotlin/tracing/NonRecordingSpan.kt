@@ -1,12 +1,9 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.tracing.data.SpanEventData
-import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.Span
 import io.opentelemetry.kotlin.tracing.model.SpanContext
-import io.opentelemetry.kotlin.tracing.model.SpanKind
 
 /**
  * A reference to a [Span] that cannot actively record any data. This can be useful for
@@ -18,23 +15,11 @@ class NonRecordingSpan(
     override val spanContext: SpanContext,
 ) : Span {
 
-    override var name: String = ""
-    override var status: StatusData = StatusData.Unset
+    override fun setName(name: String) {
+    }
 
-    override val spanKind: SpanKind
-        get() = SpanKind.INTERNAL
-
-    override val startTimestamp: Long
-        get() = 0
-
-    override val attributes: Map<String, Any>
-        get() = emptyMap()
-
-    override val events: List<SpanEventData>
-        get() = emptyList()
-
-    override val links: List<SpanLinkData>
-        get() = emptyList()
+    override fun setStatus(status: StatusData) {
+    }
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
     }

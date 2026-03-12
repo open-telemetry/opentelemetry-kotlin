@@ -153,7 +153,7 @@ internal class SpanLinkTest {
                 }
             }
         })
-        val link = span.links.single()
+        val link = (span.toReadableSpan()).links.single()
         assertEquals(fakeSpanLimitsConfig.attributeCountLimit, link.attributes.size)
     }
 
@@ -166,7 +166,7 @@ internal class SpanLinkTest {
                 }
             })
         }
-        val link = span.links.single()
+        val link = (span.toReadableSpan()).links.single()
         assertEquals(fakeSpanLimitsConfig.attributeCountLimit, link.attributes.size)
     }
 

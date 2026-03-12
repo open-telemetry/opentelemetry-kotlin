@@ -2,25 +2,21 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.tracing.data.SpanEventData
-import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.Span
 import io.opentelemetry.kotlin.tracing.model.SpanContext
-import io.opentelemetry.kotlin.tracing.model.SpanKind
 
 @ExperimentalApi
 internal object NoopSpan : Span {
 
-    override var name: String = ""
-    override var status: StatusData = StatusData.Unset
-    override val parent: SpanContext = NoopSpanContext
     override val spanContext: SpanContext = NoopSpanContext
-    override val spanKind: SpanKind = SpanKind.INTERNAL
-    override val startTimestamp: Long = -1L
-    override val attributes: Map<String, Any> = emptyMap()
-    override val events: List<SpanEventData> = emptyList()
-    override val links: List<SpanLinkData> = emptyList()
+    override val parent: SpanContext = NoopSpanContext
+
+    override fun setName(name: String) {
+    }
+
+    override fun setStatus(status: StatusData) {
+    }
 
     override fun end() {
     }

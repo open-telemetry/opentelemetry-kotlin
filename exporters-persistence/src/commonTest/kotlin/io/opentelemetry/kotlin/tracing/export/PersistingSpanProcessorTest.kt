@@ -73,10 +73,10 @@ internal class PersistingSpanProcessorTest {
     fun testProcessorMutation() = runTest {
         val expected = "override"
         val processor1 = FakeSpanProcessor(
-            endingAction = { span -> span.name = "flibbet" }
+            endingAction = { span -> span.setName("flibbet") }
         )
         val processor2 = FakeSpanProcessor(
-            endingAction = { span -> span.name = expected }
+            endingAction = { span -> span.setName(expected) }
         )
         val exporter = FakeSpanExporter()
         val processor = createProcessor(

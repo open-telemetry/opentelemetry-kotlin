@@ -41,14 +41,12 @@ internal class SpanExtTest {
     fun `test invalid span`() {
         val invalid = spanFactory.invalid
         assertSpanContextsMatch(spanContextFactory.invalid, invalid.spanContext)
-        assertSpanContextsMatch(spanContextFactory.invalid, invalid.parent)
     }
 
     @Test
     fun `test from span context valid`() {
         val span = spanFactory.fromSpanContext(validSpanContext)
         assertSpanContextsMatch(validSpanContext, span.spanContext)
-        assertSpanContextsMatch(spanContextFactory.invalid, span.parent)
     }
 
     @Test

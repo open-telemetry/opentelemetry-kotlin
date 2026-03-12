@@ -145,7 +145,7 @@ internal class SpanEventTest {
                 }
             }
         })
-        val event = span.events.single()
+        val event = (span.toReadableSpan()).events.single()
         assertEquals(fakeSpanLimitsConfig.attributeCountLimit, event.attributes.size)
     }
 
@@ -158,7 +158,7 @@ internal class SpanEventTest {
                 }
             })
         }
-        val event = span.events.single()
+        val event = (span.toReadableSpan()).events.single()
         assertEquals(fakeSpanLimitsConfig.attributeCountLimit, event.attributes.size)
     }
 
