@@ -13,15 +13,6 @@ import io.opentelemetry.kotlin.ThreadSafe
 public interface Context {
 
     /**
-     * Creates a new [ContextKey] with the given name. The name is used for debugging and does NOT uniquely identify
-     * values - use the [ContextKey] itself for that.
-     *
-     * [T] represents the type of the value that is stored in the context.
-     */
-    @ThreadSafe
-    public fun <T> createKey(name: String): ContextKey<T>
-
-    /**
      * Associates a value on the [Context] with the given [ContextKey].
      *
      * [T] represents the type of the value that is stored in the context.

@@ -372,7 +372,7 @@ internal class SpanExportTest {
 
         // Create a context key and add a test value
         val currentContext = harness.kotlinApi.context.implicit()
-        val contextKey = currentContext.createKey<String>("best_team")
+        val contextKey = harness.kotlinApi.context.createKey<String>("best_team")
         val testContextValue = "independiente"
         val testContext = currentContext.set(contextKey, testContextValue)
 

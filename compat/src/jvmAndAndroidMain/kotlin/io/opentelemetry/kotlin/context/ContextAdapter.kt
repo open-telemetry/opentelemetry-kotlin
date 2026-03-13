@@ -1,16 +1,11 @@
 package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
-import io.opentelemetry.kotlin.aliases.OtelJavaContextKey
 
 internal class ContextAdapter(
     val impl: OtelJavaContext,
     private val repository: ContextKeyRepository = ContextKeyRepository.INSTANCE
 ) : Context {
-
-    override fun <T> createKey(name: String): ContextKey<T> {
-        return ContextKeyAdapter(OtelJavaContextKey.named(name))
-    }
 
     @Suppress("UNCHECKED_CAST")
     override fun <T> set(key: ContextKey<T>, value: T?): Context {

@@ -126,10 +126,11 @@ internal class NoopTests {
     @Test
     fun testNoopExplicitContext() {
         val otel = NoopOpenTelemetry
-        val ctx = otel.context.root()
 
-        val key = ctx.createKey<String>("key")
+        val key = otel.context.createKey<String>("key")
         assertTrue(key is NoopContextKey)
+
+        val ctx = otel.context.root()
 
         val other = ctx.set(key, "value")
         assertSame(ctx, other)

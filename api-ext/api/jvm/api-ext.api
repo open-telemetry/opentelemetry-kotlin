@@ -7,9 +7,9 @@ public final class io/opentelemetry/kotlin/attributes/AttributesMutatorExtKt {
 	public static final fun setAttributes (Lio/opentelemetry/kotlin/attributes/AttributesMutator;Ljava/util/Map;)V
 }
 
-public final class io/opentelemetry/kotlin/context/ContextApiExtKt {
+public final class io/opentelemetry/kotlin/context/ContextFactoryApiExtKt {
 	public static final fun asImplicitContext (Lio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
-	public static final fun with (Lio/opentelemetry/kotlin/context/Context;Ljava/util/Map;)Lio/opentelemetry/kotlin/context/Context;
+	public static final fun with (Lio/opentelemetry/kotlin/factory/ContextFactory;Lio/opentelemetry/kotlin/context/Context;Ljava/util/Map;)Lio/opentelemetry/kotlin/context/Context;
 }
 
 public final class io/opentelemetry/kotlin/tracing/SpanExtKt {

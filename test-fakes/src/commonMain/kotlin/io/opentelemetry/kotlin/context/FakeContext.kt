@@ -5,8 +5,6 @@ class FakeContext(
     private val onDetach: () -> Unit = {},
 ) : Context {
 
-    override fun <T> createKey(name: String): ContextKey<T> = FakeContextKey(name)
-
     override fun <T> set(key: ContextKey<T>, value: T?): Context {
         return FakeContext(attrs + (key to value), onAttach, onDetach)
     }

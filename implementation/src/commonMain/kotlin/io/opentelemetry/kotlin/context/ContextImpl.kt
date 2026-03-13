@@ -4,8 +4,6 @@ internal class ContextImpl(
     private val impl: Map<ContextKey<*>, Any?> = emptyMap()
 ) : Context {
 
-    override fun <T> createKey(name: String): ContextKey<T> = ContextKeyImpl(name)
-
     override fun <T> set(
         key: ContextKey<T>,
         value: T?
