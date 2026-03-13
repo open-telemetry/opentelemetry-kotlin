@@ -6,16 +6,45 @@ import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.compositeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.simpleSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.stdoutSpanExporter
+import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
+import io.opentelemetry.kotlin.tracing.sampling.BuiltInSampler
+import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 internal class TracerProviderConfigImplTest {
 
     private val clock = FakeClock()
+
+    @Test
+    fun testDefaultSamplerAlwaysOn() {
+        val cfg = TracerProviderConfigImpl(clock).generateTracingConfig()
+        assertSame(AlwaysOnSampler, cfg.sampler)
+    }
+
+    @Test
+    fun testBuiltInSamplerConfig() {
+        val cfg = TracerProviderConfigImpl(clock).apply {
+            sampler(BuiltInSampler.ALWAYS_ON)
+        }.generateTracingConfig()
+        assertNotNull(cfg.sampler)
+    }
+
+    @Test
+    fun testCustomSamplerConfig() {
+        val sampler = FakeSampler()
+        val cfg = TracerProviderConfigImpl(clock).apply {
+            sampler {
+                sampler
+            }
+        }.generateTracingConfig()
+        assertSame(sampler, cfg.sampler)
+    }
 
     @Test
     fun testDefaultTracingConfig() {
