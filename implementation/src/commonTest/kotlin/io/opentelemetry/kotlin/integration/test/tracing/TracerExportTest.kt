@@ -79,7 +79,7 @@ internal class TracerExportTest {
 
     @Test
     fun testSpanEventExport() = runTest {
-        harness.tracer.startSpan("test", null, SpanKind.INTERNAL, null) {
+        harness.tracer.startSpan("test", null, SpanKind.INTERNAL, null).apply {
             addEvent("my_event", 500) {
                 setStringAttribute("foo", "bar")
             }
@@ -172,13 +172,6 @@ internal class TracerExportTest {
             repeat(spanAttributeLimit + 1) {
                 setStringAttribute("key-$it", "value")
             }
-            repeat(eventLimit + 1) {
-                addEvent("event") {
-                    repeat(spanAttributeLimit + 1) {
-                        setStringAttribute("key-$it", "value")
-                    }
-                }
-            }
             repeat(linkLimit + 1) {
                 val linkedSpan = harness.tracer.startSpan("linkedSpan")
                 addLink(linkedSpan.spanContext) {
@@ -188,6 +181,13 @@ internal class TracerExportTest {
                 }
             }
         }.run {
+            repeat(eventLimit + 1) {
+                addEvent("event") {
+                    repeat(spanAttributeLimit + 1) {
+                        setStringAttribute("key-$it", "value")
+                    }
+                }
+            }
             end()
         }
 
