@@ -40,7 +40,7 @@ public abstract interface class io/opentelemetry/kotlin/context/ContextKey {
 }
 
 public abstract interface class io/opentelemetry/kotlin/context/Scope {
-	public abstract fun detach ()V
+	public abstract fun detach ()Z
 }
 
 public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {

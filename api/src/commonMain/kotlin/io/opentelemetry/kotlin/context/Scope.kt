@@ -16,5 +16,5 @@ public interface Scope {
      *
      * https://opentelemetry.io/docs/specs/otel/context/#detach-context
      */
-    public fun detach()
+    public fun detach(): Boolean
 }
