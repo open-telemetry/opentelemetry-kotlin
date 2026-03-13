@@ -50,8 +50,8 @@ public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
 }
 
 public abstract interface class io/opentelemetry/kotlin/factory/SpanContextFactory {
-	public abstract fun create (Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/model/TraceFlags;Lio/opentelemetry/kotlin/tracing/model/TraceState;)Lio/opentelemetry/kotlin/tracing/model/SpanContext;
-	public abstract fun create ([B[BLio/opentelemetry/kotlin/tracing/model/TraceFlags;Lio/opentelemetry/kotlin/tracing/model/TraceState;)Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+	public abstract fun create (Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/model/TraceFlags;Lio/opentelemetry/kotlin/tracing/model/TraceState;Z)Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+	public abstract fun create ([B[BLio/opentelemetry/kotlin/tracing/model/TraceFlags;Lio/opentelemetry/kotlin/tracing/model/TraceState;Z)Lio/opentelemetry/kotlin/tracing/model/SpanContext;
 	public abstract fun getInvalid ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
 }
 

@@ -30,27 +30,37 @@ internal class CompatSpanContextFactory : SpanContextFactory {
         traceId: String,
         spanId: String,
         traceFlags: TraceFlags,
-        traceState: TraceState
+        traceState: TraceState,
+        isRemote: Boolean,
     ): SpanContext = SpanContextAdapter(
-        OtelJavaSpanContext.create(
-            traceId,
-            spanId,
-            traceFlags.toOtelJavaTraceFlags(),
-            traceState.toOtelJavaTraceState()
-        )
+        if (isRemote) {
+            OtelJavaSpanContext.createFromRemoteParent(
+                traceId,
+                spanId,
+                traceFlags.toOtelJavaTraceFlags(),
+                traceState.toOtelJavaTraceState()
+            )
+        } else {
+            OtelJavaSpanContext.create(
+                traceId,
+                spanId,
+                traceFlags.toOtelJavaTraceFlags(),
+                traceState.toOtelJavaTraceState()
+            )
+        }
     )
 
     override fun create(
         traceIdBytes: ByteArray,
         spanIdBytes: ByteArray,
         traceFlags: TraceFlags,
-        traceState: TraceState
-    ): SpanContext = SpanContextAdapter(
-        OtelJavaSpanContext.create(
-            traceIdBytes.toHexString(),
-            spanIdBytes.toHexString(),
-            traceFlags.toOtelJavaTraceFlags(),
-            traceState.toOtelJavaTraceState()
-        )
+        traceState: TraceState,
+        isRemote: Boolean,
+    ): SpanContext = create(
+        traceIdBytes.toHexString(),
+        spanIdBytes.toHexString(),
+        traceFlags,
+        traceState,
+        isRemote,
     )
 }

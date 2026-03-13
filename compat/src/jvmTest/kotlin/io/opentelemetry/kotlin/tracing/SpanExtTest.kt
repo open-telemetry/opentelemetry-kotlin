@@ -35,6 +35,7 @@ internal class SpanExtTest {
         spanId = generator.generateSpanId(),
         traceState = traceStateFactory.default,
         traceFlags = traceFlagsFactory.default,
+        isRemote = false,
     )
 
     @Test
