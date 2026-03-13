@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.attributes.setExceptionAttributes
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
@@ -52,6 +53,7 @@ internal class LoggerImpl(
         context: Context?,
         severityNumber: SeverityNumber?,
         severityText: String?,
+        exception: Throwable?,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         processTelemetry(
@@ -62,6 +64,7 @@ internal class LoggerImpl(
             eventName = eventName,
             severityText = severityText,
             severityNumber = severityNumber,
+            exception = exception,
             attributes = attributes
         )
     }
@@ -74,6 +77,7 @@ internal class LoggerImpl(
         eventName: String?,
         severityText: String?,
         severityNumber: SeverityNumber?,
+        exception: Throwable?,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         shutdownState.execute {
@@ -96,6 +100,9 @@ internal class LoggerImpl(
                 logLimitConfig = logLimitConfig,
                 eventName = eventName,
             )
+            if (exception != null) {
+                log.setExceptionAttributes(exception)
+            }
             if (attributes != null) {
                 attributes(log)
             }

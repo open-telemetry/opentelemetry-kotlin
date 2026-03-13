@@ -12,6 +12,8 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":sdk-api"))
+                implementation(project(":semconv"))
+                implementation(project(":platform-implementations"))
             }
         }
         val commonTest by getting {
