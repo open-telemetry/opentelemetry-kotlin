@@ -158,7 +158,8 @@ internal class NoopTests {
             otel.idGenerator.generateTraceIdBytes(),
             otel.idGenerator.generateSpanIdBytes(),
             otel.traceFlags.default,
-            otel.traceState.default
+            otel.traceState.default,
+            false,
         )
         assertSame(invalid, other)
     }
