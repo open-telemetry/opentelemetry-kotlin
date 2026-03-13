@@ -201,6 +201,9 @@ public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadableSp
 	public abstract fun toSpanData ()Lio/opentelemetry/kotlin/tracing/data/SpanData;
 }
 
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEvent : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanEventData {
+}
+
 public abstract interface class io/opentelemetry/kotlin/tracing/sampling/Sampler {
 	public abstract fun getDescription ()Ljava/lang/String;
 	public abstract fun shouldSample (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/model/SpanKind;Lio/opentelemetry/kotlin/attributes/AttributeContainer;Ljava/util/List;)Lio/opentelemetry/kotlin/tracing/sampling/SamplingResult;
