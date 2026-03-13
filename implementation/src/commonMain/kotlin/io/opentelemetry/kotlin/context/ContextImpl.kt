@@ -29,7 +29,6 @@ internal class ContextImpl(
     }
 
     private object NoopScope : Scope {
-        override fun detach() {
-        }
+        override fun detach(): Boolean = true
     }
 }
