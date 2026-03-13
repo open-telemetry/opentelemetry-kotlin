@@ -42,4 +42,5 @@ include(
     "examples:example-app",
     "examples:example-app-android",
     ":smoke-test",
+    ":instrumentation-ktor",
 )

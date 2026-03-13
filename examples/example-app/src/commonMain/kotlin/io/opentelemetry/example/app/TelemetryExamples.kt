@@ -37,6 +37,7 @@ suspend fun runAllExamples(platform: String) {
     demonstrateSpanNesting(tracer)
     demonstrateBasicLogging(logger)
     demonstrateComplexLogging(logger)
+    demonstrateKtorClientInstrumentation(otel)
 
     // flush all pending telemetry before terminating
     AppConfig.forceFlush()
@@ -45,6 +46,29 @@ suspend fun runAllExamples(platform: String) {
     // give HTTP client time to complete requests before process exits.
     // in future the SDK needs to be updated to handle this automatically.
     delay(500)
+}
+
+/**
+ * Demonstrates how to instrument Ktor client outgoing requests.
+ */
+private suspend fun demonstrateKtorClientInstrumentation(otel: OpenTelemetry) {
+    println("--- Demonstrating Ktor Client Instrumentation ---")
+    val client = io.ktor.client.HttpClient(io.ktor.client.engine.cio.CIO) {
+        install(io.opentelemetry.kotlin.instrumentation.ktor.OpenTelemetryKtor) {
+            openTelemetry = otel
+        }
+    }
+
+    try {
+        println("Sending request to https://opentelemetry.io...")
+        client.get("https://opentelemetry.io")
+        println("Request successful.")
+    } catch (e: Exception) {
+        println("Request failed: ${e.message}")
+    } finally {
+        client.close()
+    }
+    println()
 }
 
 /**

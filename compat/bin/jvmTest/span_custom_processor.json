@@ -1,0 +1,139 @@
+[
+  {
+    "name": "other",
+    "kind": "INTERNAL",
+    "statusData": {
+      "name": "ERROR",
+      "description": "bad_err"
+    },
+    "spanContext": {
+      "traceId": "1e6b4ea924f9baa8e77bcc2f537f0b02",
+      "spanId": "2cc2b48c50aefe53",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "parentSpanContext": {
+      "traceId": "00000000000000000000000000000000",
+      "spanId": "0000000000000000",
+      "traceFlags": "00",
+      "traceState": {}
+    },
+    "startTimestamp": 0,
+    "attributes": {
+      "double": "5.4",
+      "string": "value",
+      "bool": "false",
+      "doubleList": "[5.4]",
+      "stringList": "[value]",
+      "longList": "[5]",
+      "boolList": "[false]",
+      "long": "5"
+    },
+    "events": [
+      {
+        "name": "custom_event",
+        "attributes": {
+          "key": "value"
+        },
+        "timestamp": 30,
+        "totalAttributesCount": 1
+      }
+    ],
+    "links": [],
+    "endTimestamp": 0,
+    "ended": true,
+    "totalRecordedEvents": 1,
+    "totalRecordedLinks": 0,
+    "totalAttributeCount": 8,
+    "resource": {
+      "schemaUrl": "null",
+      "attributes": {
+        "service.name": "unknown_service:java",
+        "telemetry.sdk.language": "java",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "UNKNOWN"
+      }
+    },
+    "instrumentationScopeInfo": {
+      "name": "test_tracer",
+      "version": "0.1.0",
+      "schemaUrl": "null",
+      "attributes": {}
+    }
+  },
+  {
+    "name": "my_span",
+    "kind": "INTERNAL",
+    "statusData": {
+      "name": "ERROR",
+      "description": "bad_err"
+    },
+    "spanContext": {
+      "traceId": "f9a51310c8eed9889d46ef3bafda11b1",
+      "spanId": "ac2c315346a8f5dc",
+      "traceFlags": "01",
+      "traceState": {}
+    },
+    "parentSpanContext": {
+      "traceId": "00000000000000000000000000000000",
+      "spanId": "0000000000000000",
+      "traceFlags": "00",
+      "traceState": {}
+    },
+    "startTimestamp": 0,
+    "attributes": {
+      "double": "5.4",
+      "string": "value",
+      "bool": "false",
+      "doubleList": "[5.4]",
+      "stringList": "[value]",
+      "longList": "[5]",
+      "boolList": "[false]",
+      "long": "5"
+    },
+    "events": [
+      {
+        "name": "custom_event",
+        "attributes": {
+          "key": "value"
+        },
+        "timestamp": 30,
+        "totalAttributesCount": 1
+      }
+    ],
+    "links": [
+      {
+        "spanContext": {
+          "traceId": "1e6b4ea924f9baa8e77bcc2f537f0b02",
+          "spanId": "2cc2b48c50aefe53",
+          "traceFlags": "01",
+          "traceState": {}
+        },
+        "attributes": {
+          "key": "value"
+        },
+        "totalAttributeCount": 1
+      }
+    ],
+    "endTimestamp": 0,
+    "ended": true,
+    "totalRecordedEvents": 1,
+    "totalRecordedLinks": 1,
+    "totalAttributeCount": 8,
+    "resource": {
+      "schemaUrl": "null",
+      "attributes": {
+        "service.name": "unknown_service:java",
+        "telemetry.sdk.language": "java",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "UNKNOWN"
+      }
+    },
+    "instrumentationScopeInfo": {
+      "name": "test_tracer",
+      "version": "0.1.0",
+      "schemaUrl": "null",
+      "attributes": {}
+    }
+  }
+]
