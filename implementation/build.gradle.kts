@@ -17,6 +17,7 @@ kotlin {
                 implementation(project(":sdk-api"))
                 implementation(project(":model"))
                 implementation(project(":platform-implementations"))
+                implementation(project(":semconv"))
                 implementation(project(":exporters-core"))
                 implementation(project(":noop"))
                 implementation(libs.kotlinx.coroutines)

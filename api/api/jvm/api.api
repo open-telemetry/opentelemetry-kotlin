@@ -181,8 +181,13 @@ public abstract interface class io/opentelemetry/kotlin/tracing/model/Span : io/
 	public abstract fun getParent ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
 	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
 	public abstract fun isRecording ()Z
+	public abstract fun recordException (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun setName (Ljava/lang/String;)V
 	public abstract fun setStatus (Lio/opentelemetry/kotlin/tracing/data/StatusData;)V
+}
+
+public final class io/opentelemetry/kotlin/tracing/model/Span$DefaultImpls {
+	public static synthetic fun recordException$default (Lio/opentelemetry/kotlin/tracing/model/Span;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanContext {
