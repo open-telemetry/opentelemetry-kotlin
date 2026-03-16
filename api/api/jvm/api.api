@@ -221,9 +221,6 @@ public final class io/opentelemetry/kotlin/tracing/model/SpanKind : java/lang/En
 	public static fun values ()[Lio/opentelemetry/kotlin/tracing/model/SpanKind;
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLink : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanLinkData {
-}
-
 public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLinkCreator {
 	public abstract fun addLink (Lio/opentelemetry/kotlin/tracing/model/SpanContext;Lkotlin/jvm/functions/Function1;)V
 }
