@@ -447,6 +447,7 @@ public abstract interface class io/opentelemetry/kotlin/tracing/sampling/Sampler
 
 public abstract interface class io/opentelemetry/kotlin/tracing/sampling/SamplingResult {
 	public abstract fun getAttributes ()Lio/opentelemetry/kotlin/attributes/AttributeContainer;
+	public abstract fun getDecision ()Lio/opentelemetry/kotlin/tracing/sampling/SamplingResult$Decision;
 	public abstract fun getTraceState ()Lio/opentelemetry/kotlin/tracing/model/TraceState;
 }
 
