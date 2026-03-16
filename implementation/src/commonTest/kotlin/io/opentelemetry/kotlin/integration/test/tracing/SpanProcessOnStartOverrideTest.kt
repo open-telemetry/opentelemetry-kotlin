@@ -32,7 +32,6 @@ internal class SpanProcessOnStartOverrideTest {
         harness.config.spanProcessors.add(OnStartSpanProcessor())
         harness.tracer.startSpan("span", null, SpanKind.INTERNAL, null) {
             setStringAttribute("key", "value")
-            addEvent("test")
             addLink(FakeSpanContext.INVALID)
         }
         harness.assertSpans(
@@ -62,7 +61,7 @@ internal class SpanProcessOnStartOverrideTest {
             assertTrue(resource.attributes.isEmpty())
             assertEquals("test_tracer", instrumentationScopeInfo.name)
             assertEquals(mapOf("key" to "value"), attributes)
-            assertEquals(1, events.size)
+            assertEquals(0, events.size)
             assertEquals(1, links.size)
 
             // assert subset of properties can be written

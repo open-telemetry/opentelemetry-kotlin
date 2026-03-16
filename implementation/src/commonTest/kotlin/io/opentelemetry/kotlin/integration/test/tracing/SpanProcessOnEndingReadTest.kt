@@ -32,10 +32,11 @@ internal class SpanProcessOnEndingReadTest {
         harness.config.spanProcessors.add(OnEndingSpanProcessor())
         harness.tracer.startSpan("span") {
             setStringAttribute("key", "value")
-            addEvent("test")
             addLink(FakeSpanContext.INVALID) {
                 setStringAttribute("foo", "bar")
             }
+        }.apply {
+            addEvent("test")
         }.end()
         harness.assertSpans(
             expectedCount = 1,

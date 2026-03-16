@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.context
 class FakeContext(
     val attrs: Map<ContextKey<*>, Any?> = emptyMap(),
     private val onAttach: () -> Unit = {},
-    private val onDetach: () -> Unit = {},
+    private val onDetach: () -> Boolean = { true },
 ) : Context {
 
     override fun <T> set(key: ContextKey<T>, value: T?): Context {

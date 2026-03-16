@@ -42,7 +42,10 @@ internal class ContextExtTest {
         var detached = false
         val ctx = FakeContext(
             onAttach = { attached = true },
-            onDetach = { detached = true }
+            onDetach = {
+                detached = true
+                true
+            }
         )
 
         val expected = "result"
@@ -61,7 +64,10 @@ internal class ContextExtTest {
         var detached = false
         val ctx = FakeContext(
             onAttach = { attached = true },
-            onDetach = { detached = true }
+            onDetach = {
+                detached = true
+                true
+            }
         )
 
         assertFailsWith<IllegalStateException> {

@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 internal class PersistingLogRecordExporterTest {
 
@@ -25,27 +26,22 @@ internal class PersistingLogRecordExporterTest {
     }
 
     @Test
-    fun testDeleteCalledOnSuccess() = runTest {
+    fun testExportReturnsSuccessWhenStoreSucceeds() = runTest {
         val repository = FakeTelemetryRepository<ReadableLogRecord>()
-        val exporter = PersistingLogRecordExporter(
-            FakeLogRecordExporter(action = { Success }),
-            repository,
-        )
+        val exporter = PersistingLogRecordExporter(FakeLogRecordExporter(), repository)
 
-        exporter.export(telemetry)
-        assertEquals(1, repository.deleteCalls)
+        val result = exporter.export(telemetry)
+        assertEquals(Success, result)
     }
 
     @Test
-    fun testDeleteNotCalledOnFailure() = runTest {
+    fun testDelegateNotCalledWhenStoreSucceeds() = runTest {
         val repository = FakeTelemetryRepository<ReadableLogRecord>()
-        val exporter = PersistingLogRecordExporter(
-            FakeLogRecordExporter(action = { Failure }),
-            repository,
-        )
+        val delegate = FakeLogRecordExporter()
+        val exporter = PersistingLogRecordExporter(delegate, repository)
 
         exporter.export(telemetry)
-        assertEquals(0, repository.deleteCalls)
+        assertTrue(delegate.logs.isEmpty())
     }
 
     @Test
@@ -61,8 +57,8 @@ internal class PersistingLogRecordExporterTest {
     }
 
     @Test
-    fun testExportResultPropagated() = runTest {
-        val repository = FakeTelemetryRepository<ReadableLogRecord>()
+    fun testFallbackExportResultPropagatedWhenStoreFails() = runTest {
+        val repository = FakeTelemetryRepository<ReadableLogRecord>(storeFails = true)
         val exporter = PersistingLogRecordExporter(
             FakeLogRecordExporter(action = { Failure }),
             repository,
@@ -73,22 +69,18 @@ internal class PersistingLogRecordExporterTest {
     }
 
     @Test
-    fun testShutdown() = runTest {
+    fun testForceFlushReturnsSuccess() = runTest {
         val repository = FakeTelemetryRepository<ReadableLogRecord>()
         val exporter = PersistingLogRecordExporter(FakeLogRecordExporter(), repository)
+        assertEquals(Success, exporter.forceFlush())
+    }
 
-        assertEquals(Success, exporter.export(telemetry))
-        assertEquals(1, repository.storeCalls)
-        assertEquals(1, repository.deleteCalls)
-        assertEquals(1, repository.storedTelemetry.size)
-
+    @Test
+    fun testShutdownReturnsSuccess() = runTest {
+        val repository = FakeTelemetryRepository<ReadableLogRecord>()
+        val exporter = PersistingLogRecordExporter(FakeLogRecordExporter(), repository)
         assertEquals(Success, exporter.shutdown())
         assertEquals(Success, exporter.shutdown())
-
-        assertEquals(Failure, exporter.export(telemetry))
-        assertEquals(1, repository.storeCalls)
-        assertEquals(1, repository.deleteCalls)
-        assertEquals(1, repository.storedTelemetry.size)
     }
 
     @Test

@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.context
 
+import io.opentelemetry.kotlin.platformLog
 import kotlin.concurrent.Volatile
 
 internal class ScopeImpl(
@@ -17,12 +18,17 @@ internal class ScopeImpl(
     @Volatile
     private var detached = false
 
-    override fun detach() {
-        if (!detached) {
-            if (storage.implicitContext() == currentContext) {
-                detached = true
-                storage.setImplicitContext(previousContext)
-            }
+    override fun detach(): Boolean {
+        if (detached) {
+            platformLog("OpenTelemetry: Scope.detach() called on an already-detached scope")
+            return false
         }
+        if (storage.implicitContext() != currentContext) {
+            platformLog("OpenTelemetry: Scope.detach() called out of order — context has already changed")
+            return false
+        }
+        detached = true
+        storage.setImplicitContext(previousContext)
+        return true
     }
 }
