@@ -65,6 +65,9 @@ internal class TelemetryRepositoryImpl<T>(
         fileSystem.delete(record.filename)
     }
 
+    override fun listAll(): List<PersistedTelemetryRecord> =
+        listRecordsForType().sortedWith(PersistedTelemetryRecord.comparator)
+
     private fun listRecordsForType(): List<PersistedTelemetryRecord> {
         return fileSystem.list()
             .mapNotNull { PersistedTelemetryRecord.fromFilename(it) }
