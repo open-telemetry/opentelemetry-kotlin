@@ -161,17 +161,24 @@ public abstract interface class io/opentelemetry/kotlin/resource/MutableResource
 	public abstract fun setSchemaUrl (Ljava/lang/String;)V
 }
 
-public abstract interface class io/opentelemetry/kotlin/resource/Resource {
+public abstract interface class io/opentelemetry/kotlin/resource/Resource : io/opentelemetry/kotlin/attributes/AttributeContainer {
 	public abstract fun asNewResource (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/resource/Resource;
-	public abstract fun getAttributes ()Ljava/util/Map;
 	public abstract fun getSchemaUrl ()Ljava/lang/String;
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanData : io/opentelemetry/kotlin/tracing/data/SpanSchema {
+public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanData : io/opentelemetry/kotlin/attributes/AttributeContainer {
 	public abstract fun getEndTimestamp ()Ljava/lang/Long;
+	public abstract fun getEvents ()Ljava/util/List;
 	public abstract fun getHasEnded ()Z
 	public abstract fun getInstrumentationScopeInfo ()Lio/opentelemetry/kotlin/InstrumentationScopeInfo;
+	public abstract fun getLinks ()Ljava/util/List;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getParent ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
 	public abstract fun getResource ()Lio/opentelemetry/kotlin/resource/Resource;
+	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+	public abstract fun getSpanKind ()Lio/opentelemetry/kotlin/tracing/model/SpanKind;
+	public abstract fun getStartTimestamp ()J
+	public abstract fun getStatus ()Lio/opentelemetry/kotlin/tracing/data/StatusData;
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanExporter : io/opentelemetry/kotlin/export/TelemetryCloseable {
@@ -186,11 +193,14 @@ public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanProce
 	public abstract fun onStart (Lio/opentelemetry/kotlin/tracing/model/ReadWriteSpan;Lio/opentelemetry/kotlin/context/Context;)V
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadWriteSpan : io/opentelemetry/kotlin/attributes/AttributeContainer, io/opentelemetry/kotlin/tracing/model/ReadableSpan, io/opentelemetry/kotlin/tracing/model/Span {
+public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadWriteSpan : io/opentelemetry/kotlin/tracing/model/ReadableSpan, io/opentelemetry/kotlin/tracing/model/Span {
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadableSpan : io/opentelemetry/kotlin/tracing/data/SpanData {
 	public abstract fun toSpanData ()Lio/opentelemetry/kotlin/tracing/data/SpanData;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLink : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanLinkData {
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/sampling/Sampler {

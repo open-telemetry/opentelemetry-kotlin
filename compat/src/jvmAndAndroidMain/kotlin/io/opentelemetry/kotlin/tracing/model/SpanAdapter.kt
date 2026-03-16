@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaImplicitContextKeyed
 import io.opentelemetry.kotlin.aliases.OtelJavaScope
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
+import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
@@ -25,49 +26,40 @@ internal class SpanAdapter(
     val impl: OtelJavaSpan,
     private val clock: Clock,
     parentCtx: OtelJavaContext?,
-    override val spanKind: SpanKind,
-    override val startTimestamp: Long,
+    val spanKind: SpanKind,
+    val startTimestamp: Long,
     private val spanLimitsConfig: CompatSpanLimitsConfig,
-) : Span, SpanCreationAction, OtelJavaImplicitContextKeyed {
+) : Span, AttributeContainer, SpanCreationAction, OtelJavaImplicitContextKeyed {
 
     private val attrs: MutableMap<String, Any> = ConcurrentHashMap()
     private val eventsImpl: ConcurrentLinkedQueue<SpanEventData> = ConcurrentLinkedQueue()
     private val linksImpl: ConcurrentLinkedQueue<SpanLink> = ConcurrentLinkedQueue()
-
-    private var implName: String = ""
-    private var implStatus: StatusData = StatusData.Unset
 
     override val parent: SpanContext = SpanContextAdapter(
         parentCtx?.let { OtelJavaSpan.fromContext(it) }?.spanContext
             ?: OtelJavaSpanContext.getInvalid()
     )
 
-    override var name: String
-        get() = implName
-        set(value) {
-            implName = value
-            impl.updateName(value)
-        }
-
-    override var status: StatusData
-        get() = implStatus
-        set(value) {
-            implStatus = value
-            value.toOtelJavaStatusData().let {
-                impl.setStatus(it.statusCode, it.description)
-            }
-        }
-
     override val spanContext: SpanContext = SpanContextAdapter(impl.spanContext)
 
     override val attributes: Map<String, Any>
         get() = attrs.toMap()
 
-    override val events: List<SpanEventData>
+    val events: List<SpanEventData>
         get() = eventsImpl.toList()
 
-    override val links: List<SpanLinkData>
+    val links: List<SpanLinkData>
         get() = linksImpl.toList()
+
+    override fun setName(name: String) {
+        impl.updateName(name)
+    }
+
+    override fun setStatus(status: StatusData) {
+        status.toOtelJavaStatusData().let {
+            impl.setStatus(it.statusCode, it.description)
+        }
+    }
 
     override fun end() {
         impl.end()

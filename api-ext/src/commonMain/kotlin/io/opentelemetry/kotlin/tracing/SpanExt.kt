@@ -48,10 +48,10 @@ public fun Span.addLink(span: Span, attributes: AttributesMutator.() -> Unit = {
 @ExperimentalApi
 public fun Span.wrapOperation(action: () -> StatusData) {
     try {
-        status = action()
+        setStatus(action())
     } catch (exc: Throwable) {
         recordException(exc)
-        status = StatusData.Error(exc.message)
+        setStatus(StatusData.Error(exc.message))
     } finally {
         end()
     }

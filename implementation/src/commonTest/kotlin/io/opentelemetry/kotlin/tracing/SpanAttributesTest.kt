@@ -64,33 +64,33 @@ internal class SpanAttributesTest {
     @Test
     fun testSpanDefaultAttributes() {
         val span = tracer.startSpan("test")
-        assertTrue(span.attributes.isEmpty())
+        assertTrue(span.toReadableSpan().attributes.isEmpty())
 
         // ensure returned values is immutable, and not the underlying implementation
-        assertTrue(span.attributes !is MutableMap<*, *>)
+        assertTrue((span.toReadableSpan()).attributes !is MutableMap<*, *>)
     }
 
     @Test
     fun testSpanAddAttributesDuringCreation() {
         val span = tracer.startSpan("test") { addTestAttributes() }
-        assertEquals(expected, span.attributes)
+        assertEquals(expected, (span.toReadableSpan()).attributes)
     }
 
     @Test
     fun testSpanAddAttributesAfterCreation() {
         val span = tracer.startSpan("test")
         span.addTestAttributes()
-        assertEquals(expected, span.attributes)
+        assertEquals(expected, (span.toReadableSpan()).attributes)
     }
 
     @Test
     fun testSpanAddAttributesAfterEnd() {
         val span = tracer.startSpan("test")
         span.addTestAttributes()
-        assertEquals(expected, span.attributes)
+        assertEquals(expected, (span.toReadableSpan()).attributes)
         span.end()
         span.addTestAttributesAlternateValues()
-        assertEquals(expected, span.attributes)
+        assertEquals(expected, (span.toReadableSpan()).attributes)
     }
 
     @Test
@@ -103,7 +103,7 @@ internal class SpanAttributesTest {
             end()
         }
 
-        assertEquals(expected, span.attributes)
+        assertEquals(expected, (span.toReadableSpan()).attributes)
     }
 
     @Test
@@ -115,7 +115,7 @@ internal class SpanAttributesTest {
             end()
         }
 
-        assertEquals(expected, span.attributes)
+        assertEquals(expected, (span.toReadableSpan()).attributes)
     }
 
     private fun AttributesMutator.addTestAttributes(keyToken: String = "") {

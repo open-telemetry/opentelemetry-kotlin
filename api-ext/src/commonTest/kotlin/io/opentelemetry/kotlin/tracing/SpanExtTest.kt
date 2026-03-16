@@ -88,7 +88,7 @@ internal class SpanExtTest {
 
         span.wrapOperation {
             assertTrue(span.isRecording())
-            span.name = updatedName
+            span.setName(updatedName)
             StatusData.Ok
         }
         assertFalse(span.isRecording())

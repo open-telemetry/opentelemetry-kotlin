@@ -50,7 +50,7 @@ internal class TracerExportTest {
             spanKind = SpanKind.PRODUCER,
             startTimestamp = 500
         ).apply {
-            status = StatusData.Error("Whoops")
+            setStatus(StatusData.Error("Whoops"))
             end(1000)
         }
         harness.assertSpans(1, "span_basic_props.json")

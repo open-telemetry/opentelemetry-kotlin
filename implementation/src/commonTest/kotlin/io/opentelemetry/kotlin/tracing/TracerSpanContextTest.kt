@@ -66,7 +66,7 @@ internal class TracerSpanContextTest {
     @Test
     fun testNoExplicitParentContext() {
         val span = tracer.startSpan("test")
-        assertFalse(span.parent.isValid)
+        assertFalse((span.toReadableSpan()).parent.isValid)
         val spanContext = span.spanContext
         assertValidSpanContext(spanContext)
     }
@@ -81,7 +81,7 @@ internal class TracerSpanContextTest {
             parentContext = parentCtx,
         )
 
-        assertFalse(span.parent.isValid)
+        assertFalse((span.toReadableSpan()).parent.isValid)
         val spanContext = span.spanContext
         assertValidSpanContext(spanContext)
     }
@@ -95,7 +95,7 @@ internal class TracerSpanContextTest {
             parentContext = parentCtx,
         )
 
-        assertTrue(span.parent.isValid)
+        assertTrue((span.toReadableSpan()).parent.isValid)
         val spanContext = span.spanContext
         assertValidSpanContext(spanContext)
         assertEquals(parentSpan.spanContext.traceId, spanContext.traceId)
@@ -116,8 +116,8 @@ internal class TracerSpanContextTest {
         val second = tracer.startSpan("second")
         second.end()
 
-        assertSame(span.spanContext, first.parent)
-        assertSame(spanContextFactory.invalid, second.parent)
+        assertSame(span.spanContext, first.toReadableSpan().parent)
+        assertSame(spanContextFactory.invalid, second.toReadableSpan().parent)
     }
 
     private fun assertValidSpanContext(spanContext: SpanContext) {
