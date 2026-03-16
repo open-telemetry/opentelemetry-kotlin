@@ -161,9 +161,8 @@ public abstract interface class io/opentelemetry/kotlin/resource/MutableResource
 	public abstract fun setSchemaUrl (Ljava/lang/String;)V
 }
 
-public abstract interface class io/opentelemetry/kotlin/resource/Resource {
+public abstract interface class io/opentelemetry/kotlin/resource/Resource : io/opentelemetry/kotlin/attributes/AttributeContainer {
 	public abstract fun asNewResource (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/resource/Resource;
-	public abstract fun getAttributes ()Ljava/util/Map;
 	public abstract fun getSchemaUrl ()Ljava/lang/String;
 }
 
@@ -199,6 +198,9 @@ public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadWriteS
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadableSpan : io/opentelemetry/kotlin/tracing/data/SpanData {
 	public abstract fun toSpanData ()Lio/opentelemetry/kotlin/tracing/data/SpanData;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLink : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanLinkData {
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/sampling/Sampler {
