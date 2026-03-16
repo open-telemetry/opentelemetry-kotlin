@@ -19,6 +19,7 @@ internal class FakeOtelJavaReadWriteSpan(
 ) : OtelJavaReadWriteSpan, OtelJavaReadableSpan by readableSpan {
 
     var endCalls: Int = 0
+    val recordedExceptions: MutableList<Pair<Throwable, OtelJavaAttributes>> = mutableListOf()
 
     override fun getInstrumentationScopeInfo(): OtelJavaInstrumentationScopeInfo {
         return readableSpan.instrumentationScopeInfo
@@ -59,7 +60,8 @@ internal class FakeOtelJavaReadWriteSpan(
         exception: Throwable,
         additionalAttributes: OtelJavaAttributes
     ): OtelJavaSpan {
-        TODO("Not yet implemented")
+        recordedExceptions.add(exception to additionalAttributes)
+        return this
     }
 
     override fun updateName(name: String): OtelJavaSpan {

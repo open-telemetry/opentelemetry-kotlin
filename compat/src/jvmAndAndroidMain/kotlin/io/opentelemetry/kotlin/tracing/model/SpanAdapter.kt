@@ -157,6 +157,14 @@ internal class SpanAdapter(
         }
     }
 
+    override fun recordException(exception: Throwable, attributes: (AttributesMutator.() -> Unit)?) {
+        val container = CompatAttributesModel()
+        if (attributes != null) {
+            attributes(container)
+        }
+        impl.recordException(exception, container.otelJavaAttributes())
+    }
+
     override fun storeInContext(context: OtelJavaContext): OtelJavaContext? {
         return impl.storeInContext(context)
     }

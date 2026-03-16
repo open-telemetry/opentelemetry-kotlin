@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.attributes.setExceptionAttributes
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanDataImpl
@@ -249,6 +250,13 @@ internal class SpanModel(
             if (isRecording()) {
                 attrs.setDoubleListAttribute(key, value)
             }
+        }
+    }
+
+    override fun recordException(exception: Throwable, attributes: (AttributesMutator.() -> Unit)?) {
+        addEvent("exception") {
+            setExceptionAttributes(exception)
+            attributes?.invoke(this)
         }
     }
 }

@@ -33,6 +33,11 @@ public interface SamplingResult {
     }
 
     /**
+     * The sampling decision.
+     */
+    public val decision: Decision
+
+    /**
      * The attributes that were added to the span.
      */
     public val attributes: AttributeContainer
