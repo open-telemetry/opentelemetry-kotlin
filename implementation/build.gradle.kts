@@ -1,3 +1,5 @@
+import com.codingfeline.buildkonfig.compiler.FieldSpec
+
 plugins {
     kotlin("multiplatform")
     id("com.android.kotlin.multiplatform.library")
@@ -5,6 +7,15 @@ plugins {
     id("signing")
     id("com.vanniktech.maven.publish")
     id("org.jetbrains.kotlinx.kover")
+    alias(libs.plugins.buildKonfig)
+}
+
+buildkonfig {
+    packageName = "io.opentelemetry.kotlin"
+
+    defaultConfigs {
+        buildConfigField(FieldSpec.Type.STRING, "SDK_VERSION", project.version.toString())
+    }
 }
 
 kotlin {
@@ -19,6 +30,7 @@ kotlin {
                 implementation(project(":platform-implementations"))
                 implementation(project(":exporters-core"))
                 implementation(project(":noop"))
+                implementation(project(":semconv"))
                 implementation(libs.kotlinx.coroutines)
             }
         }
@@ -40,6 +52,10 @@ kotlin {
             }
         }
     }
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    exclude { it.file.path.contains("buildkonfig") }
 }
 
 tasks.register<Copy>("copyiOSTestResources") {

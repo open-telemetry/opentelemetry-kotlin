@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.integration.test.tracing
 
+import io.opentelemetry.kotlin.assertHasSdkDefaultAttributes
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
@@ -56,7 +57,7 @@ internal class SpanProcessOnEndingReadTest {
             assertNotNull(endTimestamp)
             assertTrue(spanContext.isValid)
             assertFalse(parent.isValid)
-            assertTrue(resource.attributes.isEmpty())
+            assertHasSdkDefaultAttributes(resource.attributes)
             assertEquals("test_tracer", instrumentationScopeInfo.name)
             assertEquals(mapOf("key" to "value"), attributes)
             assertEquals(1, events.size)
