@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.FakeAttributesMutator
+import io.opentelemetry.kotlin.exceptionType
 import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
@@ -98,5 +99,14 @@ class FakeSpan(
 
     override fun setDoubleListAttribute(key: String, value: List<Double>) {
         TODO("Not yet implemented")
+    }
+
+    override fun recordException(exception: Throwable, attributes: (AttributesMutator.() -> Unit)?) {
+        addEvent("exception") {
+            setStringAttribute("exception.stacktrace", exception.stackTraceToString())
+            exception.message?.let { setStringAttribute("exception.message", it) }
+            exception.exceptionType()?.let { setStringAttribute("exception.type", it) }
+            attributes?.invoke(this)
+        }
     }
 }

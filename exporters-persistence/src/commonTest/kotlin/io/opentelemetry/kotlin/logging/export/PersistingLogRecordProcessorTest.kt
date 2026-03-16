@@ -176,7 +176,7 @@ internal class PersistingLogRecordProcessorTest {
         processor.onEmit(FakeReadWriteLogRecord(body = body), context)
         assertEquals(Success, processor.forceFlush())
         assertEquals(Success, processor.shutdown())
-        assertEquals(body, failingExporter.logs.single().body)
+        assertTrue(failingExporter.logs.any { it.body == body })
         assertTrue(
             fileSystem.list().isNotEmpty(),
             "Persisted file should be retained when the export fails",
@@ -410,9 +410,8 @@ internal class PersistingLogRecordProcessorTest {
 
         val exportedBodies = otherExporter.logs.map { it.body }
         assertTrue("other" in exportedBodies)
-
-        // TODO: future: alter the assertion when persisted records are exported.
-        assertFalse("log" in exportedBodies)
+        assertTrue("log" in exportedBodies)
+        assertTrue(fileSystem.list().isEmpty())
     }
 
     @Test
@@ -468,6 +467,144 @@ internal class PersistingLogRecordProcessorTest {
 
         processor.shutdown()
         assertEquals(Success, processor.forceFlush())
+    }
+
+    @Test
+    fun testFlushExportsPersistedRecords() = runTest {
+        val fileSystem = FakeTelemetryFileSystem()
+
+        // store a record that fails to export
+        val failingExporter = FakeLogRecordExporter(action = { Failure })
+        val processor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(failingExporter),
+            processors = listOf(FakeLogRecordProcessor()),
+        )
+        processor.onEmit(FakeReadWriteLogRecord(body = "persisted"), context)
+        assertEquals(Success, processor.forceFlush())
+        assertEquals(Success, processor.shutdown())
+        assertTrue(fileSystem.list().isNotEmpty())
+
+        // new processor with succeeding exporter recovers the persisted record
+        val successExporter = FakeLogRecordExporter()
+        val recoveryProcessor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(successExporter),
+            processors = listOf(FakeLogRecordProcessor()),
+        )
+        assertEquals(Success, recoveryProcessor.forceFlush())
+        assertEquals(Success, recoveryProcessor.shutdown())
+
+        assertTrue(successExporter.logs.any { it.body == "persisted" })
+        assertTrue(fileSystem.list().isEmpty())
+    }
+
+    @Test
+    fun testFlushContinuesPastFailedRecords() = runTest {
+        val fileSystem = FakeTelemetryFileSystem()
+
+        // store two records using two separate processors (one record each)
+        val storingProcessor1 = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(FakeLogRecordExporter(action = { Failure })),
+            processors = listOf(FakeLogRecordProcessor()),
+        )
+        storingProcessor1.onEmit(FakeReadWriteLogRecord(body = "record-1"), context)
+        assertEquals(Success, storingProcessor1.forceFlush())
+        assertEquals(Success, storingProcessor1.shutdown())
+
+        val storingProcessor2 = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(FakeLogRecordExporter(action = { Failure })),
+            processors = listOf(FakeLogRecordProcessor()),
+        )
+        storingProcessor2.onEmit(FakeReadWriteLogRecord(body = "record-2"), context)
+        assertEquals(Success, storingProcessor2.forceFlush())
+        assertEquals(Success, storingProcessor2.shutdown())
+
+        assertEquals(2, fileSystem.list().size)
+
+        // flush with an always-failing exporter to verify both records are attempted
+        var exportCount = 0
+        val alwaysFailExporter = FakeLogRecordExporter(action = {
+            exportCount++
+            Failure
+        })
+        val flushProcessor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(alwaysFailExporter),
+            processors = listOf(FakeLogRecordProcessor()),
+        )
+        assertEquals(Success, flushProcessor.forceFlush())
+
+        // both records should have been attempted during the single flushPersisted() call
+        assertEquals(2, exportCount)
+        assertEquals(2, fileSystem.list().size)
+
+        flushProcessor.shutdown()
+    }
+
+    @Test
+    fun testFlushDeletesCorruptedRecords() = runTest {
+        val fileSystem = FakeTelemetryFileSystem()
+
+        // store a record
+        val storingProcessor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(FakeLogRecordExporter(action = { Failure })),
+            processors = listOf(FakeLogRecordProcessor()),
+        )
+        storingProcessor.onEmit(FakeReadWriteLogRecord(body = "corrupted"), context)
+        assertEquals(Success, storingProcessor.forceFlush())
+        assertEquals(Success, storingProcessor.shutdown())
+        assertTrue(fileSystem.list().isNotEmpty())
+
+        // make reads fail, simulating bad data
+        fileSystem.failReads = true
+
+        val exporter = FakeLogRecordExporter()
+        val processor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(exporter),
+            processors = listOf(FakeLogRecordProcessor()),
+        )
+        assertEquals(Success, processor.forceFlush())
+        assertEquals(Success, processor.shutdown())
+
+        // bad record should be deleted, exporter should not be called
+        assertTrue(fileSystem.list().isEmpty())
+        assertTrue(exporter.logs.isEmpty())
+    }
+
+    @Test
+    fun testConcurrentFlushSafety() = runTest {
+        val fileSystem = FakeTelemetryFileSystem()
+        var exportCount = 0
+        val exporter = FakeLogRecordExporter(
+            action = { batch ->
+                exportCount += batch.size
+                Success
+            }
+        )
+        val processor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(exporter),
+            processors = listOf(FakeLogRecordProcessor()),
+        )
+
+        repeat(3) {
+            processor.onEmit(FakeReadWriteLogRecord(body = "log-$it"), context)
+        }
+
+        // run two concurrent forceFlush calls
+        val flush1 = async { processor.forceFlush() }
+        val flush2 = async { processor.forceFlush() }
+        assertEquals(Success, flush1.await())
+        assertEquals(Success, flush2.await())
+        assertEquals(Success, processor.shutdown())
+
+        assertEquals(3, exportCount)
+        assertTrue(fileSystem.list().isEmpty())
     }
 
     private fun TestScope.createProcessor(

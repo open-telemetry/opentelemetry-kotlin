@@ -26,12 +26,6 @@
     "events": [
       {
         "name": "test",
-        "attributes": {},
-        "timestamp": 0,
-        "totalAttributesCount": 0
-      },
-      {
-        "name": "test",
         "attributes": {
           "foo": "bar"
         },
@@ -69,7 +63,7 @@
     ],
     "endTimestamp": 678,
     "ended": true,
-    "totalRecordedEvents": 2,
+    "totalRecordedEvents": 1,
     "totalRecordedLinks": 2,
     "totalAttributeCount": 2,
     "resource": {

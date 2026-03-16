@@ -113,9 +113,12 @@
     "events": [
       {
         "name": "first",
-        "attributes": {},
+        "attributes": {
+          "key1": "value",
+          "key2": "value"
+        },
         "timestamp": 0,
-        "totalAttributesCount": 0
+        "totalAttributesCount": 2
       }
     ],
     "links": [
@@ -126,8 +129,10 @@
           "traceFlags": "01",
           "traceState": {}
         },
-        "attributes": {},
-        "totalAttributeCount": 0
+        "attributes": {
+          "key1": "value"
+        },
+        "totalAttributeCount": 1
       }
     ],
     "endTimestamp": 0,

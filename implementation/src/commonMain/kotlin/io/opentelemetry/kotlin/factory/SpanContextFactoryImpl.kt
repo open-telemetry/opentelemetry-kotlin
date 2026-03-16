@@ -26,7 +26,8 @@ internal class SpanContextFactoryImpl(
         traceId: String,
         spanId: String,
         traceFlags: TraceFlags,
-        traceState: TraceState
+        traceState: TraceState,
+        isRemote: Boolean,
     ): SpanContext {
         val isValidTraceId = isValidTraceId(traceId)
         val isValidSpanId = isValidSpanId(spanId)
@@ -42,7 +43,7 @@ internal class SpanContextFactoryImpl(
             },
             traceFlags = traceFlags,
             isValid = isValidTraceId && isValidSpanId,
-            isRemote = false,
+            isRemote = isRemote,
             traceState = traceState
         )
     }
@@ -51,12 +52,14 @@ internal class SpanContextFactoryImpl(
         traceIdBytes: ByteArray,
         spanIdBytes: ByteArray,
         traceFlags: TraceFlags,
-        traceState: TraceState
+        traceState: TraceState,
+        isRemote: Boolean,
     ): SpanContext = create(
         traceIdBytes.toHexString(),
         spanIdBytes.toHexString(),
         traceFlags,
-        traceState
+        traceState,
+        isRemote,
     )
 
     private fun isValidTraceId(traceId: String): Boolean {

@@ -12,7 +12,6 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(project(":api"))
-                implementation(project(":platform-implementations"))
             }
         }
         val commonTest by getting {

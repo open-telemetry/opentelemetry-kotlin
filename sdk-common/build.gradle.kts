@@ -12,12 +12,15 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":sdk-api"))
+                implementation(project(":platform-implementations"))
+                implementation(project(":semconv"))
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
+                implementation(project(":test-fakes"))
             }
         }
         val jvmTest by getting {
