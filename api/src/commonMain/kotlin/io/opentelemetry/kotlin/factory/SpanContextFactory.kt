@@ -29,7 +29,8 @@ public interface SpanContextFactory {
         traceId: String,
         spanId: String,
         traceFlags: TraceFlags,
-        traceState: TraceState
+        traceState: TraceState,
+        isRemote: Boolean,
     ): SpanContext
 
     /**
@@ -45,6 +46,7 @@ public interface SpanContextFactory {
         traceIdBytes: ByteArray,
         spanIdBytes: ByteArray,
         traceFlags: TraceFlags,
-        traceState: TraceState
+        traceState: TraceState,
+        isRemote: Boolean,
     ): SpanContext
 }

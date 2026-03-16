@@ -33,6 +33,7 @@ internal class SpanFactoryImplTest {
             spanIdBytes = generator.generateSpanIdBytes(),
             traceState = traceStateFactory.default,
             traceFlags = traceFlagsFactory.default,
+            isRemote = false,
         )
         val span = spanFactory.fromSpanContext(spanContext)
         assertTrue(span.spanContext.isValid)
