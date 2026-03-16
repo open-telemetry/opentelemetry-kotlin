@@ -47,6 +47,7 @@ internal class TracerProviderImpl(
             spanLimitConfig = tracingConfig.spanLimits,
             idGenerator = idGenerator,
             shutdownState = shutdownState,
+            sampler = tracingConfig.sampler,
         )
     }
 

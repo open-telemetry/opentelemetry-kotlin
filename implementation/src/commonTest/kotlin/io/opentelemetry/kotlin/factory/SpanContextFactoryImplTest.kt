@@ -31,7 +31,7 @@ internal class SpanContextFactoryImplTest {
         val traceFlags = traceFlagsFactory.default
         val traceState = traceStateFactory.default
 
-        val spanContext = factory.create(traceId, spanId, traceFlags, traceState)
+        val spanContext = factory.create(traceId, spanId, traceFlags, traceState, false)
 
         assertEquals(traceId, spanContext.traceId)
         assertEquals(spanId, spanContext.spanId)
@@ -48,7 +48,7 @@ internal class SpanContextFactoryImplTest {
         val traceFlags = traceFlagsFactory.default
         val traceState = traceStateFactory.default
 
-        val spanContext = factory.create(traceId, spanId, traceFlags, traceState)
+        val spanContext = factory.create(traceId, spanId, traceFlags, traceState, false)
 
         assertEquals(traceId, spanContext.traceId)
         assertEquals(spanId, spanContext.spanId)
@@ -64,7 +64,7 @@ internal class SpanContextFactoryImplTest {
         val traceFlags = traceFlagsFactory.default
         val traceState = traceStateFactory.default
 
-        val spanContext = factory.create(traceId, spanId, traceFlags, traceState)
+        val spanContext = factory.create(traceId, spanId, traceFlags, traceState, false)
 
         assertEquals(traceId, spanContext.traceId)
         assertEquals(spanId, spanContext.spanId)
@@ -80,7 +80,7 @@ internal class SpanContextFactoryImplTest {
         val traceFlags = traceFlagsFactory.default
         val traceState = traceStateFactory.default
 
-        val spanContext = factory.create(shortTraceId, shortSpanId, traceFlags, traceState)
+        val spanContext = factory.create(shortTraceId, shortSpanId, traceFlags, traceState, false)
 
         assertEquals("00000000000000000000000000000000", spanContext.traceId)
         assertEquals("0000000000000000", spanContext.spanId)
@@ -96,7 +96,7 @@ internal class SpanContextFactoryImplTest {
         val traceFlags = traceFlagsFactory.default
         val traceState = traceStateFactory.default
 
-        val spanContext = factory.create(invalidTraceId, invalidSpanId, traceFlags, traceState)
+        val spanContext = factory.create(invalidTraceId, invalidSpanId, traceFlags, traceState, false)
 
         assertEquals("00000000000000000000000000000000", spanContext.traceId)
         assertEquals("0000000000000000", spanContext.spanId)
@@ -112,7 +112,7 @@ internal class SpanContextFactoryImplTest {
         val traceFlags = traceFlagsFactory.default
         val traceState = traceStateFactory.default
 
-        val spanContext = factory.create(traceId, spanId, traceFlags, traceState)
+        val spanContext = factory.create(traceId, spanId, traceFlags, traceState, false)
 
         assertEquals(traceId.lowercase(), spanContext.traceId)
         assertEquals(spanId.lowercase(), spanContext.spanId)
@@ -128,7 +128,7 @@ internal class SpanContextFactoryImplTest {
         val traceFlags = traceFlagsFactory.default
         val traceState = traceStateFactory.default
 
-        val spanContext = factory.create(traceId, spanId, traceFlags, traceState)
+        val spanContext = factory.create(traceId, spanId, traceFlags, traceState, false)
 
         assertEquals(traceId, spanContext.traceId)
         assertEquals(spanId, spanContext.spanId)
@@ -146,7 +146,7 @@ internal class SpanContextFactoryImplTest {
             .put("key1", "value1")
             .put("key2", "value2")
 
-        val spanContext = factory.create(traceId, spanId, customTraceFlags, customTraceState)
+        val spanContext = factory.create(traceId, spanId, customTraceFlags, customTraceState, false)
 
         assertEquals(traceId, spanContext.traceId)
         assertEquals(spanId, spanContext.spanId)
@@ -157,13 +157,39 @@ internal class SpanContextFactoryImplTest {
     }
 
     @Test
+    internal fun testCreateWithIsRemoteTrue() {
+        val traceId = "12345678901234567890123456789012"
+        val spanId = "1234567890123456"
+        val traceFlags = traceFlagsFactory.default
+        val traceState = traceStateFactory.default
+
+        val spanContext = factory.create(traceId, spanId, traceFlags, traceState, true)
+
+        assertTrue(spanContext.isRemote)
+        assertTrue(spanContext.isValid)
+    }
+
+    @Test
+    internal fun testCreateBytesWithIsRemoteTrue() {
+        val traceIdBytes = "12345678901234567890123456789012".hexToByteArray()
+        val spanIdBytes = "1234567890123456".hexToByteArray()
+        val traceFlags = traceFlagsFactory.default
+        val traceState = traceStateFactory.default
+
+        val spanContext = factory.create(traceIdBytes, spanIdBytes, traceFlags, traceState, true)
+
+        assertTrue(spanContext.isRemote)
+        assertTrue(spanContext.isValid)
+    }
+
+    @Test
     internal fun testStatePreservedWithInvalidIds() {
         val invalidTraceId = "invalid"
         val invalidSpanId = "bad"
         val customTraceFlags = traceFlagsFactory.fromHex("01")
         val customTraceState = traceStateFactory.default.put("key", "value")
 
-        val spanContext = factory.create(invalidTraceId, invalidSpanId, customTraceFlags, customTraceState)
+        val spanContext = factory.create(invalidTraceId, invalidSpanId, customTraceFlags, customTraceState, false)
 
         assertEquals("00000000000000000000000000000000", spanContext.traceId)
         assertEquals("0000000000000000", spanContext.spanId)

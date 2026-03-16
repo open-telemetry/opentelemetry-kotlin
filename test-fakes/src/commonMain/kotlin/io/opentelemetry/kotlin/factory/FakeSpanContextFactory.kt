@@ -13,23 +13,27 @@ class FakeSpanContextFactory : SpanContextFactory {
         traceId: String,
         spanId: String,
         traceFlags: TraceFlags,
-        traceState: TraceState
+        traceState: TraceState,
+        isRemote: Boolean,
     ): SpanContext = FakeSpanContext(
         traceId.hexToByteArray(),
         spanId.hexToByteArray(),
         traceFlags,
-        traceState
+        traceState,
+        isRemote,
     )
 
     override fun create(
         traceIdBytes: ByteArray,
         spanIdBytes: ByteArray,
         traceFlags: TraceFlags,
-        traceState: TraceState
+        traceState: TraceState,
+        isRemote: Boolean,
     ): SpanContext = FakeSpanContext(
         traceIdBytes,
         spanIdBytes,
         traceFlags,
-        traceState
+        traceState,
+        isRemote,
     )
 }

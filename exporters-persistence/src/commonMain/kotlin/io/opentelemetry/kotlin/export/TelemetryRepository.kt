@@ -29,4 +29,9 @@ internal interface TelemetryRepository<T> {
      * Deletes the given record from the repository, if it is present.
      */
     fun delete(record: PersistedTelemetryRecord)
+
+    /**
+     * Returns all persisted records, sorted oldest-first.
+     */
+    fun listAll(): List<PersistedTelemetryRecord>
 }
