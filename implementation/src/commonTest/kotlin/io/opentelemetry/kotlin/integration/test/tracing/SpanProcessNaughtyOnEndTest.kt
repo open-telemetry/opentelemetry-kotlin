@@ -32,8 +32,9 @@ internal class SpanProcessNaughtyOnEndTest {
         harness.config.spanProcessors.add(NaughtySpanProcessor())
         harness.tracer.startSpan("span") {
             setStringAttribute("key", "value")
-            addEvent("test")
             addLink(FakeSpanContext.INVALID)
+        }.apply {
+            addEvent("test")
         }.end(500)
         harness.assertSpans(
             expectedCount = 1,
