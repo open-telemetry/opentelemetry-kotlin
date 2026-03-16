@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
+import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
@@ -41,6 +42,7 @@ internal fun createOpenTelemetryImpl(
     config: OpenTelemetryConfigDsl.() -> Unit,
     idGenerator: IdGenerator = IdGeneratorImpl(),
 ): OpenTelemetry {
+    val resourceFactory = ResourceFactoryImpl()
     val traceFlags = TraceFlagsFactoryImpl()
     val traceState = TraceStateFactoryImpl()
     val spanContext = SpanContextFactoryImpl(idGenerator, traceFlags, traceState)
@@ -75,5 +77,6 @@ internal fun createOpenTelemetryImpl(
         context = contextFactory,
         span = span,
         idGenerator = idGenerator,
+        resource = resourceFactory,
     )
 }

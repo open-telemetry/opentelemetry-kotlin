@@ -12,6 +12,7 @@ public abstract interface class io/opentelemetry/kotlin/InstrumentationScopeInfo
 public abstract interface class io/opentelemetry/kotlin/OpenTelemetrySdk : io/opentelemetry/kotlin/OpenTelemetry {
 	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
 	public abstract fun getIdGenerator ()Lio/opentelemetry/kotlin/factory/IdGenerator;
+	public abstract fun getResource ()Lio/opentelemetry/kotlin/factory/ResourceFactory;
 }
 
 public abstract interface class io/opentelemetry/kotlin/context/ImplicitContextStorage {
@@ -52,6 +53,15 @@ public abstract interface class io/opentelemetry/kotlin/factory/IdGenerator {
 public final class io/opentelemetry/kotlin/factory/IdGeneratorKt {
 	public static final fun hexToByteArray (Ljava/lang/String;)[B
 	public static final fun toHexString ([B)Ljava/lang/String;
+}
+
+public abstract interface class io/opentelemetry/kotlin/factory/ResourceFactory {
+	public abstract fun create (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/resource/Resource;
+	public abstract fun getEmpty ()Lio/opentelemetry/kotlin/resource/Resource;
+}
+
+public final class io/opentelemetry/kotlin/factory/ResourceFactory$DefaultImpls {
+	public static synthetic fun create$default (Lio/opentelemetry/kotlin/factory/ResourceFactory;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/resource/Resource;
 }
 
 public abstract interface annotation class io/opentelemetry/kotlin/init/ConfigDsl : java/lang/annotation/Annotation {
@@ -166,6 +176,7 @@ public abstract interface class io/opentelemetry/kotlin/resource/MutableResource
 public abstract interface class io/opentelemetry/kotlin/resource/Resource : io/opentelemetry/kotlin/attributes/AttributeContainer {
 	public abstract fun asNewResource (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/resource/Resource;
 	public abstract fun getSchemaUrl ()Ljava/lang/String;
+	public abstract fun merge (Lio/opentelemetry/kotlin/resource/Resource;)Lio/opentelemetry/kotlin/resource/Resource;
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanData : io/opentelemetry/kotlin/attributes/AttributeContainer {
@@ -200,6 +211,9 @@ public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadWriteS
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadableSpan : io/opentelemetry/kotlin/tracing/data/SpanData {
 	public abstract fun toSpanData ()Lio/opentelemetry/kotlin/tracing/data/SpanData;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEvent : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanEventData {
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLink : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanLinkData {

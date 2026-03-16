@@ -50,6 +50,11 @@ private class DeserializedResource(
     override fun asNewResource(action: MutableResource.() -> Unit): Resource {
         throw UnsupportedOperationException()
     }
+
+    override fun merge(other: Resource): Resource = DeserializedResource(
+        attributes = attributes + other.attributes,
+        schemaUrl = other.schemaUrl ?: schemaUrl,
+    )
 }
 
 internal class DeserializedSpanContext(

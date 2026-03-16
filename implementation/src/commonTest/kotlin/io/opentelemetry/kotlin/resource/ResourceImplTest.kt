@@ -75,4 +75,66 @@ internal class ResourceImplTest {
         }
         assertEquals(DEFAULT_ATTRIBUTE_LIMIT, resource.attributes.size)
     }
+
+    @Test
+    fun testMergeNonOverlapping() {
+        val base = ResourceImpl(AttributesModel(attrs = mutableMapOf("a" to "1")), "https://example.com/base")
+        val other = ResourceImpl(AttributesModel(attrs = mutableMapOf("b" to "2")), "https://example.com/other")
+        val merged = base.merge(other)
+        assertEquals("1", merged.attributes["a"])
+        assertEquals("2", merged.attributes["b"])
+    }
+
+    @Test
+    fun testMergeOtherWinsOnConflict() {
+        val base = ResourceImpl(AttributesModel(attrs = mutableMapOf("key" to "base")), null)
+        val other = ResourceImpl(AttributesModel(attrs = mutableMapOf("key" to "other")), null)
+        val merged = base.merge(other)
+        assertEquals("other", merged.attributes["key"])
+    }
+
+    @Test
+    fun testMergeSchemaUrlBothNull() {
+        val base = ResourceImpl(AttributesModel(), null)
+        val other = ResourceImpl(AttributesModel(), null)
+        assertNull(base.merge(other).schemaUrl)
+    }
+
+    @Test
+    fun testMergeSchemaUrlBaseNull() {
+        val base = ResourceImpl(AttributesModel(), null)
+        val other = ResourceImpl(AttributesModel(), "https://example.com/other")
+        assertEquals("https://example.com/other", base.merge(other).schemaUrl)
+    }
+
+    @Test
+    fun testMergeSchemaUrlOtherNull() {
+        val base = ResourceImpl(AttributesModel(), "https://example.com/base")
+        val other = ResourceImpl(AttributesModel(), null)
+        assertEquals("https://example.com/base", base.merge(other).schemaUrl)
+    }
+
+    @Test
+    fun testMergeSchemaUrlSame() {
+        val base = ResourceImpl(AttributesModel(), "https://example.com/schema")
+        val other = ResourceImpl(AttributesModel(), "https://example.com/schema")
+        assertEquals("https://example.com/schema", base.merge(other).schemaUrl)
+    }
+
+    @Test
+    fun testMergeSchemaUrlDifferentOtherWins() {
+        val base = ResourceImpl(AttributesModel(), "https://example.com/base")
+        val other = ResourceImpl(AttributesModel(), "https://example.com/other")
+        assertEquals("https://example.com/other", base.merge(other).schemaUrl)
+    }
+
+    @Test
+    fun testMergeAttributeLimit() {
+        val baseAttrs = (0 until DEFAULT_ATTRIBUTE_LIMIT).associate { "base$it" to "v$it" }
+        val otherAttrs = mapOf("extra" to "value")
+        val base = ResourceImpl(AttributesModel(attrs = baseAttrs.toMutableMap()), null)
+        val other = ResourceImpl(AttributesModel(attrs = otherAttrs.toMutableMap()), null)
+        val merged = base.merge(other)
+        assertEquals(DEFAULT_ATTRIBUTE_LIMIT, merged.attributes.size)
+    }
 }

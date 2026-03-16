@@ -204,9 +204,6 @@ public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanContex
 public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanCreationAction : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/model/SpanLinkCreator {
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEvent : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanEventData {
-}
-
 public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEventCreator {
 	public abstract fun addEvent (Ljava/lang/String;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;)V
 }
