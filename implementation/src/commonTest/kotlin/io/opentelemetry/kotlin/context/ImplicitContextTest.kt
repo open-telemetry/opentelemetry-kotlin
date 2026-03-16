@@ -5,7 +5,9 @@ import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 internal class ImplicitContextTest {
 
@@ -53,6 +55,35 @@ internal class ImplicitContextTest {
 
         scope.detach()
         assertSame(factory.root(), factory.implicit())
+    }
+
+    @Test
+    fun testDetachReturnsTrueOnSuccess() {
+        val newCtx = factory.root().with(mapOf("key" to "value"))
+        val scope = newCtx.attach()
+        assertTrue(scope.detach())
+    }
+
+    @Test
+    fun testDetachReturnsFalseWhenAlreadyDetached() {
+        val newCtx = factory.root().with(mapOf("key" to "value"))
+        val scope = newCtx.attach()
+        assertTrue(scope.detach())
+        assertFalse(scope.detach())
+    }
+
+    @Test
+    fun testDetachReturnsFalseWhenOutOfOrder() {
+        val ctx1 = factory.root().with(mapOf("key" to "value"))
+        val scope1 = ctx1.attach()
+        val ctx2 = factory.root().with(mapOf("another" to "value"))
+        val scope2 = ctx2.attach()
+
+        // scope1 is out of order — ctx2 is current
+        assertFalse(scope1.detach())
+
+        // scope2 is still detachable
+        assertTrue(scope2.detach())
     }
 
     @Test
