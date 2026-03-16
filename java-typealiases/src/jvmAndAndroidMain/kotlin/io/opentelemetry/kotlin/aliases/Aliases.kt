@@ -57,6 +57,9 @@ import io.opentelemetry.sdk.trace.data.LinkData
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.data.StatusData
 import io.opentelemetry.sdk.trace.export.SpanExporter
+import io.opentelemetry.sdk.trace.samplers.Sampler
+import io.opentelemetry.sdk.trace.samplers.SamplingDecision
+import io.opentelemetry.sdk.trace.samplers.SamplingResult
 
 typealias OtelJavaAttributes = Attributes
 typealias OtelJavaAttributeKey<T> = AttributeKey<T>
@@ -113,3 +116,6 @@ typealias OtelJavaLogRecordBuilder = LogRecordBuilder
 typealias OtelJavaResourceBuilder = ResourceBuilder
 typealias OtelJavaSpanLimits = SpanLimits
 typealias OtelJavaLogLimits = LogLimits
+typealias OtelJavaSampler = Sampler
+typealias OtelJavaSamplingResult = SamplingResult
+typealias OtelJavaSamplingDecision = SamplingDecision

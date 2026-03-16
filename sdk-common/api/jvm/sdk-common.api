@@ -1,3 +1,7 @@
+public final class io/opentelemetry/kotlin/attributes/ExceptionAttributesMutatorExtKt {
+	public static final fun setExceptionAttributes (Lio/opentelemetry/kotlin/attributes/AttributesMutator;Ljava/lang/Throwable;)V
+}
+
 public final class io/opentelemetry/kotlin/export/MutableShutdownState : io/opentelemetry/kotlin/export/ShutdownState {
 	public fun <init> ()V
 	public fun isShutdown ()Z

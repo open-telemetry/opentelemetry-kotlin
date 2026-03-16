@@ -113,4 +113,8 @@ class FakeReadWriteSpan(
     override fun toSpanData(): SpanData {
         throw UnsupportedOperationException()
     }
+
+    override fun recordException(exception: Throwable, attributes: (AttributesMutator.() -> Unit)?) {
+        throw UnsupportedOperationException()
+    }
 }
