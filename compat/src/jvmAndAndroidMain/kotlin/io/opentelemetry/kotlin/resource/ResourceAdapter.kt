@@ -38,7 +38,7 @@ internal class ResourceAdapter(
     }
 }
 
-@Suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST", "SpreadOperator")
 private fun OtelJavaResourceBuilder.putTyped(key: String, value: Any) {
     when (value) {
         is String -> put(key, value)
