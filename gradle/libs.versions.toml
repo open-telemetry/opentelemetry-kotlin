@@ -28,7 +28,7 @@ protobufPlugin = "0.9.6"
 wire = "6.0.0"
 buildKonfig = "0.17.1"
 composeMultiplatform = "1.10.2"
-androidxActivityCompose = "1.12.4"
+androidxActivityCompose = "1.13.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
