@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.init.config
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
+import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
+import io.opentelemetry.kotlin.tracing.sampling.Sampler
 
 /**
  * Configuration for the Tracing API.
@@ -23,5 +25,10 @@ internal class TracingConfig(
     /**
      * A resource to append to spans.
      */
-    val resource: Resource
+    val resource: Resource,
+
+    /**
+     * The sampler to use when creating spans.
+     */
+    val sampler: Sampler = AlwaysOnSampler,
 )

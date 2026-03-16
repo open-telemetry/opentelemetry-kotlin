@@ -40,7 +40,7 @@ public abstract interface class io/opentelemetry/kotlin/context/ContextKey {
 }
 
 public abstract interface class io/opentelemetry/kotlin/context/Scope {
-	public abstract fun detach ()V
+	public abstract fun detach ()Z
 }
 
 public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
@@ -50,8 +50,8 @@ public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
 }
 
 public abstract interface class io/opentelemetry/kotlin/factory/SpanContextFactory {
-	public abstract fun create (Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/model/TraceFlags;Lio/opentelemetry/kotlin/tracing/model/TraceState;)Lio/opentelemetry/kotlin/tracing/model/SpanContext;
-	public abstract fun create ([B[BLio/opentelemetry/kotlin/tracing/model/TraceFlags;Lio/opentelemetry/kotlin/tracing/model/TraceState;)Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+	public abstract fun create (Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/model/TraceFlags;Lio/opentelemetry/kotlin/tracing/model/TraceState;Z)Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+	public abstract fun create ([B[BLio/opentelemetry/kotlin/tracing/model/TraceFlags;Lio/opentelemetry/kotlin/tracing/model/TraceState;Z)Lio/opentelemetry/kotlin/tracing/model/SpanContext;
 	public abstract fun getInvalid ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
 }
 
@@ -181,8 +181,13 @@ public abstract interface class io/opentelemetry/kotlin/tracing/model/Span : io/
 	public abstract fun getParent ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
 	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
 	public abstract fun isRecording ()Z
+	public abstract fun recordException (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun setName (Ljava/lang/String;)V
 	public abstract fun setStatus (Lio/opentelemetry/kotlin/tracing/data/StatusData;)V
+}
+
+public final class io/opentelemetry/kotlin/tracing/model/Span$DefaultImpls {
+	public static synthetic fun recordException$default (Lio/opentelemetry/kotlin/tracing/model/Span;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanContext {
@@ -196,7 +201,7 @@ public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanContex
 	public abstract fun isValid ()Z
 }
 
-public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanCreationAction : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/model/SpanEventCreator, io/opentelemetry/kotlin/tracing/model/SpanLinkCreator {
+public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanCreationAction : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/model/SpanLinkCreator {
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEventCreator {

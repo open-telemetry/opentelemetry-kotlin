@@ -37,14 +37,15 @@ internal class OtelJavaSpanProcessorAdapterTest {
                 startTimestamp = fakeTime,
                 action = {
                     setStringAttribute("key", "value")
-                    addEvent("event", fakeTime) {
-                        setStringAttribute("eventAttr", "value")
-                    }
                     addLink(fakeInProgressOtelJavaSpanData.spanContext.toOtelKotlinSpanContext()) {
                         setStringAttribute("linkAttr", "value")
                     }
                 }
-            )
+            ).apply {
+                addEvent("event", fakeTime) {
+                    setStringAttribute("eventAttr", "value")
+                }
+            }
             config.spanProcessors.add(
                 FakeSpanProcessor(
                     startAction = assertInputForSpan(

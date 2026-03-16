@@ -57,4 +57,16 @@ public interface Span : AttributesMutator, SpanLinkCreator, SpanEventCreator {
      */
     @ThreadSafe
     public fun end(timestamp: Long)
+
+    /**
+     * Records an exception on this span as an event, following the OpenTelemetry
+     * semantic conventions for exception events.
+     *
+     * https://opentelemetry.io/docs/specs/otel/trace/exceptions/
+     */
+    @ThreadSafe
+    public fun recordException(
+        exception: Throwable,
+        attributes: (AttributesMutator.() -> Unit)? = null,
+    )
 }

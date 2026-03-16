@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.compositeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.stdoutLogRecordExporter
+import io.opentelemetry.kotlin.sdkDefaultAttributes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -21,7 +22,7 @@ internal class LoggerProviderConfigImplTest {
     fun testDefaultLoggingConfig() {
         val cfg = LoggerProviderConfigImpl(clock).generateLoggingConfig()
         assertTrue(cfg.processors.isEmpty())
-        assertTrue(cfg.resource.attributes.isEmpty())
+        assertEquals(sdkDefaultAttributes, cfg.resource.attributes)
         assertNull(cfg.resource.schemaUrl)
 
         with(cfg.logLimits) {
@@ -53,7 +54,7 @@ internal class LoggerProviderConfigImplTest {
 
         assertNotNull(cfg.processors.single())
         assertEquals(schemaUrl, cfg.resource.schemaUrl)
-        assertEquals(mapOf("key" to "value"), cfg.resource.attributes)
+        assertEquals(sdkDefaultAttributes + mapOf("key" to "value"), cfg.resource.attributes)
 
         with(cfg.logLimits) {
             assertEquals(attrCount, attributeCountLimit)
@@ -76,7 +77,7 @@ internal class LoggerProviderConfigImplTest {
         val cfg = LoggerProviderConfigImpl(clock).apply {
             resource(mapOf("extra" to true))
         }.generateLoggingConfig()
-        assertEquals(mapOf("extra" to true), cfg.resource.attributes)
+        assertEquals(sdkDefaultAttributes + mapOf("extra" to true), cfg.resource.attributes)
     }
 
     @Test
@@ -84,7 +85,7 @@ internal class LoggerProviderConfigImplTest {
         val cfg = LoggerProviderConfigImpl(clock).apply {
             resource(mapOf("key" to "value"))
         }.generateLoggingConfig()
-        assertEquals(mapOf("key" to "value"), cfg.resource.attributes)
+        assertEquals(sdkDefaultAttributes + mapOf("key" to "value"), cfg.resource.attributes)
     }
 
     @Test

@@ -12,6 +12,7 @@ public abstract interface class io/opentelemetry/kotlin/InstrumentationScopeInfo
 public abstract interface class io/opentelemetry/kotlin/OpenTelemetrySdk : io/opentelemetry/kotlin/OpenTelemetry {
 	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
 	public abstract fun getIdGenerator ()Lio/opentelemetry/kotlin/factory/IdGenerator;
+	public abstract fun getResource ()Lio/opentelemetry/kotlin/factory/ResourceFactory;
 }
 
 public abstract interface class io/opentelemetry/kotlin/context/ImplicitContextStorage {
@@ -52,6 +53,15 @@ public abstract interface class io/opentelemetry/kotlin/factory/IdGenerator {
 public final class io/opentelemetry/kotlin/factory/IdGeneratorKt {
 	public static final fun hexToByteArray (Ljava/lang/String;)[B
 	public static final fun toHexString ([B)Ljava/lang/String;
+}
+
+public abstract interface class io/opentelemetry/kotlin/factory/ResourceFactory {
+	public abstract fun create (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/resource/Resource;
+	public abstract fun getEmpty ()Lio/opentelemetry/kotlin/resource/Resource;
+}
+
+public final class io/opentelemetry/kotlin/factory/ResourceFactory$DefaultImpls {
+	public static synthetic fun create$default (Lio/opentelemetry/kotlin/factory/ResourceFactory;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/resource/Resource;
 }
 
 public abstract interface annotation class io/opentelemetry/kotlin/init/ConfigDsl : java/lang/annotation/Annotation {
@@ -112,6 +122,8 @@ public abstract interface class io/opentelemetry/kotlin/init/TraceExportConfigDs
 
 public abstract interface class io/opentelemetry/kotlin/init/TracerProviderConfigDsl : io/opentelemetry/kotlin/init/ResourceConfigDsl {
 	public abstract fun export (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun sampler (Lio/opentelemetry/kotlin/tracing/sampling/BuiltInSampler;)V
+	public abstract fun sampler (Lkotlin/jvm/functions/Function0;)V
 	public abstract fun spanLimits (Lkotlin/jvm/functions/Function1;)V
 }
 
@@ -164,6 +176,7 @@ public abstract interface class io/opentelemetry/kotlin/resource/MutableResource
 public abstract interface class io/opentelemetry/kotlin/resource/Resource : io/opentelemetry/kotlin/attributes/AttributeContainer {
 	public abstract fun asNewResource (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/resource/Resource;
 	public abstract fun getSchemaUrl ()Ljava/lang/String;
+	public abstract fun merge (Lio/opentelemetry/kotlin/resource/Resource;)Lio/opentelemetry/kotlin/resource/Resource;
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanData : io/opentelemetry/kotlin/attributes/AttributeContainer {
@@ -206,6 +219,13 @@ public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEvent 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLink : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanLinkData {
 }
 
+public final class io/opentelemetry/kotlin/tracing/sampling/BuiltInSampler : java/lang/Enum {
+	public static final field ALWAYS_ON Lio/opentelemetry/kotlin/tracing/sampling/BuiltInSampler;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/sampling/BuiltInSampler;
+	public static fun values ()[Lio/opentelemetry/kotlin/tracing/sampling/BuiltInSampler;
+}
+
 public abstract interface class io/opentelemetry/kotlin/tracing/sampling/Sampler {
 	public abstract fun getDescription ()Ljava/lang/String;
 	public abstract fun shouldSample (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/model/SpanKind;Lio/opentelemetry/kotlin/attributes/AttributeContainer;Ljava/util/List;)Lio/opentelemetry/kotlin/tracing/sampling/SamplingResult;
@@ -213,6 +233,7 @@ public abstract interface class io/opentelemetry/kotlin/tracing/sampling/Sampler
 
 public abstract interface class io/opentelemetry/kotlin/tracing/sampling/SamplingResult {
 	public abstract fun getAttributes ()Lio/opentelemetry/kotlin/attributes/AttributeContainer;
+	public abstract fun getDecision ()Lio/opentelemetry/kotlin/tracing/sampling/SamplingResult$Decision;
 	public abstract fun getTraceState ()Lio/opentelemetry/kotlin/tracing/model/TraceState;
 }
 

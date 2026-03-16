@@ -26,7 +26,8 @@ internal class SpanContextFactoryTest {
             traceId,
             spanId,
             traceFlags,
-            traceState
+            traceState,
+            false,
         )
         assertEquals(traceId.toHexString(), spanContext.traceIdBytes.toHexString())
         assertEquals(spanId.toHexString(), spanContext.spanIdBytes.toHexString())

@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
+import io.opentelemetry.kotlin.factory.ResourceFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
@@ -19,4 +20,5 @@ internal class CompatOpenTelemetryImpl(
     override val context: ContextFactory,
     override val span: SpanFactory,
     override val idGenerator: IdGenerator,
+    override val resource: ResourceFactory,
 ) : OpenTelemetrySdk

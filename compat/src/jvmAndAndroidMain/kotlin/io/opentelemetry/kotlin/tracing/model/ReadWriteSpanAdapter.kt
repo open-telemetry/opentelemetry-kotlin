@@ -91,4 +91,12 @@ internal class ReadWriteSpanAdapter(
     override fun setDoubleListAttribute(key: String, value: List<Double>) {
         impl.setAttribute(OtelJavaAttributeKey.doubleArrayKey(key), value)
     }
+
+    override fun recordException(exception: Throwable, attributes: (AttributesMutator.() -> Unit)?) {
+        val container = CompatAttributesModel()
+        if (attributes != null) {
+            attributes(container)
+        }
+        impl.recordException(exception, container.otelJavaAttributes())
+    }
 }
