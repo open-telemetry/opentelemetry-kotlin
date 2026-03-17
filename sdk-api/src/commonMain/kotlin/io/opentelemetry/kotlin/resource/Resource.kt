@@ -22,4 +22,12 @@ public interface Resource : AttributeContainer {
      * Creates a new resource using the current instance as a template.
      */
     public fun asNewResource(action: MutableResource.() -> Unit): Resource
+
+    /**
+     * Merges this resource with [other], returning a new [Resource].
+     * Properties on [other] take precedence in the event of a conflict when merging.
+     *
+     * https://opentelemetry.io/docs/specs/otel/resource/sdk/#merge
+     */
+    public fun merge(other: Resource): Resource
 }

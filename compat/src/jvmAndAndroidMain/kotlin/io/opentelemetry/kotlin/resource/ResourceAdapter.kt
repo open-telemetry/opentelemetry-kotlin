@@ -18,8 +18,40 @@ internal class ResourceAdapter(
         impl.schemaUrl?.let(builder::setSchemaUrl)
 
         impl.attributes.forEach {
-            builder.put(it.key, it.value.toString())
+            builder.putTyped(it.key, it.value)
         }
         return ResourceAdapter(builder.build())
+    }
+
+    override fun merge(other: Resource): Resource {
+        val mergedAttrs = attributes + other.attributes
+        val mergedSchema = when {
+            schemaUrl == null -> other.schemaUrl
+            other.schemaUrl == null -> schemaUrl
+            schemaUrl == other.schemaUrl -> schemaUrl
+            else -> other.schemaUrl
+        }
+        val builder = OtelJavaResourceBuilder()
+        mergedSchema?.let(builder::setSchemaUrl)
+        mergedAttrs.forEach { builder.putTyped(it.key, it.value) }
+        return ResourceAdapter(builder.build())
+    }
+}
+
+@Suppress("UNCHECKED_CAST", "SpreadOperator")
+private fun OtelJavaResourceBuilder.putTyped(key: String, value: Any) {
+    when (value) {
+        is String -> put(key, value)
+        is Long -> put(key, value)
+        is Double -> put(key, value)
+        is Boolean -> put(key, value)
+        is List<*> -> when {
+            value.all { it is String } -> put(key, *value.map { it as String }.toTypedArray())
+            value.all { it is Long } -> put(key, *value.map { it as Long }.toLongArray())
+            value.all { it is Double } -> put(key, *value.map { it as Double }.toDoubleArray())
+            value.all { it is Boolean } -> put(key, *value.map { it as Boolean }.toBooleanArray())
+            else -> put(key, value.toString())
+        }
+        else -> put(key, value.toString())
     }
 }

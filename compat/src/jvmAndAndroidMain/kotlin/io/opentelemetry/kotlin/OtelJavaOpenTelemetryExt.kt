@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
 import io.opentelemetry.kotlin.clock.ClockAdapter
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
+import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.factory.CompatTraceFlagsFactory
@@ -42,5 +43,6 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(): OpenTelemetry {
         context = contextFactory,
         span = span,
         idGenerator = idGenerator,
+        resource = CompatResourceFactory,
     )
 }
