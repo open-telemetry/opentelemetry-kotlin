@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.export.DelegatingTelemetryCloseable
+import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
@@ -28,15 +28,15 @@ internal class TracerProviderImpl(
 ) : TracerProvider, TelemetryCloseable {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
-    private val closeable: DelegatingTelemetryCloseable = DelegatingTelemetryCloseable()
+    private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(
+        tracingConfig.processors,
+    )
     private val noopTracer = NoopOpenTelemetry.tracerProvider.getTracer("")
 
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
-        val processor = tracingConfig.processors.firstOrNull()
-        processor?.let(closeable::add)
         TracerImpl(
             clock = clock,
-            processor = processor,
+            processor = tracingConfig.processors.firstOrNull(),
             contextFactory = contextFactory,
             spanContextFactory = spanContextFactory,
             traceFlagsFactory = traceFlagsFactory,

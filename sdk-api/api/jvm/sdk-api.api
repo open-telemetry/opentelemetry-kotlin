@@ -27,6 +27,28 @@ public final class io/opentelemetry/kotlin/context/ImplicitContextStorageMode : 
 	public static fun values ()[Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
 }
 
+public final class io/opentelemetry/kotlin/error/NoopSdkErrorHandler : io/opentelemetry/kotlin/error/SdkErrorHandler {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/error/NoopSdkErrorHandler;
+	public fun onApiMisuse (Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;)V
+	public fun onSdkCodeError (Ljava/lang/Throwable;Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;)V
+	public fun onUserCodeError (Ljava/lang/Throwable;Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/error/SdkErrorHandler {
+	public abstract fun onApiMisuse (Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;)V
+	public abstract fun onSdkCodeError (Ljava/lang/Throwable;Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;)V
+	public abstract fun onUserCodeError (Ljava/lang/Throwable;Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;)V
+}
+
+public final class io/opentelemetry/kotlin/error/SdkErrorSeverity : java/lang/Enum {
+	public static final field ERROR Lio/opentelemetry/kotlin/error/SdkErrorSeverity;
+	public static final field INFO Lio/opentelemetry/kotlin/error/SdkErrorSeverity;
+	public static final field WARNING Lio/opentelemetry/kotlin/error/SdkErrorSeverity;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/error/SdkErrorSeverity;
+	public static fun values ()[Lio/opentelemetry/kotlin/error/SdkErrorSeverity;
+}
+
 public abstract class io/opentelemetry/kotlin/export/OperationResultCode {
 }
 

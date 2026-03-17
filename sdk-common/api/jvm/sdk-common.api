@@ -1,5 +1,17 @@
-public final class io/opentelemetry/kotlin/attributes/ExceptionAttributesMutatorExtKt {
+public final class io/opentelemetry/kotlin/attributes/ExceptionAttributesExtKt {
 	public static final fun setExceptionAttributes (Lio/opentelemetry/kotlin/attributes/AttributesMutator;Ljava/lang/Throwable;)V
+}
+
+public final class io/opentelemetry/kotlin/export/BatchExportOperationKt {
+	public static final fun batchExportOperation (Ljava/util/List;Lio/opentelemetry/kotlin/error/SdkErrorHandler;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/export/OperationResultCode;
+	public static final fun batchExportOperationSuspend (Ljava/util/List;Lio/opentelemetry/kotlin/error/SdkErrorHandler;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/opentelemetry/kotlin/export/CompositeTelemetryCloseable : io/opentelemetry/kotlin/export/TelemetryCloseable {
+	public fun <init> (Ljava/util/List;Lio/opentelemetry/kotlin/error/SdkErrorHandler;)V
+	public synthetic fun <init> (Ljava/util/List;Lio/opentelemetry/kotlin/error/SdkErrorHandler;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun forceFlush (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun shutdown (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/opentelemetry/kotlin/export/MutableShutdownState : io/opentelemetry/kotlin/export/ShutdownState {
