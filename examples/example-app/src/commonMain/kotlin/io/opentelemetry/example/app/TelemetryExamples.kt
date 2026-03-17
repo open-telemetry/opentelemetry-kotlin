@@ -59,19 +59,17 @@ private fun demonstrateBasicSpan(tracer: Tracer) {
  * Creates a complex span with attributes and events.
  */
 private fun demonstrateComplexSpan(tracer: Tracer) {
-    val span = // Add an event to mark when the request started
-        tracer.startSpan(
+    val span = tracer.startSpan(
             name = "http-request",
             spanKind = SpanKind.CLIENT,
-            // Add an event to mark when the request started
             action = {
                 setStringAttribute(HttpAttributes.HTTP_REQUEST_METHOD, "GET")
                 setStringAttribute(UrlAttributes.URL_FULL, "https://api.example.com/users/123")
                 setLongAttribute("net.peer.port", 443L)
-
-                // Add an event to mark when the request started
-                addEvent("request-started")
             })
+
+    // Add an event to mark when the request started
+    span.addEvent("request-started")
 
     // Add more attributes during span lifetime
     span.setLongAttribute(HttpAttributes.HTTP_RESPONSE_STATUS_CODE, 200L)

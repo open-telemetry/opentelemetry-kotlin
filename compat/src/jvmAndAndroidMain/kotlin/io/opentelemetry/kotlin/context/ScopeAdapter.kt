@@ -5,5 +5,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaScope
 internal class ScopeAdapter(
     private val impl: OtelJavaScope
 ) : Scope {
-    override fun detach() = impl.close()
+    override fun detach(): Boolean {
+        impl.close()
+        return true
+    }
 }

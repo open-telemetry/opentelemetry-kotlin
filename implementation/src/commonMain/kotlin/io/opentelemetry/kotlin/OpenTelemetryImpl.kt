@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
+import io.opentelemetry.kotlin.factory.ResourceFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
@@ -25,6 +26,7 @@ internal class OpenTelemetryImpl(
     override val context: ContextFactory,
     override val span: SpanFactory,
     override val idGenerator: IdGenerator,
+    override val resource: ResourceFactory,
     private val timeoutMs: Long = 3000,
 ) : OpenTelemetrySdk, TelemetryCloseable {
 

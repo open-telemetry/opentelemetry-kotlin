@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaStatusCode
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
 import io.opentelemetry.kotlin.tracing.model.SpanAdapter
@@ -25,6 +26,8 @@ internal class ContextRetrievalTest {
     private lateinit var kotlinDecorator: Context
     private lateinit var javaDecorator: OtelJavaContext
 
+    private val contextFactory = CompatContextFactory()
+
     @Before
     fun setUp() {
         impl = OtelJavaContext.current()
@@ -35,7 +38,7 @@ internal class ContextRetrievalTest {
     @Test
     fun `store and retrieve explicit key from context`() {
         // assert that values are stored via one layer
-        val kotlinKey = kotlinDecorator.createKey<String>("kotlin")
+        val kotlinKey = contextFactory.createKey<String>("kotlin")
         val kotlinValue = "kotlin_value"
         val kotlinCtx = kotlinDecorator.set(kotlinKey, kotlinValue)
         assertEquals(kotlinValue, kotlinCtx.get(kotlinKey))

@@ -5,8 +5,8 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.tracing.TracingDsl
 
 /**
- * Allows attributes, links, and events to be configured at span creation time.
+ * Allows attributes and links to be configured at span creation time.
  */
 @ExperimentalApi
 @TracingDsl
-public interface SpanCreationAction : AttributesMutator, SpanLinkCreator, SpanEventCreator
+public interface SpanCreationAction : AttributesMutator, SpanLinkCreator

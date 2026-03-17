@@ -38,7 +38,6 @@ public abstract interface class io/opentelemetry/kotlin/attributes/MutableAttrib
 
 public abstract interface class io/opentelemetry/kotlin/context/Context {
 	public abstract fun attach ()Lio/opentelemetry/kotlin/context/Scope;
-	public abstract fun createKey (Ljava/lang/String;)Lio/opentelemetry/kotlin/context/ContextKey;
 	public abstract fun get (Lio/opentelemetry/kotlin/context/ContextKey;)Ljava/lang/Object;
 	public abstract fun set (Lio/opentelemetry/kotlin/context/ContextKey;Ljava/lang/Object;)Lio/opentelemetry/kotlin/context/Context;
 }
@@ -80,6 +79,7 @@ public abstract interface class io/opentelemetry/kotlin/export/TelemetryCloseabl
 }
 
 public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
+	public abstract fun createKey (Ljava/lang/String;)Lio/opentelemetry/kotlin/context/ContextKey;
 	public abstract fun implicitContext ()Lio/opentelemetry/kotlin/context/Context;
 	public abstract fun root ()Lio/opentelemetry/kotlin/context/Context;
 	public abstract fun storeSpan (Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/model/Span;)Lio/opentelemetry/kotlin/context/Context;

@@ -3,6 +3,9 @@
     "resource": {
       "schemaUrl": "https://example.com/foo",
       "attributes": {
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.language": "kotlin",
+        "telemetry.sdk.version": "UNKNOWN",
         "resource.foo": "bar"
       }
     },

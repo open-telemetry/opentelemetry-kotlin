@@ -26,6 +26,7 @@ class FakeLogger(
         context: Context?,
         severityNumber: SeverityNumber?,
         severityText: String?,
+        exception: Throwable?,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         processTelemetry(eventName, timestamp, observedTimestamp, severityNumber, severityText, body)

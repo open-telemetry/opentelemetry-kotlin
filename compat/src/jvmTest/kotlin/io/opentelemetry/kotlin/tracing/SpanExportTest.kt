@@ -13,7 +13,6 @@ import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceFlags
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import io.opentelemetry.kotlin.tracing.model.SpanContext
-import io.opentelemetry.kotlin.tracing.model.SpanCreationAction
 import io.opentelemetry.kotlin.tracing.model.SpanKind
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -372,7 +371,7 @@ internal class SpanExportTest {
 
         // Create a context key and add a test value
         val currentContext = harness.kotlinApi.context.implicit()
-        val contextKey = currentContext.createKey<String>("best_team")
+        val contextKey = harness.kotlinApi.context.createKey<String>("best_team")
         val testContextValue = "independiente"
         val testContext = currentContext.set(contextKey, testContextValue)
 
@@ -405,13 +404,14 @@ internal class SpanExportTest {
             addLink(b.spanContext) {
                 addMultipleAttrs()
             }
+        }).apply {
             addEvent("first") {
                 addMultipleAttrs()
             }
             addEvent("second") {
                 addMultipleAttrs()
             }
-        })
+        }
         a.end()
         b.end()
         c.end()
@@ -437,7 +437,7 @@ internal class SpanExportTest {
         )
     }
 
-    private fun SpanCreationAction.addMultipleAttrs() {
+    private fun AttributesMutator.addMultipleAttrs() {
         setStringAttribute("key1", "value")
         setStringAttribute("key2", "value")
     }

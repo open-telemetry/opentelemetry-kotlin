@@ -42,6 +42,7 @@ public interface Logger {
      * - [context] - the context in which the log was emitted
      * - [severityNumber] - the severity of the log
      * - [severityText] - a string representation of the severity at the point it was captured
+     * - [exception] - an optional exception to associate with the log record
      * - [attributes] - additional attributes to associate with the log
      */
     public fun emit(
@@ -52,6 +53,7 @@ public interface Logger {
         context: Context? = null,
         severityNumber: SeverityNumber? = null,
         severityText: String? = null,
+        exception: Throwable? = null,
         attributes: (AttributesMutator.() -> Unit)? = null,
     )
 }
