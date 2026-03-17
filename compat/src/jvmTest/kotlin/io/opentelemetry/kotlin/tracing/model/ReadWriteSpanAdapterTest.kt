@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.tracing.model
 import fakeInProgressOtelJavaSpanData
 import fakeOtelJavaEventData
 import fakeOtelJavaLinkData
+import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
+import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanData
 import io.opentelemetry.kotlin.aliases.OtelJavaStatusData
@@ -111,6 +113,38 @@ internal class ReadWriteSpanAdapterTest {
                 }
             }
         )
+    }
+
+    @Test
+    fun `recordException empty attrs`() {
+        val exception = IllegalStateException("something went wrong")
+        adapter.recordException(exception)
+
+        val (recordedException, recordedAttrs) = fakeImpl.recordedExceptions.single()
+        assertEquals(exception, recordedException)
+        assertEquals(OtelJavaAttributes.empty(), recordedAttrs)
+    }
+
+    @Test
+    fun `recordException extra attrs`() {
+        val exception = RuntimeException("oops")
+        adapter.recordException(exception) {
+            setStringAttribute("custom.key", "custom.value")
+        }
+
+        val (recordedException, recordedAttrs) = fakeImpl.recordedExceptions.single()
+        assertEquals(exception, recordedException)
+        assertEquals("custom.value", recordedAttrs.get(OtelJavaAttributeKey.stringKey("custom.key")))
+    }
+
+    @Test
+    fun `recordException null attrs`() {
+        val exception = RuntimeException("error")
+        adapter.recordException(exception, null)
+
+        val (recordedException, recordedAttrs) = fakeImpl.recordedExceptions.single()
+        assertEquals(exception, recordedException)
+        assertEquals(OtelJavaAttributes.empty(), recordedAttrs)
     }
 
     private fun ReadWriteSpanAdapter.assertImmutableProperties(expected: OtelJavaSpanData) {

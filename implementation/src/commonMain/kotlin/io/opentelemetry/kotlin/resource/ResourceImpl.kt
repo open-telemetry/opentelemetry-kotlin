@@ -18,6 +18,17 @@ internal class ResourceImpl(
         return ResourceImpl(container, impl.schemaUrl)
     }
 
-    private fun Map<String, Any>.limit(): MutableMap<String, Any> =
+    override fun merge(other: Resource): Resource {
+        val mergedAttrs = (attributes + other.attributes).limit()
+        val mergedSchema = when {
+            schemaUrl == null -> other.schemaUrl
+            other.schemaUrl == null -> schemaUrl
+            schemaUrl == other.schemaUrl -> schemaUrl
+            else -> other.schemaUrl
+        }
+        return ResourceImpl(AttributesModel(attrs = mergedAttrs), mergedSchema)
+    }
+
+    internal fun Map<String, Any>.limit(): MutableMap<String, Any> =
         entries.take(DEFAULT_ATTRIBUTE_LIMIT).associate { it.toPair() }.toMutableMap()
 }

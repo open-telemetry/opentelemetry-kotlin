@@ -13,13 +13,15 @@ internal object NoopSpanContextFactory : SpanContextFactory {
         traceId: String,
         spanId: String,
         traceFlags: TraceFlags,
-        traceState: TraceState
+        traceState: TraceState,
+        isRemote: Boolean,
     ): SpanContext = NoopSpanContext
 
     override fun create(
         traceIdBytes: ByteArray,
         spanIdBytes: ByteArray,
         traceFlags: TraceFlags,
-        traceState: TraceState
+        traceState: TraceState,
+        isRemote: Boolean,
     ): SpanContext = NoopSpanContext
 }
