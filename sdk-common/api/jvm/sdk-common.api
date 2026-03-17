@@ -1,4 +1,4 @@
-public final class io/opentelemetry/kotlin/attributes/ExceptionAttributesMutatorExtKt {
+public final class io/opentelemetry/kotlin/attributes/ExceptionAttributesExtKt {
 	public static final fun setExceptionAttributes (Lio/opentelemetry/kotlin/attributes/AttributesMutator;Ljava/lang/Throwable;)V
 }
 

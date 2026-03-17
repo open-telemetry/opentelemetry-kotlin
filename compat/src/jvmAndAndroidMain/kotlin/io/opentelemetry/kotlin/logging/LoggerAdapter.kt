@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaLogger
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.attributes.setExceptionAttributes
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.OtelJavaContextAdapter
 import io.opentelemetry.kotlin.context.OtelJavaContextKeyRepository
@@ -33,6 +34,7 @@ internal class LoggerAdapter(
         context: Context?,
         severityNumber: SeverityNumber?,
         severityText: String?,
+        exception: Throwable?,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         processTelemetry(
@@ -43,6 +45,7 @@ internal class LoggerAdapter(
             context = context,
             severityNumber = severityNumber,
             severityText = severityText,
+            exception = exception,
             attributes = attributes
         )
     }
@@ -55,6 +58,7 @@ internal class LoggerAdapter(
         context: Context?,
         severityNumber: SeverityNumber?,
         severityText: String?,
+        exception: Throwable?,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         val builder = impl.logRecordBuilder()
@@ -81,9 +85,14 @@ internal class LoggerAdapter(
             builder.setSeverityText(severityText)
         }
 
+        val container = CompatAttributesModel()
+        if (exception != null) {
+            container.setExceptionAttributes(exception)
+        }
         if (attributes != null) {
-            val container = CompatAttributesModel()
             attributes(container)
+        }
+        if (exception != null || attributes != null) {
             builder.setAllAttributes(container.otelJavaAttributes())
         }
         builder.emit()

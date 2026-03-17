@@ -6,9 +6,12 @@ import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import io.opentelemetry.kotlin.logging.model.SeverityNumber
+import io.opentelemetry.kotlin.semconv.ExceptionAttributes
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -128,6 +131,18 @@ internal class LogExportTest {
             expectedCount = 1,
             goldenFileName = "log_custom_processor.json",
         )
+    }
+
+    @Test
+    fun `test log with exception export`() = runTest {
+        val exception = RuntimeException("test error")
+        harness.logger.emit("test", exception = exception)
+        harness.assertLogRecords(expectedCount = 1) { logs ->
+            val attrs = logs.single().attributes
+            assertEquals(exception.stackTraceToString(), attrs[ExceptionAttributes.EXCEPTION_STACKTRACE])
+            assertEquals("test error", attrs[ExceptionAttributes.EXCEPTION_MESSAGE])
+            assertNotNull(attrs[ExceptionAttributes.EXCEPTION_TYPE])
+        }
     }
 
     @Test
