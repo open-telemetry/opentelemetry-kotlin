@@ -106,6 +106,15 @@ internal class LoggerExportTest {
     }
 
     @Test
+    fun testLogWithStructuredBodyExported() = runTest {
+        val body = mapOf("message" to "hello", "count" to 42L)
+        harness.logger.emit(body = body)
+        harness.assertLogRecords(expectedCount = 1) { logs ->
+            assertEquals(body, logs.single().body)
+        }
+    }
+
+    @Test
     fun testEventExport() = runTest {
         val logger = harness.kotlinApi.loggerProvider.getLogger("test_logger")
         logger.emit(

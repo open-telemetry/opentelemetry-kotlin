@@ -17,7 +17,7 @@ internal class OtelJavaLogRecordBuilderAdapter(private val impl: Logger) :
     private var context: OtelJavaContext? = null
     private var severity: OtelJavaSeverity? = null
     private var severityText: String? = null
-    private var body: String? = null
+    private var body: Any? = null
     private val attrs = ConcurrentHashMap<String, String>()
 
     override fun setTimestamp(timestamp: Long, unit: TimeUnit): OtelJavaLogRecordBuilder {
