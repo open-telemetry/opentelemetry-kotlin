@@ -12,7 +12,7 @@ class ComplexSpanCreationFixture(
     private val other = tracer.startSpan("other")
 
     override fun execute() {
-        tracer.startSpan(
+        val span = tracer.startSpan(
             "new_span",
             otel.context.root(),
             SpanKind.CLIENT,
@@ -20,12 +20,14 @@ class ComplexSpanCreationFixture(
         ) {
             repeat(100) { k ->
                 setStringAttribute("key_$k", "value")
-                addEvent("my_event_$k") {
-                    setBooleanAttribute("event", true)
-                }
                 addLink(other.spanContext) {
                     setStringAttribute("link_$k", "value")
                 }
+            }
+        }
+        repeat(100) { k ->
+            span.addEvent("my_event_$k") {
+                setBooleanAttribute("event", true)
             }
         }
     }

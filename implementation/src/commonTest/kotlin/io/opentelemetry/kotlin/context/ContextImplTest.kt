@@ -24,21 +24,20 @@ internal class ContextImplTest {
 
     @Test
     fun testContextCreateContextKey() {
-        val ctx = factory.root()
-        assertNotEquals(ctx.createKey<String>("my_key"), ctx.createKey("my_key"))
+        assertNotEquals(factory.createKey<String>("my_key"), factory.createKey("my_key"))
     }
 
     @Test
     fun testContextGetAbsentValue() {
         val ctx = factory.root()
-        val key = ctx.createKey<String>("my_key")
+        val key = factory.createKey<String>("my_key")
         assertNull(ctx.get(key))
     }
 
     @Test
     fun testContextGetPresentValue() {
         val ctx = factory.root()
-        val key = ctx.createKey<String>("my_key")
+        val key = factory.createKey<String>("my_key")
         val value = "my_value"
         val newCtx = ctx.set(key, value)
 
@@ -49,9 +48,9 @@ internal class ContextImplTest {
     @Test
     fun testContextMultipleValues() {
         val ctx = factory.root()
-        val key1 = ctx.createKey<String>("my_key1")
-        val key2 = ctx.createKey<String>("my_key2")
-        val key3 = ctx.createKey<Int>("my_key3")
+        val key1 = factory.createKey<String>("my_key1")
+        val key2 = factory.createKey<String>("my_key2")
+        val key3 = factory.createKey<Int>("my_key3")
         val value1 = "my_value1"
         val value2 = "my_value2"
         val value3 = 42
@@ -65,7 +64,7 @@ internal class ContextImplTest {
     @Test
     fun testContextOverrideExistingKey() {
         val ctx = factory.root()
-        val key = ctx.createKey<String>("my_key")
+        val key = factory.createKey<String>("my_key")
         val value1 = "my_value1"
         val value2 = "my_value2"
 
@@ -76,7 +75,7 @@ internal class ContextImplTest {
     @Test
     fun testContextKeyExplicitNull() {
         val ctx = factory.root()
-        val key = ctx.createKey<String>("key")
+        val key = factory.createKey<String>("key")
         val newCtx = ctx.set(key, null)
         assertNull(newCtx.get(key))
     }

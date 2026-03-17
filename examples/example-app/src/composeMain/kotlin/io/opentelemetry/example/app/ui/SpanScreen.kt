@@ -201,39 +201,40 @@ private fun startSpan(otel: OpenTelemetry, form: SpanFormState): Pair<Span, Scop
                     }
                 }
             }
-            form.events.forEach { event ->
-                if (event.name.isNotBlank()) {
-                    val eventTs = event.timestamp.toLongOrNull()
-                    if (eventTs != null) {
-                        addEvent(name = event.name, timestamp = eventTs) {
-                            event.attributes.forEach { attr ->
-                                if (attr.key.isNotBlank()) {
-                                    when (attr.type) {
-                                        AttributeType.STRING -> setStringAttribute(
-                                            attr.key,
-                                            attr.value
-                                        )
+        })
 
-                                        AttributeType.LONG -> attr.value.toLongOrNull()
-                                            ?.let { setLongAttribute(attr.key, it) }
+    form.events.forEach { event ->
+        if (event.name.isNotBlank()) {
+            val eventTs = event.timestamp.toLongOrNull()
+            if (eventTs != null) {
+                span.addEvent(name = event.name, timestamp = eventTs) {
+                    event.attributes.forEach { attr ->
+                        if (attr.key.isNotBlank()) {
+                            when (attr.type) {
+                                AttributeType.STRING -> setStringAttribute(
+                                    attr.key,
+                                    attr.value
+                                )
 
-                                        AttributeType.DOUBLE -> attr.value.toDoubleOrNull()
-                                            ?.let { setDoubleAttribute(attr.key, it) }
+                                AttributeType.LONG -> attr.value.toLongOrNull()
+                                    ?.let { setLongAttribute(attr.key, it) }
 
-                                        AttributeType.BOOLEAN -> setBooleanAttribute(
-                                            attr.key,
-                                            attr.value.toBoolean()
-                                        )
-                                    }
-                                }
+                                AttributeType.DOUBLE -> attr.value.toDoubleOrNull()
+                                    ?.let { setDoubleAttribute(attr.key, it) }
+
+                                AttributeType.BOOLEAN -> setBooleanAttribute(
+                                    attr.key,
+                                    attr.value.toBoolean()
+                                )
                             }
                         }
-                    } else {
-                        addEvent(event.name)
                     }
                 }
+            } else {
+                span.addEvent(event.name)
             }
-        })
+        }
+    }
 
     // Set span as implicit context if requested
     val scope = if (form.setAsImplicitContext) {

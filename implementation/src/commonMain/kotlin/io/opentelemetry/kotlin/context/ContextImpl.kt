@@ -4,8 +4,6 @@ internal class ContextImpl(
     private val impl: Map<ContextKey<*>, Any?> = emptyMap()
 ) : Context {
 
-    override fun <T> createKey(name: String): ContextKey<T> = ContextKeyImpl(name)
-
     override fun <T> set(
         key: ContextKey<T>,
         value: T?
@@ -29,7 +27,6 @@ internal class ContextImpl(
     }
 
     private object NoopScope : Scope {
-        override fun detach() {
-        }
+        override fun detach(): Boolean = true
     }
 }

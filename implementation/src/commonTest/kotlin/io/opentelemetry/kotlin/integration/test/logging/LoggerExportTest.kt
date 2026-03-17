@@ -2,10 +2,12 @@ package io.opentelemetry.kotlin.integration.test.logging
 
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
 import io.opentelemetry.kotlin.logging.model.SeverityNumber
+import io.opentelemetry.kotlin.semconv.ExceptionAttributes
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 internal class LoggerExportTest {
 
@@ -88,6 +90,18 @@ internal class LoggerExportTest {
         }
         harness.assertLogRecords(expectedCount = 1) { logs ->
             assertEquals(logAttributeLimit, logs.single().attributes.size)
+        }
+    }
+
+    @Test
+    fun testLogWithExceptionExported() = runTest {
+        val exception = RuntimeException("test error")
+        harness.logger.emit("test", exception = exception)
+        harness.assertLogRecords(expectedCount = 1) { logs ->
+            val attrs = logs.single().attributes
+            assertEquals(exception.stackTraceToString(), attrs[ExceptionAttributes.EXCEPTION_STACKTRACE])
+            assertEquals("test error", attrs[ExceptionAttributes.EXCEPTION_MESSAGE])
+            assertNotNull(attrs[ExceptionAttributes.EXCEPTION_TYPE])
         }
     }
 

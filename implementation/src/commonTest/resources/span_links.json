@@ -29,7 +29,11 @@
     "totalAttributeCount": 0,
     "resource": {
       "schemaUrl": "null",
-      "attributes": {}
+      "attributes": {
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.language": "kotlin",
+        "telemetry.sdk.version": "UNKNOWN"
+      }
     },
     "instrumentationScopeInfo": {
       "name": "test_tracer",
@@ -81,7 +85,11 @@
     "totalAttributeCount": 0,
     "resource": {
       "schemaUrl": "null",
-      "attributes": {}
+      "attributes": {
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.language": "kotlin",
+        "telemetry.sdk.version": "UNKNOWN"
+      }
     },
     "instrumentationScopeInfo": {
       "name": "test_tracer",

@@ -4,10 +4,12 @@ import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.NoopContextFactory
 import io.opentelemetry.kotlin.factory.NoopIdGenerator
+import io.opentelemetry.kotlin.factory.NoopResourceFactory
 import io.opentelemetry.kotlin.factory.NoopSpanContextFactory
 import io.opentelemetry.kotlin.factory.NoopSpanFactory
 import io.opentelemetry.kotlin.factory.NoopTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.NoopTraceStateFactory
+import io.opentelemetry.kotlin.factory.ResourceFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
@@ -28,4 +30,5 @@ internal object NoopOpenTelemetryImpl : OpenTelemetrySdk {
     override val context: ContextFactory = NoopContextFactory
     override val span: SpanFactory = NoopSpanFactory
     override val idGenerator: IdGenerator = NoopIdGenerator
+    override val resource: ResourceFactory = NoopResourceFactory
 }

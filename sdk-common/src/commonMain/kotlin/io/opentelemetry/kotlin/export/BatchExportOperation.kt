@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.error.SdkErrorSeverity
  * Performs an export operation on each element in a List and returns a success code if each
  * operation is successful, or a failure code if any operation fails.
  */
-internal fun <T> batchExportOperation(
+public fun <T> batchExportOperation(
     elements: List<T>,
     sdkErrorHandler: SdkErrorHandler,
     action: (T) -> OperationResultCode
@@ -37,7 +37,7 @@ internal fun <T> batchExportOperation(
  * Performs an export operation on each element in a List and returns a success code if each
  * operation is successful, or a failure code if any operation fails.
  */
-internal suspend fun <T> batchExportOperationSuspend(
+public suspend fun <T> batchExportOperationSuspend(
     elements: List<T>,
     sdkErrorHandler: SdkErrorHandler,
     action: suspend (T) -> OperationResultCode

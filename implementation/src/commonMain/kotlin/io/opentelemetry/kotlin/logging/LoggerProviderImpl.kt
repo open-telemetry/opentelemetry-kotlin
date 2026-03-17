@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.export.DelegatingTelemetryCloseable
+import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
@@ -19,19 +19,19 @@ internal class LoggerProviderImpl(
     contextFactory: ContextFactory,
     spanContextFactory: SpanContextFactory,
     spanFactory: SpanFactory,
-    private val closeable: DelegatingTelemetryCloseable = DelegatingTelemetryCloseable()
 ) : LoggerProvider, TelemetryCloseable {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
+    private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(
+        loggingConfig.processors,
+    )
     private val noopLogger = NoopOpenTelemetry.loggerProvider.getLogger("")
 
     private val apiProvider by lazy {
         ApiProviderImpl<Logger> { key ->
-            val processor = loggingConfig.processors.firstOrNull()
-            processor?.let(closeable::add)
             LoggerImpl(
                 clock,
-                processor,
+                loggingConfig.processors.firstOrNull(),
                 contextFactory,
                 spanContextFactory,
                 spanFactory,
