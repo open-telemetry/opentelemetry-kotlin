@@ -58,6 +58,7 @@ internal class CompatTracerProviderConfig(
         builder.setSampler(
             when (builtin) {
                 BuiltInSampler.ALWAYS_ON -> OtelJavaSampler.alwaysOn()
+                BuiltInSampler.ALWAYS_OFF -> OtelJavaSampler.alwaysOff()
             }
         )
     }

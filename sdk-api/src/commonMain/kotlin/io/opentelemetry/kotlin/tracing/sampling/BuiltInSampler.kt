@@ -9,5 +9,18 @@ import io.opentelemetry.kotlin.ExperimentalApi
  */
 @ExperimentalApi
 public enum class BuiltInSampler {
+
+    /**
+     * Spans will always be recorded and sampled.
+     *
+     * https://opentelemetry.io/docs/specs/otel/trace/sdk/#alwayson
+     */
     ALWAYS_ON,
+
+    /**
+     * Spans will never be recorded and sampled.
+     *
+     * https://opentelemetry.io/docs/specs/otel/trace/sdk/#alwaysoff
+     */
+    ALWAYS_OFF,
 }
