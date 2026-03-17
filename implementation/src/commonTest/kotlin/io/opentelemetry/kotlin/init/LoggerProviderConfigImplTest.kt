@@ -7,6 +7,8 @@ import io.opentelemetry.kotlin.logging.export.compositeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.stdoutLogRecordExporter
 import io.opentelemetry.kotlin.sdkDefaultAttributes
+import io.opentelemetry.kotlin.semconv.ServiceAttributes
+import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -86,6 +88,22 @@ internal class LoggerProviderConfigImplTest {
             resource(mapOf("key" to "value"))
         }.generateLoggingConfig()
         assertEquals(sdkDefaultAttributes + mapOf("key" to "value"), cfg.resource.attributes)
+    }
+
+    @Test
+    fun testSdkDefaultAttributes() {
+        val cfg = LoggerProviderConfigImpl(clock).apply {
+            resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to "my-custom-sdk"))
+        }.generateLoggingConfig()
+        assertEquals("opentelemetry", cfg.resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME])
+    }
+
+    @Test
+    fun testServiceNameDefaults() {
+        val cfg = LoggerProviderConfigImpl(clock).apply {
+            resource(mapOf(ServiceAttributes.SERVICE_NAME to "my-service"))
+        }.generateLoggingConfig()
+        assertEquals("unknown_service", cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
     }
 
     @Test
