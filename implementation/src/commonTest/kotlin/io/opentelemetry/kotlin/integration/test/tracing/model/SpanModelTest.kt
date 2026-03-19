@@ -24,7 +24,14 @@ internal class SpanModelTest {
             FakeResource(),
             FakeSpanContext.INVALID,
             FakeSpanContext.VALID,
-            SpanLimitConfig(100, 100, 100, 100, 100)
+            SpanLimitConfig(
+                attributeCountLimit = 100,
+                attributeValueLengthLimit = Int.MAX_VALUE,
+                linkCountLimit = 100,
+                eventCountLimit = 100,
+                attributeCountPerEventLimit = 100,
+                attributeCountPerLinkLimit = 100
+            )
         )
         assertTrue(span.isRecording())
         span.end()

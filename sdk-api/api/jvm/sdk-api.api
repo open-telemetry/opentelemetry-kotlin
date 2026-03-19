@@ -90,6 +90,13 @@ public final class io/opentelemetry/kotlin/factory/ResourceFactory$DefaultImpls 
 	public static synthetic fun create$default (Lio/opentelemetry/kotlin/factory/ResourceFactory;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/resource/Resource;
 }
 
+public abstract interface class io/opentelemetry/kotlin/init/AttributeLimitsConfigDsl {
+	public abstract fun getAttributeCountLimit ()I
+	public abstract fun getAttributeValueLengthLimit ()I
+	public abstract fun setAttributeCountLimit (I)V
+	public abstract fun setAttributeValueLengthLimit (I)V
+}
+
 public abstract interface annotation class io/opentelemetry/kotlin/init/ConfigDsl : java/lang/annotation/Annotation {
 }
 
@@ -102,11 +109,7 @@ public abstract interface class io/opentelemetry/kotlin/init/LogExportConfigDsl 
 	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
 }
 
-public abstract interface class io/opentelemetry/kotlin/init/LogLimitsConfigDsl {
-	public abstract fun getAttributeCountLimit ()I
-	public abstract fun getAttributeValueLengthLimit ()I
-	public abstract fun setAttributeCountLimit (I)V
-	public abstract fun setAttributeValueLengthLimit (I)V
+public abstract interface class io/opentelemetry/kotlin/init/LogLimitsConfigDsl : io/opentelemetry/kotlin/init/AttributeLimitsConfigDsl {
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/LoggerProviderConfigDsl : io/opentelemetry/kotlin/init/ResourceConfigDsl {
@@ -129,13 +132,11 @@ public final class io/opentelemetry/kotlin/init/ResourceConfigDsl$DefaultImpls {
 	public static synthetic fun resource$default (Lio/opentelemetry/kotlin/init/ResourceConfigDsl;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
-public abstract interface class io/opentelemetry/kotlin/init/SpanLimitsConfigDsl {
-	public abstract fun getAttributeCountLimit ()I
+public abstract interface class io/opentelemetry/kotlin/init/SpanLimitsConfigDsl : io/opentelemetry/kotlin/init/AttributeLimitsConfigDsl {
 	public abstract fun getAttributeCountPerEventLimit ()I
 	public abstract fun getAttributeCountPerLinkLimit ()I
 	public abstract fun getEventCountLimit ()I
 	public abstract fun getLinkCountLimit ()I
-	public abstract fun setAttributeCountLimit (I)V
 	public abstract fun setAttributeCountPerEventLimit (I)V
 	public abstract fun setAttributeCountPerLinkLimit (I)V
 	public abstract fun setEventCountLimit (I)V

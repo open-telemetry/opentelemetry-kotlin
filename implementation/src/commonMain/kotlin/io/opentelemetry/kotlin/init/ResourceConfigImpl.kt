@@ -40,7 +40,7 @@ internal class ResourceConfigImpl : ResourceConfigDsl {
         val merged = (resourceAttrs.attributes + sdkDefaults).toMutableMap()
         return ResourceImpl(
             schemaUrl = schemaUrl,
-            container = AttributesModel(DEFAULT_ATTRIBUTE_LIMIT, merged)
+            container = AttributesModel(attributeLimit = DEFAULT_ATTRIBUTE_LIMIT, attrs = merged)
         )
     }
 }

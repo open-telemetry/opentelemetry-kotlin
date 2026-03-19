@@ -46,6 +46,7 @@ internal class TracerProviderConfigImpl(
 
     private fun generateSpanLimitsConfig(): SpanLimitConfig = SpanLimitConfig(
         attributeCountLimit = spanLimitsConfigImpl.attributeCountLimit,
+        attributeValueLengthLimit = spanLimitsConfigImpl.attributeValueLengthLimit,
         linkCountLimit = spanLimitsConfigImpl.linkCountLimit,
         eventCountLimit = spanLimitsConfigImpl.eventCountLimit,
         attributeCountPerEventLimit = spanLimitsConfigImpl.attributeCountPerEventLimit,

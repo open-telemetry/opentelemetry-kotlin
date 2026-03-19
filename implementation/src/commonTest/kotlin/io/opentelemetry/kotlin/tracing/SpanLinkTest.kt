@@ -37,6 +37,7 @@ internal class SpanLinkTest {
         processor = FakeSpanProcessor()
         spanLimitConfig = SpanLimitConfig(
             attributeCountLimit = fakeSpanLimitsConfig.attributeCountLimit,
+            attributeValueLengthLimit = fakeSpanLimitsConfig.attributeValueLengthLimit,
             linkCountLimit = linkLimit,
             eventCountLimit = fakeSpanLimitsConfig.eventCountLimit,
             attributeCountPerEventLimit = fakeSpanLimitsConfig.attributeCountPerEventLimit,
