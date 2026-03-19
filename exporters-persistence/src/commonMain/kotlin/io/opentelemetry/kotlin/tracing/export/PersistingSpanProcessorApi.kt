@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.export.PersistedTelemetryConfig
 import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryFileSystemImpl
 import io.opentelemetry.kotlin.export.getFileSystem
-import io.opentelemetry.kotlin.init.ConfigDsl
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +28,6 @@ import okio.Path
  * This processor is not supported on JS platforms currently.
  */
 @ExperimentalApi
-@ConfigDsl
 public fun TraceExportConfigDsl.persistingSpanProcessor(
     processor: SpanProcessor,
     exporter: SpanExporter,
@@ -51,7 +49,6 @@ public fun TraceExportConfigDsl.persistingSpanProcessor(
 }
 
 @ExperimentalApi
-@ConfigDsl
 internal fun TraceExportConfigDsl.persistingSpanProcessorImpl(
     processor: SpanProcessor,
     exporter: SpanExporter,

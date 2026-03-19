@@ -25,3 +25,10 @@ Targets: JVM, Android (API 21+), iOS, JS.
 - **PR size**: keep diffs under 500 lines.
 - **AI contributions**: all AI-generated code must be manually reviewed before committing.
 - **OTel spec** Search the OpenTelemetry specification when relevant and keep changes compliant
+
+## AI agent guidelines
+
+- Do NOT inspect the gradle cache or decompile JARs.
+- Avoid module-specific tasks during verification unless necessary. E.g. `./gradlew detekt` rather than `./gradlew :module:detekt`.
+- Select commands appropriately during verification to avoid unnecessary permission prompts.
+- Ask lots of clarifying questions. Interview the programmer often when gathering requirements.
