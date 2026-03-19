@@ -10,6 +10,20 @@ import io.opentelemetry.kotlin.resource.ResourceImpl
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 
+internal fun sdkDefaultResource(): Resource = ResourceImpl(
+    container = AttributesModel(
+        DEFAULT_ATTRIBUTE_LIMIT,
+        mutableMapOf(
+            ServiceAttributes.SERVICE_NAME to "unknown_service",
+            ServiceAttributes.SERVICE_VERSION to BuildKonfig.SDK_VERSION,
+            TelemetryAttributes.TELEMETRY_SDK_NAME to "opentelemetry",
+            TelemetryAttributes.TELEMETRY_SDK_LANGUAGE to "kotlin",
+            TelemetryAttributes.TELEMETRY_SDK_VERSION to BuildKonfig.SDK_VERSION,
+        ),
+    ),
+    schemaUrl = null,
+)
+
 internal class ResourceConfigImpl : ResourceConfigDsl {
 
     private val resourceAttrs = AttributesModel(DEFAULT_ATTRIBUTE_LIMIT)
@@ -29,18 +43,8 @@ internal class ResourceConfigImpl : ResourceConfigDsl {
         }
     }
 
-    fun generateResource(): Resource {
-        val sdkDefaults = mapOf(
-            ServiceAttributes.SERVICE_NAME to "unknown_service",
-            ServiceAttributes.SERVICE_VERSION to BuildKonfig.SDK_VERSION,
-            TelemetryAttributes.TELEMETRY_SDK_NAME to "opentelemetry",
-            TelemetryAttributes.TELEMETRY_SDK_LANGUAGE to "kotlin",
-            TelemetryAttributes.TELEMETRY_SDK_VERSION to BuildKonfig.SDK_VERSION,
-        )
-        val merged = (resourceAttrs.attributes + sdkDefaults).toMutableMap()
-        return ResourceImpl(
-            schemaUrl = schemaUrl,
-            container = AttributesModel(DEFAULT_ATTRIBUTE_LIMIT, merged)
-        )
-    }
+    internal fun generateResource(): Resource = ResourceImpl(
+        container = AttributesModel(DEFAULT_ATTRIBUTE_LIMIT, resourceAttrs.attributes.toMutableMap()),
+        schemaUrl = schemaUrl,
+    )
 }

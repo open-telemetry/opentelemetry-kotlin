@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
+import io.opentelemetry.kotlin.resource.Resource
 
 internal class LoggerProviderConfigImpl(
     private val clock: Clock,
@@ -23,10 +24,10 @@ internal class LoggerProviderConfigImpl(
         logLimitsConfigImpl.action()
     }
 
-    fun generateLoggingConfig(): LoggingConfig = LoggingConfig(
+    fun generateLoggingConfig(base: Resource): LoggingConfig = LoggingConfig(
         processors = processors.toList(),
         logLimits = generateLogLimitsConfig(),
-        resource = resourceConfigImpl.generateResource(),
+        resource = base.merge(resourceConfigImpl.generateResource()),
     )
 
     private fun generateLogLimitsConfig(): LogLimitConfig = LogLimitConfig(

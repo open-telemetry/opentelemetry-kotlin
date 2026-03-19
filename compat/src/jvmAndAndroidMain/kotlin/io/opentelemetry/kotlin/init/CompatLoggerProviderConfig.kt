@@ -12,6 +12,8 @@ import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.logging.LoggerProviderAdapter
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.OtelJavaLogRecordProcessorAdapter
+import io.opentelemetry.kotlin.resource.Resource
+import io.opentelemetry.kotlin.resource.ResourceAdapter
 
 @ExperimentalApi
 internal class CompatLoggerProviderConfig(
@@ -20,15 +22,16 @@ internal class CompatLoggerProviderConfig(
 
     private val builder: OtelJavaSdkLoggerProviderBuilder = OtelJavaSdkLoggerProvider.builder()
 
+    private val resourceAttrs = CompatAttributesModel()
+    private var resourceSchemaUrl: String? = null
+
     override fun resource(schemaUrl: String?, attributes: AttributesMutator.() -> Unit) {
-        val attrs = CompatAttributesModel().apply(attributes).otelJavaAttributes()
-        builder.setResource(OtelJavaResource.create(attrs, schemaUrl))
+        resourceSchemaUrl = schemaUrl
+        resourceAttrs.apply(attributes)
     }
 
     override fun resource(map: Map<String, Any>) {
-        resource {
-            setAttributes(map)
-        }
+        resourceAttrs.apply { setAttributes(map) }
     }
 
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
@@ -40,7 +43,15 @@ internal class CompatLoggerProviderConfig(
         builder.setLogLimits { CompatLogLimitsConfig().apply(action).build() }
     }
 
-    fun build(clock: Clock): LoggerProvider {
+    fun build(clock: Clock, baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build())): LoggerProvider {
+        val resource = ResourceAdapter(
+            OtelJavaResource.create(resourceAttrs.otelJavaAttributes(), resourceSchemaUrl)
+        )
+        val merged = baseResource.merge(resource)
+        if (merged.attributes.isNotEmpty() || merged.schemaUrl != null) {
+            val attrs = CompatAttributesModel().apply { setAttributes(merged.attributes) }.otelJavaAttributes()
+            builder.setResource(OtelJavaResource.create(attrs, merged.schemaUrl))
+        }
         builder.setClock(OtelJavaClockWrapper(clock))
         return LoggerProviderAdapter(builder.build())
     }

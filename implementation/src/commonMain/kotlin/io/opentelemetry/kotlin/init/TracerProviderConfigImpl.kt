@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
+import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
 import io.opentelemetry.kotlin.tracing.sampling.BuiltInSampler
@@ -37,10 +38,10 @@ internal class TracerProviderConfigImpl(
         samplerFactory = { factory() }
     }
 
-    fun generateTracingConfig(): TracingConfig = TracingConfig(
+    fun generateTracingConfig(base: Resource): TracingConfig = TracingConfig(
         processors = processors.toList(),
         spanLimits = generateSpanLimitsConfig(),
-        resource = resourceConfigImpl.generateResource(),
+        resource = base.merge(resourceConfigImpl.generateResource()),
         samplerFactory = samplerFactory,
     )
 
