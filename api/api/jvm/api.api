@@ -14,10 +14,6 @@ public abstract interface class io/opentelemetry/kotlin/OpenTelemetry {
 public abstract interface annotation class io/opentelemetry/kotlin/ThreadSafe : java/lang/annotation/Annotation {
 }
 
-public abstract interface class io/opentelemetry/kotlin/attributes/AttributeContainer {
-	public abstract fun getAttributes ()Ljava/util/Map;
-}
-
 public abstract interface class io/opentelemetry/kotlin/attributes/AttributesMutator {
 	public abstract fun setBooleanAttribute (Ljava/lang/String;Z)V
 	public abstract fun setBooleanListAttribute (Ljava/lang/String;Ljava/util/List;)V
@@ -146,15 +142,6 @@ public final class io/opentelemetry/kotlin/tracing/TracerProvider$DefaultImpls {
 }
 
 public abstract interface annotation class io/opentelemetry/kotlin/tracing/TracingDsl : java/lang/annotation/Annotation {
-}
-
-public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanEventData : io/opentelemetry/kotlin/attributes/AttributeContainer {
-	public abstract fun getName ()Ljava/lang/String;
-	public abstract fun getTimestamp ()J
-}
-
-public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanLinkData : io/opentelemetry/kotlin/attributes/AttributeContainer {
-	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
 }
 
 public abstract class io/opentelemetry/kotlin/tracing/data/StatusData {

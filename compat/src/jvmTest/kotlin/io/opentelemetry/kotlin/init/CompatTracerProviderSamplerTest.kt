@@ -60,6 +60,17 @@ internal class CompatTracerProviderSamplerTest {
     }
 
     @Test
+    fun `builtin ALWAYS_OFF sampler drops spans`() {
+        val clock = FakeClock()
+        val config = CompatTracerProviderConfig(clock, CompatIdGenerator()).apply {
+            sampler(BuiltInSampler.ALWAYS_OFF)
+        }
+        val span = config.build(clock).getTracer("test").startSpan("span")
+        assertFalse(span.isRecording())
+        assertFalse(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
     fun `builtin ALWAYS_ON sampler exports span`() {
         val processor = FakeSpanProcessor()
         val sdk = createCompatOpenTelemetry {

@@ -15,6 +15,10 @@ public abstract interface class io/opentelemetry/kotlin/OpenTelemetrySdk : io/op
 	public abstract fun getResource ()Lio/opentelemetry/kotlin/factory/ResourceFactory;
 }
 
+public abstract interface class io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun getAttributes ()Ljava/util/Map;
+}
+
 public abstract interface class io/opentelemetry/kotlin/context/ImplicitContextStorage {
 	public abstract fun implicitContext ()Lio/opentelemetry/kotlin/context/Context;
 	public abstract fun setImplicitContext (Lio/opentelemetry/kotlin/context/Context;)V
@@ -216,6 +220,15 @@ public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanData : 
 	public abstract fun getStatus ()Lio/opentelemetry/kotlin/tracing/data/StatusData;
 }
 
+public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanEventData : io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getTimestamp ()J
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanLinkData : io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+}
+
 public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanExporter : io/opentelemetry/kotlin/export/TelemetryCloseable {
 	public abstract fun export (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -242,6 +255,7 @@ public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLink :
 }
 
 public final class io/opentelemetry/kotlin/tracing/sampling/BuiltInSampler : java/lang/Enum {
+	public static final field ALWAYS_OFF Lio/opentelemetry/kotlin/tracing/sampling/BuiltInSampler;
 	public static final field ALWAYS_ON Lio/opentelemetry/kotlin/tracing/sampling/BuiltInSampler;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/sampling/BuiltInSampler;
