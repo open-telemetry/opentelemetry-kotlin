@@ -14,10 +14,6 @@ public abstract interface class io/opentelemetry/kotlin/OpenTelemetry {
 public abstract interface annotation class io/opentelemetry/kotlin/ThreadSafe : java/lang/annotation/Annotation {
 }
 
-public abstract interface class io/opentelemetry/kotlin/attributes/AttributeContainer {
-	public abstract fun getAttributes ()Ljava/util/Map;
-}
-
 public abstract interface class io/opentelemetry/kotlin/attributes/AttributesMutator {
 	public abstract fun setBooleanAttribute (Ljava/lang/String;Z)V
 	public abstract fun setBooleanListAttribute (Ljava/lang/String;Ljava/util/List;)V
@@ -71,12 +67,12 @@ public abstract interface class io/opentelemetry/kotlin/factory/TraceStateFactor
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/Logger {
-	public abstract fun emit (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun emit (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun enabled (Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;)Z
 }
 
 public final class io/opentelemetry/kotlin/logging/Logger$DefaultImpls {
-	public static synthetic fun emit$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static synthetic fun emit$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/Object;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun enabled$default (Lio/opentelemetry/kotlin/logging/Logger;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/model/SeverityNumber;Ljava/lang/String;ILjava/lang/Object;)Z
 }
 
@@ -146,15 +142,6 @@ public final class io/opentelemetry/kotlin/tracing/TracerProvider$DefaultImpls {
 }
 
 public abstract interface annotation class io/opentelemetry/kotlin/tracing/TracingDsl : java/lang/annotation/Annotation {
-}
-
-public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanEventData : io/opentelemetry/kotlin/attributes/AttributeContainer {
-	public abstract fun getName ()Ljava/lang/String;
-	public abstract fun getTimestamp ()J
-}
-
-public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanLinkData : io/opentelemetry/kotlin/attributes/AttributeContainer {
-	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
 }
 
 public abstract class io/opentelemetry/kotlin/tracing/data/StatusData {

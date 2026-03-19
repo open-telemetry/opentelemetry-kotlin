@@ -19,7 +19,7 @@ class FakeLogger(
     ): Boolean = enabledResult()
 
     override fun emit(
-        body: String?,
+        body: Any?,
         eventName: String?,
         timestamp: Long?,
         observedTimestamp: Long?,
@@ -38,7 +38,7 @@ class FakeLogger(
         observedTimestamp: Long?,
         severityNumber: SeverityNumber?,
         severityText: String?,
-        body: String?
+        body: Any?
     ) {
         eventName.toString()
         logs.add(

@@ -15,6 +15,10 @@ public abstract interface class io/opentelemetry/kotlin/OpenTelemetrySdk : io/op
 	public abstract fun getResource ()Lio/opentelemetry/kotlin/factory/ResourceFactory;
 }
 
+public abstract interface class io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun getAttributes ()Ljava/util/Map;
+}
+
 public abstract interface class io/opentelemetry/kotlin/context/ImplicitContextStorage {
 	public abstract fun implicitContext ()Lio/opentelemetry/kotlin/context/Context;
 	public abstract fun setImplicitContext (Lio/opentelemetry/kotlin/context/Context;)V
@@ -163,13 +167,13 @@ public final class io/opentelemetry/kotlin/logging/export/LogRecordProcessor$Def
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/model/ReadWriteLogRecord : io/opentelemetry/kotlin/attributes/AttributeContainer, io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/logging/model/ReadableLogRecord {
-	public abstract fun getBody ()Ljava/lang/String;
+	public abstract fun getBody ()Ljava/lang/Object;
 	public abstract fun getEventName ()Ljava/lang/String;
 	public abstract fun getObservedTimestamp ()Ljava/lang/Long;
 	public abstract fun getSeverityNumber ()Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
 	public abstract fun getSeverityText ()Ljava/lang/String;
 	public abstract fun getTimestamp ()Ljava/lang/Long;
-	public abstract fun setBody (Ljava/lang/String;)V
+	public abstract fun setBody (Ljava/lang/Object;)V
 	public abstract fun setEventName (Ljava/lang/String;)V
 	public abstract fun setObservedTimestamp (Ljava/lang/Long;)V
 	public abstract fun setSeverityNumber (Lio/opentelemetry/kotlin/logging/model/SeverityNumber;)V
@@ -178,7 +182,7 @@ public abstract interface class io/opentelemetry/kotlin/logging/model/ReadWriteL
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/model/ReadableLogRecord : io/opentelemetry/kotlin/attributes/AttributeContainer {
-	public abstract fun getBody ()Ljava/lang/String;
+	public abstract fun getBody ()Ljava/lang/Object;
 	public abstract fun getEventName ()Ljava/lang/String;
 	public abstract fun getInstrumentationScopeInfo ()Lio/opentelemetry/kotlin/InstrumentationScopeInfo;
 	public abstract fun getObservedTimestamp ()Ljava/lang/Long;
@@ -216,6 +220,15 @@ public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanData : 
 	public abstract fun getStatus ()Lio/opentelemetry/kotlin/tracing/data/StatusData;
 }
 
+public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanEventData : io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getTimestamp ()J
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanLinkData : io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+}
+
 public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanExporter : io/opentelemetry/kotlin/export/TelemetryCloseable {
 	public abstract fun export (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -242,6 +255,7 @@ public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLink :
 }
 
 public final class io/opentelemetry/kotlin/tracing/sampling/BuiltInSampler : java/lang/Enum {
+	public static final field ALWAYS_OFF Lio/opentelemetry/kotlin/tracing/sampling/BuiltInSampler;
 	public static final field ALWAYS_ON Lio/opentelemetry/kotlin/tracing/sampling/BuiltInSampler;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/sampling/BuiltInSampler;

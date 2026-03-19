@@ -46,7 +46,7 @@ public interface Logger {
      * - [attributes] - additional attributes to associate with the log
      */
     public fun emit(
-        body: String? = null,
+        body: Any? = null,
         eventName: String? = null,
         timestamp: Long? = null,
         observedTimestamp: Long? = null,
