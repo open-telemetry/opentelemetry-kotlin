@@ -15,6 +15,10 @@ public abstract interface class io/opentelemetry/kotlin/OpenTelemetrySdk : io/op
 	public abstract fun getResource ()Lio/opentelemetry/kotlin/factory/ResourceFactory;
 }
 
+public abstract interface class io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun getAttributes ()Ljava/util/Map;
+}
+
 public abstract interface class io/opentelemetry/kotlin/context/ImplicitContextStorage {
 	public abstract fun implicitContext ()Lio/opentelemetry/kotlin/context/Context;
 	public abstract fun setImplicitContext (Lio/opentelemetry/kotlin/context/Context;)V
@@ -214,6 +218,15 @@ public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanData : 
 	public abstract fun getSpanKind ()Lio/opentelemetry/kotlin/tracing/model/SpanKind;
 	public abstract fun getStartTimestamp ()J
 	public abstract fun getStatus ()Lio/opentelemetry/kotlin/tracing/data/StatusData;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanEventData : io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getTimestamp ()J
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanLinkData : io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/model/SpanContext;
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanExporter : io/opentelemetry/kotlin/export/TelemetryCloseable {

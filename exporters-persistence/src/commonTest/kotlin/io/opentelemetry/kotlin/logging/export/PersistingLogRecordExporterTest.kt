@@ -76,11 +76,20 @@ internal class PersistingLogRecordExporterTest {
     }
 
     @Test
-    fun testShutdownReturnsSuccess() = runTest {
+    fun testShutdown() = runTest {
         val repository = FakeTelemetryRepository<ReadableLogRecord>()
         val exporter = PersistingLogRecordExporter(FakeLogRecordExporter(), repository)
+
+        assertEquals(Success, exporter.export(telemetry))
+        assertEquals(1, repository.storeCalls)
+        assertEquals(1, repository.storedTelemetry.size)
+
         assertEquals(Success, exporter.shutdown())
         assertEquals(Success, exporter.shutdown())
+
+        assertEquals(Failure, exporter.export(telemetry))
+        assertEquals(1, repository.storeCalls)
+        assertEquals(1, repository.storedTelemetry.size)
     }
 
     @Test

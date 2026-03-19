@@ -18,6 +18,7 @@ include(
     ":core",
     ":api",
     ":api-ext",
+    ":sdk-ext",
     ":sdk-api",
     ":sdk-common",
     ":noop",
@@ -43,3 +44,15 @@ include(
     "examples:example-app-android",
     ":smoke-test",
 )
+
+includeFromDir("instrumentation")
+
+fun includeFromDir(dirName: String, maxDepth: Int = 3) {
+    val dir = File(rootDir, dirName)
+    val separator = Regex("[/\\\\]")
+    dir.walk().maxDepth(maxDepth).forEach {
+        if (it.name == "build.gradle.kts") {
+            include(":$dirName:${it.parentFile.toRelativeString(dir).replace(separator, ":")}")
+        }
+    }
+}
