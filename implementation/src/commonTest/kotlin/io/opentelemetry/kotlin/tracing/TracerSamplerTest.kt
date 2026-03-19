@@ -46,7 +46,7 @@ internal class TracerSamplerTest {
         spanFactory = SpanFactoryImpl(spanContextFactory, (contextFactory as ContextFactoryImpl).spanKey)
     }
 
-    private fun buildTracer(sampler: Sampler = AlwaysOnSampler) = TracerImpl(
+    private fun buildTracer(sampler: Sampler = AlwaysOnSampler(spanFactory)) = TracerImpl(
         clock = clock,
         processor = processor,
         contextFactory = contextFactory,

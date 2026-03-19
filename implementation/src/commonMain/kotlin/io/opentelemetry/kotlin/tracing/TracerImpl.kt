@@ -40,7 +40,7 @@ internal class TracerImpl(
     private val resource: Resource,
     private val spanLimitConfig: SpanLimitConfig,
     private val shutdownState: ShutdownState,
-    private val sampler: Sampler = AlwaysOnSampler,
+    private val sampler: Sampler = AlwaysOnSampler(spanFactory),
 ) : Tracer {
 
     private val noopSpan = NoopOpenTelemetry.tracerProvider.getTracer("").startSpan("")

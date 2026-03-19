@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
@@ -16,7 +17,7 @@ internal class TracerProviderConfigImpl(
 
     private val processors: MutableList<SpanProcessor> = mutableListOf()
     private val spanLimitsConfigImpl = SpanLimitsConfigImpl()
-    private var samplerFactory: (() -> Sampler) = { AlwaysOnSampler }
+    private var samplerFactory: (SpanFactory) -> Sampler = { AlwaysOnSampler(it) }
 
     override fun spanLimits(action: SpanLimitsConfigDsl.() -> Unit) {
         spanLimitsConfigImpl.action()
@@ -29,18 +30,18 @@ internal class TracerProviderConfigImpl(
     }
 
     override fun sampler(builtin: BuiltInSampler) {
-        samplerFactory = builtin::toSampler
+        samplerFactory = { builtin.toSampler(it) }
     }
 
     override fun sampler(factory: () -> Sampler) {
-        samplerFactory = factory
+        samplerFactory = { factory() }
     }
 
     fun generateTracingConfig(): TracingConfig = TracingConfig(
         processors = processors.toList(),
         spanLimits = generateSpanLimitsConfig(),
         resource = resourceConfigImpl.generateResource(),
-        sampler = samplerFactory(),
+        samplerFactory = samplerFactory,
     )
 
     private fun generateSpanLimitsConfig(): SpanLimitConfig = SpanLimitConfig(

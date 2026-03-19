@@ -33,6 +33,8 @@ internal class TracerProviderImpl(
     )
     private val noopTracer = NoopOpenTelemetry.tracerProvider.getTracer("")
 
+    private val sampler = tracingConfig.samplerFactory(spanFactory)
+
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
         TracerImpl(
             clock = clock,
@@ -47,7 +49,7 @@ internal class TracerProviderImpl(
             spanLimitConfig = tracingConfig.spanLimits,
             idGenerator = idGenerator,
             shutdownState = shutdownState,
-            sampler = tracingConfig.sampler,
+            sampler = sampler,
         )
     }
 

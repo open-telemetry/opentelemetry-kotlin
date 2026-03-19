@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.assertHasSdkDefaultAttributes
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import io.opentelemetry.kotlin.sdkDefaultAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -15,6 +16,7 @@ import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
@@ -27,7 +29,7 @@ internal class TracerProviderConfigImplTest {
     @Test
     fun testDefaultSamplerAlwaysOn() {
         val cfg = TracerProviderConfigImpl(clock).generateTracingConfig()
-        assertSame(AlwaysOnSampler, cfg.sampler)
+        assertIs<AlwaysOnSampler>(cfg.samplerFactory(FakeSpanFactory()))
     }
 
     @Test
@@ -35,7 +37,7 @@ internal class TracerProviderConfigImplTest {
         val cfg = TracerProviderConfigImpl(clock).apply {
             sampler(BuiltInSampler.ALWAYS_ON)
         }.generateTracingConfig()
-        assertNotNull(cfg.sampler)
+        assertNotNull(cfg.samplerFactory(FakeSpanFactory()))
     }
 
     @Test
@@ -46,7 +48,7 @@ internal class TracerProviderConfigImplTest {
                 sampler
             }
         }.generateTracingConfig()
-        assertSame(sampler, cfg.sampler)
+        assertSame(sampler, cfg.samplerFactory(FakeSpanFactory()))
     }
 
     @Test

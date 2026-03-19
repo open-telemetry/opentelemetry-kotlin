@@ -1,5 +1,7 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
-internal fun BuiltInSampler.toSampler(): Sampler = when (this) {
-    BuiltInSampler.ALWAYS_ON -> AlwaysOnSampler
+import io.opentelemetry.kotlin.factory.SpanFactory
+
+internal fun BuiltInSampler.toSampler(spanFactory: SpanFactory): Sampler = when (this) {
+    BuiltInSampler.ALWAYS_ON -> AlwaysOnSampler(spanFactory)
 }
