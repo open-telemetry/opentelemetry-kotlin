@@ -27,7 +27,7 @@ internal class LoggerAdapter(
     }
 
     override fun emit(
-        body: String?,
+        body: Any?,
         eventName: String?,
         timestamp: Long?,
         observedTimestamp: Long?,
@@ -52,7 +52,7 @@ internal class LoggerAdapter(
 
     private fun processTelemetry(
         eventName: String?,
-        body: String?,
+        body: Any?,
         timestamp: Long?,
         observedTimestamp: Long?,
         context: Context?,
@@ -64,7 +64,7 @@ internal class LoggerAdapter(
         val builder = impl.logRecordBuilder()
 
         if (body != null) {
-            builder.setBody(body)
+            builder.setBody(body.toString())
         }
         if (eventName != null) {
             builder.setEventName(eventName)

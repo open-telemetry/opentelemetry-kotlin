@@ -12,7 +12,7 @@ class FakeReadWriteLogRecord(
     override var observedTimestamp: Long? = null,
     override var severityNumber: SeverityNumber? = SeverityNumber.UNKNOWN,
     override var severityText: String? = null,
-    override var body: String? = null,
+    override var body: Any? = null,
     override var eventName: String? = null,
     override var spanContext: SpanContext = FakeSpanContext.INVALID,
     override val attributes: Map<String, Any> = emptyMap(),

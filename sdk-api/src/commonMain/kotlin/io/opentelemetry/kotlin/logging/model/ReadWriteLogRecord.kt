@@ -34,9 +34,10 @@ public interface ReadWriteLogRecord : ReadableLogRecord, AttributesMutator, Attr
     public override var severityText: String?
 
     /**
-     * Contains the body of the log message - i.e. a human-readable string or free-form string data.
+     * Contains the body of the log message. Can be a string, number, boolean, map, or list,
+     * per the OpenTelemetry log data model (https://opentelemetry.io/docs/specs/otel/logs/data-model/#field-body).
      */
-    public override var body: String?
+    public override var body: Any?
 
     /**
      * Contains the event name if this is an event, otherwise null

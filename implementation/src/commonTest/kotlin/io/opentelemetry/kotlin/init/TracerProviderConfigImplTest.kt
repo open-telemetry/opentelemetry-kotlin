@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import io.opentelemetry.kotlin.sdkDefaultAttributes
+import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.compositeSpanProcessor
@@ -151,10 +152,18 @@ internal class TracerProviderConfigImplTest {
     }
 
     @Test
-    fun testUserAttributeOverridesSdkDefault() {
+    fun testSdkDefaultAttributes2() {
         val cfg = TracerProviderConfigImpl(clock).apply {
             resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to "my-custom-sdk"))
         }.generateTracingConfig()
-        assertEquals("my-custom-sdk", cfg.resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME])
+        assertEquals("opentelemetry", cfg.resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME])
+    }
+
+    @Test
+    fun testServiceNameDefaults() {
+        val cfg = TracerProviderConfigImpl(clock).apply {
+            resource(mapOf(ServiceAttributes.SERVICE_NAME to "my-service"))
+        }.generateTracingConfig()
+        assertEquals("unknown_service", cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
     }
 }

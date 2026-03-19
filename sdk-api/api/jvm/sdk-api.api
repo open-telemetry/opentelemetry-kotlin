@@ -167,13 +167,13 @@ public final class io/opentelemetry/kotlin/logging/export/LogRecordProcessor$Def
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/model/ReadWriteLogRecord : io/opentelemetry/kotlin/attributes/AttributeContainer, io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/logging/model/ReadableLogRecord {
-	public abstract fun getBody ()Ljava/lang/String;
+	public abstract fun getBody ()Ljava/lang/Object;
 	public abstract fun getEventName ()Ljava/lang/String;
 	public abstract fun getObservedTimestamp ()Ljava/lang/Long;
 	public abstract fun getSeverityNumber ()Lio/opentelemetry/kotlin/logging/model/SeverityNumber;
 	public abstract fun getSeverityText ()Ljava/lang/String;
 	public abstract fun getTimestamp ()Ljava/lang/Long;
-	public abstract fun setBody (Ljava/lang/String;)V
+	public abstract fun setBody (Ljava/lang/Object;)V
 	public abstract fun setEventName (Ljava/lang/String;)V
 	public abstract fun setObservedTimestamp (Ljava/lang/Long;)V
 	public abstract fun setSeverityNumber (Lio/opentelemetry/kotlin/logging/model/SeverityNumber;)V
@@ -182,7 +182,7 @@ public abstract interface class io/opentelemetry/kotlin/logging/model/ReadWriteL
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/model/ReadableLogRecord : io/opentelemetry/kotlin/attributes/AttributeContainer {
-	public abstract fun getBody ()Ljava/lang/String;
+	public abstract fun getBody ()Ljava/lang/Object;
 	public abstract fun getEventName ()Ljava/lang/String;
 	public abstract fun getInstrumentationScopeInfo ()Lio/opentelemetry/kotlin/InstrumentationScopeInfo;
 	public abstract fun getObservedTimestamp ()Ljava/lang/Long;

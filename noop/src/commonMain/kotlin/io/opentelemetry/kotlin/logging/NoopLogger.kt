@@ -14,7 +14,7 @@ internal object NoopLogger : Logger {
     ): Boolean = false
 
     override fun emit(
-        body: String?,
+        body: Any?,
         eventName: String?,
         timestamp: Long?,
         observedTimestamp: Long?,

@@ -20,6 +20,14 @@ internal class ReadableLogRecordExtTest {
     }
 
     @Test
+    fun testLogRecordStructuredBodyConversion() {
+        val structuredBody = mapOf("key" to "value")
+        val record = FakeReadableLogRecord(body = structuredBody)
+        val observed = record.toLogRecordData()
+        assertEquals(structuredBody.toString(), observed.bodyValue?.asString())
+    }
+
+    @Test
     fun testLogRecordNullConversions() {
         val record = FakeReadableLogRecord(
             timestamp = null,

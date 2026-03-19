@@ -37,7 +37,7 @@ internal class ReadWriteLogRecordAdapter(
         set(value) {
         }
 
-    override var body: String?
+    override var body: Any?
         get() = impl.bodyValue?.asString()
         set(value) {
         }

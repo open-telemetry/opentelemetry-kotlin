@@ -30,6 +30,8 @@
     "resource": {
       "schemaUrl": "null",
       "attributes": {
+        "service.name": "unknown_service",
+        "service.version": "UNKNOWN",
         "telemetry.sdk.name": "opentelemetry",
         "telemetry.sdk.language": "kotlin",
         "telemetry.sdk.version": "UNKNOWN"
@@ -73,6 +75,8 @@
     "resource": {
       "schemaUrl": "null",
       "attributes": {
+        "service.name": "unknown_service",
+        "service.version": "UNKNOWN",
         "telemetry.sdk.name": "opentelemetry",
         "telemetry.sdk.language": "kotlin",
         "telemetry.sdk.version": "UNKNOWN"
@@ -143,6 +147,8 @@
     "resource": {
       "schemaUrl": "null",
       "attributes": {
+        "service.name": "unknown_service",
+        "service.version": "UNKNOWN",
         "telemetry.sdk.name": "opentelemetry",
         "telemetry.sdk.language": "kotlin",
         "telemetry.sdk.version": "UNKNOWN"

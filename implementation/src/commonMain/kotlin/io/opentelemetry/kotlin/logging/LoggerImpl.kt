@@ -46,7 +46,7 @@ internal class LoggerImpl(
         }
 
     override fun emit(
-        body: String?,
+        body: Any?,
         eventName: String?,
         timestamp: Long?,
         observedTimestamp: Long?,
@@ -73,7 +73,7 @@ internal class LoggerImpl(
         context: Context?,
         timestamp: Long?,
         observedTimestamp: Long?,
-        body: String?,
+        body: Any?,
         eventName: String?,
         severityText: String?,
         severityNumber: SeverityNumber?,

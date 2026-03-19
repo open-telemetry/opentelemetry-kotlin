@@ -32,7 +32,7 @@
       "attributes": {
         "environment": "test",
         "service.name": "test-service",
-        "service.version": "1.0.0"
+        "service.version": "UNKNOWN"
       }
     },
     "instrumentationScopeInfo": {

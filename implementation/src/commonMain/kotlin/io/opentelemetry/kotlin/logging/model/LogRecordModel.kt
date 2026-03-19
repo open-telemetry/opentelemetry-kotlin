@@ -16,7 +16,7 @@ internal class LogRecordModel(
     override val instrumentationScopeInfo: InstrumentationScopeInfo,
     timestamp: Long,
     observedTimestamp: Long,
-    body: String?,
+    body: Any?,
     eventName: String?,
     severityText: String?,
     severityNumber: SeverityNumber?,
@@ -68,7 +68,7 @@ internal class LogRecordModel(
             }
         }
 
-    override var body: String? = body
+    override var body: Any? = body
         get() = lock.read {
             field
         }
