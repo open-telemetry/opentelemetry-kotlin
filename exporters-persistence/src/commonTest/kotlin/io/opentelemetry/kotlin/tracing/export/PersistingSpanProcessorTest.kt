@@ -23,7 +23,6 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -172,7 +171,7 @@ internal class PersistingSpanProcessorTest {
         processor.onEnd(FakeReadWriteSpan(name = name))
         assertEquals(Success, processor.forceFlush())
         assertEquals(Success, processor.shutdown())
-        assertEquals(name, failingExporter.exports.single().name)
+        assertTrue(failingExporter.exports.any { it.name == name })
         assertTrue(fileSystem.list().isNotEmpty())
     }
 
@@ -404,9 +403,145 @@ internal class PersistingSpanProcessorTest {
 
         val exportedNames = session2Exporter.exports.map { it.name }
         assertTrue("other" in exportedNames)
+        assertTrue("span" in exportedNames)
+    }
 
-        // TODO: future: alter the assertion when persisted records are exported.
-        assertFalse("span" in exportedNames)
+    @Test
+    fun testFlushExportsPersistedSpans() = runTest {
+        val fileSystem = FakeTelemetryFileSystem()
+
+        // store a span that fails to export
+        val failingExporter = FakeSpanExporter(exportReturnValue = { Failure })
+        val processor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(failingExporter),
+            processors = listOf(FakeSpanProcessor()),
+        )
+        processor.onEnd(FakeReadWriteSpan(name = "persisted"))
+        assertEquals(Success, processor.forceFlush())
+        assertEquals(Success, processor.shutdown())
+        assertTrue(fileSystem.list().isNotEmpty())
+
+        // new processor with succeeding exporter recovers the persisted span
+        val successExporter = FakeSpanExporter()
+        val recoveryProcessor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(successExporter),
+            processors = listOf(FakeSpanProcessor()),
+        )
+        assertEquals(Success, recoveryProcessor.forceFlush())
+        assertEquals(Success, recoveryProcessor.shutdown())
+
+        assertTrue(successExporter.exports.any { it.name == "persisted" })
+        assertTrue(fileSystem.list().isEmpty())
+    }
+
+    @Test
+    fun testFlushContinuesPastFailedSpans() = runTest {
+        val fileSystem = FakeTelemetryFileSystem()
+
+        // store two spans using two separate processors (one span each)
+        val storingProcessor1 = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(FakeSpanExporter(exportReturnValue = { Failure })),
+            processors = listOf(FakeSpanProcessor()),
+        )
+        storingProcessor1.onEnd(FakeReadWriteSpan(name = "span-1"))
+        assertEquals(Success, storingProcessor1.forceFlush())
+        assertEquals(Success, storingProcessor1.shutdown())
+
+        val storingProcessor2 = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(FakeSpanExporter(exportReturnValue = { Failure })),
+            processors = listOf(FakeSpanProcessor()),
+        )
+        storingProcessor2.onEnd(FakeReadWriteSpan(name = "span-2"))
+        assertEquals(Success, storingProcessor2.forceFlush())
+        assertEquals(Success, storingProcessor2.shutdown())
+
+        assertEquals(2, fileSystem.list().size)
+
+        // flush with an always-failing exporter to verify both spans are attempted
+        var exportCount = 0
+        val alwaysFailExporter = FakeSpanExporter(exportReturnValue = {
+            exportCount++
+            Failure
+        })
+        val flushProcessor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(alwaysFailExporter),
+            processors = listOf(FakeSpanProcessor()),
+        )
+        assertEquals(Success, flushProcessor.forceFlush())
+
+        // both spans should have been attempted during the single flushPersisted() call
+        assertEquals(2, exportCount)
+        assertEquals(2, fileSystem.list().size)
+
+        flushProcessor.shutdown()
+    }
+
+    @Test
+    fun testFlushDeletesCorruptedSpans() = runTest {
+        val fileSystem = FakeTelemetryFileSystem()
+
+        // store a span
+        val storingProcessor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(FakeSpanExporter(exportReturnValue = { Failure })),
+            processors = listOf(FakeSpanProcessor()),
+        )
+        storingProcessor.onEnd(FakeReadWriteSpan(name = "corrupted"))
+        assertEquals(Success, storingProcessor.forceFlush())
+        assertEquals(Success, storingProcessor.shutdown())
+        assertTrue(fileSystem.list().isNotEmpty())
+
+        // make reads fail, simulating bad data
+        fileSystem.failReads = true
+
+        val exporter = FakeSpanExporter()
+        val processor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(exporter),
+            processors = listOf(FakeSpanProcessor()),
+        )
+        assertEquals(Success, processor.forceFlush())
+        assertEquals(Success, processor.shutdown())
+
+        // bad span should be deleted, exporter should not be called
+        assertTrue(fileSystem.list().isEmpty())
+        assertTrue(exporter.exports.isEmpty())
+    }
+
+    @Test
+    fun testConcurrentFlushSafety() = runTest {
+        val fileSystem = FakeTelemetryFileSystem()
+        var exportCount = 0
+        val exporter = FakeSpanExporter(
+            exportReturnValue = { batch ->
+                exportCount += batch.size
+                Success
+            }
+        )
+        val processor = createProcessor(
+            fileSystem = fileSystem,
+            exporters = listOf(exporter),
+            processors = listOf(FakeSpanProcessor()),
+        )
+
+        repeat(3) {
+            processor.onEnd(FakeReadWriteSpan(name = "span-$it"))
+        }
+
+        // run two concurrent forceFlush calls
+        val flush1 = async { processor.forceFlush() }
+        val flush2 = async { processor.forceFlush() }
+        assertEquals(Success, flush1.await())
+        assertEquals(Success, flush2.await())
+        assertEquals(Success, processor.shutdown())
+
+        assertEquals(3, exportCount)
+        assertTrue(fileSystem.list().isEmpty())
     }
 
     @Test
