@@ -10,6 +10,12 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 public interface ResourceConfigDsl {
 
     /**
+     * Sets the logical name of the service. Defaults to "unknown_service" if not explicitly set.
+     * https://opentelemetry.io/docs/specs/semconv/registry/attributes/service/#service-attributes
+     */
+    public var serviceName: String
+
+    /**
      * Declares a resource, including an optional schema and any attributes.
      */
     public fun resource(schemaUrl: String? = null, attributes: AttributesMutator.() -> Unit)

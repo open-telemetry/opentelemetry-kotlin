@@ -121,8 +121,10 @@ public abstract interface class io/opentelemetry/kotlin/init/OpenTelemetryConfig
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/ResourceConfigDsl {
+	public abstract fun getServiceName ()Ljava/lang/String;
 	public abstract fun resource (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun resource (Ljava/util/Map;)V
+	public abstract fun setServiceName (Ljava/lang/String;)V
 }
 
 public final class io/opentelemetry/kotlin/init/ResourceConfigDsl$DefaultImpls {
