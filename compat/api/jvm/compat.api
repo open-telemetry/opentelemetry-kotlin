@@ -59,3 +59,8 @@ public final class io/opentelemetry/kotlin/tracing/ext/SpanLinkDataExtKt {
 	public static final fun toOtelJavaLinkData (Lio/opentelemetry/kotlin/tracing/data/SpanLinkData;)Lio/opentelemetry/sdk/trace/data/LinkData;
 }
 
+public final class io/opentelemetry/kotlin/tracing/sampling/BuiltInSamplerApiKt {
+	public static final fun alwaysOff (Lio/opentelemetry/kotlin/init/SamplerConfigDsl;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
+	public static final fun alwaysOn (Lio/opentelemetry/kotlin/init/SamplerConfigDsl;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
+}
+
