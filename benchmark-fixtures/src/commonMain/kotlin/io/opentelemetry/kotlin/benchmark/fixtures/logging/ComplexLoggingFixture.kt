@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.benchmark.fixtures.logging
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.benchmark.fixtures.BenchmarkFixture
 import io.opentelemetry.kotlin.logging.Logger
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
+import io.opentelemetry.kotlin.logging.SeverityNumber
 
 class ComplexLoggingFixture(
     private val otel: OpenTelemetry

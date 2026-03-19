@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.tracing.NoopTraceFlags
-import io.opentelemetry.kotlin.tracing.model.TraceFlags
+import io.opentelemetry.kotlin.tracing.TraceFlags
 
 internal object NoopTraceFlagsFactory : TraceFlagsFactory {
     override val default: TraceFlags = NoopTraceFlags

@@ -5,11 +5,11 @@ import io.opentelemetry.kotlin.framework.serialization.SerializableSpanData
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
+import io.opentelemetry.kotlin.tracing.SpanContext
+import io.opentelemetry.kotlin.tracing.SpanKind
+import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanEventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
-import io.opentelemetry.kotlin.tracing.data.StatusData
-import io.opentelemetry.kotlin.tracing.model.SpanContext
-import io.opentelemetry.kotlin.tracing.model.SpanKind
 import io.opentelemetry.kotlin.tracing.model.hex
 import kotlin.test.Test
 import kotlin.test.assertEquals

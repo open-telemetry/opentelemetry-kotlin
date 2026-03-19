@@ -9,11 +9,11 @@ import io.opentelemetry.kotlin.framework.serialization.SerializableSpanContext
 import io.opentelemetry.kotlin.framework.serialization.SerializableSpanData
 import io.opentelemetry.kotlin.framework.serialization.SerializableSpanStatusData
 import io.opentelemetry.kotlin.resource.Resource
+import io.opentelemetry.kotlin.tracing.SpanContext
+import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
-import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
-import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.hex
 
 internal fun ReadableSpan.toSerializable(): SerializableSpanData =

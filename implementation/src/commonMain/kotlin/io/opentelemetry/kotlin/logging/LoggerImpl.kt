@@ -13,7 +13,6 @@ import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.LogRecordModel
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecordImpl
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
 import io.opentelemetry.kotlin.resource.Resource
 
 internal class LoggerImpl(

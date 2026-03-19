@@ -6,9 +6,6 @@ import io.opentelemetry.kotlin.exceptionType
 import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
-import io.opentelemetry.kotlin.tracing.data.StatusData
-import io.opentelemetry.kotlin.tracing.model.Span
-import io.opentelemetry.kotlin.tracing.model.SpanContext
 
 class FakeSpan(
     name: String = "",

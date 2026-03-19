@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.tracing.ext
 
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
-import io.opentelemetry.kotlin.tracing.model.SpanKind
+import io.opentelemetry.kotlin.tracing.SpanKind
 import org.junit.Test
 import kotlin.test.assertEquals
 

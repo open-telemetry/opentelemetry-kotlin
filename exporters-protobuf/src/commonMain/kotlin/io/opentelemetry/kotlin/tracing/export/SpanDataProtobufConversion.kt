@@ -10,9 +10,9 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.SpanData
-import io.opentelemetry.kotlin.tracing.data.StatusData
-import io.opentelemetry.kotlin.tracing.model.SpanContext
-import io.opentelemetry.kotlin.tracing.model.SpanKind
+import io.opentelemetry.kotlin.tracing.StatusData
+import io.opentelemetry.kotlin.tracing.SpanContext
+import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.proto.trace.v1.Span
 import io.opentelemetry.proto.trace.v1.Status
 import okio.ByteString.Companion.toByteString

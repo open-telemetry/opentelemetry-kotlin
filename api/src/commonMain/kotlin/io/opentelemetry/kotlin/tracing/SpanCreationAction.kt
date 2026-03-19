@@ -1,8 +1,7 @@
-package io.opentelemetry.kotlin.tracing.model
+package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.tracing.TracingDsl
 
 /**
  * Allows attributes and links to be configured at span creation time.

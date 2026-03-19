@@ -7,7 +7,6 @@ import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
 import kotlin.test.BeforeTest

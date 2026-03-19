@@ -1,8 +1,7 @@
-package io.opentelemetry.kotlin.tracing.data
+package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
-import io.opentelemetry.kotlin.tracing.StatusCode
 
 /**
  * Immutable representation of a Status

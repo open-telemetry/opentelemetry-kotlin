@@ -6,14 +6,11 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
-import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.ext.storeInContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceFlags
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
-import io.opentelemetry.kotlin.tracing.model.SpanContext
-import io.opentelemetry.kotlin.tracing.model.SpanKind
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
 
 /**
  * Class that emits log record objects.

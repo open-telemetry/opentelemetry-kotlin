@@ -7,10 +7,10 @@ import io.opentelemetry.kotlin.framework.loadTestFixture
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
+import io.opentelemetry.kotlin.tracing.SpanKind
+import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanEventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
-import io.opentelemetry.kotlin.tracing.data.StatusData
-import io.opentelemetry.kotlin.tracing.model.SpanKind
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

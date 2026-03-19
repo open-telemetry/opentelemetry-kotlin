@@ -8,8 +8,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextAdapter
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
-import io.opentelemetry.kotlin.tracing.model.Span
-import io.opentelemetry.kotlin.tracing.model.SpanContext
+import io.opentelemetry.kotlin.tracing.Span
+import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanContextAdapter
 
 internal class CompatSpanFactory(spanContextFactory: SpanContextFactory) : SpanFactory {
