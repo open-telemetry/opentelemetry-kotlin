@@ -18,9 +18,9 @@ import io.opentelemetry.kotlin.tracing.TracerProvider
 import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
 import io.opentelemetry.kotlin.tracing.export.OtelJavaSpanProcessorAdapter
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
-import io.opentelemetry.kotlin.tracing.sampling.SamplerAdapter
 import io.opentelemetry.kotlin.tracing.sampling.OtelJavaSamplerAdapter
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
+import io.opentelemetry.kotlin.tracing.sampling.SamplerAdapter
 
 @ExperimentalApi
 internal class CompatTracerProviderConfig(
