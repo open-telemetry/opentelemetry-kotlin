@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.tracing.model.TraceFlags
 
 @ExperimentalApi
 internal object NoopTraceFlags : TraceFlags {

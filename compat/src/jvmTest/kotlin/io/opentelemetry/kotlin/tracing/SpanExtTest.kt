@@ -17,7 +17,6 @@ import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.ext.storeInContext
 import io.opentelemetry.kotlin.tracing.model.SpanAdapter
 import io.opentelemetry.kotlin.tracing.model.SpanContextAdapter
-import io.opentelemetry.kotlin.tracing.model.SpanKind
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

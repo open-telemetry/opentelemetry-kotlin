@@ -76,10 +76,26 @@ internal class PersistingSpanExporterTest {
     }
 
     @Test
-    fun testShutdownReturnsSuccess() = runTest {
+    fun testShutdown() = runTest {
         val repository = FakeTelemetryRepository<SpanData>()
         val exporter = PersistingSpanExporter(FakeSpanExporter(), repository)
-        assertEquals(Success, exporter.shutdown())
-        assertEquals(Success, exporter.shutdown())
+
+        assertEquals(Success, exporter.export(telemetry))
+        assertEquals(1, repository.storeCalls)
+        assertEquals(1, repository.storedTelemetry.size)
+        exporter.shutdown()
+        exporter.shutdown()
+
+        assertEquals(Failure, exporter.export(telemetry))
+        assertEquals(1, repository.storeCalls)
+        assertEquals(1, repository.storedTelemetry.size)
+    }
+
+    @Test
+    fun testForceFlushWorksAfterShutdown() = runTest {
+        val repository = FakeTelemetryRepository<SpanData>()
+        val exporter = PersistingSpanExporter(FakeSpanExporter(), repository)
+        exporter.shutdown()
+        assertEquals(Success, exporter.forceFlush())
     }
 }

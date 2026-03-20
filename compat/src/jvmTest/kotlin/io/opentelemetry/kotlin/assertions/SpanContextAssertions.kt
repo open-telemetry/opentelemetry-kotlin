@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.assertions
 
-import io.opentelemetry.kotlin.tracing.model.SpanContext
+import io.opentelemetry.kotlin.tracing.SpanContext
 import kotlin.test.assertEquals
 
 internal fun assertSpanContextsMatch(lhs: SpanContext, rhs: SpanContext) {

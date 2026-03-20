@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.attributes.setExceptionAttributes
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.OtelJavaContextAdapter
 import io.opentelemetry.kotlin.context.OtelJavaContextKeyRepository
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
 import java.util.concurrent.TimeUnit
 
 @ExperimentalApi

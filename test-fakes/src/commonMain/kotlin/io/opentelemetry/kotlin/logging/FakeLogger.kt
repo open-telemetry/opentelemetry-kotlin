@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
 
 class FakeLogger(
     val name: String,

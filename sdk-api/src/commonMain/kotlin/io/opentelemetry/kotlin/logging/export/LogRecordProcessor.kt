@@ -4,8 +4,8 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.TelemetryCloseable
+import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
 
 /**
  * Processes logs before they are exported as batches.

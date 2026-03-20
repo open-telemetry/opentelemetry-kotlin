@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
 import io.opentelemetry.kotlin.semconv.ExceptionAttributes
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest

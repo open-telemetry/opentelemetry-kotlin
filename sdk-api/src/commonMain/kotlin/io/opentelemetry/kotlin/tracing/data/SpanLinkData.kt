@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.tracing.data
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.attributes.AttributeContainer
-import io.opentelemetry.kotlin.tracing.model.SpanContext
+import io.opentelemetry.kotlin.tracing.SpanContext
 
 /**
  * A read-only representation of a Link

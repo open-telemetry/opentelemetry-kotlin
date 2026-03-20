@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.context.FakeContextKey
-import io.opentelemetry.kotlin.tracing.model.Span
+import io.opentelemetry.kotlin.tracing.Span
 
 class FakeContextFactory : ContextFactory {
 

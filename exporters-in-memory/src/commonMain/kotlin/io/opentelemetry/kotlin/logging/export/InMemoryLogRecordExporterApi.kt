@@ -2,7 +2,6 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.init.ConfigDsl
 import io.opentelemetry.kotlin.init.LogExportConfigDsl
 
 /**
@@ -10,6 +9,5 @@ import io.opentelemetry.kotlin.init.LogExportConfigDsl
  * This is intended for development/testing rather than production use.
  */
 @ExperimentalApi
-@ConfigDsl
 public fun LogExportConfigDsl.inMemoryLogRecordExporter(): InMemoryLogRecordExporter =
     InMemoryLogRecordExporterImpl()

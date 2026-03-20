@@ -2,10 +2,10 @@ package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributeContainer
-import io.opentelemetry.kotlin.tracing.model.TraceState
+import io.opentelemetry.kotlin.tracing.TraceState
 
 /**
- * The result of a decision on whether a [io.opentelemetry.kotlin.tracing.model.Span] should
+ * The result of a decision on whether a [io.opentelemetry.kotlin.tracing.Span] should
  * be sampled or not.
  */
 @ExperimentalApi
@@ -43,8 +43,8 @@ public interface SamplingResult {
     public val attributes: AttributeContainer
 
     /**
-     * The [TraceState] that will be associated with the [io.opentelemetry.kotlin.tracing.model.Span]
-     * through the new [io.opentelemetry.kotlin.tracing.model.SpanContext].
+     * The [TraceState] that will be associated with the [io.opentelemetry.kotlin.tracing.Span]
+     * through the new [io.opentelemetry.kotlin.tracing.SpanContext].
      */
     public val traceState: TraceState
 }

@@ -6,9 +6,9 @@ import io.opentelemetry.kotlin.export.conversion.createKeyValues
 import io.opentelemetry.kotlin.export.conversion.toAttributeMap
 import io.opentelemetry.kotlin.export.conversion.toFlagsInt
 import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
+import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.resource.Resource
-import io.opentelemetry.kotlin.tracing.model.SpanContext
+import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.proto.common.v1.AnyValue
 import io.opentelemetry.proto.logs.v1.LogRecord
 import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_DEBUG

@@ -170,4 +170,23 @@ internal class TracerProviderConfigImplTest {
         }.generateTracingConfig()
         assertEquals("unknown_service", cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
     }
+
+    @Test
+    fun testServiceNameOverride() {
+        val value = "my-service"
+        val cfg = TracerProviderConfigImpl(clock).apply {
+            serviceName = value
+        }.generateTracingConfig()
+        assertEquals(value, cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
+    }
+
+    @Test
+    fun testServiceNamePrecedence() {
+        val value = "custom"
+        val cfg = TracerProviderConfigImpl(clock).apply {
+            resource(mapOf(ServiceAttributes.SERVICE_NAME to "res"))
+            serviceName = value
+        }.generateTracingConfig()
+        assertEquals(value, cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
+    }
 }

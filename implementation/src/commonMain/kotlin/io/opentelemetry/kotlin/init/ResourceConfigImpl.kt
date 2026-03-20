@@ -14,6 +14,7 @@ internal class ResourceConfigImpl : ResourceConfigDsl {
 
     private val resourceAttrs = AttributesModel(DEFAULT_ATTRIBUTE_LIMIT)
     private var schemaUrl: String? = null
+    override var serviceName: String = "unknown_service"
 
     override fun resource(
         schemaUrl: String?,
@@ -31,7 +32,7 @@ internal class ResourceConfigImpl : ResourceConfigDsl {
 
     fun generateResource(): Resource {
         val sdkDefaults = mapOf(
-            ServiceAttributes.SERVICE_NAME to "unknown_service",
+            ServiceAttributes.SERVICE_NAME to serviceName,
             ServiceAttributes.SERVICE_VERSION to BuildKonfig.SDK_VERSION,
             TelemetryAttributes.TELEMETRY_SDK_NAME to "opentelemetry",
             TelemetryAttributes.TELEMETRY_SDK_LANGUAGE to "kotlin",

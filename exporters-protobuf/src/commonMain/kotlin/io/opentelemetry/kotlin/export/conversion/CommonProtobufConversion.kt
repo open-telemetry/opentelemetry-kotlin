@@ -4,9 +4,9 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.resource.MutableResource
 import io.opentelemetry.kotlin.resource.Resource
-import io.opentelemetry.kotlin.tracing.model.SpanContext
-import io.opentelemetry.kotlin.tracing.model.TraceFlags
-import io.opentelemetry.kotlin.tracing.model.TraceState
+import io.opentelemetry.kotlin.tracing.SpanContext
+import io.opentelemetry.kotlin.tracing.TraceFlags
+import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.model.hex
 import io.opentelemetry.proto.common.v1.InstrumentationScope
 

@@ -3,8 +3,8 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
 
 class FakeLogRecordProcessor(
     var flushCode: () -> OperationResultCode = { OperationResultCode.Success },
