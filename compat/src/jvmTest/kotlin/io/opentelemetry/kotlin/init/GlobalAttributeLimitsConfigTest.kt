@@ -16,8 +16,8 @@ internal class GlobalAttributeLimitsConfigTest {
         val cfg = CompatAttributeLimitsConfig()
         assertFalse(cfg.attributeCountLimitSet)
         assertFalse(cfg.attributeValueLengthLimitSet)
-        assertEquals(0, cfg.attributeCountLimit)
-        assertEquals(0, cfg.attributeValueLengthLimit)
+        assertEquals(DEFAULT_ATTR_LIMIT, cfg.attributeCountLimit)
+        assertEquals(DEFAULT_ATTR_VALUE_LENGTH_LIMIT, cfg.attributeValueLengthLimit)
     }
 
     @Test
@@ -75,12 +75,12 @@ internal class GlobalAttributeLimitsConfigTest {
     fun `no global - defaults are zero (Java SDK uses its own defaults)`() {
         val tracerConfig = CompatTracerProviderConfig(clock, CompatIdGenerator())
         tracerConfig.build(clock)
-        assertEquals(0, tracerConfig.spanLimitsConfig.attributeCountLimit)
-        assertEquals(0, tracerConfig.spanLimitsConfig.attributeValueLengthLimit)
+        assertEquals(DEFAULT_ATTR_LIMIT, tracerConfig.spanLimitsConfig.attributeCountLimit)
+        assertEquals(DEFAULT_ATTR_VALUE_LENGTH_LIMIT, tracerConfig.spanLimitsConfig.attributeValueLengthLimit)
 
         val loggerConfig = CompatLoggerProviderConfig(clock)
         loggerConfig.build(clock)
-        assertEquals(0, loggerConfig.logLimitsConfig.attributeCountLimit)
-        assertEquals(0, loggerConfig.logLimitsConfig.attributeValueLengthLimit)
+        assertEquals(DEFAULT_ATTR_LIMIT, loggerConfig.logLimitsConfig.attributeCountLimit)
+        assertEquals(DEFAULT_ATTR_VALUE_LENGTH_LIMIT, loggerConfig.logLimitsConfig.attributeValueLengthLimit)
     }
 }

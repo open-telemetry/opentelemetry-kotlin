@@ -8,12 +8,12 @@ internal class SpanLimitsConfigImplTest {
     @Test
     fun `test default`() {
         CompatSpanLimitsConfig().apply {
-            assertEquals(0, eventCountLimit)
-            assertEquals(0, attributeCountLimit)
-            assertEquals(0, linkCountLimit)
-            assertEquals(0, attributeCountPerLinkLimit)
-            assertEquals(0, attributeCountPerEventLimit)
-            assertEquals(0, attributeValueLengthLimit)
+            assertEquals(DEFAULT_EVENT_LIMIT, eventCountLimit)
+            assertEquals(DEFAULT_ATTR_LIMIT, attributeCountLimit)
+            assertEquals(DEFAULT_LINK_LIMIT, linkCountLimit)
+            assertEquals(DEFAULT_ATTR_LIMIT, attributeCountPerLinkLimit)
+            assertEquals(DEFAULT_ATTR_LIMIT, attributeCountPerEventLimit)
+            assertEquals(DEFAULT_ATTR_VALUE_LENGTH_LIMIT, attributeValueLengthLimit)
         }
     }
 
