@@ -4,12 +4,13 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaIdGenerator
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
-import io.opentelemetry.kotlin.aliases.OtelJavaSampler
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProviderBuilder
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setAttributes
+import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
+import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
@@ -18,9 +19,9 @@ import io.opentelemetry.kotlin.tracing.TracerProvider
 import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
 import io.opentelemetry.kotlin.tracing.export.OtelJavaSpanProcessorAdapter
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
-import io.opentelemetry.kotlin.tracing.sampling.BuiltInSampler
 import io.opentelemetry.kotlin.tracing.sampling.OtelJavaSamplerAdapter
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
+import io.opentelemetry.kotlin.tracing.sampling.SamplerAdapter
 
 @ExperimentalApi
 internal class CompatTracerProviderConfig(
@@ -66,17 +67,16 @@ internal class CompatTracerProviderConfig(
         builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor))
     }
 
-    override fun sampler(builtin: BuiltInSampler) {
-        builder.setSampler(
-            when (builtin) {
-                BuiltInSampler.ALWAYS_ON -> OtelJavaSampler.alwaysOn()
-                BuiltInSampler.ALWAYS_OFF -> OtelJavaSampler.alwaysOff()
-            }
-        )
-    }
-
-    override fun sampler(factory: () -> Sampler) {
-        builder.setSampler(OtelJavaSamplerAdapter(factory()))
+    override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
+        val samplerConfig = object : SamplerConfigDsl {
+            override val spanFactory = CompatSpanFactory(CompatSpanContextFactory())
+        }
+        val sampler = samplerConfig.action()
+        val otelJavaSampler = when (sampler) {
+            is SamplerAdapter -> sampler.impl
+            else -> OtelJavaSamplerAdapter(sampler)
+        }
+        builder.setSampler(otelJavaSampler)
     }
 
     fun build(clock: Clock, baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build())): TracerProvider {

@@ -6,10 +6,8 @@ import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
-import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
-import io.opentelemetry.kotlin.tracing.sampling.BuiltInSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
-import io.opentelemetry.kotlin.tracing.sampling.toSampler
+import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
 
 internal class TracerProviderConfigImpl(
     private val clock: Clock,
@@ -18,7 +16,7 @@ internal class TracerProviderConfigImpl(
 
     private val processors: MutableList<SpanProcessor> = mutableListOf()
     private val spanLimitsConfigImpl = SpanLimitsConfigImpl()
-    private var samplerFactory: (SpanFactory) -> Sampler = { AlwaysOnSampler(it) }
+    private var samplerAction: SamplerConfigDsl.() -> Sampler = { alwaysOn() }
 
     override fun spanLimits(action: SpanLimitsConfigDsl.() -> Unit) {
         spanLimitsConfigImpl.action()
@@ -30,20 +28,18 @@ internal class TracerProviderConfigImpl(
         processors.add(processor)
     }
 
-    override fun sampler(builtin: BuiltInSampler) {
-        samplerFactory = { builtin.toSampler(it) }
-    }
-
-    override fun sampler(factory: () -> Sampler) {
-        samplerFactory = { factory() }
+    override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
+        samplerAction = action
     }
 
     fun generateTracingConfig(base: Resource): TracingConfig = TracingConfig(
         processors = processors.toList(),
         spanLimits = generateSpanLimitsConfig(),
         resource = base.merge(resourceConfigImpl.generateResource()),
-        samplerFactory = samplerFactory,
+        samplerFactory = { spanFactory -> SamplerConfigImpl(spanFactory).samplerAction() },
     )
+
+    private class SamplerConfigImpl(override val spanFactory: SpanFactory) : SamplerConfigDsl
 
     private fun generateSpanLimitsConfig(): SpanLimitConfig = SpanLimitConfig(
         attributeCountLimit = spanLimitsConfigImpl.attributeCountLimit,
