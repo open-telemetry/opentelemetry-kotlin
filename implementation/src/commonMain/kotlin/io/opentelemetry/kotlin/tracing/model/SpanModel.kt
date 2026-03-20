@@ -117,7 +117,10 @@ internal class SpanModel(
     ) {
         lock.write {
             if (isRecording() && linksList.size < spanLimitConfig.linkCountLimit && !hasSpanContext(spanContext)) {
-                val container = AttributesModel(spanLimitConfig.attributeCountPerLinkLimit)
+                val container = AttributesModel(
+                    attributeLimit = spanLimitConfig.attributeCountPerLinkLimit,
+                    attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
+                )
                 if (attributes != null) {
                     attributes(container)
                 }
@@ -140,7 +143,10 @@ internal class SpanModel(
     ) {
         lock.write {
             if (isRecording() && eventsList.size < spanLimitConfig.eventCountLimit) {
-                val container = AttributesModel(spanLimitConfig.attributeCountPerEventLimit)
+                val container = AttributesModel(
+                    attributeLimit = spanLimitConfig.attributeCountPerEventLimit,
+                    attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
+                )
                 if (attributes != null) {
                     attributes(container)
                 }
@@ -172,7 +178,11 @@ internal class SpanModel(
         get() = state == State.ENDED
 
     private val attrs by lazy {
-        AttributesModel(spanLimitConfig.attributeCountLimit, mutableMapOf())
+        AttributesModel(
+            attributeLimit = spanLimitConfig.attributeCountLimit,
+            attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit,
+            attrs = mutableMapOf()
+        )
     }
 
     override val attributes: Map<String, Any>

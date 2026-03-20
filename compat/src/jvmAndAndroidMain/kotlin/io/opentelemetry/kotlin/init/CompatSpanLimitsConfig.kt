@@ -14,6 +14,12 @@ internal class CompatSpanLimitsConfig : SpanLimitsConfigDsl {
             builder.setMaxNumberOfAttributes(value)
         }
 
+    override var attributeValueLengthLimit: Int = 0
+        set(value) {
+            field = value
+            builder.setMaxAttributeValueLength(value)
+        }
+
     override var linkCountLimit: Int = 0
         set(value) {
             field = value

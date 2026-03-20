@@ -90,7 +90,11 @@ internal class LogRecordModel(
         }
 
     private val attrs by lazy {
-        AttributesModel(logLimitConfig.attributeCountLimit, mutableMapOf())
+        AttributesModel(
+            attributeLimit = logLimitConfig.attributeCountLimit,
+            attributeValueLengthLimit = logLimitConfig.attributeValueLengthLimit,
+            attrs = mutableMapOf()
+        )
     }
 
     override val attributes: Map<String, Any>
