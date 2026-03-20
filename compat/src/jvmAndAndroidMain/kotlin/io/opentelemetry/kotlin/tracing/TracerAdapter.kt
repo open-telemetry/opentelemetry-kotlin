@@ -8,10 +8,7 @@ import io.opentelemetry.kotlin.context.OtelJavaContextAdapter
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
-import io.opentelemetry.kotlin.tracing.model.Span
 import io.opentelemetry.kotlin.tracing.model.SpanAdapter
-import io.opentelemetry.kotlin.tracing.model.SpanCreationAction
-import io.opentelemetry.kotlin.tracing.model.SpanKind
 import java.util.concurrent.TimeUnit
 
 internal class TracerAdapter(

@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSampler
-import io.opentelemetry.kotlin.init.ConfigDsl
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
 
 /**
@@ -11,7 +10,6 @@ import io.opentelemetry.kotlin.init.SamplerConfigDsl
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#alwayson
  */
 @ExperimentalApi
-@ConfigDsl
 public fun SamplerConfigDsl.alwaysOn(): Sampler = SamplerAdapter(OtelJavaSampler.alwaysOn())
 
 /**
@@ -20,5 +18,4 @@ public fun SamplerConfigDsl.alwaysOn(): Sampler = SamplerAdapter(OtelJavaSampler
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#alwaysoff
  */
 @ExperimentalApi
-@ConfigDsl
 public fun SamplerConfigDsl.alwaysOff(): Sampler = SamplerAdapter(OtelJavaSampler.alwaysOff())

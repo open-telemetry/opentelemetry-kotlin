@@ -4,7 +4,6 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
-import io.opentelemetry.kotlin.init.ConfigDsl
 import io.opentelemetry.kotlin.init.LogExportConfigDsl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -15,7 +14,6 @@ import kotlinx.coroutines.SupervisorJob
  * Creates a composite log record processor that delegates to a list of processors.
  */
 @ExperimentalApi
-@ConfigDsl
 public fun LogExportConfigDsl.compositeLogRecordProcessor(vararg processors: LogRecordProcessor): LogRecordProcessor {
     require(processors.isNotEmpty()) { "At least one processor must be provided" }
     return CompositeLogRecordProcessor(processors.toList(), NoopSdkErrorHandler)
@@ -25,7 +23,6 @@ public fun LogExportConfigDsl.compositeLogRecordProcessor(vararg processors: Log
  * Creates a simple log record processor that immediately sends any telemetry to its exporter.
  */
 @ExperimentalApi
-@ConfigDsl
 public fun LogExportConfigDsl.simpleLogRecordProcessor(exporter: LogRecordExporter): LogRecordProcessor {
     val dispatcher: CoroutineDispatcher = Dispatchers.Default
     val scope = CoroutineScope(SupervisorJob() + dispatcher)
@@ -36,7 +33,6 @@ public fun LogExportConfigDsl.simpleLogRecordProcessor(exporter: LogRecordExport
  * Creates a composite log record exporter that delegates to a list of exporters.
  */
 @ExperimentalApi
-@ConfigDsl
 public fun LogExportConfigDsl.compositeLogRecordExporter(vararg exporters: LogRecordExporter): LogRecordExporter {
     require(exporters.isNotEmpty()) { "At least one exporter must be provided" }
     return CompositeLogRecordExporter(exporters.toList(), NoopSdkErrorHandler)
@@ -47,7 +43,6 @@ public fun LogExportConfigDsl.compositeLogRecordExporter(vararg exporters: LogRe
  * See https://opentelemetry.io/docs/specs/otel/logs/sdk/#batching-processor
  */
 @ExperimentalApi
-@ConfigDsl
 public fun LogExportConfigDsl.batchLogRecordProcessor(
     exporter: LogRecordExporter,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
@@ -72,7 +67,6 @@ public fun LogExportConfigDsl.batchLogRecordProcessor(
  * production use. The output format is not standardized and can change at any time.
  */
 @ExperimentalApi
-@ConfigDsl
 public fun LogExportConfigDsl.stdoutLogRecordExporter(
     logger: (String) -> Unit = ::println
 ): LogRecordExporter = StdoutLogRecordExporter(logger)

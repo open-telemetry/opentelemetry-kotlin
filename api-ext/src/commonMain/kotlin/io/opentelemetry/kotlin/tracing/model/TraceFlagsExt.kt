@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing.model
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
+import io.opentelemetry.kotlin.tracing.TraceFlags
 
 /**
  * Returns the hexadecimal representation of the trace flags as a 2-character lowercase string.

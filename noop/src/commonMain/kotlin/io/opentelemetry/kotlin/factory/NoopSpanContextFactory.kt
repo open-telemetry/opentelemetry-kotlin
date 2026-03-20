@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.tracing.NoopSpanContext
-import io.opentelemetry.kotlin.tracing.model.SpanContext
-import io.opentelemetry.kotlin.tracing.model.TraceFlags
-import io.opentelemetry.kotlin.tracing.model.TraceState
+import io.opentelemetry.kotlin.tracing.SpanContext
+import io.opentelemetry.kotlin.tracing.TraceFlags
+import io.opentelemetry.kotlin.tracing.TraceState
 
 internal object NoopSpanContextFactory : SpanContextFactory {
 

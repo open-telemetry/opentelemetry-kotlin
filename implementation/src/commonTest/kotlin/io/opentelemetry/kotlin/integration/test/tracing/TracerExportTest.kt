@@ -1,8 +1,8 @@
 package io.opentelemetry.kotlin.integration.test.tracing
 
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
-import io.opentelemetry.kotlin.tracing.data.StatusData
-import io.opentelemetry.kotlin.tracing.model.SpanKind
+import io.opentelemetry.kotlin.tracing.SpanKind
+import io.opentelemetry.kotlin.tracing.StatusData
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

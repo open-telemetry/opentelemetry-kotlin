@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.attributes.AttributeContainer
-import io.opentelemetry.kotlin.tracing.model.TraceState
+import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
 
 internal class SamplingResultImpl(

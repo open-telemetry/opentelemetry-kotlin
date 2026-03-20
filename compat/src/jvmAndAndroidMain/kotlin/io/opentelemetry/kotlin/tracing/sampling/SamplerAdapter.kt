@@ -8,10 +8,10 @@ import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
+import io.opentelemetry.kotlin.tracing.SpanKind
+import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
-import io.opentelemetry.kotlin.tracing.model.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
-import io.opentelemetry.kotlin.tracing.model.TraceState
 import io.opentelemetry.kotlin.tracing.model.TraceStateAdapter
 
 internal class SamplerAdapter(

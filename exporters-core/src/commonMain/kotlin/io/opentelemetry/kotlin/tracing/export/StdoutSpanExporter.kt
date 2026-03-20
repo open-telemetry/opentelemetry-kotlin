@@ -3,8 +3,8 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.platformLog
+import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.data.SpanData
-import io.opentelemetry.kotlin.tracing.data.StatusData
 
 /**
  * A [SpanExporter] that outputs span data to stdout.

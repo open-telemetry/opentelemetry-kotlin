@@ -65,6 +65,7 @@ internal class TracerProviderConfigImplTest {
             assertEquals(128, attributeCountLimit)
             assertEquals(128, attributeCountPerLinkLimit)
             assertEquals(128, attributeCountPerEventLimit)
+            assertEquals(Int.MAX_VALUE, attributeValueLengthLimit)
         }
     }
 
@@ -83,6 +84,7 @@ internal class TracerProviderConfigImplTest {
         val attrCount = 300
         val attrCountPerLink = 400
         val attrCountPerEvent = 500
+        val attrValueLength = 600
         val schemaUrl = "https://example.com/schema"
 
         val cfg = TracerProviderConfigImpl(clock).apply {
@@ -98,6 +100,7 @@ internal class TracerProviderConfigImplTest {
                 attributeCountLimit = attrCount
                 attributeCountPerLinkLimit = attrCountPerLink
                 attributeCountPerEventLimit = attrCountPerEvent
+                attributeValueLengthLimit = attrValueLength
             }
         }.generateTracingConfig()
 
@@ -111,6 +114,7 @@ internal class TracerProviderConfigImplTest {
             assertEquals(attrCount, attributeCountLimit)
             assertEquals(attrCountPerLink, attributeCountPerLinkLimit)
             assertEquals(attrCountPerEvent, attributeCountPerEventLimit)
+            assertEquals(attrValueLength, attributeValueLengthLimit)
         }
     }
 
@@ -165,5 +169,24 @@ internal class TracerProviderConfigImplTest {
             resource(mapOf(ServiceAttributes.SERVICE_NAME to "my-service"))
         }.generateTracingConfig()
         assertEquals("unknown_service", cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
+    }
+
+    @Test
+    fun testServiceNameOverride() {
+        val value = "my-service"
+        val cfg = TracerProviderConfigImpl(clock).apply {
+            serviceName = value
+        }.generateTracingConfig()
+        assertEquals(value, cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
+    }
+
+    @Test
+    fun testServiceNamePrecedence() {
+        val value = "custom"
+        val cfg = TracerProviderConfigImpl(clock).apply {
+            resource(mapOf(ServiceAttributes.SERVICE_NAME to "res"))
+            serviceName = value
+        }.generateTracingConfig()
+        assertEquals(value, cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
     }
 }

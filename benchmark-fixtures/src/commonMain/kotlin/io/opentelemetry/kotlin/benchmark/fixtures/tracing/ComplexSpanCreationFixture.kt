@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.benchmark.fixtures.tracing
 
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.benchmark.fixtures.BenchmarkFixture
-import io.opentelemetry.kotlin.tracing.model.SpanKind
+import io.opentelemetry.kotlin.tracing.SpanKind
 
 class ComplexSpanCreationFixture(
     private val otel: OpenTelemetry

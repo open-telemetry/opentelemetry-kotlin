@@ -3,11 +3,11 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.tracing.model.SpanKind
+import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 
 /**
- * Decides whether a [io.opentelemetry.kotlin.tracing.model.Span] should be sampled or not
+ * Decides whether a [io.opentelemetry.kotlin.tracing.Span] should be sampled or not
  * by using information just before it's created to return a [SamplingResult].
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#sampler

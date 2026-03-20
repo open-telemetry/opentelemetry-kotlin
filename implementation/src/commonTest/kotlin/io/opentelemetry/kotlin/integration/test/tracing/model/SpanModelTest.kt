@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
+import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanModel
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -18,13 +19,20 @@ internal class SpanModelTest {
             FakeClock(),
             null,
             "span",
-            io.opentelemetry.kotlin.tracing.model.SpanKind.INTERNAL,
+            SpanKind.INTERNAL,
             0L,
             FakeInstrumentationScopeInfo(),
             FakeResource(),
             FakeSpanContext.INVALID,
             FakeSpanContext.VALID,
-            SpanLimitConfig(100, 100, 100, 100, 100)
+            SpanLimitConfig(
+                attributeCountLimit = 100,
+                attributeValueLengthLimit = Int.MAX_VALUE,
+                linkCountLimit = 100,
+                eventCountLimit = 100,
+                attributeCountPerEventLimit = 100,
+                attributeCountPerLinkLimit = 100
+            )
         )
         assertTrue(span.isRecording())
         span.end()

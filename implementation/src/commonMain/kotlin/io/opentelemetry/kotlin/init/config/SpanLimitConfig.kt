@@ -14,6 +14,11 @@ internal class SpanLimitConfig(
     val attributeCountLimit: Int,
 
     /**
+     * Max attribute value length.
+     */
+    val attributeValueLengthLimit: Int,
+
+    /**
      * Max link count.
      */
     val linkCountLimit: Int,

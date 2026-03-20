@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing.ext
 
 import io.opentelemetry.kotlin.aliases.OtelJavaStatusCode
 import io.opentelemetry.kotlin.aliases.OtelJavaStatusData
-import io.opentelemetry.kotlin.tracing.data.StatusData
+import io.opentelemetry.kotlin.tracing.StatusData
 import org.junit.Test
 import kotlin.test.assertEquals
 

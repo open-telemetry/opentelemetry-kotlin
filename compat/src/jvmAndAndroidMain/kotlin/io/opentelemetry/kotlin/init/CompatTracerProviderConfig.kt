@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaIdGenerator
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
@@ -12,6 +13,7 @@ import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
+import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.tracing.TracerProvider
 import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
 import io.opentelemetry.kotlin.tracing.export.OtelJavaSpanProcessorAdapter
@@ -28,6 +30,8 @@ internal class CompatTracerProviderConfig(
 
     private val builder: OtelJavaSdkTracerProviderBuilder = OtelJavaSdkTracerProvider.builder()
     private val spanLimitsConfig = CompatSpanLimitsConfig()
+    private var resource: OtelJavaResource? = null
+    private var serviceNameOverride: String? = null
 
     init {
         if (idGenerator is OtelJavaIdGenerator) {
@@ -35,9 +39,15 @@ internal class CompatTracerProviderConfig(
         }
     }
 
+    override var serviceName: String
+        get() = serviceNameOverride ?: "unknown_service"
+        set(value) {
+            serviceNameOverride = value
+        }
+
     override fun resource(schemaUrl: String?, attributes: AttributesMutator.() -> Unit) {
         val attrs = CompatAttributesModel().apply(attributes).otelJavaAttributes()
-        builder.setResource(OtelJavaResource.create(attrs, schemaUrl))
+        resource = OtelJavaResource.create(attrs, schemaUrl)
     }
 
     override fun resource(map: Map<String, Any>) {
@@ -68,6 +78,24 @@ internal class CompatTracerProviderConfig(
     }
 
     fun build(clock: Clock): TracerProvider {
+        val override = serviceNameOverride
+        val finalResource = when {
+            override != null -> {
+                val base = OtelJavaResource.create(
+                    OtelJavaAttributes.builder().put(ServiceAttributes.SERVICE_NAME, override)
+                        .build()
+                )
+                base.merge(resource ?: OtelJavaResource.empty())
+            }
+
+            resource != null -> {
+                resource
+            }
+            else -> {
+                null
+            }
+        }
+        finalResource?.let { builder.setResource(it) }
         builder.setClock(OtelJavaClockWrapper(clock))
         return TracerProviderAdapter(builder.build(), clock, spanLimitsConfig)
     }

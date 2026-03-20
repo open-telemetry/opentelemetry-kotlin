@@ -13,12 +13,12 @@ public final class io/opentelemetry/kotlin/context/ContextFactoryApiExtKt {
 }
 
 public final class io/opentelemetry/kotlin/tracing/SpanExtKt {
-	public static final fun addLink (Lio/opentelemetry/kotlin/tracing/model/Span;Lio/opentelemetry/kotlin/tracing/model/Span;Lkotlin/jvm/functions/Function1;)V
-	public static synthetic fun addLink$default (Lio/opentelemetry/kotlin/tracing/model/Span;Lio/opentelemetry/kotlin/tracing/model/Span;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
-	public static final fun wrapOperation (Lio/opentelemetry/kotlin/tracing/model/Span;Lkotlin/jvm/functions/Function0;)V
+	public static final fun addLink (Lio/opentelemetry/kotlin/tracing/Span;Lio/opentelemetry/kotlin/tracing/Span;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun addLink$default (Lio/opentelemetry/kotlin/tracing/Span;Lio/opentelemetry/kotlin/tracing/Span;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static final fun wrapOperation (Lio/opentelemetry/kotlin/tracing/Span;Lkotlin/jvm/functions/Function0;)V
 }
 
 public final class io/opentelemetry/kotlin/tracing/model/TraceFlagsExtKt {
-	public static final fun getHex (Lio/opentelemetry/kotlin/tracing/model/TraceFlags;)Ljava/lang/String;
+	public static final fun getHex (Lio/opentelemetry/kotlin/tracing/TraceFlags;)Ljava/lang/String;
 }
 

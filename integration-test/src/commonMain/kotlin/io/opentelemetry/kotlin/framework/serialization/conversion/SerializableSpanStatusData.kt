@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.framework.serialization.conversion
 
 import io.opentelemetry.kotlin.framework.serialization.SerializableSpanStatusData
-import io.opentelemetry.kotlin.tracing.data.StatusData
+import io.opentelemetry.kotlin.tracing.StatusData
 
 fun StatusData.toSerializable() =
     SerializableSpanStatusData(
