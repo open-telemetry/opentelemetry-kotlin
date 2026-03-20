@@ -64,6 +64,7 @@ internal class TracerImpl(
                 parentSpanContext.isValid -> parentSpanContext.traceIdBytes
                 else -> idGenerator.generateTraceIdBytes()
             }
+            val spanIdBytes = idGenerator.generateSpanIdBytes()
 
             val result = sampler.shouldSample(
                 context = ctx,
@@ -74,12 +75,12 @@ internal class TracerImpl(
                 links = emptyList(),
             )
 
-            if (result.decision == SamplingResult.Decision.DROP) {
-                return@ifActiveOrElse noopSpan
-            }
-
             val sampled = result.decision == SamplingResult.Decision.RECORD_AND_SAMPLE
             val spanContext = calculateSpanContext(traceIdBytes, sampled)
+
+            if (decision == SamplingResult.Decision.DROP) {
+                return@ifActiveOrElse NonRecordingSpan(parentSpanContext, spanContext)
+            }
 
             val spanModel = SpanModel(
                 clock = clock,
@@ -101,12 +102,14 @@ internal class TracerImpl(
             CreatedSpan(spanModel)
         }
 
-    private fun calculateSpanContext(traceIdBytes: ByteArray, isSampled: Boolean = true): SpanContext {
-        val spanId = idGenerator.generateSpanIdBytes()
-
+    private fun calculateSpanContext(
+        traceIdBytes: ByteArray,
+        spanIdBytes: ByteArray,
+        isSampled: Boolean = true
+    ): SpanContext {
         return SpanContextImpl(
             traceIdBytes = traceIdBytes,
-            spanIdBytes = spanId,
+            spanIdBytes = spanIdBytes,
             traceFlags = when {
                 isSampled -> traceFlagsDefault
                 else -> TraceFlagsImpl(isSampled = false, isRandom = false)
