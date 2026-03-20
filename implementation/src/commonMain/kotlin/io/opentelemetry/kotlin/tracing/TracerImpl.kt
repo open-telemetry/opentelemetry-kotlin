@@ -76,9 +76,9 @@ internal class TracerImpl(
             )
 
             val sampled = result.decision == SamplingResult.Decision.RECORD_AND_SAMPLE
-            val spanContext = calculateSpanContext(traceIdBytes, sampled)
+            val spanContext = calculateSpanContext(traceIdBytes, spanIdBytes, sampled)
 
-            if (decision == SamplingResult.Decision.DROP) {
+            if (result.decision == SamplingResult.Decision.DROP) {
                 return@ifActiveOrElse NonRecordingSpan(parentSpanContext, spanContext)
             }
 
@@ -105,13 +105,13 @@ internal class TracerImpl(
     private fun calculateSpanContext(
         traceIdBytes: ByteArray,
         spanIdBytes: ByteArray,
-        isSampled: Boolean = true
+        sampled: Boolean,
     ): SpanContext {
         return SpanContextImpl(
             traceIdBytes = traceIdBytes,
             spanIdBytes = spanIdBytes,
             traceFlags = when {
-                isSampled -> traceFlagsDefault
+                sampled -> traceFlagsDefault
                 else -> TraceFlagsImpl(isSampled = false, isRandom = false)
             },
             isValid = true,
