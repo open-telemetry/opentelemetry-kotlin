@@ -2,7 +2,6 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.init.ConfigDsl
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 
 /**
@@ -10,5 +9,4 @@ import io.opentelemetry.kotlin.init.TraceExportConfigDsl
  * This is intended for development/testing rather than production use.
  */
 @ExperimentalApi
-@ConfigDsl
 public fun TraceExportConfigDsl.inMemorySpanExporter(): InMemorySpanExporter = InMemorySpanExporterImpl()

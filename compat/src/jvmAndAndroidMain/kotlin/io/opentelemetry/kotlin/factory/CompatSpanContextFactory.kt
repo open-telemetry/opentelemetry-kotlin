@@ -1,14 +1,14 @@
 package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
+import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanContextImpl
+import io.opentelemetry.kotlin.tracing.TraceFlags
+import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceFlags
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceState
-import io.opentelemetry.kotlin.tracing.model.SpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanContextAdapter
-import io.opentelemetry.kotlin.tracing.model.TraceFlags
 import io.opentelemetry.kotlin.tracing.model.TraceFlagsAdapter
-import io.opentelemetry.kotlin.tracing.model.TraceState
 import io.opentelemetry.kotlin.tracing.model.TraceStateAdapter
 
 internal class CompatSpanContextFactory : SpanContextFactory {

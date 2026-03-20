@@ -1,4 +1,4 @@
-package io.opentelemetry.kotlin.logging.model
+package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
 

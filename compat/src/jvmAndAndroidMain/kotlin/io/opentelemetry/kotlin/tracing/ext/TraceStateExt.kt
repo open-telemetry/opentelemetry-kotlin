@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.tracing.ext
 
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
-import io.opentelemetry.kotlin.tracing.model.TraceState
+import io.opentelemetry.kotlin.tracing.TraceState
 
 internal fun TraceState.toOtelJavaTraceState(): OtelJavaTraceState {
     return OtelJavaTraceState.builder().apply {

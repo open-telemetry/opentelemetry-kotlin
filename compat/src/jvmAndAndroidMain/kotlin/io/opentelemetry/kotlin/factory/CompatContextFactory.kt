@@ -6,8 +6,8 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.context.ContextKeyAdapter
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
+import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.ext.storeInContext
-import io.opentelemetry.kotlin.tracing.model.Span
 
 internal class CompatContextFactory : ContextFactory {
 

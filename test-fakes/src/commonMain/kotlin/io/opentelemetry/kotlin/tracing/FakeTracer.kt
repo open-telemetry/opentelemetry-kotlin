@@ -1,9 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.tracing.model.Span
-import io.opentelemetry.kotlin.tracing.model.SpanCreationAction
-import io.opentelemetry.kotlin.tracing.model.SpanKind
 
 class FakeTracer(
     val name: String

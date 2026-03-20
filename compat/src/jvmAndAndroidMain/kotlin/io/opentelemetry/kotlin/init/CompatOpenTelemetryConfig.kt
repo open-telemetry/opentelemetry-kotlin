@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
+import io.opentelemetry.kotlin.semconv.ServiceAttributes
 
 @ExperimentalApi
 internal class CompatOpenTelemetryConfig(
@@ -21,6 +22,14 @@ internal class CompatOpenTelemetryConfig(
 
     private val globalResourceAttrs = CompatAttributesModel()
     private var globalResourceSchemaUrl: String? = null
+    private var serviceNameOverride: String? = null
+
+    override var serviceName: String
+        get() = serviceNameOverride ?: "unknown_service"
+        set(value) {
+            serviceNameOverride = value
+            globalResourceAttrs.setStringAttribute(ServiceAttributes.SERVICE_NAME, value)
+        }
 
     override fun resource(schemaUrl: String?, attributes: AttributesMutator.() -> Unit) {
         globalResourceSchemaUrl = schemaUrl

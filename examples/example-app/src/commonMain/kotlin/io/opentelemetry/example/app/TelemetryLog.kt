@@ -1,7 +1,7 @@
 package io.opentelemetry.example.app
 
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
-import io.opentelemetry.kotlin.tracing.model.SpanKind
+import io.opentelemetry.kotlin.logging.SeverityNumber
+import io.opentelemetry.kotlin.tracing.SpanKind
 
 enum class AttributeType {
     STRING, LONG, DOUBLE, BOOLEAN

@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
+import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.tracing.TracerProvider
 import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
 import io.opentelemetry.kotlin.tracing.export.OtelJavaSpanProcessorAdapter
@@ -29,6 +30,7 @@ internal class CompatTracerProviderConfig(
 
     private val builder: OtelJavaSdkTracerProviderBuilder = OtelJavaSdkTracerProvider.builder()
     private val spanLimitsConfig = CompatSpanLimitsConfig()
+    private var serviceNameOverride: String? = null
 
     private val resourceAttrs = CompatAttributesModel()
     private var resourceSchemaUrl: String? = null
@@ -38,6 +40,13 @@ internal class CompatTracerProviderConfig(
             builder.setIdGenerator(idGenerator)
         }
     }
+
+    override var serviceName: String
+        get() = serviceNameOverride ?: "unknown_service"
+        set(value) {
+            serviceNameOverride = value
+            resourceAttrs.setStringAttribute(ServiceAttributes.SERVICE_NAME, value)
+        }
 
     override fun resource(schemaUrl: String?, attributes: AttributesMutator.() -> Unit) {
         resourceSchemaUrl = schemaUrl

@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.tracing.model.TraceState
 
 @ExperimentalApi
 internal object NoopTraceState : TraceState {

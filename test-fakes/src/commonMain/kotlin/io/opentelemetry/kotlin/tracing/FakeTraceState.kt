@@ -1,7 +1,5 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.tracing.model.TraceState
-
 class FakeTraceState(
     private val attrs: Map<String, String> = mapOf("foo" to "bar")
 ) : TraceState {

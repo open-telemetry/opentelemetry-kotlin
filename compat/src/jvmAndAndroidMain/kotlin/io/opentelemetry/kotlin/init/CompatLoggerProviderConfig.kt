@@ -14,6 +14,7 @@ import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.OtelJavaLogRecordProcessorAdapter
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
+import io.opentelemetry.kotlin.semconv.ServiceAttributes
 
 @ExperimentalApi
 internal class CompatLoggerProviderConfig(
@@ -21,6 +22,14 @@ internal class CompatLoggerProviderConfig(
 ) : LoggerProviderConfigDsl {
 
     private val builder: OtelJavaSdkLoggerProviderBuilder = OtelJavaSdkLoggerProvider.builder()
+    private var serviceNameOverride: String? = null
+
+    override var serviceName: String
+        get() = serviceNameOverride ?: "unknown_service"
+        set(value) {
+            serviceNameOverride = value
+            resourceAttrs.setStringAttribute(ServiceAttributes.SERVICE_NAME, value)
+        }
 
     private val resourceAttrs = CompatAttributesModel()
     private var resourceSchemaUrl: String? = null
@@ -43,7 +52,10 @@ internal class CompatLoggerProviderConfig(
         builder.setLogLimits { CompatLogLimitsConfig().apply(action).build() }
     }
 
-    fun build(clock: Clock, baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build())): LoggerProvider {
+    fun build(
+        clock: Clock,
+        baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build())
+    ): LoggerProvider {
         val resource = ResourceAdapter(
             OtelJavaResource.create(resourceAttrs.otelJavaAttributes(), resourceSchemaUrl)
         )

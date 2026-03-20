@@ -1,4 +1,4 @@
 public final class io/opentelemetry/kotlin/tracing/SpanReadExtKt {
-	public static final fun toReadableSpan (Lio/opentelemetry/kotlin/tracing/model/Span;)Lio/opentelemetry/kotlin/tracing/model/ReadableSpan;
+	public static final fun toReadableSpan (Lio/opentelemetry/kotlin/tracing/Span;)Lio/opentelemetry/kotlin/tracing/model/ReadableSpan;
 }
 

@@ -40,6 +40,7 @@ internal class SpanAttributesTest {
     fun setUp() {
         spanLimitConfig = SpanLimitConfig(
             attributeCountLimit = attributeLimit,
+            attributeValueLengthLimit = Int.MAX_VALUE,
             linkCountLimit = fakeSpanLimitsConfig.linkCountLimit,
             eventCountLimit = fakeSpanLimitsConfig.eventCountLimit,
             attributeCountPerEventLimit = fakeSpanLimitsConfig.attributeCountPerEventLimit,
@@ -116,6 +117,83 @@ internal class SpanAttributesTest {
         }
 
         assertEquals(expected, (span.toReadableSpan()).attributes)
+    }
+
+    @Test
+    fun testSpanStringAttrTruncated() {
+        val tracer = tracerWithValueLengthLimit(3)
+        val span = tracer.startSpan("test")
+        span.setStringAttribute("key", "abcdef")
+        assertEquals("abc", span.toReadableSpan().attributes["key"])
+    }
+
+    @Test
+    fun testSpanStringListAttrTruncated() {
+        val tracer = tracerWithValueLengthLimit(2)
+        val span = tracer.startSpan("test")
+        span.setStringListAttribute("key", listOf("hello", "world"))
+        @Suppress("UNCHECKED_CAST")
+        val result = span.toReadableSpan().attributes["key"] as List<String>
+        assertEquals(listOf("he", "wo"), result)
+    }
+
+    @Test
+    fun testSpanNonStringAttributeNotTruncated() {
+        val tracer = tracerWithValueLengthLimit(3)
+        val span = tracer.startSpan("test")
+        span.setLongAttribute("long", 123456789L)
+        span.setDoubleAttribute("double", 3.14159)
+        span.setBooleanAttribute("bool", true)
+        assertEquals(123456789L, span.toReadableSpan().attributes["long"])
+        assertEquals(3.14159, span.toReadableSpan().attributes["double"])
+        assertEquals(true, span.toReadableSpan().attributes["bool"])
+    }
+
+    @Test
+    fun testEventStringAttrTruncated() {
+        val tracer = tracerWithValueLengthLimit(3)
+        val span = tracer.startSpan("test")
+        span.addEvent("evt") {
+            setStringAttribute("key", "abcdef")
+        }
+        val eventAttrs = span.toReadableSpan().events.first().attributes
+        assertEquals("abc", eventAttrs["key"])
+    }
+
+    @Test
+    fun testLinkStringAttrTruncated() {
+        val tracer = tracerWithValueLengthLimit(3)
+        val span = tracer.startSpan("test")
+        span.addLink(FakeSpanContext()) {
+            setStringAttribute("key", "abcdef")
+        }
+        val linkAttrs = span.toReadableSpan().links.first().attributes
+        assertEquals("abc", linkAttrs["key"])
+    }
+
+    private fun tracerWithValueLengthLimit(limit: Int): TracerImpl {
+        val config = SpanLimitConfig(
+            attributeCountLimit = attributeLimit,
+            attributeValueLengthLimit = limit,
+            linkCountLimit = fakeSpanLimitsConfig.linkCountLimit,
+            eventCountLimit = fakeSpanLimitsConfig.eventCountLimit,
+            attributeCountPerEventLimit = fakeSpanLimitsConfig.attributeCountPerEventLimit,
+            attributeCountPerLinkLimit = fakeSpanLimitsConfig.attributeCountPerLinkLimit
+        )
+        return TracerImpl(
+            clock = FakeClock(),
+            processor = FakeSpanProcessor(),
+            contextFactory = FakeContextFactory(),
+            spanContextFactory = FakeSpanContextFactory(),
+            traceFlagsFactory = FakeTraceFlagsFactory(),
+            traceStateFactory = FakeTraceStateFactory(),
+            spanFactory = FakeSpanFactory(),
+            scope = key,
+            resource = FakeResource(),
+            spanLimitConfig = config,
+            idGenerator = FakeIdGenerator(),
+            shutdownState = MutableShutdownState(),
+        )
     }
 
     private fun AttributesMutator.addTestAttributes(keyToken: String = "") {
