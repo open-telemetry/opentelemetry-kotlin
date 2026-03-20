@@ -21,7 +21,9 @@ import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 internal class TracerSamplerTest {
@@ -76,6 +78,16 @@ internal class TracerSamplerTest {
         val tracer = buildTracer(sampler)
         val span = tracer.startSpan("test")
         assertFalse(span.isRecording())
+        assertTrue(span.spanContext.isValid)
+        assertNotEquals("0000000000000000", span.spanContext.spanId)
+    }
+
+    @Test
+    fun testDropDecisionSpanIdsUnique() {
+        val sampler = FakeSampler(SamplingResult.Decision.DROP)
+        val tracer = buildTracer(sampler)
+        val spanIds = (1..10).map { tracer.startSpan("test-$it").spanContext.spanId }.toSet()
+        assertEquals(10, spanIds.size)
     }
 
     @Test
