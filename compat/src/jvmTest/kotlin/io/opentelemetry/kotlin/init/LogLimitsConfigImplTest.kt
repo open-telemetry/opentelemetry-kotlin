@@ -8,8 +8,8 @@ internal class LogLimitsConfigImplTest {
     @Test
     fun `test default`() {
         CompatLogLimitsConfig().apply {
-            assertEquals(0, attributeCountLimit)
-            assertEquals(0, attributeValueLengthLimit)
+            assertEquals(DEFAULT_ATTR_LIMIT, attributeCountLimit)
+            assertEquals(DEFAULT_ATTR_VALUE_LENGTH_LIMIT, attributeValueLengthLimit)
         }
     }
 

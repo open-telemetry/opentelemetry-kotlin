@@ -22,6 +22,8 @@ internal class CompatLoggerProviderConfig(
 ) : LoggerProviderConfigDsl {
 
     private val builder: OtelJavaSdkLoggerProviderBuilder = OtelJavaSdkLoggerProvider.builder()
+    internal val logLimitsConfig = CompatLogLimitsConfig()
+    private var logLimitsAction: (LogLimitsConfigDsl.() -> Unit)? = null
     private var serviceNameOverride: String? = null
 
     override var serviceName: String
@@ -49,13 +51,22 @@ internal class CompatLoggerProviderConfig(
     }
 
     override fun logLimits(action: LogLimitsConfigDsl.() -> Unit) {
-        builder.setLogLimits { CompatLogLimitsConfig().apply(action).build() }
+        logLimitsAction = action
     }
 
     fun build(
         clock: Clock,
-        baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build())
+        baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build()),
+        globalLimits: CompatAttributeLimitsConfig? = null,
     ): LoggerProvider {
+        if (globalLimits?.attributeCountLimitSet == true) {
+            logLimitsConfig.attributeCountLimit = globalLimits.attributeCountLimit
+        }
+        if (globalLimits?.attributeValueLengthLimitSet == true) {
+            logLimitsConfig.attributeValueLengthLimit = globalLimits.attributeValueLengthLimit
+        }
+        logLimitsAction?.invoke(logLimitsConfig)
+        builder.setLogLimits(logLimitsConfig::build)
         val resource = ResourceAdapter(
             OtelJavaResource.create(resourceAttrs.otelJavaAttributes(), resourceSchemaUrl)
         )

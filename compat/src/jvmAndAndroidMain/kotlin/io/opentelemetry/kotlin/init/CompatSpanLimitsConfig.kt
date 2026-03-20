@@ -8,37 +8,37 @@ internal class CompatSpanLimitsConfig : SpanLimitsConfigDsl {
 
     private val builder = OtelJavaSpanLimits.builder()
 
-    override var attributeCountLimit: Int = 0
+    override var attributeCountLimit: Int = DEFAULT_ATTR_LIMIT
         set(value) {
             field = value
             builder.setMaxNumberOfAttributes(value)
         }
 
-    override var attributeValueLengthLimit: Int = 0
+    override var attributeValueLengthLimit: Int = DEFAULT_ATTR_VALUE_LENGTH_LIMIT
         set(value) {
             field = value
             builder.setMaxAttributeValueLength(value)
         }
 
-    override var linkCountLimit: Int = 0
+    override var linkCountLimit: Int = DEFAULT_LINK_LIMIT
         set(value) {
             field = value
             builder.setMaxNumberOfLinks(value)
         }
 
-    override var eventCountLimit: Int = 0
+    override var eventCountLimit: Int = DEFAULT_EVENT_LIMIT
         set(value) {
             field = value
             builder.setMaxNumberOfEvents(value)
         }
 
-    override var attributeCountPerEventLimit: Int = 0
+    override var attributeCountPerEventLimit: Int = DEFAULT_ATTR_LIMIT
         set(value) {
             field = value
             builder.setMaxNumberOfAttributesPerEvent(value)
         }
 
-    override var attributeCountPerLinkLimit: Int = 0
+    override var attributeCountPerLinkLimit: Int = DEFAULT_ATTR_LIMIT
         set(value) {
             field = value
             builder.setMaxNumberOfAttributesPerLink(value)
