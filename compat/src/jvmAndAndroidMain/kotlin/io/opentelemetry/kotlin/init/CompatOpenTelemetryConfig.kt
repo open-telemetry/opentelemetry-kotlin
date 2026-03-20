@@ -19,6 +19,11 @@ internal class CompatOpenTelemetryConfig(
 
     internal val tracerProviderConfig = CompatTracerProviderConfig(clock, idGenerator)
     internal val loggerProviderConfig = CompatLoggerProviderConfig(clock)
+    internal val globalAttributeLimits = CompatAttributeLimitsConfig()
+
+    override fun attributeLimits(action: AttributeLimitsConfigDsl.() -> Unit) {
+        globalAttributeLimits.action()
+    }
 
     private val globalResourceAttrs = CompatAttributesModel()
     private var globalResourceSchemaUrl: String? = null

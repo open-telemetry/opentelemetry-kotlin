@@ -15,11 +15,11 @@ internal class TracerProviderConfigImpl(
 ) : TracerProviderConfigDsl, ResourceConfigDsl by resourceConfigImpl {
 
     private val processors: MutableList<SpanProcessor> = mutableListOf()
-    private val spanLimitsConfigImpl = SpanLimitsConfigImpl()
+    private var spanLimitsAction: SpanLimitsConfigDsl.() -> Unit = {}
     private var samplerAction: SamplerConfigDsl.() -> Sampler = { alwaysOn() }
 
     override fun spanLimits(action: SpanLimitsConfigDsl.() -> Unit) {
-        spanLimitsConfigImpl.action()
+        spanLimitsAction = action
     }
 
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
@@ -32,21 +32,29 @@ internal class TracerProviderConfigImpl(
         samplerAction = action
     }
 
-    fun generateTracingConfig(base: Resource): TracingConfig = TracingConfig(
+    fun generateTracingConfig(base: Resource, globalLimits: AttributeLimitsConfigImpl? = null): TracingConfig = TracingConfig(
         processors = processors.toList(),
-        spanLimits = generateSpanLimitsConfig(),
+        spanLimits = generateSpanLimitsConfig(globalLimits),
         resource = base.merge(resourceConfigImpl.generateResource()),
         samplerFactory = { spanFactory -> SamplerConfigImpl(spanFactory).samplerAction() },
     )
 
     private class SamplerConfigImpl(override val spanFactory: SpanFactory) : SamplerConfigDsl
 
-    private fun generateSpanLimitsConfig(): SpanLimitConfig = SpanLimitConfig(
-        attributeCountLimit = spanLimitsConfigImpl.attributeCountLimit,
-        attributeValueLengthLimit = spanLimitsConfigImpl.attributeValueLengthLimit,
-        linkCountLimit = spanLimitsConfigImpl.linkCountLimit,
-        eventCountLimit = spanLimitsConfigImpl.eventCountLimit,
-        attributeCountPerEventLimit = spanLimitsConfigImpl.attributeCountPerEventLimit,
-        attributeCountPerLinkLimit = spanLimitsConfigImpl.attributeCountPerLinkLimit
-    )
+    private fun generateSpanLimitsConfig(globalLimits: AttributeLimitsConfigImpl?): SpanLimitConfig {
+        val impl = SpanLimitsConfigImpl()
+        globalLimits?.let {
+            impl.attributeCountLimit = it.attributeCountLimit
+            impl.attributeValueLengthLimit = it.attributeValueLengthLimit
+        }
+        spanLimitsAction(impl)
+        return SpanLimitConfig(
+            attributeCountLimit = impl.attributeCountLimit,
+            attributeValueLengthLimit = impl.attributeValueLengthLimit,
+            linkCountLimit = impl.linkCountLimit,
+            eventCountLimit = impl.eventCountLimit,
+            attributeCountPerEventLimit = impl.attributeCountPerEventLimit,
+            attributeCountPerLinkLimit = impl.attributeCountPerLinkLimit,
+        )
+    }
 }

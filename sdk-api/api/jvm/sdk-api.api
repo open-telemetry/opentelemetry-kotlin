@@ -118,6 +118,7 @@ public abstract interface class io/opentelemetry/kotlin/init/LoggerProviderConfi
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/OpenTelemetryConfigDsl : io/opentelemetry/kotlin/init/ResourceConfigDsl {
+	public abstract fun attributeLimits (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun context (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun loggerProvider (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun tracerProvider (Lkotlin/jvm/functions/Function1;)V

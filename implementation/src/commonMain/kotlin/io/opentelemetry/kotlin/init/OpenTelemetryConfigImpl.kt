@@ -10,6 +10,11 @@ internal class OpenTelemetryConfigImpl(
     internal val tracingConfig: TracerProviderConfigImpl = TracerProviderConfigImpl(clock)
     internal val loggingConfig: LoggerProviderConfigImpl = LoggerProviderConfigImpl(clock)
     internal val contextConfig: ContextConfigImpl = ContextConfigImpl()
+    private val globalAttributeLimits = AttributeLimitsConfigImpl()
+
+    override fun attributeLimits(action: AttributeLimitsConfigDsl.() -> Unit) {
+        globalAttributeLimits.action()
+    }
 
     override fun tracerProvider(action: TracerProviderConfigDsl.() -> Unit) {
         tracingConfig.action()
@@ -26,8 +31,8 @@ internal class OpenTelemetryConfigImpl(
     private val defaultResource by lazy(::sdkDefaultResource)
 
     internal fun generateTracingConfig() =
-        tracingConfig.generateTracingConfig(defaultResource.merge(globalResourceConfig.generateResource()))
+        tracingConfig.generateTracingConfig(defaultResource.merge(globalResourceConfig.generateResource()), globalAttributeLimits)
 
     internal fun generateLoggingConfig() =
-        loggingConfig.generateLoggingConfig(defaultResource.merge(globalResourceConfig.generateResource()))
+        loggingConfig.generateLoggingConfig(defaultResource.merge(globalResourceConfig.generateResource()), globalAttributeLimits)
 }

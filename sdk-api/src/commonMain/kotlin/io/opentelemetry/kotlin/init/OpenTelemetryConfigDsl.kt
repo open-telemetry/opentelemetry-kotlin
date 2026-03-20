@@ -10,6 +10,12 @@ import io.opentelemetry.kotlin.ExperimentalApi
 public interface OpenTelemetryConfigDsl : ResourceConfigDsl {
 
     /**
+     * Defines global attribute limits. This can be overridden on individual signals.
+     * https://opentelemetry.io/docs/specs/otel/common/#attribute-limits
+     */
+    public fun attributeLimits(action: AttributeLimitsConfigDsl.() -> Unit)
+
+    /**
      * Defines configuration for the [io.opentelemetry.kotlin.tracing.TracerProvider].
      */
     public fun tracerProvider(action: TracerProviderConfigDsl.() -> Unit)
