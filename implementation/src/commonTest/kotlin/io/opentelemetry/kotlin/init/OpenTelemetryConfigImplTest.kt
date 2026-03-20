@@ -16,8 +16,8 @@ internal class OpenTelemetryConfigImplTest {
     @Test
     fun testDefaultConfig() {
         val cfg = OpenTelemetryConfigImpl(clock)
-        assertTrue(cfg.tracingConfig.generateTracingConfig().processors.isEmpty())
-        assertTrue(cfg.loggingConfig.generateLoggingConfig().processors.isEmpty())
+        assertTrue(cfg.generateTracingConfig().processors.isEmpty())
+        assertTrue(cfg.generateLoggingConfig().processors.isEmpty())
         assertEquals(ImplicitContextStorageMode.GLOBAL, cfg.contextConfig.storageMode)
     }
 
@@ -33,7 +33,7 @@ internal class OpenTelemetryConfigImplTest {
         cfg.context {
             assertEquals(ImplicitContextStorageMode.GLOBAL, storageMode)
         }
-        assertFalse(cfg.tracingConfig.generateTracingConfig().processors.isEmpty())
-        assertFalse(cfg.loggingConfig.generateLoggingConfig().processors.isEmpty())
+        assertFalse(cfg.generateTracingConfig().processors.isEmpty())
+        assertFalse(cfg.generateLoggingConfig().processors.isEmpty())
     }
 }
