@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.tracing.model.SpanLink
 
 class FakeSampler(
     private val decision: SamplingResult.Decision = SamplingResult.Decision.RECORD_AND_SAMPLE,
+    private val samplerAttributes: Map<String, Any> = emptyMap(),
 ) : Sampler {
 
     var callCount = 0
@@ -23,18 +24,18 @@ class FakeSampler(
         links: List<SpanLink>,
     ): SamplingResult {
         callCount++
-        return FakeSamplingResult(decision)
+        return FakeSamplingResult(decision, FakeAttributeContainer(samplerAttributes))
     }
 
     override val description: String = "FakeSampler"
 
     private class FakeSamplingResult(
         override val decision: SamplingResult.Decision,
-        override val attributes: AttributeContainer = FakeEmptyAttributeContainer,
+        override val attributes: AttributeContainer = FakeAttributeContainer(emptyMap()),
         override val traceState: TraceState = FakeTraceState(emptyMap()),
     ) : SamplingResult
 
-    private object FakeEmptyAttributeContainer : AttributeContainer {
-        override val attributes: Map<String, Any> = emptyMap()
-    }
+    private class FakeAttributeContainer(
+        override val attributes: Map<String, Any>
+    ) : AttributeContainer
 }

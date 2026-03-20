@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
@@ -64,21 +65,21 @@ internal class TracerImpl(
                 else -> idGenerator.generateTraceIdBytes()
             }
 
-            val samplingDecision = sampler.shouldSample(
+            val result = sampler.shouldSample(
                 context = ctx,
                 traceId = traceIdBytes.toHexString(),
                 name = name,
                 spanKind = spanKind,
                 attributes = AttributesModel(),
                 links = emptyList(),
-            ).decision
+            )
 
-            if (samplingDecision == SamplingResult.Decision.DROP) {
+            if (result.decision == SamplingResult.Decision.DROP) {
                 return@ifActiveOrElse noopSpan
             }
 
-            val isSampled = samplingDecision == SamplingResult.Decision.RECORD_AND_SAMPLE
-            val spanContext = calculateSpanContext(traceIdBytes, isSampled)
+            val sampled = result.decision == SamplingResult.Decision.RECORD_AND_SAMPLE
+            val spanContext = calculateSpanContext(traceIdBytes, sampled)
 
             val spanModel = SpanModel(
                 clock = clock,
@@ -92,6 +93,7 @@ internal class TracerImpl(
                 spanContext = spanContext,
                 spanLimitConfig = spanLimitConfig
             )
+            spanModel.setAttributes(result.attributes)
             if (action != null) {
                 action(spanModel)
             }
