@@ -8,6 +8,17 @@ internal class TraceStateImpl private constructor(
 ) : TraceState {
 
     companion object {
+        private const val MAX_ENTRIES = 32
+        private const val MAX_KEY_LENGTH = 256
+        private const val MAX_VALUE_LENGTH = 256
+        private const val MAX_TENANT_LENGTH = 241
+        private const val MAX_SYSTEM_LENGTH = 14
+        private const val CHR_MIN = 0x20
+        private const val CHR_MAX = 0x7E
+        private const val NBLK_CHR_MIN = 0x21
+        private val SIMPLE_KEY_REGEX = Regex("^[a-z][a-z0-9_*/-]*$")
+        private val TENANT_ID_REGEX = Regex("^[a-z0-9][a-z0-9_*/-]*$")
+
         fun create(): TraceState = TraceStateImpl(emptyMap())
     }
 
@@ -19,7 +30,9 @@ internal class TraceStateImpl private constructor(
         if (!isValidKey(key) || !isValidValue(value)) {
             return this
         }
-
+        if (data.size >= MAX_ENTRIES && !data.containsKey(key)) {
+            return this
+        }
         return TraceStateImpl(data + (key to value))
     }
 
@@ -32,7 +45,7 @@ internal class TraceStateImpl private constructor(
     }
 
     private fun isValidKey(key: String): Boolean {
-        if (key.isBlank() || key.length > 256) {
+        if (key.isBlank() || key.length > MAX_KEY_LENGTH) {
             return false
         }
 
@@ -46,17 +59,17 @@ internal class TraceStateImpl private constructor(
     }
 
     private fun isValidSimpleKey(key: String): Boolean {
-        return key.matches(Regex("^[a-z0-9][a-z0-9_*/-]*$"))
+        return key.matches(SIMPLE_KEY_REGEX)
     }
 
     private fun isValidMultiTenantKey(tenant: String, system: String): Boolean {
         // Tenant: max 241 chars (1 + 0*240), starts with lowercase letter or digit
-        if (tenant.length > 241 || !tenant.matches(Regex("^[a-z0-9][a-z0-9_*/-]*$"))) {
+        if (tenant.length > MAX_TENANT_LENGTH || !tenant.matches(TENANT_ID_REGEX)) {
             return false
         }
 
         // System: max 14 chars, starts with lowercase letter
-        if (system.length > 14 || !system.matches(Regex("^[a-z][a-z0-9_*/-]*$"))) {
+        if (system.length > MAX_SYSTEM_LENGTH || !system.matches(SIMPLE_KEY_REGEX)) {
             return false
         }
 
@@ -66,11 +79,22 @@ internal class TraceStateImpl private constructor(
     private fun isValidValue(value: String): Boolean {
         // W3C TraceState value validation
         // Value must be max 256 characters, printable ASCII except comma and equals
-        return value.length <= 256 && value.all { it.isValidTraceStateChar() }
+        if (value.isEmpty() || value.length > MAX_VALUE_LENGTH) {
+            return false
+        }
+        if (!value.all { it.isValidTraceStateChar() }) {
+            return false
+        }
+        return value.last().isNonBlankTraceStateChar()
     }
 
     private fun Char.isValidTraceStateChar(): Boolean {
         // Printable ASCII (0x20-0x7E) except comma (0x2C) and equals (0x3D)
-        return this.code in 0x20..0x7E && this != ',' && this != '='
+        return this.code in CHR_MIN..CHR_MAX && this != ',' && this != '='
+    }
+
+    private fun Char.isNonBlankTraceStateChar(): Boolean {
+        // nblk-chr = 0x21-0x7E except comma (0x2C) and equals (0x3D)
+        return this.code in NBLK_CHR_MIN..CHR_MAX && this != ',' && this != '='
     }
 }

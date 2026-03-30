@@ -48,12 +48,11 @@ internal class TraceStateImplTest {
 
     @Test
     fun testEmptyValues() {
-        val traceState = TraceStateImpl.create()
+        val original = TraceStateImpl.create()
+        val traceState = original
             .put("empty", "")
             .put("space", " ")
-
-        assertEquals("", traceState.get("empty"))
-        assertEquals(" ", traceState.get("space"))
+        assertSame(original, traceState)
     }
 
     @Test
@@ -120,8 +119,9 @@ internal class TraceStateImplTest {
         val result1 = traceState.put("key", "value") // starts with letter
         assertEquals("value", result1.get("key"))
 
-        val result2 = traceState.put("1vendor", "test") // starts with digit
-        assertEquals("test", result2.get("1vendor"))
+        // simple-key must start with lcalpha, not digit
+        val result2 = traceState.put("1vendor", "test")
+        assertSame(traceState, result2)
 
         val result3 = traceState.put("a_b-c*d/e", "test") // allowed characters
         assertEquals("test", result3.get("a_b-c*d/e"))
@@ -187,6 +187,35 @@ internal class TraceStateImplTest {
         val tooLongValue = "a".repeat(257)
         val result2 = traceState.put("key", tooLongValue)
         assertSame(traceState, result2)
+    }
+
+    @Test
+    fun testTrailingWhitespace() {
+        val traceState = TraceStateImpl.create()
+        val result = traceState.put("key", "value ")
+        assertSame(traceState, result)
+
+        // Leading space is fine as long as it ends with nblk-chr
+        val leadingSpace = traceState.put("key", " value")
+        assertEquals(" value", leadingSpace.get("key"))
+    }
+
+    @Test
+    fun testMaxEntries() {
+        var traceState = TraceStateImpl.create()
+        for (i in 1..32) {
+            traceState = traceState.put("key$i", "value$i")
+        }
+        assertEquals(32, traceState.asMap().size)
+
+        // reject 33rd unique key
+        val result = traceState.put("key33", "value33")
+        assertSame(traceState, result)
+
+        // updating existing keys is allowed
+        val updated = traceState.put("key1", "newvalue")
+        assertEquals("newvalue", updated.get("key1"))
+        assertEquals(32, updated.asMap().size)
     }
 
     @Test
