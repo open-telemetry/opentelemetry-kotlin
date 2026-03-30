@@ -41,9 +41,9 @@ jobs:
           echo "Installing weaver $weaver_tag"
           gh release download "$weaver_tag" \
             --repo open-telemetry/weaver \
-            --pattern '*x86_64-unknown-linux-gnu.tar.gz' \
-            --output weaver.tar.gz
-          tar -xzf weaver.tar.gz
+            --pattern '*x86_64-unknown-linux-gnu.tar.xz' \
+            --output weaver.tar.xz
+          tar -xJf weaver.tar.xz
           mv weaver /usr/local/bin/weaver
           weaver --version
         env:
