@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.factory
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
-import io.opentelemetry.kotlin.tracing.model.Span
+import io.opentelemetry.kotlin.tracing.Span
 
 /**
  * A factory for retrieving [Context] instances.

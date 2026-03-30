@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init.config
 
 import io.opentelemetry.kotlin.ThreadSafe
+import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
@@ -28,7 +29,7 @@ internal class TracingConfig(
     val resource: Resource,
 
     /**
-     * The sampler to use when creating spans.
+     * Factory that produces the sampler to use when creating spans.
      */
-    val sampler: Sampler = AlwaysOnSampler,
+    val samplerFactory: (SpanFactory) -> Sampler = { AlwaysOnSampler(it) },
 )

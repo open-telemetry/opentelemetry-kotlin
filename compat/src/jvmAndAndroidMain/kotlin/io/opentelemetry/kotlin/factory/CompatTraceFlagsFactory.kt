@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceFlags
-import io.opentelemetry.kotlin.tracing.model.TraceFlags
+import io.opentelemetry.kotlin.tracing.TraceFlags
 import io.opentelemetry.kotlin.tracing.model.TraceFlagsAdapter
 
 internal class CompatTraceFlagsFactory : TraceFlagsFactory {

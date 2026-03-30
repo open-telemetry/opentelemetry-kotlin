@@ -8,13 +8,16 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.Resource
+import io.opentelemetry.kotlin.tracing.SpanContext
+import io.opentelemetry.kotlin.tracing.SpanCreationAction
 import io.opentelemetry.kotlin.tracing.SpanDataImpl
 import io.opentelemetry.kotlin.tracing.SpanEventImpl
+import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.SpanLinkImpl
+import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
-import io.opentelemetry.kotlin.tracing.data.StatusData
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 
 /**
@@ -114,7 +117,10 @@ internal class SpanModel(
     ) {
         lock.write {
             if (isRecording() && linksList.size < spanLimitConfig.linkCountLimit && !hasSpanContext(spanContext)) {
-                val container = AttributesModel(spanLimitConfig.attributeCountPerLinkLimit)
+                val container = AttributesModel(
+                    attributeLimit = spanLimitConfig.attributeCountPerLinkLimit,
+                    attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
+                )
                 if (attributes != null) {
                     attributes(container)
                 }
@@ -137,7 +143,10 @@ internal class SpanModel(
     ) {
         lock.write {
             if (isRecording() && eventsList.size < spanLimitConfig.eventCountLimit) {
-                val container = AttributesModel(spanLimitConfig.attributeCountPerEventLimit)
+                val container = AttributesModel(
+                    attributeLimit = spanLimitConfig.attributeCountPerEventLimit,
+                    attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
+                )
                 if (attributes != null) {
                     attributes(container)
                 }
@@ -169,7 +178,11 @@ internal class SpanModel(
         get() = state == State.ENDED
 
     private val attrs by lazy {
-        AttributesModel(spanLimitConfig.attributeCountLimit, mutableMapOf())
+        AttributesModel(
+            attributeLimit = spanLimitConfig.attributeCountLimit,
+            attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit,
+            attrs = mutableMapOf()
+        )
     }
 
     override val attributes: Map<String, Any>

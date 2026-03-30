@@ -40,15 +40,15 @@ public final class io/opentelemetry/kotlin/tracing/export/SpanProcessorExtKt {
 }
 
 public final class io/opentelemetry/kotlin/tracing/ext/OtelJavaSpanContextExtKt {
-	public static final fun toOtelKotlinSpanContext (Lio/opentelemetry/api/trace/SpanContext;)Lio/opentelemetry/kotlin/tracing/model/SpanContext;
+	public static final fun toOtelKotlinSpanContext (Lio/opentelemetry/api/trace/SpanContext;)Lio/opentelemetry/kotlin/tracing/SpanContext;
 }
 
 public final class io/opentelemetry/kotlin/tracing/ext/SpanContextExtKt {
-	public static final fun toOtelJavaSpanContext (Lio/opentelemetry/kotlin/tracing/model/SpanContext;)Lio/opentelemetry/api/trace/SpanContext;
+	public static final fun toOtelJavaSpanContext (Lio/opentelemetry/kotlin/tracing/SpanContext;)Lio/opentelemetry/api/trace/SpanContext;
 }
 
 public final class io/opentelemetry/kotlin/tracing/ext/SpanContextStorageExtKt {
-	public static final fun storeInContext (Lio/opentelemetry/kotlin/tracing/model/Span;Lio/opentelemetry/kotlin/context/Context;)Lio/opentelemetry/kotlin/context/Context;
+	public static final fun storeInContext (Lio/opentelemetry/kotlin/tracing/Span;Lio/opentelemetry/kotlin/context/Context;)Lio/opentelemetry/kotlin/context/Context;
 }
 
 public final class io/opentelemetry/kotlin/tracing/ext/SpanEventDataExtKt {
@@ -57,5 +57,10 @@ public final class io/opentelemetry/kotlin/tracing/ext/SpanEventDataExtKt {
 
 public final class io/opentelemetry/kotlin/tracing/ext/SpanLinkDataExtKt {
 	public static final fun toOtelJavaLinkData (Lio/opentelemetry/kotlin/tracing/data/SpanLinkData;)Lio/opentelemetry/sdk/trace/data/LinkData;
+}
+
+public final class io/opentelemetry/kotlin/tracing/sampling/CompatBuiltInSamplerApiKt {
+	public static final fun alwaysOff (Lio/opentelemetry/kotlin/init/SamplerConfigDsl;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
+	public static final fun alwaysOn (Lio/opentelemetry/kotlin/init/SamplerConfigDsl;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
 }
 

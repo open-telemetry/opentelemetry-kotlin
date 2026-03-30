@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
+import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
@@ -21,7 +22,9 @@ import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 internal class TracerSamplerTest {
@@ -46,7 +49,10 @@ internal class TracerSamplerTest {
         spanFactory = SpanFactoryImpl(spanContextFactory, (contextFactory as ContextFactoryImpl).spanKey)
     }
 
-    private fun buildTracer(sampler: Sampler = AlwaysOnSampler) = TracerImpl(
+    private fun buildTracer(
+        sampler: Sampler = AlwaysOnSampler(spanFactory),
+        limitsCfg: SpanLimitConfig = fakeSpanLimitsConfig
+    ) = TracerImpl(
         clock = clock,
         processor = processor,
         contextFactory = contextFactory,
@@ -56,7 +62,7 @@ internal class TracerSamplerTest {
         spanFactory = spanFactory,
         scope = key,
         resource = FakeResource(),
-        spanLimitConfig = fakeSpanLimitsConfig,
+        spanLimitConfig = limitsCfg,
         idGenerator = idGenerator,
         shutdownState = MutableShutdownState(),
         sampler = sampler,
@@ -76,6 +82,16 @@ internal class TracerSamplerTest {
         val tracer = buildTracer(sampler)
         val span = tracer.startSpan("test")
         assertFalse(span.isRecording())
+        assertTrue(span.spanContext.isValid)
+        assertNotEquals("0000000000000000", span.spanContext.spanId)
+    }
+
+    @Test
+    fun testDropDecisionSpanIdsUnique() {
+        val sampler = FakeSampler(SamplingResult.Decision.DROP)
+        val tracer = buildTracer(sampler)
+        val spanIds = (1..10).map { tracer.startSpan("test-$it").spanContext.spanId }.toSet()
+        assertEquals(10, spanIds.size)
     }
 
     @Test
@@ -94,5 +110,46 @@ internal class TracerSamplerTest {
         val span = tracer.startSpan("test")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
+    fun testSamplerAttrsAdded() {
+        val sampler = FakeSampler(samplerAttributes = mapOf("sampler.key" to "sampler.value"))
+        val tracer = buildTracer(sampler)
+        val span = tracer.startSpan("test")
+        assertEquals("sampler.value", span.toReadableSpan().attributes["sampler.key"])
+    }
+
+    @Test
+    fun testSpanAttrsOverrideSamplerAttrs() {
+        val sampler = FakeSampler(samplerAttributes = mapOf("shared.key" to "sampler.value"))
+        val tracer = buildTracer(sampler)
+        val span = tracer.startSpan("test") {
+            setStringAttribute("shared.key", "span.value")
+        }
+        assertEquals("span.value", span.toReadableSpan().attributes["shared.key"])
+    }
+
+    @Test
+    fun testSamplerAttrsRespectLimits() {
+        val cfg = fakeSpanLimitsConfig
+        val limitedConfig = SpanLimitConfig(
+            attributeCountLimit = 2,
+            attributeValueLengthLimit = cfg.attributeValueLengthLimit,
+            linkCountLimit = cfg.linkCountLimit,
+            eventCountLimit = cfg.eventCountLimit,
+            attributeCountPerEventLimit = cfg.attributeCountPerEventLimit,
+            attributeCountPerLinkLimit = cfg.attributeCountPerLinkLimit,
+        )
+        val sampler = FakeSampler(
+            samplerAttributes = mapOf(
+                "key1" to "value1",
+                "key2" to "value2",
+                "key3" to "value3",
+            )
+        )
+        val tracer = buildTracer(sampler, limitedConfig)
+        val span = tracer.startSpan("test")
+        assertEquals(2, span.toReadableSpan().attributes.size)
     }
 }

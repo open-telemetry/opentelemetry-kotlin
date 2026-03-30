@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 
 /**
- * Represents a link to a [SpanContext] and optional attributes further describing the link.
+ * Represents a link to a [io.opentelemetry.kotlin.tracing.SpanContext] and optional attributes further describing the link.
  *
  * https://opentelemetry.io/docs/specs/otel/trace/api/#link
  */

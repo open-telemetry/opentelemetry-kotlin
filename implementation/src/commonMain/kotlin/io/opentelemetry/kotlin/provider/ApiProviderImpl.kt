@@ -35,7 +35,7 @@ internal class ApiProviderImpl<T>(
         schemaUrl: String?,
         attributes: (AttributesMutator.() -> Unit)?
     ): InstrumentationScopeInfo {
-        val container = AttributesModel(DEFAULT_ATTRIBUTE_LIMIT, mutableMapOf())
+        val container = AttributesModel(attributeLimit = DEFAULT_ATTRIBUTE_LIMIT, attrs = mutableMapOf())
         if (attributes != null) {
             attributes(container)
         }

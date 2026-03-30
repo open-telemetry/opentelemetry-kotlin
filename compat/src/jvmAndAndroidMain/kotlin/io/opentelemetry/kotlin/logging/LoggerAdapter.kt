@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.attributes.setExceptionAttributes
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.OtelJavaContextAdapter
 import io.opentelemetry.kotlin.context.OtelJavaContextKeyRepository
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
 import java.util.concurrent.TimeUnit
 
 @ExperimentalApi
@@ -27,7 +26,7 @@ internal class LoggerAdapter(
     }
 
     override fun emit(
-        body: String?,
+        body: Any?,
         eventName: String?,
         timestamp: Long?,
         observedTimestamp: Long?,
@@ -52,7 +51,7 @@ internal class LoggerAdapter(
 
     private fun processTelemetry(
         eventName: String?,
-        body: String?,
+        body: Any?,
         timestamp: Long?,
         observedTimestamp: Long?,
         context: Context?,
@@ -64,7 +63,7 @@ internal class LoggerAdapter(
         val builder = impl.logRecordBuilder()
 
         if (body != null) {
-            builder.setBody(body)
+            builder.setBody(body.toString())
         }
         if (eventName != null) {
             builder.setEventName(eventName)

@@ -4,8 +4,9 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
+import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.resource.Resource
-import io.opentelemetry.kotlin.tracing.model.SpanContext
+import io.opentelemetry.kotlin.tracing.SpanContext
 
 /**
  * The single source of truth for log record state. This is not exposed to consumers of the API - they
@@ -16,7 +17,7 @@ internal class LogRecordModel(
     override val instrumentationScopeInfo: InstrumentationScopeInfo,
     timestamp: Long,
     observedTimestamp: Long,
-    body: String?,
+    body: Any?,
     eventName: String?,
     severityText: String?,
     severityNumber: SeverityNumber?,
@@ -68,7 +69,7 @@ internal class LogRecordModel(
             }
         }
 
-    override var body: String? = body
+    override var body: Any? = body
         get() = lock.read {
             field
         }
@@ -89,7 +90,11 @@ internal class LogRecordModel(
         }
 
     private val attrs by lazy {
-        AttributesModel(logLimitConfig.attributeCountLimit, mutableMapOf())
+        AttributesModel(
+            attributeLimit = logLimitConfig.attributeCountLimit,
+            attributeValueLengthLimit = logLimitConfig.attributeValueLengthLimit,
+            attrs = mutableMapOf()
+        )
     }
 
     override val attributes: Map<String, Any>

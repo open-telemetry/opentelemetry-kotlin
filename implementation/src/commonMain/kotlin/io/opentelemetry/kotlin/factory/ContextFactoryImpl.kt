@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.context.ContextKeyImpl
 import io.opentelemetry.kotlin.context.DefaultImplicitContextStorage
 import io.opentelemetry.kotlin.context.ImplicitContextStorage
-import io.opentelemetry.kotlin.tracing.model.Span
+import io.opentelemetry.kotlin.tracing.Span
 
 internal class ContextFactoryImpl : ContextFactory {
 

@@ -7,6 +7,8 @@ import io.opentelemetry.kotlin.logging.export.compositeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.stdoutLogRecordExporter
 import io.opentelemetry.kotlin.sdkDefaultAttributes
+import io.opentelemetry.kotlin.semconv.ServiceAttributes
+import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -17,10 +19,11 @@ import kotlin.test.assertTrue
 internal class LoggerProviderConfigImplTest {
 
     private val clock = FakeClock()
+    private val base = sdkDefaultResource()
 
     @Test
     fun testDefaultLoggingConfig() {
-        val cfg = LoggerProviderConfigImpl(clock).generateLoggingConfig()
+        val cfg = LoggerProviderConfigImpl(clock).generateLoggingConfig(base)
         assertTrue(cfg.processors.isEmpty())
         assertEquals(sdkDefaultAttributes, cfg.resource.attributes)
         assertNull(cfg.resource.schemaUrl)
@@ -50,7 +53,7 @@ internal class LoggerProviderConfigImplTest {
                 attributeCountLimit = attrCount
                 attributeValueLengthLimit = attrValueCount
             }
-        }.generateLoggingConfig()
+        }.generateLoggingConfig(base)
 
         assertNotNull(cfg.processors.single())
         assertEquals(schemaUrl, cfg.resource.schemaUrl)
@@ -76,7 +79,7 @@ internal class LoggerProviderConfigImplTest {
     fun testResourceOverride() {
         val cfg = LoggerProviderConfigImpl(clock).apply {
             resource(mapOf("extra" to true))
-        }.generateLoggingConfig()
+        }.generateLoggingConfig(base)
         assertEquals(sdkDefaultAttributes + mapOf("extra" to true), cfg.resource.attributes)
     }
 
@@ -84,8 +87,26 @@ internal class LoggerProviderConfigImplTest {
     fun testSimpleResourceConfig() {
         val cfg = LoggerProviderConfigImpl(clock).apply {
             resource(mapOf("key" to "value"))
-        }.generateLoggingConfig()
+        }.generateLoggingConfig(base)
         assertEquals(sdkDefaultAttributes + mapOf("key" to "value"), cfg.resource.attributes)
+    }
+
+    @Test
+    fun testSdkDefaultAttributes() {
+        val value = "my-custom-sdk"
+        val cfg = LoggerProviderConfigImpl(clock).apply {
+            resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to value))
+        }.generateLoggingConfig(base)
+        assertEquals(value, cfg.resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME])
+    }
+
+    @Test
+    fun testServiceNameDefaults() {
+        val value = "my-service"
+        val cfg = LoggerProviderConfigImpl(clock).apply {
+            resource(mapOf(ServiceAttributes.SERVICE_NAME to value))
+        }.generateLoggingConfig(base)
+        assertEquals(value, cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
     }
 
     @Test
@@ -95,7 +116,7 @@ internal class LoggerProviderConfigImplTest {
         }
         val cfg = LoggerProviderConfigImpl(clock).apply {
             resource(attrs)
-        }.generateLoggingConfig()
+        }.generateLoggingConfig(base)
         assertEquals(DEFAULT_ATTRIBUTE_LIMIT, cfg.resource.attributes.size)
     }
 }

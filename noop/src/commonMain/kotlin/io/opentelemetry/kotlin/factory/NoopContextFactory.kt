@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.context.NoopContext
 import io.opentelemetry.kotlin.context.NoopContextKey
-import io.opentelemetry.kotlin.tracing.model.Span
+import io.opentelemetry.kotlin.tracing.Span
 
 internal object NoopContextFactory : ContextFactory {
 

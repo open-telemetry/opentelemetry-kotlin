@@ -3,19 +3,14 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.tracing.TraceStateImpl
-import io.opentelemetry.kotlin.tracing.model.SpanKind
+import io.opentelemetry.kotlin.factory.SpanFactory
+import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
+import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
 
-/**
- * https://opentelemetry.io/docs/specs/otel/trace/sdk/#alwayson
- */
-internal object AlwaysOnSampler : Sampler {
-    private val result = SamplingResultImpl(
-        decision = SamplingResult.Decision.RECORD_AND_SAMPLE,
-        attributes = AttributesModel(),
-        traceState = TraceStateImpl.create(),
-    )
+internal class AlwaysOnSampler(private val spanFactory: SpanFactory) : Sampler {
+
+    override val description: String = "AlwaysOnSampler"
 
     override fun shouldSample(
         context: Context,
@@ -24,7 +19,12 @@ internal object AlwaysOnSampler : Sampler {
         spanKind: SpanKind,
         attributes: AttributeContainer,
         links: List<SpanLink>,
-    ): SamplingResult = result
-
-    override val description: String = "AlwaysOnSampler"
+    ): SamplingResult {
+        val parentTraceState = spanFactory.fromContext(context).spanContext.traceState
+        return SamplingResultImpl(
+            decision = Decision.RECORD_AND_SAMPLE,
+            attributes = AttributesModel(),
+            traceState = parentTraceState,
+        )
+    }
 }

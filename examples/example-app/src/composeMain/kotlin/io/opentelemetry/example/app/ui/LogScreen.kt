@@ -30,7 +30,7 @@ import io.opentelemetry.example.app.LogFormState
 import io.opentelemetry.example.app.ui.components.AttributeEditor
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.OpenTelemetry
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
+import io.opentelemetry.kotlin.logging.SeverityNumber
 import kotlinx.coroutines.delay
 
 @Composable

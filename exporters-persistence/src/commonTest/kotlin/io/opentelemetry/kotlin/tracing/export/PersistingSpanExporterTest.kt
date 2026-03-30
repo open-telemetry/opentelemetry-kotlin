@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 internal class PersistingSpanExporterTest {
 
@@ -25,27 +26,22 @@ internal class PersistingSpanExporterTest {
     }
 
     @Test
-    fun testDeleteCalledOnSuccess() = runTest {
+    fun testExportSuccess() = runTest {
         val repository = FakeTelemetryRepository<SpanData>()
-        val exporter = PersistingSpanExporter(
-            FakeSpanExporter(exportReturnValue = { Success }),
-            repository,
-        )
+        val exporter = PersistingSpanExporter(FakeSpanExporter(), repository)
 
-        exporter.export(telemetry)
-        assertEquals(1, repository.deleteCalls)
+        val result = exporter.export(telemetry)
+        assertEquals(Success, result)
     }
 
     @Test
-    fun testDeleteNotCalledOnFailure() = runTest {
+    fun testDelegateNotCalled() = runTest {
         val repository = FakeTelemetryRepository<SpanData>()
-        val exporter = PersistingSpanExporter(
-            FakeSpanExporter(exportReturnValue = { Failure }),
-            repository,
-        )
+        val delegate = FakeSpanExporter()
+        val exporter = PersistingSpanExporter(delegate, repository)
 
         exporter.export(telemetry)
-        assertEquals(0, repository.deleteCalls)
+        assertTrue(delegate.exports.isEmpty())
     }
 
     @Test
@@ -61,8 +57,8 @@ internal class PersistingSpanExporterTest {
     }
 
     @Test
-    fun testExportResultPropagated() = runTest {
-        val repository = FakeTelemetryRepository<SpanData>()
+    fun testFallbackExport() = runTest {
+        val repository = FakeTelemetryRepository<SpanData>(storeFails = true)
         val exporter = PersistingSpanExporter(
             FakeSpanExporter(exportReturnValue = { Failure }),
             repository,
@@ -73,22 +69,33 @@ internal class PersistingSpanExporterTest {
     }
 
     @Test
+    fun testForceFlushReturnsSuccess() = runTest {
+        val repository = FakeTelemetryRepository<SpanData>()
+        val exporter = PersistingSpanExporter(FakeSpanExporter(), repository)
+        assertEquals(Success, exporter.forceFlush())
+    }
+
+    @Test
     fun testShutdown() = runTest {
         val repository = FakeTelemetryRepository<SpanData>()
-        val exporter = PersistingSpanExporter(
-            FakeSpanExporter(exportReturnValue = { Success }),
-            repository,
-        )
+        val exporter = PersistingSpanExporter(FakeSpanExporter(), repository)
 
         assertEquals(Success, exporter.export(telemetry))
         assertEquals(1, repository.storeCalls)
-        assertEquals(1, repository.deleteCalls)
         assertEquals(1, repository.storedTelemetry.size)
+        exporter.shutdown()
         exporter.shutdown()
 
         assertEquals(Failure, exporter.export(telemetry))
         assertEquals(1, repository.storeCalls)
-        assertEquals(1, repository.deleteCalls)
         assertEquals(1, repository.storedTelemetry.size)
+    }
+
+    @Test
+    fun testForceFlushWorksAfterShutdown() = runTest {
+        val repository = FakeTelemetryRepository<SpanData>()
+        val exporter = PersistingSpanExporter(FakeSpanExporter(), repository)
+        exporter.shutdown()
+        assertEquals(Success, exporter.forceFlush())
     }
 }

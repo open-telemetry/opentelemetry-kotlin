@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
-import io.opentelemetry.kotlin.init.ConfigDsl
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -14,7 +13,6 @@ import kotlinx.coroutines.SupervisorJob
  * Creates a composite span processor that delegates to a list of processors.
  */
 @ExperimentalApi
-@ConfigDsl
 public fun TraceExportConfigDsl.compositeSpanProcessor(vararg processors: SpanProcessor): SpanProcessor {
     require(processors.isNotEmpty()) { "At least one processor must be provided" }
     return CompositeSpanProcessor(processors.toList(), NoopSdkErrorHandler)
@@ -23,7 +21,6 @@ public fun TraceExportConfigDsl.compositeSpanProcessor(vararg processors: SpanPr
 /**
  * Creates a simple span processor that immediately sends any telemetry to its exporter.
  */
-@ConfigDsl
 @ExperimentalApi
 public fun TraceExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): SpanProcessor {
     val dispatcher: CoroutineDispatcher = Dispatchers.Default
@@ -35,7 +32,6 @@ public fun TraceExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): Spa
  * Creates a composite span exporter that delegates to a list of exporters.
  */
 @ExperimentalApi
-@ConfigDsl
 public fun TraceExportConfigDsl.compositeSpanExporter(vararg exporters: SpanExporter): SpanExporter {
     require(exporters.isNotEmpty()) { "At least one exporter must be provided" }
     return CompositeSpanExporter(exporters.toList(), NoopSdkErrorHandler)
@@ -46,7 +42,6 @@ public fun TraceExportConfigDsl.compositeSpanExporter(vararg exporters: SpanExpo
  * See https://opentelemetry.io/docs/specs/otel/logs/sdk/#batching-processor
  */
 @ExperimentalApi
-@ConfigDsl
 public fun TraceExportConfigDsl.batchSpanProcessor(
     exporter: SpanExporter,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
@@ -71,7 +66,6 @@ public fun TraceExportConfigDsl.batchSpanProcessor(
  * production use. The output format is not standardized and can change at any time.
  */
 @ExperimentalApi
-@ConfigDsl
 public fun TraceExportConfigDsl.stdoutSpanExporter(
     logger: (String) -> Unit = ::println
 ): SpanExporter = StdoutSpanExporter(logger)

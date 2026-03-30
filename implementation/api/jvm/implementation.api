@@ -3,3 +3,8 @@ public final class io/opentelemetry/kotlin/OpenTelemetryImplEntrypointKt {
 	public static synthetic fun createOpenTelemetry$default (Lio/opentelemetry/kotlin/Clock;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/OpenTelemetry;
 }
 
+public final class io/opentelemetry/kotlin/tracing/sampling/BuiltInSamplerApiKt {
+	public static final fun alwaysOff (Lio/opentelemetry/kotlin/init/SamplerConfigDsl;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
+	public static final fun alwaysOn (Lio/opentelemetry/kotlin/init/SamplerConfigDsl;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
+}
+

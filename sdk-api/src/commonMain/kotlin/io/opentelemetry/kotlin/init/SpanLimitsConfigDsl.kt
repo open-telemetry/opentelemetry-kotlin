@@ -7,12 +7,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  */
 @ExperimentalApi
 @ConfigDsl
-public interface SpanLimitsConfigDsl {
-
-    /**
-     * The maximum number of attributes
-     */
-    public var attributeCountLimit: Int
+public interface SpanLimitsConfigDsl : AttributeLimitsConfigDsl {
 
     /**
      * The maximum number of links

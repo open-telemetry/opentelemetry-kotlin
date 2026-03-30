@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.tracing.ext
 
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceFlags
-import io.opentelemetry.kotlin.tracing.model.TraceFlags
+import io.opentelemetry.kotlin.tracing.TraceFlags
 
 internal fun TraceFlags.toOtelJavaTraceFlags(): OtelJavaTraceFlags {
     val sb = StringBuilder()

@@ -2,17 +2,18 @@ package io.opentelemetry.kotlin.logging.model
 
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
+import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
-import io.opentelemetry.kotlin.tracing.model.SpanContext
+import io.opentelemetry.kotlin.tracing.SpanContext
 
 class FakeReadWriteLogRecord(
     override var timestamp: Long? = null,
     override var observedTimestamp: Long? = null,
     override var severityNumber: SeverityNumber? = SeverityNumber.UNKNOWN,
     override var severityText: String? = null,
-    override var body: String? = null,
+    override var body: Any? = null,
     override var eventName: String? = null,
     override var spanContext: SpanContext = FakeSpanContext.INVALID,
     override val attributes: Map<String, Any> = emptyMap(),

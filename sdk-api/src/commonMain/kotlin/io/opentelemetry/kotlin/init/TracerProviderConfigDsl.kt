@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
-import io.opentelemetry.kotlin.tracing.sampling.BuiltInSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 
 /**
@@ -24,12 +23,7 @@ public interface TracerProviderConfigDsl : ResourceConfigDsl {
     public fun export(action: TraceExportConfigDsl.() -> SpanProcessor)
 
     /**
-     * Configure sampling using a built-in sampler.
+     * Configures the strategy that should be used for sampling.
      */
-    public fun sampler(builtin: BuiltInSampler)
-
-    /**
-     * Configure sampling using a custom sampler.
-     */
-    public fun sampler(factory: () -> Sampler)
+    public fun sampler(action: SamplerConfigDsl.() -> Sampler)
 }

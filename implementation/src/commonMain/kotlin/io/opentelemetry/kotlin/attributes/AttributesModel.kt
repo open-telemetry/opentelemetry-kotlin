@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.threadSafeMap
 @ThreadSafe
 internal class AttributesModel(
     private val attributeLimit: Int = DEFAULT_ATTRIBUTE_LIMIT,
+    private val attributeValueLengthLimit: Int = DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
     private val attrs: MutableMap<String, Any> = threadSafeMap()
 ) : AttributesMutator, AttributeContainer {
 
@@ -17,7 +18,7 @@ internal class AttributesModel(
 
     override fun setStringAttribute(key: String, value: String) {
         if (canAddAttribute(key)) {
-            attrs[key] = value
+            attrs[key] = value.take(attributeValueLengthLimit)
         }
     }
 
@@ -47,7 +48,7 @@ internal class AttributesModel(
         value: List<String>
     ) {
         if (canAddAttribute(key)) {
-            attrs[key] = value
+            attrs[key] = value.map { it.take(attributeValueLengthLimit) }
         }
     }
 
@@ -76,3 +77,4 @@ internal class AttributesModel(
 }
 
 internal const val DEFAULT_ATTRIBUTE_LIMIT: Int = 128
+internal const val DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT: Int = Int.MAX_VALUE

@@ -8,13 +8,13 @@ internal class CompatLogLimitsConfig : LogLimitsConfigDsl {
 
     private val builder = OtelJavaLogLimits.builder()
 
-    override var attributeCountLimit: Int = 0
+    override var attributeCountLimit: Int = DEFAULT_ATTR_LIMIT
         set(value) {
             field = value
             builder.setMaxNumberOfAttributes(value)
         }
 
-    override var attributeValueLengthLimit: Int = 0
+    override var attributeValueLengthLimit: Int = DEFAULT_ATTR_VALUE_LENGTH_LIMIT
         set(value) {
             field = value
             builder.setMaxAttributeValueLength(value)
