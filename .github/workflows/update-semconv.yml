@@ -1,0 +1,97 @@
+name: Update semantic conventions
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update-semconv:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Check for new semconv version
+        run: |
+          latest=$(gh api repos/open-telemetry/semantic-conventions/releases/latest --jq '.tag_name' | sed 's/^v//')
+          current=$(grep 'val semanticConventionsVersion' semconv/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
+
+          echo "Latest semconv version: $latest"
+          echo "Current semconv version: $current"
+
+          if [[ "$latest" == "$current" ]]; then
+            echo "Already up to date, nothing to do."
+            echo "UP_TO_DATE=true" >> $GITHUB_ENV
+          else
+            echo "New version available: $latest"
+            echo "UP_TO_DATE=false" >> $GITHUB_ENV
+            echo "LATEST=$latest" >> $GITHUB_ENV
+            echo "CURRENT=$current" >> $GITHUB_ENV
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install weaver
+        if: env.UP_TO_DATE == 'false'
+        run: |
+          weaver_tag=$(gh api repos/open-telemetry/weaver/releases/latest --jq '.tag_name')
+          echo "Installing weaver $weaver_tag"
+          gh release download "$weaver_tag" \
+            --repo open-telemetry/weaver \
+            --pattern '*x86_64-unknown-linux-gnu.tar.gz' \
+            --output weaver.tar.gz
+          tar -xzf weaver.tar.gz
+          mv weaver /usr/local/bin/weaver
+          weaver --version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Java
+        if: env.UP_TO_DATE == 'false'
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          distribution: 'adopt'
+          java-version: 21
+
+      - name: Setup Gradle
+        if: env.UP_TO_DATE == 'false'
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+
+      - name: Update semconv version in build file
+        if: env.UP_TO_DATE == 'false'
+        run: |
+          sed -Ei "s/(val semanticConventionsVersion = \").*\"/\1${LATEST}\"/" semconv/build.gradle.kts
+
+      - name: Regenerate semantic conventions
+        if: env.UP_TO_DATE == 'false'
+        run: ./gradlew :semconv:generateSemanticConventions
+
+      - name: Use CLA approved github bot
+        if: env.UP_TO_DATE == 'false'
+        run: .github/scripts/use-cla-approved-github-bot.sh
+
+      - uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        if: env.UP_TO_DATE == 'false'
+        id: otelbot-token
+        with:
+          app-id: ${{ vars.OTELBOT_APP_ID }}
+          private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
+
+      - name: Create pull request
+        if: env.UP_TO_DATE == 'false'
+        env:
+          GH_TOKEN: ${{ steps.otelbot-token.outputs.token }}
+        run: |
+          message="Update semantic conventions to v${LATEST}"
+          branch="otelbot/update-semconv-to-${LATEST}"
+
+          git checkout -b $branch
+          git add semconv/build.gradle.kts semconv/src/
+          git commit -m "$message"
+          git push --set-upstream origin $branch
+          gh pr create --title "$message" \
+                       --body "Updates semantic conventions from \`${CURRENT}\` to \`v${LATEST}\`." \
+                       --base main
