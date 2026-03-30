@@ -59,7 +59,6 @@ internal fun createOpenTelemetryImpl(
             contextFactory = contextFactory,
             spanContextFactory = spanContext,
             traceFlagsFactory = traceFlags,
-            traceStateFactory = traceState,
             spanFactory = span,
             idGenerator = idGenerator,
         ),

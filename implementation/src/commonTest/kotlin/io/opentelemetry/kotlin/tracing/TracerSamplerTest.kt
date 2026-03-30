@@ -58,7 +58,6 @@ internal class TracerSamplerTest {
         contextFactory = contextFactory,
         spanContextFactory = spanContextFactory,
         traceFlagsFactory = TraceFlagsFactoryImpl(),
-        traceStateFactory = TraceStateFactoryImpl(),
         spanFactory = spanFactory,
         scope = key,
         resource = FakeResource(),
@@ -128,6 +127,15 @@ internal class TracerSamplerTest {
             setStringAttribute("shared.key", "span.value")
         }
         assertEquals("span.value", span.toReadableSpan().attributes["shared.key"])
+    }
+
+    @Test
+    fun testSamplerTraceStateApplied() {
+        val traceState = FakeTraceState(mapOf("vendor" to "data"))
+        val sampler = FakeSampler(samplerTraceState = traceState)
+        val tracer = buildTracer(sampler)
+        val span = tracer.startSpan("test")
+        assertEquals("data", span.spanContext.traceState.get("vendor"))
     }
 
     @Test

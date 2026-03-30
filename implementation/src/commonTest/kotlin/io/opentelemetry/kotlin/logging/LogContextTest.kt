@@ -63,7 +63,6 @@ internal class LogContextTest {
             contextFactory = contextFactory,
             spanContextFactory = spanContextFactory,
             traceFlagsFactory = traceFlags,
-            traceStateFactory = traceState,
             spanFactory = spanFactory,
             scope = key,
             resource = FakeResource(),

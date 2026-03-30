@@ -12,7 +12,6 @@ import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
-import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.Resource
@@ -30,7 +29,6 @@ internal class TracerImpl(
     private val contextFactory: ContextFactory,
     spanContextFactory: SpanContextFactory,
     traceFlagsFactory: TraceFlagsFactory,
-    traceStateFactory: TraceStateFactory,
     private val spanFactory: SpanFactory,
     private val idGenerator: IdGenerator,
     private val scope: InstrumentationScopeInfo,
@@ -44,7 +42,6 @@ internal class TracerImpl(
     private val root = contextFactory.root()
     private val invalidSpanContext = spanContextFactory.invalid
     private val traceFlagsDefault = traceFlagsFactory.default
-    private val traceStateDefault = traceStateFactory.default
 
     override fun startSpan(
         name: String,
@@ -76,7 +73,7 @@ internal class TracerImpl(
             )
 
             val sampled = result.decision == SamplingResult.Decision.RECORD_AND_SAMPLE
-            val spanContext = calculateSpanContext(traceIdBytes, spanIdBytes, sampled)
+            val spanContext = calculateSpanContext(traceIdBytes, spanIdBytes, sampled, result.traceState)
 
             if (result.decision == SamplingResult.Decision.DROP) {
                 return@ifActiveOrElse NonRecordingSpan(parentSpanContext, spanContext)
@@ -106,6 +103,7 @@ internal class TracerImpl(
         traceIdBytes: ByteArray,
         spanIdBytes: ByteArray,
         sampled: Boolean,
+        traceState: TraceState,
     ): SpanContext {
         return SpanContextImpl(
             traceIdBytes = traceIdBytes,
@@ -116,7 +114,7 @@ internal class TracerImpl(
             },
             isValid = true,
             isRemote = false,
-            traceState = traceStateDefault,
+            traceState = traceState,
         )
     }
 }
