@@ -126,10 +126,6 @@ public abstract interface class io/opentelemetry/kotlin/tracing/Span : io/opente
 	public abstract fun setStatus (Lio/opentelemetry/kotlin/tracing/StatusData;)V
 }
 
-public final class io/opentelemetry/kotlin/tracing/Span$DefaultImpls {
-	public static synthetic fun recordException$default (Lio/opentelemetry/kotlin/tracing/Span;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
-}
-
 public abstract interface class io/opentelemetry/kotlin/tracing/SpanContext {
 	public abstract fun getSpanId ()Ljava/lang/String;
 	public abstract fun getSpanIdBytes ()[B
