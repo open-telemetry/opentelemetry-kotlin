@@ -4,11 +4,10 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
+import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
-import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
-import io.opentelemetry.kotlin.tracing.sampling.BuiltInSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
-import io.opentelemetry.kotlin.tracing.sampling.toSampler
+import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
 
 internal class TracerProviderConfigImpl(
     private val clock: Clock,
@@ -16,11 +15,11 @@ internal class TracerProviderConfigImpl(
 ) : TracerProviderConfigDsl, ResourceConfigDsl by resourceConfigImpl {
 
     private val processors: MutableList<SpanProcessor> = mutableListOf()
-    private val spanLimitsConfigImpl = SpanLimitsConfigImpl()
-    private var samplerFactory: (SpanFactory) -> Sampler = { AlwaysOnSampler(it) }
+    private var spanLimitsAction: SpanLimitsConfigDsl.() -> Unit = {}
+    private var samplerAction: SamplerConfigDsl.() -> Sampler = { alwaysOn() }
 
     override fun spanLimits(action: SpanLimitsConfigDsl.() -> Unit) {
-        spanLimitsConfigImpl.action()
+        spanLimitsAction = action
     }
 
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
@@ -29,26 +28,33 @@ internal class TracerProviderConfigImpl(
         processors.add(processor)
     }
 
-    override fun sampler(builtin: BuiltInSampler) {
-        samplerFactory = { builtin.toSampler(it) }
+    override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
+        samplerAction = action
     }
 
-    override fun sampler(factory: () -> Sampler) {
-        samplerFactory = { factory() }
-    }
-
-    fun generateTracingConfig(): TracingConfig = TracingConfig(
+    fun generateTracingConfig(base: Resource, globalLimits: AttributeLimitsConfigImpl? = null): TracingConfig = TracingConfig(
         processors = processors.toList(),
-        spanLimits = generateSpanLimitsConfig(),
-        resource = resourceConfigImpl.generateResource(),
-        samplerFactory = samplerFactory,
+        spanLimits = generateSpanLimitsConfig(globalLimits),
+        resource = base.merge(resourceConfigImpl.generateResource()),
+        samplerFactory = { spanFactory -> SamplerConfigImpl(spanFactory).samplerAction() },
     )
 
-    private fun generateSpanLimitsConfig(): SpanLimitConfig = SpanLimitConfig(
-        attributeCountLimit = spanLimitsConfigImpl.attributeCountLimit,
-        linkCountLimit = spanLimitsConfigImpl.linkCountLimit,
-        eventCountLimit = spanLimitsConfigImpl.eventCountLimit,
-        attributeCountPerEventLimit = spanLimitsConfigImpl.attributeCountPerEventLimit,
-        attributeCountPerLinkLimit = spanLimitsConfigImpl.attributeCountPerLinkLimit
-    )
+    private class SamplerConfigImpl(override val spanFactory: SpanFactory) : SamplerConfigDsl
+
+    private fun generateSpanLimitsConfig(globalLimits: AttributeLimitsConfigImpl?): SpanLimitConfig {
+        val impl = SpanLimitsConfigImpl()
+        globalLimits?.let {
+            impl.attributeCountLimit = it.attributeCountLimit
+            impl.attributeValueLengthLimit = it.attributeValueLengthLimit
+        }
+        spanLimitsAction(impl)
+        return SpanLimitConfig(
+            attributeCountLimit = impl.attributeCountLimit,
+            attributeValueLengthLimit = impl.attributeValueLengthLimit,
+            linkCountLimit = impl.linkCountLimit,
+            eventCountLimit = impl.eventCountLimit,
+            attributeCountPerEventLimit = impl.attributeCountPerEventLimit,
+            attributeCountPerLinkLimit = impl.attributeCountPerLinkLimit,
+        )
+    }
 }

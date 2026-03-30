@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
@@ -18,10 +19,6 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.model.CreatedSpan
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpanImpl
-import io.opentelemetry.kotlin.tracing.model.Span
-import io.opentelemetry.kotlin.tracing.model.SpanContext
-import io.opentelemetry.kotlin.tracing.model.SpanCreationAction
-import io.opentelemetry.kotlin.tracing.model.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanModel
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
@@ -67,22 +64,23 @@ internal class TracerImpl(
                 parentSpanContext.isValid -> parentSpanContext.traceIdBytes
                 else -> idGenerator.generateTraceIdBytes()
             }
+            val spanIdBytes = idGenerator.generateSpanIdBytes()
 
-            val samplingDecision = sampler.shouldSample(
+            val result = sampler.shouldSample(
                 context = ctx,
                 traceId = traceIdBytes.toHexString(),
                 name = name,
                 spanKind = spanKind,
                 attributes = AttributesModel(),
                 links = emptyList(),
-            ).decision
+            )
 
-            if (samplingDecision == SamplingResult.Decision.DROP) {
-                return@ifActiveOrElse noopSpan
+            val sampled = result.decision == SamplingResult.Decision.RECORD_AND_SAMPLE
+            val spanContext = calculateSpanContext(traceIdBytes, spanIdBytes, sampled)
+
+            if (result.decision == SamplingResult.Decision.DROP) {
+                return@ifActiveOrElse NonRecordingSpan(parentSpanContext, spanContext)
             }
-
-            val isSampled = samplingDecision == SamplingResult.Decision.RECORD_AND_SAMPLE
-            val spanContext = calculateSpanContext(traceIdBytes, isSampled)
 
             val spanModel = SpanModel(
                 clock = clock,
@@ -96,6 +94,7 @@ internal class TracerImpl(
                 spanContext = spanContext,
                 spanLimitConfig = spanLimitConfig
             )
+            spanModel.setAttributes(result.attributes)
             if (action != null) {
                 action(spanModel)
             }
@@ -103,14 +102,16 @@ internal class TracerImpl(
             CreatedSpan(spanModel)
         }
 
-    private fun calculateSpanContext(traceIdBytes: ByteArray, isSampled: Boolean = true): SpanContext {
-        val spanId = idGenerator.generateSpanIdBytes()
-
+    private fun calculateSpanContext(
+        traceIdBytes: ByteArray,
+        spanIdBytes: ByteArray,
+        sampled: Boolean,
+    ): SpanContext {
         return SpanContextImpl(
             traceIdBytes = traceIdBytes,
-            spanIdBytes = spanId,
+            spanIdBytes = spanIdBytes,
             traceFlags = when {
-                isSampled -> traceFlagsDefault
+                sampled -> traceFlagsDefault
                 else -> TraceFlagsImpl(isSampled = false, isRandom = false)
             },
             isValid = true,

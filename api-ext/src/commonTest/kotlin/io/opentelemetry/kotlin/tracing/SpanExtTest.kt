@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.exceptionType
-import io.opentelemetry.kotlin.tracing.data.StatusData
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

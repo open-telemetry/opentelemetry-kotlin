@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
-import io.opentelemetry.kotlin.tracing.data.StatusData
+import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.proto.trace.v1.Span
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -5,14 +5,15 @@ import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import io.opentelemetry.kotlin.sdkDefaultAttributes
+import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.compositeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.simpleSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.stdoutSpanExporter
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
-import io.opentelemetry.kotlin.tracing.sampling.BuiltInSampler
 import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
+import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -25,18 +26,19 @@ import kotlin.test.assertTrue
 internal class TracerProviderConfigImplTest {
 
     private val clock = FakeClock()
+    private val base = sdkDefaultResource()
 
     @Test
     fun testDefaultSamplerAlwaysOn() {
-        val cfg = TracerProviderConfigImpl(clock).generateTracingConfig()
+        val cfg = TracerProviderConfigImpl(clock).generateTracingConfig(base)
         assertIs<AlwaysOnSampler>(cfg.samplerFactory(FakeSpanFactory()))
     }
 
     @Test
     fun testBuiltInSamplerConfig() {
         val cfg = TracerProviderConfigImpl(clock).apply {
-            sampler(BuiltInSampler.ALWAYS_ON)
-        }.generateTracingConfig()
+            sampler { alwaysOn() }
+        }.generateTracingConfig(base)
         assertNotNull(cfg.samplerFactory(FakeSpanFactory()))
     }
 
@@ -47,13 +49,13 @@ internal class TracerProviderConfigImplTest {
             sampler {
                 sampler
             }
-        }.generateTracingConfig()
+        }.generateTracingConfig(base)
         assertSame(sampler, cfg.samplerFactory(FakeSpanFactory()))
     }
 
     @Test
     fun testDefaultTracingConfig() {
-        val cfg = TracerProviderConfigImpl(clock).generateTracingConfig()
+        val cfg = TracerProviderConfigImpl(clock).generateTracingConfig(base)
         assertTrue(cfg.processors.isEmpty())
         assertEquals(sdkDefaultAttributes, cfg.resource.attributes)
         assertNull(cfg.resource.schemaUrl)
@@ -64,12 +66,13 @@ internal class TracerProviderConfigImplTest {
             assertEquals(128, attributeCountLimit)
             assertEquals(128, attributeCountPerLinkLimit)
             assertEquals(128, attributeCountPerEventLimit)
+            assertEquals(Int.MAX_VALUE, attributeValueLengthLimit)
         }
     }
 
     @Test
     fun testSdkDefaultAttributes() {
-        val cfg = TracerProviderConfigImpl(clock).generateTracingConfig()
+        val cfg = TracerProviderConfigImpl(clock).generateTracingConfig(base)
         assertHasSdkDefaultAttributes(cfg.resource.attributes)
     }
 
@@ -82,6 +85,7 @@ internal class TracerProviderConfigImplTest {
         val attrCount = 300
         val attrCountPerLink = 400
         val attrCountPerEvent = 500
+        val attrValueLength = 600
         val schemaUrl = "https://example.com/schema"
 
         val cfg = TracerProviderConfigImpl(clock).apply {
@@ -97,8 +101,9 @@ internal class TracerProviderConfigImplTest {
                 attributeCountLimit = attrCount
                 attributeCountPerLinkLimit = attrCountPerLink
                 attributeCountPerEventLimit = attrCountPerEvent
+                attributeValueLengthLimit = attrValueLength
             }
-        }.generateTracingConfig()
+        }.generateTracingConfig(base)
 
         assertNotNull(cfg.processors.single())
         assertEquals(schemaUrl, cfg.resource.schemaUrl)
@@ -110,6 +115,7 @@ internal class TracerProviderConfigImplTest {
             assertEquals(attrCount, attributeCountLimit)
             assertEquals(attrCountPerLink, attributeCountPerLinkLimit)
             assertEquals(attrCountPerEvent, attributeCountPerEventLimit)
+            assertEquals(attrValueLength, attributeValueLengthLimit)
         }
     }
 
@@ -127,7 +133,7 @@ internal class TracerProviderConfigImplTest {
     fun testResourceOverride() {
         val cfg = TracerProviderConfigImpl(clock).apply {
             resource(mapOf("extra" to true))
-        }.generateTracingConfig()
+        }.generateTracingConfig(base)
         assertEquals(sdkDefaultAttributes + mapOf("extra" to true), cfg.resource.attributes)
     }
 
@@ -135,7 +141,7 @@ internal class TracerProviderConfigImplTest {
     fun testSimpleResourceConfig() {
         val cfg = TracerProviderConfigImpl(clock).apply {
             resource(mapOf("key" to "value"))
-        }.generateTracingConfig()
+        }.generateTracingConfig(base)
         assertEquals(sdkDefaultAttributes + mapOf("key" to "value"), cfg.resource.attributes)
     }
 
@@ -146,15 +152,44 @@ internal class TracerProviderConfigImplTest {
         }
         val cfg = TracerProviderConfigImpl(clock).apply {
             resource(attrs)
-        }.generateTracingConfig()
+        }.generateTracingConfig(base)
         assertEquals(DEFAULT_ATTRIBUTE_LIMIT, cfg.resource.attributes.size)
     }
 
     @Test
-    fun testUserAttributeOverridesSdkDefault() {
+    fun testSdkDefaultAttributes2() {
+        val value = "my-custom-sdk"
         val cfg = TracerProviderConfigImpl(clock).apply {
-            resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to "my-custom-sdk"))
-        }.generateTracingConfig()
-        assertEquals("my-custom-sdk", cfg.resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME])
+            resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to value))
+        }.generateTracingConfig(base)
+        assertEquals(value, cfg.resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME])
+    }
+
+    @Test
+    fun testServiceNameDefaults() {
+        val value = "my-service"
+        val cfg = TracerProviderConfigImpl(clock).apply {
+            resource(mapOf(ServiceAttributes.SERVICE_NAME to value))
+        }.generateTracingConfig(base)
+        assertEquals(value, cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
+    }
+
+    @Test
+    fun testServiceNameOverride() {
+        val value = "my-service"
+        val cfg = TracerProviderConfigImpl(clock).apply {
+            serviceName = value
+        }.generateTracingConfig(base)
+        assertEquals(value, cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
+    }
+
+    @Test
+    fun testServiceNamePrecedence() {
+        val value = "custom"
+        val cfg = TracerProviderConfigImpl(clock).apply {
+            resource(mapOf(ServiceAttributes.SERVICE_NAME to "res"))
+            serviceName = value
+        }.generateTracingConfig(base)
+        assertEquals(value, cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
     }
 }

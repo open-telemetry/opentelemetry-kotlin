@@ -3,9 +3,6 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.factory.toHexString
-import io.opentelemetry.kotlin.tracing.model.SpanContext
-import io.opentelemetry.kotlin.tracing.model.TraceFlags
-import io.opentelemetry.kotlin.tracing.model.TraceState
 
 class FakeSpanContext(
     override val traceIdBytes: ByteArray = ByteArray(16),

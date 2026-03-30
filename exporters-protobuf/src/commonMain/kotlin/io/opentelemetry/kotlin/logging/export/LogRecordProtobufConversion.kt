@@ -6,9 +6,9 @@ import io.opentelemetry.kotlin.export.conversion.createKeyValues
 import io.opentelemetry.kotlin.export.conversion.toAttributeMap
 import io.opentelemetry.kotlin.export.conversion.toFlagsInt
 import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
+import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.resource.Resource
-import io.opentelemetry.kotlin.tracing.model.SpanContext
+import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.proto.common.v1.AnyValue
 import io.opentelemetry.proto.logs.v1.LogRecord
 import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_DEBUG
@@ -47,7 +47,7 @@ internal fun ReadableLogRecord.toProtobuf(): LogRecord = LogRecord(
     observed_time_unix_nano = observedTimestamp ?: 0L,
     severity_number = severityNumber?.convertSeverityNumber() ?: SEVERITY_NUMBER_UNSPECIFIED,
     severity_text = severityText ?: "",
-    body = body?.let { AnyValue(string_value = it) },
+    body = body?.toAnyValue(),
     attributes = attributes.createKeyValues(),
     event_name = eventName ?: "",
 )
@@ -60,7 +60,7 @@ internal fun LogRecord.toReadableLogRecord(
     observedTimestamp = observed_time_unix_nano,
     severityNumber = severity_number.toSeverityNumber(),
     severityText = severity_text.ifEmpty { null },
-    body = body?.string_value,
+    body = body?.toAny(),
     eventName = event_name.ifEmpty { null },
     attributes = attributes.toAttributeMap(),
     spanContext = DeserializedSpanContext(
@@ -71,6 +71,24 @@ internal fun LogRecord.toReadableLogRecord(
     resource = resource,
     instrumentationScopeInfo = instrumentationScopeInfo
 )
+
+private fun Any.toAnyValue(): AnyValue = when (this) {
+    is String  -> AnyValue(string_value = this)
+    is Boolean -> AnyValue(bool_value = this)
+    is Long    -> AnyValue(int_value = this)
+    is Int     -> AnyValue(int_value = this.toLong())
+    is Double  -> AnyValue(double_value = this)
+    is Float   -> AnyValue(double_value = this.toDouble())
+    else       -> AnyValue(string_value = this.toString())
+}
+
+private fun AnyValue.toAny(): Any? = when {
+    string_value != null -> string_value
+    bool_value   != null -> bool_value
+    int_value    != null -> int_value
+    double_value != null -> double_value
+    else                 -> null
+}
 
 private fun SeverityNumber.convertSeverityNumber(): io.opentelemetry.proto.logs.v1.SeverityNumber =
     when (this) {
@@ -135,7 +153,7 @@ private class DeserializedReadableLogRecord(
     override val observedTimestamp: Long?,
     override val severityNumber: SeverityNumber?,
     override val severityText: String?,
-    override val body: String?,
+    override val body: Any?,
     override val eventName: String?,
     override val attributes: Map<String, Any>,
     override val spanContext: SpanContext,

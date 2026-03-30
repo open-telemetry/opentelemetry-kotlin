@@ -8,11 +8,12 @@ internal class SpanLimitsConfigImplTest {
     @Test
     fun `test default`() {
         CompatSpanLimitsConfig().apply {
-            assertEquals(0, eventCountLimit)
-            assertEquals(0, attributeCountLimit)
-            assertEquals(0, linkCountLimit)
-            assertEquals(0, attributeCountPerLinkLimit)
-            assertEquals(0, attributeCountPerEventLimit)
+            assertEquals(DEFAULT_EVENT_LIMIT, eventCountLimit)
+            assertEquals(DEFAULT_ATTR_LIMIT, attributeCountLimit)
+            assertEquals(DEFAULT_LINK_LIMIT, linkCountLimit)
+            assertEquals(DEFAULT_ATTR_LIMIT, attributeCountPerLinkLimit)
+            assertEquals(DEFAULT_ATTR_LIMIT, attributeCountPerEventLimit)
+            assertEquals(DEFAULT_ATTR_VALUE_LENGTH_LIMIT, attributeValueLengthLimit)
         }
     }
 
@@ -25,6 +26,7 @@ internal class SpanLimitsConfigImplTest {
             linkCountLimit = 3
             attributeCountPerLinkLimit = 4
             attributeCountPerEventLimit = 5
+            attributeValueLengthLimit = 6
         }
         val impl = cfg.build()
         assertEquals(1, impl.maxNumberOfEvents)
@@ -32,5 +34,6 @@ internal class SpanLimitsConfigImplTest {
         assertEquals(3, impl.maxNumberOfLinks)
         assertEquals(4, impl.maxNumberOfAttributesPerLink)
         assertEquals(5, impl.maxNumberOfAttributesPerEvent)
+        assertEquals(6, impl.maxAttributeValueLength)
     }
 }

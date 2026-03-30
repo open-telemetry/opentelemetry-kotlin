@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
 
 @ExperimentalApi
 internal object NoopLogger : Logger {
@@ -14,7 +13,7 @@ internal object NoopLogger : Logger {
     ): Boolean = false
 
     override fun emit(
-        body: String?,
+        body: Any?,
         eventName: String?,
         timestamp: Long?,
         observedTimestamp: Long?,

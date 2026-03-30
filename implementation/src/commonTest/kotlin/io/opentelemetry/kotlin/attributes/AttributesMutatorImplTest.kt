@@ -35,6 +35,59 @@ internal class AttributesMutatorImplTest {
         assertEquals(expected, attrs)
     }
 
+    @Test
+    fun testStringValueTruncated() {
+        val attrs = AttributesModel(attributeLimit = attributeLimit, attributeValueLengthLimit = 3).apply {
+            setStringAttribute("key", "abcdef")
+        }.attributes
+        assertEquals("abc", attrs["key"])
+    }
+
+    @Test
+    fun testStringValueAtLimit() {
+        val attrs = AttributesModel(attributeLimit = attributeLimit, attributeValueLengthLimit = 5).apply {
+            setStringAttribute("key", "hello")
+        }.attributes
+        assertEquals("hello", attrs["key"])
+    }
+
+    @Test
+    fun testStringListValuesTruncated() {
+        val attrs = AttributesModel(attributeLimit = attributeLimit, attributeValueLengthLimit = 2).apply {
+            setStringListAttribute("key", listOf("hello", "world"))
+        }.attributes
+        @Suppress("UNCHECKED_CAST")
+        assertEquals(listOf("he", "wo"), attrs["key"] as List<String>)
+    }
+
+    @Test
+    fun testNonStringTypesUnaffected() {
+        val attrs = AttributesModel(attributeLimit = attributeLimit, attributeValueLengthLimit = 1).apply {
+            setLongAttribute("long", 123456789L)
+            setDoubleAttribute("double", 3.14159)
+            setBooleanAttribute("bool", true)
+            setLongListAttribute("long_list", listOf(1L, 2L, 3L))
+            setDoubleListAttribute("double_list", listOf(1.0, 2.0))
+            setBooleanListAttribute("bool_list", listOf(true, false))
+        }.attributes
+        assertEquals(123456789L, attrs["long"])
+        assertEquals(3.14159, attrs["double"])
+        assertEquals(true, attrs["bool"])
+        assertEquals(listOf(1L, 2L, 3L), attrs["long_list"])
+        assertEquals(listOf(1.0, 2.0), attrs["double_list"])
+        assertEquals(listOf(true, false), attrs["bool_list"])
+    }
+
+    @Test
+    fun testKeyUpdateAtLimit() {
+        val attrs = AttributesModel(attributeLimit = 1, attributeValueLengthLimit = 3).apply {
+            setStringAttribute("key", "first")
+            // update existing key. should still truncate even though at limit
+            setStringAttribute("key", "abcdef")
+        }.attributes
+        assertEquals("abc", attrs["key"])
+    }
+
     private fun AttributesMutator.addTestAttributes(keyToken: String = "") {
         setStringAttribute("string$keyToken", "value")
         setDoubleAttribute("double$keyToken", 3.14)

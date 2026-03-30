@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
 import org.junit.Test
 
 internal class SeverityNumberExtTest {

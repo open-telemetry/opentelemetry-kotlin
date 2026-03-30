@@ -6,9 +6,10 @@ import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.compositeSpanProcessor
-import io.opentelemetry.kotlin.tracing.sampling.BuiltInSampler
 import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
+import io.opentelemetry.kotlin.tracing.sampling.alwaysOff
+import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -31,7 +32,7 @@ internal class CompatTracerProviderSamplerTest {
     fun `builtin ALWAYS_ON sampler records and samples spans`() {
         val clock = FakeClock()
         val config = CompatTracerProviderConfig(clock, CompatIdGenerator()).apply {
-            sampler(BuiltInSampler.ALWAYS_ON)
+            sampler { alwaysOn() }
         }
         val span = config.build(clock).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
@@ -63,7 +64,7 @@ internal class CompatTracerProviderSamplerTest {
     fun `builtin ALWAYS_OFF sampler drops spans`() {
         val clock = FakeClock()
         val config = CompatTracerProviderConfig(clock, CompatIdGenerator()).apply {
-            sampler(BuiltInSampler.ALWAYS_OFF)
+            sampler { alwaysOff() }
         }
         val span = config.build(clock).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
@@ -75,7 +76,7 @@ internal class CompatTracerProviderSamplerTest {
         val processor = FakeSpanProcessor()
         val sdk = createCompatOpenTelemetry {
             tracerProvider {
-                sampler(BuiltInSampler.ALWAYS_ON)
+                sampler { alwaysOn() }
                 export { compositeSpanProcessor(processor) }
             }
         }

@@ -30,7 +30,7 @@ internal class BuiltInSamplersTest {
     private val spanFactory = SpanFactoryImpl(spanContextFactory, contextFactory.spanKey)
     private val scope = InstrumentationScopeInfoImpl("test", null, null, emptyMap())
 
-    private fun buildTracer(builtin: BuiltInSampler) = TracerImpl(
+    private fun buildTracer(sampler: Sampler) = TracerImpl(
         clock = clock,
         processor = FakeSpanProcessor(),
         contextFactory = contextFactory,
@@ -43,19 +43,19 @@ internal class BuiltInSamplersTest {
         spanLimitConfig = fakeSpanLimitsConfig,
         idGenerator = idGenerator,
         shutdownState = MutableShutdownState(),
-        sampler = builtin.toSampler(spanFactory),
+        sampler = sampler,
     )
 
     @Test
     fun testAlwaysOnRecordsAndSamplesSpan() {
-        val span = buildTracer(BuiltInSampler.ALWAYS_ON).startSpan("span")
+        val span = buildTracer(AlwaysOnSampler(spanFactory)).startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
 
     @Test
     fun testAlwaysOffDropsSpan() {
-        val span = buildTracer(BuiltInSampler.ALWAYS_OFF).startSpan("span")
+        val span = buildTracer(AlwaysOffSampler(spanFactory)).startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
     }

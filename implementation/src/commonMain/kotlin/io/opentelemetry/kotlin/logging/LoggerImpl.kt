@@ -13,7 +13,6 @@ import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.LogRecordModel
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecordImpl
-import io.opentelemetry.kotlin.logging.model.SeverityNumber
 import io.opentelemetry.kotlin.resource.Resource
 
 internal class LoggerImpl(
@@ -46,7 +45,7 @@ internal class LoggerImpl(
         }
 
     override fun emit(
-        body: String?,
+        body: Any?,
         eventName: String?,
         timestamp: Long?,
         observedTimestamp: Long?,
@@ -73,7 +72,7 @@ internal class LoggerImpl(
         context: Context?,
         timestamp: Long?,
         observedTimestamp: Long?,
-        body: String?,
+        body: Any?,
         eventName: String?,
         severityText: String?,
         severityNumber: SeverityNumber?,

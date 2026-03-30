@@ -2,6 +2,9 @@ package io.opentelemetry.kotlin.tracing.model
 
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.factory.hexToByteArray
+import io.opentelemetry.kotlin.tracing.SpanContext
+import io.opentelemetry.kotlin.tracing.TraceFlags
+import io.opentelemetry.kotlin.tracing.TraceState
 
 internal class SpanContextAdapter(
     val impl: OtelJavaSpanContext

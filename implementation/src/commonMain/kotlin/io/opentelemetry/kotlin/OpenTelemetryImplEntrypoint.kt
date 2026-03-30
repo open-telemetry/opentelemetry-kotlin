@@ -50,8 +50,8 @@ internal fun createOpenTelemetryImpl(
     val span = SpanFactoryImpl(spanContext, contextFactory.spanKey)
 
     val cfg = OpenTelemetryConfigImpl(clock).apply(config)
-    val tracingConfig = cfg.tracingConfig.generateTracingConfig()
-    val loggingConfig = cfg.loggingConfig.generateLoggingConfig()
+    val tracingConfig = cfg.generateTracingConfig()
+    val loggingConfig = cfg.generateLoggingConfig()
     return OpenTelemetryImpl(
         tracerProvider = TracerProviderImpl(
             clock = clock,

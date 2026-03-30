@@ -97,6 +97,52 @@ internal class LogAttributesTest {
         assertEquals(expected, log.attributes)
     }
 
+    @Test
+    fun testStringAttrTruncated() {
+        val logger = loggerWithValueLengthLimit(3)
+        logger.emit("test") { setStringAttribute("key", "abcdef") }
+        val log = processor.logs.last()
+        assertEquals("abc", log.attributes["key"])
+    }
+
+    @Test
+    fun testStringListAttrTruncated() {
+        val logger = loggerWithValueLengthLimit(2)
+        logger.emit("test") { setStringListAttribute("key", listOf("hello", "world")) }
+        val log = processor.logs.last()
+        @Suppress("UNCHECKED_CAST")
+        assertEquals(listOf("he", "wo"), log.attributes["key"] as List<String>)
+    }
+
+    @Test
+    fun testNonStringAttrsUnaffected() {
+        val logger = loggerWithValueLengthLimit(1)
+        logger.emit("test") {
+            setLongAttribute("long", 123456789L)
+            setDoubleAttribute("double", 3.14159)
+            setBooleanAttribute("bool", true)
+        }
+        val log = processor.logs.last()
+        assertEquals(123456789L, log.attributes["long"])
+        assertEquals(3.14159, log.attributes["double"])
+        assertEquals(true, log.attributes["bool"])
+    }
+
+    private fun loggerWithValueLengthLimit(limit: Int): LoggerImpl = LoggerImpl(
+        clock = FakeClock(),
+        processor = processor,
+        contextFactory = FakeContextFactory(),
+        spanContextFactory = FakeSpanContextFactory(),
+        spanFactory = FakeSpanFactory(),
+        key = key,
+        resource = FakeResource(),
+        logLimitConfig = LogLimitConfig(
+            attributeCountLimit = 8,
+            attributeValueLengthLimit = limit,
+        ),
+        shutdownState = MutableShutdownState(),
+    )
+
     private fun AttributesMutator.addTestAttributes(keyToken: String = "") {
         setStringAttribute("string$keyToken", "value")
         setDoubleAttribute("double$keyToken", 3.14)

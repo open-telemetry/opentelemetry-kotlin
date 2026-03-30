@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.tracing.model.TraceState
+import io.opentelemetry.kotlin.tracing.TraceState
 
 /**
  * A factory for creating [TraceState] instances.

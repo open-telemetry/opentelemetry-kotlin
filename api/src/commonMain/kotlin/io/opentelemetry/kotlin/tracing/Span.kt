@@ -1,10 +1,8 @@
-package io.opentelemetry.kotlin.tracing.model
+package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.tracing.TracingDsl
-import io.opentelemetry.kotlin.tracing.data.StatusData
 
 /**
  * A span represents a single operation within a trace.
