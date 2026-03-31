@@ -11,9 +11,9 @@ import io.opentelemetry.kotlin.resource.Resource
 internal class LoggingConfig(
 
     /**
-     * List of processors. These will be executed in the order they are provided.
+     * The processor to use for log record data.
      */
-    val processors: List<LogRecordProcessor>,
+    val processor: LogRecordProcessor?,
 
     /**
      * Limits on log data capture.

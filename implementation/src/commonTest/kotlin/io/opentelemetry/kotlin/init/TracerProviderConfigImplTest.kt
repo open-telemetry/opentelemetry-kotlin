@@ -21,7 +21,6 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
-import kotlin.test.assertTrue
 
 internal class TracerProviderConfigImplTest {
 
@@ -56,7 +55,7 @@ internal class TracerProviderConfigImplTest {
     @Test
     fun testDefaultTracingConfig() {
         val cfg = TracerProviderConfigImpl(clock).generateTracingConfig(base)
-        assertTrue(cfg.processors.isEmpty())
+        assertNull(cfg.processor)
         assertEquals(sdkDefaultAttributes, cfg.resource.attributes)
         assertNull(cfg.resource.schemaUrl)
 
@@ -105,7 +104,7 @@ internal class TracerProviderConfigImplTest {
             }
         }.generateTracingConfig(base)
 
-        assertNotNull(cfg.processors.single())
+        assertNotNull(cfg.processor)
         assertEquals(schemaUrl, cfg.resource.schemaUrl)
         assertEquals(sdkDefaultAttributes + mapOf("key" to "value"), cfg.resource.attributes)
 

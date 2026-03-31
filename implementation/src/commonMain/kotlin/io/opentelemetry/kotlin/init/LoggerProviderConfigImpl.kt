@@ -11,13 +11,12 @@ internal class LoggerProviderConfigImpl(
     private val resourceConfigImpl: ResourceConfigImpl = ResourceConfigImpl()
 ) : LoggerProviderConfigDsl, ResourceConfigDsl by resourceConfigImpl {
 
-    private val processors: MutableList<LogRecordProcessor> = mutableListOf()
+    private var processor: LogRecordProcessor? = null
     private var logLimitsAction: LogLimitsConfigDsl.() -> Unit = {}
 
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
-        require(processors.isEmpty()) { "export() should only be called once." }
-        val processor = LogExportConfigImpl(clock).action()
-        processors.add(processor)
+        require(processor == null) { "export() should only be called once." }
+        processor = LogExportConfigImpl(clock).action()
     }
 
     override fun logLimits(action: LogLimitsConfigDsl.() -> Unit) {
@@ -25,7 +24,7 @@ internal class LoggerProviderConfigImpl(
     }
 
     fun generateLoggingConfig(base: Resource, globalLimits: AttributeLimitsConfigImpl? = null): LoggingConfig = LoggingConfig(
-        processors = processors.toList(),
+        processor = processor,
         logLimits = generateLogLimitsConfig(globalLimits),
         resource = base.merge(resourceConfigImpl.generateResource()),
     )
