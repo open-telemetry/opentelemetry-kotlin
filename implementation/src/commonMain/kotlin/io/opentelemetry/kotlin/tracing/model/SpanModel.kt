@@ -67,7 +67,7 @@ internal class SpanModel(
 
     override fun setStatus(status: StatusData) {
         lock.write {
-            if (isRecording()) {
+            if (isRecording() && statusImpl !is StatusData.Ok) {
                 statusImpl = status
             }
         }
