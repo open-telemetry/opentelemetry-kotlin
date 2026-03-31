@@ -12,7 +12,6 @@ import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
-import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
 
@@ -22,7 +21,6 @@ internal class TracerProviderImpl(
     contextFactory: ContextFactory,
     spanContextFactory: SpanContextFactory,
     traceFlagsFactory: TraceFlagsFactory,
-    traceStateFactory: TraceStateFactory,
     spanFactory: SpanFactory,
     private val idGenerator: IdGenerator,
 ) : TracerProvider, TelemetryCloseable {
@@ -42,7 +40,6 @@ internal class TracerProviderImpl(
             contextFactory = contextFactory,
             spanContextFactory = spanContextFactory,
             traceFlagsFactory = traceFlagsFactory,
-            traceStateFactory = traceStateFactory,
             spanFactory = spanFactory,
             scope = key,
             resource = tracingConfig.resource,

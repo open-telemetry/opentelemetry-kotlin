@@ -52,7 +52,6 @@ internal class TracerSpanContextTest {
             contextFactory = contextFactory,
             spanContextFactory = spanContextFactory,
             traceFlagsFactory = traceFlags,
-            traceStateFactory = traceState,
             spanFactory = spanFactory,
             scope = key,
             resource = FakeResource(),

@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import io.opentelemetry.kotlin.factory.FakeTraceFlagsFactory
-import io.opentelemetry.kotlin.factory.FakeTraceStateFactory
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -43,7 +42,6 @@ internal class SpanDataTest {
             contextFactory = FakeContextFactory(),
             spanContextFactory = FakeSpanContextFactory(),
             traceFlagsFactory = FakeTraceFlagsFactory(),
-            traceStateFactory = FakeTraceStateFactory(),
             spanFactory = FakeSpanFactory(),
             scope = key,
             resource = fakeResource,

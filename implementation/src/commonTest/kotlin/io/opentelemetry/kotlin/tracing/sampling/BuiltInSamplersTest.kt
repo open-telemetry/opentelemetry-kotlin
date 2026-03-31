@@ -36,7 +36,6 @@ internal class BuiltInSamplersTest {
         contextFactory = contextFactory,
         spanContextFactory = spanContextFactory,
         traceFlagsFactory = traceFlagsFactory,
-        traceStateFactory = traceStateFactory,
         spanFactory = spanFactory,
         scope = scope,
         resource = FakeResource(),

@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import io.opentelemetry.kotlin.factory.FakeTraceFlagsFactory
-import io.opentelemetry.kotlin.factory.FakeTraceStateFactory
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.ResourceImpl
@@ -40,7 +39,6 @@ internal class TracerProviderImplTest {
             contextFactory = FakeContextFactory(),
             spanContextFactory = FakeSpanContextFactory(),
             traceFlagsFactory = FakeTraceFlagsFactory(),
-            traceStateFactory = FakeTraceStateFactory(),
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
         )
@@ -137,7 +135,6 @@ internal class TracerProviderImplTest {
             contextFactory = FakeContextFactory(),
             spanContextFactory = FakeSpanContextFactory(),
             traceFlagsFactory = FakeTraceFlagsFactory(),
-            traceStateFactory = FakeTraceStateFactory(),
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
         )
@@ -168,7 +165,6 @@ internal class TracerProviderImplTest {
             contextFactory = FakeContextFactory(),
             spanContextFactory = FakeSpanContextFactory(),
             traceFlagsFactory = FakeTraceFlagsFactory(),
-            traceStateFactory = FakeTraceStateFactory(),
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
         )
