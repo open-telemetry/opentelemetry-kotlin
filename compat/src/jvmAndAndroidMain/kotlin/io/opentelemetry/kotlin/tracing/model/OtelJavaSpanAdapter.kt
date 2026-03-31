@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaStatusCode
 import io.opentelemetry.kotlin.attributes.convertToMap
+import io.opentelemetry.kotlin.attributes.setExceptionAttributes
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
@@ -66,7 +67,8 @@ internal class OtelJavaSpanAdapter(private val span: Span) : OtelJavaSpan, OtelJ
         exception: Throwable,
         additionalAttributes: OtelJavaAttributes
     ): OtelJavaSpan {
-        span.recordException(exception) {
+        span.addEvent("exception") {
+            setExceptionAttributes(exception)
             additionalAttributes.convertToMap().forEach {
                 setStringAttribute(it.key, it.value.toString())
             }
