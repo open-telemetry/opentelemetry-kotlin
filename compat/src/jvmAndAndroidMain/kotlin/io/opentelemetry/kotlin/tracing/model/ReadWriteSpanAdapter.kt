@@ -14,6 +14,8 @@ internal class ReadWriteSpanAdapter(
     private val readableSpan: ReadableSpanAdapter = ReadableSpanAdapter(impl)
 ) : ReadWriteSpan, ReadableSpan by readableSpan {
 
+    override var spanContext: SpanContext = readableSpan.spanContext
+
     override fun setName(name: String) {
         impl.updateName(name)
     }
