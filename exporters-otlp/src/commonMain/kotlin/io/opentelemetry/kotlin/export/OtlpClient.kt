@@ -76,6 +76,6 @@ internal class OtlpClient(
         bodyAsChannel().readRemaining(MAX_ERROR_BODY_BYTES).readByteArray()
 
     private companion object {
-        const val MAX_ERROR_BODY_BYTES: Long = 64 * 1024
+        const val MAX_ERROR_BODY_BYTES: Long = 4 * 1024 * 1024
     }
 }
