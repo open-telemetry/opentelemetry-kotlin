@@ -62,5 +62,7 @@ public final class io/opentelemetry/kotlin/tracing/ext/SpanLinkDataExtKt {
 public final class io/opentelemetry/kotlin/tracing/sampling/CompatBuiltInSamplerApiKt {
 	public static final fun alwaysOff (Lio/opentelemetry/kotlin/init/SamplerConfigDsl;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
 	public static final fun alwaysOn (Lio/opentelemetry/kotlin/init/SamplerConfigDsl;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
+	public static final fun parentBased (Lio/opentelemetry/kotlin/init/SamplerConfigDsl;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
+	public static synthetic fun parentBased$default (Lio/opentelemetry/kotlin/init/SamplerConfigDsl;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
 }
 
