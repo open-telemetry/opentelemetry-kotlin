@@ -17,7 +17,7 @@ object ErrorAttributes {
     * It is also NOT RECOMMENDED to duplicate the value of <c>exception.message</c> in <c>error.message</c>.</p>
     * <p><c>error.message</c> is NOT RECOMMENDED for metrics or spans due to its unbounded cardinality and overlap with span status.</p>
     */
-    @IncubatingApi
+    @Deprecated("Use domain-specific error message attribute. For example, use `feature_flag.error.message` for feature flag errors.")
     const val ERROR_MESSAGE: String = "error.message"
 
     /**

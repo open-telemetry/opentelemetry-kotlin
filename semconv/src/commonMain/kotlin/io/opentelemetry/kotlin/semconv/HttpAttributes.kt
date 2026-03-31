@@ -75,8 +75,13 @@ object HttpAttributes {
     * <p>If the HTTP request method is not known to instrumentation, it MUST set the <c>http.request.method</c> attribute to <c>_OTHER</c>.</p>
     * <p>If the HTTP instrumentation could end up converting valid HTTP request methods to <c>_OTHER</c>, then it MUST provide a way to override
     * the list of known HTTP methods. If this override is done via environment variable, then the environment variable MUST be named
-    * OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS and support a comma-separated list of case-sensitive known HTTP methods
-    * (this list MUST be a full override of the default known method, it is not a list of known methods in addition to the defaults).</p>
+    * OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS and support a comma-separated list of case-sensitive known HTTP methods.</p>
+    * <p>
+    * If this override is done via declarative configuration, then the list MUST be configurable via the <c>known_methods</c> property
+    * (an array of case-sensitive strings with minimum items 0) under <c>.instrumentation/development.general.http.client</c> and/or
+    * <c>.instrumentation/development.general.http.server</c>.</p>
+    * <p>In either case, this list MUST be a full override of the default known methods,
+    * it is not a list of known methods in addition to the defaults.</p>
     * <p>HTTP method names are case-sensitive and <c>http.request.method</c> attribute value MUST match a known HTTP method name exactly.
     * Instrumentations for specific web frameworks that consider HTTP methods to be case insensitive, SHOULD populate a canonical equivalent.
     * Tracing instrumentations that do so, MUST also set <c>http.request.method_original</c> to the original value.</p>

@@ -10,6 +10,14 @@ object ServiceAttributes {
   
 
     /**
+    * <p>The operational criticality of the service.</p>
+    * <p>Notes:</p>
+    * <p>Application developers are encouraged to set <c>service.criticality</c> to express the operational importance of their services. Telemetry consumers MAY use this attribute to optimize telemetry collection or improve user experience.</p>
+    */
+    @IncubatingApi
+    const val SERVICE_CRITICALITY: String = "service.criticality"
+
+    /**
     * <p>The string ID of the service instance.</p>
     * <p>Notes:</p>
     * <p>MUST be unique for each instance of the same <c>service.namespace,service.name</c> pair (in other words
@@ -35,7 +43,6 @@ object ServiceAttributes {
     * for that telemetry. This is typically the case for scraping receivers, as they know the target address and
     * port.</p>
     */
-    @IncubatingApi
     const val SERVICE_INSTANCE_ID: String = "service.instance.id"
 
     /**
@@ -50,7 +57,6 @@ object ServiceAttributes {
     * <p>Notes:</p>
     * <p>A string value having a meaning that helps to distinguish a group of services, for example the team name that owns a group of services. <c>service.name</c> is expected to be unique within the same namespace. If <c>service.namespace</c> is not specified in the Resource then <c>service.name</c> is expected to be unique for all services that have no explicit namespace defined (so the empty/unspecified namespace is simply one more valid namespace). Zero-length namespace string is assumed equal to unspecified namespace.</p>
     */
-    @IncubatingApi
     const val SERVICE_NAMESPACE: String = "service.namespace"
 
     /**
@@ -69,4 +75,31 @@ object ServiceAttributes {
     * <p>The version string of the service component. The format is not defined by these conventions.</p>
     */
     const val SERVICE_VERSION: String = "service.version"
+
+    /**
+    * <p>SERVICE_CRITICALITY</p>
+    */
+    @IncubatingApi
+    enum class ServiceCriticalityValues(val value: String) {
+
+        /**
+        * <p>Service is business-critical; downtime directly impacts revenue, user experience, or core functionality.</p>
+        */
+        CRITICAL("critical"),
+
+        /**
+        * <p>Service is important but has degradation tolerance or fallback mechanisms.</p>
+        */
+        HIGH("high"),
+
+        /**
+        * <p>Service provides supplementary functionality; degradation has limited user impact.</p>
+        */
+        MEDIUM("medium"),
+
+        /**
+        * <p>Service is non-essential to core operations; used for background tasks or internal tools.</p>
+        */
+        LOW("low"),
+    }
 }

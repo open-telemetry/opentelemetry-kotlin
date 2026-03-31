@@ -10,6 +10,12 @@ object OpenaiAttributes {
   
 
     /**
+    * <p>The type of OpenAI API being used.</p>
+    */
+    @IncubatingApi
+    const val OPENAI_API_TYPE: String = "openai.api.type"
+
+    /**
     * <p>The service tier requested. May be a specific tier, default, or auto.</p>
     */
     @IncubatingApi
@@ -26,6 +32,23 @@ object OpenaiAttributes {
     */
     @IncubatingApi
     const val OPENAI_RESPONSE_SYSTEM_FINGERPRINT: String = "openai.response.system_fingerprint"
+
+    /**
+    * <p>OPENAI_API_TYPE</p>
+    */
+    @IncubatingApi
+    enum class OpenaiApiTypeValues(val value: String) {
+
+        /**
+        * <p>The OpenAI <a href="https://developers.openai.com/api/reference/chat-completions/overview">Chat Completions API</a>.</p>
+        */
+        CHAT_COMPLETIONS("chat_completions"),
+
+        /**
+        * <p>The OpenAI <a href="https://developers.openai.com/api/reference/responses/overview">Responses API</a>.</p>
+        */
+        RESPONSES("responses"),
+    }
 
     /**
     * <p>OPENAI_REQUEST_SERVICE_TIER</p>
