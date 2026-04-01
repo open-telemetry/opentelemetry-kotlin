@@ -18,3 +18,24 @@ public fun SamplerConfigDsl.alwaysOn(): Sampler = AlwaysOnSampler(spanFactory)
  */
 @ExperimentalApi
 public fun SamplerConfigDsl.alwaysOff(): Sampler = AlwaysOffSampler(spanFactory)
+
+/**
+ * Configures sampling based on the parent span's sampling decision.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#parentbased
+ */
+@ExperimentalApi
+public fun SamplerConfigDsl.parentBased(
+    root: Sampler,
+    remoteParentSampled: Sampler = alwaysOn(),
+    remoteParentNotSampled: Sampler = alwaysOff(),
+    localParentSampled: Sampler = alwaysOn(),
+    localParentNotSampled: Sampler = alwaysOff(),
+): Sampler = ParentBasedSampler(
+    spanFactory = spanFactory,
+    root = root,
+    remoteParentSampled = remoteParentSampled,
+    remoteParentNotSampled = remoteParentNotSampled,
+    localParentSampled = localParentSampled,
+    localParentNotSampled = localParentNotSampled,
+)

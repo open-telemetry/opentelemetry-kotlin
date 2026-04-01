@@ -84,6 +84,35 @@ internal class SpanSimplePropertiesTest {
     }
 
     @Test
+    fun testSpanStatusOkCannotBeOverridden() {
+        val span = tracer.startSpan("test")
+        span.setStatus(StatusData.Ok)
+        span.setStatus(StatusData.Error("Whoops"))
+        assertEquals(StatusData.Ok, (span.toReadableSpan()).status)
+
+        span.setStatus(StatusData.Unset)
+        assertEquals(StatusData.Ok, (span.toReadableSpan()).status)
+    }
+
+    @Test
+    fun testSpanStatusUnsetCanBeOverridden() {
+        val span = tracer.startSpan("test")
+        span.setStatus(StatusData.Unset)
+        val error = StatusData.Error("Whoops")
+        span.setStatus(error)
+        assertEquals(error, (span.toReadableSpan()).status)
+    }
+
+    @Test
+    fun testSpanStatusErrorCanBeOverridden() {
+        val span = tracer.startSpan("test")
+        span.setStatus(StatusData.Error("Whoops"))
+        val unset = StatusData.Unset
+        span.setStatus(unset)
+        assertEquals(unset, (span.toReadableSpan()).status)
+    }
+
+    @Test
     fun testSpanKind() {
         val span = tracer.startSpan("test")
         assertEquals(SpanKind.INTERNAL, (span.toReadableSpan()).spanKind)
