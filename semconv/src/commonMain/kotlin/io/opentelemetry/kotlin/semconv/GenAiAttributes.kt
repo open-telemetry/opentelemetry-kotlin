@@ -28,6 +28,12 @@ object GenAiAttributes {
     const val GEN_AI_AGENT_NAME: String = "gen_ai.agent.name"
 
     /**
+    * <p>The version of the GenAI agent.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_AGENT_VERSION: String = "gen_ai.agent.version"
+
+    /**
     * <p>Deprecated, use Event API to report completions contents.</p>
     */
     @Deprecated("Removed, no replacement at this time.")
@@ -289,6 +295,29 @@ object GenAiAttributes {
     const val GEN_AI_RESPONSE_MODEL: String = "gen_ai.response.model"
 
     /**
+    * <p>The documents retrieved.</p>
+    * <p>Notes:</p>
+    * <p>Instrumentations MUST follow <a href="/docs/gen-ai/gen-ai-retrieval-documents.json">Retrieval documents JSON schema</a>.
+    * When the attribute is recorded on events, it MUST be recorded in structured
+    * form. When recorded on spans, it MAY be recorded as a JSON string if structured
+    * format is not supported and SHOULD be recorded in structured form otherwise.</p>
+    * <p>Each document object SHOULD contain at least the following properties:
+    * <c>id</c> (string): A unique identifier for the document, <c>score</c> (double): The relevance score of the document</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_RETRIEVAL_DOCUMENTS: String = "gen_ai.retrieval.documents"
+
+    /**
+    * <p>The query text used for retrieval.</p>
+    * <p>Notes:</p>
+    * <blockquote>
+    * <p>[!Warning]
+    * This attribute may contain sensitive information.</p></blockquote>
+    */
+    @IncubatingApi
+    const val GEN_AI_RETRIEVAL_QUERY_TEXT: String = "gen_ai.retrieval.query.text"
+
+    /**
     * <p>Deprecated, use <c>gen_ai.provider.name</c> instead.</p>
     */
     @Deprecated("Replaced by `gen_ai.provider.name`.")
@@ -393,6 +422,22 @@ object GenAiAttributes {
     const val GEN_AI_TOOL_TYPE: String = "gen_ai.tool.type"
 
     /**
+    * <p>The number of input tokens written to a provider-managed cache.</p>
+    * <p>Notes:</p>
+    * <p>The value SHOULD be included in <c>gen_ai.usage.input_tokens</c>.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS: String = "gen_ai.usage.cache_creation.input_tokens"
+
+    /**
+    * <p>The number of input tokens served from a provider-managed cache.</p>
+    * <p>Notes:</p>
+    * <p>The value SHOULD be included in <c>gen_ai.usage.input_tokens</c>.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS: String = "gen_ai.usage.cache_read.input_tokens"
+
+    /**
     * <p>Deprecated, use <c>gen_ai.usage.output_tokens</c> instead.</p>
     */
     @Deprecated("Replaced by `gen_ai.usage.output_tokens`.")
@@ -400,6 +445,11 @@ object GenAiAttributes {
 
     /**
     * <p>The number of tokens used in the GenAI input (prompt).</p>
+    * <p>Notes:</p>
+    * <p>This value SHOULD include all types of input tokens, including cached tokens.
+    * Instrumentations SHOULD make a best effort to populate this value, using a total
+    * provided by the provider when available or, depending on the provider API,
+    * by summing different token types parsed from the provider output.</p>
     */
     @IncubatingApi
     const val GEN_AI_USAGE_INPUT_TOKENS: String = "gen_ai.usage.input_tokens"
@@ -480,6 +530,11 @@ object GenAiAttributes {
         * <p>Embeddings operation such as <a href="https://platform.openai.com/docs/api-reference/embeddings/create">OpenAI Create embeddings API</a></p>
         */
         EMBEDDINGS("embeddings"),
+
+        /**
+        * <p>Retrieval operation such as <a href="https://platform.openai.com/docs/api-reference/vector-stores/search">OpenAI Search Vector Store API</a></p>
+        */
+        RETRIEVAL("retrieval"),
 
         /**
         * <p>Create GenAI agent</p>

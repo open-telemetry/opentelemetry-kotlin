@@ -16,9 +16,15 @@ object FeatureFlagAttributes {
     const val FEATURE_FLAG_CONTEXT_ID: String = "feature_flag.context.id"
 
     /**
-    * <p>Deprecated, use <c>error.message</c> instead.</p>
+    * <p>A message providing more detail about an error that occurred during feature flag evaluation in human-readable form.</p>
     */
-    @Deprecated("Replaced by `error.message`.")
+    @IncubatingApi
+    const val FEATURE_FLAG_ERROR_MESSAGE: String = "feature_flag.error.message"
+
+    /**
+    * <p>Deprecated, use <c>feature_flag.error.message</c> instead.</p>
+    */
+    @Deprecated("Replaced by `feature_flag.error.message`.")
     const val FEATURE_FLAG_EVALUATION_ERROR_MESSAGE: String = "feature_flag.evaluation.error.message"
 
     /**

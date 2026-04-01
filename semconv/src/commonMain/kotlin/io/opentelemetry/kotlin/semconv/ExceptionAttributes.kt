@@ -17,6 +17,10 @@ object ExceptionAttributes {
 
     /**
     * <p>The exception message.</p>
+    * <p>Notes:</p>
+    * <blockquote>
+    * <p>[!WARNING]</p>
+    * <p>This attribute may contain sensitive information.</p></blockquote>
     */
     const val EXCEPTION_MESSAGE: String = "exception.message"
 

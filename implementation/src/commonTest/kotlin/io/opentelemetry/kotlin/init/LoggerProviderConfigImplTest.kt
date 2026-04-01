@@ -14,7 +14,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 internal class LoggerProviderConfigImplTest {
 
@@ -24,7 +23,7 @@ internal class LoggerProviderConfigImplTest {
     @Test
     fun testDefaultLoggingConfig() {
         val cfg = LoggerProviderConfigImpl(clock).generateLoggingConfig(base)
-        assertTrue(cfg.processors.isEmpty())
+        assertNull(cfg.processor)
         assertEquals(sdkDefaultAttributes, cfg.resource.attributes)
         assertNull(cfg.resource.schemaUrl)
 
@@ -55,7 +54,7 @@ internal class LoggerProviderConfigImplTest {
             }
         }.generateLoggingConfig(base)
 
-        assertNotNull(cfg.processors.single())
+        assertNotNull(cfg.processor)
         assertEquals(schemaUrl, cfg.resource.schemaUrl)
         assertEquals(sdkDefaultAttributes + mapOf("key" to "value"), cfg.resource.attributes)
 

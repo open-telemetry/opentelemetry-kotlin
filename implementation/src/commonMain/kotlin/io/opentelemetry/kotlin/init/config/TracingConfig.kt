@@ -14,9 +14,9 @@ import io.opentelemetry.kotlin.tracing.sampling.Sampler
 internal class TracingConfig(
 
     /**
-     * List of processors. These will be executed in the order they are provided.
+     * The processor to use for span data.
      */
-    val processors: List<SpanProcessor>,
+    val processor: SpanProcessor?,
 
     /**
      * Limits on span data capture.

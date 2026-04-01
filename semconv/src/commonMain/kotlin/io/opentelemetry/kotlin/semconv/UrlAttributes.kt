@@ -49,6 +49,14 @@ object UrlAttributes {
     *   <li><a href="https://cloud.google.com/storage/docs/access-control/signed-urls"><c>X-Goog-Signature</c></a></li>
     * </ul>
     * <p>This list is subject to change over time.</p>
+    * <p>Matching of query parameter keys against the sensitive list SHOULD be case-sensitive.</p>
+    * <p>
+    * Instrumentation MAY provide a way to override this list via declarative configuration.
+    * If so, it SHOULD use the <c>sensitive_query_parameters</c> property
+    * (an array of case-sensitive strings with minimum items 0) under
+    * <c>.instrumentation/development.general.sanitization.url</c>.
+    * This list is a full override of the default sensitive query parameter keys,
+    * it is not a list of keys in addition to the defaults.</p>
     * <p>When a query string value is redacted, the query string key SHOULD still be preserved, e.g.
     * <c>https://www.example.com/path?color=blue&sig=REDACTED</c>.</p>
     */
@@ -89,6 +97,13 @@ object UrlAttributes {
     *   <li><a href="https://cloud.google.com/storage/docs/access-control/signed-urls"><c>X-Goog-Signature</c></a></li>
     * </ul>
     * <p>This list is subject to change over time.</p>
+    * <p>Matching of query parameter keys against the sensitive list SHOULD be case-sensitive.</p>
+    * <p>Instrumentation MAY provide a way to override this list via declarative configuration.
+    * If so, it SHOULD use the <c>sensitive_query_parameters</c> property
+    * (an array of case-sensitive strings with minimum items 0) under
+    * <c>.instrumentation/development.general.sanitization.url</c>.
+    * This list is a full override of the default sensitive query parameter keys,
+    * it is not a list of keys in addition to the defaults.</p>
     * <p>When a query string value is redacted, the query string key SHOULD still be preserved, e.g.
     * <c>q=OpenTelemetry&sig=REDACTED</c>.</p>
     */
