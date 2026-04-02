@@ -24,7 +24,7 @@ internal class LoggerProviderImplTest {
 
     private val clock = FakeClock()
     private val loggingConfig = LoggingConfig(
-        emptyList(),
+        null,
         LogLimitConfig(100, 100),
         ResourceImpl(AttributesModel(), null)
     )
@@ -119,7 +119,7 @@ internal class LoggerProviderImplTest {
             }
         )
         val config = LoggingConfig(
-            listOf(processor),
+            processor,
             LogLimitConfig(100, 100),
             FakeResource(),
         )
@@ -141,7 +141,7 @@ internal class LoggerProviderImplTest {
             }
         )
         val config = LoggingConfig(
-            listOf(processor),
+            processor,
             LogLimitConfig(100, 100),
             FakeResource(),
         )
@@ -164,7 +164,7 @@ internal class LoggerProviderImplTest {
     fun testExistingLoggerDoesNotEmitAfterShutdown() = runTest {
         val processor = FakeLogRecordProcessor()
         val config = LoggingConfig(
-            listOf(processor),
+            processor,
             LogLimitConfig(100, 100),
             FakeResource(),
         )

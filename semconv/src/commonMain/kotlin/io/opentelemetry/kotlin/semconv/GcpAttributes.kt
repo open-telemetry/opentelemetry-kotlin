@@ -158,6 +158,24 @@ object GcpAttributes {
     const val GCP_GCE_INSTANCE_NAME: String = "gcp.gce.instance.name"
 
     /**
+    * <p>The name of the Instance Group Manager (IGM) that manages this VM, if any.</p>
+    */
+    @IncubatingApi
+    const val GCP_GCE_INSTANCE_GROUP_MANAGER_NAME: String = "gcp.gce.instance_group_manager.name"
+
+    /**
+    * <p>The region of a <strong>regional</strong> Instance Group Manager (e.g., <c>us-central1</c>). Set this <strong>only</strong> when the IGM is regional.</p>
+    */
+    @IncubatingApi
+    const val GCP_GCE_INSTANCE_GROUP_MANAGER_REGION: String = "gcp.gce.instance_group_manager.region"
+
+    /**
+    * <p>The zone of a <strong>zonal</strong> Instance Group Manager (e.g., <c>us-central1-a</c>). Set this <strong>only</strong> when the IGM is zonal.</p>
+    */
+    @IncubatingApi
+    const val GCP_GCE_INSTANCE_GROUP_MANAGER_ZONE: String = "gcp.gce.instance_group_manager.zone"
+
+    /**
     * <p>GCP_APPHUB_SERVICE_CRITICALITY_TYPE</p>
     */
     @IncubatingApi

@@ -23,7 +23,7 @@ internal class LoggerProviderImpl(
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
     private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(
-        loggingConfig.processors,
+        loggingConfig.processor?.let { listOf(it) } ?: emptyList()
     )
     private val noopLogger = NoopOpenTelemetry.loggerProvider.getLogger("")
 
@@ -31,7 +31,7 @@ internal class LoggerProviderImpl(
         ApiProviderImpl<Logger> { key ->
             LoggerImpl(
                 clock,
-                loggingConfig.processors.firstOrNull(),
+                loggingConfig.processor,
                 contextFactory,
                 spanContextFactory,
                 spanFactory,
