@@ -25,7 +25,5 @@ internal class PersistingSpanExporter(
     override suspend fun forceFlush(): OperationResultCode = Success
 
     override suspend fun shutdown(): OperationResultCode =
-        shutdownState.shutdown {
-            exporter.shutdown()
-        }
+        shutdownState.shutdown(action = exporter::shutdown)
 }

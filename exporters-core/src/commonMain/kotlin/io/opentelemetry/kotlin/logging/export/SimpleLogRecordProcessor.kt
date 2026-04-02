@@ -3,8 +3,10 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import kotlinx.coroutines.CoroutineScope
@@ -43,10 +45,9 @@ internal class SimpleLogRecordProcessor(
         eventName: String?,
     ): Boolean = !shutdownState.isShutdown
 
-    override suspend fun forceFlush(): OperationResultCode = exporter.forceFlush()
+    override suspend fun forceFlush(): OperationResultCode =
+        runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS) { exporter.forceFlush() }
 
     override suspend fun shutdown(): OperationResultCode =
-        shutdownState.shutdown {
-            exporter.shutdown()
-        }
+        shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS, exporter::shutdown)
 }

@@ -16,6 +16,7 @@ internal class BatchTelemetryProcessor<T>(
     private val scheduleDelayMs: Long,
     private val exportTimeoutMs: Long,
     private val maxExportBatchSize: Int,
+    private val forceFlushTimeoutMs: Long = BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS,
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
     private val exportAction: suspend (telemetry: List<T>) -> OperationResultCode,
 ) : TelemetryCloseable {
@@ -30,6 +31,7 @@ internal class BatchTelemetryProcessor<T>(
         require(maxQueueSize >= 0)
         require(maxExportBatchSize >= 0)
         require(exportTimeoutMs >= 0)
+        require(forceFlushTimeoutMs >= 0)
         require(maxExportBatchSize <= maxQueueSize)
 
         scope.launch {
@@ -49,10 +51,11 @@ internal class BatchTelemetryProcessor<T>(
     }
 
     override suspend fun forceFlush(): OperationResultCode {
-        scope.launch {
-            flushInternal()
-        }.join()
-        return OperationResultCode.Success
+        if (shutdownState.isShutdown) { return OperationResultCode.Success }
+        return runWithTimeout(forceFlushTimeoutMs) {
+            scope.launch { flushInternal() }.join()
+            OperationResultCode.Success
+        }
     }
 
     override suspend fun shutdown(): OperationResultCode =

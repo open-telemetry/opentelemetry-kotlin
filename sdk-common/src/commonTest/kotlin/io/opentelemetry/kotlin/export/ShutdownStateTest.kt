@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
+import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -127,7 +128,7 @@ internal class ShutdownStateTest {
     }
 
     @Test
-    fun testShutdownWithActionRunsActionAndSetsFlag() {
+    fun testShutdownWithActionRunsActionAndSetsFlag() = runTest {
         var actionCalled = false
         val result = state.shutdown {
             actionCalled = true
@@ -139,7 +140,7 @@ internal class ShutdownStateTest {
     }
 
     @Test
-    fun testShutdownWithActionReturnsSuccessWhenAlreadyShutdown() {
+    fun testShutdownWithActionReturnsSuccessWhenAlreadyShutdown() = runTest {
         state.shutdownNow()
         var actionCalled = false
         val result = state.shutdown {
@@ -151,7 +152,7 @@ internal class ShutdownStateTest {
     }
 
     @Test
-    fun testShutdownWithActionPropagatesFailure() {
+    fun testShutdownWithActionPropagatesFailure() = runTest {
         val result = state.shutdown { Failure }
         assertTrue(state.isShutdown)
         assertEquals(Failure, result)
