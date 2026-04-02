@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.context.ContextKeyImpl
 import io.opentelemetry.kotlin.context.DefaultImplicitContextStorage
 import io.opentelemetry.kotlin.context.ImplicitContextStorage
+import io.opentelemetry.kotlin.context.Scope
 import io.opentelemetry.kotlin.tracing.Span
 
 internal class ContextFactoryImpl : ContextFactory {
@@ -23,4 +24,6 @@ internal class ContextFactoryImpl : ContextFactory {
     override fun implicit(): Context = storage.implicitContext()
 
     override fun <T> createKey(name: String): ContextKey<T> = ContextKeyImpl(name)
+
+    override fun makeCurrent(span: Span): Scope = storeSpan(implicit(), span).attach()
 }

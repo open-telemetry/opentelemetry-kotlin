@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.factory
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
+import io.opentelemetry.kotlin.context.Scope
 import io.opentelemetry.kotlin.tracing.Span
 
 /**
@@ -33,4 +34,14 @@ public interface ContextFactory {
      * [T] represents the type of the value that is stored in the context.
      */
     public fun <T> createKey(name: String): ContextKey<T>
+
+    /**
+     * Stores [span] in a new [Context] derived from [implicit] and sets
+     * the new [Context] as the implicit context.
+     *
+     * Returns a [Scope]. Neglecting to close the [Scope] is a programming error.
+     *
+     * https://opentelemetry.io/docs/specs/otel/trace/api/#context-interaction
+     */
+    public fun makeCurrent(span: Span): Scope
 }
