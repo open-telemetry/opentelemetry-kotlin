@@ -7,6 +7,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+private const val SHUTDOWN_TIMEOUT_MS = 5000L
+
 internal class TelemetryExporter<T>(
     private val initialDelayMs: Long,
     private val maxAttemptIntervalMs: Long,
@@ -52,7 +54,7 @@ internal class TelemetryExporter<T>(
     override suspend fun forceFlush(): OperationResultCode = Success
 
     override suspend fun shutdown(): OperationResultCode =
-        shutdownState.shutdown {
+        shutdownState.shutdown(SHUTDOWN_TIMEOUT_MS) {
             scope.cancel()
             Success
         }

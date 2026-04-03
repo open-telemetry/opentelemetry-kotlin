@@ -27,4 +27,14 @@ public object BatchTelemetryDefaults {
      * Maximum number of telemetry items to export in a single batch
      */
     public const val MAX_EXPORT_BATCH_SIZE: Int = 512
+
+    /**
+     * Timeout in ms for forceFlush
+     */
+    public const val FORCE_FLUSH_TIMEOUT_MS: Long = 5000
+
+    /**
+     * Timeout in ms for shutdown
+     */
+    public const val SHUTDOWN_TIMEOUT_MS: Long = 5000
 }

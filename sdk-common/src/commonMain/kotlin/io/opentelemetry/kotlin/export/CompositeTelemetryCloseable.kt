@@ -18,13 +18,20 @@ public class CompositeTelemetryCloseable(
         batchExportOperationSuspend(
             elements = closeables,
             sdkErrorHandler = sdkErrorHandler,
-            action = TelemetryCloseable::forceFlush
-        )
+        ) {
+            runWithTimeout(FORCE_FLUSH_TIMEOUT_MS) { it.forceFlush() }
+        }
 
     override suspend fun shutdown(): OperationResultCode =
         batchExportOperationSuspend(
             elements = closeables,
             sdkErrorHandler = sdkErrorHandler,
-            action = TelemetryCloseable::shutdown
-        )
+        ) {
+            runWithTimeout(SHUTDOWN_TIMEOUT_MS) { it.shutdown() }
+        }
+
+    private companion object {
+        const val FORCE_FLUSH_TIMEOUT_MS = 5000L
+        const val SHUTDOWN_TIMEOUT_MS = 5000L
+    }
 }

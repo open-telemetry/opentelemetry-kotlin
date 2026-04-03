@@ -1,9 +1,11 @@
 public final class io/opentelemetry/kotlin/export/BatchTelemetryDefaults {
 	public static final field EXPORT_TIMEOUT_MS J
+	public static final field FORCE_FLUSH_TIMEOUT_MS J
 	public static final field INSTANCE Lio/opentelemetry/kotlin/export/BatchTelemetryDefaults;
 	public static final field MAX_EXPORT_BATCH_SIZE I
 	public static final field MAX_QUEUE_SIZE I
 	public static final field SCHEDULE_DELAY_MS J
+	public static final field SHUTDOWN_TIMEOUT_MS J
 }
 
 public final class io/opentelemetry/kotlin/logging/export/CoreLogRecordExporterApiKt {

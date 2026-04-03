@@ -2,8 +2,10 @@ package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import kotlinx.coroutines.CoroutineScope
@@ -43,10 +45,10 @@ internal class SimpleSpanProcessor(
 
     override fun isStartRequired(): Boolean = true
     override fun isEndRequired(): Boolean = true
-    override suspend fun forceFlush(): OperationResultCode = exporter.forceFlush()
+
+    override suspend fun forceFlush(): OperationResultCode =
+        runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS) { exporter.forceFlush() }
 
     override suspend fun shutdown(): OperationResultCode =
-        shutdownState.shutdown {
-            exporter.shutdown()
-        }
+        shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS, exporter::shutdown)
 }
