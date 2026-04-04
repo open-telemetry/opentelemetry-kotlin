@@ -2,6 +2,8 @@ package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.aliases.OtelJavaContextKey
 import io.opentelemetry.kotlin.factory.CompatContextFactory
+import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
+import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotSame
@@ -9,7 +11,7 @@ import kotlin.test.assertNull
 
 internal class OtelJavaContextAdapterTest {
 
-    private val contextFactory = CompatContextFactory()
+    private val contextFactory = CompatContextFactory(CompatSpanFactory(CompatSpanContextFactory()))
 
     @Test
     fun `test context`() {

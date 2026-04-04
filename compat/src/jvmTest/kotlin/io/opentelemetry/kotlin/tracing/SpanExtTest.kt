@@ -26,7 +26,7 @@ internal class SpanExtTest {
     private val traceStateFactory = CompatTraceStateFactory()
     private val traceFlagsFactory = CompatTraceFlagsFactory()
     private val spanFactory = CompatSpanFactory(spanContextFactory)
-    private val contextFactory = CompatContextFactory()
+    private val contextFactory = CompatContextFactory(spanFactory)
     private val generator = OtelJavaIdGenerator.random()
 
     private val validSpanContext = spanContextFactory.create(

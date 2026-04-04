@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.context.NoopContext
 import io.opentelemetry.kotlin.context.NoopContextKey
+import io.opentelemetry.kotlin.tracing.NoopSpan
 import io.opentelemetry.kotlin.tracing.Span
 
 internal object NoopContextFactory : ContextFactory {
@@ -18,4 +19,6 @@ internal object NoopContextFactory : ContextFactory {
     override fun implicit(): Context = NoopContext
 
     override fun <T> createKey(name: String): ContextKey<T> = NoopContextKey(name)
+
+    override fun currentSpan(): Span = NoopSpan
 }

@@ -31,7 +31,7 @@ internal class BuiltInSamplersTest {
     private val traceFlagsFactory = TraceFlagsFactoryImpl()
     private val traceStateFactory = TraceStateFactoryImpl()
     private val spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlagsFactory, traceStateFactory)
-    private val contextFactory = ContextFactoryImpl()
+    private val contextFactory = ContextFactoryImpl(spanContextFactory)
     private val spanFactory = SpanFactoryImpl(spanContextFactory, contextFactory.spanKey)
     private val scope = InstrumentationScopeInfoImpl("test", null, null, emptyMap())
 

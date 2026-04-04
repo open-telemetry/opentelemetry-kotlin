@@ -10,6 +10,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaStatusCode
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.factory.CompatContextFactory
+import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
+import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
@@ -26,7 +28,8 @@ internal class ContextRetrievalTest {
     private lateinit var kotlinDecorator: Context
     private lateinit var javaDecorator: OtelJavaContext
 
-    private val contextFactory = CompatContextFactory()
+    private val spanFactory = CompatSpanFactory(CompatSpanContextFactory())
+    private val contextFactory = CompatContextFactory(spanFactory)
 
     @Before
     fun setUp() {

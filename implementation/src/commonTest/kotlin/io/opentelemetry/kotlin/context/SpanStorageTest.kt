@@ -6,12 +6,14 @@ import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.tracing.FakeSpan
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertSame
 
 internal class SpanStorageTest {
 
-    private val contextFactory = ContextFactoryImpl()
-    private val spanFactory = SpanFactoryImpl(SpanContextFactoryImpl(IdGeneratorImpl()), contextFactory.spanKey)
+    private val spanContextFactory = SpanContextFactoryImpl(IdGeneratorImpl())
+    private val contextFactory = ContextFactoryImpl(spanContextFactory)
+    private val spanFactory = SpanFactoryImpl(spanContextFactory, contextFactory.spanKey)
 
     @Test
     fun testSpanStorage() {
@@ -32,5 +34,23 @@ internal class SpanStorageTest {
         val finalCtx = contextFactory.storeSpan(newCtx, otherSpan)
         val retrievedSpan = spanFactory.fromContext(finalCtx)
         assertSame(otherSpan, retrievedSpan)
+    }
+
+    @Test
+    fun testCurrentSpanReturnsInvalid() {
+        assertFalse(contextFactory.currentSpan().spanContext.isValid)
+        assertFalse(contextFactory.currentSpan().isRecording())
+    }
+
+    @Test
+    fun testCurrentSpanReturnsActive() {
+        val span = FakeSpan()
+        val ctx = contextFactory.storeSpan(contextFactory.implicit(), span)
+        val scope = ctx.attach()
+        try {
+            assertSame(span, contextFactory.currentSpan())
+        } finally {
+            scope.detach()
+        }
     }
 }

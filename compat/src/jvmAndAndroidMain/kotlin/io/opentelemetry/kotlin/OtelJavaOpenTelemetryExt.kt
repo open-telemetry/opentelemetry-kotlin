@@ -30,8 +30,8 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(): OpenTelemetry {
     val traceFlags = CompatTraceFlagsFactory()
     val traceState = CompatTraceStateFactory()
     val spanContext = CompatSpanContextFactory()
-    val contextFactory = CompatContextFactory()
     val span = CompatSpanFactory(spanContext)
+    val contextFactory = CompatContextFactory(span)
     val clock = ClockAdapter(OtelJavaClock.getDefault())
     return CompatOpenTelemetryImpl(
         tracerProvider = TracerProviderAdapter(tracerProvider, clock, CompatSpanLimitsConfig()),

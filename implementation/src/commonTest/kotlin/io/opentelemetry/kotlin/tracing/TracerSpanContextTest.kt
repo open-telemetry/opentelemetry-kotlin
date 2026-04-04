@@ -44,7 +44,7 @@ internal class TracerSpanContextTest {
         val traceFlags = TraceFlagsFactoryImpl()
         val traceState = TraceStateFactoryImpl()
         spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlags, traceState)
-        contextFactory = ContextFactoryImpl()
+        contextFactory = ContextFactoryImpl(spanContextFactory)
         spanFactory = SpanFactoryImpl(spanContextFactory, (contextFactory as ContextFactoryImpl).spanKey)
         tracer = TracerImpl(
             clock = clock,

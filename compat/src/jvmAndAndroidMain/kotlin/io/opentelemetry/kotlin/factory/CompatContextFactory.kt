@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.ext.storeInContext
 
-internal class CompatContextFactory : ContextFactory {
+internal class CompatContextFactory(private val spanFactory: SpanFactory) : ContextFactory {
 
     override fun root(): Context = OtelJavaContext.root().toOtelKotlinContext()
 
@@ -21,4 +21,6 @@ internal class CompatContextFactory : ContextFactory {
     override fun implicit(): Context = OtelJavaContext.current().toOtelKotlinContext()
 
     override fun <T> createKey(name: String): ContextKey<T> = ContextKeyAdapter(OtelJavaContextKey.named(name))
+
+    override fun currentSpan(): Span = spanFactory.fromContext(implicit())
 }

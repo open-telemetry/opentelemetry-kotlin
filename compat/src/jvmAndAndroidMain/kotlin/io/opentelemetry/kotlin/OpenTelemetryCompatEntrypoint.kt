@@ -42,8 +42,8 @@ internal fun createCompatOpenTelemetryImpl(
     val traceFlags = CompatTraceFlagsFactory()
     val traceState = CompatTraceStateFactory()
     val spanContext = CompatSpanContextFactory()
-    val contextFactory = CompatContextFactory()
     val span = CompatSpanFactory(spanContext)
+    val contextFactory = CompatContextFactory(span)
 
     val cfg = CompatOpenTelemetryConfig(clock, idGenerator).apply(config)
     val base = cfg.buildGlobalResource()

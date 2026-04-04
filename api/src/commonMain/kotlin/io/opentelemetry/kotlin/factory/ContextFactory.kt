@@ -33,4 +33,10 @@ public interface ContextFactory {
      * [T] represents the type of the value that is stored in the context.
      */
     public fun <T> createKey(name: String): ContextKey<T>
+
+    /**
+     * Returns the [Span] from the implicit [Context], or an invalid non-recording [Span] if none
+     * exists.
+     */
+    public fun currentSpan(): Span
 }

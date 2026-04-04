@@ -10,8 +10,8 @@ internal class SpanFactoryImplTest {
     private val spanContextFactory = CompatSpanContextFactory()
     private val traceStateFactory = CompatTraceStateFactory()
     private val traceFlagsFactory = CompatTraceFlagsFactory()
-    private val contextFactory = CompatContextFactory()
     private val spanFactory = CompatSpanFactory(spanContextFactory)
+    private val contextFactory = CompatContextFactory(spanFactory)
 
     @Test
     fun `test invalid is the same instance`() {
