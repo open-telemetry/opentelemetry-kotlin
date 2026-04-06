@@ -4,6 +4,16 @@ Please open an issue on GitHub with your bug report/feature request and somebody
 you on whether it's something that is actively being worked on, or whether external contributions
 would be accepted.
 
+## Setting up development environment
+
+1. Fork and clone the repository
+2. Install the following prerequisites:
+   1. JDK >=11 (OpenJdk 21 using https://sdkman.io/ is recommended)
+   2. Android SDK: https://developer.android.com/studio
+   3. Android Studio or IntelliJ IDEA are recommended
+3. Run `./gradlew build` to confirm the project builds
+4. Open an issue or update these docs if there was a step missing from these instructions!
+
 ## Development guidelines
 
 The following guidelines should be followed during development:

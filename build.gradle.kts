@@ -10,11 +10,12 @@ plugins {
 
 plugins.withType<YarnPlugin> {
     extensions.configure<YarnRootExtension> {
-        resolution("minimatch", ">=9.0.7")
-        resolution("serialize-javascript", ">=7.0.3")
+        resolution("brace-expansion", ">=5.0.5")
+        resolution("diff", ">=8.0.3")
         resolution("glob", ">=10.5.0")
         resolution("js-yaml", ">=4.1.1")
-        resolution("diff", ">=8.0.3")
+        resolution("minimatch", ">=9.0.7")
+        resolution("serialize-javascript", ">=7.0.5")
     }
 }
 

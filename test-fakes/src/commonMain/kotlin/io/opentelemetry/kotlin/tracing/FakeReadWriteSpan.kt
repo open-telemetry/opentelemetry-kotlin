@@ -14,7 +14,7 @@ class FakeReadWriteSpan(
     name: String = "fake_span",
     status: StatusData = StatusData.Unset,
     override val parent: SpanContext = FakeSpanContext.INVALID,
-    override val spanContext: SpanContext = FakeSpanContext.INVALID,
+    spanContext: SpanContext = FakeSpanContext.INVALID,
     override val spanKind: SpanKind = SpanKind.INTERNAL,
     override val startTimestamp: Long = 0,
     override val events: List<SpanEventData> = emptyList(),
@@ -25,6 +25,8 @@ class FakeReadWriteSpan(
     override val instrumentationScopeInfo: InstrumentationScopeInfo = FakeInstrumentationScopeInfo(),
     override val hasEnded: Boolean = false
 ) : ReadWriteSpan {
+
+    override var spanContext: SpanContext = spanContext
 
     private var nameImpl: String = name
     override val name: String get() = nameImpl

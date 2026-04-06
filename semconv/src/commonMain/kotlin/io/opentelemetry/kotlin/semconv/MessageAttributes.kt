@@ -10,33 +10,33 @@ object MessageAttributes {
   
 
     /**
-    * <p>Deprecated, use <c>rpc.message.compressed_size</c> instead.</p>
+    * <p>Deprecated, no replacement at this time.</p>
     */
-    @Deprecated("Replaced by `rpc.message.compressed_size`.")
+    @Deprecated("Deprecated, no replacement at this time.")
     const val MESSAGE_COMPRESSED_SIZE: String = "message.compressed_size"
 
     /**
-    * <p>Deprecated, use <c>rpc.message.id</c> instead.</p>
+    * <p>Deprecated, no replacement at this time.</p>
     */
-    @Deprecated("Replaced by `rpc.message.id`.")
+    @Deprecated("Deprecated, no replacement at this time.")
     const val MESSAGE_ID: String = "message.id"
 
     /**
-    * <p>Deprecated, use <c>rpc.message.type</c> instead.</p>
+    * <p>Deprecated, no replacement at this time.</p>
     */
-    @Deprecated("Replaced by `rpc.message.type`.")
+    @Deprecated("Deprecated, no replacement at this time.")
     const val MESSAGE_TYPE: String = "message.type"
 
     /**
-    * <p>Deprecated, use <c>rpc.message.uncompressed_size</c> instead.</p>
+    * <p>Deprecated, no replacement at this time.</p>
     */
-    @Deprecated("Replaced by `rpc.message.uncompressed_size`.")
+    @Deprecated("Deprecated, no replacement at this time.")
     const val MESSAGE_UNCOMPRESSED_SIZE: String = "message.uncompressed_size"
 
     /**
     * <p>MESSAGE_TYPE</p>
     */
-    @Deprecated("Replaced by `rpc.message.type`.")
+    @Deprecated("Deprecated, no replacement at this time.")
     enum class MessageTypeValues(val value: String) {
 
         /**

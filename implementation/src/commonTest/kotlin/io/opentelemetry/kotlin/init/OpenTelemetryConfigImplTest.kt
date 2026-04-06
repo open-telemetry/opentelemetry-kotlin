@@ -8,8 +8,8 @@ import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 internal class OpenTelemetryConfigImplTest {
 
@@ -18,8 +18,8 @@ internal class OpenTelemetryConfigImplTest {
     @Test
     fun testDefaultConfig() {
         val cfg = OpenTelemetryConfigImpl(clock)
-        assertTrue(cfg.generateTracingConfig().processors.isEmpty())
-        assertTrue(cfg.generateLoggingConfig().processors.isEmpty())
+        assertNull(cfg.generateTracingConfig().processor)
+        assertNull(cfg.generateLoggingConfig().processor)
         assertEquals(ImplicitContextStorageMode.GLOBAL, cfg.contextConfig.storageMode)
     }
 
@@ -35,8 +35,8 @@ internal class OpenTelemetryConfigImplTest {
         cfg.context {
             assertEquals(ImplicitContextStorageMode.GLOBAL, storageMode)
         }
-        assertFalse(cfg.generateTracingConfig().processors.isEmpty())
-        assertFalse(cfg.generateLoggingConfig().processors.isEmpty())
+        assertNotNull(cfg.generateTracingConfig().processor)
+        assertNotNull(cfg.generateLoggingConfig().processor)
     }
 
     @Test

@@ -249,6 +249,8 @@ public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanProce
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadWriteSpan : io/opentelemetry/kotlin/tracing/Span, io/opentelemetry/kotlin/tracing/model/ReadableSpan {
+	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/SpanContext;
+	public abstract fun setSpanContext (Lio/opentelemetry/kotlin/tracing/SpanContext;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadableSpan : io/opentelemetry/kotlin/tracing/data/SpanData {

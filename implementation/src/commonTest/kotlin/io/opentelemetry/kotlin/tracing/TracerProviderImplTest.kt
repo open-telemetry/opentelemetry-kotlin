@@ -24,7 +24,7 @@ import kotlin.test.assertSame
 internal class TracerProviderImplTest {
 
     private val tracingConfig = TracingConfig(
-        emptyList(),
+        null,
         fakeSpanLimitsConfig,
         ResourceImpl(AttributesModel(), null)
     )
@@ -125,7 +125,7 @@ internal class TracerProviderImplTest {
             }
         )
         val config = TracingConfig(
-            listOf(processor),
+            processor,
             fakeSpanLimitsConfig,
             FakeResource(),
         )
@@ -155,7 +155,7 @@ internal class TracerProviderImplTest {
             }
         )
         val config = TracingConfig(
-            listOf(processor),
+            processor,
             fakeSpanLimitsConfig,
             FakeResource(),
         )

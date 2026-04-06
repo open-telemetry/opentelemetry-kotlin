@@ -43,7 +43,7 @@ jobs:
             --repo open-telemetry/weaver \
             --pattern '*x86_64-unknown-linux-gnu.tar.xz' \
             --output weaver.tar.xz
-          tar -xJf weaver.tar.xz
+          tar -xJf weaver.tar.xz --strip-components 1
           mv weaver /usr/local/bin/weaver
           weaver --version
         env:
@@ -58,7 +58,7 @@ jobs:
 
       - name: Setup Gradle
         if: env.UP_TO_DATE == 'false'
-        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+        uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0
 
       - name: Update semconv version in build file
         if: env.UP_TO_DATE == 'false'

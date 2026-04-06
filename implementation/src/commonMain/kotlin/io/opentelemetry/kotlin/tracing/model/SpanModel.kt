@@ -32,7 +32,7 @@ internal class SpanModel(
     override val instrumentationScopeInfo: InstrumentationScopeInfo,
     override val resource: Resource,
     override val parent: SpanContext,
-    override val spanContext: SpanContext,
+    spanContext: SpanContext,
     private val spanLimitConfig: SpanLimitConfig
 ) : ReadWriteSpan, SpanCreationAction {
 
@@ -48,6 +48,7 @@ internal class SpanModel(
 
     private var state: State = State.STARTED
 
+    private var spanContextImpl: SpanContext = spanContext
     private var nameImpl: String = name
     private var statusImpl: StatusData = StatusData.Unset
 
@@ -56,6 +57,14 @@ internal class SpanModel(
 
     override val status: StatusData
         get() = lock.read { statusImpl }
+
+    override var spanContext: SpanContext
+        get() = lock.read { spanContextImpl }
+        set(value) = lock.write {
+            if (isRecording()) {
+                spanContextImpl = value
+            }
+        }
 
     override fun setName(name: String) {
         lock.write {
@@ -67,7 +76,7 @@ internal class SpanModel(
 
     override fun setStatus(status: StatusData) {
         lock.write {
-            if (isRecording()) {
+            if (isRecording() && statusImpl !is StatusData.Ok) {
                 statusImpl = status
             }
         }

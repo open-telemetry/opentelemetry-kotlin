@@ -556,6 +556,132 @@ object K8sAttributes {
     const val K8S_RESOURCEQUOTA_UID: String = "k8s.resourcequota.uid"
 
     /**
+    * <p>The annotation placed on the Service, the <c><key></c> being the annotation name, the value being the annotation value, even if the value is empty.</p>
+    * <p>Notes:</p>
+    * <p>Examples:</p>
+    * <ul>
+    *   <li>An annotation <c>prometheus.io/scrape</c> with value <c>true</c> SHOULD be recorded as
+    * the <c>k8s.service.annotation.prometheus.io/scrape</c> attribute with value <c>"true"</c>.</li>
+    *   <li>An annotation <c>data</c> with empty string value SHOULD be recorded as
+    * the <c>k8s.service.annotation.data</c> attribute with value <c>""</c>.</li>
+    * </ul>
+    */
+    @IncubatingApi
+    const val K8S_SERVICE_ANNOTATION: String = "k8s.service.annotation"
+
+    /**
+    * <p>The address type of the service endpoint.</p>
+    * <p>Notes:</p>
+    * <p>The network address family or type of the endpoint.
+    * This attribute aligns with the <c>addressType</c> field of the
+    * <a href="https://kubernetes.io/docs/reference/kubernetes-api/service-resources/endpoint-slice-v1/">K8s EndpointSlice</a>.
+    * It is used to differentiate metrics when a Service is backed by multiple address types
+    * (e.g., in dual-stack clusters).</p>
+    */
+    @IncubatingApi
+    const val K8S_SERVICE_ENDPOINT_ADDRESS_TYPE: String = "k8s.service.endpoint.address_type"
+
+    /**
+    * <p>The condition of the service endpoint.</p>
+    * <p>Notes:</p>
+    * <p>The current operational condition of the service endpoint.
+    * An endpoint can have multiple conditions set at once (e.g., both <c>serving</c> and <c>terminating</c> during rollout).
+    * This attribute aligns with the condition fields in the <a href="https://kubernetes.io/docs/reference/kubernetes-api/service-resources/endpoint-slice-v1/">K8s EndpointSlice</a>.</p>
+    */
+    @IncubatingApi
+    const val K8S_SERVICE_ENDPOINT_CONDITION: String = "k8s.service.endpoint.condition"
+
+    /**
+    * <p>The zone of the service endpoint.</p>
+    * <p>Notes:</p>
+    * <p>The zone where the endpoint is located, typically corresponding to a failure domain.
+    * This attribute aligns with the <c>zone</c> field of endpoints in the
+    * <a href="https://kubernetes.io/docs/reference/kubernetes-api/service-resources/endpoint-slice-v1/">K8s EndpointSlice</a>.
+    * It enables zone-aware monitoring of service endpoint distribution and supports
+    * features like <a href="https://kubernetes.io/docs/concepts/services-networking/topology-aware-routing/">Topology Aware Routing</a>.</p>
+    * <p>If the zone is not populated (e.g., nodes without the <c>topology.kubernetes.io/zone</c> label),
+    * the attribute value will be an empty string.</p>
+    */
+    @IncubatingApi
+    const val K8S_SERVICE_ENDPOINT_ZONE: String = "k8s.service.endpoint.zone"
+
+    /**
+    * <p>The label placed on the Service, the <c><key></c> being the label name, the value being the label value, even if the value is empty.</p>
+    * <p>Notes:</p>
+    * <p>Examples:</p>
+    * <ul>
+    *   <li>A label <c>app</c> with value <c>my-service</c> SHOULD be recorded as
+    * the <c>k8s.service.label.app</c> attribute with value <c>"my-service"</c>.</li>
+    *   <li>A label <c>data</c> with empty string value SHOULD be recorded as
+    * the <c>k8s.service.label.data</c> attribute with value <c>""</c>.</li>
+    * </ul>
+    */
+    @IncubatingApi
+    const val K8S_SERVICE_LABEL: String = "k8s.service.label"
+
+    /**
+    * <p>The name of the Service.</p>
+    */
+    @IncubatingApi
+    const val K8S_SERVICE_NAME: String = "k8s.service.name"
+
+    /**
+    * <p>Whether the Service publishes not-ready endpoints.</p>
+    * <p>Notes:</p>
+    * <p>Whether the Service is configured to publish endpoints before the pods are ready.
+    * This attribute is typically used to indicate that a Service (such as a headless
+    * Service for a StatefulSet) allows peer discovery before pods pass their readiness probes.
+    * It aligns with the <c>publishNotReadyAddresses</c> field of the
+    * <a href="https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/#ServiceSpec">K8s ServiceSpec</a>.</p>
+    */
+    @IncubatingApi
+    const val K8S_SERVICE_PUBLISH_NOT_READY_ADDRESSES: String = "k8s.service.publish_not_ready_addresses"
+
+    /**
+    * <p>The selector key-value pair placed on the Service, the <c><key></c> being the selector key, the value being the selector value.</p>
+    * <p>Notes:</p>
+    * <p>These selectors are used to correlate with pod labels. Each selector key-value pair becomes a separate attribute.</p>
+    * <p>Examples:</p>
+    * <ul>
+    *   <li>A selector <c>app=my-app</c> SHOULD be recorded as
+    * the <c>k8s.service.selector.app</c> attribute with value <c>"my-app"</c>.</li>
+    *   <li>A selector <c>version=v1</c> SHOULD be recorded as
+    * the <c>k8s.service.selector.version</c> attribute with value <c>"v1"</c>.</li>
+    * </ul>
+    */
+    @IncubatingApi
+    const val K8S_SERVICE_SELECTOR: String = "k8s.service.selector"
+
+    /**
+    * <p>The traffic distribution policy for the Service.</p>
+    * <p>Notes:</p>
+    * <p>Specifies how traffic is distributed to endpoints for this Service.
+    * This attribute aligns with the <c>trafficDistribution</c> field of the
+    * <a href="https://kubernetes.io/docs/reference/networking/virtual-ips/#traffic-distribution">K8s ServiceSpec</a>.
+    * Known values include <c>PreferSameZone</c> (prefer endpoints in the same zone as the client) and
+    * <c>PreferSameNode</c> (prefer endpoints on the same node, fallback to same zone, then cluster-wide).
+    * If this field is not set on the Service, the attribute SHOULD NOT be emitted.
+    * When not set, Kubernetes distributes traffic evenly across all endpoints cluster-wide.</p>
+    */
+    @IncubatingApi
+    const val K8S_SERVICE_TRAFFIC_DISTRIBUTION: String = "k8s.service.traffic_distribution"
+
+    /**
+    * <p>The type of the Kubernetes Service.</p>
+    * <p>Notes:</p>
+    * <p>This attribute aligns with the <c>type</c> field of the
+    * <a href="https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/#ServiceSpec">K8s ServiceSpec</a>.</p>
+    */
+    @IncubatingApi
+    const val K8S_SERVICE_TYPE: String = "k8s.service.type"
+
+    /**
+    * <p>The UID of the Service.</p>
+    */
+    @IncubatingApi
+    const val K8S_SERVICE_UID: String = "k8s.service.uid"
+
+    /**
     * <p>The annotation placed on the StatefulSet, the <c><key></c> being the annotation name, the value being the annotation value, even if the value is empty.</p>
     * <p>Notes:</p>
     * <p>Examples:</p>
@@ -820,6 +946,77 @@ object K8sAttributes {
         * <p>The pod was rejected admission to the node because of an error during admission that could not be categorized.</p>
         */
         UNEXPECTED_ADMISSION_ERROR("UnexpectedAdmissionError"),
+    }
+
+    /**
+    * <p>K8S_SERVICE_ENDPOINT_ADDRESS_TYPE</p>
+    */
+    @IncubatingApi
+    enum class K8sServiceEndpointAddressTypeValues(val value: String) {
+
+        /**
+        * <p>IPv4 address type</p>
+        */
+        IPV4("IPv4"),
+
+        /**
+        * <p>IPv6 address type</p>
+        */
+        IPV6("IPv6"),
+
+        /**
+        * <p>FQDN address type</p>
+        */
+        FQDN("FQDN"),
+    }
+
+    /**
+    * <p>K8S_SERVICE_ENDPOINT_CONDITION</p>
+    */
+    @IncubatingApi
+    enum class K8sServiceEndpointConditionValues(val value: String) {
+
+        /**
+        * <p>The endpoint is ready to receive new connections.</p>
+        */
+        READY("ready"),
+
+        /**
+        * <p>The endpoint is currently handling traffic.</p>
+        */
+        SERVING("serving"),
+
+        /**
+        * <p>The endpoint is in the process of shutting down.</p>
+        */
+        TERMINATING("terminating"),
+    }
+
+    /**
+    * <p>K8S_SERVICE_TYPE</p>
+    */
+    @IncubatingApi
+    enum class K8sServiceTypeValues(val value: String) {
+
+        /**
+        * <p>ClusterIP service type</p>
+        */
+        CLUSTER_IP("ClusterIP"),
+
+        /**
+        * <p>NodePort service type</p>
+        */
+        NODE_PORT("NodePort"),
+
+        /**
+        * <p>LoadBalancer service type</p>
+        */
+        LOAD_BALANCER("LoadBalancer"),
+
+        /**
+        * <p>ExternalName service type</p>
+        */
+        EXTERNAL_NAME("ExternalName"),
     }
 
     /**

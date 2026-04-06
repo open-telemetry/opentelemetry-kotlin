@@ -52,9 +52,9 @@ object RpcAttributes {
     const val RPC_JSONRPC_ERROR_CODE: String = "rpc.jsonrpc.error_code"
 
     /**
-    * <p>Deprecated, use span status description or <c>error.message</c> attribute on other signals.</p>
+    * <p>Deprecated, use the span status description when reporting JSON-RPC spans.</p>
     */
-    @Deprecated("Use the span status description or `error.message` attribute on other signals.")
+    @Deprecated("Use the span status description when reporting JSON-RPC spans.")
     const val RPC_JSONRPC_ERROR_MESSAGE: String = "rpc.jsonrpc.error_message"
 
     /**
@@ -72,7 +72,7 @@ object RpcAttributes {
     /**
     * <p>Compressed size of the message in bytes.</p>
     */
-    @IncubatingApi
+    @Deprecated("Deprecated, no replacement at this time.")
     const val RPC_MESSAGE_COMPRESSED_SIZE: String = "rpc.message.compressed_size"
 
     /**
@@ -80,19 +80,19 @@ object RpcAttributes {
     * <p>Notes:</p>
     * <p>This way we guarantee that the values will be consistent between different implementations.</p>
     */
-    @IncubatingApi
+    @Deprecated("Deprecated, no replacement at this time.")
     const val RPC_MESSAGE_ID: String = "rpc.message.id"
 
     /**
     * <p>Whether this is a received or sent message.</p>
     */
-    @IncubatingApi
+    @Deprecated("Deprecated, no replacement at this time.")
     const val RPC_MESSAGE_TYPE: String = "rpc.message.type"
 
     /**
     * <p>Uncompressed size of the message in bytes.</p>
     */
-    @IncubatingApi
+    @Deprecated("Deprecated, no replacement at this time.")
     const val RPC_MESSAGE_UNCOMPRESSED_SIZE: String = "rpc.message.uncompressed_size"
 
     /**
@@ -360,7 +360,7 @@ object RpcAttributes {
     /**
     * <p>RPC_MESSAGE_TYPE</p>
     */
-    @IncubatingApi
+    @Deprecated("Deprecated, no replacement at this time.")
     enum class RpcMessageTypeValues(val value: String) {
 
         /**

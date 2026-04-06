@@ -64,4 +64,20 @@ object PprofAttributes {
     */
     @IncubatingApi
     const val PPROF_PROFILE_KEEP_FRAMES: String = "pprof.profile.keep_frames"
+
+    /**
+    * <p>Records the pprof's default_sample_type in the original profile. Not set if the default sample type was missing.</p>
+    * <p>Notes:</p>
+    * <p>This attribute, if present, MUST be set at the scope level (resource_profiles[].scope_profiles[].scope.attributes[]).</p>
+    */
+    @IncubatingApi
+    const val PPROF_SCOPE_DEFAULT_SAMPLE_TYPE: String = "pprof.scope.default_sample_type"
+
+    /**
+    * <p>Records the indexes of the sample types in the original profile.</p>
+    * <p>Notes:</p>
+    * <p>This attribute, if present, MUST be set at the scope level (resource_profiles[].scope_profiles[].scope.attributes[]).</p>
+    */
+    @IncubatingApi
+    const val PPROF_SCOPE_SAMPLE_TYPE_ORDER: String = "pprof.scope.sample_type_order"
 }

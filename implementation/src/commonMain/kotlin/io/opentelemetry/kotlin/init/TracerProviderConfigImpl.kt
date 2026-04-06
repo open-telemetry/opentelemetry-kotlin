@@ -14,7 +14,7 @@ internal class TracerProviderConfigImpl(
     private val resourceConfigImpl: ResourceConfigImpl = ResourceConfigImpl()
 ) : TracerProviderConfigDsl, ResourceConfigDsl by resourceConfigImpl {
 
-    private val processors: MutableList<SpanProcessor> = mutableListOf()
+    private var processor: SpanProcessor? = null
     private var spanLimitsAction: SpanLimitsConfigDsl.() -> Unit = {}
     private var samplerAction: SamplerConfigDsl.() -> Sampler = { alwaysOn() }
 
@@ -23,9 +23,8 @@ internal class TracerProviderConfigImpl(
     }
 
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
-        require(processors.isEmpty()) { "export() should only be called once." }
-        val processor = TraceExportConfigImpl(clock).action()
-        processors.add(processor)
+        require(processor == null) { "export() should only be called once." }
+        processor = TraceExportConfigImpl(clock).action()
     }
 
     override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
@@ -33,7 +32,7 @@ internal class TracerProviderConfigImpl(
     }
 
     fun generateTracingConfig(base: Resource, globalLimits: AttributeLimitsConfigImpl? = null): TracingConfig = TracingConfig(
-        processors = processors.toList(),
+        processor = processor,
         spanLimits = generateSpanLimitsConfig(globalLimits),
         resource = base.merge(resourceConfigImpl.generateResource()),
         samplerFactory = { spanFactory -> SamplerConfigImpl(spanFactory).samplerAction() },
