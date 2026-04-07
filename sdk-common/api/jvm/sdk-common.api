@@ -12,6 +12,8 @@ public final class io/opentelemetry/kotlin/export/BatchExportOperationKt {
 }
 
 public final class io/opentelemetry/kotlin/export/CompositeTelemetryCloseable : io/opentelemetry/kotlin/export/TelemetryCloseable {
+	public static final field FORCE_FLUSH_TIMEOUT_MS J
+	public static final field SHUTDOWN_TIMEOUT_MS J
 	public fun <init> (Ljava/util/List;Lio/opentelemetry/kotlin/error/SdkErrorHandler;)V
 	public synthetic fun <init> (Ljava/util/List;Lio/opentelemetry/kotlin/error/SdkErrorHandler;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun forceFlush (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -19,10 +21,16 @@ public final class io/opentelemetry/kotlin/export/CompositeTelemetryCloseable : 
 }
 
 public final class io/opentelemetry/kotlin/export/MutableShutdownState : io/opentelemetry/kotlin/export/ShutdownState {
+	public static final field Companion Lio/opentelemetry/kotlin/export/MutableShutdownState$Companion;
+	public static final field DEFAULT_TIMEOUT_MS J
 	public fun <init> ()V
 	public fun isShutdown ()Z
-	public final fun shutdown (Lkotlin/jvm/functions/Function0;)Lio/opentelemetry/kotlin/export/OperationResultCode;
+	public final fun shutdown (JLkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun shutdown$default (Lio/opentelemetry/kotlin/export/MutableShutdownState;JLkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun shutdownNow ()V
+}
+
+public final class io/opentelemetry/kotlin/export/MutableShutdownState$Companion {
 }
 
 public abstract class io/opentelemetry/kotlin/export/ShutdownState {
@@ -31,5 +39,9 @@ public abstract class io/opentelemetry/kotlin/export/ShutdownState {
 	public final fun ifActive (Lkotlin/jvm/functions/Function0;)Lio/opentelemetry/kotlin/export/OperationResultCode;
 	public final fun ifActiveOrElse (Ljava/lang/Object;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public abstract fun isShutdown ()Z
+}
+
+public final class io/opentelemetry/kotlin/export/TimeoutOperationKt {
+	public static final fun runWithTimeout (JLkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 

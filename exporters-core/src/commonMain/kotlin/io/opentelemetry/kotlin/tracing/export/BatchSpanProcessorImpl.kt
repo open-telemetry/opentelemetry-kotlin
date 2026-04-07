@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.BatchTelemetryProcessor
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
@@ -46,8 +47,9 @@ internal class BatchSpanProcessorImpl(
     override suspend fun forceFlush(): OperationResultCode = processor.forceFlush()
 
     override suspend fun shutdown(): OperationResultCode =
-        shutdownState.shutdown {
-            exporter.shutdown()
+        shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS) {
+            val exporterResult = exporter.shutdown()
             processor.shutdown()
+            exporterResult
         }
 }

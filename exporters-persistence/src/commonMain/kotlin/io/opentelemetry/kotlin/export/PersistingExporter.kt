@@ -28,9 +28,7 @@ internal class PersistingExporter<T>(
         }
 
     override suspend fun shutdown(): OperationResultCode =
-        shutdownState.shutdown {
-            closeable.shutdown()
-        }
+        shutdownState.shutdown(action = closeable::shutdown)
 
     override suspend fun forceFlush(): OperationResultCode = closeable.forceFlush()
 }

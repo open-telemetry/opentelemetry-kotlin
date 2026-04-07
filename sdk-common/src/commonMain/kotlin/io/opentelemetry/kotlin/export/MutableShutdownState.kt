@@ -23,18 +23,22 @@ public class MutableShutdownState : ShutdownState() {
     }
 
     /**
-     * If not already shut down, call [shutdownNow] and run [action] to perform additional cleanup.
-     * [action] must be thread-safe and be able to be invoked many times without issue.
-     * If already shut down, return [OperationResultCode.Success].
-     * This method will not handle exceptions thrown by [action].
+     * If not already shut down, call [shutdownNow] and run [action] within [timeoutMs] milliseconds.
+     * Returns [OperationResultCode.Failure] if the timeout elapses before [action] completes.
+     * If already shut down, returns [OperationResultCode.Success].
      */
-    public inline fun shutdown(
-        action: () -> OperationResultCode,
+    public suspend fun shutdown(
+        timeoutMs: Long = DEFAULT_TIMEOUT_MS,
+        action: suspend () -> OperationResultCode,
     ): OperationResultCode =
         if (isShutdown) {
             OperationResultCode.Success
         } else {
             shutdownNow()
-            action()
+            runWithTimeout(timeoutMs, action)
         }
+
+    public companion object {
+        public const val DEFAULT_TIMEOUT_MS: Long = 5000
+    }
 }

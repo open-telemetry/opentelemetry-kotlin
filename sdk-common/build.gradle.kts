@@ -14,6 +14,7 @@ kotlin {
                 implementation(project(":sdk-api"))
                 implementation(project(":platform-implementations"))
                 implementation(project(":semconv"))
+                implementation(libs.kotlinx.coroutines)
             }
         }
         val commonTest by getting {
