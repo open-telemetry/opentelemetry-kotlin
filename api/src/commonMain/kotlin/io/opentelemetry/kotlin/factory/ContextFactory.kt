@@ -39,7 +39,7 @@ public interface ContextFactory {
      * Stores [span] in a new [Context] derived from [implicit] and sets
      * the new [Context] as the implicit context.
      *
-     * Returns a [Scope]. Neglecting to close the [Scope] is a programming error.
+     * Returns a [Scope]. Neglecting to detach the [Scope] is a programming error.
      *
      * https://opentelemetry.io/docs/specs/otel/trace/api/#context-interaction
      */
