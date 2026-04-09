@@ -3,6 +3,9 @@ package io.opentelemetry.kotlin
 import io.opentelemetry.kotlin.context.NoopContext
 import io.opentelemetry.kotlin.context.NoopContextKey
 import io.opentelemetry.kotlin.logging.SeverityNumber
+import io.opentelemetry.kotlin.propagation.NoopTextMapPropagator
+import io.opentelemetry.kotlin.propagation.TextMapGetter
+import io.opentelemetry.kotlin.propagation.TextMapSetter
 import io.opentelemetry.kotlin.tracing.NoopSpan
 import io.opentelemetry.kotlin.tracing.NoopSpanContext
 import io.opentelemetry.kotlin.tracing.NoopTraceFlags
@@ -216,6 +219,25 @@ internal class NoopTests {
         // merge and asNewResource return the same noop instance
         assertSame(empty, empty.merge(created))
         assertSame(empty, empty.asNewResource { attributes["k"] = "v" })
+    }
+
+    @Test
+    fun testNoopTextMapPropagator() {
+        assertEquals(emptyList(), NoopTextMapPropagator.fields())
+
+        val ctx = NoopOpenTelemetry.context.root()
+        val carrier = mutableMapOf("key" to "value")
+
+        // inject is a no-op — setter must never be called
+        NoopTextMapPropagator.inject(ctx, carrier, TextMapSetter { _, _, _ -> error("setter should not be called") })
+        assertEquals(mapOf("key" to "value"), carrier)
+
+        // extract returns the original context unchanged
+        val getter = object : TextMapGetter<MutableMap<String, String>> {
+            override fun keys(carrier: MutableMap<String, String>) = carrier.keys
+            override fun get(carrier: MutableMap<String, String>, key: String) = carrier[key]
+        }
+        assertSame(ctx, NoopTextMapPropagator.extract(ctx, carrier, getter))
     }
 
     private fun verifySpanOperationsAreNoop(span: NoopSpan) {
