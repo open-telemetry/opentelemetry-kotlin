@@ -2,6 +2,79 @@
 
 ## Unreleased
 
+- Alter Tracing API so that `Span` does not include readable values
+  ([#267](https://github.com/open-telemetry/opentelemetry-kotlin/pull/267))
+- Move packages of several APIs
+  ([#321](https://github.com/open-telemetry/opentelemetry-kotlin/pull/321))
+  ([#295](https://github.com/open-telemetry/opentelemetry-kotlin/pull/295))
+  ([#293](https://github.com/open-telemetry/opentelemetry-kotlin/pull/293))
+- Alter resource API
+  ([#288](https://github.com/open-telemetry/opentelemetry-kotlin/pull/288))
+- Add SDK instance level support of ShutdownState
+  ([#300](https://github.com/open-telemetry/opentelemetry-kotlin/pull/300))
+- Provide return value for Scope#detach()
+  ([#287](https://github.com/open-telemetry/opentelemetry-kotlin/pull/287))
+- Disallow creating span events during creation
+  ([#290](https://github.com/open-telemetry/opentelemetry-kotlin/pull/290))
+- Add isRemote flag to SpanContext
+  ([#289](https://github.com/open-telemetry/opentelemetry-kotlin/pull/289))
+- Add DSL for configuring samplers
+  ([#297](https://github.com/open-telemetry/opentelemetry-kotlin/pull/297))
+  ([#314](https://github.com/open-telemetry/opentelemetry-kotlin/pull/314))
+  ([#325](https://github.com/open-telemetry/opentelemetry-kotlin/pull/325))
+  ([#346](https://github.com/open-telemetry/opentelemetry-kotlin/pull/346))
+- Capture default attributes in resource object
+  ([#308](https://github.com/open-telemetry/opentelemetry-kotlin/pull/308))
+  ([#317](https://github.com/open-telemetry/opentelemetry-kotlin/pull/317))
+- Add ResourceFactory API
+  ([#299](https://github.com/open-telemetry/opentelemetry-kotlin/pull/299))
+- Bump JavaScript dependencies
+  ([#309](https://github.com/open-telemetry/opentelemetry-kotlin/pull/309))
+- Support exception parameter in Logger interface
+  ([#296](https://github.com/open-telemetry/opentelemetry-kotlin/pull/296))
+- Move createKey() function to ContextFactory
+  ([#291](https://github.com/open-telemetry/opentelemetry-kotlin/pull/291))
+- Implement the AlwaysOn/AlwaysOff built-in samplers
+  ([#306](https://github.com/open-telemetry/opentelemetry-kotlin/pull/306))
+- Move additional interfaces to sdk-api
+  ([#311](https://github.com/open-telemetry/opentelemetry-kotlin/pull/311))
+- Add API for span conversion
+  ([#316](https://github.com/open-telemetry/opentelemetry-kotlin/pull/316))
+- Support logging structured messages
+  ([#313](https://github.com/open-telemetry/opentelemetry-kotlin/pull/313))
+- Configure attribute limits on traces/logs
+  ([#324](https://github.com/open-telemetry/opentelemetry-kotlin/pull/324))
+- Allow resources to be specified at a global level
+  ([#323](https://github.com/open-telemetry/opentelemetry-kotlin/pull/323))
+- Alter DSL for configuring built-in samplers
+  ([#327](https://github.com/open-telemetry/opentelemetry-kotlin/pull/327))
+- Ensure span id is generated before sampling decisions
+  ([#335](https://github.com/open-telemetry/opentelemetry-kotlin/pull/335))
+- Add global attribute limits
+  ([#328](https://github.com/open-telemetry/opentelemetry-kotlin/pull/328))
+- Add attributes from sampling result to span
+  ([#338](https://github.com/open-telemetry/opentelemetry-kotlin/pull/338))
+- Remove recordException() from API
+  ([#320](https://github.com/open-telemetry/opentelemetry-kotlin/pull/320))
+- Ensure that TraceState complies with W3C TraceContext spec
+  ([#345](https://github.com/open-telemetry/opentelemetry-kotlin/pull/345))
+- Disallow overriding span status once set to Ok
+  ([#357](https://github.com/open-telemetry/opentelemetry-kotlin/pull/357))
+- Add bounding for OTLP response body
+  ([#361](https://github.com/open-telemetry/opentelemetry-kotlin/pull/361))
+- Create parent based sampler
+  ([#349](https://github.com/open-telemetry/opentelemetry-kotlin/pull/349))
+- Update semantic conventions to v1.40.0
+  ([#363](https://github.com/open-telemetry/opentelemetry-kotlin/pull/363))
+- Bump JavaScript dependency versions
+  ([#360](https://github.com/open-telemetry/opentelemetry-kotlin/pull/360))
+- Add ability to override span context
+  ([#358](https://github.com/open-telemetry/opentelemetry-kotlin/pull/358))
+- Add makeCurrent() API to ContextFactory
+  ([#351](https://github.com/open-telemetry/opentelemetry-kotlin/pull/351))
+- Allow specifying timeout for OTLP export
+  ([#386](https://github.com/open-telemetry/opentelemetry-kotlin/pull/386))
+
 ## Version 0.2.0 (2026-03-11)
 
 - Set explicit minCompileSdk at 34
