@@ -6,6 +6,6 @@ import io.opentelemetry.kotlin.context.Context
 @ExperimentalApi
 internal object NoopTextMapPropagator : TextMapPropagator {
     override fun fields(): Collection<String> = emptyList()
-    override fun <C> inject(context: Context, carrier: C, setter: TextMapSetter<C>) {}
-    override fun <C> extract(context: Context, carrier: C, getter: TextMapGetter<C>): Context = context
+    override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {}
+    override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context = context
 }
