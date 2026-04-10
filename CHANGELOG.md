@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 0.3.0 (2026-04-10)
+
 ## Version 0.2.0 (2026-03-11)
 
 - Set explicit minCompileSdk at 34
