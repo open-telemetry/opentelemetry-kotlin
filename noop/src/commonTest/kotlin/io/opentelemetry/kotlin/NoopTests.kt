@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin
 import io.opentelemetry.kotlin.context.NoopContext
 import io.opentelemetry.kotlin.context.NoopContextKey
 import io.opentelemetry.kotlin.logging.SeverityNumber
+import io.opentelemetry.kotlin.propagation.NoopPropagatorFactory
 import io.opentelemetry.kotlin.propagation.NoopTextMapPropagator
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapSetter
@@ -238,6 +239,12 @@ internal class NoopTests {
             override fun get(carrier: MutableMap<String, String>, key: String) = carrier[key]
         }
         assertSame(ctx, NoopTextMapPropagator.extract(ctx, carrier, getter))
+    }
+
+    @Test
+    fun testNoopPropagatorFactory() {
+        assertSame(NoopTextMapPropagator, NoopPropagatorFactory.composite(NoopTextMapPropagator))
+        assertSame(NoopTextMapPropagator, NoopPropagatorFactory.composite(listOf(NoopTextMapPropagator)))
     }
 
     private fun verifySpanOperationsAreNoop(span: NoopSpan) {
