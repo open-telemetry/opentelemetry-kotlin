@@ -29,10 +29,11 @@ internal class ProbabilitySampler(private val spanFactory: SpanFactory, ratio: D
         attributes: AttributeContainer,
         links: List<SpanLink>
     ): SamplingResult {
-        val decision = if (randomnessFromTraceId(traceId) >= rejectionThreshold)
+        val decision = if (randomnessFromTraceId(traceId) >= rejectionThreshold) {
             Decision.RECORD_AND_SAMPLE
-        else
+        } else {
             Decision.DROP
+        }
         return SamplingResultImpl(
             decision = decision,
 //            TODO: should this get fresh attributes?
