@@ -25,6 +25,23 @@ public abstract interface class io/opentelemetry/kotlin/attributes/AttributesMut
 	public abstract fun setStringListAttribute (Ljava/lang/String;Ljava/util/List;)V
 }
 
+public abstract interface class io/opentelemetry/kotlin/baggage/Baggage {
+	public abstract fun asMap ()Ljava/util/Map;
+	public abstract fun getValue (Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun remove (Ljava/lang/String;)Lio/opentelemetry/kotlin/baggage/Baggage;
+	public abstract fun set (Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/baggage/Baggage;
+	public abstract fun set (Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/baggage/BaggageEntryMetadata;)Lio/opentelemetry/kotlin/baggage/Baggage;
+}
+
+public abstract interface class io/opentelemetry/kotlin/baggage/BaggageEntry {
+	public abstract fun getMetadata ()Lio/opentelemetry/kotlin/baggage/BaggageEntryMetadata;
+	public abstract fun getValue ()Ljava/lang/String;
+}
+
+public abstract interface class io/opentelemetry/kotlin/baggage/BaggageEntryMetadata {
+	public abstract fun getValue ()Ljava/lang/String;
+}
+
 public abstract interface class io/opentelemetry/kotlin/context/Context {
 	public abstract fun attach ()Lio/opentelemetry/kotlin/context/Scope;
 	public abstract fun get (Lio/opentelemetry/kotlin/context/ContextKey;)Ljava/lang/Object;
@@ -115,6 +132,11 @@ public final class io/opentelemetry/kotlin/logging/SeverityNumber : java/lang/En
 	public final fun getSeverityNumber ()I
 	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/logging/SeverityNumber;
 	public static fun values ()[Lio/opentelemetry/kotlin/logging/SeverityNumber;
+}
+
+public abstract interface class io/opentelemetry/kotlin/propagation/PropagatorFactory {
+	public abstract fun composite (Ljava/util/List;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
+	public abstract fun composite ([Lio/opentelemetry/kotlin/propagation/TextMapPropagator;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 }
 
 public abstract interface class io/opentelemetry/kotlin/propagation/TextMapGetter {
