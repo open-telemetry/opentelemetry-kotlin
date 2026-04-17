@@ -1,9 +1,11 @@
 package io.opentelemetry.kotlin.config.envar.processor
 
+import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.config.envar.model.EnvVarName
 import io.opentelemetry.kotlin.config.envar.model.EnvironmentVariable
 
 
+@ExperimentalApi
 internal abstract class EnvVarConfigProcessor<R, T> {
     /**
      * list of env vars
