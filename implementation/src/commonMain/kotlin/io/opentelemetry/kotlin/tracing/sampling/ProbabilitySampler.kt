@@ -1,8 +1,10 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.attributes.AttributeContainer
+import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.factory.SpanFactory
+
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
@@ -30,16 +32,21 @@ internal class ProbabilitySampler(private val spanFactory: SpanFactory, ratio: D
         attributes: AttributeContainer,
         links: List<SpanLink>
     ): SamplingResult {
-        val decision = if (randomnessFromTraceId(traceId) >= rejectionThreshold) {
+        val parentSpanContext = spanFactory.fromContext(context).spanContext
+        val traceState = parentSpanContext.traceState
+        val otelTraceState = OtelTraceState.parse(traceState.get("ot"))
+
+        val randomness = otelTraceState.rv ?: randomnessFromTraceId(traceId)
+        val decision = if (randomness >= rejectionThreshold) {
             Decision.RECORD_AND_SAMPLE
         } else {
             Decision.DROP
         }
+
         return SamplingResultImpl(
             decision = decision,
-//            TODO: should this get fresh attributes?
-            attributes = attributes,
-            traceState = spanFactory.fromContext(context).spanContext.traceState,
+            attributes = AttributesModel(),
+            traceState = traceState,
         )
     }
 
