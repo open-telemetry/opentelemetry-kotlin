@@ -9,15 +9,16 @@ import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
 
 internal class ProbabilitySampler(private val spanFactory: SpanFactory, ratio: Double) : Sampler {
 
-    init {
-        require(ratio in 0.0..1.0) { "ratio must be between 0.0 and 1.0, got $ratio" }
-    }
-
     private companion object {
-        private const val MAX_THRESHOLD = 1L shl 56
+        private const val MAX_THRESHOLD: Long = 1L shl 56
+        private const val MIN_RATIO: Double = 1.0 / MAX_THRESHOLD
     }
 
-    private val rejectionThreshold: Long = ((1 - ratio.coerceAtLeast(1.0 / MAX_THRESHOLD)) * MAX_THRESHOLD).toLong()
+    init {
+        require(ratio in MIN_RATIO..1.0) { "ratio must be between 2^-56 and 1, got $ratio" }
+    }
+
+    private val rejectionThreshold: Long = MAX_THRESHOLD - (ratio * MAX_THRESHOLD).toLong()
 
     override val description: String = "ProbabilitySampler{$ratio}"
 

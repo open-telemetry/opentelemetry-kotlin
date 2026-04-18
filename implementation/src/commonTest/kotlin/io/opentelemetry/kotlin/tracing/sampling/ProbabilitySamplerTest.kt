@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.tracing.SpanKind
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 @OptIn(ExperimentalApi::class)
 internal class ProbabilitySamplerTest {
@@ -47,5 +48,39 @@ internal class ProbabilitySamplerTest {
         )
         assertEquals(SamplingResult.Decision.DROP, result.decision)
     }
-}
 
+    @Test
+    fun testRecordsAndSamplesSpanAtMinimumRatio() {
+        val ratio = 1.0 / (1L shl 56).toDouble()
+        val result = ProbabilitySampler(spanFactory, ratio).shouldSample(
+            context = contextFactory.root(),
+            traceId = "000000000000000000ffffffffffffff",
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+        assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, result.decision)
+    }
+
+    @Test
+    fun testDropsSpanAtMinimumRatio() {
+        val ratio = 1.0 / (1L shl 56).toDouble()
+        val result = ProbabilitySampler(spanFactory, ratio).shouldSample(
+            context = contextFactory.root(),
+            traceId = "000000000000000000fffffffffffffe",
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+        assertEquals(SamplingResult.Decision.DROP, result.decision)
+    }
+
+    @Test
+    fun testThrowsOnInvalidRatio() {
+        assertFailsWith(IllegalArgumentException::class) {
+            ProbabilitySampler(spanFactory, 0.0)
+        }
+    }
+}
