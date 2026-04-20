@@ -92,8 +92,8 @@ internal class ProbabilitySamplerTest {
         val randomnessBelowThreshold = "70000000000000"
         val randomnessAboveThreshold = "90000000000000"
 
-        val traceId = "aaaaaaaaaaaaaaaaaa${randomnessBelowThreshold}"
-        val traceState = traceStateFactory.default.put("ot", "rv:${randomnessAboveThreshold}")
+        val traceId = "aaaaaaaaaaaaaaaaaa$randomnessBelowThreshold"
+        val traceState = traceStateFactory.default.put("ot", "rv:$randomnessAboveThreshold")
         val parentSpanContext = spanContextFactory.create(
             traceIdBytes = traceId.hexToByteArray(),
             spanIdBytes = idGenerator.generateSpanIdBytes(),
@@ -123,7 +123,7 @@ internal class ProbabilitySamplerTest {
         val ratio = 0.5 // threshold = "80000000000000"
         val randomnessAboveThreshold = "90000000000000"
 
-        val traceId = "aaaaaaaaaaaaaaaaaa${randomnessAboveThreshold}"
+        val traceId = "aaaaaaaaaaaaaaaaaa$randomnessAboveThreshold"
         val traceState = traceStateFactory.default.put("ot", "rv:garbage")
         val parentSpanContext = spanContextFactory.create(
             traceIdBytes = traceId.hexToByteArray(),
