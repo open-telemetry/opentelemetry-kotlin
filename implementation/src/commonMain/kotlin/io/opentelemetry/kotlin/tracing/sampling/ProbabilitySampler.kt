@@ -15,7 +15,7 @@ internal class ProbabilitySampler(private val spanFactory: SpanFactory, ratio: D
 
     private companion object {
         private const val MAX_THRESHOLD: Long = 1L shl 56
-        private const val MIN_RATIO: Double = 1.0 / MAX_THRESHOLD
+        private val MIN_RATIO: Double = 1.0 / MAX_THRESHOLD
 
         @Volatile
         private var compatibilityWarningLogged = false
