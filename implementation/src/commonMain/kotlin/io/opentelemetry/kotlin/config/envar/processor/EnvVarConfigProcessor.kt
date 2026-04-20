@@ -21,10 +21,13 @@ internal abstract class EnvVarConfigProcessor<R, T> {
     /**
      * processes total list of env vars to be specific
      */
-    protected abstract fun process(entries: Map<EnvVarName, EnvironmentVariable<T>>): R
+    protected abstract fun process(
+        entries: Map<EnvVarName, EnvironmentVariable<T>>,
+        defaultValue: R? = null
+    ): R
 
-    fun resolve(getRawValue: (String) -> String?): R =
+    fun resolve(defaultValue: R? = null, getRawValue: (String) -> String?): R =
         envVars
             .associateWith { EnvironmentVariable(it, parse(getRawValue(it.value))) }
-            .let(::process)
+            .let { process(it, defaultValue)}
 }

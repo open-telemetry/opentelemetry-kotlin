@@ -16,8 +16,11 @@ internal class LogLimitEnvVarConfigProcessorImpl(
     LogLimitEnvVarConfigProcessor() {
     override fun parse(value: String?): Int? = value?.toInt()
 
-    override fun process(entries: Map<EnvVarName, EnvironmentVariable<Int>>): LogLimitConfig {
-        return LogLimitConfig(
+    override fun process(
+        entries: Map<EnvVarName, EnvironmentVariable<Int>>,
+        defaultValue: LogLimitConfig?
+    ): LogLimitConfig {
+        return defaultValue ?: LogLimitConfig(
             attributeCountLimit = entries[envVarName("OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT")]?.value
                 ?: DEFAULT_ATTRIBUTE_LIMIT,
             attributeValueLengthLimit = entries[envVarName("OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT")]?.value
