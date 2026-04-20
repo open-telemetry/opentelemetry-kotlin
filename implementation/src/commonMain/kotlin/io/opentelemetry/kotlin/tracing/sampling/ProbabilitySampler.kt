@@ -16,8 +16,12 @@ internal class ProbabilitySampler(private val spanFactory: SpanFactory, ratio: D
     private companion object {
         private const val MAX_THRESHOLD: Long = 1L shl 56
         private const val MIN_RATIO: Double = 1.0 / MAX_THRESHOLD
+
         @Volatile
         private var compatibilityWarningLogged = false
+        const val COMPATIBILITY_WARNING = "WARNING: The ProbabilitySampler sampler is presuming TraceIDs are random " +
+            "and expects the Trace random flag to be set in confirmation. Please " +
+            "upgrade your caller(s) to use W3C Trace Context Level 2."
     }
 
     init {
@@ -47,7 +51,7 @@ internal class ProbabilitySampler(private val spanFactory: SpanFactory, ratio: D
         } else {
             if (parentSpanContext.isValid && !parentSpanContext.traceFlags.isRandom && !compatibilityWarningLogged) {
                 compatibilityWarningLogged = true
-                platformLog("WARNING: The ProbabilitySampler sampler is presuming TraceIDs are random and expects the Trace random flag to be set in confirmation.")
+                platformLog(COMPATIBILITY_WARNING)
             }
             randomness = randomnessFromTraceId(traceId)
         }
