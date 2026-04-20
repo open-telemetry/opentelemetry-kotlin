@@ -15,7 +15,6 @@ internal class ProbabilitySampler(private val spanFactory: SpanFactory, ratio: D
 
     private companion object {
         private const val MAX_THRESHOLD: Long = 1L shl 56
-        private val MIN_RATIO: Double = 1.0 / MAX_THRESHOLD
 
         @Volatile
         private var compatibilityWarningLogged = false
@@ -25,7 +24,7 @@ internal class ProbabilitySampler(private val spanFactory: SpanFactory, ratio: D
     }
 
     init {
-        require(ratio in MIN_RATIO..1.0) { "ratio must be between 2^-56 and 1, got $ratio" }
+        require(ratio in (1.0 / MAX_THRESHOLD)..1.0) { "ratio must be between 2^-56 and 1, got $ratio" }
     }
 
     private val rejectionThreshold: Long = MAX_THRESHOLD - (ratio * MAX_THRESHOLD).toLong()
