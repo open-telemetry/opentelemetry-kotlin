@@ -10,7 +10,10 @@ import io.opentelemetry.kotlin.init.config.LogLimitConfig
 /**
  * Configures LogRecord Limits based on env vars
  */
-internal class LogLimitEnvVarConfigProcessorImpl : LogLimitEnvVarConfigProcessor() {
+internal class LogLimitEnvVarConfigProcessorImpl(
+    override val envVars: List<EnvVarName>
+) :
+    LogLimitEnvVarConfigProcessor() {
     override fun parse(value: String?): Int? = value?.toInt()
 
     override fun process(entries: Map<EnvVarName, EnvironmentVariable<Int>>): LogLimitConfig {
