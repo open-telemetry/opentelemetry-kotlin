@@ -99,6 +99,9 @@ internal class ProbabilitySamplerTest {
         assertFailsWith(IllegalArgumentException::class) {
             ProbabilitySampler(spanFactory, 0.0)
         }
+        assertFailsWith(IllegalArgumentException::class) {
+            ProbabilitySampler(spanFactory, 2.0)
+        }
     }
 
     @Test
