@@ -10,7 +10,6 @@ import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.tracing.SpanKind
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -86,6 +85,7 @@ internal class ProbabilitySamplerTest {
         }
     }
 
+    // TODO: Refactor to get rid of some of the boilerplate
     @Test
     fun recordsAndSamplesSpanWithExplicitRandomness() {
         val ratio = 0.5 // threshold = "80000000000000"
@@ -118,14 +118,63 @@ internal class ProbabilitySamplerTest {
         assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, result.decision)
     }
 
-    @Ignore("TODO")
     @Test
-    fun fallsBackToTraceIdRandomnessWhenExplicitRandomnessIsMalformed() {
+    fun fallsBackToTraceIdRandomness() {
+        val ratio = 0.5 // threshold = "80000000000000"
+        val randomnessAboveThreshold = "90000000000000"
+
+        val traceId = "aaaaaaaaaaaaaaaaaa${randomnessAboveThreshold}"
+        val traceState = traceStateFactory.default.put("ot", "rv:garbage")
+        val parentSpanContext = spanContextFactory.create(
+            traceIdBytes = traceId.hexToByteArray(),
+            spanIdBytes = idGenerator.generateSpanIdBytes(),
+            traceFlags = traceFlagsFactory.default,
+            traceState = traceState,
+            isRemote = true
+        )
+        val parentContext = contextFactory.storeSpan(
+            contextFactory.root(),
+            spanFactory.fromSpanContext(parentSpanContext),
+        )
+
+        val result = ProbabilitySampler(spanFactory, ratio).shouldSample(
+            context = parentContext,
+            traceId = traceId,
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+
+        assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, result.decision)
     }
 
-    @Ignore("TODO")
     @Test
-    fun updatesExistingThresholdInOutgoingTraceState() {
-    }
+    fun updatesExistingThreshold() {
+        val ratio = 0.5 // threshold = "80000000000000"
+        val traceId = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        val traceState = traceStateFactory.default.put("ot", "th:123")
+        val parentSpanContext = spanContextFactory.create(
+            traceIdBytes = traceId.hexToByteArray(),
+            spanIdBytes = idGenerator.generateSpanIdBytes(),
+            traceFlags = traceFlagsFactory.default,
+            traceState = traceState,
+            isRemote = true
+        )
+        val parentContext = contextFactory.storeSpan(
+            contextFactory.root(),
+            spanFactory.fromSpanContext(parentSpanContext),
+        )
 
+        val result = ProbabilitySampler(spanFactory, ratio).shouldSample(
+            context = parentContext,
+            traceId = traceId,
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+
+        assertEquals("th:8", result.traceState.get("ot"))
+    }
 }

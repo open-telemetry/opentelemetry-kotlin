@@ -4,10 +4,10 @@ import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.factory.SpanFactory
-
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
+import kotlin.math.max
 
 internal class ProbabilitySampler(private val spanFactory: SpanFactory, ratio: Double) : Sampler {
 
@@ -35,6 +35,7 @@ internal class ProbabilitySampler(private val spanFactory: SpanFactory, ratio: D
         val parentSpanContext = spanFactory.fromContext(context).spanContext
         val traceState = parentSpanContext.traceState
         val otelTraceState = OtelTraceState.parse(traceState.get("ot"))
+        otelTraceState.setThreshold(max(otelTraceState.th ?: 0L, rejectionThreshold))
 
         val randomness = otelTraceState.rv ?: randomnessFromTraceId(traceId)
         val decision = if (randomness >= rejectionThreshold) {
@@ -46,7 +47,7 @@ internal class ProbabilitySampler(private val spanFactory: SpanFactory, ratio: D
         return SamplingResultImpl(
             decision = decision,
             attributes = AttributesModel(),
-            traceState = traceState,
+            traceState = traceState.put("ot", otelTraceState.encode()),
         )
     }
 
