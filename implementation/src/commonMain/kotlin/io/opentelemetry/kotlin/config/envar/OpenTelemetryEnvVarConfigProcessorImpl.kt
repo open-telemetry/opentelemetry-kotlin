@@ -16,8 +16,12 @@ internal fun createOpenTelemetryEnvVarConfigProcessor(
     config: OpenTelemetryConfigDsl.() -> Unit
 ): OpenTelemetryEnvVarConfigProcessor {
     val cfg = OpenTelemetryConfigImpl(clock).apply(config)
+    val logLimitProcessor = LogLimitEnvVarConfigProcessorImpl(
+        envVars = logLimitEnvars()
+    )
     return OpenTelemetryEnvVarConfigProcessorImpl(
-        loggingConfig = cfg.generateLoggingConfig()
+        loggingConfig = cfg.generateLoggingConfig(),
+        logLimitProcessor = logLimitProcessor
     )
 }
 
@@ -26,12 +30,7 @@ internal fun createOpenTelemetryEnvVarConfigProcessor(
  */
 internal class OpenTelemetryEnvVarConfigProcessorImpl(
     private val loggingConfig: LoggingConfig,
-    private val logLimitProcessor: LogLimitEnvVarConfigProcessor = LogLimitEnvVarConfigProcessorImpl(
-        envVars = listOf(
-            envVarName("OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT"),
-            envVarName("OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT")
-        )
-    )
+    private val logLimitProcessor: LogLimitEnvVarConfigProcessor
 ) : OpenTelemetryEnvVarConfigProcessor {
     override fun process(): EnvironmentConfiguration {
         return EnvironmentConfiguration(
@@ -45,6 +44,11 @@ internal class OpenTelemetryEnvVarConfigProcessorImpl(
         )
     }
 }
+
+internal fun logLimitEnvars() = listOf(
+    envVarName("OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT"),
+    envVarName("OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT")
+)
 
 internal expect fun getEnvVarValue(envVar: String): String?
 
