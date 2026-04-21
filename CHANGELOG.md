@@ -1,6 +1,6 @@
 # opentelemetry-kotlin changelog
 
-## Unreleased
+## Version 0.3.0 (2026-04-21)
 
 - Alter Tracing API so that `Span` does not include readable values
   ([#267](https://github.com/open-telemetry/opentelemetry-kotlin/pull/267))
