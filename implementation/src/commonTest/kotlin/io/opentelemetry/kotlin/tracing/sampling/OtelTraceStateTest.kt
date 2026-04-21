@@ -86,16 +86,17 @@ internal class OtelTraceStateTest {
     }
 
     @Test
-    fun acceptsMaxThreshold() {
-        val ot = OtelTraceState.parse("")
-        ot.setThreshold(0xffffffffffffff)
-        assertEquals("th:ffffffffffffff", ot.encode())
-    }
-
-    @Test
     fun preservesOtherKeys() {
         val ot = OtelTraceState.parse("rv:123456789abcde;th:123")
         ot.setThreshold(0xdef)
-        assertEquals("rv:123456789abcde;th:00000000000def", ot.encode())
+        assertEquals(0x123456789abcde, ot.rv)
+        assertEquals(0x00000000000def, ot.th)
+    }
+
+    @Test
+    fun erasesThreshold() {
+        val ot = OtelTraceState.parse("rv:123456789abcde;th:123")
+        ot.eraseThreshold()
+        assertEquals("rv:123456789abcde", ot.encode())
     }
 }

@@ -20,6 +20,10 @@ internal class OtelTraceState private constructor(
         }
     }
 
+    fun eraseThreshold() {
+        pairs.remove("th")
+    }
+
     fun encode(): String = pairs.entries.joinToString(";") { (key, value) -> "$key:$value" }
 
     companion object {
