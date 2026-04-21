@@ -134,6 +134,9 @@ public final class io/opentelemetry/kotlin/logging/SeverityNumber : java/lang/En
 	public static fun values ()[Lio/opentelemetry/kotlin/logging/SeverityNumber;
 }
 
+public abstract interface class io/opentelemetry/kotlin/metrics/Meter {
+}
+
 public abstract interface class io/opentelemetry/kotlin/propagation/PropagatorFactory {
 	public abstract fun composite (Ljava/util/List;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public abstract fun composite ([Lio/opentelemetry/kotlin/propagation/TextMapPropagator;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
