@@ -42,7 +42,6 @@ internal class ProbabilitySampler(private val spanFactory: SpanFactory, ratio: D
         val parentSpanContext = spanFactory.fromContext(context).spanContext
         val traceState = parentSpanContext.traceState
         val otelTraceState = OtelTraceState.parse(traceState.get("ot"))
-        otelTraceState.setThreshold(max(otelTraceState.th ?: 0L, rejectionThreshold))
 
         val explicitRandomness = otelTraceState.rv
         val randomness = if (explicitRandomness != null) {
@@ -54,6 +53,17 @@ internal class ProbabilitySampler(private val spanFactory: SpanFactory, ratio: D
             }
             randomnessFromTraceId(traceId)
         }
+
+        val incomingTh = otelTraceState.th
+        if (
+            incomingTh != null &&
+            parentSpanContext.isValid &&
+            (randomness >= incomingTh) != parentSpanContext.traceFlags.isSampled
+        ) {
+            otelTraceState.eraseThreshold()
+        }
+
+        otelTraceState.setThreshold(max(otelTraceState.th ?: 0L, rejectionThreshold))
 
         val decision = if (randomness >= rejectionThreshold) {
             Decision.RECORD_AND_SAMPLE
