@@ -43,3 +43,16 @@ jobs:
           slug: open-telemetry/opentelemetry-kotlin
           fail_ci_if_error: false
           files: build/reports/kover/reportRelease.xml
+
+  required-status-check:
+    permissions:
+      contents: read
+      issues: write
+    needs:
+      - gradle-test
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - if: |
+          needs.gradle-test.result != 'success'
+        run: exit 1
