@@ -1,7 +1,5 @@
 package io.opentelemetry.kotlin.config.envar.logging
 
-import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
-import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.config.envar.model.EnvVarName
 import io.opentelemetry.kotlin.config.envar.model.EnvVarName.Companion.envVarName
 import io.opentelemetry.kotlin.config.envar.model.EnvironmentVariable
@@ -17,13 +15,13 @@ internal class LogLimitEnvVarConfigProcessorImpl(
 
     override fun process(
         entries: Map<EnvVarName, EnvironmentVariable<Int>>,
-        defaultValue: LogLimitConfig?
+        defaultValue: LogLimitConfig
     ): LogLimitConfig {
-        return defaultValue ?: LogLimitConfig(
+        return LogLimitConfig(
             attributeCountLimit = entries[envVarName("OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT")]?.value
-                ?: DEFAULT_ATTRIBUTE_LIMIT,
+                ?: defaultValue.attributeCountLimit,
             attributeValueLengthLimit = entries[envVarName("OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT")]?.value
-                ?: DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
+                ?: defaultValue.attributeValueLengthLimit
         )
     }
 }

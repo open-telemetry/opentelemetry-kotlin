@@ -15,11 +15,7 @@ internal class OpenTelemetryEnvVarConfigProcessorImpl(
         return EnvironmentConfiguration(
             logLimitConfig = logLimitProcessor.resolve(
                 defaultValue = loggingConfig.logLimits
-            ) {
-                getEnvVarValue(
-                    it
-                )
-            }
+            ) { envVar -> getEnvVarValue(envVar) }
         )
     }
 }
