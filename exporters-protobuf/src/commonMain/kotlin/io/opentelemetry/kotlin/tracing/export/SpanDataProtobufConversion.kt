@@ -24,6 +24,7 @@ fun SpanData.toProtobuf() = Span(
     trace_state = spanContext.traceState.toW3CString(),
     flags = spanContext.traceFlags.toFlagsInt(),
     parent_span_id = parent.spanIdBytes.toByteString(),
+    kind = spanKind.toProtoSpanKind(),
     start_time_unix_nano = startTimestamp,
     end_time_unix_nano = endTimestamp ?: 0,
     attributes = attributes.createKeyValues(),
@@ -52,7 +53,7 @@ internal fun Span.toSpanData(
         flags = flags,
         traceStateString = trace_state,
     ),
-    spanKind = SpanKind.INTERNAL,
+    spanKind = kind.toSpanKind(),
     startTimestamp = start_time_unix_nano,
     endTimestamp = end_time_unix_nano,
     resource = resource,
@@ -78,6 +79,22 @@ private fun SpanLinkData.toLinkData() = Span.Link(
     span_id = spanContext.spanIdBytes.toByteString(),
     attributes = attributes.createKeyValues()
 )
+
+private fun SpanKind.toProtoSpanKind(): Span.SpanKind = when (this) {
+    SpanKind.SERVER -> Span.SpanKind.SPAN_KIND_SERVER
+    SpanKind.CLIENT -> Span.SpanKind.SPAN_KIND_CLIENT
+    SpanKind.PRODUCER -> Span.SpanKind.SPAN_KIND_PRODUCER
+    SpanKind.CONSUMER -> Span.SpanKind.SPAN_KIND_CONSUMER
+    SpanKind.INTERNAL -> Span.SpanKind.SPAN_KIND_INTERNAL
+}
+
+private fun Span.SpanKind.toSpanKind(): SpanKind = when (this) {
+    Span.SpanKind.SPAN_KIND_SERVER -> SpanKind.SERVER
+    Span.SpanKind.SPAN_KIND_CLIENT -> SpanKind.CLIENT
+    Span.SpanKind.SPAN_KIND_PRODUCER -> SpanKind.PRODUCER
+    Span.SpanKind.SPAN_KIND_CONSUMER -> SpanKind.CONSUMER
+    else -> SpanKind.INTERNAL
+}
 
 private fun Status.toStatusData(): StatusData = when (code) {
     Status.StatusCode.STATUS_CODE_OK -> StatusData.Ok

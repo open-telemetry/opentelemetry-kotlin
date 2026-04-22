@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.export.assertAttributesMatch
 import io.opentelemetry.kotlin.factory.toHexString
+import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
@@ -39,6 +40,21 @@ class SpanDataProtobufConversionTest {
         assertAttributesMatch(obj.attributes, protobuf.attributes)
         assertEventsMatch(obj.events, protobuf.events)
         assertLinksMatch(obj.links, protobuf.links)
+    }
+
+    @Test
+    fun testSpanKindMapping() {
+        val kindMappings = mapOf(
+            SpanKind.INTERNAL to Span.SpanKind.SPAN_KIND_INTERNAL,
+            SpanKind.SERVER to Span.SpanKind.SPAN_KIND_SERVER,
+            SpanKind.CLIENT to Span.SpanKind.SPAN_KIND_CLIENT,
+            SpanKind.PRODUCER to Span.SpanKind.SPAN_KIND_PRODUCER,
+            SpanKind.CONSUMER to Span.SpanKind.SPAN_KIND_CONSUMER,
+        )
+        kindMappings.forEach { (spanKind, protoKind) ->
+            val protobuf = FakeSpanData(spanKind = spanKind).toProtobuf()
+            assertEquals(protoKind, protobuf.kind)
+        }
     }
 
     private fun assertEventsMatch(
