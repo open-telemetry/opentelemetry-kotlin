@@ -53,6 +53,46 @@ internal class LogLimitEnvVarConfigProcessorImplTest {
         assertEquals(128, config.attributeCountLimit)
     }
 
+    @Test
+    fun `should successfully resolve config with defaults when raw values are null`() {
+        //given
+        val processor = LogLimitEnvVarConfigProcessorImpl(
+            envVars = logLimitEnvars()
+        )
+        val clock = FakeClock()
+        val otelConfig = OpenTelemetryConfigImpl(clock)
+        otelConfig.loggerProvider {
+            export { FakeLogRecordProcessor() }
+        }
+        val defaultValue = otelConfig.generateLoggingConfig().logLimits
+
+        //when
+        val config = processor.resolve(defaultValue = defaultValue) { null }
+
+        //then
+        assertEquals(Int.MAX_VALUE, config.attributeValueLengthLimit)
+        assertEquals(128, config.attributeCountLimit)
+    }
+
+    @Test
+    fun `should successfully resolve config with defaults when env vars are missing`() {
+        //given
+        val processor = LogLimitEnvVarConfigProcessorImpl(envVars = emptyList())
+        val clock = FakeClock()
+        val otelConfig = OpenTelemetryConfigImpl(clock)
+        otelConfig.loggerProvider {
+            export { FakeLogRecordProcessor() }
+        }
+        val defaultValue = otelConfig.generateLoggingConfig().logLimits
+
+        //when
+        val config = processor.resolve(defaultValue = defaultValue)
+
+        //then
+        assertEquals(Int.MAX_VALUE, config.attributeValueLengthLimit)
+        assertEquals(128, config.attributeCountLimit)
+    }
+
     private fun getFakeEnvVarValue(envVar: String): String {
         return when (envVar) {
             "OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT" -> "1"

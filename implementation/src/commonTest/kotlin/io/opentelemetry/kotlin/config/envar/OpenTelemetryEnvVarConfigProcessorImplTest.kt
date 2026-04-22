@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.config.envar
 
 import io.opentelemetry.kotlin.clock.FakeClock
-import io.opentelemetry.kotlin.config.envar.logging.LogLimitEnvVarConfigProcessorImpl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import kotlin.test.Test
@@ -17,9 +16,7 @@ internal class OpenTelemetryEnvVarConfigProcessorImplTest {
         cfg.loggerProvider {
             export { FakeLogRecordProcessor() }
         }
-        val logLimitProcessor = LogLimitEnvVarConfigProcessorImpl(
-            envVars = logLimitEnvars()
-        )
+        val logLimitProcessor = FakeLogLimitEnvVarConfigProcessor()
         val configProcessor = OpenTelemetryEnvVarConfigProcessorImpl(
             loggingConfig = cfg.generateLoggingConfig(),
             logLimitProcessor = logLimitProcessor
