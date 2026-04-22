@@ -30,4 +30,21 @@ internal class ResourceFactoryTest {
         val resource = factory.create {}
         assertNull(resource.schemaUrl)
     }
+
+    @Test
+    fun `create with attributes`() {
+        val resource = factory.create {
+            setStringAttribute("key", "value")
+        }
+        assertEquals("value", resource.attributes["key"])
+    }
+
+    @Test
+    fun `create with schema url and attributes`() {
+        val resource = factory.create(schemaUrl = "https://example.com/schema") {
+            setStringAttribute("service.name", "my-service")
+        }
+        assertEquals("my-service", resource.attributes["service.name"])
+        assertEquals("https://example.com/schema", resource.schemaUrl)
+    }
 }
