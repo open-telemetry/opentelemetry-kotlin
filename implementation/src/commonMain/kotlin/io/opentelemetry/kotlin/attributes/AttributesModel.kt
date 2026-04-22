@@ -73,7 +73,8 @@ internal class AttributesModel(
     override val attributes: Map<String, Any>
         get() = attrs.toMap()
 
-    private fun canAddAttribute(key: String): Boolean = attrs.size < attributeLimit || attrs.contains(key)
+    private fun canAddAttribute(key: String): Boolean =
+        key.isNotEmpty() && (attrs.size < attributeLimit || attrs.contains(key))
 }
 
 internal const val DEFAULT_ATTRIBUTE_LIMIT: Int = 128
