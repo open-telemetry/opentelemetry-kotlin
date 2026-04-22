@@ -58,4 +58,13 @@ private class ThreadSafeMapImpl<K, V>(
     override fun clear() = lock.write {
         impl.clear()
     }
+
+    override fun equals(other: Any?): Boolean = lock.read {
+        if (other !is Map<*, *>) {
+            return false
+        }
+        impl == other
+    }
+
+    override fun hashCode(): Int = lock.read { impl.hashCode() }
 }

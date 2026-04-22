@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.attributes
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
 internal class AttributesMutatorImplTest {
 
@@ -86,6 +87,45 @@ internal class AttributesMutatorImplTest {
             setStringAttribute("key", "abcdef")
         }.attributes
         assertEquals("abc", attrs["key"])
+    }
+
+    @Test
+    fun testEqualityReflexive() {
+        val attrs = AttributesModel(attributeLimit).apply { addTestAttributes() }
+        assertEquals(attrs, attrs)
+    }
+
+    @Test
+    fun testEqualityWithSameContent() {
+        val a = AttributesModel(attributeLimit).apply { addTestAttributes() }
+        val b = AttributesModel(attributeLimit).apply { addTestAttributes() }
+        assertEquals(a, b)
+    }
+
+    @Test
+    fun testEqualityEmptyInstances() {
+        assertEquals(AttributesModel(), AttributesModel())
+    }
+
+    @Test
+    fun testInequalityWithDifferentContent() {
+        val a = AttributesModel(attributeLimit).apply { setStringAttribute("key", "a") }
+        val b = AttributesModel(attributeLimit).apply { setStringAttribute("key", "b") }
+        assertNotEquals(a, b)
+    }
+
+    @Test
+    fun testInequalityWithDifferentKeys() {
+        val a = AttributesModel(attributeLimit).apply { setStringAttribute("key1", "value") }
+        val b = AttributesModel(attributeLimit).apply { setStringAttribute("key2", "value") }
+        assertNotEquals(a, b)
+    }
+
+    @Test
+    fun testHashCodeConsistency() {
+        val a = AttributesModel(attributeLimit).apply { addTestAttributes() }
+        val b = AttributesModel(attributeLimit).apply { addTestAttributes() }
+        assertEquals(a.hashCode(), b.hashCode())
     }
 
     private fun AttributesMutator.addTestAttributes(keyToken: String = "") {
