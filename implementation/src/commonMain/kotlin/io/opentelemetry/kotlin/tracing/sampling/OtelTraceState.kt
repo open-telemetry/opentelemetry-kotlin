@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
-import io.opentelemetry.kotlin.factory.isValidHex
 import io.opentelemetry.kotlin.factory.isValidLowercaseHex
 
 internal class OtelTraceState private constructor(
