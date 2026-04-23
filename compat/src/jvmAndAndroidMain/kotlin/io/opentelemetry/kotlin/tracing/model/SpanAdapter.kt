@@ -161,6 +161,10 @@ internal class SpanAdapter(
         }
     }
 
+    override fun setByteArrayAttribute(key: String, value: ByteArray) {
+        // no java implementation available
+    }
+
     override fun storeInContext(context: OtelJavaContext): OtelJavaContext? {
         return impl.storeInContext(context)
     }

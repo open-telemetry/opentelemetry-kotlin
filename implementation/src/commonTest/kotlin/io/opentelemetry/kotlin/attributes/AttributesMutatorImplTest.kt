@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.attributes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 internal class AttributesMutatorImplTest {
 
@@ -90,6 +91,16 @@ internal class AttributesMutatorImplTest {
     }
 
     @Test
+    fun testByteArrayAttribute() {
+        val bytes = byteArrayOf(0x01, 0x02, 0x03)
+        val attrs = AttributesModel(attributeLimit).apply {
+            setByteArrayAttribute("bytes", bytes)
+        }.attributes
+        val stored = attrs["bytes"] as ByteArray
+        assertTrue(stored.contentEquals(bytes))
+    }
+
+    @Test
     fun testEmptyKeyIgnoredForAllTypes() {
         val attrs = AttributesModel(attributeLimit).apply {
             setBooleanAttribute("", true)
@@ -100,6 +111,7 @@ internal class AttributesMutatorImplTest {
             setStringListAttribute("", listOf("value"))
             setLongListAttribute("", listOf(1L))
             setDoubleListAttribute("", listOf(1.0))
+            setByteArrayAttribute("", byteArrayOf(0x01))
         }.attributes
         assertEquals(emptyMap(), attrs)
     }

@@ -57,4 +57,7 @@ class FakeReadWriteLogRecord(
         value: List<Double>
     ) {
     }
+
+    override fun setByteArrayAttribute(key: String, value: ByteArray) {
+    }
 }

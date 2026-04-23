@@ -96,4 +96,8 @@ class FakeSpan(
     override fun setDoubleListAttribute(key: String, value: List<Double>) {
         TODO("Not yet implemented")
     }
+
+    override fun setByteArrayAttribute(key: String, value: ByteArray) {
+        TODO("Not yet implemented")
+    }
 }

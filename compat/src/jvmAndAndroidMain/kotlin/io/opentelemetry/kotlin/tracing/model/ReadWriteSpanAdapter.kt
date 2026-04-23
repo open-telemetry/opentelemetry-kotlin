@@ -94,4 +94,8 @@ internal class ReadWriteSpanAdapter(
     override fun setDoubleListAttribute(key: String, value: List<Double>) {
         impl.setAttribute(OtelJavaAttributeKey.doubleArrayKey(key), value)
     }
+
+    override fun setByteArrayAttribute(key: String, value: ByteArray) {
+        // no java implementation available
+    }
 }

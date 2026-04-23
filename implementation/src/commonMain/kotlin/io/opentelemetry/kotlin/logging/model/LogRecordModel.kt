@@ -161,4 +161,10 @@ internal class LogRecordModel(
             attrs.setDoubleListAttribute(key, value)
         }
     }
+
+    override fun setByteArrayAttribute(key: String, value: ByteArray) {
+        lock.write {
+            attrs.setByteArrayAttribute(key, value)
+        }
+    }
 }

@@ -19,6 +19,7 @@ public fun AttributesMutator.setAttributes(attributes: Map<String, Any>) {
             is Boolean -> setBooleanAttribute(it.key, input)
             is Long -> setLongAttribute(it.key, input)
             is Double -> setDoubleAttribute(it.key, input)
+            is ByteArray -> setByteArrayAttribute(it.key, input)
             is Collection<*> -> handleCollection(it.key, input.toList())
             is Array<*> -> handleCollection(it.key, input.toList())
             else -> setStringAttribute(it.key, it.value.toString())

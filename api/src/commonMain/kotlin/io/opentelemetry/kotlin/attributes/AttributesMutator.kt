@@ -59,4 +59,10 @@ public interface AttributesMutator {
      */
     @ThreadSafe
     public fun setDoubleListAttribute(key: String, value: List<Double>)
+
+    /**
+     * Sets an attribute with a byte array value.
+     */
+    @ThreadSafe
+    public fun setByteArrayAttribute(key: String, value: ByteArray)
 }

@@ -70,6 +70,12 @@ internal class AttributesModel(
         }
     }
 
+    override fun setByteArrayAttribute(key: String, value: ByteArray) {
+        if (canAddAttribute(key)) {
+            attrs[key] = value
+        }
+    }
+
     override val attributes: Map<String, Any>
         get() = attrs.toMap()
 

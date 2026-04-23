@@ -73,5 +73,9 @@ internal class AttributeContainerExtTest {
         override fun setDoubleListAttribute(key: String, value: List<Double>) {
             attributes[key] = value
         }
+
+        override fun setByteArrayAttribute(key: String, value: ByteArray) {
+            attributes[key] = value
+        }
     }
 }

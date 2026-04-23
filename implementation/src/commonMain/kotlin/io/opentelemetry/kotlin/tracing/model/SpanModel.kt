@@ -273,4 +273,12 @@ internal class SpanModel(
             }
         }
     }
+
+    override fun setByteArrayAttribute(key: String, value: ByteArray) {
+        lock.write {
+            if (isRecording()) {
+                attrs.setByteArrayAttribute(key, value)
+            }
+        }
+    }
 }

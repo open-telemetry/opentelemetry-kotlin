@@ -79,6 +79,10 @@ internal class ReadWriteLogRecordAdapter(
         impl.setAttribute(OtelJavaAttributeKey.doubleArrayKey(key), value)
     }
 
+    override fun setByteArrayAttribute(key: String, value: ByteArray) {
+        // no java implementation available
+    }
+
     override val attributes: Map<String, Any>
         get() = impl.attributes.convertToMap()
 

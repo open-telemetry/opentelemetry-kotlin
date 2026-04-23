@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.export.conversion
 import io.opentelemetry.proto.common.v1.AnyValue
 import io.opentelemetry.proto.common.v1.ArrayValue
 import io.opentelemetry.proto.common.v1.KeyValue
+import okio.ByteString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -22,6 +23,8 @@ class AttributeProtobufConversionTest {
         assertEquals(createForValue(42L).value_?.int_value, 42L)
         assertEquals(createForValue(0.2).value_?.double_value, 0.2)
         assertEquals(createForValue(true).value_?.bool_value, true)
+        val bytes = byteArrayOf(0x01, 0x02, 0x03)
+        assertEquals(createForValue(bytes).value_?.bytes_value, ByteString.of(*bytes))
     }
 
     @Test
@@ -83,6 +86,23 @@ class AttributeProtobufConversionTest {
         assertEquals(2, list.size)
         assertEquals("a", list[0])
         assertEquals(1L, list[1])
+    }
+
+    @Test
+    fun testAttributeMapDeserialization_bytes() {
+        val bytes = byteArrayOf(0xDE.toByte(), 0xAD.toByte(), 0xBE.toByte(), 0xEF.toByte())
+        val keyValues = listOf(KeyValue("key", AnyValue(bytes_value = ByteString.of(*bytes))))
+        val map = keyValues.toAttributeMap()
+        assertTrue((map["key"] as ByteArray).contentEquals(bytes))
+    }
+
+    @Test
+    fun testRoundTripByteArray() {
+        val value = byteArrayOf(0x01, 0x02, 0x03)
+        val original = mapOf("bytes" to value)
+        val keyValues = original.createKeyValues()
+        val deserialized = keyValues.toAttributeMap()
+        assertTrue((deserialized["bytes"] as ByteArray).contentEquals(value))
     }
 
     @Test

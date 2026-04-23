@@ -47,6 +47,10 @@ class FakeAttributesMutator(
         map[key] = value
     }
 
+    override fun setByteArrayAttribute(key: String, value: ByteArray) {
+        map[key] = value
+    }
+
     val attributes: Map<String, Any>
         get() = map.toMap()
 }

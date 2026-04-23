@@ -62,4 +62,7 @@ class NonRecordingSpan(
 
     override fun setDoubleListAttribute(key: String, value: List<Double>) {
     }
+
+    override fun setByteArrayAttribute(key: String, value: ByteArray) {
+    }
 }

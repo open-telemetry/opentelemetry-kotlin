@@ -40,6 +40,10 @@ internal class CompatAttributesModel(
         attrs.put(OtelJavaAttributeKey.doubleArrayKey(key), value)
     }
 
+    override fun setByteArrayAttribute(key: String, value: ByteArray) {
+        // no java implementation available
+    }
+
     override val attributes: Map<String, Any>
         get() = attrs.build().convertToMap()
 

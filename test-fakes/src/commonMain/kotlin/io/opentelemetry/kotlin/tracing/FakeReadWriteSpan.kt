@@ -109,6 +109,10 @@ class FakeReadWriteSpan(
         throw UnsupportedOperationException()
     }
 
+    override fun setByteArrayAttribute(key: String, value: ByteArray) {
+        throw UnsupportedOperationException()
+    }
+
     override fun toSpanData(): SpanData {
         throw UnsupportedOperationException()
     }

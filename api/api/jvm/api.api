@@ -17,6 +17,7 @@ public abstract interface annotation class io/opentelemetry/kotlin/ThreadSafe : 
 public abstract interface class io/opentelemetry/kotlin/attributes/AttributesMutator {
 	public abstract fun setBooleanAttribute (Ljava/lang/String;Z)V
 	public abstract fun setBooleanListAttribute (Ljava/lang/String;Ljava/util/List;)V
+	public abstract fun setByteArrayAttribute (Ljava/lang/String;[B)V
 	public abstract fun setDoubleAttribute (Ljava/lang/String;D)V
 	public abstract fun setDoubleListAttribute (Ljava/lang/String;Ljava/util/List;)V
 	public abstract fun setLongAttribute (Ljava/lang/String;J)V
