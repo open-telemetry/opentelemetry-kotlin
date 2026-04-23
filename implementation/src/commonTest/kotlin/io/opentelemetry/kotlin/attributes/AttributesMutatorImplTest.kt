@@ -90,6 +90,21 @@ internal class AttributesMutatorImplTest {
     }
 
     @Test
+    fun testEmptyKeyIgnoredForAllTypes() {
+        val attrs = AttributesModel(attributeLimit).apply {
+            setBooleanAttribute("", true)
+            setStringAttribute("", "value")
+            setLongAttribute("", 1L)
+            setDoubleAttribute("", 1.0)
+            setBooleanListAttribute("", listOf(true))
+            setStringListAttribute("", listOf("value"))
+            setLongListAttribute("", listOf(1L))
+            setDoubleListAttribute("", listOf(1.0))
+        }.attributes
+        assertEquals(emptyMap(), attrs)
+    }
+
+    @Test
     fun testEqualityReflexive() {
         val attrs = AttributesModel(attributeLimit).apply { addTestAttributes() }
         assertEquals(attrs, attrs)
