@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.factory
 
+import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotSame
@@ -52,5 +53,14 @@ internal class ResourceFactoryImplTest {
         }
         assertEquals("my-service", resource.attributes["service.name"])
         assertEquals("https://example.com/schema", resource.schemaUrl)
+    }
+
+    @Test
+    fun testCreateNoAttributeLimit() {
+        val count = DEFAULT_ATTRIBUTE_LIMIT + 3
+        val resource = factory.create {
+            (0 until count).forEach { setStringAttribute("key$it", "value$it") }
+        }
+        assertEquals(count, resource.attributes.size)
     }
 }

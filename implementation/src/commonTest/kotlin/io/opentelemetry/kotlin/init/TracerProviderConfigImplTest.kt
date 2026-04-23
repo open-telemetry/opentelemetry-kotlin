@@ -145,14 +145,13 @@ internal class TracerProviderConfigImplTest {
     }
 
     @Test
-    fun testResourceLimit() {
-        val attrs = (0..DEFAULT_ATTRIBUTE_LIMIT + 2).associate {
-            "key$it" to "value$it"
-        }
+    fun testNoResourceLimit() {
+        val count = DEFAULT_ATTRIBUTE_LIMIT + 3
+        val attrs = (0 until count).associate { "key$it" to "value$it" }
         val cfg = TracerProviderConfigImpl(clock).apply {
             resource(attrs)
         }.generateTracingConfig(base)
-        assertEquals(DEFAULT_ATTRIBUTE_LIMIT, cfg.resource.attributes.size)
+        assertEquals(count + sdkDefaultAttributes.size, cfg.resource.attributes.size)
     }
 
     @Test
