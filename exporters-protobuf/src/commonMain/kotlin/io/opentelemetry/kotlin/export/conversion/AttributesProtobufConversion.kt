@@ -34,6 +34,8 @@ private fun convertAttributeValue(value: Any): AnyValue = when (value) {
     is String -> AnyValue(string_value = value)
     is Long -> AnyValue(int_value = value)
     is Double -> AnyValue(double_value = value)
+    is Float -> AnyValue(double_value = value.toDouble())
+    is Number -> AnyValue(int_value = value.toLong())
     is Boolean -> AnyValue(bool_value = value)
     is List<*> -> AnyValue(array_value = handleList(value as List<Any>))
     else -> throw UnsupportedOperationException()

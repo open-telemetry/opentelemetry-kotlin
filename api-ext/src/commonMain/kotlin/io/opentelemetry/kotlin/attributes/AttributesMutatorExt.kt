@@ -19,6 +19,8 @@ public fun AttributesMutator.setAttributes(attributes: Map<String, Any>) {
             is Boolean -> setBooleanAttribute(it.key, input)
             is Long -> setLongAttribute(it.key, input)
             is Double -> setDoubleAttribute(it.key, input)
+            is Float -> setDoubleAttribute(it.key, input.toDouble())
+            is Number -> setLongAttribute(it.key, input.toLong())
             is Collection<*> -> handleCollection(it.key, input.toList())
             is Array<*> -> handleCollection(it.key, input.toList())
             else -> setStringAttribute(it.key, it.value.toString())
@@ -31,8 +33,13 @@ private fun AttributesMutator.handleCollection(key: String, input: List<*>) {
     when {
         input.all { it is String } -> setStringListAttribute(key, input as List<String>)
         input.all { it is Boolean } -> setBooleanListAttribute(key, input as List<Boolean>)
-        input.all { it is Double } -> setDoubleListAttribute(key, input as List<Double>)
         input.all { it is Long } -> setLongListAttribute(key, input as List<Long>)
+        input.all { it is Double } -> setDoubleListAttribute(key, input as List<Double>)
+        input.all { it is Float } -> setDoubleListAttribute(key, input.filterIsInstance<Float>().map { it.toDouble() })
+        input.all { it is Number && it !is Double && it !is Float } -> setLongListAttribute(
+            key,
+            input.filterIsInstance<Number>().map { it.toLong() }
+        )
         else -> return
     }
 }
