@@ -8,7 +8,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 class AttributeProtobufConversionTest {
 
@@ -36,6 +35,39 @@ class AttributeProtobufConversionTest {
         assertNotNull(array)
         assertEquals(array[0].string_value, "val")
         assertEquals(array[1].int_value, 32L)
+    }
+
+    @Test
+    fun testIntValueDoesNotThrow() {
+        val value = 42
+        val keyValue = createForValue(value)
+        val anyValue = checkNotNull(keyValue.value_)
+        val numericValue = anyValue.int_value ?: anyValue.double_value?.toLong()
+        assertEquals(42L, numericValue)
+    }
+
+    @Test
+    fun testFloatValueDoesNotThrow() {
+        val keyValue = createForValue(1.5f)
+        val anyValue = keyValue.value_
+        checkNotNull(anyValue)
+        assertEquals(1.5, anyValue.double_value)
+    }
+
+    @Test
+    fun testShortValueDoesNotThrow() {
+        val keyValue = createForValue(1.toShort())
+        val anyValue = checkNotNull(keyValue.value_)
+        val numericValue = anyValue.int_value ?: anyValue.double_value?.toLong()
+        assertEquals(1L, numericValue)
+    }
+
+    @Test
+    fun testByteValueDoesNotThrow() {
+        val keyValue = createForValue(1.toByte())
+        val anyValue = checkNotNull(keyValue.value_)
+        val numericValue = anyValue.int_value ?: anyValue.double_value?.toLong()
+        assertEquals(1L, numericValue)
     }
 
     @Test

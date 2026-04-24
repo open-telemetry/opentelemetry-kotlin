@@ -35,6 +35,42 @@ internal class AttributeContainerExtTest {
         assertEquals(expected, observed)
     }
 
+    @Test
+    fun testIntAttributeStorage() {
+        val attrs = FakeAttributesMutator()
+        val i = 5
+        attrs.setAttributes(mapOf("int" to i))
+        val value = attrs.attributes["int"] as Number
+        assertEquals(i.toLong(), value.toLong())
+    }
+
+    @Test
+    fun testFloatAttributeStorage() {
+        val attrs = FakeAttributesMutator()
+        val f = 1.5f
+        attrs.setAttributes(mapOf("float" to f))
+        val value = attrs.attributes["float"] as Number
+        assertEquals(f.toDouble(), value.toDouble())
+    }
+
+    @Test
+    fun testByteAttributeStorage() {
+        val attrs = FakeAttributesMutator()
+        val b = 1.toByte()
+        attrs.setAttributes(mapOf("byte" to b))
+        val value = attrs.attributes["byte"] as Number
+        assertEquals(b.toLong(), value.toLong())
+    }
+
+    @Test
+    fun testShortAttributeStorage() {
+        val attrs = FakeAttributesMutator()
+        val s = 1.toShort()
+        attrs.setAttributes(mapOf("short" to s))
+        val value = attrs.attributes["short"] as Number
+        assertEquals(s.toLong(), value.toLong())
+    }
+
     private class ComplexObject {
         override fun toString(): String = "ComplexObject"
     }

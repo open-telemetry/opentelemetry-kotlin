@@ -7,19 +7,15 @@ public fun AttributesMutator.setAttributes(container: AttributeContainer) {
             is String -> setStringAttribute(key, value)
             is Long -> setLongAttribute(key, value)
             is Double -> setDoubleAttribute(key, value)
+            is Float -> setDoubleAttribute(key, value.toDouble())
+            is Number -> setLongAttribute(key, value.toLong())
             is List<*> -> when (value.firstOrNull()) {
-                is Boolean ->
-                    @Suppress("UNCHECKED_CAST")
-                    setBooleanListAttribute(key, value as List<Boolean>)
-                is String ->
-                    @Suppress("UNCHECKED_CAST")
-                    setStringListAttribute(key, value as List<String>)
-                is Long ->
-                    @Suppress("UNCHECKED_CAST")
-                    setLongListAttribute(key, value as List<Long>)
-                is Double ->
-                    @Suppress("UNCHECKED_CAST")
-                    setDoubleListAttribute(key, value as List<Double>)
+                is Boolean -> setBooleanListAttribute(key, value.filterIsInstance<Boolean>())
+                is String -> setStringListAttribute(key, value.filterIsInstance<String>())
+                is Long -> setLongListAttribute(key, value.filterIsInstance<Long>())
+                is Double -> setDoubleListAttribute(key, value.filterIsInstance<Double>())
+                is Float -> setDoubleListAttribute(key, value.filterIsInstance<Float>().map(Float::toDouble))
+                is Number -> setLongListAttribute(key, value.filterIsInstance<Number>().map(Number::toLong))
                 else -> {}
             }
             else -> {}

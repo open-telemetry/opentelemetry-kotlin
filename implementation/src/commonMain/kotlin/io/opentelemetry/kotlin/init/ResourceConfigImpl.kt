@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.BuildKonfig
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
+import io.opentelemetry.kotlin.attributes.NO_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceImpl
@@ -12,6 +12,7 @@ import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 
 internal fun sdkDefaultResource(): Resource = ResourceImpl(
     container = AttributesModel(
+        attributeLimit = NO_ATTRIBUTE_LIMIT,
         attrs = mutableMapOf(
             ServiceAttributes.SERVICE_NAME to "unknown_service",
             ServiceAttributes.SERVICE_VERSION to BuildKonfig.SDK_VERSION,
@@ -25,7 +26,7 @@ internal fun sdkDefaultResource(): Resource = ResourceImpl(
 
 internal class ResourceConfigImpl : ResourceConfigDsl {
 
-    private val resourceAttrs = AttributesModel(DEFAULT_ATTRIBUTE_LIMIT)
+    private val resourceAttrs = AttributesModel(attributeLimit = NO_ATTRIBUTE_LIMIT)
     private var schemaUrl: String? = null
     private var serviceNameOverride: String? = null
 
@@ -54,7 +55,7 @@ internal class ResourceConfigImpl : ResourceConfigDsl {
         serviceNameOverride?.let { attrs[ServiceAttributes.SERVICE_NAME] = it }
         return ResourceImpl(
             schemaUrl = schemaUrl,
-            container = AttributesModel(attributeLimit = DEFAULT_ATTRIBUTE_LIMIT, attrs = attrs)
+            container = AttributesModel(attributeLimit = NO_ATTRIBUTE_LIMIT, attrs = attrs)
         )
     }
 }

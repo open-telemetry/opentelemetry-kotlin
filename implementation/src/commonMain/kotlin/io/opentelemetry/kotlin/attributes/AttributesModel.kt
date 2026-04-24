@@ -97,3 +97,4 @@ internal class AttributesModel(
 
 internal const val DEFAULT_ATTRIBUTE_LIMIT: Int = 128
 internal const val DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT: Int = Int.MAX_VALUE
+internal const val NO_ATTRIBUTE_LIMIT: Int = Int.MAX_VALUE

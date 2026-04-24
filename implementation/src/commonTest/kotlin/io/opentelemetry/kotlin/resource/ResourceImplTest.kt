@@ -54,26 +54,25 @@ internal class ResourceImplTest {
     }
 
     @Test
-    fun testNewResourceAttributeLimit() {
-        val attrs = (0..DEFAULT_ATTRIBUTE_LIMIT + 2).associate {
-            "key$it" to "value$it"
-        }
+    fun testNewResourceNoAttributeLimit() {
+        val count = DEFAULT_ATTRIBUTE_LIMIT + 3
+        val attrs = (0 until count).associate { "key$it" to "value$it" }
         val container = AttributesModel(attrs = attrs.toMutableMap())
         val resource = ResourceImpl(container, "https://example.com/schema")
-        assertEquals(DEFAULT_ATTRIBUTE_LIMIT, resource.attributes.size)
+        assertEquals(count, resource.attributes.size)
     }
 
     @Test
-    fun testMutateResourceAttributeLimit() {
-        val attrs = (0..DEFAULT_ATTRIBUTE_LIMIT + 2).associate {
-            "key$it" to "value$it"
-        }
+    fun testMutateResourceNoAttributeLimit() {
+        val count = DEFAULT_ATTRIBUTE_LIMIT + 3
+        val attrs = (0 until count).associate { "key$it" to "value$it" }
         val container = AttributesModel(attrs = attrs.toMutableMap())
         val resource = ResourceImpl(container, "https://example.com/schema")
-        resource.asNewResource {
-            attributes.putAll(attrs)
+        val mutated = resource.asNewResource {
+            attributes["extraKey"] = "extraValue"
         }
-        assertEquals(DEFAULT_ATTRIBUTE_LIMIT, resource.attributes.size)
+        assertEquals(count + 1, mutated.attributes.size)
+        assertEquals("extraValue", mutated.attributes["extraKey"])
     }
 
     @Test
@@ -129,12 +128,13 @@ internal class ResourceImplTest {
     }
 
     @Test
-    fun testMergeAttributeLimit() {
+    fun testMergeNoAttributeLimit() {
         val baseAttrs = (0 until DEFAULT_ATTRIBUTE_LIMIT).associate { "base$it" to "v$it" }
         val otherAttrs = mapOf("extra" to "value")
         val base = ResourceImpl(AttributesModel(attrs = baseAttrs.toMutableMap()), null)
         val other = ResourceImpl(AttributesModel(attrs = otherAttrs.toMutableMap()), null)
         val merged = base.merge(other)
-        assertEquals(DEFAULT_ATTRIBUTE_LIMIT, merged.attributes.size)
+        assertEquals(DEFAULT_ATTRIBUTE_LIMIT + 1, merged.attributes.size)
+        assertEquals("value", merged.attributes["extra"])
     }
 }

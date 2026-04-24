@@ -1,14 +1,21 @@
 package io.opentelemetry.kotlin.tracing.export
 
+import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.toByteArray
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.HttpRequestData
+import io.ktor.client.request.header
 import io.ktor.http.HttpStatusCode
+import io.ktor.util.toMap
 import io.ktor.utils.io.ByteReadChannel
+import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpClient
 import io.opentelemetry.kotlin.export.createDefaultHttpClient
+import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import kotlinx.coroutines.delay
@@ -86,6 +93,29 @@ internal class OtlpHttpSpanExporterTest {
         val code = exporter.export(spans)
         assertEquals(OperationResultCode.Success, code)
         assertTelemetryExported(spans)
+    }
+
+    @Test
+    fun testCustomHttpClientIsUsed() = runTest {
+        val customServer = MockEngine {
+            respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
+        }
+        val customClient = HttpClient(customServer) {
+            defaultRequest { header("Authorization", "Bearer test-token") }
+        }
+        val fakeConfig = object : TraceExportConfigDsl {
+            override val clock: Clock = FakeClock()
+        }
+        val customExporter = fakeConfig.otlpHttpSpanExporter(baseUrl, customClient)
+        customExporter.export(spans)
+
+        withTimeout(1000) {
+            while (customServer.requestHistory.isEmpty()) {
+                delay(1L)
+            }
+        }
+        val headers = customServer.requestHistory.single().headers.toMap().mapValues { it.value.joinToString() }
+        assertEquals("Bearer test-token", headers["Authorization"])
     }
 
     private suspend fun waitForExportedTelemetry(
