@@ -137,6 +137,14 @@ public final class io/opentelemetry/kotlin/logging/SeverityNumber : java/lang/En
 public abstract interface class io/opentelemetry/kotlin/metrics/Meter {
 }
 
+public abstract interface class io/opentelemetry/kotlin/metrics/MeterProvider {
+	public abstract fun getMeter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/Meter;
+}
+
+public final class io/opentelemetry/kotlin/metrics/MeterProvider$DefaultImpls {
+	public static synthetic fun getMeter$default (Lio/opentelemetry/kotlin/metrics/MeterProvider;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/Meter;
+}
+
 public abstract interface class io/opentelemetry/kotlin/propagation/PropagatorFactory {
 	public abstract fun composite (Ljava/util/List;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public abstract fun composite ([Lio/opentelemetry/kotlin/propagation/TextMapPropagator;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
