@@ -3,6 +3,9 @@
 package io.opentelemetry.kotlin.aliases
 
 import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.api.baggage.Baggage
+import io.opentelemetry.api.baggage.BaggageEntry
+import io.opentelemetry.api.baggage.BaggageEntryMetadata
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.common.AttributesBuilder
@@ -61,6 +64,9 @@ import io.opentelemetry.sdk.trace.samplers.Sampler
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision
 import io.opentelemetry.sdk.trace.samplers.SamplingResult
 
+typealias OtelJavaBaggage = Baggage
+typealias OtelJavaBaggageEntry = BaggageEntry
+typealias OtelJavaBaggageEntryMetadata = BaggageEntryMetadata
 typealias OtelJavaAttributes = Attributes
 typealias OtelJavaAttributeKey<T> = AttributeKey<T>
 typealias OtelJavaSpan = Span
