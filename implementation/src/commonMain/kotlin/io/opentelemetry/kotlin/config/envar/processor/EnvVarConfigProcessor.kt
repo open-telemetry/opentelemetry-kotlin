@@ -14,7 +14,6 @@ internal abstract class EnvVarConfigProcessor<R, T> {
      */
     protected abstract fun parse(value: String?): T?
 
-
     /**
      * processes total list of env vars to be specific
      */
@@ -26,5 +25,5 @@ internal abstract class EnvVarConfigProcessor<R, T> {
     fun resolve(defaultValue: R, getRawValue: ((String) -> String?)? = null): R =
         envVars
             .associateWith { EnvironmentVariable(it, parse(getRawValue?.invoke(it.value))) }
-            .let { process(it, defaultValue)}
+            .let { process(it, defaultValue) }
 }

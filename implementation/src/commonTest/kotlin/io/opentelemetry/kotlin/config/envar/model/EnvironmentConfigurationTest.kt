@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
 internal class EnvironmentConfigurationTest {
     @Test
     fun `should successfully create an environment configuration`() {
-        //given
+        // given
         val clock = FakeClock()
         val otelConfig = OpenTelemetryConfigImpl(clock)
         otelConfig.loggerProvider {
@@ -17,12 +17,12 @@ internal class EnvironmentConfigurationTest {
         }
         val defaultValue = otelConfig.generateLoggingConfig().logLimits
 
-        //when
+        // when
         val config = EnvironmentConfiguration(
             logLimitConfig = defaultValue
         )
 
-        //then
+        // then
         assertEquals(Int.MAX_VALUE, config.logLimitConfig.attributeValueLengthLimit)
         assertEquals(128, config.logLimitConfig.attributeCountLimit)
     }

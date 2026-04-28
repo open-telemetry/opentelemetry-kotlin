@@ -8,28 +8,28 @@ import kotlin.test.assertIs
 internal class EnvVarNameTest {
     @Test
     fun `should successfully create an env var name`() {
-        //given
+        // given
         val envVar = "OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT"
 
-        //when
+        // when
         val envVarName = EnvVarName(envVar)
 
-        //then
+        // then
         assertEquals("OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT", envVarName.value)
     }
 
     @Test
     fun `should throw an error when creating an invalid env var name`() {
-        //given
+        // given
         val envVar = "invalid-env-var"
 
-        //when
+        // when
         val result = assertFails {
             EnvVarName(envVar)
         }
 
 
-        //then
+        // then
         assertIs<IllegalArgumentException>(result)
     }
 }

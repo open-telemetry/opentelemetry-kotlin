@@ -10,7 +10,7 @@ internal class OpenTelemetryEnvVarConfigProcessorImplTest {
 
     @Test
     fun `should successfully parse env var value`() {
-        //given
+        // given
         val clock = FakeClock()
         val cfg = OpenTelemetryConfigImpl(clock)
         cfg.loggerProvider {
@@ -22,10 +22,10 @@ internal class OpenTelemetryEnvVarConfigProcessorImplTest {
             logLimitProcessor = logLimitProcessor
         )
 
-        //when
+        // when
         val environmentConfiguration = configProcessor.process()
 
-        //then
+        // then
         assertEquals(
             expected = Int.MAX_VALUE,
             actual = environmentConfiguration.logLimitConfig.attributeValueLengthLimit

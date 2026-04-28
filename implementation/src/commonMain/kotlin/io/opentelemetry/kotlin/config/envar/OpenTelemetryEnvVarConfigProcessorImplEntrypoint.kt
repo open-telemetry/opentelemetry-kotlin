@@ -37,7 +37,6 @@ internal fun createOpenTelemetryEnvVarConfigProcessorImpl(
     )
 }
 
-
 internal fun logLimitEnvars() = listOf(
     envVarName("OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT"),
     envVarName("OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT")
