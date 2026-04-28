@@ -17,6 +17,7 @@ public fun AttributesMutator.setAttributes(attributes: Map<String, Any>) {
         when (val input = it.value) {
             is String -> setStringAttribute(it.key, input)
             is Boolean -> setBooleanAttribute(it.key, input)
+            is Int -> setLongAttribute(it.key, input.toLong())
             is Long -> setLongAttribute(it.key, input)
             is Double -> setDoubleAttribute(it.key, input)
             is Float -> setDoubleAttribute(it.key, input.toDouble())
@@ -41,6 +42,6 @@ private fun AttributesMutator.handleCollection(key: String, input: List<*>) {
             key,
             input.filterIsInstance<Number>().map { it.toLong() }
         )
-        else -> return
+        else -> handleCollection(key, input.map { it?.toString() })
     }
 }
