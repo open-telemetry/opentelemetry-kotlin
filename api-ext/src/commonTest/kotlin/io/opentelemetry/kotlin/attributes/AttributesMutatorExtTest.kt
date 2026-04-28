@@ -9,6 +9,7 @@ internal class AttributesMutatorExtTest {
     @Test
     fun `can set attributes with map`() {
         val mutator = FakeAttributesMutator()
+        mutator.setLongAttribute("existing", 55.44.toLong())
         val map = mapOf(
             Pair("foo", "bar"), Pair("long", 21L),
             Pair("int", 123), Pair("double", 21.5), Pair("float", 22.5f),
@@ -33,6 +34,7 @@ internal class AttributesMutatorExtTest {
             listOf("TestObj(first=one, second=1)", "TestObj(first=two, second=2)"),
             mutator.attributes["arrayobj"] as List<*>
         )
+        assertEquals(55.44.toLong(), mutator.attributes["existing"])
     }
 
     data class TestObj(val first: String, val second: Long)
