@@ -155,6 +155,29 @@ internal class AttributesMutatorImplTest {
         assertEquals(a.hashCode(), b.hashCode())
     }
 
+    @Test
+    fun testEqualityWithMatchingByteArrayContent() {
+        val a = AttributesModel(attributeLimit).apply {
+            setByteArrayAttribute("bytes", byteArrayOf(0x01, 0x02, 0x03))
+        }
+        val b = AttributesModel(attributeLimit).apply {
+            setByteArrayAttribute("bytes", byteArrayOf(0x01, 0x02, 0x03))
+        }
+        assertEquals(a, b)
+        assertEquals(a.hashCode(), b.hashCode())
+    }
+
+    @Test
+    fun testInequalityWithDifferingByteArrayContent() {
+        val a = AttributesModel(attributeLimit).apply {
+            setByteArrayAttribute("bytes", byteArrayOf(0x01, 0x02, 0x03))
+        }
+        val b = AttributesModel(attributeLimit).apply {
+            setByteArrayAttribute("bytes", byteArrayOf(0x01, 0x02, 0x04))
+        }
+        assertNotEquals(a, b)
+    }
+
     private fun AttributesMutator.addTestAttributes(keyToken: String = "") {
         setStringAttribute("string$keyToken", "value")
         setDoubleAttribute("double$keyToken", 3.14)
