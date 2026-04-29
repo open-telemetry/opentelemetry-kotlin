@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.config.envar.logging
 
 import io.opentelemetry.kotlin.clock.FakeClock
-import io.opentelemetry.kotlin.config.envar.logLimitEnvars
+import io.opentelemetry.kotlin.config.envar.EnvVarConstants
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import kotlin.test.Test
@@ -13,7 +13,7 @@ internal class LogLimitEnvVarConfigProcessorImplTest {
     fun `should successfully resolve env var values`() {
         // given
         val processor = LogLimitEnvVarConfigProcessorImpl(
-            envVars = logLimitEnvars()
+            envVars = EnvVarConstants.LogLimits.envVars
         )
         val clock = FakeClock()
         val otelConfig = OpenTelemetryConfigImpl(clock)
@@ -36,7 +36,7 @@ internal class LogLimitEnvVarConfigProcessorImplTest {
     fun `should successfully resolve config with defaults`() {
         // given
         val processor = LogLimitEnvVarConfigProcessorImpl(
-            envVars = logLimitEnvars()
+            envVars = EnvVarConstants.LogLimits.envVars
         )
         val clock = FakeClock()
         val otelConfig = OpenTelemetryConfigImpl(clock)
@@ -57,7 +57,7 @@ internal class LogLimitEnvVarConfigProcessorImplTest {
     fun `should successfully resolve config with defaults when raw values are null`() {
         // given
         val processor = LogLimitEnvVarConfigProcessorImpl(
-            envVars = logLimitEnvars()
+            envVars = EnvVarConstants.LogLimits.envVars
         )
         val clock = FakeClock()
         val otelConfig = OpenTelemetryConfigImpl(clock)
