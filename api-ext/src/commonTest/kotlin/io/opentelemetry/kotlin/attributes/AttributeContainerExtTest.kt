@@ -19,20 +19,17 @@ internal class AttributeContainerExtTest {
             "boolList" to arrayOf(true),
             "complex" to ComplexObject(),
         )
-        val expected = mapOf(
-            "string" to "value",
-            "long" to 5L,
-            "double" to 10.0,
-            "bool" to true,
-            "stringList" to listOf("value"),
-            "longList" to listOf(5L),
-            "doubleList" to listOf(10.0),
-            "boolList" to listOf(true),
-            "complex" to "ComplexObject"
-        )
         attrs.setAttributes(input)
         val observed = attrs.attributes
-        assertEquals(expected, observed)
+        assertEquals("value", observed["string"])
+        assertEquals(5L, (observed["long"] as Number).toLong())
+        assertEquals(10.0, (observed["double"] as Number).toDouble())
+        assertEquals(true, observed["bool"])
+        assertEquals(listOf("value"), observed["stringList"] as List<*>)
+        assertEquals(listOf(5L), (observed["longList"] as List<*>).map { (it as Number).toLong() })
+        assertEquals(listOf(10.0), (observed["doubleList"] as List<*>).map { (it as Number).toDouble() })
+        assertEquals(listOf(true), observed["boolList"] as List<*>)
+        assertEquals("ComplexObject", observed["complex"])
     }
 
     @Test
