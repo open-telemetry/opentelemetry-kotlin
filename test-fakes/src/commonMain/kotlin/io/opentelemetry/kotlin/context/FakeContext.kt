@@ -1,4 +1,8 @@
 package io.opentelemetry.kotlin.context
+
+import io.opentelemetry.kotlin.baggage.Baggage
+import io.opentelemetry.kotlin.baggage.FakeBaggage
+
 class FakeContext(
     val attrs: Map<ContextKey<*>, Any?> = emptyMap(),
     private val onAttach: () -> Unit = {},
@@ -17,4 +21,10 @@ class FakeContext(
         onAttach()
         return FakeScope(onDetach)
     }
+
+    override fun storeBaggage(baggage: Baggage): Context = FakeContext(attrs, onAttach, onDetach)
+
+    override fun extractBaggage(): Baggage = FakeBaggage()
+
+    override fun clearBaggage(): Context = FakeContext(attrs, onAttach, onDetach)
 }

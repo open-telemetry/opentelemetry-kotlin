@@ -1,6 +1,9 @@
 package io.opentelemetry.kotlin.context
 
+import io.opentelemetry.kotlin.aliases.OtelJavaBaggage
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
+import io.opentelemetry.kotlin.baggage.Baggage
+import io.opentelemetry.kotlin.baggage.BaggageAdapter
 
 internal class ContextAdapter(
     val impl: OtelJavaContext,
@@ -20,4 +23,13 @@ internal class ContextAdapter(
     override fun attach(): Scope {
         return ScopeAdapter(impl.makeCurrent())
     }
+
+    override fun storeBaggage(baggage: Baggage): Context {
+        return ContextAdapter((baggage as BaggageAdapter).impl.storeInContext(impl), repository)
+    }
+
+    override fun extractBaggage(): Baggage = BaggageAdapter(OtelJavaBaggage.fromContext(impl))
+
+    override fun clearBaggage(): Context =
+        ContextAdapter(OtelJavaBaggage.empty().storeInContext(impl), repository)
 }

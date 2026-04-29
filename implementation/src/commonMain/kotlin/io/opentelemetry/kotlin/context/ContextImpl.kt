@@ -1,4 +1,10 @@
 package io.opentelemetry.kotlin.context
+
+import io.opentelemetry.kotlin.baggage.Baggage
+import io.opentelemetry.kotlin.baggage.BaggageImpl
+
+private val BAGGAGE_KEY: ContextKey<Baggage> = ContextKeyImpl("otel-kotlin-baggage")
+
 internal class ContextImpl(
     private val storage: ImplicitContextStorage,
     private val impl: Map<ContextKey<*>, Any?> = emptyMap()
@@ -25,6 +31,12 @@ internal class ContextImpl(
         storage.setImplicitContext(this)
         return ScopeImpl(current, this, storage)
     }
+
+    override fun storeBaggage(baggage: Baggage): Context = set(BAGGAGE_KEY, baggage)
+
+    override fun extractBaggage(): Baggage = get(BAGGAGE_KEY) ?: BaggageImpl.EMPTY
+
+    override fun clearBaggage(): Context = set(BAGGAGE_KEY, null)
 
     private object NoopScope : Scope {
         override fun detach(): Boolean = true
