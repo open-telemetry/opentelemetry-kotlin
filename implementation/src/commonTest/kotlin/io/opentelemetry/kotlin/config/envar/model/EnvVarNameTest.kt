@@ -28,7 +28,6 @@ internal class EnvVarNameTest {
             EnvVarName(envVar)
         }
 
-
         // then
         assertIs<IllegalArgumentException>(result)
     }
