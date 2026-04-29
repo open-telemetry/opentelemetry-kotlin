@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
+import io.opentelemetry.kotlin.baggage.Baggage
 
 /**
  * Immutable propagation mechanism that carries values across concerns.
@@ -42,4 +43,28 @@ public interface Context {
      */
     @ThreadSafe
     public fun attach(): Scope
+
+    /**
+     * Returns a new [Context] derived from this one with [baggage] stored under a pre-defined key.
+     *
+     * https://opentelemetry.io/docs/specs/otel/baggage/api/#context-interaction
+     */
+    @ThreadSafe
+    public fun storeBaggage(baggage: Baggage): Context
+
+    /**
+     * Returns the [Baggage] stored in this [Context], or an empty [Baggage] if none is present.
+     *
+     * https://opentelemetry.io/docs/specs/otel/baggage/api/#context-interaction
+     */
+    @ThreadSafe
+    public fun extractBaggage(): Baggage
+
+    /**
+     * Returns a new [Context] derived from this one with all baggage entries removed.
+     *
+     * https://opentelemetry.io/docs/specs/otel/baggage/api/#context-interaction
+     */
+    @ThreadSafe
+    public fun clearBaggage(): Context
 }

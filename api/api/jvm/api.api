@@ -45,8 +45,11 @@ public abstract interface class io/opentelemetry/kotlin/baggage/BaggageEntryMeta
 
 public abstract interface class io/opentelemetry/kotlin/context/Context {
 	public abstract fun attach ()Lio/opentelemetry/kotlin/context/Scope;
+	public abstract fun clearBaggage ()Lio/opentelemetry/kotlin/context/Context;
+	public abstract fun extractBaggage ()Lio/opentelemetry/kotlin/baggage/Baggage;
 	public abstract fun get (Lio/opentelemetry/kotlin/context/ContextKey;)Ljava/lang/Object;
 	public abstract fun set (Lio/opentelemetry/kotlin/context/ContextKey;Ljava/lang/Object;)Lio/opentelemetry/kotlin/context/Context;
+	public abstract fun storeBaggage (Lio/opentelemetry/kotlin/baggage/Baggage;)Lio/opentelemetry/kotlin/context/Context;
 }
 
 public abstract interface class io/opentelemetry/kotlin/context/ContextKey {
