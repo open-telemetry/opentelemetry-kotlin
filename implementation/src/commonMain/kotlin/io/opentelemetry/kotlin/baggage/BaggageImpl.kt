@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.baggage
 import io.opentelemetry.kotlin.ExperimentalApi
 
 @OptIn(ExperimentalApi::class)
-internal class BaggageImpl private constructor(
+internal class BaggageImpl(
     private val entries: Map<String, BaggageEntry>,
 ) : Baggage {
 

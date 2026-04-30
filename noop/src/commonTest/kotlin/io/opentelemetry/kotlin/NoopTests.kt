@@ -1,7 +1,9 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.baggage.NoopBaggage
 import io.opentelemetry.kotlin.context.NoopContext
 import io.opentelemetry.kotlin.context.NoopContextKey
+import io.opentelemetry.kotlin.factory.NoopBaggageFactory
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.propagation.NoopPropagatorFactory
 import io.opentelemetry.kotlin.propagation.NoopTextMapPropagator
@@ -245,6 +247,12 @@ internal class NoopTests {
     fun testNoopPropagatorFactory() {
         assertSame(NoopTextMapPropagator, NoopPropagatorFactory.composite(NoopTextMapPropagator))
         assertSame(NoopTextMapPropagator, NoopPropagatorFactory.composite(listOf(NoopTextMapPropagator)))
+    }
+
+    @Test
+    fun testNoopBaggageFactory() {
+        assertSame(NoopBaggage, NoopBaggageFactory.empty())
+        assertSame(NoopBaggage, NoopBaggageFactory.create { })
     }
 
     private fun verifySpanOperationsAreNoop(span: NoopSpan) {
