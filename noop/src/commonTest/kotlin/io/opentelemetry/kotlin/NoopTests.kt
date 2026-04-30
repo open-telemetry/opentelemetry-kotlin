@@ -245,6 +245,7 @@ internal class NoopTests {
     fun testNoopPropagatorFactory() {
         assertSame(NoopTextMapPropagator, NoopPropagatorFactory.composite(NoopTextMapPropagator))
         assertSame(NoopTextMapPropagator, NoopPropagatorFactory.composite(listOf(NoopTextMapPropagator)))
+        assertSame(NoopTextMapPropagator, NoopPropagatorFactory.w3cBaggage())
     }
 
     private fun verifySpanOperationsAreNoop(span: NoopSpan) {
