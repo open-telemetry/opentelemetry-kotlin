@@ -34,6 +34,9 @@ import io.opentelemetry.context.ContextKey
 import io.opentelemetry.context.ImplicitContextKeyed
 import io.opentelemetry.context.Scope
 import io.opentelemetry.context.propagation.ContextPropagators
+import io.opentelemetry.context.propagation.TextMapGetter
+import io.opentelemetry.context.propagation.TextMapPropagator
+import io.opentelemetry.context.propagation.TextMapSetter
 import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.common.Clock
 import io.opentelemetry.sdk.common.CompletableResultCode
@@ -113,6 +116,9 @@ typealias OtelJavaInstrumentationLibraryInfo = InstrumentationLibraryInfo
 typealias OtelJavaAttributesBuilder = AttributesBuilder
 typealias OtelJavaSpanBuilder = SpanBuilder
 typealias OtelJavaContextPropagators = ContextPropagators
+typealias OtelJavaTextMapPropagator = TextMapPropagator
+typealias OtelJavaTextMapGetter<C> = TextMapGetter<C>
+typealias OtelJavaTextMapSetter<C> = TextMapSetter<C>
 typealias OtelJavaImplicitContextKeyed = ImplicitContextKeyed
 typealias OtelJavaScope = Scope
 typealias OtelJavaTracerBuilder = TracerBuilder
