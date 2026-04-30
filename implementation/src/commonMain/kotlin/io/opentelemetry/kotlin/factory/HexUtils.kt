@@ -8,8 +8,22 @@ internal fun Char.isHexDigit(): Boolean {
 }
 
 /**
+ * Returns true if the character is a valid lowercase hexadecimal digit (0-9, a-f).
+ */
+internal fun Char.isLowercaseHexDigit(): Boolean {
+    return this.isDigit() || this in 'a'..'f'
+}
+
+/**
  * Returns true if the string contains only valid hexadecimal characters.
  */
 internal fun String.isValidHex(): Boolean {
     return this.all { it.isHexDigit() }
+}
+
+/**
+ * Returns true if the string contains only valid lowercase hexadecimal characters.
+ */
+internal fun String.isValidLowercaseHex(): Boolean {
+    return this.all { it.isLowercaseHexDigit() }
 }
