@@ -23,4 +23,12 @@ public interface PropagatorFactory {
      * https://opentelemetry.io/docs/specs/otel/context/api-propagators/#composite-propagator
      */
     public fun composite(propagators: List<TextMapPropagator>): TextMapPropagator
+
+    /**
+     * Returns a [TextMapPropagator] that injects and extracts [io.opentelemetry.kotlin.baggage.Baggage]
+     * via the W3C `baggage` HTTP header.
+     *
+     * https://www.w3.org/TR/baggage/
+     */
+    public fun w3cBaggage(): TextMapPropagator
 }

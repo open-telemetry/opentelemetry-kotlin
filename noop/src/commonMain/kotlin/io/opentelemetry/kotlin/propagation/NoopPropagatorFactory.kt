@@ -10,4 +10,6 @@ internal object NoopPropagatorFactory : PropagatorFactory {
 
     override fun composite(propagators: List<TextMapPropagator>): TextMapPropagator =
         NoopTextMapPropagator
+
+    override fun w3cBaggage(): TextMapPropagator = NoopTextMapPropagator
 }
