@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 internal class LogLimitEnvVarConfigProcessorImplTest {
 
     @Test
-    fun `should successfully resolve env var values`() {
+    fun `should successfully configure env var values`() {
         // given
         val processor = LogLimitEnvVarConfigProcessorImpl(
             envVars = EnvVarConstants.LogLimits.envVars
@@ -23,7 +23,7 @@ internal class LogLimitEnvVarConfigProcessorImplTest {
         val defaultValue = otelConfig.generateLoggingConfig().logLimits
 
         // when
-        val config = processor.resolve(defaultValue = defaultValue) {
+        val config = processor.configure(defaultValue = defaultValue) {
             getFakeEnvVarValue(it)
         }
 
@@ -33,7 +33,7 @@ internal class LogLimitEnvVarConfigProcessorImplTest {
     }
 
     @Test
-    fun `should successfully resolve config with defaults`() {
+    fun `should successfully configure config with defaults`() {
         // given
         val processor = LogLimitEnvVarConfigProcessorImpl(
             envVars = EnvVarConstants.LogLimits.envVars
@@ -46,7 +46,7 @@ internal class LogLimitEnvVarConfigProcessorImplTest {
         val defaultValue = otelConfig.generateLoggingConfig().logLimits
 
         // when
-        val config = processor.resolve(defaultValue = defaultValue)
+        val config = processor.configure(defaultValue = defaultValue)
 
         // then
         assertEquals(Int.MAX_VALUE, config.attributeValueLengthLimit)
@@ -54,7 +54,7 @@ internal class LogLimitEnvVarConfigProcessorImplTest {
     }
 
     @Test
-    fun `should successfully resolve config with defaults when raw values are null`() {
+    fun `should successfully configure config with defaults when raw values are null`() {
         // given
         val processor = LogLimitEnvVarConfigProcessorImpl(
             envVars = EnvVarConstants.LogLimits.envVars
@@ -67,7 +67,7 @@ internal class LogLimitEnvVarConfigProcessorImplTest {
         val defaultValue = otelConfig.generateLoggingConfig().logLimits
 
         // when
-        val config = processor.resolve(defaultValue = defaultValue) { null }
+        val config = processor.configure(defaultValue = defaultValue) { null }
 
         // then
         assertEquals(Int.MAX_VALUE, config.attributeValueLengthLimit)
@@ -75,7 +75,7 @@ internal class LogLimitEnvVarConfigProcessorImplTest {
     }
 
     @Test
-    fun `should successfully resolve config with defaults when env vars are missing`() {
+    fun `should successfully configure config with defaults when env vars are missing`() {
         // given
         val processor = LogLimitEnvVarConfigProcessorImpl(envVars = emptyList())
         val clock = FakeClock()
@@ -86,7 +86,7 @@ internal class LogLimitEnvVarConfigProcessorImplTest {
         val defaultValue = otelConfig.generateLoggingConfig().logLimits
 
         // when
-        val config = processor.resolve(defaultValue = defaultValue)
+        val config = processor.configure(defaultValue = defaultValue)
 
         // then
         assertEquals(Int.MAX_VALUE, config.attributeValueLengthLimit)

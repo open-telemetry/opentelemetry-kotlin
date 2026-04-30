@@ -9,7 +9,7 @@ internal class FakeLogLimitEnvVarConfigProcessor :
     LogLimitEnvVarConfigProcessor() {
     override val envVars: List<EnvVarName> = emptyList()
 
-    override fun parse(value: String?): Int? = null
+    override fun parse(rawValue: String?): Int? = null
 
     override fun process(
         entries: Map<EnvVarName, EnvironmentVariable<Int>>,

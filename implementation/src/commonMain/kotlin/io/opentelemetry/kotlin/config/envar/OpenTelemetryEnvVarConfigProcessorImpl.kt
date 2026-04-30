@@ -13,7 +13,7 @@ internal class OpenTelemetryEnvVarConfigProcessorImpl(
 ) : OpenTelemetryEnvVarConfigProcessor {
     override fun process(): EnvironmentConfiguration {
         return EnvironmentConfiguration(
-            logLimitConfig = logLimitProcessor.resolve(
+            logLimitConfig = logLimitProcessor.configure(
                 defaultValue = loggingConfig.logLimits
             ) { envVar -> getEnvVarValue(envVar) }
         )

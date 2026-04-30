@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.init.config.LogLimitConfig
 internal class LogLimitEnvVarConfigProcessorImpl(
     override val envVars: List<EnvVarName>
 ) : LogLimitEnvVarConfigProcessor() {
-    override fun parse(value: String?): Int? = value?.toInt()
+    override fun parse(rawValue: String?): Int? = rawValue?.toInt()
 
     override fun process(
         entries: Map<EnvVarName, EnvironmentVariable<Int>>,
