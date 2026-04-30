@@ -8,12 +8,11 @@ internal object EnvVarConstants {
         val envVars: List<EnvVarName>
     }
 
-    internal object LogLimits: EnvVarLimits {
+    internal object LogLimits : EnvVarLimits {
         private val ATTR_COUNT_LIMIT = envVarName("OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT")
-        private val ATTR_VALUE_LENGTH_LIMIT = envVarName("OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT")
+        private val ATTR_VALUE_LENGTH_LIMIT =
+            envVarName("OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT")
 
-        override val envVars = listOf(
-            ATTR_COUNT_LIMIT, ATTR_VALUE_LENGTH_LIMIT
-        )
+        override val envVars = listOf(ATTR_COUNT_LIMIT, ATTR_VALUE_LENGTH_LIMIT)
     }
 }

@@ -30,7 +30,8 @@ internal abstract class EnvVarConfigProcessor<R, T> {
      * @param defaultValue the default value returned
      * @param R is the resulting config type
      * @param T is the environment variable type
-     * @return a configuration object built with envars, or with the given default values if the environment variable does not exist or is not set.
+     * @return a configuration object built with envars, or with the given default values
+     * if the environment variable does not exist or is not set.
      */
     protected abstract fun process(
         entries: Map<EnvVarName, EnvironmentVariable<T>>,
