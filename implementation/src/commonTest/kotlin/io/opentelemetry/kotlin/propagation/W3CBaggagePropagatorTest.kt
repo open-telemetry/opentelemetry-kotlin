@@ -246,6 +246,33 @@ internal class W3CBaggagePropagatorTest {
     }
 
     @Test
+    fun `extract combines multiple baggage headers`() {
+        val carrier = mapOf("baggage" to listOf("a=1", "b=2,c=3"))
+        val ctx = propagator.extract(contextFactory.root(), carrier, MultiValueMapTextMapGetter)
+        val baggage = ctx.extractBaggage()
+        assertEquals("1", baggage.getValue("a"))
+        assertEquals("2", baggage.getValue("b"))
+        assertEquals("3", baggage.getValue("c"))
+        assertEquals(3, baggage.asMap().size)
+    }
+
+    @Test
+    fun `extract reads a single baggage header via getAll`() {
+        val carrier = mapOf("baggage" to listOf("k=v"))
+        val baggage = propagator.extract(contextFactory.root(), carrier, MultiValueMapTextMapGetter)
+            .extractBaggage()
+        assertEquals("v", baggage.getValue("k"))
+        assertEquals(1, baggage.asMap().size)
+    }
+
+    @Test
+    fun `extract returns original context when getAll returns no headers`() {
+        val ctx = contextFactory.root()
+        val result = propagator.extract(ctx, emptyMap(), MultiValueMapTextMapGetter)
+        assertSame(ctx, result)
+    }
+
+    @Test
     fun `inject and extract round-trip preserves entries and metadata`() {
         val original = BaggageImpl.EMPTY
             .set("user.id", "alice", BaggageEntryMetadataImpl("propagation=public"))
@@ -273,5 +300,13 @@ internal class W3CBaggagePropagatorTest {
             MapTextMapGetter,
         )
         return ctx.extractBaggage()
+    }
+
+    private object MultiValueMapTextMapGetter : TextMapGetter<Map<String, List<String>>> {
+        override fun keys(carrier: Map<String, List<String>>): Collection<String> = carrier.keys
+        override fun get(carrier: Map<String, List<String>>, key: String): String? =
+            carrier[key]?.firstOrNull()
+        override fun getAll(carrier: Map<String, List<String>>, key: String): List<String> =
+            carrier[key].orEmpty()
     }
 }

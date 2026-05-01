@@ -171,6 +171,7 @@ public abstract interface class io/opentelemetry/kotlin/propagation/PropagatorFa
 
 public abstract interface class io/opentelemetry/kotlin/propagation/TextMapGetter {
 	public abstract fun get (Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun getAll (Ljava/lang/Object;Ljava/lang/String;)Ljava/util/List;
 	public abstract fun keys (Ljava/lang/Object;)Ljava/util/Collection;
 }
 
