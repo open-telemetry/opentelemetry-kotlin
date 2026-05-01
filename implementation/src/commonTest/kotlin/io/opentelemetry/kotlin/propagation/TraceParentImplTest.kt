@@ -16,7 +16,7 @@ import kotlin.test.assertTrue
  * https://www.w3.org/TR/trace-context/#traceparent-header
  */
 @OptIn(ExperimentalApi::class)
-internal class TraceParentTest {
+internal class TraceParentImplTest {
 
     private val flagsFactory = TraceFlagsFactoryImpl()
     private val traceId = "0af7651916cd43dd8448eb211c80319c"
@@ -25,7 +25,7 @@ internal class TraceParentTest {
 
     @Test
     fun `encode produces the canonical version 00 traceparent header`() {
-        val tp = TraceParent(
+        val tp = TraceParentImpl(
             version = "00",
             traceId = traceId,
             spanId = spanId,
@@ -36,7 +36,7 @@ internal class TraceParentTest {
 
     @Test
     fun `encoded header is exactly 55 chars for version 00`() {
-        val tp = TraceParent(
+        val tp = TraceParentImpl(
             version = "00",
             traceId = traceId,
             spanId = spanId,
@@ -47,7 +47,7 @@ internal class TraceParentTest {
 
     @Test
     fun `encode renders flags 00 when neither sampled nor random`() {
-        val tp = TraceParent(
+        val tp = TraceParentImpl(
             version = "00",
             traceId = traceId,
             spanId = spanId,
@@ -58,7 +58,7 @@ internal class TraceParentTest {
 
     @Test
     fun `encode renders flags 02 when only random bit set`() {
-        val tp = TraceParent(
+        val tp = TraceParentImpl(
             version = "00",
             traceId = traceId,
             spanId = spanId,
@@ -69,7 +69,7 @@ internal class TraceParentTest {
 
     @Test
     fun `encode renders flags 03 when sampled and random bits set`() {
-        val tp = TraceParent(
+        val tp = TraceParentImpl(
             version = "00",
             traceId = traceId,
             spanId = spanId,
@@ -80,7 +80,7 @@ internal class TraceParentTest {
 
     @Test
     fun `encoded flags are always two lowercase hex characters`() {
-        val tp = TraceParent(
+        val tp = TraceParentImpl(
             version = "00",
             traceId = traceId,
             spanId = spanId,
@@ -93,7 +93,7 @@ internal class TraceParentTest {
 
     @Test
     fun `decode parses the canonical version 00 traceparent header`() {
-        val tp = TraceParent.decode(canonicalHeader, flagsFactory)
+        val tp = TraceParentImpl.decode(canonicalHeader, flagsFactory)
         assertNotNull(tp)
         assertEquals("00", tp.version)
         assertEquals(traceId, tp.traceId)
@@ -104,7 +104,7 @@ internal class TraceParentTest {
 
     @Test
     fun `decode populates flags via the supplied factory`() {
-        val tp = TraceParent.decode("00-$traceId-$spanId-03", flagsFactory)
+        val tp = TraceParentImpl.decode("00-$traceId-$spanId-03", flagsFactory)
         assertNotNull(tp)
         assertTrue(tp.traceFlags.isSampled)
         assertTrue(tp.traceFlags.isRandom)
@@ -112,7 +112,7 @@ internal class TraceParentTest {
 
     @Test
     fun `decode handles flags 00 by reporting both flags off`() {
-        val tp = TraceParent.decode("00-$traceId-$spanId-00", flagsFactory)
+        val tp = TraceParentImpl.decode("00-$traceId-$spanId-00", flagsFactory)
         assertNotNull(tp)
         assertFalse(tp.traceFlags.isSampled)
         assertFalse(tp.traceFlags.isRandom)
@@ -120,7 +120,7 @@ internal class TraceParentTest {
 
     @Test
     fun `decode round-trips into encode without loss`() {
-        val tp = TraceParent.decode(canonicalHeader, flagsFactory)
+        val tp = TraceParentImpl.decode(canonicalHeader, flagsFactory)
         assertNotNull(tp)
         assertEquals(canonicalHeader, tp.encode())
     }
@@ -131,7 +131,7 @@ internal class TraceParentTest {
         // these headers may carry additional `-`-separated fields after flags,
         // so length and field count constraints from version 00 do not apply.
         val header = "01-$traceId-$spanId-01-extra"
-        val tp = TraceParent.decode(header, flagsFactory)
+        val tp = TraceParentImpl.decode(header, flagsFactory)
         assertNotNull(tp)
         assertEquals("01", tp.version)
         assertEquals(traceId, tp.traceId)
@@ -141,99 +141,99 @@ internal class TraceParentTest {
 
     @Test
     fun `decode rejects an empty header`() {
-        assertNull(TraceParent.decode("", flagsFactory))
+        assertNull(TraceParentImpl.decode("", flagsFactory))
     }
 
     @Test
     fun `decode rejects a header shorter than 55 chars`() {
         val header = "00-$traceId-${spanId.dropLast(1)}-01"
         assertTrue(header.length < 55)
-        assertNull(TraceParent.decode(header, flagsFactory))
+        assertNull(TraceParentImpl.decode(header, flagsFactory))
     }
 
     @Test
     fun `decode rejects any uppercase character per spec`() {
         val uppercaseTraceId = traceId.replaceFirst('a', 'A')
-        assertNull(TraceParent.decode("00-$uppercaseTraceId-$spanId-01", flagsFactory))
+        assertNull(TraceParentImpl.decode("00-$uppercaseTraceId-$spanId-01", flagsFactory))
     }
 
     @Test
     fun `decode rejects header with fewer than four fields`() {
         val header = "0".repeat(55)
-        assertNull(TraceParent.decode(header, flagsFactory))
+        assertNull(TraceParentImpl.decode(header, flagsFactory))
     }
 
     @Test
     fun `decode rejects forbidden ff version per spec`() {
-        assertNull(TraceParent.decode("ff-$traceId-$spanId-01", flagsFactory))
+        assertNull(TraceParentImpl.decode("ff-$traceId-$spanId-01", flagsFactory))
     }
 
     @Test
     fun `decode rejects non-hex version`() {
-        assertNull(TraceParent.decode("0g-$traceId-$spanId-01", flagsFactory))
+        assertNull(TraceParentImpl.decode("0g-$traceId-$spanId-01", flagsFactory))
     }
 
     @Test
     fun `decode rejects version of wrong length`() {
         val header = "001-$traceId-$spanId-01"
-        assertNull(TraceParent.decode(header, flagsFactory))
+        assertNull(TraceParentImpl.decode(header, flagsFactory))
     }
 
     @Test
     fun `decode rejects version 00 with an additional field`() {
         val header = "00-$traceId-$spanId-01-extra"
-        assertNull(TraceParent.decode(header, flagsFactory))
+        assertNull(TraceParentImpl.decode(header, flagsFactory))
     }
 
     @Test
     fun `decode rejects trace id of wrong length`() {
         val longTrace = "0".repeat(33)
-        assertNull(TraceParent.decode("01-$longTrace-$spanId-01", flagsFactory))
+        assertNull(TraceParentImpl.decode("01-$longTrace-$spanId-01", flagsFactory))
     }
 
     @Test
     fun `decode rejects non-hex trace id`() {
         val invalidTraceId = traceId.replaceFirst('a', 'g')
-        assertNull(TraceParent.decode("00-$invalidTraceId-$spanId-01", flagsFactory))
+        assertNull(TraceParentImpl.decode("00-$invalidTraceId-$spanId-01", flagsFactory))
     }
 
     @Test
     fun `decode rejects span id of wrong length`() {
         val longSpan = "0".repeat(17)
-        assertNull(TraceParent.decode("01-$traceId-$longSpan-01", flagsFactory))
+        assertNull(TraceParentImpl.decode("01-$traceId-$longSpan-01", flagsFactory))
     }
 
     @Test
     fun `decode rejects non-hex span id`() {
         val invalidSpanId = spanId.replaceFirst('b', 'g')
-        assertNull(TraceParent.decode("00-$traceId-$invalidSpanId-01", flagsFactory))
+        assertNull(TraceParentImpl.decode("00-$traceId-$invalidSpanId-01", flagsFactory))
     }
 
     @Test
     fun `decode rejects flags of wrong length`() {
-        assertNull(TraceParent.decode("01-$traceId-$spanId-001", flagsFactory))
+        assertNull(TraceParentImpl.decode("01-$traceId-$spanId-001", flagsFactory))
     }
 
     @Test
     fun `decode rejects non-hex flags`() {
-        assertNull(TraceParent.decode("00-$traceId-$spanId-zz", flagsFactory))
+        assertNull(TraceParentImpl.decode("00-$traceId-$spanId-zz", flagsFactory))
     }
 
     @Test
     fun `decode rejects header with uppercase version`() {
         val header = "0A-$traceId-$spanId-01"
-        assertNull(TraceParent.decode(header, flagsFactory))
+        assertNull(TraceParentImpl.decode(header, flagsFactory))
     }
 
     @Test
     fun `decode rejects header with uppercase flags`() {
         val header = "00-$traceId-$spanId-0A"
-        assertNull(TraceParent.decode(header, flagsFactory))
+        assertNull(TraceParentImpl.decode(header, flagsFactory))
     }
 
     @Test
     fun `constructor accepts canonical fields`() {
-        val tp = TraceParent(
+        val tp = TraceParentImpl(
             version = "00",
             traceId = traceId,
             spanId = spanId,
@@ -245,7 +245,7 @@ internal class TraceParentTest {
     @Test
     fun `constructor rejects version of wrong length`() {
         assertFailsWith<IllegalArgumentException> {
-            TraceParent(
+            TraceParentImpl(
                 version = "0",
                 traceId = traceId,
                 spanId = spanId,
@@ -257,7 +257,7 @@ internal class TraceParentTest {
     @Test
     fun `constructor rejects non-hex version`() {
         assertFailsWith<IllegalArgumentException> {
-            TraceParent(
+            TraceParentImpl(
                 version = "0g",
                 traceId = traceId,
                 spanId = spanId,
@@ -269,7 +269,7 @@ internal class TraceParentTest {
     @Test
     fun `constructor rejects uppercase hex version`() {
         assertFailsWith<IllegalArgumentException> {
-            TraceParent(
+            TraceParentImpl(
                 version = "0A",
                 traceId = traceId,
                 spanId = spanId,
@@ -281,7 +281,7 @@ internal class TraceParentTest {
     @Test
     fun `constructor rejects forbidden ff version`() {
         assertFailsWith<IllegalArgumentException> {
-            TraceParent(
+            TraceParentImpl(
                 version = "ff",
                 traceId = traceId,
                 spanId = spanId,
@@ -293,7 +293,7 @@ internal class TraceParentTest {
     @Test
     fun `constructor rejects trace id of wrong length`() {
         assertFailsWith<IllegalArgumentException> {
-            TraceParent(
+            TraceParentImpl(
                 version = "00",
                 traceId = "0".repeat(31),
                 spanId = spanId,
@@ -305,7 +305,7 @@ internal class TraceParentTest {
     @Test
     fun `constructor rejects non-hex trace id`() {
         assertFailsWith<IllegalArgumentException> {
-            TraceParent(
+            TraceParentImpl(
                 version = "00",
                 traceId = traceId.replaceFirst('a', 'g'),
                 spanId = spanId,
@@ -317,7 +317,7 @@ internal class TraceParentTest {
     @Test
     fun `constructor rejects uppercase hex trace id`() {
         assertFailsWith<IllegalArgumentException> {
-            TraceParent(
+            TraceParentImpl(
                 version = "00",
                 traceId = traceId.uppercase(),
                 spanId = spanId,
@@ -329,7 +329,7 @@ internal class TraceParentTest {
     @Test
     fun `constructor rejects span id of wrong length`() {
         assertFailsWith<IllegalArgumentException> {
-            TraceParent(
+            TraceParentImpl(
                 version = "00",
                 traceId = traceId,
                 spanId = "0".repeat(15),
@@ -341,7 +341,7 @@ internal class TraceParentTest {
     @Test
     fun `constructor rejects non-hex span id`() {
         assertFailsWith<IllegalArgumentException> {
-            TraceParent(
+            TraceParentImpl(
                 version = "00",
                 traceId = traceId,
                 spanId = spanId.replaceFirst('b', 'g'),
@@ -353,7 +353,7 @@ internal class TraceParentTest {
     @Test
     fun `constructor rejects uppercase hex span id`() {
         assertFailsWith<IllegalArgumentException> {
-            TraceParent(
+            TraceParentImpl(
                 version = "00",
                 traceId = traceId,
                 spanId = spanId.uppercase(),
@@ -365,7 +365,7 @@ internal class TraceParentTest {
     @Test
     fun `constructor rejects empty version`() {
         assertFailsWith<IllegalArgumentException> {
-            TraceParent(
+            TraceParentImpl(
                 version = "",
                 traceId = traceId,
                 spanId = spanId,
@@ -377,7 +377,7 @@ internal class TraceParentTest {
     @Test
     fun `constructor rejects empty trace id`() {
         assertFailsWith<IllegalArgumentException> {
-            TraceParent(
+            TraceParentImpl(
                 version = "00",
                 traceId = "",
                 spanId = spanId,
@@ -389,7 +389,7 @@ internal class TraceParentTest {
     @Test
     fun `constructor rejects empty span id`() {
         assertFailsWith<IllegalArgumentException> {
-            TraceParent(
+            TraceParentImpl(
                 version = "00",
                 traceId = traceId,
                 spanId = "",

@@ -4,6 +4,11 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.factory.IdGeneratorImpl
+import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
+import io.opentelemetry.kotlin.factory.SpanFactoryImpl
+import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
+import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
@@ -12,8 +17,19 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class PropagatorFactoryImplTest {
 
-    private val factory = PropagatorFactoryImpl()
+    private val traceFlagsFactory = TraceFlagsFactoryImpl()
+    private val traceStateFactory = TraceStateFactoryImpl()
+    private val spanContextFactory = SpanContextFactoryImpl(IdGeneratorImpl(), traceFlagsFactory, traceStateFactory)
     private val contextFactory = ContextFactoryImpl()
+    private val spanFactory = SpanFactoryImpl(spanContextFactory, contextFactory.spanKey)
+
+    private val factory = PropagatorFactoryImpl(
+        traceFlagsFactory = traceFlagsFactory,
+        traceStateFactory = traceStateFactory,
+        spanContextFactory = spanContextFactory,
+        spanFactory = spanFactory,
+        contextFactory = contextFactory,
+    )
 
     @Test
     fun `composite of zero propagators returns empty propagator`() {
@@ -80,6 +96,17 @@ internal class PropagatorFactoryImplTest {
     @Test
     fun `w3cBaggage returns the W3C baggage propagator`() {
         assertSame(W3CBaggagePropagator, factory.w3cBaggage())
+    }
+
+    @Test
+    fun `w3cTraceContext returns a propagator for traceparent and tracestate fields`() {
+        val propagator = factory.w3cTraceContext()
+        assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
+    }
+
+    @Test
+    fun `w3cTraceContext returns the same instance on repeated calls`() {
+        assertSame(factory.w3cTraceContext(), factory.w3cTraceContext())
     }
 
     @Test
