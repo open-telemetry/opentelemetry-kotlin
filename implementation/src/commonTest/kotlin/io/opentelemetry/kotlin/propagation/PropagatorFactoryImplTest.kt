@@ -78,6 +78,11 @@ internal class PropagatorFactoryImplTest {
     }
 
     @Test
+    fun `w3cBaggage returns the W3C baggage propagator`() {
+        assertSame(W3CBaggagePropagator, factory.w3cBaggage())
+    }
+
+    @Test
     fun `vararg and list overloads behave identically`() {
         val a = RecordingPropagator(listOf("a"))
         val b = RecordingPropagator(listOf("b"))

@@ -89,4 +89,83 @@ internal class HexTest {
     fun testMixedValidAndInvalidIsNotValidHex() {
         assertFalse("0123456789abcdefg".isValidHex())
     }
+
+    @Test
+    fun testDigitIsLowercaseHexDigit() {
+        assertTrue('0'.isLowercaseHexDigit())
+        assertTrue('9'.isLowercaseHexDigit())
+    }
+
+    @Test
+    fun testLowercaseHexLetterIsLowercaseHexDigit() {
+        assertTrue('a'.isLowercaseHexDigit())
+        assertTrue('f'.isLowercaseHexDigit())
+    }
+
+    @Test
+    fun testUppercaseHexLetterIsNotLowercaseHexDigit() {
+        assertFalse('A'.isLowercaseHexDigit())
+        assertFalse('F'.isLowercaseHexDigit())
+    }
+
+    @Test
+    fun testNonHexLetterIsNotLowercaseHexDigit() {
+        assertFalse('g'.isLowercaseHexDigit())
+        assertFalse('G'.isLowercaseHexDigit())
+    }
+
+    @Test
+    fun testSpaceIsNotLowercaseHexDigit() {
+        assertFalse(' '.isLowercaseHexDigit())
+    }
+
+    @Test
+    fun testHyphenIsNotLowercaseHexDigit() {
+        assertFalse('-'.isLowercaseHexDigit())
+    }
+
+    @Test
+    fun testEmptyStringIsValidLowercaseHex() {
+        assertTrue("".isValidLowercaseHex())
+    }
+
+    @Test
+    fun testAllDigitsIsValidLowercaseHex() {
+        assertTrue("0123456789".isValidLowercaseHex())
+    }
+
+    @Test
+    fun testLowercaseLettersIsValidLowercaseHex() {
+        assertTrue("abcdef".isValidLowercaseHex())
+    }
+
+    @Test
+    fun testUppercaseLettersIsNotValidLowercaseHex() {
+        assertFalse("ABCDEF".isValidLowercaseHex())
+    }
+
+    @Test
+    fun testMixedCaseIsNotValidLowercaseHex() {
+        assertFalse("aAbBcCdDeEfF0123456789".isValidLowercaseHex())
+    }
+
+    @Test
+    fun testStringWithGIsNotValidLowercaseHex() {
+        assertFalse("abcdefg".isValidLowercaseHex())
+    }
+
+    @Test
+    fun testStringWithSpaceIsNotValidLowercaseHex() {
+        assertFalse("abc def".isValidLowercaseHex())
+    }
+
+    @Test
+    fun testStringWithHyphenIsNotValidLowercaseHex() {
+        assertFalse("abc-def".isValidLowercaseHex())
+    }
+
+    @Test
+    fun testMixedValidAndInvalidIsNotValidLowercaseHex() {
+        assertFalse("0123456789abcdefg".isValidLowercaseHex())
+    }
 }

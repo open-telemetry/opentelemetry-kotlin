@@ -18,6 +18,8 @@ internal class PropagatorFactoryImpl : PropagatorFactory {
         }
     }
 
+    override fun w3cBaggage(): TextMapPropagator = W3CBaggagePropagator
+
     private object EmptyTextMapPropagator : TextMapPropagator {
         override fun fields(): Collection<String> = emptyList()
         override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {}

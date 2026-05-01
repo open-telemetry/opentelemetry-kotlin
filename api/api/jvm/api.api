@@ -34,6 +34,15 @@ public abstract interface class io/opentelemetry/kotlin/baggage/Baggage {
 	public abstract fun set (Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/baggage/BaggageEntryMetadata;)Lio/opentelemetry/kotlin/baggage/Baggage;
 }
 
+public abstract interface class io/opentelemetry/kotlin/baggage/BaggageCreationAction {
+	public abstract fun put (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public abstract fun remove (Ljava/lang/String;)V
+}
+
+public final class io/opentelemetry/kotlin/baggage/BaggageCreationAction$DefaultImpls {
+	public static synthetic fun put$default (Lio/opentelemetry/kotlin/baggage/BaggageCreationAction;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+}
+
 public abstract interface class io/opentelemetry/kotlin/baggage/BaggageEntry {
 	public abstract fun getMetadata ()Lio/opentelemetry/kotlin/baggage/BaggageEntryMetadata;
 	public abstract fun getValue ()Ljava/lang/String;
@@ -57,6 +66,11 @@ public abstract interface class io/opentelemetry/kotlin/context/ContextKey {
 
 public abstract interface class io/opentelemetry/kotlin/context/Scope {
 	public abstract fun detach ()Z
+}
+
+public abstract interface class io/opentelemetry/kotlin/factory/BaggageFactory {
+	public abstract fun create (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/baggage/Baggage;
+	public abstract fun empty ()Lio/opentelemetry/kotlin/baggage/Baggage;
 }
 
 public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
@@ -152,6 +166,7 @@ public final class io/opentelemetry/kotlin/metrics/MeterProvider$DefaultImpls {
 public abstract interface class io/opentelemetry/kotlin/propagation/PropagatorFactory {
 	public abstract fun composite (Ljava/util/List;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public abstract fun composite ([Lio/opentelemetry/kotlin/propagation/TextMapPropagator;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
+	public abstract fun w3cBaggage ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 }
 
 public abstract interface class io/opentelemetry/kotlin/propagation/TextMapGetter {
