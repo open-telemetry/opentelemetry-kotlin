@@ -7,6 +7,8 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.factory.IdGenerator
+import io.opentelemetry.kotlin.propagation.CompatPropagatorConfigImpl
+import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
@@ -20,6 +22,7 @@ internal class CompatOpenTelemetryConfig(
     internal val tracerProviderConfig = CompatTracerProviderConfig(clock, idGenerator)
     internal val loggerProviderConfig = CompatLoggerProviderConfig(clock)
     internal val globalAttributeLimits = CompatAttributeLimitsConfig()
+    internal val propagatorCfg = CompatPropagatorConfigImpl()
 
     override fun attributeLimits(action: AttributeLimitsConfigDsl.() -> Unit) {
         globalAttributeLimits.action()
@@ -58,5 +61,9 @@ internal class CompatOpenTelemetryConfig(
 
     override fun loggerProvider(action: LoggerProviderConfigDsl.() -> Unit) {
         loggerProviderConfig.action()
+    }
+
+    override fun propagator(action: PropagatorConfigDsl.() -> TextMapPropagator) {
+        propagatorCfg.action()
     }
 }
