@@ -103,6 +103,7 @@ public abstract interface annotation class io/opentelemetry/kotlin/init/ConfigDs
 public abstract interface class io/opentelemetry/kotlin/init/ContextConfigDsl {
 	public abstract fun getStorageMode ()Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
 	public abstract fun setStorageMode (Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;)V
+	public abstract fun storage (Lkotlin/jvm/functions/Function0;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/LogExportConfigDsl {
