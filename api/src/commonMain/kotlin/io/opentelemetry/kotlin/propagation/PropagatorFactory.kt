@@ -31,4 +31,12 @@ public interface PropagatorFactory {
      * https://www.w3.org/TR/baggage/
      */
     public fun w3cBaggage(): TextMapPropagator
+
+    /**
+     * Returns a [TextMapPropagator] that injects and extracts the current span context
+     * via the W3C `traceparent` and `tracestate` HTTP headers.
+     *
+     * https://www.w3.org/TR/trace-context/
+     */
+    public fun w3cTraceContext(): TextMapPropagator
 }

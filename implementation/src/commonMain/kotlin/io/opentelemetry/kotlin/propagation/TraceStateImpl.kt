@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.tracing.TraceState
  * https://www.w3.org/TR/trace-context-2/#tracestate-header
  */
 @OptIn(ExperimentalApi::class)
-internal class TraceStateImpl(traceState: TraceState) {
+internal class TraceStateImpl(internal val traceState: TraceState) {
 
     private val state by lazy {
         traceState.asMap()

@@ -248,6 +248,7 @@ internal class NoopTests {
         assertSame(NoopTextMapPropagator, NoopPropagatorFactory.composite(NoopTextMapPropagator))
         assertSame(NoopTextMapPropagator, NoopPropagatorFactory.composite(listOf(NoopTextMapPropagator)))
         assertSame(NoopTextMapPropagator, NoopPropagatorFactory.w3cBaggage())
+        assertSame(NoopTextMapPropagator, NoopPropagatorFactory.w3cTraceContext())
     }
 
     @Test

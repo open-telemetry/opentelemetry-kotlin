@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapPropagator
 import io.opentelemetry.kotlin.propagation.OtelJavaTextMapPropagatorAdapter
@@ -21,6 +22,10 @@ internal class CompatPropagatorFactory : PropagatorFactory {
 
     override fun w3cBaggage(): TextMapPropagator {
         return TextMapPropagatorAdapter(W3CBaggagePropagator.getInstance())
+    }
+
+    override fun w3cTraceContext(): TextMapPropagator {
+        return TextMapPropagatorAdapter(W3CTraceContextPropagator.getInstance())
     }
 
     private fun TextMapPropagator.toOtelJava(): OtelJavaTextMapPropagator =
