@@ -9,9 +9,11 @@ import io.opentelemetry.kotlin.context.ImplicitContextStorage
 import io.opentelemetry.kotlin.context.Scope
 import io.opentelemetry.kotlin.tracing.Span
 
-internal class ContextFactoryImpl : ContextFactory {
+internal class ContextFactoryImpl(
+    storageFactory: (supplier: () -> Context) -> ImplicitContextStorage = ::DefaultImplicitContextStorage,
+) : ContextFactory {
 
-    private val storage: ImplicitContextStorage = DefaultImplicitContextStorage { root }
+    private val storage: ImplicitContextStorage = storageFactory { root }
     private val root by lazy { ContextImpl(storage) }
     internal val spanKey by lazy { createKey<Span>("otel-kotlin-span") }
 
