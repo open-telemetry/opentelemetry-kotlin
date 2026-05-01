@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.logging.LoggerProvider
+import io.opentelemetry.kotlin.propagation.PropagatorFactory
 import io.opentelemetry.kotlin.tracing.TracerProvider
 import kotlinx.coroutines.withTimeout
 
@@ -27,6 +28,7 @@ internal class OpenTelemetryImpl(
     override val span: SpanFactory,
     override val idGenerator: IdGenerator,
     override val resource: ResourceFactory,
+    override val propagators: PropagatorFactory,
     private val timeoutMs: Long = 3000,
 ) : OpenTelemetrySdk, TelemetryCloseable {
 

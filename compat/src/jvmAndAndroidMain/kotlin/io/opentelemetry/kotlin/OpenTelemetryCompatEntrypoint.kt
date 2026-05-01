@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin
 import io.opentelemetry.kotlin.clock.ClockAdapter
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
+import io.opentelemetry.kotlin.factory.CompatPropagatorFactory
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
@@ -58,5 +59,6 @@ internal fun createCompatOpenTelemetryImpl(
         span = span,
         idGenerator = idGenerator,
         resource = CompatResourceFactory,
+        propagators = CompatPropagatorFactory(),
     )
 }

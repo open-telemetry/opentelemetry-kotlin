@@ -4,6 +4,7 @@ public abstract interface annotation class io/opentelemetry/kotlin/ExperimentalA
 public abstract interface class io/opentelemetry/kotlin/OpenTelemetry {
 	public abstract fun getContext ()Lio/opentelemetry/kotlin/factory/ContextFactory;
 	public abstract fun getLoggerProvider ()Lio/opentelemetry/kotlin/logging/LoggerProvider;
+	public abstract fun getPropagators ()Lio/opentelemetry/kotlin/propagation/PropagatorFactory;
 	public abstract fun getSpan ()Lio/opentelemetry/kotlin/factory/SpanFactory;
 	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/factory/SpanContextFactory;
 	public abstract fun getTraceFlags ()Lio/opentelemetry/kotlin/factory/TraceFlagsFactory;

@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
 import io.opentelemetry.kotlin.logging.LoggerProviderImpl
+import io.opentelemetry.kotlin.propagation.PropagatorFactoryImpl
 import io.opentelemetry.kotlin.tracing.TracerProviderImpl
 
 /**
@@ -48,6 +49,7 @@ internal fun createOpenTelemetryImpl(
     val spanContext = SpanContextFactoryImpl(idGenerator, traceFlags, traceState)
     val contextFactory = ContextFactoryImpl()
     val span = SpanFactoryImpl(spanContext, contextFactory.spanKey)
+    val propagatorFactory = PropagatorFactoryImpl()
 
     val cfg = OpenTelemetryConfigImpl(clock).apply(config)
     val tracingConfig = cfg.generateTracingConfig()
@@ -77,5 +79,6 @@ internal fun createOpenTelemetryImpl(
         span = span,
         idGenerator = idGenerator,
         resource = resourceFactory,
+        propagators = propagatorFactory,
     )
 }
