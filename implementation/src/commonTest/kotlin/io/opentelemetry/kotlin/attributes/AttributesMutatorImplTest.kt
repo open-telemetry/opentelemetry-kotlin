@@ -101,6 +101,25 @@ internal class AttributesMutatorImplTest {
     }
 
     @Test
+    fun testByteArrayValueTruncated() {
+        val attrs = AttributesModel(attributeLimit = attributeLimit, attributeValueLengthLimit = 3).apply {
+            setByteArrayAttribute("bytes", byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05, 0x06))
+        }.attributes
+        val stored = attrs["bytes"] as ByteArray
+        assertTrue(stored.contentEquals(byteArrayOf(0x01, 0x02, 0x03)))
+    }
+
+    @Test
+    fun testByteArrayValueAtLimit() {
+        val bytes = byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05)
+        val attrs = AttributesModel(attributeLimit = attributeLimit, attributeValueLengthLimit = 5).apply {
+            setByteArrayAttribute("bytes", bytes)
+        }.attributes
+        val stored = attrs["bytes"] as ByteArray
+        assertTrue(stored.contentEquals(bytes))
+    }
+
+    @Test
     fun testEmptyKeyIgnoredForAllTypes() {
         val attrs = AttributesModel(attributeLimit).apply {
             setBooleanAttribute("", true)
