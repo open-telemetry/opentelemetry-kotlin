@@ -1,14 +1,16 @@
 package io.opentelemetry.kotlin.propagation
 
+import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapGetter
 
-internal class OtelJavaTextMapGetterAdapter(
-    private val delegate: TextMapGetter<Any>,
-) : OtelJavaTextMapGetter<Any> {
+@OptIn(ExperimentalApi::class)
+internal class OtelJavaTextMapGetterAdapter<C : Any>(
+    private val delegate: TextMapGetter<C>,
+) : OtelJavaTextMapGetter<C> {
 
-    override fun keys(carrier: Any): Iterable<String> = delegate.keys(carrier)
+    override fun keys(carrier: C): Iterable<String> = delegate.keys(carrier)
 
-    override fun get(carrier: Any?, key: String): String? {
+    override fun get(carrier: C?, key: String): String? {
         if (carrier == null) {
             return null
         }

@@ -1,14 +1,17 @@
 package io.opentelemetry.kotlin.propagation
 
+import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapSetter
 
-internal class OtelJavaTextMapSetterAdapter(
-    private val delegate: TextMapSetter<Any>,
-) : OtelJavaTextMapSetter<Any> {
+@OptIn(ExperimentalApi::class)
+internal class OtelJavaTextMapSetterAdapter<C : Any>(
+    private val delegate: TextMapSetter<C>,
+) : OtelJavaTextMapSetter<C> {
 
-    override fun set(carrier: Any?, key: String, value: String) {
-        if (carrier != null) {
-            delegate.set(carrier, key, value)
+    override fun set(carrier: C?, key: String, value: String) {
+        if (carrier == null) {
+            return
         }
+        delegate.set(carrier, key, value)
     }
 }
