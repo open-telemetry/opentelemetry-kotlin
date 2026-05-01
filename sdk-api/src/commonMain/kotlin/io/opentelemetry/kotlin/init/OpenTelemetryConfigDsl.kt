@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.propagation.TextMapPropagator
 
 /**
  * Defines configuration for [io.opentelemetry.kotlin.OpenTelemetry].
@@ -29,4 +30,10 @@ public interface OpenTelemetryConfigDsl : ResourceConfigDsl {
      * Defines configuration for how Context behaves.
      */
     public fun context(action: ContextConfigDsl.() -> Unit)
+
+    /**
+     * Configures the [TextMapPropagator] used to inject and extract context across process boundaries.
+     * https://opentelemetry.io/docs/specs/otel/context/api-propagators/
+     */
+    public fun propagator(action: PropagatorConfigDsl.() -> TextMapPropagator)
 }

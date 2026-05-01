@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.logging.LoggerProvider
+import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.tracing.Tracer
 import io.opentelemetry.kotlin.tracing.TracerProvider
 
@@ -53,4 +54,9 @@ public interface OpenTelemetry {
      * Factory that constructs Span objects.
      */
     public val span: SpanFactory
+
+    /**
+     * The [TextMapPropagator] used to inject and extract context across process boundaries.
+     */
+    public val propagator: TextMapPropagator
 }

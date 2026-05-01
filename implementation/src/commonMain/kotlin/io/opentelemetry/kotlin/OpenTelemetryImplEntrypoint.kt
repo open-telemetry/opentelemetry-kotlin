@@ -77,5 +77,6 @@ internal fun createOpenTelemetryImpl(
         span = span,
         idGenerator = idGenerator,
         resource = resourceFactory,
+        propagator = cfg.propagatorCfg.buildPropagator(),
     )
 }

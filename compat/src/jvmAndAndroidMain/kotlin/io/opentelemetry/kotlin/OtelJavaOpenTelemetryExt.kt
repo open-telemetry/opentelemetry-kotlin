@@ -12,6 +12,7 @@ import io.opentelemetry.kotlin.factory.CompatTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.CompatTraceStateFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.logging.LoggerProviderAdapter
+import io.opentelemetry.kotlin.propagation.TextMapPropagatorAdapter
 import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
 
 /**
@@ -44,5 +45,6 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(): OpenTelemetry {
         span = span,
         idGenerator = idGenerator,
         resource = CompatResourceFactory,
+        propagator = TextMapPropagatorAdapter(propagators.textMapPropagator),
     )
 }
