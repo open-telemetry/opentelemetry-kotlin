@@ -3,8 +3,6 @@ package io.opentelemetry.kotlin.factory
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.baggage.Baggage
 import io.opentelemetry.kotlin.baggage.BaggageCreationAction
-import io.opentelemetry.kotlin.baggage.BaggageEntry
-import io.opentelemetry.kotlin.baggage.BaggageEntryImpl
 import io.opentelemetry.kotlin.baggage.BaggageEntryMetadataImpl
 import io.opentelemetry.kotlin.baggage.BaggageImpl
 
@@ -21,19 +19,16 @@ internal class BaggageFactoryImpl : BaggageFactory {
 
     private class BaggageCreationActionImpl : BaggageCreationAction {
 
-        private val entries: MutableMap<String, BaggageEntry> = mutableMapOf()
+        private var baggage: Baggage = BaggageImpl.EMPTY
 
         override fun put(name: String, value: String, metadata: String) {
-            entries[name] = BaggageEntryImpl(value, BaggageEntryMetadataImpl(metadata))
+            baggage = baggage.set(name, value, BaggageEntryMetadataImpl(metadata))
         }
 
         override fun remove(name: String) {
-            entries.remove(name)
+            baggage = baggage.remove(name)
         }
 
-        fun build(): Baggage = when {
-            entries.isEmpty() -> BaggageImpl.EMPTY
-            else -> BaggageImpl(entries.toMap())
-        }
+        fun build(): Baggage = baggage
     }
 }

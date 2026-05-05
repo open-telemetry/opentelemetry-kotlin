@@ -24,7 +24,6 @@ internal object W3CBaggagePropagator : TextMapPropagator {
     private const val HTAB = '\t'
     private const val MAX_HEADER_BYTES = 8192
     private const val MAX_ENTRY_BYTES = 4096
-    private const val MAX_ENTRIES = 180
 
     private val FIELDS = listOf(FIELD)
 
@@ -50,27 +49,17 @@ internal object W3CBaggagePropagator : TextMapPropagator {
 
     private fun encode(entries: Map<String, BaggageEntry>): String? {
         val builder = StringBuilder()
-        var count = 0
         for ((name, entry) in entries) {
-            if (count >= MAX_ENTRIES) {
-                break
+            val piece = encodeIfFits(name, entry, builder.length) ?: continue
+            if (builder.isNotEmpty()) {
+                builder.append(ENTRY_DELIMITER)
             }
-            val piece = encodeIfFits(name, entry, builder.length)
-            if (piece != null) {
-                if (builder.isNotEmpty()) {
-                    builder.append(ENTRY_DELIMITER)
-                }
-                builder.append(piece)
-                count++
-            }
+            builder.append(piece)
         }
         return builder.takeIf(StringBuilder::isNotEmpty)?.toString()
     }
 
     private fun encodeIfFits(name: String, entry: BaggageEntry, currentLength: Int): String? {
-        if (!isValidToken(name)) {
-            return null
-        }
         val piece = encodeEntry(name, entry.value, entry.metadata.value)
         if (piece.length > MAX_ENTRY_BYTES) {
             return null
@@ -96,15 +85,11 @@ internal object W3CBaggagePropagator : TextMapPropagator {
 
     private fun decode(header: String): Baggage? {
         var baggage: Baggage = BaggageImpl.EMPTY
-        var added = false
         for (rawElement in header.split(ENTRY_DELIMITER)) {
-            val parsed = parseElement(rawElement)
-            if (parsed != null) {
-                baggage = baggage.set(parsed.key, parsed.value, BaggageEntryMetadataImpl(parsed.metadata))
-                added = true
-            }
+            val parsed = parseElement(rawElement) ?: continue
+            baggage = baggage.set(parsed.key, parsed.value, BaggageEntryMetadataImpl(parsed.metadata))
         }
-        return baggage.takeIf { added }
+        return baggage.takeIf { it !== BaggageImpl.EMPTY }
     }
 
     private fun parseElement(rawElement: String): ParsedEntry? {
@@ -132,9 +117,6 @@ internal object W3CBaggagePropagator : TextMapPropagator {
         }
         val key = keyValuePart.substring(0, eq).trim(SPACE, HTAB)
         val rawValue = keyValuePart.substring(eq + 1).trim(SPACE, HTAB)
-        if (key.isEmpty() || !isValidToken(key)) {
-            return null
-        }
         val value = percentDecode(rawValue) ?: return null
         return ParsedEntry(key, value, metadata.trim(SPACE, HTAB))
     }
@@ -204,24 +186,6 @@ internal object W3CBaggagePropagator : TextMapPropagator {
         else -> false
     }
 
-    /**
-     * RFC 7230 token: 1*tchar.
-     * tchar = "!" / "#" / "$" / "%" / "&" / "'" / "*" / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~" / DIGIT / ALPHA
-     */
-    private fun isValidToken(name: String): Boolean {
-        if (name.isEmpty()) {
-            return false
-        }
-        return name.all(::isTChar)
-    }
-
-    private fun isTChar(c: Char): Boolean {
-        if (c in 'a'..'z' || c in 'A'..'Z' || c in '0'..'9') {
-            return true
-        }
-        return c in TCHAR_SPECIALS
-    }
-
     private fun hexDigit(c: Char): Int = when (c) {
         in '0'..'9' -> c - '0'
         in 'a'..'f' -> c - 'a' + DECIMAL_BASE
@@ -248,9 +212,5 @@ internal object W3CBaggagePropagator : TextMapPropagator {
     private val HEX = charArrayOf(
         '0', '1', '2', '3', '4', '5', '6', '7',
         '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
-    )
-
-    private val TCHAR_SPECIALS = setOf(
-        '!', '#', '$', '%', '&', '\'', '*', '+', '-', '.', '^', '_', '`', '|', '~',
     )
 }
