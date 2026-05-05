@@ -58,5 +58,6 @@ internal fun createCompatOpenTelemetryImpl(
         span = span,
         idGenerator = idGenerator,
         resource = CompatResourceFactory,
+        propagator = cfg.propagatorCfg.buildPropagator(),
     )
 }

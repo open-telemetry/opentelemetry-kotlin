@@ -4,6 +4,7 @@ public abstract interface annotation class io/opentelemetry/kotlin/ExperimentalA
 public abstract interface class io/opentelemetry/kotlin/OpenTelemetry {
 	public abstract fun getContext ()Lio/opentelemetry/kotlin/factory/ContextFactory;
 	public abstract fun getLoggerProvider ()Lio/opentelemetry/kotlin/logging/LoggerProvider;
+	public abstract fun getPropagator ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public abstract fun getSpan ()Lio/opentelemetry/kotlin/factory/SpanFactory;
 	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/factory/SpanContextFactory;
 	public abstract fun getTraceFlags ()Lio/opentelemetry/kotlin/factory/TraceFlagsFactory;
@@ -163,14 +164,9 @@ public final class io/opentelemetry/kotlin/metrics/MeterProvider$DefaultImpls {
 	public static synthetic fun getMeter$default (Lio/opentelemetry/kotlin/metrics/MeterProvider;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/Meter;
 }
 
-public abstract interface class io/opentelemetry/kotlin/propagation/PropagatorFactory {
-	public abstract fun composite (Ljava/util/List;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
-	public abstract fun composite ([Lio/opentelemetry/kotlin/propagation/TextMapPropagator;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
-	public abstract fun w3cBaggage ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
-}
-
 public abstract interface class io/opentelemetry/kotlin/propagation/TextMapGetter {
 	public abstract fun get (Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun getAll (Ljava/lang/Object;Ljava/lang/String;)Ljava/util/List;
 	public abstract fun keys (Ljava/lang/Object;)Ljava/util/Collection;
 }
 

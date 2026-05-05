@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.propagation.TextMapPropagator
 
 internal class OpenTelemetryConfigImpl(
     clock: Clock,
@@ -10,6 +11,7 @@ internal class OpenTelemetryConfigImpl(
     internal val tracingConfig: TracerProviderConfigImpl = TracerProviderConfigImpl(clock)
     internal val loggingConfig: LoggerProviderConfigImpl = LoggerProviderConfigImpl(clock)
     internal val contextConfig: ContextConfigImpl = ContextConfigImpl()
+    internal val propagatorCfg: PropagatorConfigImpl = PropagatorConfigImpl()
     private val globalAttributeLimits = AttributeLimitsConfigImpl()
 
     override fun attributeLimits(action: AttributeLimitsConfigDsl.() -> Unit) {
@@ -26,6 +28,10 @@ internal class OpenTelemetryConfigImpl(
 
     override fun context(action: ContextConfigDsl.() -> Unit) {
         contextConfig.action()
+    }
+
+    override fun propagator(action: PropagatorConfigDsl.() -> TextMapPropagator) {
+        propagatorCfg.action()
     }
 
     private val defaultResource by lazy(::sdkDefaultResource)

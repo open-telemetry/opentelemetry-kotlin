@@ -40,8 +40,11 @@ internal object W3CBaggagePropagator : TextMapPropagator {
     }
 
     override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context {
-        val header = getter.get(carrier, FIELD) ?: return context
-        val baggage = decode(header) ?: return context
+        val combined = getter.getAll(carrier, FIELD).joinToString(ENTRY_DELIMITER.toString())
+        if (combined.isEmpty()) {
+            return context
+        }
+        val baggage = decode(combined) ?: return context
         return context.storeBaggage(baggage)
     }
 

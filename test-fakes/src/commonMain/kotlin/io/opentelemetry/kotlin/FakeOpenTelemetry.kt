@@ -17,6 +17,8 @@ import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.logging.FakeLoggerProvider
 import io.opentelemetry.kotlin.logging.LoggerProvider
+import io.opentelemetry.kotlin.propagation.FakeTextMapPropagator
+import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.tracing.FakeTracerProvider
 import io.opentelemetry.kotlin.tracing.TracerProvider
 
@@ -31,4 +33,5 @@ class FakeOpenTelemetry : OpenTelemetrySdk {
     override val span: SpanFactory = FakeSpanFactory()
     override val idGenerator: IdGenerator = FakeIdGenerator()
     override val resource: ResourceFactory = FakeResourceFactory()
+    override val propagator: TextMapPropagator = FakeTextMapPropagator()
 }

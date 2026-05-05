@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.logging.LoggerProvider
+import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.tracing.TracerProvider
 
 internal class CompatOpenTelemetryImpl(
@@ -21,4 +22,5 @@ internal class CompatOpenTelemetryImpl(
     override val span: SpanFactory,
     override val idGenerator: IdGenerator,
     override val resource: ResourceFactory,
+    override val propagator: TextMapPropagator,
 ) : OpenTelemetrySdk
