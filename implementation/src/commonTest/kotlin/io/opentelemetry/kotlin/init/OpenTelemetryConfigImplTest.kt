@@ -122,6 +122,20 @@ internal class OpenTelemetryConfigImplTest {
     }
 
     @Test
+    fun testThreadLocalStorage() {
+        val cfg = OpenTelemetryConfigImpl(clock).apply {
+            context {
+                storageMode = ImplicitContextStorageMode.THREAD_LOCAL
+            }
+        }
+        val storage = cfg.contextConfig.generateStorage(::FakeContext)
+        val root = FakeContext()
+        val rootStorage = cfg.contextConfig.generateStorage { root }
+        assertNotNull(storage)
+        assertSame(root, rootStorage.implicitContext())
+    }
+
+    @Test
     fun testCustomStorage() {
         val custom = FakeImplicitContextStorage()
         val cfg = OpenTelemetryConfigImpl(clock).apply {

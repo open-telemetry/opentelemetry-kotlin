@@ -26,6 +26,7 @@ public abstract interface class io/opentelemetry/kotlin/context/ImplicitContextS
 
 public final class io/opentelemetry/kotlin/context/ImplicitContextStorageMode : java/lang/Enum {
 	public static final field GLOBAL Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
+	public static final field THREAD_LOCAL Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
 	public static fun values ()[Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
