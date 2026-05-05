@@ -10,6 +10,10 @@ import io.opentelemetry.kotlin.ExperimentalApi
 @ExperimentalApi
 public sealed class AnyValue {
 
+    public object NullValue : AnyValue() {
+        override fun toString(): String = "NullValue"
+    }
+
     public class StringValue(public val value: String) : AnyValue() {
         override fun equals(other: Any?): Boolean {
             if (this === other) {
@@ -90,12 +94,12 @@ public sealed class AnyValue {
         override fun toString(): String = "BytesValue(size=${value.size})"
     }
 
-    public class ArrayValue(public val values: List<AnyValue>) : AnyValue() {
+    public class ListValue(public val values: List<AnyValue>) : AnyValue() {
         override fun equals(other: Any?): Boolean {
             if (this === other) {
                 return true
             }
-            if (other !is ArrayValue) {
+            if (other !is ListValue) {
                 return false
             }
             return values == other.values
@@ -103,7 +107,7 @@ public sealed class AnyValue {
 
         override fun hashCode(): Int = values.hashCode()
 
-        override fun toString(): String = "ArrayValue(values=$values)"
+        override fun toString(): String = "ListValue(values=$values)"
     }
 
     public class MapValue(public val values: Map<String, AnyValue>) : AnyValue() {

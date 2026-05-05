@@ -17,14 +17,6 @@ public abstract interface annotation class io/opentelemetry/kotlin/ThreadSafe : 
 public abstract class io/opentelemetry/kotlin/attributes/AnyValue {
 }
 
-public final class io/opentelemetry/kotlin/attributes/AnyValue$ArrayValue : io/opentelemetry/kotlin/attributes/AnyValue {
-	public fun <init> (Ljava/util/List;)V
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getValues ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class io/opentelemetry/kotlin/attributes/AnyValue$BoolValue : io/opentelemetry/kotlin/attributes/AnyValue {
 	public fun <init> (Z)V
 	public fun equals (Ljava/lang/Object;)Z
@@ -49,6 +41,14 @@ public final class io/opentelemetry/kotlin/attributes/AnyValue$DoubleValue : io/
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/opentelemetry/kotlin/attributes/AnyValue$ListValue : io/opentelemetry/kotlin/attributes/AnyValue {
+	public fun <init> (Ljava/util/List;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValues ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/opentelemetry/kotlin/attributes/AnyValue$LongValue : io/opentelemetry/kotlin/attributes/AnyValue {
 	public fun <init> (J)V
 	public fun equals (Ljava/lang/Object;)Z
@@ -62,6 +62,11 @@ public final class io/opentelemetry/kotlin/attributes/AnyValue$MapValue : io/ope
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getValues ()Ljava/util/Map;
 	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/opentelemetry/kotlin/attributes/AnyValue$NullValue : io/opentelemetry/kotlin/attributes/AnyValue {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/attributes/AnyValue$NullValue;
 	public fun toString ()Ljava/lang/String;
 }
 

@@ -5,9 +5,26 @@ package io.opentelemetry.kotlin.attributes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 internal class AnyValueTest {
+
+    @Test
+    fun nullValueIsSingleton() {
+        assertSame(AnyValue.NullValue, AnyValue.NullValue)
+        assertEquals(AnyValue.NullValue, AnyValue.NullValue)
+        assertEquals(AnyValue.NullValue.hashCode(), AnyValue.NullValue.hashCode())
+    }
+
+    @Test
+    fun nullValueNotEqualToOtherTypes() {
+        assertNotEquals<Any>(AnyValue.NullValue, AnyValue.StringValue(""))
+        assertNotEquals<Any>(AnyValue.NullValue, AnyValue.LongValue(0L))
+        assertNotEquals<Any>(AnyValue.NullValue, AnyValue.BoolValue(false))
+        assertNotEquals<Any>(AnyValue.NullValue, AnyValue.ListValue(emptyList()))
+        assertNotEquals<Any>(AnyValue.NullValue, AnyValue.MapValue(emptyMap()))
+    }
 
     @Test
     fun stringValueExposesValue() {
@@ -157,27 +174,27 @@ internal class AnyValueTest {
     }
 
     @Test
-    fun arrayValueExposesValues() {
+    fun listValueExposesValues() {
         val list = listOf(
             AnyValue.StringValue("a"),
             AnyValue.LongValue(1L)
         )
-        assertEquals(list, AnyValue.ArrayValue(list).values)
+        assertEquals(list, AnyValue.ListValue(list).values)
     }
 
     @Test
-    fun arrayValueEmptyIsPreserved() {
-        val empty = AnyValue.ArrayValue(emptyList())
+    fun listValueEmptyIsPreserved() {
+        val empty = AnyValue.ListValue(emptyList())
         assertEquals(0, empty.values.size)
-        assertEquals(AnyValue.ArrayValue(emptyList()), empty)
+        assertEquals(AnyValue.ListValue(emptyList()), empty)
     }
 
     @Test
-    fun arrayValueHomogeneousEquality() {
-        val a = AnyValue.ArrayValue(
+    fun listValueHomogeneousEquality() {
+        val a = AnyValue.ListValue(
             listOf(AnyValue.LongValue(1L), AnyValue.LongValue(2L))
         )
-        val b = AnyValue.ArrayValue(
+        val b = AnyValue.ListValue(
             listOf(AnyValue.LongValue(1L), AnyValue.LongValue(2L))
         )
         assertEquals(a, b)
@@ -185,19 +202,19 @@ internal class AnyValueTest {
     }
 
     @Test
-    fun arrayValueOrderMatters() {
-        val a = AnyValue.ArrayValue(
+    fun listValueOrderMatters() {
+        val a = AnyValue.ListValue(
             listOf(AnyValue.LongValue(1L), AnyValue.LongValue(2L))
         )
-        val b = AnyValue.ArrayValue(
+        val b = AnyValue.ListValue(
             listOf(AnyValue.LongValue(2L), AnyValue.LongValue(1L))
         )
         assertNotEquals(a, b)
     }
 
     @Test
-    fun arrayValueHeterogeneousEquality() {
-        val a = AnyValue.ArrayValue(
+    fun listValueHeterogeneousEquality() {
+        val a = AnyValue.ListValue(
             listOf(
                 AnyValue.StringValue("s"),
                 AnyValue.LongValue(1L),
@@ -205,7 +222,7 @@ internal class AnyValueTest {
                 AnyValue.BoolValue(true)
             )
         )
-        val b = AnyValue.ArrayValue(
+        val b = AnyValue.ListValue(
             listOf(
                 AnyValue.StringValue("s"),
                 AnyValue.LongValue(1L),
@@ -217,17 +234,17 @@ internal class AnyValueTest {
     }
 
     @Test
-    fun arrayValueNestedArraysEquality() {
-        val a = AnyValue.ArrayValue(
+    fun listValueNestedArraysEquality() {
+        val a = AnyValue.ListValue(
             listOf(
-                AnyValue.ArrayValue(listOf(AnyValue.LongValue(1L))),
-                AnyValue.ArrayValue(listOf(AnyValue.LongValue(2L)))
+                AnyValue.ListValue(listOf(AnyValue.LongValue(1L))),
+                AnyValue.ListValue(listOf(AnyValue.LongValue(2L)))
             )
         )
-        val b = AnyValue.ArrayValue(
+        val b = AnyValue.ListValue(
             listOf(
-                AnyValue.ArrayValue(listOf(AnyValue.LongValue(1L))),
-                AnyValue.ArrayValue(listOf(AnyValue.LongValue(2L)))
+                AnyValue.ListValue(listOf(AnyValue.LongValue(1L))),
+                AnyValue.ListValue(listOf(AnyValue.LongValue(2L)))
             )
         )
         assertEquals(a, b)
@@ -235,11 +252,11 @@ internal class AnyValueTest {
     }
 
     @Test
-    fun arrayValueContainingBytesUsesContentEquality() {
-        val a = AnyValue.ArrayValue(
+    fun listValueContainingBytesUsesContentEquality() {
+        val a = AnyValue.ListValue(
             listOf(AnyValue.BytesValue(byteArrayOf(1, 2)))
         )
-        val b = AnyValue.ArrayValue(
+        val b = AnyValue.ListValue(
             listOf(AnyValue.BytesValue(byteArrayOf(1, 2)))
         )
         assertEquals(a, b)
@@ -335,17 +352,17 @@ internal class AnyValueTest {
     }
 
     @Test
-    fun mapValueWithArrayValuesEquality() {
+    fun mapValueWithListValuesEquality() {
         val a = AnyValue.MapValue(
             mapOf(
-                "list" to AnyValue.ArrayValue(
+                "list" to AnyValue.ListValue(
                     listOf(AnyValue.StringValue("a"), AnyValue.StringValue("b"))
                 )
             )
         )
         val b = AnyValue.MapValue(
             mapOf(
-                "list" to AnyValue.ArrayValue(
+                "list" to AnyValue.ListValue(
                     listOf(AnyValue.StringValue("a"), AnyValue.StringValue("b"))
                 )
             )
@@ -354,14 +371,14 @@ internal class AnyValueTest {
     }
 
     @Test
-    fun arrayValueWithMapValueEquality() {
-        val a = AnyValue.ArrayValue(
+    fun listValueWithMapValueEquality() {
+        val a = AnyValue.ListValue(
             listOf(
                 AnyValue.MapValue(mapOf("k" to AnyValue.LongValue(1L))),
                 AnyValue.MapValue(mapOf("k" to AnyValue.LongValue(2L)))
             )
         )
-        val b = AnyValue.ArrayValue(
+        val b = AnyValue.ListValue(
             listOf(
                 AnyValue.MapValue(mapOf("k" to AnyValue.LongValue(1L))),
                 AnyValue.MapValue(mapOf("k" to AnyValue.LongValue(2L)))
@@ -375,12 +392,12 @@ internal class AnyValueTest {
         val build = {
             AnyValue.MapValue(
                 mapOf(
-                    "data" to AnyValue.ArrayValue(
+                    "data" to AnyValue.ListValue(
                         listOf(
                             AnyValue.MapValue(
                                 mapOf(
                                     "id" to AnyValue.LongValue(1L),
-                                    "tags" to AnyValue.ArrayValue(
+                                    "tags" to AnyValue.ListValue(
                                         listOf(
                                             AnyValue.StringValue("a"),
                                             AnyValue.StringValue("b")
@@ -400,12 +417,13 @@ internal class AnyValueTest {
     @Test
     fun differentVariantsAreNotEqual() {
         val variants = listOf(
+            AnyValue.NullValue,
             AnyValue.StringValue("1"),
             AnyValue.BoolValue(true),
             AnyValue.LongValue(1L),
             AnyValue.DoubleValue(1.0),
             AnyValue.BytesValue(byteArrayOf(1)),
-            AnyValue.ArrayValue(emptyList()),
+            AnyValue.ListValue(emptyList()),
             AnyValue.MapValue(emptyMap())
         )
         for (i in variants.indices) {
@@ -420,27 +438,29 @@ internal class AnyValueTest {
     @Test
     fun variantsCanBeDiscriminatedByIsCheck() {
         val values: List<AnyValue> = listOf(
+            AnyValue.NullValue,
             AnyValue.StringValue("s"),
             AnyValue.BoolValue(true),
             AnyValue.LongValue(1L),
             AnyValue.DoubleValue(1.0),
             AnyValue.BytesValue(byteArrayOf(1)),
-            AnyValue.ArrayValue(emptyList()),
+            AnyValue.ListValue(emptyList()),
             AnyValue.MapValue(emptyMap())
         )
         val tags = values.map {
             when (it) {
+                is AnyValue.NullValue -> "null"
                 is AnyValue.StringValue -> "string"
                 is AnyValue.BoolValue -> "bool"
                 is AnyValue.LongValue -> "long"
                 is AnyValue.DoubleValue -> "double"
                 is AnyValue.BytesValue -> "bytes"
-                is AnyValue.ArrayValue -> "array"
+                is AnyValue.ListValue -> "list"
                 is AnyValue.MapValue -> "map"
             }
         }
         assertEquals(
-            listOf("string", "bool", "long", "double", "bytes", "array", "map"),
+            listOf("null", "string", "bool", "long", "double", "bytes", "list", "map"),
             tags
         )
     }
