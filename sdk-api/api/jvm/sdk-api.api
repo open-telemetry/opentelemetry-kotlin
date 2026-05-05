@@ -122,7 +122,14 @@ public abstract interface class io/opentelemetry/kotlin/init/OpenTelemetryConfig
 	public abstract fun attributeLimits (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun context (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun loggerProvider (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun propagator (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun tracerProvider (Lkotlin/jvm/functions/Function1;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/init/PropagatorConfigDsl {
+	public abstract fun composite ([Lio/opentelemetry/kotlin/propagation/TextMapPropagator;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
+	public abstract fun w3cBaggage ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
+	public abstract fun w3cTraceContext ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/ResourceConfigDsl {

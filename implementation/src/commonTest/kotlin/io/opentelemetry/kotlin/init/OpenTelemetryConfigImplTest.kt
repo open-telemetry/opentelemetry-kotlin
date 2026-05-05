@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.init
 
+import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.clock.FakeClock
@@ -8,9 +9,12 @@ import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.context.FakeImplicitContextStorage
 import io.opentelemetry.kotlin.context.ImplicitContextStorageMode
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
+import io.opentelemetry.kotlin.propagation.CompositeTextMapPropagator
+import io.opentelemetry.kotlin.propagation.W3CBaggagePropagator
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
@@ -26,6 +30,25 @@ internal class OpenTelemetryConfigImplTest {
         assertNull(cfg.generateTracingConfig().processor)
         assertNull(cfg.generateLoggingConfig().processor)
         assertEquals(ImplicitContextStorageMode.GLOBAL, cfg.contextConfig.storageMode)
+        assertSame(NoopOpenTelemetry.propagator, cfg.propagatorCfg.buildPropagator())
+    }
+
+    @Test
+    fun testPropagatorOverride() {
+        val cfg = OpenTelemetryConfigImpl(clock).apply {
+            propagator { w3cBaggage() }
+        }
+        assertSame(W3CBaggagePropagator, cfg.propagatorCfg.buildPropagator())
+    }
+
+    @Test
+    fun testCompositePropagatorOverride() {
+        val cfg = OpenTelemetryConfigImpl(clock).apply {
+            propagator { composite(w3cBaggage()) }
+        }
+        val composite = cfg.propagatorCfg.buildPropagator()
+        assertIs<CompositeTextMapPropagator>(composite)
+        assertEquals(listOf("baggage"), composite.fields().toList())
     }
 
     @Test

@@ -1,28 +1,25 @@
-package io.opentelemetry.kotlin.factory
+package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapPropagator
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
-import io.opentelemetry.kotlin.propagation.TextMapGetter
-import io.opentelemetry.kotlin.propagation.TextMapPropagator
-import io.opentelemetry.kotlin.propagation.TextMapPropagatorAdapter
-import io.opentelemetry.kotlin.propagation.TextMapSetter
+import io.opentelemetry.kotlin.factory.CompatContextFactory
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
-internal class CompatPropagatorFactoryTest {
+internal class CompatPropagatorApiTest {
 
-    private val factory = CompatPropagatorFactory()
+    private val dsl = CompatPropagatorConfigImpl()
     private val contextFactory = CompatContextFactory()
 
     @Test
     fun `composite of zero propagators returns a working noop`() {
         val key: ContextKey<String> = contextFactory.createKey("k")
-        val composite = factory.composite()
+        val composite = dsl.composite()
         assertTrue(composite.fields().isEmpty())
 
         val carrier = mutableMapOf<String, String>()
@@ -37,7 +34,7 @@ internal class CompatPropagatorFactoryTest {
     @Test
     fun `composite of single Kotlin propagator round-trips through Java`() {
         val recording = RecordingPropagator(listOf("foo"))
-        val composite = factory.composite(recording)
+        val composite = dsl.composite(recording)
 
         val carrier = mutableMapOf<String, String>()
         composite.inject(contextFactory.root(), carrier, MapTextMapSetter)
@@ -52,7 +49,7 @@ internal class CompatPropagatorFactoryTest {
     fun `composite invokes inject on all delegates in order`() {
         val a = RecordingPropagator(listOf("a"))
         val b = RecordingPropagator(listOf("b"))
-        val composite = factory.composite(a, b)
+        val composite = dsl.composite(a, b)
 
         val carrier = linkedMapOf<String, String>()
         composite.inject(contextFactory.root(), carrier, MapTextMapSetter)
@@ -66,7 +63,7 @@ internal class CompatPropagatorFactoryTest {
     fun `composite threads context through extract delegates left-to-right`() {
         val keyA: ContextKey<String> = contextFactory.createKey("a")
         val keyB: ContextKey<String> = contextFactory.createKey("b")
-        val composite = factory.composite(
+        val composite = dsl.composite(
             ContextWritingPropagator(keyA, "alpha"),
             ContextWritingPropagator(keyB, "beta"),
         )
@@ -78,37 +75,45 @@ internal class CompatPropagatorFactoryTest {
     }
 
     @Test
-    fun `composite of single TextMapPropagatorAdapter unwraps to avoid double-wrapping`() {
+    fun `composite unwraps adapters before delegating to Java`() {
         val javaPropagator: OtelJavaTextMapPropagator = OtelJavaTextMapPropagator.noop()
         val adapter = TextMapPropagatorAdapter(javaPropagator)
 
-        val composite = factory.composite(adapter)
+        val composite = dsl.composite(adapter)
 
         assertTrue(composite is TextMapPropagatorAdapter)
         assertSame(javaPropagator, composite.impl)
     }
 
     @Test
-    fun `vararg and list overloads behave identically`() {
-        val a = RecordingPropagator(listOf("x"))
-        val b = RecordingPropagator(listOf("y"))
+    fun `w3cBaggage returns an adapter wrapping the Java W3CBaggagePropagator`() {
+        val propagator = dsl.w3cBaggage()
+        assertTrue(propagator is TextMapPropagatorAdapter)
+        assertEquals(listOf("baggage"), propagator.fields().toList())
+    }
 
-        val viaVararg = factory.composite(a, b)
-        val viaList = factory.composite(listOf(a, b))
+    @Test
+    fun `composite call captures the result and buildPropagator returns it`() {
+        val captured = dsl.composite(RecordingPropagator(listOf("foo")))
+        assertSame(captured, dsl.buildPropagator())
+    }
 
-        assertEquals(viaVararg.fields().toList(), viaList.fields().toList())
+    @Test
+    fun `w3cBaggage call captures the result and buildPropagator returns it`() {
+        val captured = dsl.w3cBaggage()
+        assertSame(captured, dsl.buildPropagator())
     }
 
     @Test
     fun `w3cTraceContext returns an adapter for traceparent and tracestate fields`() {
-        val propagator = factory.w3cTraceContext()
+        val propagator = dsl.w3cTraceContext()
         assertTrue(propagator is TextMapPropagatorAdapter)
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
     }
 
     @Test
     fun `w3cTraceContext round-trips a traceparent header through inject and extract`() {
-        val propagator = factory.w3cTraceContext()
+        val propagator = dsl.w3cTraceContext()
         val incoming = mapOf(
             "traceparent" to "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01",
             "tracestate" to "vendor=value",
@@ -120,6 +125,12 @@ internal class CompatPropagatorFactoryTest {
 
         assertEquals(incoming["traceparent"], outgoing["traceparent"])
         assertEquals(incoming["tracestate"], outgoing["tracestate"])
+    }
+
+    @Test
+    fun `w3cTraceContext call captures the result and buildPropagator returns it`() {
+        val captured = dsl.w3cTraceContext()
+        assertSame(captured, dsl.buildPropagator())
     }
 }
 

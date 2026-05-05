@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.context.NoopContext
 import io.opentelemetry.kotlin.context.NoopContextKey
 import io.opentelemetry.kotlin.factory.NoopBaggageFactory
 import io.opentelemetry.kotlin.logging.SeverityNumber
-import io.opentelemetry.kotlin.propagation.NoopPropagatorFactory
 import io.opentelemetry.kotlin.propagation.NoopTextMapPropagator
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapSetter
@@ -246,11 +245,8 @@ internal class NoopTests {
     }
 
     @Test
-    fun testNoopPropagatorFactory() {
-        assertSame(NoopTextMapPropagator, NoopPropagatorFactory.composite(NoopTextMapPropagator))
-        assertSame(NoopTextMapPropagator, NoopPropagatorFactory.composite(listOf(NoopTextMapPropagator)))
-        assertSame(NoopTextMapPropagator, NoopPropagatorFactory.w3cBaggage())
-        assertSame(NoopTextMapPropagator, NoopPropagatorFactory.w3cTraceContext())
+    fun testNoopOpenTelemetryPropagator() {
+        assertSame(NoopTextMapPropagator, NoopOpenTelemetry.propagator)
     }
 
     @Test

@@ -9,54 +9,36 @@ import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
+import io.opentelemetry.kotlin.init.PropagatorConfigImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
-internal class PropagatorFactoryImplTest {
+internal class CorePropagatorApiTest {
 
+    private val dsl = PropagatorConfigImpl()
+    private val contextFactory = ContextFactoryImpl()
     private val traceFlagsFactory = TraceFlagsFactoryImpl()
     private val traceStateFactory = TraceStateFactoryImpl()
     private val spanContextFactory = SpanContextFactoryImpl(IdGeneratorImpl(), traceFlagsFactory, traceStateFactory)
-    private val contextFactory = ContextFactoryImpl()
     private val spanFactory = SpanFactoryImpl(spanContextFactory, contextFactory.spanKey)
 
-    private val factory = PropagatorFactoryImpl(
-        traceFlagsFactory = traceFlagsFactory,
-        traceStateFactory = traceStateFactory,
-        spanContextFactory = spanContextFactory,
-        spanFactory = spanFactory,
-        contextFactory = contextFactory,
-    )
-
     @Test
-    fun `composite of zero propagators returns empty propagator`() {
-        val composite = factory.composite()
-        assertTrue(composite.fields().isEmpty())
-
-        val root = contextFactory.root()
-        val carrier = mutableMapOf<String, String>()
-        composite.inject(root, carrier, MapTextMapSetter)
-        assertTrue(carrier.isEmpty())
-
-        val ctx = composite.extract(root, carrier, MapTextMapGetter)
-        assertSame(root, ctx)
-    }
-
-    @Test
-    fun `composite of single propagator returns same instance`() {
+    fun `composite with single propagator wraps in CompositeTextMapPropagator`() {
         val single = RecordingPropagator(listOf("foo"))
-        assertSame(single, factory.composite(single))
-        assertSame(single, factory.composite(listOf(single)))
+        val composite = dsl.composite(single)
+        assertIs<CompositeTextMapPropagator>(composite)
+        assertEquals(listOf("foo"), composite.fields().toList())
     }
 
     @Test
-    fun `composite of many returns deduped union of fields preserving order`() {
+    fun `composite returns deduped union of fields preserving order`() {
         val a = RecordingPropagator(listOf("a", "shared"))
         val b = RecordingPropagator(listOf("b", "shared", "c"))
-        val composite = factory.composite(a, b)
+        val composite = dsl.composite(a, b)
         assertEquals(listOf("a", "shared", "b", "c"), composite.fields().toList())
     }
 
@@ -64,7 +46,7 @@ internal class PropagatorFactoryImplTest {
     fun `composite invokes inject on all delegates in order`() {
         val a = RecordingPropagator(listOf("a"))
         val b = RecordingPropagator(listOf("b"))
-        val composite = factory.composite(a, b)
+        val composite = dsl.composite(a, b)
         val carrier = mutableMapOf<String, String>()
         composite.inject(contextFactory.root(), carrier, MapTextMapSetter)
         assertEquals(listOf("a", "b"), carrier.keys.toList())
@@ -76,46 +58,53 @@ internal class PropagatorFactoryImplTest {
     fun `composite threads context through extract delegates left-to-right`() {
         val keyA: ContextKey<String> = contextFactory.createKey("a")
         val keyB: ContextKey<String> = contextFactory.createKey("b")
-        val a = ContextWritingPropagator(keyA, "alpha")
-        val b = ContextWritingPropagator(keyB, "beta")
-        val composite = factory.composite(a, b)
+        val composite = dsl.composite(
+            ContextWritingPropagator(keyA, "alpha"),
+            ContextWritingPropagator(keyB, "beta"),
+        )
         val result = composite.extract(contextFactory.root(), emptyMap(), MapTextMapGetter)
         assertEquals("alpha", result.get(keyA))
         assertEquals("beta", result.get(keyB))
     }
 
     @Test
-    fun `composite extract observes upstream context modifications`() {
-        val key: ContextKey<String> = contextFactory.createKey("k")
-        val writer = ContextWritingPropagator(key, "set-by-writer")
-        val reader = ContextReadingPropagator(key)
-        factory.composite(writer, reader).extract(contextFactory.root(), emptyMap(), MapTextMapGetter)
-        assertEquals("set-by-writer", reader.observedValue)
+    fun `w3cBaggage returns the W3C baggage propagator singleton`() {
+        assertSame(W3CBaggagePropagator, dsl.w3cBaggage())
     }
 
     @Test
-    fun `w3cBaggage returns the W3C baggage propagator`() {
-        assertSame(W3CBaggagePropagator, factory.w3cBaggage())
+    fun `w3cBaggage call captures the result and buildPropagator returns it`() {
+        dsl.w3cBaggage()
+        assertSame(W3CBaggagePropagator, dsl.buildPropagator())
+    }
+
+    @Test
+    fun `composite call captures the result and buildPropagator returns it`() {
+        val captured = dsl.composite(RecordingPropagator(listOf("foo")))
+        assertSame(captured, dsl.buildPropagator())
     }
 
     @Test
     fun `w3cTraceContext returns a propagator for traceparent and tracestate fields`() {
-        val propagator = factory.w3cTraceContext()
+        val propagator = dsl.w3cTraceContext()
+        installFactories()
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
     }
 
     @Test
-    fun `w3cTraceContext returns the same instance on repeated calls`() {
-        assertSame(factory.w3cTraceContext(), factory.w3cTraceContext())
+    fun `w3cTraceContext call captures the result and buildPropagator returns it`() {
+        val captured = dsl.w3cTraceContext()
+        assertSame(captured, dsl.buildPropagator())
     }
 
-    @Test
-    fun `vararg and list overloads behave identically`() {
-        val a = RecordingPropagator(listOf("a"))
-        val b = RecordingPropagator(listOf("b"))
-        val viaVararg = factory.composite(a, b)
-        val viaList = factory.composite(listOf(a, b))
-        assertEquals(viaVararg.fields().toList(), viaList.fields().toList())
+    private fun installFactories() {
+        dsl.installFactories(
+            traceFlagsFactory = traceFlagsFactory,
+            traceStateFactory = traceStateFactory,
+            spanContextFactory = spanContextFactory,
+            spanFactory = spanFactory,
+            contextFactory = contextFactory,
+        )
     }
 }
 
@@ -128,9 +117,7 @@ private class RecordingPropagator(private val keys: List<String>) : TextMapPropa
 
     override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {
         injectCalled = true
-        keys.forEach { k ->
-            setter.set(carrier, k, "set-by-$k")
-        }
+        keys.forEach { k -> setter.set(carrier, k, "set-by-$k") }
     }
 
     override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context = context
@@ -143,20 +130,6 @@ private class ContextWritingPropagator(
 ) : TextMapPropagator {
     override fun fields(): Collection<String> = emptyList()
     override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {}
-    override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context {
-        return context.set(key, value)
-    }
-}
-
-@OptIn(ExperimentalApi::class)
-private class ContextReadingPropagator(private val key: ContextKey<String>) : TextMapPropagator {
-    var observedValue: String? = null
-        private set
-
-    override fun fields(): Collection<String> = emptyList()
-    override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {}
-    override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context {
-        observedValue = context.get(key)
-        return context
-    }
+    override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context =
+        context.set(key, value)
 }
