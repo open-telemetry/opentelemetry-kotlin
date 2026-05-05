@@ -255,6 +255,12 @@ internal class NoopTests {
         assertSame(NoopBaggage, NoopBaggageFactory.create { })
     }
 
+    @Test
+    fun testNoopOpenTelemetryBaggage() {
+        assertSame(NoopBaggageFactory, NoopOpenTelemetry.baggage)
+        assertSame(NoopBaggage, NoopOpenTelemetry.baggage.create { put("k", "v") })
+    }
+
     private fun verifySpanOperationsAreNoop(span: NoopSpan) {
         // Test primitive attributes
         span.setStringAttribute("key", "value")

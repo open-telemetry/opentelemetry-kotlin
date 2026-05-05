@@ -1,7 +1,9 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.factory.BaggageFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
+import io.opentelemetry.kotlin.factory.FakeBaggageFactory
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.FakeResourceFactory
@@ -31,6 +33,7 @@ class FakeOpenTelemetry : OpenTelemetrySdk {
     override val traceState: TraceStateFactory = FakeTraceStateFactory()
     override val context: ContextFactory = FakeContextFactory()
     override val span: SpanFactory = FakeSpanFactory()
+    override val baggage: BaggageFactory = FakeBaggageFactory()
     override val idGenerator: IdGenerator = FakeIdGenerator()
     override val resource: ResourceFactory = FakeResourceFactory()
     override val propagator: TextMapPropagator = FakeTextMapPropagator()

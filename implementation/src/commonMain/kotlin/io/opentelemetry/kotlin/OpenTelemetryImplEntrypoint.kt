@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.factory.BaggageFactoryImpl
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
@@ -83,6 +84,7 @@ internal fun createOpenTelemetryImpl(
         traceState = traceState,
         context = contextFactory,
         span = span,
+        baggage = BaggageFactoryImpl(),
         idGenerator = idGenerator,
         resource = resourceFactory,
         propagator = cfg.propagatorCfg.buildPropagator(),

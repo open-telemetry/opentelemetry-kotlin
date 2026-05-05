@@ -1,8 +1,13 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.factory.CompatBaggageFactory
 import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotSame
+import org.junit.Assert.assertSame
 import org.junit.Test
 
+@OptIn(ExperimentalApi::class)
 internal class OpenTelemetrySdkTest {
 
     @Test
@@ -15,9 +20,23 @@ internal class OpenTelemetrySdkTest {
             setStringAttribute("key", "value")
         }
         val d = provider.getTracer("another")
-        Assert.assertSame(a, b)
-        Assert.assertNotSame(b, c)
-        Assert.assertNotSame(c, d)
+        assertSame(a, b)
+        assertNotSame(b, c)
+        assertNotSame(c, d)
+    }
+
+    @Test
+    fun `retrieve baggage factory`() {
+        val sdk = createCompatOpenTelemetry()
+        Assert.assertTrue(sdk.baggage is CompatBaggageFactory)
+
+        val baggage = sdk.baggage.create {
+            put("user", "alice")
+            put("region", "eu", metadata = "secure")
+        }
+        assertEquals("alice", baggage.getValue("user"))
+        assertEquals("eu", baggage.getValue("region"))
+        assertEquals("secure", baggage.asMap()["region"]?.metadata?.value)
     }
 
     @Test
@@ -30,8 +49,8 @@ internal class OpenTelemetrySdkTest {
             setStringAttribute("key", "value")
         }
         val d = provider.getLogger("another")
-        Assert.assertSame(a, b)
-        Assert.assertNotSame(b, c)
-        Assert.assertNotSame(c, d)
+        assertSame(a, b)
+        assertNotSame(b, c)
+        assertNotSame(c, d)
     }
 }

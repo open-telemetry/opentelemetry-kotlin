@@ -1,7 +1,9 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.factory.BaggageFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
+import io.opentelemetry.kotlin.factory.NoopBaggageFactory
 import io.opentelemetry.kotlin.factory.NoopContextFactory
 import io.opentelemetry.kotlin.factory.NoopIdGenerator
 import io.opentelemetry.kotlin.factory.NoopResourceFactory
@@ -31,6 +33,7 @@ internal object NoopOpenTelemetryImpl : OpenTelemetrySdk {
     override val traceState: TraceStateFactory = NoopTraceStateFactory
     override val context: ContextFactory = NoopContextFactory
     override val span: SpanFactory = NoopSpanFactory
+    override val baggage: BaggageFactory = NoopBaggageFactory
     override val idGenerator: IdGenerator = NoopIdGenerator
     override val resource: ResourceFactory = NoopResourceFactory
     override val propagator: TextMapPropagator = NoopTextMapPropagator
