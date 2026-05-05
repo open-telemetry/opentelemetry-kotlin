@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.clock.ClockAdapter
+import io.opentelemetry.kotlin.factory.CompatBaggageFactory
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
@@ -56,6 +57,7 @@ internal fun createCompatOpenTelemetryImpl(
         traceState = traceState,
         context = contextFactory,
         span = span,
+        baggage = CompatBaggageFactory(),
         idGenerator = idGenerator,
         resource = CompatResourceFactory,
         propagator = cfg.propagatorCfg.buildPropagator(),

@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.factory.BaggageFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.ResourceFactory
@@ -20,6 +21,7 @@ internal class CompatOpenTelemetryImpl(
     override val traceState: TraceStateFactory,
     override val context: ContextFactory,
     override val span: SpanFactory,
+    override val baggage: BaggageFactory,
     override val idGenerator: IdGenerator,
     override val resource: ResourceFactory,
     override val propagator: TextMapPropagator,
