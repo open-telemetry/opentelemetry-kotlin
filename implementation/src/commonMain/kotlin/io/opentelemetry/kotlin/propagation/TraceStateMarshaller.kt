@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.tracing.TraceState
  * https://www.w3.org/TR/trace-context-2/#tracestate-header
  */
 @OptIn(ExperimentalApi::class)
-internal class TraceStateImpl(internal val traceState: TraceState) {
+internal class TraceStateMarshaller(internal val traceState: TraceState) {
 
     private val state by lazy {
         traceState.asMap()
@@ -33,7 +33,7 @@ internal class TraceStateImpl(internal val traceState: TraceState) {
         private const val OWS_SPACE = ' '
         private const val OWS_HTAB = '\t'
 
-        fun decode(header: String, traceStateFactory: TraceStateFactory): TraceStateImpl {
+        fun decode(header: String, traceStateFactory: TraceStateFactory): TraceStateMarshaller {
             var state = traceStateFactory.default
             val seen = mutableSetOf<String>()
             val split = header.split(LIST_MEMBER_SEPARATOR)
@@ -45,7 +45,7 @@ internal class TraceStateImpl(internal val traceState: TraceState) {
                     state = next
                 }
             }
-            return TraceStateImpl(state)
+            return TraceStateMarshaller(state)
         }
 
         private fun parseMember(raw: String, seen: MutableSet<String>): Pair<String, String>? {
