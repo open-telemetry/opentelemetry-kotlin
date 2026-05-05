@@ -103,6 +103,35 @@ internal class CompatPropagatorApiTest {
         val captured = dsl.w3cBaggage()
         assertSame(captured, dsl.buildPropagator())
     }
+
+    @Test
+    fun `w3cTraceContext returns an adapter for traceparent and tracestate fields`() {
+        val propagator = dsl.w3cTraceContext()
+        assertTrue(propagator is TextMapPropagatorAdapter)
+        assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
+    }
+
+    @Test
+    fun `w3cTraceContext round-trips a traceparent header through inject and extract`() {
+        val propagator = dsl.w3cTraceContext()
+        val incoming = mapOf(
+            "traceparent" to "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01",
+            "tracestate" to "vendor=value",
+        )
+        val extracted = propagator.extract(contextFactory.root(), incoming, MapTextMapGetter)
+
+        val outgoing = mutableMapOf<String, String>()
+        propagator.inject(extracted, outgoing, MapTextMapSetter)
+
+        assertEquals(incoming["traceparent"], outgoing["traceparent"])
+        assertEquals(incoming["tracestate"], outgoing["tracestate"])
+    }
+
+    @Test
+    fun `w3cTraceContext call captures the result and buildPropagator returns it`() {
+        val captured = dsl.w3cTraceContext()
+        assertSame(captured, dsl.buildPropagator())
+    }
 }
 
 @OptIn(ExperimentalApi::class)
@@ -140,6 +169,8 @@ private class ContextWritingPropagator(
 private object MapTextMapGetter : TextMapGetter<Map<String, String>> {
     override fun keys(carrier: Map<String, String>): Collection<String> = carrier.keys
     override fun get(carrier: Map<String, String>, key: String): String? = carrier[key]
+    override fun getAll(carrier: Map<String, String>, key: String): List<String> =
+        carrier[key]?.let { listOf(it) } ?: emptyList()
 }
 
 @OptIn(ExperimentalApi::class)

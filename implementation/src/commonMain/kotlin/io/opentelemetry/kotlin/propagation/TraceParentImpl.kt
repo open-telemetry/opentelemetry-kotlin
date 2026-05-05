@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.tracing.TraceFlags
  * https://www.w3.org/TR/trace-context/#traceparent-header
  */
 @OptIn(ExperimentalApi::class)
-internal class TraceParent(
+internal class TraceParentImpl(
     val version: String,
     val traceId: String,
     val spanId: String,
@@ -57,7 +57,7 @@ internal class TraceParent(
         private const val FLAG_RANDOM = 0b0000_0010
         private const val HEX_RADIX = 16
 
-        fun decode(header: String, traceFlagsFactory: TraceFlagsFactory): TraceParent? {
+        fun decode(header: String, traceFlagsFactory: TraceFlagsFactory): TraceParentImpl? {
             if (header.length < LEN_V00) {
                 return null
             }
@@ -82,7 +82,7 @@ internal class TraceParent(
             }
 
             return try {
-                TraceParent(
+                TraceParentImpl(
                     version = version,
                     traceId = parts[1],
                     spanId = parts[2],

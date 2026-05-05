@@ -4,6 +4,11 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.factory.IdGeneratorImpl
+import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
+import io.opentelemetry.kotlin.factory.SpanFactoryImpl
+import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
+import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.init.PropagatorConfigImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -16,6 +21,10 @@ internal class CorePropagatorApiTest {
 
     private val dsl = PropagatorConfigImpl()
     private val contextFactory = ContextFactoryImpl()
+    private val traceFlagsFactory = TraceFlagsFactoryImpl()
+    private val traceStateFactory = TraceStateFactoryImpl()
+    private val spanContextFactory = SpanContextFactoryImpl(IdGeneratorImpl(), traceFlagsFactory, traceStateFactory)
+    private val spanFactory = SpanFactoryImpl(spanContextFactory, contextFactory.spanKey)
 
     @Test
     fun `composite with single propagator wraps in CompositeTextMapPropagator`() {
@@ -73,6 +82,29 @@ internal class CorePropagatorApiTest {
     fun `composite call captures the result and buildPropagator returns it`() {
         val captured = dsl.composite(RecordingPropagator(listOf("foo")))
         assertSame(captured, dsl.buildPropagator())
+    }
+
+    @Test
+    fun `w3cTraceContext returns a propagator for traceparent and tracestate fields`() {
+        val propagator = dsl.w3cTraceContext()
+        installFactories()
+        assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
+    }
+
+    @Test
+    fun `w3cTraceContext call captures the result and buildPropagator returns it`() {
+        val captured = dsl.w3cTraceContext()
+        assertSame(captured, dsl.buildPropagator())
+    }
+
+    private fun installFactories() {
+        dsl.installFactories(
+            traceFlagsFactory = traceFlagsFactory,
+            traceStateFactory = traceStateFactory,
+            spanContextFactory = spanContextFactory,
+            spanFactory = spanFactory,
+            contextFactory = contextFactory,
+        )
     }
 }
 
