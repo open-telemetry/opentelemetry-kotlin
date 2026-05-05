@@ -91,4 +91,63 @@ internal class BaggageImplTest {
         val baggage = BaggageImpl.EMPTY.set("k", "v")
         assertTrue(baggage.asMap()["k"] is BaggageEntryImpl)
     }
+
+    @Test
+    fun `set with invalid key returns same instance`() {
+        val original = BaggageImpl.EMPTY.set("ok", "v")
+        assertSame(original, original.set("bad key", "v"))
+        assertSame(original, original.set("bad,key", "v"))
+        assertSame(original, original.set("bad;key", "v"))
+    }
+
+    @Test
+    fun `set with empty key returns same instance`() {
+        val original = BaggageImpl.EMPTY.set("ok", "v")
+        assertSame(original, original.set("", "v"))
+    }
+
+    @Test
+    fun `set with value containing CR returns same instance`() {
+        val original = BaggageImpl.EMPTY.set("ok", "v")
+        assertSame(original, original.set("k", "bad\rvalue"))
+    }
+
+    @Test
+    fun `set with value containing LF returns same instance`() {
+        val original = BaggageImpl.EMPTY.set("ok", "v")
+        assertSame(original, original.set("k", "bad\nvalue"))
+    }
+
+    @Test
+    fun `set with value containing NUL returns same instance`() {
+        val original = BaggageImpl.EMPTY.set("ok", "v")
+        assertSame(original, original.set("k", "bad\u0000value"))
+    }
+
+    @Test
+    fun `set with metadata enforces key validation`() {
+        val original = BaggageImpl.EMPTY.set("ok", "v")
+        assertSame(original, original.set("bad key", "v", BaggageEntryMetadataImpl("m")))
+    }
+
+    @Test
+    fun `set silently drops new entry beyond MAX_ENTRIES`() {
+        val full = (0 until BaggageImpl.MAX_ENTRIES).fold(BaggageImpl.EMPTY) { acc, idx ->
+            acc.set("k$idx", "v")
+        }
+        assertEquals(BaggageImpl.MAX_ENTRIES, full.asMap().size)
+        val attempted = full.set("kExtra", "v")
+        assertSame(full, attempted)
+        assertNull(attempted.getValue("kExtra"))
+    }
+
+    @Test
+    fun `set replaces existing key when at MAX_ENTRIES cap`() {
+        val full = (0 until BaggageImpl.MAX_ENTRIES).fold(BaggageImpl.EMPTY) { acc, idx ->
+            acc.set("k$idx", "v")
+        }
+        val updated = full.set("k0", "new")
+        assertEquals(BaggageImpl.MAX_ENTRIES, updated.asMap().size)
+        assertEquals("new", updated.getValue("k0"))
+    }
 }

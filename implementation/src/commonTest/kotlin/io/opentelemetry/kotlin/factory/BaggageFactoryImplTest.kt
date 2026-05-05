@@ -77,4 +77,48 @@ internal class BaggageFactoryImplTest {
         }
         assertEquals("v", baggage.getValue("k"))
     }
+
+    @Test
+    fun `create put with invalid key drops entry`() {
+        val baggage = factory.create {
+            put("ok", "v")
+            put("bad key", "v")
+            put("", "v")
+        }
+        assertEquals(1, baggage.asMap().size)
+        assertEquals("v", baggage.getValue("ok"))
+        assertNull(baggage.getValue("bad key"))
+    }
+
+    @Test
+    fun `create put with invalid value drops entry`() {
+        val baggage = factory.create {
+            put("ok", "v")
+            put("crlf", "bad\rvalue")
+            put("nul", "bad\u0000value")
+        }
+        assertEquals(1, baggage.asMap().size)
+        assertNull(baggage.getValue("crlf"))
+        assertNull(baggage.getValue("nul"))
+    }
+
+    @Test
+    fun `create put silently drops new entry beyond MAX_ENTRIES`() {
+        val baggage = factory.create {
+            repeat(BaggageImpl.MAX_ENTRIES) { idx -> put("k$idx", "v") }
+            put("kExtra", "v")
+        }
+        assertEquals(BaggageImpl.MAX_ENTRIES, baggage.asMap().size)
+        assertNull(baggage.getValue("kExtra"))
+    }
+
+    @Test
+    fun `create put replaces existing key when at MAX_ENTRIES cap`() {
+        val baggage = factory.create {
+            repeat(BaggageImpl.MAX_ENTRIES) { idx -> put("k$idx", "v") }
+            put("k0", "new")
+        }
+        assertEquals(BaggageImpl.MAX_ENTRIES, baggage.asMap().size)
+        assertEquals("new", baggage.getValue("k0"))
+    }
 }
