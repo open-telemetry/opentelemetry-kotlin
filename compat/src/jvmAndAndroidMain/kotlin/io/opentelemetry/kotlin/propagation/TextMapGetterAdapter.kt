@@ -9,4 +9,7 @@ internal class TextMapGetterAdapter<C : Any>(
     override fun keys(carrier: C): Collection<String> = delegate.keys(carrier).toList()
 
     override fun get(carrier: C, key: String): String? = delegate.get(carrier, key)
+
+    override fun getAll(carrier: C, key: String): List<String> =
+        get(carrier, key)?.let { listOf(it) } ?: emptyList()
 }
