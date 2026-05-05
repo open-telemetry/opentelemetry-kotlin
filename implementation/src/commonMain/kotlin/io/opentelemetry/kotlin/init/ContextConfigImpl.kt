@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.DefaultImplicitContextStorage
 import io.opentelemetry.kotlin.context.ImplicitContextStorage
 import io.opentelemetry.kotlin.context.ImplicitContextStorageMode
+import io.opentelemetry.kotlin.context.threadLocalImplicitContextStorage
 
 internal class ContextConfigImpl : ContextConfigDsl {
     override var storageMode: ImplicitContextStorageMode = ImplicitContextStorageMode.GLOBAL
@@ -18,6 +19,7 @@ internal class ContextConfigImpl : ContextConfigDsl {
         customStorage?.let { return it() }
         return when (storageMode) {
             ImplicitContextStorageMode.GLOBAL -> DefaultImplicitContextStorage(rootSupplier)
+            ImplicitContextStorageMode.THREAD_LOCAL -> threadLocalImplicitContextStorage(rootSupplier)
         }
     }
 }
