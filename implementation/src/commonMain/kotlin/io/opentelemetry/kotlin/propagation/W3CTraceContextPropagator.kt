@@ -29,15 +29,15 @@ internal class W3CTraceContextPropagator(
         if (!spanContext.isValid) {
             return
         }
-        val traceparent = TraceParentImpl(
-            version = TraceParentImpl.VERSION_00,
+        val traceparent = TraceParent(
+            version = TraceParent.VERSION_00,
             traceId = spanContext.traceId,
             spanId = spanContext.spanId,
             traceFlags = spanContext.traceFlags,
         ).encode()
         setter.set(carrier, TRACEPARENT, traceparent)
 
-        val tracestate = TraceStateImpl(spanContext.traceState).encode()
+        val tracestate = TraceStateMarshaller(spanContext.traceState).encode()
         if (tracestate.isNotEmpty()) {
             setter.set(carrier, TRACESTATE, tracestate)
         }
@@ -45,12 +45,12 @@ internal class W3CTraceContextPropagator(
 
     override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context {
         val rawTraceparent = getter.get(carrier, TRACEPARENT) ?: return context
-        val parsed = TraceParentImpl.decode(rawTraceparent, traceFlagsFactory) ?: return context
+        val parsed = TraceParent.decode(rawTraceparent, traceFlagsFactory) ?: return context
 
         val rawTracestate = getter.get(carrier, TRACESTATE)
         val traceState = when (rawTracestate) {
             null -> traceStateFactory.default
-            else -> TraceStateImpl.decode(rawTracestate, traceStateFactory).traceState
+            else -> TraceStateMarshaller.decode(rawTracestate, traceStateFactory).traceState
         }
 
         val spanContext = spanContextFactory.create(
