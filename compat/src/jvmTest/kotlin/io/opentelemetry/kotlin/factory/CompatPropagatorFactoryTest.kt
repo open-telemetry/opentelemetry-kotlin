@@ -98,6 +98,29 @@ internal class CompatPropagatorFactoryTest {
 
         assertEquals(viaVararg.fields().toList(), viaList.fields().toList())
     }
+
+    @Test
+    fun `w3cTraceContext returns an adapter for traceparent and tracestate fields`() {
+        val propagator = factory.w3cTraceContext()
+        assertTrue(propagator is TextMapPropagatorAdapter)
+        assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
+    }
+
+    @Test
+    fun `w3cTraceContext round-trips a traceparent header through inject and extract`() {
+        val propagator = factory.w3cTraceContext()
+        val incoming = mapOf(
+            "traceparent" to "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01",
+            "tracestate" to "vendor=value",
+        )
+        val extracted = propagator.extract(contextFactory.root(), incoming, MapTextMapGetter)
+
+        val outgoing = mutableMapOf<String, String>()
+        propagator.inject(extracted, outgoing, MapTextMapSetter)
+
+        assertEquals(incoming["traceparent"], outgoing["traceparent"])
+        assertEquals(incoming["tracestate"], outgoing["tracestate"])
+    }
 }
 
 @OptIn(ExperimentalApi::class)

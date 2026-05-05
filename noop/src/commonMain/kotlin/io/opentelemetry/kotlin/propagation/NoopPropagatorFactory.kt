@@ -12,4 +12,6 @@ internal object NoopPropagatorFactory : PropagatorFactory {
         NoopTextMapPropagator
 
     override fun w3cBaggage(): TextMapPropagator = NoopTextMapPropagator
+
+    override fun w3cTraceContext(): TextMapPropagator = NoopTextMapPropagator
 }
