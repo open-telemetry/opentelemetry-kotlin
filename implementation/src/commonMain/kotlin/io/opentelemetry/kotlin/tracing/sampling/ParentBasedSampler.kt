@@ -2,12 +2,10 @@ package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 
 internal class ParentBasedSampler(
-    private val spanFactory: SpanFactory,
     private val root: Sampler,
     private val remoteParentSampled: Sampler,
     private val remoteParentNotSampled: Sampler,
@@ -32,7 +30,7 @@ internal class ParentBasedSampler(
         attributes: AttributeContainer,
         links: List<SpanLink>,
     ): SamplingResult {
-        val parent = spanFactory.fromContext(context).spanContext
+        val parent = context.extractSpan().spanContext
         val delegate = when {
             !parent.isValid -> root
             parent.isRemote && parent.traceFlags.isSampled -> remoteParentSampled

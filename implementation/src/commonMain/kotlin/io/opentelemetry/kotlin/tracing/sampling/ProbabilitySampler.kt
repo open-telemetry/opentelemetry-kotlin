@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
@@ -11,7 +10,7 @@ import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
 import kotlin.concurrent.Volatile
 import kotlin.math.max
 
-internal class ProbabilitySampler(private val spanFactory: SpanFactory, ratio: Double) : Sampler {
+internal class ProbabilitySampler(ratio: Double) : Sampler {
 
     private companion object {
         private const val MAX_THRESHOLD: Long = 1L shl 56
@@ -39,7 +38,7 @@ internal class ProbabilitySampler(private val spanFactory: SpanFactory, ratio: D
         attributes: AttributeContainer,
         links: List<SpanLink>
     ): SamplingResult {
-        val parentSpanContext = spanFactory.fromContext(context).spanContext
+        val parentSpanContext = context.extractSpan().spanContext
         val traceState = parentSpanContext.traceState
         val otelTraceState = OtelTraceState.parse(traceState.get("ot"))
 

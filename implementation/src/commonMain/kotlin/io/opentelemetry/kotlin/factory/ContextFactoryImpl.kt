@@ -6,26 +6,18 @@ import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.context.ContextKeyImpl
 import io.opentelemetry.kotlin.context.DefaultImplicitContextStorage
 import io.opentelemetry.kotlin.context.ImplicitContextStorage
-import io.opentelemetry.kotlin.context.Scope
-import io.opentelemetry.kotlin.tracing.Span
 
 internal class ContextFactoryImpl(
+    private val spanFactory: SpanFactory,
     storageFactory: (supplier: () -> Context) -> ImplicitContextStorage = ::DefaultImplicitContextStorage,
 ) : ContextFactory {
 
     private val storage: ImplicitContextStorage = storageFactory { root }
-    private val root by lazy { ContextImpl(storage) }
-    internal val spanKey by lazy { createKey<Span>("otel-kotlin-span") }
+    private val root by lazy { ContextImpl(storage, spanFactory) }
 
     override fun root(): Context = root
-
-    override fun storeSpan(context: Context, span: Span): Context {
-        return context.set(spanKey, span)
-    }
 
     override fun implicit(): Context = storage.implicitContext()
 
     override fun <T> createKey(name: String): ContextKey<T> = ContextKeyImpl(name)
-
-    override fun makeCurrent(span: Span): Scope = storeSpan(implicit(), span).attach()
 }

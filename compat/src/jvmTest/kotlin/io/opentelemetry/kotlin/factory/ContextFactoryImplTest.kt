@@ -10,7 +10,6 @@ import kotlin.test.assertSame
 internal class ContextFactoryImplTest {
 
     private val contextFactory = CompatContextFactory()
-    private val spanFactory = CompatSpanFactory(CompatSpanContextFactory())
 
     @Test
     fun `test root`() {
@@ -21,8 +20,8 @@ internal class ContextFactoryImplTest {
     fun `test store span`() {
         val tracer = createCompatOpenTelemetry().tracerProvider.getTracer("tracer")
         val span = tracer.startSpan("span")
-        val ctx = contextFactory.storeSpan(contextFactory.root(), span)
-        val retrievedSpan = spanFactory.fromContext(ctx)
+        val ctx = contextFactory.root().storeSpan(span)
+        val retrievedSpan = ctx.extractSpan()
         assertSpanContextsMatch(span.spanContext, retrievedSpan.spanContext)
     }
 

@@ -44,15 +44,14 @@ internal class TracerSpanContextTest {
         val traceFlags = TraceFlagsFactoryImpl()
         val traceState = TraceStateFactoryImpl()
         spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlags, traceState)
-        contextFactory = ContextFactoryImpl()
-        spanFactory = SpanFactoryImpl(spanContextFactory, (contextFactory as ContextFactoryImpl).spanKey)
+        spanFactory = SpanFactoryImpl(spanContextFactory)
+        contextFactory = ContextFactoryImpl(spanFactory)
         tracer = TracerImpl(
             clock = clock,
             processor = processor,
             contextFactory = contextFactory,
             spanContextFactory = spanContextFactory,
             traceFlagsFactory = traceFlags,
-            spanFactory = spanFactory,
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,
@@ -73,7 +72,7 @@ internal class TracerSpanContextTest {
     fun testExplicitParentContextOfInvalidSpan() {
         val invalidSpan = spanFactory.invalid
         assertFalse(invalidSpan.spanContext.isValid)
-        val parentCtx = contextFactory.storeSpan(contextFactory.root(), invalidSpan)
+        val parentCtx = contextFactory.root().storeSpan(invalidSpan)
         val span = tracer.startSpan(
             "test",
             parentContext = parentCtx,
@@ -87,7 +86,7 @@ internal class TracerSpanContextTest {
     @Test
     fun testExplicitParentContextOfValidSpan() {
         val parentSpan = tracer.startSpan("parent")
-        val parentCtx = contextFactory.storeSpan(contextFactory.root(), parentSpan)
+        val parentCtx = contextFactory.root().storeSpan(parentSpan)
         val span = tracer.startSpan(
             "test",
             parentContext = parentCtx,
@@ -103,7 +102,7 @@ internal class TracerSpanContextTest {
     @Test
     fun testImplicitContext() {
         val span = tracer.startSpan("span")
-        val ctx = contextFactory.storeSpan(contextFactory.root(), span)
+        val ctx = contextFactory.root().storeSpan(span)
         val scope = ctx.attach()
 
         val first = tracer.startSpan("first")

@@ -42,7 +42,6 @@ internal class TracerProviderImpl(
             contextFactory = contextFactory,
             spanContextFactory = spanContextFactory,
             traceFlagsFactory = traceFlagsFactory,
-            spanFactory = spanFactory,
             scope = key,
             resource = tracingConfig.resource,
             spanLimitConfig = tracingConfig.spanLimits,

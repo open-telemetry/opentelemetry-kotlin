@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.context
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.baggage.Baggage
+import io.opentelemetry.kotlin.tracing.Span
 
 /**
  * Immutable propagation mechanism that carries values across concerns.
@@ -43,6 +44,22 @@ public interface Context {
      */
     @ThreadSafe
     public fun attach(): Scope
+
+    /**
+     * Returns a new [Context] derived from this one with [span] stored under a pre-defined key.
+     *
+     * https://opentelemetry.io/docs/specs/otel/trace/api/#context-interaction
+     */
+    @ThreadSafe
+    public fun storeSpan(span: Span): Context
+
+    /**
+     * Returns the [Span] stored in this [Context], or an invalid [Span] if none is present.
+     *
+     * https://opentelemetry.io/docs/specs/otel/trace/api/#context-interaction
+     */
+    @ThreadSafe
+    public fun extractSpan(): Span
 
     /**
      * Returns a new [Context] derived from this one with [baggage] stored under a pre-defined key.

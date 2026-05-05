@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.init.SamplerConfigDsl
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#alwayson
  */
 @ExperimentalApi
-public fun SamplerConfigDsl.alwaysOn(): Sampler = AlwaysOnSampler(spanFactory)
+public fun SamplerConfigDsl.alwaysOn(): Sampler = AlwaysOnSampler()
 
 /**
  * Configures sampling so that spans are never recorded and sampled.
@@ -17,7 +17,7 @@ public fun SamplerConfigDsl.alwaysOn(): Sampler = AlwaysOnSampler(spanFactory)
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#alwaysoff
  */
 @ExperimentalApi
-public fun SamplerConfigDsl.alwaysOff(): Sampler = AlwaysOffSampler(spanFactory)
+public fun SamplerConfigDsl.alwaysOff(): Sampler = AlwaysOffSampler()
 
 /**
  * Configures sampling based on the parent span's sampling decision.
@@ -32,7 +32,6 @@ public fun SamplerConfigDsl.parentBased(
     localParentSampled: Sampler = alwaysOn(),
     localParentNotSampled: Sampler = alwaysOff(),
 ): Sampler = ParentBasedSampler(
-    spanFactory = spanFactory,
     root = root,
     remoteParentSampled = remoteParentSampled,
     remoteParentNotSampled = remoteParentNotSampled,

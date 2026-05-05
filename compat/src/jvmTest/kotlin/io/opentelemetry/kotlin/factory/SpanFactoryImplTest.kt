@@ -21,7 +21,7 @@ internal class SpanFactoryImplTest {
     @Test
     fun `test from context`() {
         val ctx = contextFactory.root()
-        val span = spanFactory.fromContext(ctx)
+        val span = ctx.extractSpan()
         assertFalse(span.spanContext.isValid)
     }
 

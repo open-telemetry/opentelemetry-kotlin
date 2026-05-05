@@ -149,7 +149,7 @@ internal class TracerExportTest {
         val childName = "child"
         val parentSpan = harness.tracer.startSpan(parentName)
         val contextFactory = harness.kotlinApi.context
-        val parentCtx = contextFactory.storeSpan(contextFactory.root(), parentSpan)
+        val parentCtx = contextFactory.root().storeSpan(parentSpan)
         val childSpan = harness.tracer.startSpan(childName, parentContext = parentCtx)
         parentSpan.end()
         childSpan.end()

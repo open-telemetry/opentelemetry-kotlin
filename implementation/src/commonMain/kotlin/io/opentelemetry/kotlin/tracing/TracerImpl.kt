@@ -10,7 +10,6 @@ import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.SpanContextFactory
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
@@ -29,13 +28,12 @@ internal class TracerImpl(
     private val contextFactory: ContextFactory,
     spanContextFactory: SpanContextFactory,
     traceFlagsFactory: TraceFlagsFactory,
-    private val spanFactory: SpanFactory,
     private val idGenerator: IdGenerator,
     private val scope: InstrumentationScopeInfo,
     private val resource: Resource,
     private val spanLimitConfig: SpanLimitConfig,
     private val shutdownState: ShutdownState,
-    private val sampler: Sampler = AlwaysOnSampler(spanFactory),
+    private val sampler: Sampler = AlwaysOnSampler(),
 ) : Tracer {
 
     private val noopSpan = NoopOpenTelemetry.tracerProvider.getTracer("").startSpan("")
@@ -55,7 +53,7 @@ internal class TracerImpl(
 
             val parentSpanContext = when (ctx) {
                 root -> invalidSpanContext
-                else -> spanFactory.fromContext(ctx).spanContext
+                else -> ctx.extractSpan().spanContext
             }
             val traceIdBytes = when {
                 parentSpanContext.isValid -> parentSpanContext.traceIdBytes

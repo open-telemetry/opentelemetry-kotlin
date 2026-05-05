@@ -238,10 +238,7 @@ private fun startSpan(otel: OpenTelemetry, form: SpanFormState): Pair<Span, Scop
 
     // Set span as implicit context if requested
     val scope = if (form.setAsImplicitContext) {
-        val contextFactory = otel.context
-        val currentContext = contextFactory.implicit()
-        val spanContext = contextFactory.storeSpan(currentContext, span)
-        spanContext.attach()
+        otel.context.implicit().storeSpan(span).attach()
     } else {
         null
     }

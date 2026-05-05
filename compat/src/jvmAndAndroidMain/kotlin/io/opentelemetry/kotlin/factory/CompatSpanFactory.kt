@@ -1,16 +1,8 @@
-@file:Suppress("DiscouragedImport")
-
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.api.trace.otelJavaSpanContextKey
-import io.opentelemetry.kotlin.aliases.OtelJavaContext
-import io.opentelemetry.kotlin.aliases.OtelJavaSpan
-import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.ContextAdapter
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.kotlin.tracing.model.SpanContextAdapter
 
 internal class CompatSpanFactory(spanContextFactory: SpanContextFactory) : SpanFactory {
 
@@ -21,12 +13,5 @@ internal class CompatSpanFactory(spanContextFactory: SpanContextFactory) : SpanF
     override fun fromSpanContext(spanContext: SpanContext): Span = when {
         spanContext.isValid -> NonRecordingSpan(invalidSpanContext, spanContext)
         else -> invalid
-    }
-
-    override fun fromContext(context: Context): Span {
-        val otelJavaCtx = (context as? ContextAdapter)?.impl ?: OtelJavaContext.root()
-        val span: OtelJavaSpan =
-            otelJavaCtx.get(otelJavaSpanContextKey) ?: OtelJavaSpan.getInvalid()
-        return NonRecordingSpan(invalid.parent, SpanContextAdapter(span.spanContext))
     }
 }

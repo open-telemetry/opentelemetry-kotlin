@@ -57,7 +57,7 @@ internal class SpanExtTest {
 
     @Test
     fun `test from context invalid`() {
-        val span = spanFactory.fromContext(contextFactory.root())
+        val span = contextFactory.root().extractSpan()
         assertSpanContextsMatch(spanContextFactory.invalid, span.spanContext)
     }
 
@@ -79,10 +79,10 @@ internal class SpanExtTest {
         )
         val root = contextFactory.root()
         val ctx = span.storeInContext(root)
-        val observed = spanFactory.fromContext(root).spanContext
+        val observed = root.extractSpan().spanContext
         assertSpanContextsMatch(spanContextFactory.invalid, observed)
 
-        val retrievedSpan = spanFactory.fromContext(ctx)
+        val retrievedSpan = ctx.extractSpan()
         assertSpanContextsMatch(SpanContextAdapter(spanContext), retrievedSpan.spanContext)
     }
 }

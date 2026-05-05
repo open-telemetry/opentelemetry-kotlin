@@ -6,6 +6,9 @@ import io.opentelemetry.kotlin.baggage.BaggageEntryMetadataImpl
 import io.opentelemetry.kotlin.baggage.BaggageImpl
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.factory.IdGeneratorImpl
+import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
+import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -17,7 +20,7 @@ import kotlin.test.assertTrue
 internal class W3CBaggagePropagatorTest {
 
     private val propagator = W3CBaggagePropagator
-    private val contextFactory = ContextFactoryImpl()
+    private val contextFactory = ContextFactoryImpl(SpanFactoryImpl(SpanContextFactoryImpl(IdGeneratorImpl())))
 
     @Test
     fun `fields returns only the baggage header`() {

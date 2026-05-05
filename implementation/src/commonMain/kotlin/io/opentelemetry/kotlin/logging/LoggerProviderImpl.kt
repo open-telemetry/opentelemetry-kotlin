@@ -11,7 +11,6 @@ import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactory
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
 
@@ -20,7 +19,6 @@ internal class LoggerProviderImpl(
     loggingConfig: LoggingConfig,
     contextFactory: ContextFactory,
     spanContextFactory: SpanContextFactory,
-    spanFactory: SpanFactory,
 ) : LoggerProvider, TelemetryCloseable {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
@@ -36,7 +34,6 @@ internal class LoggerProviderImpl(
                 loggingConfig.processor,
                 contextFactory,
                 spanContextFactory,
-                spanFactory,
                 key,
                 loggingConfig.resource,
                 loggingConfig.logLimits,

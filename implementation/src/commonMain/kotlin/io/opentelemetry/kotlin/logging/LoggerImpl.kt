@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactory
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.LogRecordModel
@@ -20,7 +19,6 @@ internal class LoggerImpl(
     private val processor: LogRecordProcessor?,
     contextFactory: ContextFactory,
     spanContextFactory: SpanContextFactory,
-    spanFactory: SpanFactory,
     private val key: InstrumentationScopeInfo,
     private val resource: Resource,
     private val logLimitConfig: LogLimitConfig,
@@ -30,7 +28,6 @@ internal class LoggerImpl(
     private val contextFactory = contextFactory
     private val root = contextFactory.root()
     private val invalidSpanContext = spanContextFactory.invalid
-    private val spanFactory = spanFactory
 
     override fun enabled(
         context: Context?,
@@ -83,7 +80,7 @@ internal class LoggerImpl(
             val ctx = context ?: contextFactory.implicit()
             val spanContext = when (ctx) {
                 root -> invalidSpanContext
-                else -> spanFactory.fromContext(ctx).spanContext
+                else -> ctx.extractSpan().spanContext
             }
 
             val now = clock.now()

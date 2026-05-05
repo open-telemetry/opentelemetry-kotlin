@@ -45,12 +45,12 @@ internal class TracerSamplerTest {
         val traceFlags = TraceFlagsFactoryImpl()
         val traceState = TraceStateFactoryImpl()
         spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlags, traceState)
-        contextFactory = ContextFactoryImpl()
-        spanFactory = SpanFactoryImpl(spanContextFactory, (contextFactory as ContextFactoryImpl).spanKey)
+        spanFactory = SpanFactoryImpl(spanContextFactory)
+        contextFactory = ContextFactoryImpl(spanFactory)
     }
 
     private fun buildTracer(
-        sampler: Sampler = AlwaysOnSampler(spanFactory),
+        sampler: Sampler = AlwaysOnSampler(),
         limitsCfg: SpanLimitConfig = fakeSpanLimitsConfig
     ) = TracerImpl(
         clock = clock,
@@ -58,7 +58,6 @@ internal class TracerSamplerTest {
         contextFactory = contextFactory,
         spanContextFactory = spanContextFactory,
         traceFlagsFactory = TraceFlagsFactoryImpl(),
-        spanFactory = spanFactory,
         scope = key,
         resource = FakeResource(),
         spanLimitConfig = limitsCfg,
