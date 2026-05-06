@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
-import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -40,7 +39,6 @@ internal class LogAttributesTest {
             processor = processor,
             contextFactory = FakeContextFactory(),
             spanContextFactory = FakeSpanContextFactory(),
-            spanFactory = FakeSpanFactory(),
             key = key,
             resource = FakeResource(),
             logLimitConfig = LogLimitConfig(
@@ -133,7 +131,6 @@ internal class LogAttributesTest {
         processor = processor,
         contextFactory = FakeContextFactory(),
         spanContextFactory = FakeSpanContextFactory(),
-        spanFactory = FakeSpanFactory(),
         key = key,
         resource = FakeResource(),
         logLimitConfig = LogLimitConfig(

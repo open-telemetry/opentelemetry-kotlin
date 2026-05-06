@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
-import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import io.opentelemetry.kotlin.factory.FakeTraceFlagsFactory
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -43,7 +42,6 @@ internal class SpanEventTest {
             contextFactory = FakeContextFactory(),
             spanContextFactory = FakeSpanContextFactory(),
             traceFlagsFactory = FakeTraceFlagsFactory(),
-            spanFactory = FakeSpanFactory(),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = spanLimitConfig,

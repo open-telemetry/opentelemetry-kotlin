@@ -43,15 +43,13 @@ internal class LogContextTest {
         val traceFlags = TraceFlagsFactoryImpl()
         val traceState = TraceStateFactoryImpl()
         spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlags, traceState)
-        contextFactory = ContextFactoryImpl()
-        spanFactory =
-            SpanFactoryImpl(spanContextFactory, (contextFactory as ContextFactoryImpl).spanKey)
+        spanFactory = SpanFactoryImpl(spanContextFactory)
+        contextFactory = ContextFactoryImpl(spanFactory)
         logger = LoggerImpl(
             clock,
             processor,
             contextFactory,
             spanContextFactory,
-            spanFactory,
             key,
             FakeResource(),
             fakeLogLimitsConfig,
@@ -63,7 +61,6 @@ internal class LogContextTest {
             contextFactory = contextFactory,
             spanContextFactory = spanContextFactory,
             traceFlagsFactory = traceFlags,
-            spanFactory = spanFactory,
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,
@@ -76,14 +73,14 @@ internal class LogContextTest {
     fun testDefaultContext() {
         logger.emit()
         val log = processor.logs.single()
-        val root = spanFactory.fromContext(contextFactory.root()).spanContext
+        val root = contextFactory.root().extractSpan().spanContext
         assertSame(root, log.spanContext)
     }
 
     @Test
     fun testOverrideContext() {
         val span = tracer.startSpan("span")
-        val ctx = contextFactory.storeSpan(contextFactory.root(), span)
+        val ctx = contextFactory.root().storeSpan(span)
         logger.emit(
             context = ctx,
         )
@@ -95,7 +92,7 @@ internal class LogContextTest {
     @Test
     fun testImplicitContext() {
         val span = tracer.startSpan("span")
-        val ctx = contextFactory.storeSpan(contextFactory.root(), span)
+        val ctx = contextFactory.root().storeSpan(span)
         val scope = ctx.attach()
         logger.emit()
 

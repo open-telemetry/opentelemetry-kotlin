@@ -1,9 +1,17 @@
+@file:Suppress("DiscouragedImport")
+
 package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.aliases.OtelJavaBaggage
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
+import io.opentelemetry.kotlin.aliases.OtelJavaSpan
+import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.baggage.Baggage
 import io.opentelemetry.kotlin.baggage.BaggageAdapter
+import io.opentelemetry.kotlin.tracing.NonRecordingSpan
+import io.opentelemetry.kotlin.tracing.Span
+import io.opentelemetry.kotlin.tracing.ext.storeInContext
+import io.opentelemetry.kotlin.tracing.model.SpanContextAdapter
 
 internal class ContextAdapter(
     val impl: OtelJavaContext,
@@ -22,6 +30,16 @@ internal class ContextAdapter(
 
     override fun attach(): Scope {
         return ScopeAdapter(impl.makeCurrent())
+    }
+
+    override fun storeSpan(span: Span): Context = span.storeInContext(this)
+
+    override fun extractSpan(): Span {
+        val javaSpan = OtelJavaSpan.fromContext(impl)
+        return NonRecordingSpan(
+            SpanContextAdapter(OtelJavaSpanContext.getInvalid()),
+            SpanContextAdapter(javaSpan.spanContext),
+        )
     }
 
     override fun storeBaggage(baggage: Baggage): Context {

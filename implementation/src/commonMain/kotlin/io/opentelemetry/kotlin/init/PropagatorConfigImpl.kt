@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
@@ -43,14 +42,12 @@ internal class PropagatorConfigImpl : PropagatorConfigDsl {
         traceStateFactory: TraceStateFactory,
         spanContextFactory: SpanContextFactory,
         spanFactory: SpanFactory,
-        contextFactory: ContextFactory,
     ) {
         w3cTraceContext.delegate = W3CTraceContextPropagator(
             traceFlagsFactory = traceFlagsFactory,
             traceStateFactory = traceStateFactory,
             spanContextFactory = spanContextFactory,
             spanFactory = spanFactory,
-            contextFactory = contextFactory,
         )
     }
 

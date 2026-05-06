@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
 
@@ -21,10 +20,4 @@ public interface SpanFactory {
      * object will be returned.
      */
     public fun fromSpanContext(spanContext: SpanContext): Span
-
-    /**
-     * Returns a span from the supplied [Context]. If the context has no span an invalid span
-     * object will be returned.
-     */
-    public fun fromContext(context: Context): Span
 }

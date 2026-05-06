@@ -1,20 +1,27 @@
 package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.factory.IdGeneratorImpl
+import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
+import io.opentelemetry.kotlin.factory.SpanFactoryImpl
+import io.opentelemetry.kotlin.tracing.FakeSpan
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNotSame
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
 internal class ContextImplTest {
 
     private lateinit var factory: ContextFactoryImpl
+    private lateinit var spanFactory: SpanFactoryImpl
 
     @BeforeTest
     fun setUp() {
-        factory = ContextFactoryImpl()
+        spanFactory = SpanFactoryImpl(SpanContextFactoryImpl(IdGeneratorImpl()))
+        factory = ContextFactoryImpl(spanFactory)
     }
 
     @Test
@@ -91,5 +98,26 @@ internal class ContextImplTest {
     fun testImplicitContext() {
         val ctx = factory.root()
         assertSame(ctx, factory.implicit())
+    }
+
+    @Test
+    fun testExtractSpanFromRootReturnsInvalid() {
+        assertSame(spanFactory.invalid, factory.root().extractSpan())
+    }
+
+    @Test
+    fun testStoreSpanRoundTrip() {
+        val span = FakeSpan()
+        val ctx = factory.root().storeSpan(span)
+        assertSame(span, ctx.extractSpan())
+    }
+
+    @Test
+    fun testStoreSpanReturnsNewContext() {
+        val span = FakeSpan()
+        val root = factory.root()
+        val derived = root.storeSpan(span)
+        assertNotSame(root, derived)
+        assertSame(spanFactory.invalid, root.extractSpan())
     }
 }

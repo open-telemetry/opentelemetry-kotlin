@@ -10,16 +10,15 @@ import kotlin.test.assertSame
 
 internal class SpanStorageTest {
 
-    private val contextFactory = ContextFactoryImpl()
-    private val spanFactory = SpanFactoryImpl(SpanContextFactoryImpl(IdGeneratorImpl()), contextFactory.spanKey)
+    private val spanFactory = SpanFactoryImpl(SpanContextFactoryImpl(IdGeneratorImpl()))
+    private val contextFactory = ContextFactoryImpl(spanFactory)
 
     @Test
     fun testSpanStorage() {
         val span = FakeSpan()
         val root = contextFactory.root()
-        val newCtx = contextFactory.storeSpan(root, span)
-        val retrievedSpan = spanFactory.fromContext(newCtx)
-        assertSame(span, retrievedSpan)
+        val newCtx = root.storeSpan(span)
+        assertSame(span, newCtx.extractSpan())
     }
 
     @Test
@@ -27,10 +26,9 @@ internal class SpanStorageTest {
         val span = FakeSpan("a")
         val otherSpan = FakeSpan("b")
         val root = contextFactory.root()
-        val newCtx = contextFactory.storeSpan(root, span)
+        val newCtx = root.storeSpan(span)
 
-        val finalCtx = contextFactory.storeSpan(newCtx, otherSpan)
-        val retrievedSpan = spanFactory.fromContext(finalCtx)
-        assertSame(otherSpan, retrievedSpan)
+        val finalCtx = newCtx.storeSpan(otherSpan)
+        assertSame(otherSpan, finalCtx.extractSpan())
     }
 }

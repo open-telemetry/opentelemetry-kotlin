@@ -15,7 +15,7 @@
     "parentSpanContext": {
       "traceId": "00000000000000000000000000000000",
       "spanId": "0000000000000000",
-      "traceFlags": "01",
+      "traceFlags": "00",
       "traceState": {}
     },
     "startTimestamp": 0,
@@ -60,7 +60,7 @@
     "parentSpanContext": {
       "traceId": "00000000000000000000000000000000",
       "spanId": "0000000000000000",
-      "traceFlags": "01",
+      "traceFlags": "00",
       "traceState": {}
     },
     "startTimestamp": 0,
@@ -105,7 +105,7 @@
     "parentSpanContext": {
       "traceId": "00000000000000000000000000000000",
       "spanId": "0000000000000000",
-      "traceFlags": "01",
+      "traceFlags": "00",
       "traceState": {}
     },
     "startTimestamp": 0,

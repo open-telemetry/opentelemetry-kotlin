@@ -29,15 +29,14 @@ internal class W3CTraceContextPropagatorTest {
     private val traceFlagsFactory = TraceFlagsFactoryImpl()
     private val traceStateFactory = TraceStateFactoryImpl()
     private val spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlagsFactory, traceStateFactory)
-    private val contextFactory = ContextFactoryImpl()
-    private val spanFactory = SpanFactoryImpl(spanContextFactory, contextFactory.spanKey)
+    private val spanFactory = SpanFactoryImpl(spanContextFactory)
+    private val contextFactory = ContextFactoryImpl(spanFactory)
 
     private val propagator = W3CTraceContextPropagator(
         traceFlagsFactory = traceFlagsFactory,
         traceStateFactory = traceStateFactory,
         spanContextFactory = spanContextFactory,
         spanFactory = spanFactory,
-        contextFactory = contextFactory,
     )
 
     private val traceId = "0af7651916cd43dd8448eb211c80319c"
@@ -58,7 +57,7 @@ internal class W3CTraceContextPropagatorTest {
     @Test
     fun `inject does nothing when current span is invalid`() {
         val carrier = mutableMapOf<String, String>()
-        val context = contextFactory.storeSpan(contextFactory.root(), spanFactory.invalid)
+        val context = contextFactory.root().storeSpan(spanFactory.invalid)
         propagator.inject(context, carrier, MapTextMapSetter)
         assertTrue(carrier.isEmpty())
     }
@@ -184,7 +183,7 @@ internal class W3CTraceContextPropagatorTest {
     fun `extract produces a SpanContext with isRemote=true`() {
         val carrier = mapOf("traceparent" to "00-$traceId-$spanId-01")
         val result = propagator.extract(contextFactory.root(), carrier, MapTextMapGetter)
-        val sc = spanFactory.fromContext(result).spanContext
+        val sc = result.extractSpan().spanContext
         assertTrue(sc.isRemote)
     }
 
@@ -193,11 +192,11 @@ internal class W3CTraceContextPropagatorTest {
         val sampledCarrier = mapOf("traceparent" to "00-$traceId-$spanId-01")
         val unsampledCarrier = mapOf("traceparent" to "00-$traceId-$spanId-00")
 
-        val sampled = spanFactory
-            .fromContext(propagator.extract(contextFactory.root(), sampledCarrier, MapTextMapGetter))
+        val sampled = propagator.extract(contextFactory.root(), sampledCarrier, MapTextMapGetter)
+            .extractSpan()
             .spanContext
-        val unsampled = spanFactory
-            .fromContext(propagator.extract(contextFactory.root(), unsampledCarrier, MapTextMapGetter))
+        val unsampled = propagator.extract(contextFactory.root(), unsampledCarrier, MapTextMapGetter)
+            .extractSpan()
             .spanContext
 
         assertTrue(sampled.traceFlags.isSampled)
@@ -208,7 +207,7 @@ internal class W3CTraceContextPropagatorTest {
     fun `extract attaches an empty TraceState when tracestate header is absent`() {
         val carrier = mapOf("traceparent" to "00-$traceId-$spanId-01")
         val result = propagator.extract(contextFactory.root(), carrier, MapTextMapGetter)
-        val sc = spanFactory.fromContext(result).spanContext
+        val sc = result.extractSpan().spanContext
         assertTrue(sc.traceState.asMap().isEmpty())
     }
 
@@ -219,7 +218,7 @@ internal class W3CTraceContextPropagatorTest {
             "tracestate" to "foo=bar,baz=qux",
         )
         val result = propagator.extract(contextFactory.root(), carrier, MapTextMapGetter)
-        val sc = spanFactory.fromContext(result).spanContext
+        val sc = result.extractSpan().spanContext
         assertEquals(mapOf("foo" to "bar", "baz" to "qux"), sc.traceState.asMap())
     }
 
@@ -230,7 +229,7 @@ internal class W3CTraceContextPropagatorTest {
             "tracestate" to "foo=bar,bogus,baz=qux",
         )
         val result = propagator.extract(contextFactory.root(), carrier, MapTextMapGetter)
-        val sc = spanFactory.fromContext(result).spanContext
+        val sc = result.extractSpan().spanContext
         assertEquals(mapOf("foo" to "bar", "baz" to "qux"), sc.traceState.asMap())
     }
 
@@ -238,7 +237,7 @@ internal class W3CTraceContextPropagatorTest {
     fun `extract attaches a non-recording span on the returned context`() {
         val carrier = mapOf("traceparent" to "00-$traceId-$spanId-01")
         val result = propagator.extract(contextFactory.root(), carrier, MapTextMapGetter)
-        val span = spanFactory.fromContext(result)
+        val span = result.extractSpan()
         assertFalse(span.isRecording())
         assertEquals(traceId, span.spanContext.traceId)
         assertEquals(spanId, span.spanContext.spanId)
@@ -253,7 +252,7 @@ internal class W3CTraceContextPropagatorTest {
         )
         val carrier = injectInto(contextWithSpan(original))
         val extracted = propagator.extract(contextFactory.root(), carrier, MapTextMapGetter)
-        val sc = spanFactory.fromContext(extracted).spanContext
+        val sc = extracted.extractSpan().spanContext
 
         assertEquals(original.traceId, sc.traceId)
         assertEquals(original.spanId, sc.spanId)
@@ -274,7 +273,7 @@ internal class W3CTraceContextPropagatorTest {
     )
 
     private fun contextWithSpan(spanContext: SpanContext): Context =
-        contextFactory.storeSpan(contextFactory.root(), spanFactory.fromSpanContext(spanContext))
+        contextFactory.root().storeSpan(spanFactory.fromSpanContext(spanContext))
 
     private fun injectInto(context: Context): MutableMap<String, String> {
         val carrier = mutableMapOf<String, String>()

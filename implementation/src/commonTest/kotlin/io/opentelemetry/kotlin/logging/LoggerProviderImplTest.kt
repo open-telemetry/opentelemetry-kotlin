@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
-import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
@@ -30,12 +29,11 @@ internal class LoggerProviderImplTest {
     )
     private val contextFactory = FakeContextFactory()
     private val spanContextFactory = FakeSpanContextFactory()
-    private val spanFactory = FakeSpanFactory()
     private lateinit var impl: LoggerProviderImpl
 
     @BeforeTest
     fun setup() {
-        impl = LoggerProviderImpl(clock, loggingConfig, contextFactory, spanContextFactory, spanFactory)
+        impl = LoggerProviderImpl(clock, loggingConfig, contextFactory, spanContextFactory)
     }
 
     @Test
@@ -123,7 +121,7 @@ internal class LoggerProviderImplTest {
             LogLimitConfig(100, 100),
             FakeResource(),
         )
-        impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory, spanFactory)
+        impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
         impl.getLogger(name = "test")
 
         val result = impl.forceFlush()
@@ -145,7 +143,7 @@ internal class LoggerProviderImplTest {
             LogLimitConfig(100, 100),
             FakeResource(),
         )
-        impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory, spanFactory)
+        impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
         impl.getLogger(name = "test")
 
         val result = impl.shutdown()
@@ -168,7 +166,7 @@ internal class LoggerProviderImplTest {
             LogLimitConfig(100, 100),
             FakeResource(),
         )
-        impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory, spanFactory)
+        impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
         val logger = impl.getLogger(name = "test")
         impl.shutdown()
         logger.emit(body = "should not emit")

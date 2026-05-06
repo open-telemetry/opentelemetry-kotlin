@@ -174,7 +174,7 @@ internal class NoopTests {
     fun testStoreSpan() {
         val otel = NoopOpenTelemetry
         val span = otel.tracerProvider.getTracer("tracer").startSpan("span")
-        val ctx = otel.context.storeSpan(otel.context.root(), span)
+        val ctx = otel.context.root().storeSpan(span)
         assertTrue(ctx is NoopContext)
     }
 
@@ -197,7 +197,7 @@ internal class NoopTests {
         val second = otel.span.fromSpanContext(otel.spanContext.invalid)
         assertTrue(second is NoopSpan)
 
-        val third = otel.span.fromContext(otel.context.root())
+        val third = otel.context.root().extractSpan()
         assertTrue(third is NoopSpan)
     }
 

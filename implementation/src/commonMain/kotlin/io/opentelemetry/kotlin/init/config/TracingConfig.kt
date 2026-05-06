@@ -31,5 +31,5 @@ internal class TracingConfig(
     /**
      * Factory that produces the sampler to use when creating spans.
      */
-    val samplerFactory: (SpanFactory) -> Sampler = { AlwaysOnSampler(it) },
+    val samplerFactory: (SpanFactory) -> Sampler = { _ -> AlwaysOnSampler() },
 )

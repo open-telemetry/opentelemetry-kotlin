@@ -20,11 +20,11 @@ import kotlin.test.assertTrue
 internal class CorePropagatorApiTest {
 
     private val dsl = PropagatorConfigImpl()
-    private val contextFactory = ContextFactoryImpl()
     private val traceFlagsFactory = TraceFlagsFactoryImpl()
     private val traceStateFactory = TraceStateFactoryImpl()
     private val spanContextFactory = SpanContextFactoryImpl(IdGeneratorImpl(), traceFlagsFactory, traceStateFactory)
-    private val spanFactory = SpanFactoryImpl(spanContextFactory, contextFactory.spanKey)
+    private val spanFactory = SpanFactoryImpl(spanContextFactory)
+    private val contextFactory = ContextFactoryImpl(spanFactory)
 
     @Test
     fun `composite with single propagator wraps in CompositeTextMapPropagator`() {
@@ -103,7 +103,6 @@ internal class CorePropagatorApiTest {
             traceStateFactory = traceStateFactory,
             spanContextFactory = spanContextFactory,
             spanFactory = spanFactory,
-            contextFactory = contextFactory,
         )
     }
 }

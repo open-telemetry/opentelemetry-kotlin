@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
@@ -19,13 +18,12 @@ internal class W3CTraceContextPropagator(
     private val traceStateFactory: TraceStateFactory,
     private val spanContextFactory: SpanContextFactory,
     private val spanFactory: SpanFactory,
-    private val contextFactory: ContextFactory,
 ) : TextMapPropagator {
 
     override fun fields(): Collection<String> = FIELDS
 
     override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {
-        val spanContext = spanFactory.fromContext(context).spanContext
+        val spanContext = context.extractSpan().spanContext
         if (!spanContext.isValid) {
             return
         }
@@ -63,7 +61,7 @@ internal class W3CTraceContextPropagator(
         if (!spanContext.isValid) {
             return context
         }
-        return contextFactory.storeSpan(context, spanFactory.fromSpanContext(spanContext))
+        return context.storeSpan(spanFactory.fromSpanContext(spanContext))
     }
 
     private companion object {
