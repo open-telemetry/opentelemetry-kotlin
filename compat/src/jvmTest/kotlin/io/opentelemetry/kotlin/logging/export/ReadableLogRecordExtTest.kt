@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -25,6 +26,21 @@ internal class ReadableLogRecordExtTest {
         val record = FakeReadableLogRecord(body = structuredBody)
         val observed = record.toLogRecordData()
         assertEquals(structuredBody.toString(), observed.bodyValue?.asString())
+    }
+
+    @Test
+    fun testLogRecordAnyValueStringBody() {
+        val record = FakeReadableLogRecord(body = AnyValue.StringValue("hello"))
+        val observed = record.toLogRecordData()
+        assertEquals("hello", observed.bodyValue?.asString())
+    }
+
+    @Test
+    fun testLogRecordAnyValueMapBody() {
+        val map = AnyValue.MapValue(mapOf("k" to AnyValue.StringValue("v")))
+        val record = FakeReadableLogRecord(body = map)
+        val observed = record.toLogRecordData()
+        assertEquals(map.toString(), observed.bodyValue?.asString())
     }
 
     @Test

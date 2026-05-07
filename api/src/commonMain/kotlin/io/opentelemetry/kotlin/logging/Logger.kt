@@ -34,7 +34,9 @@ public interface Logger {
     /**
      * Emits an event with a name and the given optional parameters:
      *
-     * - [body] - the body of the log message
+     * - [body] - the body of the log message. Pass, [String] for a simple textual body,
+     *   [io.opentelemetry.kotlin.attributes.AnyValue] for structured body types, and any other
+     *   type that will be converted via toString().
      * - [eventName] - the name of the event, or null if none is set
      * - [timestamp] - the timestamp at which the event occurred
      * - [observedTimestamp] - the timestamp at which the event was entered into the OpenTelemetry API
