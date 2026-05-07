@@ -72,7 +72,11 @@ internal class AttributesModel(
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
         if (canAddAttribute(key)) {
-            attrs[key] = value
+            attrs[key] = if (value.size > attributeValueLengthLimit) {
+                value.copyOf(attributeValueLengthLimit)
+            } else {
+                value
+            }
         }
     }
 
