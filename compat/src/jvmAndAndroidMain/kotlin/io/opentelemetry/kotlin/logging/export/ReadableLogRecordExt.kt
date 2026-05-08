@@ -5,6 +5,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.aliases.OtelJavaBody
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordData
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.resourceFromMap
 import io.opentelemetry.kotlin.logging.OtelJavaLogRecordDataImpl
@@ -21,9 +22,15 @@ internal fun ReadableLogRecord.toLogRecordData(): OtelJavaLogRecordData {
         severityTextImpl = severityText,
         severityImpl = severityNumber?.toOtelJavaSeverityNumber()
             ?: OtelJavaSeverity.UNDEFINED_SEVERITY_NUMBER,
-        bodyImpl = body?.let { OtelJavaBody.string(it.toString()) } ?: OtelJavaBody.empty(),
+        bodyImpl = body.toOtelJavaBody(),
         attributesImpl = attrsFromMap(attributes),
         resourceImpl = resourceFromMap(resource),
         scopeImpl = instrumentationScopeInfo.toOtelJavaInstrumentationScopeInfo()
     )
+}
+
+private fun Any?.toOtelJavaBody(): OtelJavaBody = when (this) {
+    null -> OtelJavaBody.empty()
+    is AnyValue.StringValue -> OtelJavaBody.string(value)
+    else -> OtelJavaBody.string(toString())
 }

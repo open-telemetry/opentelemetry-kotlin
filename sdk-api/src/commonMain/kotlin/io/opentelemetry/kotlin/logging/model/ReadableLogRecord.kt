@@ -37,8 +37,10 @@ public interface ReadableLogRecord : AttributeContainer {
     public val severityText: String?
 
     /**
-     * Contains the body of the log message. Can be a string, number, boolean, map, or list,
-     * per the OpenTelemetry log data model (https://opentelemetry.io/docs/specs/otel/logs/data-model/#field-body).
+     * Contains the body of the log message.
+     *
+     * Recommended types are [String] and [io.opentelemetry.kotlin.attributes.AnyValue]. Other
+     * types are converted via toString().
      */
     public val body: Any?
 
