@@ -20,10 +20,12 @@ We are currently resource constrained and are actively seeking new contributors 
 In addition to the documentation for approver / maintainer roles and the [contributing](./CONTRIBUTING.md) guide, here are some additional notes on engaging:
 
 - [Pull request](https://github.com/open-telemetry/opentelemetry-kotlin/pulls) reviews are equally or more helpful than code contributions. Comments and approvals are valuable with or without a formal project role. They're also a great forcing function to explore a fairly complex codebase.
-- Attending the Special Interest Group (SIG) is a great way to get to know community members and learn about project priorities.
+- Attending the Special Interest Group (SIG) is a great way to get to know community members and learn about project priorities. The SIG meets weekly on Mondays at 09:00 PT -- see the [OpenTelemetry community calendar](https://github.com/open-telemetry/community#implementation-sigs) for the Zoom link, and meeting notes are available in this [Google doc](https://docs.google.com/document/d/1dzYPuJTV5usXHKAFL596SRwSlATEj_Z37GPODB73Oms).
 - Issues labeled [help wanted](https://github.com/open-telemetry/opentelemetry-kotlin/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22) are project priorities. Code contributions (or pull request reviews when a PR is linked) for these issues are particularly important.
 - Triaging / responding to new issues and discussions is a great way to engage with the project.
 - We are available in the [#otel-kotlin](https://cloud-native.slack.com/archives/C08NRCD4R4G) channel in the [CNCF Slack](https://slack.cncf.io/). Please join us there for further discussions.
+
+The SIG meeting is open for all to join. We invite everyone to join our meeting, regardless of your experience level. Whether you're a seasoned OpenTelemetry contributor, just starting your journey, or simply curious about the work we do, you're more than welcome to participate!
 
 ## Maintainers
 
