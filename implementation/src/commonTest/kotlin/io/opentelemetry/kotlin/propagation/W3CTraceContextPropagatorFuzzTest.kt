@@ -16,6 +16,7 @@ import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -105,6 +106,8 @@ internal class W3CTraceContextPropagatorFuzzTest {
                     extracted.extractSpan().spanContext.isValid,
                     "non-root context with invalid SpanContext from carrier=$carrier",
                 )
+            } else {
+                assertFalse(extracted.extractSpan().spanContext.isValid)
             }
         }
     }
