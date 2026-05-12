@@ -81,7 +81,18 @@ object ProcessAttributes {
     const val PROCESS_EXECUTABLE_BUILD_ID_GO: String = "process.executable.build_id.go"
 
     /**
-    * <p>Profiling specific build ID for executables. See the OTel specification for Profiles for more information.</p>
+    * <p>Deterministic build ID for executables.</p>
+    * <p>Notes:</p>
+    * <p>GNU and Go build IDs may be stripped or unavailable in some environments
+    * (e.g., Alpine Linux, Docker images). This attribute provides a deterministic
+    * build ID computed by hashing the first and last 4096 bytes of the file
+    * along with its length:</p>
+    * <pre>
+    * Input   ← Concat(File[:4096], File[-4096:], BigEndianUInt64(Len(File)))
+    * Digest  ← SHA256(Input)
+    * BuildID ← Digest[:16]
+    * </pre><p>The result is the first 16 bytes (128 bits) of the SHA256 digest,
+    * represented as a hex string.</p>
     */
     @IncubatingApi
     const val PROCESS_EXECUTABLE_BUILD_ID_HTLHASH: String = "process.executable.build_id.htlhash"

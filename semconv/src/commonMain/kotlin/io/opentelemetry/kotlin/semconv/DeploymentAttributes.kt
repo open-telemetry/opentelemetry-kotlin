@@ -27,7 +27,6 @@ object DeploymentAttributes {
     *   <li><c>service.name=frontend</c>, <c>deployment.environment.name=staging</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val DEPLOYMENT_ENVIRONMENT_NAME: String = "deployment.environment.name"
 
     /**
@@ -47,6 +46,32 @@ object DeploymentAttributes {
     */
     @IncubatingApi
     const val DEPLOYMENT_STATUS: String = "deployment.status"
+
+    /**
+    * <p>DEPLOYMENT_ENVIRONMENT_NAME</p>
+    */
+    enum class DeploymentEnvironmentNameValues(val value: String) {
+
+        /**
+        * <p>Production environment</p>
+        */
+        PRODUCTION("production"),
+
+        /**
+        * <p>Staging environment</p>
+        */
+        STAGING("staging"),
+
+        /**
+        * <p>Testing environment</p>
+        */
+        TEST("test"),
+
+        /**
+        * <p>Development environment</p>
+        */
+        DEVELOPMENT("development"),
+    }
 
     /**
     * <p>DEPLOYMENT_STATUS</p>

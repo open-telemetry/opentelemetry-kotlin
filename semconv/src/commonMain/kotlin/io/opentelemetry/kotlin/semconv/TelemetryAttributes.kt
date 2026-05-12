@@ -15,13 +15,11 @@ object TelemetryAttributes {
     * <p>Official auto instrumentation agents and distributions SHOULD set the <c>telemetry.distro.name</c> attribute to
     * a string starting with <c>opentelemetry-</c>, e.g. <c>opentelemetry-java-instrumentation</c>.</p>
     */
-    @IncubatingApi
     const val TELEMETRY_DISTRO_NAME: String = "telemetry.distro.name"
 
     /**
     * <p>The version string of the auto instrumentation agent or distribution, if used.</p>
     */
-    @IncubatingApi
     const val TELEMETRY_DISTRO_VERSION: String = "telemetry.distro.version"
 
     /**

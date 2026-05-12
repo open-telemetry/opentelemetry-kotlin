@@ -12,7 +12,7 @@ object GraphqlAttributes {
     /**
     * <p>The GraphQL document being executed.</p>
     * <p>Notes:</p>
-    * <p>The value may be sanitized to exclude sensitive information.</p>
+    * <p>If instrumentation can reliably identify and redact sensitive information it SHOULD do it.</p>
     */
     @IncubatingApi
     const val GRAPHQL_DOCUMENT: String = "graphql.document"

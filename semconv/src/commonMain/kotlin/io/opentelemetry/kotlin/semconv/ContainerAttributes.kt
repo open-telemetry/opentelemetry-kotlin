@@ -114,7 +114,7 @@ object ContainerAttributes {
     const val CONTAINER_RUNTIME: String = "container.runtime"
 
     /**
-    * <p>A description about the runtime which could include, for example details about the CRI/API version being used or other customisations.</p>
+    * <p>A description about the runtime which could include, for example details about the CRI/API version being used or other customizations.</p>
     */
     @IncubatingApi
     const val CONTAINER_RUNTIME_DESCRIPTION: String = "container.runtime.description"

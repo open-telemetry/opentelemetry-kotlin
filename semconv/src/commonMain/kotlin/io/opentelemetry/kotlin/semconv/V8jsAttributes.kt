@@ -24,6 +24,12 @@ object V8jsAttributes {
     const val V8JS_HEAP_SPACE_NAME: String = "v8js.heap.space.name"
 
     /**
+    * <p>The type of resource keeping the event loop active.</p>
+    */
+    @IncubatingApi
+    const val V8JS_RESOURCE_TYPE: String = "v8js.resource.type"
+
+    /**
     * <p>V8JS_GC_TYPE</p>
     */
     @IncubatingApi
@@ -80,5 +86,37 @@ object V8jsAttributes {
         * <p>Large object memory space.</p>
         */
         LARGE_OBJECT_SPACE("large_object_space"),
+    }
+
+    /**
+    * <p>V8JS_RESOURCE_TYPE</p>
+    */
+    @IncubatingApi
+    enum class V8jsResourceTypeValues(val value: String) {
+
+        /**
+        * <p>Active <c>setImmediate</c> callbacks.</p>
+        */
+        IMMEDIATE("Immediate"),
+
+        /**
+        * <p>Active TCP Servers.</p>
+        */
+        TCPSERVERWRAP("TCPServerWrap"),
+
+        /**
+        * <p>Active TCP connections.</p>
+        */
+        TCPWRAP("TCPWrap"),
+
+        /**
+        * <p>Active <c>setTimeout</c> or <c>setInterval</c> timers.</p>
+        */
+        TIMEOUT("Timeout"),
+
+        /**
+        * <p>Active Terminal I/O (stdin/stdout).</p>
+        */
+        TTYWRAP("TTYWrap"),
     }
 }
