@@ -53,6 +53,8 @@ object CicdAttributes {
 
     /**
     * <p>The unique identifier of a task run within a pipeline.</p>
+    * <p>Notes:</p>
+    * <p>For a given pipeline run and task, the <c>cicd.pipeline.task.run.id</c> MUST be unique within that run. For the same task across different runs of the same pipeline, the <c>cicd.pipeline.task.run.id</c> MAY remain the same, enabling correlation of <c>cicd.pipeline.task.run.result</c> values across multiple pipeline runs.</p>
     */
     @IncubatingApi
     const val CICD_PIPELINE_TASK_RUN_ID: String = "cicd.pipeline.task.run.id"

@@ -52,6 +52,12 @@ object SystemAttributes {
     const val SYSTEM_FILESYSTEM_TYPE: String = "system.filesystem.type"
 
     /**
+    * <p>The Linux HugePages memory state</p>
+    */
+    @IncubatingApi
+    const val SYSTEM_MEMORY_LINUX_HUGEPAGES_STATE: String = "system.memory.linux.hugepages.state"
+
+    /**
     * <p>The Linux Slab memory state</p>
     */
     @IncubatingApi
@@ -204,6 +210,23 @@ object SystemAttributes {
         * <p>ext4.</p>
         */
         EXT4("ext4"),
+    }
+
+    /**
+    * <p>SYSTEM_MEMORY_LINUX_HUGEPAGES_STATE</p>
+    */
+    @IncubatingApi
+    enum class SystemMemoryLinuxHugepagesStateValues(val value: String) {
+
+        /**
+        * <p>free.</p>
+        */
+        FREE("free"),
+
+        /**
+        * <p>used.</p>
+        */
+        USED("used"),
     }
 
     /**

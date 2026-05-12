@@ -259,6 +259,12 @@ object GenAiAttributes {
     const val GEN_AI_REQUEST_STOP_SEQUENCES: String = "gen_ai.request.stop_sequences"
 
     /**
+    * <p>Indicates whether the GenAI request was made in streaming mode.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_REQUEST_STREAM: String = "gen_ai.request.stream"
+
+    /**
     * <p>The temperature setting for the GenAI request.</p>
     */
     @IncubatingApi
@@ -293,6 +299,12 @@ object GenAiAttributes {
     */
     @IncubatingApi
     const val GEN_AI_RESPONSE_MODEL: String = "gen_ai.response.model"
+
+    /**
+    * <p>Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_RESPONSE_TIME_TO_FIRST_CHUNK: String = "gen_ai.response.time_to_first_chunk"
 
     /**
     * <p>The documents retrieved.</p>
@@ -384,15 +396,15 @@ object GenAiAttributes {
     const val GEN_AI_TOOL_CALL_RESULT: String = "gen_ai.tool.call.result"
 
     /**
-    * <p>The list of source system tool definitions available to the GenAI agent or model.</p>
+    * <p>The list of tool definitions available to the GenAI agent or model.</p>
     * <p>Notes:</p>
-    * <p>The value of this attribute matches source system tool definition format.</p>
-    * <p>It's expected to be an array of objects where each object represents a tool definition. In case a serialized string is available
-    * to the instrumentation, the instrumentation SHOULD do the best effort to
-    * deserialize it to an array. When recorded on spans, it MAY be recorded as a JSON string if structured format is not supported and SHOULD be recorded in structured form otherwise.</p>
+    * <p>Instrumentations MUST follow <a href="/docs/gen-ai/gen-ai-tool-definitions.json">Tool Definitions JSON Schema</a>.</p>
+    * <p>When the attribute is recorded on events, it MUST be recorded in structured
+    * form. When recorded on spans, it MAY be recorded as a JSON string if structured
+    * format is not supported and SHOULD be recorded in structured form otherwise.</p>
     * <p>Since this attribute could be large, it's NOT RECOMMENDED to populate
-    * it by default. Instrumentations MAY provide a way to enable
-    * populating this attribute.</p>
+    * non-required properties by default. Instrumentations MAY provide a way
+    * to enable populating optional properties.</p>
     */
     @IncubatingApi
     const val GEN_AI_TOOL_DEFINITIONS: String = "gen_ai.tool.definitions"
@@ -465,6 +477,22 @@ object GenAiAttributes {
     */
     @Deprecated("Replaced by `gen_ai.usage.input_tokens`.")
     const val GEN_AI_USAGE_PROMPT_TOKENS: String = "gen_ai.usage.prompt_tokens"
+
+    /**
+    * <p>The number of output tokens used for reasoning (e.g. chain-of-thought, extended thinking).</p>
+    * <p>Notes:</p>
+    * <p>The value SHOULD be included in <c>gen_ai.usage.output_tokens</c>.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_USAGE_REASONING_OUTPUT_TOKENS: String = "gen_ai.usage.reasoning.output_tokens"
+
+    /**
+    * <p>Human-readable name of the GenAI workflow provided by the application.</p>
+    * <p>Notes:</p>
+    * <p>This attribute can be populated in different frameworks eg: name of the first chain in LangChain OR name of the crew in CrewAI.</p>
+    */
+    @IncubatingApi
+    const val GEN_AI_WORKFLOW_NAME: String = "gen_ai.workflow.name"
 
     /**
     * <p>GEN_AI_OPENAI_REQUEST_RESPONSE_FORMAT</p>
@@ -550,6 +578,11 @@ object GenAiAttributes {
         * <p>Execute a tool</p>
         */
         EXECUTE_TOOL("execute_tool"),
+
+        /**
+        * <p>Invoke GenAI workflow</p>
+        */
+        INVOKE_WORKFLOW("invoke_workflow"),
     }
 
     /**
@@ -621,7 +654,7 @@ object GenAiAttributes {
         AZURE_AI_INFERENCE("azure.ai.inference"),
 
         /**
-        * <p><a href="https://azure.microsoft.com/products/ai-services/openai-service/">Azure OpenAI</a></p>
+        * <p><a href="https://learn.microsoft.com/en-us/azure/ai-services/openai/overview">Azure OpenAI</a></p>
         */
         AZURE_AI_OPENAI("azure.ai.openai"),
 

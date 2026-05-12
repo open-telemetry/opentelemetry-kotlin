@@ -383,10 +383,123 @@ object K8sAttributes {
     const val K8S_NODE_NAME: String = "k8s.node.name"
 
     /**
+    * <p>The name of the system container running on the K8s Node.</p>
+    */
+    @IncubatingApi
+    const val K8S_NODE_SYSTEM_CONTAINER_NAME: String = "k8s.node.system_container.name"
+
+    /**
     * <p>The UID of the Node.</p>
     */
     @IncubatingApi
     const val K8S_NODE_UID: String = "k8s.node.uid"
+
+    /**
+    * <p>The annotation placed on the PersistentVolume, the <c><key></c> being the annotation name, the value being the annotation value, even if the value is empty.</p>
+    * <p>Notes:</p>
+    * <p>Examples:</p>
+    * <ul>
+    *   <li>An annotation <c>pv.kubernetes.io/provisioned-by</c> with value <c>kubernetes.io/aws-ebs</c> SHOULD be recorded as
+    * the <c>k8s.persistentvolume.annotation.pv.kubernetes.io/provisioned-by</c> attribute with value <c>"kubernetes.io/aws-ebs"</c>.</li>
+    *   <li>An annotation <c>data</c> with empty string value SHOULD be recorded as
+    * the <c>k8s.persistentvolume.annotation.data</c> attribute with value <c>""</c>.</li>
+    * </ul>
+    */
+    @IncubatingApi
+    const val K8S_PERSISTENTVOLUME_ANNOTATION: String = "k8s.persistentvolume.annotation"
+
+    /**
+    * <p>The label placed on the PersistentVolume, the <c><key></c> being the label name, the value being the label value, even if the value is empty.</p>
+    * <p>Notes:</p>
+    * <p>Examples:</p>
+    * <ul>
+    *   <li>A label <c>type</c> with value <c>ssd</c> SHOULD be recorded as
+    * the <c>k8s.persistentvolume.label.type</c> attribute with value <c>"ssd"</c>.</li>
+    *   <li>A label <c>data</c> with empty string value SHOULD be recorded as
+    * the <c>k8s.persistentvolume.label.data</c> attribute with value <c>""</c>.</li>
+    * </ul>
+    */
+    @IncubatingApi
+    const val K8S_PERSISTENTVOLUME_LABEL: String = "k8s.persistentvolume.label"
+
+    /**
+    * <p>The name of the PersistentVolume.</p>
+    */
+    @IncubatingApi
+    const val K8S_PERSISTENTVOLUME_NAME: String = "k8s.persistentvolume.name"
+
+    /**
+    * <p>The reclaim policy of the PersistentVolume.</p>
+    * <p>Notes:</p>
+    * <p>This attribute aligns with the <c>persistentVolumeReclaimPolicy</c> field of the
+    * <a href="https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-v1/#PersistentVolumeSpec">K8s PersistentVolumeSpec</a>.</p>
+    */
+    @IncubatingApi
+    const val K8S_PERSISTENTVOLUME_RECLAIM_POLICY: String = "k8s.persistentvolume.reclaim_policy"
+
+    /**
+    * <p>The phase of the PersistentVolume.</p>
+    * <p>Notes:</p>
+    * <p>This attribute aligns with the <c>phase</c> field of the
+    * <a href="https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-v1/#PersistentVolumeStatus">K8s PersistentVolumeStatus</a>.</p>
+    */
+    @IncubatingApi
+    const val K8S_PERSISTENTVOLUME_STATUS_PHASE: String = "k8s.persistentvolume.status.phase"
+
+    /**
+    * <p>The UID of the PersistentVolume.</p>
+    */
+    @IncubatingApi
+    const val K8S_PERSISTENTVOLUME_UID: String = "k8s.persistentvolume.uid"
+
+    /**
+    * <p>The annotation placed on the PersistentVolumeClaim, the <c><key></c> being the annotation name, the value being the annotation value, even if the value is empty.</p>
+    * <p>Notes:</p>
+    * <p>Examples:</p>
+    * <ul>
+    *   <li>An annotation <c>volume.beta.kubernetes.io/storage-provisioner</c> with value <c>kubernetes.io/aws-ebs</c> SHOULD be recorded as
+    * the <c>k8s.persistentvolumeclaim.annotation.volume.beta.kubernetes.io/storage-provisioner</c> attribute with value <c>"kubernetes.io/aws-ebs"</c>.</li>
+    *   <li>An annotation <c>data</c> with empty string value SHOULD be recorded as
+    * the <c>k8s.persistentvolumeclaim.annotation.data</c> attribute with value <c>""</c>.</li>
+    * </ul>
+    */
+    @IncubatingApi
+    const val K8S_PERSISTENTVOLUMECLAIM_ANNOTATION: String = "k8s.persistentvolumeclaim.annotation"
+
+    /**
+    * <p>The label placed on the PersistentVolumeClaim, the <c><key></c> being the label name, the value being the label value, even if the value is empty.</p>
+    * <p>Notes:</p>
+    * <p>Examples:</p>
+    * <ul>
+    *   <li>A label <c>app</c> with value <c>my-app</c> SHOULD be recorded as
+    * the <c>k8s.persistentvolumeclaim.label.app</c> attribute with value <c>"my-app"</c>.</li>
+    *   <li>A label <c>data</c> with empty string value SHOULD be recorded as
+    * the <c>k8s.persistentvolumeclaim.label.data</c> attribute with value <c>""</c>.</li>
+    * </ul>
+    */
+    @IncubatingApi
+    const val K8S_PERSISTENTVOLUMECLAIM_LABEL: String = "k8s.persistentvolumeclaim.label"
+
+    /**
+    * <p>The name of the PersistentVolumeClaim.</p>
+    */
+    @IncubatingApi
+    const val K8S_PERSISTENTVOLUMECLAIM_NAME: String = "k8s.persistentvolumeclaim.name"
+
+    /**
+    * <p>The phase of the PersistentVolumeClaim.</p>
+    * <p>Notes:</p>
+    * <p>This attribute aligns with the <c>phase</c> field of the
+    * <a href="https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaimStatus">K8s PersistentVolumeClaimStatus</a>.</p>
+    */
+    @IncubatingApi
+    const val K8S_PERSISTENTVOLUMECLAIM_STATUS_PHASE: String = "k8s.persistentvolumeclaim.status.phase"
+
+    /**
+    * <p>The UID of the PersistentVolumeClaim.</p>
+    */
+    @IncubatingApi
+    const val K8S_PERSISTENTVOLUMECLAIM_UID: String = "k8s.persistentvolumeclaim.uid"
 
     /**
     * <p>The annotation placed on the Pod, the <c><key></c> being the annotation name, the value being the annotation value.</p>
@@ -882,6 +995,82 @@ object K8sAttributes {
         * <p>The network for the node is not correctly configured</p>
         */
         NETWORK_UNAVAILABLE("NetworkUnavailable"),
+    }
+
+    /**
+    * <p>K8S_PERSISTENTVOLUME_RECLAIM_POLICY</p>
+    */
+    @IncubatingApi
+    enum class K8sPersistentvolumeReclaimPolicyValues(val value: String) {
+
+        /**
+        * <p>The volume will be deleted when released from its claim.</p>
+        */
+        DELETE("Delete"),
+
+        /**
+        * <p>The volume will be recycled (basic scrub) when released from its claim.</p>
+        */
+        RECYCLE("Recycle"),
+
+        /**
+        * <p>The volume will be retained when released from its claim.</p>
+        */
+        RETAIN("Retain"),
+    }
+
+    /**
+    * <p>K8S_PERSISTENTVOLUME_STATUS_PHASE</p>
+    */
+    @IncubatingApi
+    enum class K8sPersistentvolumeStatusPhaseValues(val value: String) {
+
+        /**
+        * <p>The volume is available and not yet bound to a claim.</p>
+        */
+        AVAILABLE("Available"),
+
+        /**
+        * <p>The volume is bound to a claim.</p>
+        */
+        BOUND("Bound"),
+
+        /**
+        * <p>The volume has failed its automatic reclamation.</p>
+        */
+        FAILED("Failed"),
+
+        /**
+        * <p>The volume is being provisioned.</p>
+        */
+        PENDING("Pending"),
+
+        /**
+        * <p>The claim has been deleted but the volume is not yet available.</p>
+        */
+        RELEASED("Released"),
+    }
+
+    /**
+    * <p>K8S_PERSISTENTVOLUMECLAIM_STATUS_PHASE</p>
+    */
+    @IncubatingApi
+    enum class K8sPersistentvolumeclaimStatusPhaseValues(val value: String) {
+
+        /**
+        * <p>The claim is bound to a volume.</p>
+        */
+        BOUND("Bound"),
+
+        /**
+        * <p>The claim has lost its underlying volume (the volume does not exist anymore).</p>
+        */
+        LOST("Lost"),
+
+        /**
+        * <p>The claim has not yet been bound to a volume.</p>
+        */
+        PENDING("Pending"),
     }
 
     /**

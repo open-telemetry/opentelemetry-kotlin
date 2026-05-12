@@ -31,6 +31,12 @@ object ExceptionAttributes {
 
     /**
     * <p>The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.</p>
+    * <p>Notes:</p>
+    * <p>If the recorded exception type is a wrapper that is not meaningful for
+    * failure classification, instrumentation MAY use the type of the inner
+    * exception instead. For example, in Go, errors created with <c>fmt.Errorf</c>
+    * using <c>%w</c> MAY be unwrapped when the wrapper type does not help
+    * classify the failure.</p>
     */
     const val EXCEPTION_TYPE: String = "exception.type"
 }

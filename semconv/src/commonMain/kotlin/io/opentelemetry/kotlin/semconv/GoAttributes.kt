@@ -10,10 +10,59 @@ object GoAttributes {
   
 
     /**
+    * <p>The detailed state of the CPU.</p>
+    * <p>Notes:</p>
+    * <p>Value SHOULD match the specific CPU class reported by the Go runtime under <c>/cpu/classes/...</c>. The list of possible values is subject to change with the Go version used.</p>
+    */
+    @IncubatingApi
+    const val GO_CPU_DETAILED_STATE: String = "go.cpu.detailed_state"
+
+    /**
+    * <p>The state of the CPU.</p>
+    */
+    @IncubatingApi
+    const val GO_CPU_STATE: String = "go.cpu.state"
+
+    /**
+    * <p>The detailed type of memory.</p>
+    * <p>Notes:</p>
+    * <p>Value SHOULD match the specific memory class reported by the Go runtime under <c>/memory/classes/...</c>. The list of possible values is subject to change with the Go version used.</p>
+    */
+    @IncubatingApi
+    const val GO_MEMORY_DETAILED_TYPE: String = "go.memory.detailed_type"
+
+    /**
     * <p>The type of memory.</p>
     */
     @IncubatingApi
     const val GO_MEMORY_TYPE: String = "go.memory.type"
+
+    /**
+    * <p>GO_CPU_STATE</p>
+    */
+    @IncubatingApi
+    enum class GoCpuStateValues(val value: String) {
+
+        /**
+        * <p>CPU time spent running user Go code.</p>
+        */
+        USER("user"),
+
+        /**
+        * <p>CPU time spent performing garbage collection tasks.</p>
+        */
+        GC("gc"),
+
+        /**
+        * <p>CPU time spent returning unused memory to the underlying platform.</p>
+        */
+        SCAVENGE("scavenge"),
+
+        /**
+        * <p>Available CPU time not spent executing any Go or Go runtime code.</p>
+        */
+        IDLE("idle"),
+    }
 
     /**
     * <p>GO_MEMORY_TYPE</p>

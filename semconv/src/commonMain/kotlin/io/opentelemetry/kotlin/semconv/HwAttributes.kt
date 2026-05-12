@@ -10,7 +10,7 @@ object HwAttributes {
   
 
     /**
-    * <p>Design capacity in Watts-hours or Amper-hours</p>
+    * <p>Design capacity in Watts-hours or Ampere-hours</p>
     */
     @IncubatingApi
     const val HW_BATTERY_CAPACITY: String = "hw.battery.capacity"

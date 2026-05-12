@@ -48,7 +48,8 @@ object ServiceAttributes {
     /**
     * <p>Logical name of the service.</p>
     * <p>Notes:</p>
-    * <p>MUST be the same for all instances of horizontally scaled services. If the value was not specified, SDKs MUST fallback to <c>unknown_service:</c> concatenated with <a href="process.md"><c>process.executable.name</c></a>, e.g. <c>unknown_service:bash</c>. If <c>process.executable.name</c> is not available, the value MUST be set to <c>unknown_service</c>.</p>
+    * <p>MUST be the same for all instances of horizontally scaled services. If the value was not specified, SDKs MUST fallback to <c>unknown_service:</c> concatenated with the process executable name, e.g. <c>unknown_service:bash</c>. If the process executable name is not available, the value MUST be set to <c>unknown_service</c>.
+    * The process executable name is the name of the process executable, the same value as described by the <a href="process.md"><c>process.executable.name</c></a> resource attribute.</p>
     */
     const val SERVICE_NAME: String = "service.name"
 
