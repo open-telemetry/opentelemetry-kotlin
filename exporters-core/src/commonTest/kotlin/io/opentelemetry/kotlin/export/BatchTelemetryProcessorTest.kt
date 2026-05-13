@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -10,75 +11,24 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
 internal class BatchTelemetryProcessorTest {
 
     @Test
-    fun testInvalidMaxQueueSize() {
-        assertFailsWith<IllegalArgumentException> {
-            BatchTelemetryProcessor<Unit>(
-                maxQueueSize = -1,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = 1,
-                maxExportBatchSize = 1,
-                exportAction = { OperationResultCode.Success }
-            )
-        }
-    }
-
-    @Test
-    fun testInvalidScheduleDelayMs() {
-        assertFailsWith<IllegalArgumentException> {
-            BatchTelemetryProcessor<Unit>(
-                maxQueueSize = 1,
-                scheduleDelayMs = -1,
-                exportTimeoutMs = 1,
-                maxExportBatchSize = 1,
-                exportAction = { OperationResultCode.Success }
-            )
-        }
-    }
-
-    @Test
-    fun testInvalidExportTimeoutMs() {
-        assertFailsWith<IllegalArgumentException> {
-            BatchTelemetryProcessor<Unit>(
-                maxQueueSize = 1,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = -1,
-                maxExportBatchSize = 1,
-                exportAction = { OperationResultCode.Success }
-            )
-        }
-    }
-
-    @Test
-    fun testInvalidMaxExportBatchSize() {
-        assertFailsWith<IllegalArgumentException> {
-            BatchTelemetryProcessor<Unit>(
-                maxQueueSize = 1,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = 1,
-                maxExportBatchSize = -1,
-                exportAction = { OperationResultCode.Success }
-            )
-        }
-    }
-
-    @Test
-    fun testInvalidMaxExportBatchSize2() {
-        assertFailsWith<IllegalArgumentException> {
-            BatchTelemetryProcessor<Unit>(
-                maxQueueSize = 100,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = 1,
-                maxExportBatchSize = 200,
-                exportAction = { OperationResultCode.Success }
-            )
-        }
+    fun testInvalidValuesDoesNotThrow() {
+        val handler = FakeSdkErrorHandler()
+        BatchTelemetryProcessor<Unit>(
+            maxQueueSize = -1,
+            scheduleDelayMs = -1,
+            exportTimeoutMs = -1,
+            maxExportBatchSize = -1,
+            forceFlushTimeoutMs = -1,
+            sdkErrorHandler = handler,
+            exportAction = { OperationResultCode.Success },
+        )
+        assertEquals(5, handler.apiMisuses.size)
     }
 
     @Test
