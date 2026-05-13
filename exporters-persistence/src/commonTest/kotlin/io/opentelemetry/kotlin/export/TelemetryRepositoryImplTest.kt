@@ -172,7 +172,7 @@ internal class TelemetryRepositoryImplTest {
 
     @Test
     fun testMaxStorageLimitExceeded() {
-        val config = PersistedTelemetryConfig(maxBatchedItemsPerSignal = 3)
+        val config = PersistedTelemetryConfig(desiredMaxBatchedItemsPerSignal = 3)
         val repository = createRepository(config = config)
 
         val items = listOf("first", "second", "third", "fourth")
@@ -192,7 +192,7 @@ internal class TelemetryRepositoryImplTest {
 
     @Test
     fun testOldTelemetryPolicy() {
-        val config = PersistedTelemetryConfig(maxTelemetryAgeInDays = 7)
+        val config = PersistedTelemetryConfig(desiredMaxTelemetryAgeInDays = 7)
         val repository = createRepository(config = config)
 
         repository.store(listOf(FakeTelemetryObject("a")))

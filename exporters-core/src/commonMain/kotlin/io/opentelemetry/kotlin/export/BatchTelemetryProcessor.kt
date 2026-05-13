@@ -25,7 +25,7 @@ internal class BatchTelemetryProcessor<T>(
     private val exportAction: suspend (telemetry: List<T>) -> OperationResultCode,
 ) : TelemetryCloseable {
 
-    private val maxQueueSize: Int = validateOrUseDefault(
+    private val validMaxQueueSize: Int = validateOrUseDefault(
         sdkErrorHandler = sdkErrorHandler,
         api = API,
         configParameterName = "maxQueueSize",
@@ -33,7 +33,7 @@ internal class BatchTelemetryProcessor<T>(
         default = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     ) { it >= 0 }
 
-    private val scheduleDelayMs: Long = validateOrUseDefault(
+    private val validScheduleDelayMs: Long = validateOrUseDefault(
         sdkErrorHandler = sdkErrorHandler,
         api = API,
         configParameterName = "scheduleDelayMs",
@@ -41,7 +41,7 @@ internal class BatchTelemetryProcessor<T>(
         default = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
     ) { it > 0 }
 
-    private val exportTimeoutMs: Long = validateOrUseDefault(
+    private val validExportTimeoutMs: Long = validateOrUseDefault(
         sdkErrorHandler = sdkErrorHandler,
         api = API,
         configParameterName = "exportTimeoutMs",
@@ -49,7 +49,7 @@ internal class BatchTelemetryProcessor<T>(
         default = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
     ) { it >= 0 }
 
-    private val maxExportBatchSize: Int = if (maxExportBatchSize < 0) {
+    private val validMaxExportBatchSize: Int = if (maxExportBatchSize < 0) {
         validateOrUseDefault(
             sdkErrorHandler = sdkErrorHandler,
             api = API,
@@ -63,11 +63,11 @@ internal class BatchTelemetryProcessor<T>(
             api = API,
             configParameterName = "maxExportBatchSize",
             value = maxExportBatchSize,
-            default = maxQueueSize,
-        ) { it <= maxQueueSize }
+            default = validMaxQueueSize,
+        ) { it <= validMaxQueueSize }
     }
 
-    private val forceFlushTimeoutMs: Long = validateOrUseDefault(
+    private val validForceFlushTimeoutMs: Long = validateOrUseDefault(
         sdkErrorHandler = sdkErrorHandler,
         api = API,
         configParameterName = "forceFlushTimeoutMs",
@@ -83,7 +83,7 @@ internal class BatchTelemetryProcessor<T>(
     init {
         scope.launch {
             while (!shutdownState.isShutdown) {
-                delay(this@BatchTelemetryProcessor.scheduleDelayMs)
+                delay(this@BatchTelemetryProcessor.validScheduleDelayMs)
                 flushInternal()
             }
         }
@@ -91,7 +91,7 @@ internal class BatchTelemetryProcessor<T>(
 
     fun processTelemetry(telemetry: T) {
         shutdownState.execute {
-            if (queue.size <= maxQueueSize) {
+            if (queue.size <= validMaxQueueSize) {
                 queue.add(telemetry)
             }
         }
@@ -101,7 +101,7 @@ internal class BatchTelemetryProcessor<T>(
         if (shutdownState.isShutdown) {
             return OperationResultCode.Success
         }
-        return runWithTimeout(forceFlushTimeoutMs) {
+        return runWithTimeout(validForceFlushTimeoutMs) {
             scope.launch { flushInternal() }.join()
             OperationResultCode.Success
         }
@@ -117,13 +117,13 @@ internal class BatchTelemetryProcessor<T>(
         while (queue.isNotEmpty()) {
             val batch = mutableListOf<T>()
             mutex.withLock {
-                val size = minOf(queue.size, maxExportBatchSize)
+                val size = minOf(queue.size, validMaxExportBatchSize)
                 repeat(size) { batch += queue.removeAt(0) }
             }
 
             if (batch.isNotEmpty()) {
                 try {
-                    withTimeout(exportTimeoutMs) {
+                    withTimeout(validExportTimeoutMs) {
                         exportAction(batch)
                     }
                 } catch (ignored: Throwable) {
