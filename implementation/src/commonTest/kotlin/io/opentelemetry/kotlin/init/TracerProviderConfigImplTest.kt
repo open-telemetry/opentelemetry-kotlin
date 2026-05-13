@@ -8,17 +8,16 @@ import io.opentelemetry.kotlin.sdkDefaultAttributes
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.export.compositeSpanProcessor
-import io.opentelemetry.kotlin.tracing.export.simpleSpanProcessor
-import io.opentelemetry.kotlin.tracing.export.stdoutSpanExporter
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
 import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
 import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertNotSame
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
@@ -119,13 +118,23 @@ internal class TracerProviderConfigImplTest {
     }
 
     @Test
-    fun testDoubleExportConfig() {
-        assertFailsWith(IllegalArgumentException::class) {
-            TracerProviderConfigImpl(clock).apply {
-                export { simpleSpanProcessor(stdoutSpanExporter()) }
-                export { simpleSpanProcessor(stdoutSpanExporter()) }
+    fun testDoubleExportConfigKeepsFirst() {
+        var first: SpanProcessor? = null
+        var second: SpanProcessor? = null
+        val cfg = TracerProviderConfigImpl(clock).apply {
+            export {
+                compositeSpanProcessor(FakeSpanProcessor()).apply {
+                    first = this
+                }
             }
-        }
+            export {
+                compositeSpanProcessor(FakeSpanProcessor()).apply {
+                    second = this
+                }
+            }
+        }.generateTracingConfig(base)
+        assertSame(first, cfg.processor)
+        assertNotSame(second, cfg.processor)
     }
 
     @Test

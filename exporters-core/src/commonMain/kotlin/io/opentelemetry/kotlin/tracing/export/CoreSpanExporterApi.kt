@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.platformLog
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +15,10 @@ import kotlinx.coroutines.SupervisorJob
  */
 @ExperimentalApi
 public fun TraceExportConfigDsl.compositeSpanProcessor(vararg processors: SpanProcessor): SpanProcessor {
-    require(processors.isNotEmpty()) { "At least one processor must be provided" }
+    if (processors.isEmpty()) {
+        platformLog("At least one processor must be provided")
+        return NoopSpanProcessor
+    }
     return CompositeSpanProcessor(processors.toList(), NoopSdkErrorHandler)
 }
 
@@ -33,7 +37,10 @@ public fun TraceExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): Spa
  */
 @ExperimentalApi
 public fun TraceExportConfigDsl.compositeSpanExporter(vararg exporters: SpanExporter): SpanExporter {
-    require(exporters.isNotEmpty()) { "At least one exporter must be provided" }
+    if (exporters.isEmpty()) {
+        platformLog("At least one exporter must be provided")
+        return NoopSpanExporter
+    }
     return CompositeSpanExporter(exporters.toList(), NoopSdkErrorHandler)
 }
 

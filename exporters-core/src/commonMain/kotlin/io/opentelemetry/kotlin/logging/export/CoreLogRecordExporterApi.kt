@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.init.LogExportConfigDsl
+import io.opentelemetry.kotlin.platformLog
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +16,10 @@ import kotlinx.coroutines.SupervisorJob
  */
 @ExperimentalApi
 public fun LogExportConfigDsl.compositeLogRecordProcessor(vararg processors: LogRecordProcessor): LogRecordProcessor {
-    require(processors.isNotEmpty()) { "At least one processor must be provided" }
+    if (processors.isEmpty()) {
+        platformLog("At least one processor must be provided")
+        return NoopLogRecordProcessor
+    }
     return CompositeLogRecordProcessor(processors.toList(), NoopSdkErrorHandler)
 }
 
@@ -34,7 +38,10 @@ public fun LogExportConfigDsl.simpleLogRecordProcessor(exporter: LogRecordExport
  */
 @ExperimentalApi
 public fun LogExportConfigDsl.compositeLogRecordExporter(vararg exporters: LogRecordExporter): LogRecordExporter {
-    require(exporters.isNotEmpty()) { "At least one exporter must be provided" }
+    if (exporters.isEmpty()) {
+        platformLog("At least one exporter must be provided")
+        return NoopLogRecordExporter
+    }
     return CompositeLogRecordExporter(exporters.toList(), NoopSdkErrorHandler)
 }
 

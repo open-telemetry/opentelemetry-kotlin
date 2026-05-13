@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
+import io.opentelemetry.kotlin.logging.export.LogRecordExporter
+import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.compositeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.stdoutLogRecordExporter
@@ -11,9 +13,10 @@ import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import kotlin.test.assertNotSame
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 
 internal class LoggerProviderConfigImplTest {
 
@@ -65,13 +68,23 @@ internal class LoggerProviderConfigImplTest {
     }
 
     @Test
-    fun testDoubleExportConfig() {
-        assertFailsWith(IllegalArgumentException::class) {
-            LoggerProviderConfigImpl(clock).apply {
-                export { simpleLogRecordProcessor(stdoutLogRecordExporter()) }
-                export { simpleLogRecordProcessor(stdoutLogRecordExporter()) }
+    fun testDoubleExportConfigKeepsFirst() {
+        var first: LogRecordProcessor? = null
+        var second: LogRecordProcessor? = null
+        val cfg = LoggerProviderConfigImpl(clock).apply {
+            export {
+                simpleLogRecordProcessor(stdoutLogRecordExporter()).apply {
+                    first = this
+                }
             }
-        }
+            export {
+                simpleLogRecordProcessor(stdoutLogRecordExporter()).apply {
+                    second = this
+                }
+            }
+        }.generateLoggingConfig(base)
+        assertSame(first, cfg.processor)
+        assertNotSame(second, cfg.processor)
     }
 
     @Test
