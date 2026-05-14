@@ -16,6 +16,9 @@ import io.opentelemetry.api.logs.Logger
 import io.opentelemetry.api.logs.LoggerBuilder
 import io.opentelemetry.api.logs.LoggerProvider
 import io.opentelemetry.api.logs.Severity
+import io.opentelemetry.api.metrics.Meter
+import io.opentelemetry.api.metrics.MeterBuilder
+import io.opentelemetry.api.metrics.MeterProvider
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.api.trace.SpanBuilder
 import io.opentelemetry.api.trace.SpanContext
@@ -50,6 +53,8 @@ import io.opentelemetry.sdk.logs.SdkLoggerProviderBuilder
 import io.opentelemetry.sdk.logs.data.Body
 import io.opentelemetry.sdk.logs.data.LogRecordData
 import io.opentelemetry.sdk.logs.export.LogRecordExporter
+import io.opentelemetry.sdk.metrics.SdkMeterProvider
+import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder
 import io.opentelemetry.sdk.resources.Resource
 import io.opentelemetry.sdk.resources.ResourceBuilder
 import io.opentelemetry.sdk.trace.IdGenerator
@@ -109,6 +114,11 @@ typealias OtelJavaSpanProcessor = SpanProcessor
 typealias OtelJavaOpenTelemetrySdk = OpenTelemetrySdk
 typealias OtelJavaSdkLoggerProvider = SdkLoggerProvider
 typealias OtelJavaSdkLoggerProviderBuilder = SdkLoggerProviderBuilder
+typealias OtelJavaMeterProvider = MeterProvider
+typealias OtelJavaMeterBuilder = MeterBuilder
+typealias OtelJavaMeter = Meter
+typealias OtelJavaSdkMeterProvider = SdkMeterProvider
+typealias OtelJavaSdkMeterProviderBuilder = SdkMeterProviderBuilder
 typealias OtelJavaSdkTracerProvider = SdkTracerProvider
 typealias OtelJavaSdkTracerProviderBuilder = SdkTracerProviderBuilder
 typealias OtelJavaBody = Body
