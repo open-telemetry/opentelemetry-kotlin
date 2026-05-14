@@ -20,12 +20,9 @@ internal class CompatMeterProviderConfig(
 ) : MeterProviderConfigDsl {
 
     private val builder: OtelJavaSdkMeterProviderBuilder = OtelJavaSdkMeterProvider.builder()
-    private var serviceNameOverride: String? = null
-
-    override var serviceName: String
-        get() = serviceNameOverride ?: "unknown_service"
+    override var serviceName: String = "unknown_service"
         set(value) {
-            serviceNameOverride = value
+            field = value
             resourceAttrs.setStringAttribute(ServiceAttributes.SERVICE_NAME, value)
         }
 
