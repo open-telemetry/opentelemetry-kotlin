@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
+import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.resource.Resource
 
 internal class LoggerProviderConfigImpl(
@@ -15,7 +16,10 @@ internal class LoggerProviderConfigImpl(
     private var logLimitsAction: LogLimitsConfigDsl.() -> Unit = {}
 
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
-        require(processor == null) { "export() should only be called once." }
+        if (processor != null) {
+            platformLog("export() should only be called once.")
+            return
+        }
         processor = LogExportConfigImpl(clock).action()
     }
 

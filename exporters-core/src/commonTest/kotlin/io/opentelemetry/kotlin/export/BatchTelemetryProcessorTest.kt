@@ -10,76 +10,10 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
 internal class BatchTelemetryProcessorTest {
-
-    @Test
-    fun testInvalidMaxQueueSize() {
-        assertFailsWith<IllegalArgumentException> {
-            BatchTelemetryProcessor<Unit>(
-                maxQueueSize = -1,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = 1,
-                maxExportBatchSize = 1,
-                exportAction = { OperationResultCode.Success }
-            )
-        }
-    }
-
-    @Test
-    fun testInvalidScheduleDelayMs() {
-        assertFailsWith<IllegalArgumentException> {
-            BatchTelemetryProcessor<Unit>(
-                maxQueueSize = 1,
-                scheduleDelayMs = -1,
-                exportTimeoutMs = 1,
-                maxExportBatchSize = 1,
-                exportAction = { OperationResultCode.Success }
-            )
-        }
-    }
-
-    @Test
-    fun testInvalidExportTimeoutMs() {
-        assertFailsWith<IllegalArgumentException> {
-            BatchTelemetryProcessor<Unit>(
-                maxQueueSize = 1,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = -1,
-                maxExportBatchSize = 1,
-                exportAction = { OperationResultCode.Success }
-            )
-        }
-    }
-
-    @Test
-    fun testInvalidMaxExportBatchSize() {
-        assertFailsWith<IllegalArgumentException> {
-            BatchTelemetryProcessor<Unit>(
-                maxQueueSize = 1,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = 1,
-                maxExportBatchSize = -1,
-                exportAction = { OperationResultCode.Success }
-            )
-        }
-    }
-
-    @Test
-    fun testInvalidMaxExportBatchSize2() {
-        assertFailsWith<IllegalArgumentException> {
-            BatchTelemetryProcessor<Unit>(
-                maxQueueSize = 100,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = 1,
-                maxExportBatchSize = 200,
-                exportAction = { OperationResultCode.Success }
-            )
-        }
-    }
 
     @Test
     fun testSingleItemInBatch() = runTest {
@@ -113,10 +47,12 @@ internal class BatchTelemetryProcessorTest {
         val exports = mutableListOf<List<Int>>()
         val dispatcher = StandardTestDispatcher(testScheduler)
         val processor = BatchTelemetryProcessor(
-            maxQueueSize = 100,
-            maxExportBatchSize = 1,
-            scheduleDelayMs = 1,
-            exportTimeoutMs = 1000,
+            config = BatchTelemetryConfig(
+                maxQueueSize = 100,
+                maxExportBatchSize = 1,
+                scheduleDelayMs = 1,
+                exportTimeoutMs = 1000,
+            ),
             dispatcher = dispatcher,
             exportAction = {
                 exports.add(it)
@@ -138,10 +74,12 @@ internal class BatchTelemetryProcessorTest {
     fun testShutdownReturnsSuccessOnSecondCall() = runTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val processor = BatchTelemetryProcessor<Int>(
-            maxQueueSize = 100,
-            maxExportBatchSize = 1,
-            scheduleDelayMs = 1,
-            exportTimeoutMs = 1000,
+            config = BatchTelemetryConfig(
+                maxQueueSize = 100,
+                maxExportBatchSize = 1,
+                scheduleDelayMs = 1,
+                exportTimeoutMs = 1000,
+            ),
             dispatcher = dispatcher,
             exportAction = { OperationResultCode.Success }
         )
@@ -153,10 +91,12 @@ internal class BatchTelemetryProcessorTest {
     fun testForceFlushWorksAfterShutdown() = runTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val processor = BatchTelemetryProcessor<Int>(
-            maxQueueSize = 100,
-            maxExportBatchSize = 1,
-            scheduleDelayMs = 1,
-            exportTimeoutMs = 1000,
+            config = BatchTelemetryConfig(
+                maxQueueSize = 100,
+                maxExportBatchSize = 1,
+                scheduleDelayMs = 1,
+                exportTimeoutMs = 1000,
+            ),
             dispatcher = dispatcher,
             exportAction = { OperationResultCode.Success }
         )
@@ -214,10 +154,12 @@ internal class BatchTelemetryProcessorTest {
         val exports = mutableListOf<List<T>>()
         val dispatcher = StandardTestDispatcher(testScheduler)
         val processor = BatchTelemetryProcessor(
-            maxQueueSize = 20,
-            maxExportBatchSize = batchSize,
-            scheduleDelayMs = 1,
-            exportTimeoutMs = exportTimeoutMs,
+            config = BatchTelemetryConfig(
+                maxQueueSize = 20,
+                maxExportBatchSize = batchSize,
+                scheduleDelayMs = 1,
+                exportTimeoutMs = exportTimeoutMs,
+            ),
             dispatcher = dispatcher,
             exportAction = {
                 exportAction(it)

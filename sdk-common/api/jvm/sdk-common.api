@@ -6,6 +6,10 @@ public final class io/opentelemetry/kotlin/attributes/ExceptionAttributesExtKt {
 	public static final fun setExceptionAttributes (Lio/opentelemetry/kotlin/attributes/AttributesMutator;Ljava/lang/Throwable;)V
 }
 
+public final class io/opentelemetry/kotlin/config/ValidationKt {
+	public static final fun validateOrUseDefault (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
 public final class io/opentelemetry/kotlin/export/BatchExportOperationKt {
 	public static final fun batchExportOperation (Ljava/util/List;Lio/opentelemetry/kotlin/error/SdkErrorHandler;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/export/OperationResultCode;
 	public static final fun batchExportOperationSuspend (Ljava/util/List;Lio/opentelemetry/kotlin/error/SdkErrorHandler;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

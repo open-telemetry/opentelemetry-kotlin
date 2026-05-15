@@ -12,11 +12,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 
 internal class BatchTelemetryProcessor<T>(
-    private val maxQueueSize: Int,
-    private val scheduleDelayMs: Long,
-    private val exportTimeoutMs: Long,
-    private val maxExportBatchSize: Int,
-    private val forceFlushTimeoutMs: Long = BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS,
+    private val config: BatchTelemetryConfig = BatchTelemetryConfig(),
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
     private val exportAction: suspend (telemetry: List<T>) -> OperationResultCode,
 ) : TelemetryCloseable {
@@ -27,16 +23,9 @@ internal class BatchTelemetryProcessor<T>(
     private val queue = mutableListOf<T>()
 
     init {
-        require(scheduleDelayMs > 0)
-        require(maxQueueSize >= 0)
-        require(maxExportBatchSize >= 0)
-        require(exportTimeoutMs >= 0)
-        require(forceFlushTimeoutMs >= 0)
-        require(maxExportBatchSize <= maxQueueSize)
-
         scope.launch {
             while (!shutdownState.isShutdown) {
-                delay(scheduleDelayMs)
+                delay(config.scheduleDelayMs)
                 flushInternal()
             }
         }
@@ -44,15 +33,17 @@ internal class BatchTelemetryProcessor<T>(
 
     fun processTelemetry(telemetry: T) {
         shutdownState.execute {
-            if (queue.size <= maxQueueSize) {
+            if (queue.size <= config.maxQueueSize) {
                 queue.add(telemetry)
             }
         }
     }
 
     override suspend fun forceFlush(): OperationResultCode {
-        if (shutdownState.isShutdown) { return OperationResultCode.Success }
-        return runWithTimeout(forceFlushTimeoutMs) {
+        if (shutdownState.isShutdown) {
+            return OperationResultCode.Success
+        }
+        return runWithTimeout(config.forceFlushTimeoutMs) {
             scope.launch { flushInternal() }.join()
             OperationResultCode.Success
         }
@@ -68,13 +59,13 @@ internal class BatchTelemetryProcessor<T>(
         while (queue.isNotEmpty()) {
             val batch = mutableListOf<T>()
             mutex.withLock {
-                val size = minOf(queue.size, maxExportBatchSize)
+                val size = minOf(queue.size, config.maxExportBatchSize)
                 repeat(size) { batch += queue.removeAt(0) }
             }
 
             if (batch.isNotEmpty()) {
                 try {
-                    withTimeout(exportTimeoutMs) {
+                    withTimeout(config.exportTimeoutMs) {
                         exportAction(batch)
                     }
                 } catch (ignored: Throwable) {
