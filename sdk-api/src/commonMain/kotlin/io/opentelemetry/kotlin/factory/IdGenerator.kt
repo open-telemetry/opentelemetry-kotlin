@@ -41,15 +41,17 @@ public fun ByteArray.toHexString(): String {
 
 /**
  * Encodes Span/Trace ID hex string as a ByteArray.
+ * A string that is not in the expected format return an empty [ByteArray]
  */
 @ExperimentalApi
-public fun String.hexToByteArray(): ByteArray {
-    require(length % 2 == 0)
-    val out = ByteArray(length / 2)
-    for (i in out.indices) {
-        val hi = this[i * 2].digitToInt(16)
-        val lo = this[i * 2 + 1].digitToInt(16)
-        out[i] = ((hi shl 4) or lo).toByte()
-    }
-    return out
-}
+public fun String.hexToByteArray(): ByteArray =
+    runCatching {
+        require(length % 2 == 0)
+        val out = ByteArray(length / 2)
+        for (i in out.indices) {
+            val hi = this[i * 2].digitToInt(16)
+            val lo = this[i * 2 + 1].digitToInt(16)
+            out[i] = ((hi shl 4) or lo).toByte()
+        }
+        out
+    }.getOrDefault(ByteArray(0))

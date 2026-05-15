@@ -29,11 +29,11 @@ internal class ContextImpl(
 
     override fun attach(): Scope {
         if (storage.implicitContext() == this) {
-            return NoopScope
+            return DetachedScope
         }
         val current = storage.implicitContext()
         storage.setImplicitContext(this)
-        return ScopeImpl(current, this, storage)
+        return ScopeImpl.create(current, this, storage)
     }
 
     override fun storeSpan(span: Span): Context = set(SPAN_KEY, span)
@@ -45,8 +45,4 @@ internal class ContextImpl(
     override fun extractBaggage(): Baggage = get(BAGGAGE_KEY) ?: BaggageImpl.EMPTY
 
     override fun clearBaggage(): Context = set(BAGGAGE_KEY, null)
-
-    private object NoopScope : Scope {
-        override fun detach(): Boolean = true
-    }
 }

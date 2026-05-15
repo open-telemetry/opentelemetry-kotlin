@@ -7,12 +7,14 @@ import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.TraceStateFactory
+import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.propagation.CompositeTextMapPropagator
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.propagation.TextMapSetter
 import io.opentelemetry.kotlin.propagation.W3CBaggagePropagator
 import io.opentelemetry.kotlin.propagation.W3CTraceContextPropagator
+import kotlin.concurrent.Volatile
 
 @OptIn(ExperimentalApi::class)
 internal class PropagatorConfigImpl : PropagatorConfigDsl {
@@ -57,17 +59,29 @@ internal class PropagatorConfigImpl : PropagatorConfigDsl {
 @OptIn(ExperimentalApi::class)
 private class DeferredW3CTraceContextPropagator : TextMapPropagator {
 
+    @Volatile
     var delegate: TextMapPropagator? = null
 
-    private val resolved: TextMapPropagator
-        get() = checkNotNull(delegate) { "W3C trace context propagator has not been initialized." }
+    private var noDelegateWarningLogged = false
 
-    override fun fields(): Collection<String> = resolved.fields()
+    override fun fields(): Collection<String> = resolveDelegate().fields()
 
-    override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {
-        resolved.inject(context, carrier, setter)
-    }
+    override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) =
+        resolveDelegate().inject(context, carrier, setter)
 
     override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context =
-        resolved.extract(context, carrier, getter)
+        resolveDelegate().extract(context, carrier, getter)
+
+    private fun resolveDelegate(): TextMapPropagator {
+        val resolvedDelegate = delegate
+        return if (resolvedDelegate != null) {
+            resolvedDelegate
+        } else {
+            if (!noDelegateWarningLogged) {
+                noDelegateWarningLogged = true
+                platformLog("W3C trace context propagator accessed before SDK init completed")
+            }
+            NoopOpenTelemetry.propagator
+        }
+    }
 }

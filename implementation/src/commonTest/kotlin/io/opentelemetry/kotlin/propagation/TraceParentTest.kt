@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
 import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -22,70 +21,77 @@ internal class TraceParentTest {
     private val traceId = "0af7651916cd43dd8448eb211c80319c"
     private val spanId = "b7ad6b7169203331"
     private val canonicalHeader = "00-$traceId-$spanId-01"
+    private val traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false)
 
     @Test
     fun `encode produces the canonical version 00 traceparent header`() {
-        val tp = TraceParent(
+        val tp = TraceParent.create(
             version = "00",
             traceId = traceId,
             spanId = spanId,
-            traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
+            traceFlags = traceFlags,
         )
+        assertNotNull(tp)
         assertEquals(canonicalHeader, tp.encode())
     }
 
     @Test
     fun `encoded header is exactly 55 chars for version 00`() {
-        val tp = TraceParent(
+        val tp = TraceParent.create(
             version = "00",
             traceId = traceId,
             spanId = spanId,
-            traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
+            traceFlags = traceFlags,
         )
+        assertNotNull(tp)
         assertEquals(55, tp.encode().length)
     }
 
     @Test
     fun `encode renders flags 00 when neither sampled nor random`() {
-        val tp = TraceParent(
+        val tp = TraceParent.create(
             version = "00",
             traceId = traceId,
             spanId = spanId,
             traceFlags = TraceFlagsImpl(isSampled = false, isRandom = false),
         )
+        assertNotNull(tp)
         assertEquals("00-$traceId-$spanId-00", tp.encode())
     }
 
     @Test
     fun `encode renders flags 02 when only random bit set`() {
-        val tp = TraceParent(
+        val tp = TraceParent.create(
             version = "00",
             traceId = traceId,
             spanId = spanId,
             traceFlags = TraceFlagsImpl(isSampled = false, isRandom = true),
         )
+        assertNotNull(tp)
         assertEquals("00-$traceId-$spanId-02", tp.encode())
     }
 
     @Test
     fun `encode renders flags 03 when sampled and random bits set`() {
-        val tp = TraceParent(
+        val tp = TraceParent.create(
             version = "00",
             traceId = traceId,
             spanId = spanId,
             traceFlags = TraceFlagsImpl(isSampled = true, isRandom = true),
         )
+        assertNotNull(tp)
         assertEquals("00-$traceId-$spanId-03", tp.encode())
     }
 
     @Test
     fun `encoded flags are always two lowercase hex characters`() {
-        val tp = TraceParent(
+        val tp = TraceParent.create(
             version = "00",
             traceId = traceId,
             spanId = spanId,
             traceFlags = TraceFlagsImpl(isSampled = false, isRandom = false),
         )
+        assertNotNull(tp)
         val flags = tp.encode().substringAfterLast('-')
         assertEquals(2, flags.length)
         assertTrue(flags.all { it in '0'..'9' || it in 'a'..'f' })
@@ -232,169 +238,49 @@ internal class TraceParentTest {
     }
 
     @Test
-    fun `constructor accepts canonical fields`() {
-        val tp = TraceParent(
+    fun `create returns a TraceParent for canonical inputs`() {
+        val tp = TraceParent.create(
             version = "00",
             traceId = traceId,
             spanId = spanId,
-            traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
+            traceFlags = traceFlags,
         )
+        assertNotNull(tp)
         assertEquals(canonicalHeader, tp.encode())
     }
 
     @Test
-    fun `constructor rejects version of wrong length`() {
-        assertFailsWith<IllegalArgumentException> {
-            TraceParent(
-                version = "0",
-                traceId = traceId,
-                spanId = spanId,
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
-            )
-        }
+    fun `create returns null for version of wrong length`() {
+        assertNull(TraceParent.create("0", traceId, spanId, traceFlags))
     }
 
     @Test
-    fun `constructor rejects non-hex version`() {
-        assertFailsWith<IllegalArgumentException> {
-            TraceParent(
-                version = "0g",
-                traceId = traceId,
-                spanId = spanId,
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
-            )
-        }
+    fun `create returns null for non-hex version`() {
+        assertNull(TraceParent.create("pp", traceId, spanId, traceFlags))
     }
 
     @Test
-    fun `constructor rejects uppercase hex version`() {
-        assertFailsWith<IllegalArgumentException> {
-            TraceParent(
-                version = "0A",
-                traceId = traceId,
-                spanId = spanId,
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
-            )
-        }
+    fun `create returns null for forbidden version`() {
+        assertNull(TraceParent.create("ff", traceId, spanId, traceFlags))
     }
 
     @Test
-    fun `constructor rejects forbidden ff version`() {
-        assertFailsWith<IllegalArgumentException> {
-            TraceParent(
-                version = "ff",
-                traceId = traceId,
-                spanId = spanId,
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
-            )
-        }
+    fun `create returns null for trace id of wrong length`() {
+        assertNull(TraceParent.create("00", "1234", spanId, traceFlags))
     }
 
     @Test
-    fun `constructor rejects trace id of wrong length`() {
-        assertFailsWith<IllegalArgumentException> {
-            TraceParent(
-                version = "00",
-                traceId = "0".repeat(31),
-                spanId = spanId,
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
-            )
-        }
+    fun `create returns null for non-hex trace id`() {
+        assertNull(TraceParent.create("00", traceId.replaceFirst('a', 'g'), spanId, traceFlags))
     }
 
     @Test
-    fun `constructor rejects non-hex trace id`() {
-        assertFailsWith<IllegalArgumentException> {
-            TraceParent(
-                version = "00",
-                traceId = traceId.replaceFirst('a', 'g'),
-                spanId = spanId,
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
-            )
-        }
+    fun `create returns null for span id of wrong length`() {
+        assertNull(TraceParent.create("00", traceId, "1234", traceFlags))
     }
 
     @Test
-    fun `constructor rejects uppercase hex trace id`() {
-        assertFailsWith<IllegalArgumentException> {
-            TraceParent(
-                version = "00",
-                traceId = traceId.uppercase(),
-                spanId = spanId,
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
-            )
-        }
-    }
-
-    @Test
-    fun `constructor rejects span id of wrong length`() {
-        assertFailsWith<IllegalArgumentException> {
-            TraceParent(
-                version = "00",
-                traceId = traceId,
-                spanId = "0".repeat(15),
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
-            )
-        }
-    }
-
-    @Test
-    fun `constructor rejects non-hex span id`() {
-        assertFailsWith<IllegalArgumentException> {
-            TraceParent(
-                version = "00",
-                traceId = traceId,
-                spanId = spanId.replaceFirst('b', 'g'),
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
-            )
-        }
-    }
-
-    @Test
-    fun `constructor rejects uppercase hex span id`() {
-        assertFailsWith<IllegalArgumentException> {
-            TraceParent(
-                version = "00",
-                traceId = traceId,
-                spanId = spanId.uppercase(),
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
-            )
-        }
-    }
-
-    @Test
-    fun `constructor rejects empty version`() {
-        assertFailsWith<IllegalArgumentException> {
-            TraceParent(
-                version = "",
-                traceId = traceId,
-                spanId = spanId,
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
-            )
-        }
-    }
-
-    @Test
-    fun `constructor rejects empty trace id`() {
-        assertFailsWith<IllegalArgumentException> {
-            TraceParent(
-                version = "00",
-                traceId = "",
-                spanId = spanId,
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
-            )
-        }
-    }
-
-    @Test
-    fun `constructor rejects empty span id`() {
-        assertFailsWith<IllegalArgumentException> {
-            TraceParent(
-                version = "00",
-                traceId = traceId,
-                spanId = "",
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
-            )
-        }
+    fun `create returns null for non-hex span id`() {
+        assertNull(TraceParent.create("00", traceId, spanId.replaceFirst('b', 'g'), traceFlags))
     }
 }
