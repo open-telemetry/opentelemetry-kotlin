@@ -1,11 +1,11 @@
 package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.PersistedTelemetryType.LOGS
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
@@ -77,23 +77,17 @@ internal class TelemetryRepositoryImplTest {
     }
 
     @Test
-    fun testMaxTelemetryAgeInDays() {
-        assertFailsWith<IllegalArgumentException> {
-            PersistedTelemetryConfig(maxTelemetryAgeInDays = 0)
-        }
-        assertFailsWith<IllegalArgumentException> {
-            PersistedTelemetryConfig(maxTelemetryAgeInDays = -1)
-        }
-    }
+    fun testConfigValueFallback() {
+        val sdkErrorHandler = FakeSdkErrorHandler()
+        val config = PersistedTelemetryConfig(
+            maxBatchedItemsPerSignal = 0,
+            maxTelemetryAgeInDays = 0,
+            sdkErrorHandler = sdkErrorHandler
+        )
 
-    @Test
-    fun testMaxBatchedItemsPerSignal() {
-        assertFailsWith<IllegalArgumentException> {
-            PersistedTelemetryConfig(maxBatchedItemsPerSignal = 0)
-        }
-        assertFailsWith<IllegalArgumentException> {
-            PersistedTelemetryConfig(maxBatchedItemsPerSignal = -1)
-        }
+        assertEquals(100, config.maxBatchedItemsPerSignal)
+        assertEquals(30, config.maxTelemetryAgeInDays)
+        assertEquals(2, sdkErrorHandler.apiMisuses.size)
     }
 
     @Test
@@ -172,7 +166,7 @@ internal class TelemetryRepositoryImplTest {
 
     @Test
     fun testMaxStorageLimitExceeded() {
-        val config = PersistedTelemetryConfig(desiredMaxBatchedItemsPerSignal = 3)
+        val config = PersistedTelemetryConfig(maxBatchedItemsPerSignal = 3)
         val repository = createRepository(config = config)
 
         val items = listOf("first", "second", "third", "fourth")
@@ -192,7 +186,7 @@ internal class TelemetryRepositoryImplTest {
 
     @Test
     fun testOldTelemetryPolicy() {
-        val config = PersistedTelemetryConfig(desiredMaxTelemetryAgeInDays = 7)
+        val config = PersistedTelemetryConfig(maxTelemetryAgeInDays = 7)
         val repository = createRepository(config = config)
 
         repository.store(listOf(FakeTelemetryObject("a")))

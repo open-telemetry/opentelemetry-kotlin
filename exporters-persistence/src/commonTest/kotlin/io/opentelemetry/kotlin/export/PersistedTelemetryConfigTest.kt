@@ -17,8 +17,8 @@ internal class PersistedTelemetryConfigTest {
     fun testInvalidConfigDoesNotThrow() {
         val handler = FakeSdkErrorHandler()
         val cfg = PersistedTelemetryConfig(
-            desiredMaxBatchedItemsPerSignal = 0,
-            desiredMaxTelemetryAgeInDays = 0,
+            maxBatchedItemsPerSignal = 0,
+            maxTelemetryAgeInDays = 0,
             sdkErrorHandler = handler,
         )
         assertEquals(2, handler.apiMisuses.size)
