@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
+import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.tracing.TraceFlags
 
 /**
@@ -10,27 +11,12 @@ import io.opentelemetry.kotlin.tracing.TraceFlags
  * https://www.w3.org/TR/trace-context/#traceparent-header
  */
 @OptIn(ExperimentalApi::class)
-internal class TraceParent(
+internal class TraceParent private constructor(
     val version: String,
     val traceId: String,
     val spanId: String,
     val traceFlags: TraceFlags,
 ) {
-
-    init {
-        require(version.length == VERSION_LEN && version.isLowerHex()) {
-            "version must be $VERSION_LEN lowercase hex characters"
-        }
-        require(version != FORBIDDEN_VERSION) {
-            "version $FORBIDDEN_VERSION is reserved by the W3C spec"
-        }
-        require(traceId.length == TRACE_ID_LEN && traceId.isLowerHex()) {
-            "traceId must be $TRACE_ID_LEN lowercase hex characters"
-        }
-        require(spanId.length == SPAN_ID_LEN && spanId.isLowerHex()) {
-            "spanId must be $SPAN_ID_LEN lowercase hex characters"
-        }
-    }
 
     fun encode(): String = buildString {
         append(version)
@@ -57,6 +43,35 @@ internal class TraceParent(
         private const val FLAG_RANDOM = 0b0000_0010
         private const val HEX_RADIX = 16
 
+        /**
+         * Create a [TraceParent] if the given inputs are valid.
+         * Returns null if there is at least one invalid parameter.
+         */
+        fun create(
+            version: String,
+            traceId: String,
+            spanId: String,
+            traceFlags: TraceFlags,
+        ): TraceParent? {
+            val errorMessage =
+                if (version.length != VERSION_LEN || !version.isLowerHex() || version == FORBIDDEN_VERSION) {
+                    "version must be $VERSION_LEN lowercase hex characters and not $FORBIDDEN_VERSION"
+                } else if (traceId.length != TRACE_ID_LEN || !traceId.isLowerHex()) {
+                    "traceId must be $TRACE_ID_LEN lowercase hex characters"
+                } else if (spanId.length != SPAN_ID_LEN || !spanId.isLowerHex()) {
+                    "spanId must be $SPAN_ID_LEN lowercase hex characters"
+                } else {
+                    null
+                }
+
+            return if (errorMessage == null) {
+                TraceParent(version, traceId, spanId, traceFlags)
+            } else {
+                platformLog(errorMessage)
+                null
+            }
+        }
+
         fun decode(header: String, traceFlagsFactory: TraceFlagsFactory): TraceParent? {
             if (header.length < LEN_V00) {
                 return null
@@ -81,16 +96,12 @@ internal class TraceParent(
                 return null
             }
 
-            return try {
-                TraceParent(
-                    version = version,
-                    traceId = parts[1],
-                    spanId = parts[2],
-                    traceFlags = traceFlagsFactory.fromHex(flagsStr),
-                )
-            } catch (_: IllegalArgumentException) {
-                null
-            }
+            return create(
+                version = version,
+                traceId = parts[1],
+                spanId = parts[2],
+                traceFlags = traceFlagsFactory.fromHex(flagsStr),
+            )
         }
 
         private fun encodeFlags(flags: TraceFlags): String {

@@ -27,13 +27,15 @@ internal class W3CTraceContextPropagator(
         if (!spanContext.isValid) {
             return
         }
-        val traceparent = TraceParent(
+
+        TraceParent.create(
             version = TraceParent.VERSION_00,
             traceId = spanContext.traceId,
             spanId = spanContext.spanId,
             traceFlags = spanContext.traceFlags,
-        ).encode()
-        setter.set(carrier, TRACEPARENT, traceparent)
+        )?.let {
+            setter.set(carrier, TRACEPARENT, it.encode())
+        }
 
         val tracestate = TraceStateMarshaller(spanContext.traceState).encode()
         if (tracestate.isNotEmpty()) {

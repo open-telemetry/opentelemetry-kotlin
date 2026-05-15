@@ -7,7 +7,6 @@ import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -22,14 +21,13 @@ internal class ImplicitContextTest {
     }
 
     @Test
-    fun testSameContexts() {
-        assertFailsWith(IllegalStateException::class) {
-            ScopeImpl(
-                factory.root(),
-                factory.root(),
-                DefaultImplicitContextStorage(factory::root)
-            )
-        }
+    fun testSameContextsScopeIsAlreadyDetached() {
+        val scope = ScopeImpl.create(
+            factory.root(),
+            factory.root(),
+            DefaultImplicitContextStorage(factory::root),
+        )
+        assertTrue(scope.detach())
     }
 
     @Test
