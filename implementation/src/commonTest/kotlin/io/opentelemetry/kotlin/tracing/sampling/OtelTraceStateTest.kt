@@ -8,7 +8,7 @@ internal class OtelTraceStateTest {
     @Test
     fun parsesOt() {
         val ot = OtelTraceState.parse("rv:123456789abcde;th:123abc")
-        assertEquals(0x123456789abcde, ot.rv)
+        assertEquals(Randomness(0x123456789abcde), ot.rv)
         assertEquals(Threshold(0x123abc00000000), ot.th)
     }
 
@@ -23,20 +23,20 @@ internal class OtelTraceStateTest {
     @Test
     fun skipsEntriesWithoutColon() {
         val ot = OtelTraceState.parse("badentry;rv:123456789abcde")
-        assertEquals(0x123456789abcde, ot.rv)
+        assertEquals(Randomness(0x123456789abcde), ot.rv)
     }
 
     @Test
     fun keepsFirstValueForDuplicateKeys() {
         val ot = OtelTraceState.parse("rv:11111111111111;rv:22222222222222")
-        assertEquals(0x11111111111111, ot.rv)
+        assertEquals(Randomness(0x11111111111111), ot.rv)
     }
 
     @Test
     fun preservesOtherKeys() {
         val ot = OtelTraceState.parse("rv:123456789abcde;th:00000000000123")
         ot.applyThreshold(Threshold(0xdef))
-        assertEquals(0x123456789abcde, ot.rv)
+        assertEquals(Randomness(0x123456789abcde), ot.rv)
         assertEquals(Threshold(0x00000000000def), ot.th)
     }
 

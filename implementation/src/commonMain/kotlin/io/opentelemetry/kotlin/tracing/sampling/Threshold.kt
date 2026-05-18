@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.factory.isValidLowercaseHex
 
-internal data class Threshold(val value: Long) : Comparable<Threshold> {
+internal data class Threshold(internal val value: Long) : Comparable<Threshold> {
 
     init {
         require(value in 0..<MAX) { "threshold must be between 0 and 2^56, got $value" }

@@ -47,21 +47,21 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
                 compatibilityWarningLogged = true
                 platformLog(COMPATIBILITY_WARNING)
             }
-            randomnessFromTraceId(traceId)
+            Randomness.fromTraceId(traceId)
         }
 
         val incomingTh = otelTraceState.th
         if (
             incomingTh != null &&
             parentSpanContext.isValid &&
-            (randomness >= incomingTh.value) != parentSpanContext.traceFlags.isSampled
+            (randomness >= incomingTh) != parentSpanContext.traceFlags.isSampled
         ) {
             otelTraceState.eraseThreshold()
         }
 
         otelTraceState.applyThreshold(rejectionThreshold)
 
-        val decision = if (randomness >= rejectionThreshold.value) {
+        val decision = if (randomness >= rejectionThreshold) {
             Decision.RECORD_AND_SAMPLE
         } else {
             Decision.DROP
@@ -73,16 +73,4 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
             traceState = traceState.put("ot", otelTraceState.encode()),
         )
     }
-
-    private fun randomnessFromTraceId(traceId: String): Long =
-        (byteFromBase16(traceId[18], traceId[19]) shl 48) or
-            (byteFromBase16(traceId[20], traceId[21]) shl 40) or
-            (byteFromBase16(traceId[22], traceId[23]) shl 32) or
-            (byteFromBase16(traceId[24], traceId[25]) shl 24) or
-            (byteFromBase16(traceId[26], traceId[27]) shl 16) or
-            (byteFromBase16(traceId[28], traceId[29]) shl 8) or
-            byteFromBase16(traceId[30], traceId[31])
-
-    private fun byteFromBase16(first: Char, second: Char): Long =
-        ((first.digitToInt(16) shl 4) or second.digitToInt(16)).toLong()
 }

@@ -1,19 +1,17 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
-import io.opentelemetry.kotlin.factory.isValidLowercaseHex
-
 internal class OtelTraceState private constructor(
     private val pairs: LinkedHashMap<String, String>
 ) {
-    val rv: Long?
-        get() = pairs["rv"]?.randomness()
+    val rv: Randomness?
+        get() = pairs["rv"]?.let { Randomness.decode(it) }
 
     val th: Threshold?
         get() = pairs["th"]?.let { Threshold.decode(it) }
 
     fun applyThreshold(threshold: Threshold) {
         val current = th
-        if(current == null || threshold > current) {
+        if (current == null || threshold > current) {
             pairs["th"] = threshold.encode()
         }
     }
@@ -23,10 +21,6 @@ internal class OtelTraceState private constructor(
     }
 
     fun encode(): String = pairs.entries.joinToString(";") { (key, value) -> "$key:$value" }
-
-    private fun String.randomness(): Long? =
-        takeIf { length == 14 && isValidLowercaseHex() }
-            ?.toLong(16)
 
     companion object {
         fun parse(raw: String?): OtelTraceState {
