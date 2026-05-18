@@ -14,12 +14,8 @@ internal class OtelTraceState private constructor(
     fun applyThreshold(threshold: Threshold) {
         val current = th
         if(current == null || threshold > current) {
-            setThreshold(threshold)
+            pairs["th"] = threshold.encode()
         }
-    }
-
-    fun setThreshold(threshold: Threshold) {
-        pairs["th"] = threshold.encode()
     }
 
     fun eraseThreshold() {

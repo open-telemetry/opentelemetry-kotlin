@@ -9,7 +9,7 @@ internal class OtelTraceStateTest {
     fun parsesOt() {
         val ot = OtelTraceState.parse("rv:123456789abcde;th:123abc")
         assertEquals(0x123456789abcde, ot.rv)
-        assertEquals(0x123abc00000000, ot.th?.value)
+        assertEquals(Threshold(0x123abc00000000), ot.th)
     }
 
     @Test
@@ -35,9 +35,9 @@ internal class OtelTraceStateTest {
     @Test
     fun preservesOtherKeys() {
         val ot = OtelTraceState.parse("rv:123456789abcde;th:123")
-        ot.setThreshold(Threshold(0xdef))
+        ot.applyThreshold(Threshold(0xdef))
         assertEquals(0x123456789abcde, ot.rv)
-        assertEquals(0x00000000000def, ot.th?.value)
+        assertEquals(Threshold(0x00000000000def), ot.th)
     }
 
     @Test
