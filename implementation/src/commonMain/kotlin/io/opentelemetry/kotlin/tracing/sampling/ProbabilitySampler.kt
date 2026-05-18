@@ -12,17 +12,11 @@ import kotlin.concurrent.Volatile
 internal class ProbabilitySampler(ratio: Double) : Sampler {
 
     private companion object {
-        private const val MAX_THRESHOLD: Long = 1L shl 56
-
         @Volatile
         private var compatibilityWarningLogged = false
         const val COMPATIBILITY_WARNING = "WARNING: The ProbabilitySampler sampler is presuming TraceIDs are random " +
             "and expects the Trace random flag to be set in confirmation. Please " +
             "upgrade your caller(s) to use W3C Trace Context Level 2."
-    }
-
-    init {
-        require(ratio in (1.0 / MAX_THRESHOLD)..1.0) { "ratio must be between 2^-56 and 1, got $ratio" }
     }
 
     private val rejectionThreshold = Threshold.fromRatio(ratio)
