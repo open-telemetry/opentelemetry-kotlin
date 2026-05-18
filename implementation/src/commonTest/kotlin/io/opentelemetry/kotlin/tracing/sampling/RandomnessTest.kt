@@ -9,7 +9,7 @@ internal class RandomnessTest {
     @Test
     fun createsRandomnessFromTraceId() {
         val traceIdRandomness = "00000000000123"
-        assertEquals(Randomness(0x123), Randomness.fromTraceId("aaaaaaaaaaaaaaaaaa${traceIdRandomness}"))
+        assertEquals(Randomness(0x123), Randomness.fromTraceId("aaaaaaaaaaaaaaaaaa$traceIdRandomness"))
     }
 
     @Test
