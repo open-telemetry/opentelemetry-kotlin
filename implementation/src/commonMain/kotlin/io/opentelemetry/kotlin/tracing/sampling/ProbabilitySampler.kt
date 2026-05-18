@@ -19,6 +19,10 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
             "upgrade your caller(s) to use W3C Trace Context Level 2."
     }
 
+    init {
+        require(ratio in (1.0 / Threshold.MAX)..1.0) { "ratio must be between 2^-56 and 1, got $ratio" }
+    }
+
     private val rejectionThreshold = Threshold.fromRatio(ratio)
 
     override val description: String = "ProbabilitySampler{$ratio}"

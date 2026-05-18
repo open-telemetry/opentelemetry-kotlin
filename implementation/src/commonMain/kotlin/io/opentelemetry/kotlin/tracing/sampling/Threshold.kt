@@ -2,12 +2,10 @@ package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.factory.isValidLowercaseHex
 
-private const val MAX_THRESHOLD: Long = 1L shl 56
-
 internal data class Threshold(val value: Long) : Comparable<Threshold> {
 
     init {
-        require(value in 0..<MAX_THRESHOLD) { "threshold must be between 0 and 2^56, got $value" }
+        require(value in 0..<MAX) { "threshold must be between 0 and 2^56, got $value" }
     }
 
     override fun compareTo(other: Threshold): Int {
@@ -23,6 +21,8 @@ internal data class Threshold(val value: Long) : Comparable<Threshold> {
     }
 
     companion object {
+        internal const val MAX: Long = 1L shl 56
+
         fun decode(encoded: String): Threshold? {
             return encoded.takeIf { it.isNotBlank() && it.length <= 14 && it.isValidLowercaseHex() }
                 ?.padEnd(14, '0')
@@ -31,8 +31,7 @@ internal data class Threshold(val value: Long) : Comparable<Threshold> {
         }
 
         fun fromRatio(ratio: Double): Threshold {
-            require(ratio in (1.0 / MAX_THRESHOLD)..1.0) { "ratio must be between 2^-56 and 1, got $ratio" }
-            return Threshold(MAX_THRESHOLD - (ratio * MAX_THRESHOLD).toLong())
+            return Threshold(MAX - (ratio * MAX).toLong())
         }
     }
 }
