@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
 import kotlin.concurrent.Volatile
-import kotlin.math.max
 
 internal class ProbabilitySampler(ratio: Double) : Sampler {
 
@@ -26,7 +25,7 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
         require(ratio in (1.0 / MAX_THRESHOLD)..1.0) { "ratio must be between 2^-56 and 1, got $ratio" }
     }
 
-    private val rejectionThreshold: Long = MAX_THRESHOLD - (ratio * MAX_THRESHOLD).toLong()
+    private val rejectionThreshold = Threshold.fromRatio(ratio)
 
     override val description: String = "ProbabilitySampler{$ratio}"
 
@@ -62,9 +61,9 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
             otelTraceState.eraseThreshold()
         }
 
-        otelTraceState.applyThreshold(Threshold(rejectionThreshold))
+        otelTraceState.applyThreshold(rejectionThreshold)
 
-        val decision = if (randomness >= rejectionThreshold) {
+        val decision = if (randomness >= rejectionThreshold.value) {
             Decision.RECORD_AND_SAMPLE
         } else {
             Decision.DROP

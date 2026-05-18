@@ -29,5 +29,10 @@ internal data class Threshold(val value: Long) : Comparable<Threshold> {
                 ?.toLong(16)
                 ?.let(::Threshold)
         }
+
+        fun fromRatio(ratio: Double): Threshold {
+            require(ratio in (1.0 / MAX_THRESHOLD)..1.0) { "ratio must be between 2^-56 and 1, got $ratio" }
+            return Threshold(MAX_THRESHOLD - (ratio * MAX_THRESHOLD).toLong())
+        }
     }
 }
