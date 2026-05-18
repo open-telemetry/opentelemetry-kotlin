@@ -51,4 +51,15 @@ internal class ThresholdTest {
             Threshold(0xffffffffffffff + 1)
         }
     }
+
+    @Test
+    fun createsThresholdFromMaxRatio() {
+        assertEquals(Threshold(0L), Threshold.fromRatio(1.0))
+    }
+
+    @Test
+    fun createsThresholdFromMinRatio() {
+        val minRatio = 1.0 / Threshold.MAX
+        assertEquals(Threshold(Threshold.MAX - 1), Threshold.fromRatio(minRatio))
+    }
 }
