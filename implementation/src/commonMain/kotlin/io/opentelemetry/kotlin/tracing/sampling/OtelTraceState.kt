@@ -8,8 +8,19 @@ internal class OtelTraceState private constructor(
     val rv: Long?
         get() = pairs["rv"]?.randomness()
 
-    val th: Long?
-        get() = pairs["th"]?.threshold()
+    val th: Threshold?
+        get() = pairs["th"]?.let { Threshold.decode(it) }
+
+    fun applyThreshold(threshold: Threshold) {
+        val current = th
+        if(current == null || threshold > current) {
+            setThreshold(threshold)
+        }
+    }
+
+    fun setThreshold(threshold: Threshold) {
+        pairs["th"] = threshold.encode()
+    }
 
     fun setThreshold(threshold: Long) {
         require(threshold in 0x0..0xffffffffffffff)
@@ -48,10 +59,5 @@ internal class OtelTraceState private constructor(
 
     private fun String.randomness(): Long? =
         takeIf { length == 14 && isValidLowercaseHex() }
-            ?.toLong(16)
-
-    private fun String.threshold(): Long? =
-        takeIf { isNotBlank() && length <= 14 && isValidLowercaseHex() }
-            ?.padEnd(14, '0')
             ?.toLong(16)
 }

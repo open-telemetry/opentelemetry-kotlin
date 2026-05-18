@@ -57,12 +57,12 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
         if (
             incomingTh != null &&
             parentSpanContext.isValid &&
-            (randomness >= incomingTh) != parentSpanContext.traceFlags.isSampled
+            (randomness >= incomingTh.value) != parentSpanContext.traceFlags.isSampled
         ) {
             otelTraceState.eraseThreshold()
         }
 
-        otelTraceState.setThreshold(max(otelTraceState.th ?: 0L, rejectionThreshold))
+        otelTraceState.applyThreshold(Threshold(rejectionThreshold))
 
         val decision = if (randomness >= rejectionThreshold) {
             Decision.RECORD_AND_SAMPLE

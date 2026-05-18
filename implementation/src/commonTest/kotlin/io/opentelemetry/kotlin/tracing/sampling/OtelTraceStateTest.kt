@@ -10,7 +10,7 @@ internal class OtelTraceStateTest {
     fun parsesOt() {
         val ot = OtelTraceState.parse("rv:123456789abcde;th:123abc")
         assertEquals(0x123456789abcde, ot.rv)
-        assertEquals(0x123abc00000000, ot.th)
+        assertEquals(0x123abc00000000, ot.th?.value)
     }
 
     @Test
@@ -34,13 +34,13 @@ internal class OtelTraceStateTest {
     @Test
     fun parsesSingleCharThreshold() {
         val ot = OtelTraceState.parse("th:0")
-        assertEquals(0L, ot.th)
+        assertEquals(0L, ot.th?.value)
     }
 
     @Test
     fun parsesFullLengthThreshold() {
         val ot = OtelTraceState.parse("th:ffffffffffffff")
-        assertEquals(0xffffffffffffff, ot.th)
+        assertEquals(0xffffffffffffff, ot.th?.value)
     }
 
     @Test
@@ -90,7 +90,7 @@ internal class OtelTraceStateTest {
         val ot = OtelTraceState.parse("rv:123456789abcde;th:123")
         ot.setThreshold(0xdef)
         assertEquals(0x123456789abcde, ot.rv)
-        assertEquals(0x00000000000def, ot.th)
+        assertEquals(0x00000000000def, ot.th?.value)
     }
 
     @Test
