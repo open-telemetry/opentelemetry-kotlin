@@ -22,15 +22,6 @@ internal class OtelTraceState private constructor(
         pairs["th"] = threshold.encode()
     }
 
-    fun setThreshold(threshold: Long) {
-        require(threshold in 0x0..0xffffffffffffff)
-        pairs["th"] = if (threshold == 0L) {
-            "0"
-        } else {
-            threshold.toString(16).padStart(14, '0').trimEnd('0')
-        }
-    }
-
     fun eraseThreshold() {
         pairs.remove("th")
     }
