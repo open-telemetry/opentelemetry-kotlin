@@ -37,6 +37,10 @@ internal class OtelTraceState private constructor(
 
     fun encode(): String = pairs.entries.joinToString(";") { (key, value) -> "$key:$value" }
 
+    private fun String.randomness(): Long? =
+        takeIf { length == 14 && isValidLowercaseHex() }
+            ?.toLong(16)
+
     companion object {
         fun parse(raw: String?): OtelTraceState {
             val pairs = linkedMapOf<String, String>()
@@ -56,8 +60,4 @@ internal class OtelTraceState private constructor(
             return OtelTraceState(pairs)
         }
     }
-
-    private fun String.randomness(): Long? =
-        takeIf { length == 14 && isValidLowercaseHex() }
-            ?.toLong(16)
 }
