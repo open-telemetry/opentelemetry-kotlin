@@ -2,6 +2,110 @@
 
 ## Unreleased
 
+### Migration notes
+
+### 📈 Enhancements
+
+#### ✉️ Attributes
+
+- Attributes now support equality
+  ([#425](https://github.com/open-telemetry/opentelemetry-kotlin/pull/425))
+- Attributes now support ByteArray value types.
+  (
+  [#430](https://github.com/open-telemetry/opentelemetry-kotlin/pull/430),
+  [#452](https://github.com/open-telemetry/opentelemetry-kotlin/pull/452)
+  )
+
+#### 🧳 Baggage
+
+- The Baggage API has an initial implementation.
+  ([#436](https://github.com/open-telemetry/opentelemetry-kotlin/pull/436))
+- Baggage API also includes a compat layer.
+  ([#433](https://github.com/open-telemetry/opentelemetry-kotlin/pull/433))
+- Baggage can be created through the OpenTelemetry API.
+  ([#480](https://github.com/open-telemetry/opentelemetry-kotlin/pull/480))
+- Baggage can now be stored in the OpenTelemetry Context.
+  ([#456](https://github.com/open-telemetry/opentelemetry-kotlin/pull/456))
+- BaggageFactory now has an implementation.
+  ([#457](https://github.com/open-telemetry/opentelemetry-kotlin/pull/457))
+
+#### ✈️ Propagators
+
+- implement compat layer for PropagatorFactory
+  ([#461](https://github.com/open-telemetry/opentelemetry-kotlin/pull/461))
+- add traceparent implementation
+  ([#462](https://github.com/open-telemetry/opentelemetry-kotlin/pull/462))
+- create compat adapter for propagators
+  ([#460](https://github.com/open-telemetry/opentelemetry-kotlin/pull/460))
+- Implement W3C TraceContext Propagator
+  ([#467](https://github.com/open-telemetry/opentelemetry-kotlin/pull/467))
+- create entrypoint for propagators
+  ([#469](https://github.com/open-telemetry/opentelemetry-kotlin/pull/469))
+- Initial implementation of the TextMapPropagator API.
+  ([#455](https://github.com/open-telemetry/opentelemetry-kotlin/pull/455))
+- New spec-compliant support for W3CBaggagePropagator has been added.
+  ([#458](https://github.com/open-telemetry/opentelemetry-kotlin/pull/458))
+- TextMapGetter now has getAll() method, per specification.
+  ([#466](https://github.com/open-telemetry/opentelemetry-kotlin/pull/466))
+
+#### Miscellaneous Enhancements
+
+- feat(sampling): implement probability sampler
+  ([#398](https://github.com/open-telemetry/opentelemetry-kotlin/pull/398))
+- Initial API scaffolding has been created for Meter.
+  ([#414](https://github.com/open-telemetry/opentelemetry-kotlin/pull/414))
+- Initial API scaffolding for MeterProvider api.
+  ([#437](https://github.com/open-telemetry/opentelemetry-kotlin/pull/437))
+- OTLP exporters now allow users to provide a custom HttpClient.
+  ([#431](https://github.com/open-telemetry/opentelemetry-kotlin/pull/431))
+- support AnyValue in Logger.emit()
+  ([#490](https://github.com/open-telemetry/opentelemetry-kotlin/pull/490))
+- Scaffold MeterProvider config and compat layer
+  ([#498](https://github.com/open-telemetry/opentelemetry-kotlin/pull/498))
+- allow supplying a custom implicit context storage mechanism
+  ([#470](https://github.com/open-telemetry/opentelemetry-kotlin/pull/470))
+- thread local context storage
+  ([#479](https://github.com/open-telemetry/opentelemetry-kotlin/pull/479))
+- TraceState now has an initial implementation.
+  ([#464](https://github.com/open-telemetry/opentelemetry-kotlin/pull/464))
+- Provide implementation of AnyValue
+  ([#453](https://github.com/open-telemetry/opentelemetry-kotlin/pull/453))
+- LogLimit can now be configured from environment variables.
+  ([#407](https://github.com/open-telemetry/opentelemetry-kotlin/pull/407))
+
+### 🛠️ Bug fixes
+
+- fix: specify span kind correctly in protobuf
+  ([#417](https://github.com/open-telemetry/opentelemetry-kotlin/pull/417))
+- fix: prevent empty key for attributes
+  ([#424](https://github.com/open-telemetry/opentelemetry-kotlin/pull/424))
+- fix: hook up attributes in compat resource implementation
+  ([#423](https://github.com/open-telemetry/opentelemetry-kotlin/pull/423))
+- fix: ensure that resource attributes don't have limits
+  ([#429](https://github.com/open-telemetry/opentelemetry-kotlin/pull/429))
+- fix: handle unexpected values in attributes
+  ([#432](https://github.com/open-telemetry/opentelemetry-kotlin/pull/432))
+- Enforce attribute size limit for byte array attribute values.
+  ([#468](https://github.com/open-telemetry/opentelemetry-kotlin/pull/468))
+- Invalid configs should not throw exceptions.
+  ([#504](https://github.com/open-telemetry/opentelemetry-kotlin/pull/504))
+- Don't throw when using the DSL to configure exporters and processors.
+  ([#503](https://github.com/open-telemetry/opentelemetry-kotlin/pull/503))
+- Remove throws on init in trace and span context usage scenarios
+  ([#506](https://github.com/open-telemetry/opentelemetry-kotlin/pull/506))
+
+### 📖 Docs
+ 
+- docs: Add SIG meeting info and welcoming language
+  ([#493](https://github.com/open-telemetry/opentelemetry-kotlin/pull/493))
+- docs: add link for getting started instructions
+  ([#484](https://github.com/open-telemetry/opentelemetry-kotlin/pull/484))
+
+### 🧰 Tooling
+
+- Add fuzz tests for trace context
+  ([#492](https://github.com/open-telemetry/opentelemetry-kotlin/pull/492))
+
 ## Version 0.3.0 (2026-04-21)
 
 - Alter Tracing API so that `Span` does not include readable values
