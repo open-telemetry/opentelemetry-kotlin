@@ -2,7 +2,9 @@
 
 ## Checklist
 
-1. Run [draft-change-log-entries.yml](.github/workflows/draft-change-log-entries.yaml) on GitHub Actions
+1. Run the
+   [draft-change-log-entries.yml](https://github.com/open-telemetry/opentelemetry-kotlin/actions/workflows/draft-change-log-entries.yaml)
+   GitHub Action
 2. Create a PR updating the CHANGELOG.md and merge it after approval
 3. Run [prepare-release-branch.yml](.github/workflows/prepare-release-branch.yml) on GitHub Actions
 4. Merge the two PRs created by the previous workflow
