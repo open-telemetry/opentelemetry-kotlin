@@ -33,6 +33,14 @@ internal class AttributeContainerExtTest {
     }
 
     @Test
+    fun testAnyValueAttributeStorage() {
+        val attrs = FakeAttributesMutator()
+        val anyValue = AnyValue.MapValue(mapOf("nested" to AnyValue.StringValue("v")))
+        attrs.setAttributes(mapOf("any" to anyValue))
+        assertEquals(anyValue, attrs.attributes["any"])
+    }
+
+    @Test
     fun testIntAttributeStorage() {
         val attrs = FakeAttributesMutator()
         val i = 5
@@ -108,6 +116,10 @@ internal class AttributeContainerExtTest {
         }
 
         override fun setByteArrayAttribute(key: String, value: ByteArray) {
+            attributes[key] = value
+        }
+
+        override fun setAnyValueAttribute(key: String, value: AnyValue) {
             attributes[key] = value
         }
     }

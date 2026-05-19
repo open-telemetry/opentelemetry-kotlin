@@ -3,7 +3,9 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteLogRecord
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.convertToMap
+import io.opentelemetry.kotlin.attributes.setFlattenedAnyValueAttribute
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import io.opentelemetry.kotlin.logging.toOtelKotlinSeverityNumber
@@ -81,6 +83,10 @@ internal class ReadWriteLogRecordAdapter(
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
         // no java implementation available
+    }
+
+    override fun setAnyValueAttribute(key: String, value: AnyValue) {
+        setFlattenedAnyValueAttribute(key, value)
     }
 
     override val attributes: Map<String, Any>

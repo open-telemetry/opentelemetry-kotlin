@@ -51,6 +51,10 @@ class FakeAttributesMutator(
         map[key] = value
     }
 
+    override fun setAnyValueAttribute(key: String, value: AnyValue) {
+        map[key] = value
+    }
+
     val attributes: Map<String, Any>
         get() = map.toMap()
 }

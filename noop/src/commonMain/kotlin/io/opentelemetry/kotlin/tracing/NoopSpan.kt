@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 
 @ExperimentalApi
@@ -54,5 +55,8 @@ internal object NoopSpan : Span {
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
+    }
+
+    override fun setAnyValueAttribute(key: String, value: AnyValue) {
     }
 }

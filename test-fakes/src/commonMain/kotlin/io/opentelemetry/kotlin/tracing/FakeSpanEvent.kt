@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.tracing.model.SpanEvent
 
 class FakeSpanEvent(
@@ -42,6 +43,10 @@ class FakeSpanEvent(
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
+        attributes[key] = value
+    }
+
+    override fun setAnyValueAttribute(key: String, value: AnyValue) {
         attributes[key] = value
     }
 }

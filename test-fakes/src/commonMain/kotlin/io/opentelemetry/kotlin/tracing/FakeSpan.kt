@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.FakeAttributesMutator
 import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
@@ -98,6 +99,10 @@ class FakeSpan(
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
+        TODO("Not yet implemented")
+    }
+
+    override fun setAnyValueAttribute(key: String, value: AnyValue) {
         TODO("Not yet implemented")
     }
 }

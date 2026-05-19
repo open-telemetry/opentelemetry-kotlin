@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.attributes
 public fun AttributesMutator.setAttributes(container: AttributeContainer) {
     container.attributes.forEach { (key, value) ->
         when (value) {
+            is AnyValue -> setAnyValueAttribute(key, value)
             is Boolean -> setBooleanAttribute(key, value)
             is String -> setStringAttribute(key, value)
             is Long -> setLongAttribute(key, value)

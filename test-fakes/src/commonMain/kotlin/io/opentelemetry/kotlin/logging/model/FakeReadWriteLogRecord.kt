@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.logging.model
 
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.Resource
@@ -59,5 +60,8 @@ class FakeReadWriteLogRecord(
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
+    }
+
+    override fun setAnyValueAttribute(key: String, value: AnyValue) {
     }
 }

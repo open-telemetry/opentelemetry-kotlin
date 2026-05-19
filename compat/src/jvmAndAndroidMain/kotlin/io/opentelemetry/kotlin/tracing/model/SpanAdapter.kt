@@ -7,9 +7,11 @@ import io.opentelemetry.kotlin.aliases.OtelJavaImplicitContextKeyed
 import io.opentelemetry.kotlin.aliases.OtelJavaScope
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.attributes.setFlattenedAnyValueAttribute
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
@@ -163,6 +165,10 @@ internal class SpanAdapter(
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
         // no java implementation available
+    }
+
+    override fun setAnyValueAttribute(key: String, value: AnyValue) {
+        setFlattenedAnyValueAttribute(key, value)
     }
 
     override fun storeInContext(context: OtelJavaContext): OtelJavaContext? {

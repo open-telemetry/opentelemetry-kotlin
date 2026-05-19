@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 
 /**
@@ -64,5 +65,8 @@ class NonRecordingSpan(
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
+    }
+
+    override fun setAnyValueAttribute(key: String, value: AnyValue) {
     }
 }

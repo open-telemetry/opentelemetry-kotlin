@@ -131,8 +131,99 @@ internal class AttributesMutatorImplTest {
             setLongListAttribute("", listOf(1L))
             setDoubleListAttribute("", listOf(1.0))
             setByteArrayAttribute("", byteArrayOf(0x01))
+            setAnyValueAttribute("", AnyValue.StringValue("value"))
         }.attributes
         assertEquals(emptyMap(), attrs)
+    }
+
+    @Test
+    fun testAnyValueAttribute() {
+        val nested = AnyValue.MapValue(
+            mapOf(
+                "s" to AnyValue.StringValue("hello"),
+                "b" to AnyValue.BoolValue(true),
+                "l" to AnyValue.LongValue(42L),
+                "d" to AnyValue.DoubleValue(3.14),
+                "n" to AnyValue.NullValue,
+                "bytes" to AnyValue.BytesValue(byteArrayOf(0x01, 0x02)),
+                "list" to AnyValue.ListValue(listOf(AnyValue.StringValue("x")))
+            )
+        )
+        val attrs = AttributesModel(attributeLimit).apply {
+            setAnyValueAttribute("any", nested)
+        }.attributes
+        assertEquals(nested, attrs["any"])
+    }
+
+    @Test
+    fun testAnyValueEqualityAndHashCodeAcrossInstances() {
+        val a = AttributesModel(attributeLimit).apply {
+            setAnyValueAttribute("k", AnyValue.MapValue(mapOf("x" to AnyValue.StringValue("v"))))
+        }
+        val b = AttributesModel(attributeLimit).apply {
+            setAnyValueAttribute("k", AnyValue.MapValue(mapOf("x" to AnyValue.StringValue("v"))))
+        }
+        assertEquals(a, b)
+        assertEquals(a.hashCode(), b.hashCode())
+    }
+
+    @Test
+    fun testAnyValueStringTruncatedRecursively() {
+        val attrs = AttributesModel(
+            attributeLimit = attributeLimit,
+            attributeValueLengthLimit = 3
+        ).apply {
+            setAnyValueAttribute(
+                "map",
+                AnyValue.MapValue(mapOf("k" to AnyValue.StringValue("abcdef")))
+            )
+            setAnyValueAttribute(
+                "list",
+                AnyValue.ListValue(listOf(AnyValue.StringValue("abcdef")))
+            )
+            setAnyValueAttribute("flat", AnyValue.StringValue("abcdef"))
+        }.attributes
+
+        val map = attrs["map"] as AnyValue.MapValue
+        assertEquals("abc", (map.values["k"] as AnyValue.StringValue).value)
+        val list = attrs["list"] as AnyValue.ListValue
+        assertEquals("abc", (list.values[0] as AnyValue.StringValue).value)
+        assertEquals("abc", (attrs["flat"] as AnyValue.StringValue).value)
+    }
+
+    @Test
+    fun testAnyValueBytesTruncatedRecursively() {
+        val attrs = AttributesModel(
+            attributeLimit = attributeLimit,
+            attributeValueLengthLimit = 3
+        ).apply {
+            setAnyValueAttribute(
+                "bytes",
+                AnyValue.BytesValue(byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05))
+            )
+            setAnyValueAttribute(
+                "nested",
+                AnyValue.ListValue(
+                    listOf(AnyValue.BytesValue(byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05)))
+                )
+            )
+        }.attributes
+
+        val flat = (attrs["bytes"] as AnyValue.BytesValue).value
+        assertTrue(flat.contentEquals(byteArrayOf(0x01, 0x02, 0x03)))
+        val nested = ((attrs["nested"] as AnyValue.ListValue).values[0] as AnyValue.BytesValue).value
+        assertTrue(nested.contentEquals(byteArrayOf(0x01, 0x02, 0x03)))
+    }
+
+    @Test
+    fun testAnyValueRespectsAttributeLimit() {
+        val model = AttributesModel(attributeLimit = 1).apply {
+            setAnyValueAttribute("first", AnyValue.StringValue("a"))
+            setAnyValueAttribute("second", AnyValue.StringValue("b"))
+        }
+        val attrs = model.attributes
+        assertEquals(1, attrs.size)
+        assertEquals(AnyValue.StringValue("a"), attrs["first"])
     }
 
     @Test

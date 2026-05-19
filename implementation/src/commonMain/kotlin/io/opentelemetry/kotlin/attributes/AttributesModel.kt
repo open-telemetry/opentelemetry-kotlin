@@ -18,7 +18,7 @@ internal class AttributesModel(
 
     override fun setStringAttribute(key: String, value: String) {
         if (canAddAttribute(key)) {
-            attrs[key] = value.take(attributeValueLengthLimit)
+            attrs[key] = truncateString(value)
         }
     }
 
@@ -48,7 +48,7 @@ internal class AttributesModel(
         value: List<String>
     ) {
         if (canAddAttribute(key)) {
-            attrs[key] = value.map { it.take(attributeValueLengthLimit) }
+            attrs[key] = value.map(::truncateString)
         }
     }
 
@@ -72,9 +72,67 @@ internal class AttributesModel(
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
         if (canAddAttribute(key)) {
-            attrs[key] = if (value.size > attributeValueLengthLimit) {
-                value.copyOf(attributeValueLengthLimit)
-            } else {
+            attrs[key] = truncateByteArray(value)
+        }
+    }
+
+    override fun setAnyValueAttribute(key: String, value: AnyValue) {
+        if (canAddAttribute(key)) {
+            attrs[key] = truncateAnyValue(value)
+        }
+    }
+
+    private fun truncateString(value: String): String = value.take(attributeValueLengthLimit)
+
+    private fun truncateByteArray(value: ByteArray): ByteArray =
+        if (value.size > attributeValueLengthLimit) {
+            value.copyOf(attributeValueLengthLimit)
+        } else {
+            value
+        }
+
+    private fun truncateAnyValue(value: AnyValue): AnyValue {
+        return when (value) {
+            is AnyValue.StringValue -> {
+                AnyValue.StringValue(truncateString(value.value))
+            }
+            is AnyValue.BytesValue -> {
+                AnyValue.BytesValue(truncateByteArray(value.value))
+            }
+            is AnyValue.ListValue -> {
+                var changed = false
+                val mapped = value.values.map { item ->
+                    val truncated = truncateAnyValue(item)
+                    if (truncated !== item) {
+                        changed = true
+                    }
+                    truncated
+                }
+                if (changed) {
+                    AnyValue.ListValue(mapped)
+                } else {
+                    value
+                }
+            }
+            is AnyValue.MapValue -> {
+                var changed = false
+                val mapped = value.values.mapValues { entry ->
+                    val truncated = truncateAnyValue(entry.value)
+                    if (truncated !== entry.value) {
+                        changed = true
+                    }
+                    truncated
+                }
+                if (changed) {
+                    AnyValue.MapValue(mapped)
+                } else {
+                    value
+                }
+            }
+            AnyValue.NullValue,
+            is AnyValue.BoolValue,
+            is AnyValue.LongValue,
+            is AnyValue.DoubleValue -> {
                 value
             }
         }

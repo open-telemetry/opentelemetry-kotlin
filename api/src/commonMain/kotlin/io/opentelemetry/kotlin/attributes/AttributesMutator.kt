@@ -65,4 +65,10 @@ public interface AttributesMutator {
      */
     @ThreadSafe
     public fun setByteArrayAttribute(key: String, value: ByteArray)
+
+    /**
+     * Sets an attribute with an [AnyValue] value.
+     */
+    @ThreadSafe
+    public fun setAnyValueAttribute(key: String, value: AnyValue)
 }

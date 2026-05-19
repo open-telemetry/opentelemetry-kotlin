@@ -10,6 +10,7 @@ internal class AttributesMutatorExtTest {
     fun `can set attributes with map`() {
         val mutator = FakeAttributesMutator()
         mutator.setLongAttribute("existing", 55.44.toLong())
+        val anyValue = AnyValue.MapValue(mapOf("nested" to AnyValue.StringValue("v")))
         val map = mapOf(
             Pair("foo", "bar"), Pair("long", 21L),
             Pair("int", 123), Pair("double", 21.5), Pair("float", 22.5f),
@@ -17,7 +18,8 @@ internal class AttributesMutatorExtTest {
             Pair("bytearray", byteArrayOf(1, 2, 3)),
             Pair("list", listOf("foo", "bar", "baz")),
             Pair("tostring", TestObj("flim", 66L)),
-            Pair("arrayobj", arrayOf(TestObj("one", 1), TestObj("two", 2)))
+            Pair("arrayobj", arrayOf(TestObj("one", 1), TestObj("two", 2))),
+            Pair("anyvalue", anyValue)
         )
         mutator.setAttributes(map)
 
@@ -35,6 +37,7 @@ internal class AttributesMutatorExtTest {
             mutator.attributes["arrayobj"] as List<*>
         )
         assertEquals(55.44.toLong(), mutator.attributes["existing"])
+        assertEquals(anyValue, mutator.attributes["anyvalue"])
     }
 
     data class TestObj(val first: String, val second: Long)

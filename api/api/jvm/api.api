@@ -81,6 +81,7 @@ public final class io/opentelemetry/kotlin/attributes/AnyValue$StringValue : io/
 }
 
 public abstract interface class io/opentelemetry/kotlin/attributes/AttributesMutator {
+	public abstract fun setAnyValueAttribute (Ljava/lang/String;Lio/opentelemetry/kotlin/attributes/AnyValue;)V
 	public abstract fun setBooleanAttribute (Ljava/lang/String;Z)V
 	public abstract fun setBooleanListAttribute (Ljava/lang/String;Ljava/util/List;)V
 	public abstract fun setByteArrayAttribute (Ljava/lang/String;[B)V

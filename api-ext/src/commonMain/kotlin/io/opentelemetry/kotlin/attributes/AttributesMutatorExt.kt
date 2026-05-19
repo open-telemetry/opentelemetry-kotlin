@@ -15,6 +15,7 @@ import io.opentelemetry.kotlin.ThreadSafe
 public fun AttributesMutator.setAttributes(attributes: Map<String, Any>) {
     attributes.forEach {
         when (val input = it.value) {
+            is AnyValue -> setAnyValueAttribute(it.key, input)
             is String -> setStringAttribute(it.key, input)
             is Boolean -> setBooleanAttribute(it.key, input)
             is Long -> setLongAttribute(it.key, input)

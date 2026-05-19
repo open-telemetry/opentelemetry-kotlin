@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.model
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
@@ -278,6 +279,14 @@ internal class SpanModel(
         lock.write {
             if (isRecording()) {
                 attrs.setByteArrayAttribute(key, value)
+            }
+        }
+    }
+
+    override fun setAnyValueAttribute(key: String, value: AnyValue) {
+        lock.write {
+            if (isRecording()) {
+                attrs.setAnyValueAttribute(key, value)
             }
         }
     }

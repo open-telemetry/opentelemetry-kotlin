@@ -44,6 +44,10 @@ internal class CompatAttributesModel(
         // no java implementation available
     }
 
+    override fun setAnyValueAttribute(key: String, value: AnyValue) {
+        setFlattenedAnyValueAttribute(key, value)
+    }
+
     override val attributes: Map<String, Any>
         get() = attrs.build().convertToMap()
 
