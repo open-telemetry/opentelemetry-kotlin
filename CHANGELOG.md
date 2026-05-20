@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 0.4.0 (2026-05-20)
+
 ### ⚠️ Breaking changes
 
 - Drop platform support for x64 on iOS. This is due to the Kotlin language project
