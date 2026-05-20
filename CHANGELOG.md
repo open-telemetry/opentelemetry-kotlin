@@ -2,8 +2,13 @@
 
 ## Unreleased
 
-### Migration notes
+### ⚠️ Breaking changes
 
+- Drop platform support for x64 on iOS. This is due to the Kotlin language project
+  also dropping support for iosX64. See the 
+  [upstream release notes](https://kotlinlang.org/docs/whatsnew2220.html#deprecation-of-x86-64-apple-targets)
+  for additional detail.
+  ([#514](https://github.com/open-telemetry/opentelemetry-kotlin/pull/514))
 ### 📈 Enhancements
 
 #### ✉️ Attributes
@@ -15,6 +20,8 @@
   [#430](https://github.com/open-telemetry/opentelemetry-kotlin/pull/430),
   [#452](https://github.com/open-telemetry/opentelemetry-kotlin/pull/452)
   )
+- Attributes now support AnyValue value type.
+  ([#516](https://github.com/open-telemetry/opentelemetry-kotlin/pull/516))
 
 #### 🧳 Baggage
 
