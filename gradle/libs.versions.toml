@@ -4,7 +4,10 @@ kotlin = "2.3.21"
 android-minSdk = "21"
 android-compileSdk = "36"
 android-minCompileSdk = "34"
-android-minAgpVersion = "7.1.3"
+android-minAgpVersion = "8.0.0"
+minSupportedKotlinLang = "2.0"
+minSupportedKotlinPlugin = "2.0.0"
+minSupportedGradle = "8.0"
 detekt = "1.23.8"
 binaryCompatibilityValidator = "0.18.1"
 kotlinxBenchmarkRuntime = "0.4.17"
@@ -87,6 +90,8 @@ wire = { id = "com.squareup.wire", version.ref = "wire" }
 buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+test-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "minSupportedKotlinPlugin" }
+test-android-library = { id = "com.android.library", version.ref = "android-minAgpVersion" }
 
 [bundles]
 junit = ["junit-jupiter-api", "junit-jupiter-engine", "junit-vintage-engine"]
