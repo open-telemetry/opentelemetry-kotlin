@@ -36,7 +36,10 @@ jobs:
         uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0
 
       - name: Gradle Build
-        run: ./gradlew build :benchmark-android:assemble :benchmark-android:compileReleaseAndroidTestKotlin :benchmark-jvm:assemble :examples:example-app-android:assembleRelease koverXmlReport --stacktrace
+        run: ./gradlew build :benchmark-android:assemble :benchmark-android:compileReleaseAndroidTestKotlin :benchmark-jvm:assemble :examples:example-app-android:assembleRelease koverXmlReport -x :gradle-integration-test:test --stacktrace
+
+      - name: Publish snapshot to Maven local
+        run: ./gradlew publishToMavenLocal -PsnapshotPublish=true --stacktrace
 
       - name: Gradle Integration Test
         run: ./gradlew :gradle-integration-test:test --stacktrace

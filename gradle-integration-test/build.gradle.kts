@@ -19,24 +19,12 @@ val minSupportedGradle = libs.versions.minSupportedGradle.get()
 val snapshotVersion = "${project.version}-SNAPSHOT"
 val catalogFile = rootProject.layout.projectDirectory.file("gradle/libs.versions.toml").asFile
 
-val publishSnapshotToMavenLocal = tasks.register<Exec>("publishSnapshotToMavenLocal") {
-    workingDir = rootProject.projectDir
-    val wrapper = when {
-        System.getProperty("os.name").lowercase().contains("windows") -> "gradlew.bat"
-        else -> "gradlew"
-    }
-    commandLine(
-        rootProject.projectDir.resolve(wrapper).absolutePath,
-        "publishToMavenLocal",
-        "-Pversion=$snapshotVersion",
-        "--no-daemon",
-        "--quiet",
-    )
-}
+// snapshot artifacts consumed by the test must already be installed in mavenLocal
+// In CI this is wired as two steps as running via Gradle's Exec from inside this build caused
+// Kotlin/Native klib writes to race against the outer build's `build/` directories.
 
 tasks.test {
     useJUnitPlatform()
-    dependsOn(publishSnapshotToMavenLocal)
     systemProperty("otelKotlinVersion", snapshotVersion)
     systemProperty("minSupportedGradle", minSupportedGradle)
     systemProperty("catalogPath", catalogFile.absolutePath)

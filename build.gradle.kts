@@ -22,6 +22,12 @@ plugins.withType<YarnPlugin> {
 group = "io.opentelemetry.kotlin"
 version = project.version
 
+if (project.hasProperty("snapshotPublish")) {
+    allprojects {
+        version = "${version}-SNAPSHOT"
+    }
+}
+
 kover {
     merge {
         subprojects { project ->
