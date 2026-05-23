@@ -12,6 +12,7 @@ import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.init.config.LoggingConfig
+import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
 
 internal class LoggerProviderImpl(
@@ -49,6 +50,9 @@ internal class LoggerProviderImpl(
         attributes: (AttributesMutator.() -> Unit)?
     ): Logger =
         shutdownState.ifActiveOrElse(noopLogger) {
+            if (name.isEmpty()) {
+                platformLog("Logger requested without instrumentation scope name")
+            }
             val key = apiProvider.createInstrumentationScopeInfo(name, version, schemaUrl, attributes)
             apiProvider.getOrCreate(key)
         }

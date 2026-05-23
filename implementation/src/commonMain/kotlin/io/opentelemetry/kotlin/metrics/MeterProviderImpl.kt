@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.init.config.MetricsConfig
+import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
 
 internal class MeterProviderImpl(
@@ -35,6 +36,9 @@ internal class MeterProviderImpl(
         attributes: (AttributesMutator.() -> Unit)?,
     ): Meter =
         shutdownState.ifActiveOrElse(noopMeter) {
+            if (name.isEmpty()) {
+                platformLog("Meter requested without instrumentation scope name")
+            }
             val key = apiProvider.createInstrumentationScopeInfo(name, version, schemaUrl, attributes)
             apiProvider.getOrCreate(key)
         }

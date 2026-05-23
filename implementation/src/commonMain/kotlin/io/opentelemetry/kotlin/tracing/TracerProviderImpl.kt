@@ -15,6 +15,7 @@ import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.init.config.TracingConfig
+import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
 
 internal class TracerProviderImpl(
@@ -58,6 +59,9 @@ internal class TracerProviderImpl(
         attributes: (AttributesMutator.() -> Unit)?
     ): Tracer =
         shutdownState.ifActiveOrElse(noopTracer) {
+            if (name.isEmpty()) {
+                platformLog("Tracer requested without instrumentation scope name")
+            }
             val key = apiProvider.createInstrumentationScopeInfo(
                 name = name,
                 version = version,
