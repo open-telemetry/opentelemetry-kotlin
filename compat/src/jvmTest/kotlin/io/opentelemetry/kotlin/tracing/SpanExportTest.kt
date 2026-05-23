@@ -346,7 +346,6 @@ internal class SpanExportTest {
             schemaUrl = "https://example.com/some_schema.json"
             attributes = {
                 setStringAttribute("service.name", "test-service")
-                setStringAttribute("service.version", "1.0.0")
                 setStringAttribute("environment", "test")
             }
         }
