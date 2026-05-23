@@ -96,6 +96,13 @@ internal class OtlpHttpSpanExporterTest {
     }
 
     @Test
+    fun testExportNoOpOnEmpty() = runTest {
+        val code = exporter.export(emptyList())
+        assertEquals(OperationResultCode.Success, code)
+        assertTrue(server.requestHistory.isEmpty())
+    }
+
+    @Test
     fun testCustomHttpClientIsUsed() = runTest {
         val customServer = MockEngine {
             respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
