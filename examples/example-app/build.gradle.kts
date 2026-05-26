@@ -41,6 +41,7 @@ kotlin {
                 implementation(project(":core"))
                 implementation(project(":implementation"))
                 implementation(project(":semconv"))
+                implementation(project(":semconv-incubating"))
                 implementation(libs.kotlinx.coroutines)
                 implementation(project(":exporters-otlp"))
             }

@@ -7,7 +7,6 @@ package io.opentelemetry.kotlin.semconv
  */
 @Suppress("unused")
 object SystemAttributes {
-  
 
     /**
     * <p>Deprecated, use <c>cpu.logical_number</c> instead.</p>
@@ -22,76 +21,10 @@ object SystemAttributes {
     const val SYSTEM_CPU_STATE: String = "system.cpu.state"
 
     /**
-    * <p>The device identifier</p>
-    */
-    @IncubatingApi
-    const val SYSTEM_DEVICE: String = "system.device"
-
-    /**
-    * <p>The filesystem mode</p>
-    */
-    @IncubatingApi
-    const val SYSTEM_FILESYSTEM_MODE: String = "system.filesystem.mode"
-
-    /**
-    * <p>The filesystem mount path</p>
-    */
-    @IncubatingApi
-    const val SYSTEM_FILESYSTEM_MOUNTPOINT: String = "system.filesystem.mountpoint"
-
-    /**
-    * <p>The filesystem state</p>
-    */
-    @IncubatingApi
-    const val SYSTEM_FILESYSTEM_STATE: String = "system.filesystem.state"
-
-    /**
-    * <p>The filesystem type</p>
-    */
-    @IncubatingApi
-    const val SYSTEM_FILESYSTEM_TYPE: String = "system.filesystem.type"
-
-    /**
-    * <p>The Linux HugePages memory state</p>
-    */
-    @IncubatingApi
-    const val SYSTEM_MEMORY_LINUX_HUGEPAGES_STATE: String = "system.memory.linux.hugepages.state"
-
-    /**
-    * <p>The Linux Slab memory state</p>
-    */
-    @IncubatingApi
-    const val SYSTEM_MEMORY_LINUX_SLAB_STATE: String = "system.memory.linux.slab.state"
-
-    /**
-    * <p>The memory state</p>
-    */
-    @IncubatingApi
-    const val SYSTEM_MEMORY_STATE: String = "system.memory.state"
-
-    /**
     * <p>Deprecated, use <c>network.connection.state</c> instead.</p>
     */
     @Deprecated("Replaced by `network.connection.state`.")
     const val SYSTEM_NETWORK_STATE: String = "system.network.state"
-
-    /**
-    * <p>The paging access direction</p>
-    */
-    @IncubatingApi
-    const val SYSTEM_PAGING_DIRECTION: String = "system.paging.direction"
-
-    /**
-    * <p>The paging fault type</p>
-    */
-    @IncubatingApi
-    const val SYSTEM_PAGING_FAULT_TYPE: String = "system.paging.fault.type"
-
-    /**
-    * <p>The memory paging state</p>
-    */
-    @IncubatingApi
-    const val SYSTEM_PAGING_STATE: String = "system.paging.state"
 
     /**
     * <p>Deprecated, use <c>system.paging.fault.type</c> instead.</p>
@@ -151,131 +84,6 @@ object SystemAttributes {
         * <p>steal.</p>
         */
         STEAL("steal"),
-    }
-
-    /**
-    * <p>SYSTEM_FILESYSTEM_STATE</p>
-    */
-    @IncubatingApi
-    enum class SystemFilesystemStateValues(val value: String) {
-
-        /**
-        * <p>used.</p>
-        */
-        USED("used"),
-
-        /**
-        * <p>free.</p>
-        */
-        FREE("free"),
-
-        /**
-        * <p>reserved.</p>
-        */
-        RESERVED("reserved"),
-    }
-
-    /**
-    * <p>SYSTEM_FILESYSTEM_TYPE</p>
-    */
-    @IncubatingApi
-    enum class SystemFilesystemTypeValues(val value: String) {
-
-        /**
-        * <p>fat32.</p>
-        */
-        FAT32("fat32"),
-
-        /**
-        * <p>exfat.</p>
-        */
-        EXFAT("exfat"),
-
-        /**
-        * <p>ntfs.</p>
-        */
-        NTFS("ntfs"),
-
-        /**
-        * <p>refs.</p>
-        */
-        REFS("refs"),
-
-        /**
-        * <p>hfsplus.</p>
-        */
-        HFSPLUS("hfsplus"),
-
-        /**
-        * <p>ext4.</p>
-        */
-        EXT4("ext4"),
-    }
-
-    /**
-    * <p>SYSTEM_MEMORY_LINUX_HUGEPAGES_STATE</p>
-    */
-    @IncubatingApi
-    enum class SystemMemoryLinuxHugepagesStateValues(val value: String) {
-
-        /**
-        * <p>free.</p>
-        */
-        FREE("free"),
-
-        /**
-        * <p>used.</p>
-        */
-        USED("used"),
-    }
-
-    /**
-    * <p>SYSTEM_MEMORY_LINUX_SLAB_STATE</p>
-    */
-    @IncubatingApi
-    enum class SystemMemoryLinuxSlabStateValues(val value: String) {
-
-        /**
-        * <p>reclaimable.</p>
-        */
-        RECLAIMABLE("reclaimable"),
-
-        /**
-        * <p>unreclaimable.</p>
-        */
-        UNRECLAIMABLE("unreclaimable"),
-    }
-
-    /**
-    * <p>SYSTEM_MEMORY_STATE</p>
-    */
-    @IncubatingApi
-    enum class SystemMemoryStateValues(val value: String) {
-
-        /**
-        * <p>Actual used virtual memory in bytes.</p>
-        */
-        USED("used"),
-
-        /**
-        * <p>free.</p>
-        */
-        FREE("free"),
-
-        /**
-        * <p>shared.</p>
-        */
-        SHARED("shared"),
-
-        /**
-        * <p>buffers.</p>
-        */
-        BUFFERS("buffers"),
-
-        /**
-        * <p>cached.</p>
-        */
-        CACHED("cached"),
     }
 
     /**
@@ -343,57 +151,6 @@ object SystemAttributes {
         * <p>time_wait.</p>
         */
         TIME_WAIT("time_wait"),
-    }
-
-    /**
-    * <p>SYSTEM_PAGING_DIRECTION</p>
-    */
-    @IncubatingApi
-    enum class SystemPagingDirectionValues(val value: String) {
-
-        /**
-        * <p>in.</p>
-        */
-        IN("in"),
-
-        /**
-        * <p>out.</p>
-        */
-        OUT("out"),
-    }
-
-    /**
-    * <p>SYSTEM_PAGING_FAULT_TYPE</p>
-    */
-    @IncubatingApi
-    enum class SystemPagingFaultTypeValues(val value: String) {
-
-        /**
-        * <p>major.</p>
-        */
-        MAJOR("major"),
-
-        /**
-        * <p>minor.</p>
-        */
-        MINOR("minor"),
-    }
-
-    /**
-    * <p>SYSTEM_PAGING_STATE</p>
-    */
-    @IncubatingApi
-    enum class SystemPagingStateValues(val value: String) {
-
-        /**
-        * <p>used.</p>
-        */
-        USED("used"),
-
-        /**
-        * <p>free.</p>
-        */
-        FREE("free"),
     }
 
     /**

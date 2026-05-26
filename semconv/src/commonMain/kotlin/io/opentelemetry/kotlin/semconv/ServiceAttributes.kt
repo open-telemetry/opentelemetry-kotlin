@@ -7,15 +7,6 @@ package io.opentelemetry.kotlin.semconv
  */
 @Suppress("unused")
 object ServiceAttributes {
-  
-
-    /**
-    * <p>The operational criticality of the service.</p>
-    * <p>Notes:</p>
-    * <p>Application developers are encouraged to set <c>service.criticality</c> to express the operational importance of their services. Telemetry consumers MAY use this attribute to optimize telemetry collection or improve user experience.</p>
-    */
-    @IncubatingApi
-    const val SERVICE_CRITICALITY: String = "service.criticality"
 
     /**
     * <p>The string ID of the service instance.</p>
@@ -61,46 +52,8 @@ object ServiceAttributes {
     const val SERVICE_NAMESPACE: String = "service.namespace"
 
     /**
-    * <p>Logical name of the service on the other side of the connection. SHOULD be equal to the actual <a href="/docs/resource/README.md#service"><c>service.name</c></a> resource attribute of the remote service if any.</p>
-    */
-    @IncubatingApi
-    const val SERVICE_PEER_NAME: String = "service.peer.name"
-
-    /**
-    * <p>Logical namespace of the service on the other side of the connection. SHOULD be equal to the actual <a href="/docs/resource/README.md#service"><c>service.namespace</c></a> resource attribute of the remote service if any.</p>
-    */
-    @IncubatingApi
-    const val SERVICE_PEER_NAMESPACE: String = "service.peer.namespace"
-
-    /**
     * <p>The version string of the service component. The format is not defined by these conventions.</p>
     */
     const val SERVICE_VERSION: String = "service.version"
 
-    /**
-    * <p>SERVICE_CRITICALITY</p>
-    */
-    @IncubatingApi
-    enum class ServiceCriticalityValues(val value: String) {
-
-        /**
-        * <p>Service is business-critical; downtime directly impacts revenue, user experience, or core functionality.</p>
-        */
-        CRITICAL("critical"),
-
-        /**
-        * <p>Service is important but has degradation tolerance or fallback mechanisms.</p>
-        */
-        HIGH("high"),
-
-        /**
-        * <p>Service provides supplementary functionality; degradation has limited user impact.</p>
-        */
-        MEDIUM("medium"),
-
-        /**
-        * <p>Service is non-essential to core operations; used for background tasks or internal tools.</p>
-        */
-        LOW("low"),
-    }
 }

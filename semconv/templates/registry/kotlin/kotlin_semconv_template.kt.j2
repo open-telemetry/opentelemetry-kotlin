@@ -14,8 +14,6 @@ object {{ my_class_name }} {
     {{ [attribute.brief, concat_if("\n\nNotes:\n\n", attribute.note)] | comment | indent(4) }}
     {%- if attribute is deprecated %}
     @Deprecated("{{ attribute.deprecated.note | replace('\n', ' ') | trim  }}")
-    {%- elif attribute.stability != "stable" %}
-    @IncubatingApi
     {%- endif %}
     const val {{ attribute.name | screaming_snake_case }}: String = "{{ attribute.name }}"
   {%- endfor %}
@@ -26,8 +24,6 @@ object {{ my_class_name }} {
     {{ attribute.name | screaming_snake_case | comment | indent(4) }}
     {%- if attribute is deprecated %}
     @Deprecated("{{ attribute.deprecated.note | replace('\n', ' ') | trim  }}")
-    {%- elif attribute.stability != "stable" %}
-    @IncubatingApi
     {%- endif %}
     enum class {{ attribute.name | pascal_case }}Values(val value: {{ attribute.type | instantiated_type | map_text("kotlin_enum_type") }}) {
       {%- for member in attribute.type.members %}
@@ -39,4 +35,3 @@ object {{ my_class_name }} {
     {%- endif -%}
   {%- endfor %}
 }
-
