@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalApi::class, IncubatingApi::class)
+@file:OptIn(ExperimentalApi::class, io.opentelemetry.kotlin.semconv.incubating.IncubatingApi::class)
 
 package io.opentelemetry.example.app
 
@@ -8,9 +8,8 @@ import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.semconv.DbAttributes
 import io.opentelemetry.kotlin.semconv.ErrorAttributes
 import io.opentelemetry.kotlin.semconv.HttpAttributes
-import io.opentelemetry.kotlin.semconv.IncubatingApi
 import io.opentelemetry.kotlin.semconv.UrlAttributes
-import io.opentelemetry.kotlin.semconv.UserAttributes
+import io.opentelemetry.kotlin.semconv.incubating.UserIncubatingAttributes
 import io.opentelemetry.kotlin.tracing.Tracer
 import io.opentelemetry.kotlin.tracing.SpanKind
 import kotlinx.coroutines.delay
@@ -136,7 +135,7 @@ private fun demonstrateComplexLogging(logger: Logger) {
         severityNumber = SeverityNumber.INFO,
         severityText = "INFO",
         attributes = {
-            setStringAttribute(UserAttributes.USER_ID, "user-123")
+            setStringAttribute(UserIncubatingAttributes.USER_ID, "user-123")
             setStringAttribute("auth.method", "oauth2")
         })
 

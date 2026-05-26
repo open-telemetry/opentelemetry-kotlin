@@ -7,19 +7,12 @@ package io.opentelemetry.kotlin.semconv
  */
 @Suppress("unused")
 object HttpAttributes {
-  
 
     /**
     * <p>Deprecated, use <c>client.address</c> instead.</p>
     */
     @Deprecated("Replaced by `client.address`.")
     const val HTTP_CLIENT_IP: String = "http.client_ip"
-
-    /**
-    * <p>State of the HTTP connection in the HTTP connection pool.</p>
-    */
-    @IncubatingApi
-    const val HTTP_CONNECTION_STATE: String = "http.connection.state"
 
     /**
     * <p>Deprecated, use <c>network.protocol.name</c> and <c>network.protocol.version</c> instead.</p>
@@ -38,12 +31,6 @@ object HttpAttributes {
     */
     @Deprecated("Replaced by `http.request.method`.")
     const val HTTP_METHOD: String = "http.method"
-
-    /**
-    * <p>The size of the request payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the <a href="https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length">Content-Length</a> header. For requests using transport encoding, this should be the compressed size.</p>
-    */
-    @IncubatingApi
-    const val HTTP_REQUEST_BODY_SIZE: String = "http.request.body.size"
 
     /**
     * <p>HTTP request headers, <c><key></c> being the normalized HTTP Header name (lowercase), the value being the header values.</p>
@@ -101,12 +88,6 @@ object HttpAttributes {
     const val HTTP_REQUEST_RESEND_COUNT: String = "http.request.resend_count"
 
     /**
-    * <p>The total size of the request in bytes. This should be the total number of bytes sent over the wire, including the request line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and request body if any.</p>
-    */
-    @IncubatingApi
-    const val HTTP_REQUEST_SIZE: String = "http.request.size"
-
-    /**
     * <p>Deprecated, use <c>http.request.header.content-length</c> instead.</p>
     */
     @Deprecated("Replaced by `http.request.header.content-length`.")
@@ -117,12 +98,6 @@ object HttpAttributes {
     */
     @Deprecated("Replaced by `http.request.body.size`.")
     const val HTTP_REQUEST_CONTENT_LENGTH_UNCOMPRESSED: String = "http.request_content_length_uncompressed"
-
-    /**
-    * <p>The size of the response payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the <a href="https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length">Content-Length</a> header. For requests using transport encoding, this should be the compressed size.</p>
-    */
-    @IncubatingApi
-    const val HTTP_RESPONSE_BODY_SIZE: String = "http.response.body.size"
 
     /**
     * <p>HTTP response headers, <c><key></c> being the normalized HTTP Header name (lowercase), the value being the header values.</p>
@@ -142,12 +117,6 @@ object HttpAttributes {
     * </ul>
     */
     const val HTTP_RESPONSE_HEADER: String = "http.response.header"
-
-    /**
-    * <p>The total size of the response in bytes. This should be the total number of bytes sent over the wire, including the status line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and response body and trailers if any.</p>
-    */
-    @IncubatingApi
-    const val HTTP_RESPONSE_SIZE: String = "http.response.size"
 
     /**
     * <p><a href="https://tools.ietf.org/html/rfc7231#section-6">HTTP response status code</a>.</p>
@@ -214,23 +183,6 @@ object HttpAttributes {
     */
     @Deprecated("Replaced by `user_agent.original`.")
     const val HTTP_USER_AGENT: String = "http.user_agent"
-
-    /**
-    * <p>HTTP_CONNECTION_STATE</p>
-    */
-    @IncubatingApi
-    enum class HttpConnectionStateValues(val value: String) {
-
-        /**
-        * <p>active state.</p>
-        */
-        ACTIVE("active"),
-
-        /**
-        * <p>idle state.</p>
-        */
-        IDLE("idle"),
-    }
 
     /**
     * <p>HTTP_FLAVOR</p>

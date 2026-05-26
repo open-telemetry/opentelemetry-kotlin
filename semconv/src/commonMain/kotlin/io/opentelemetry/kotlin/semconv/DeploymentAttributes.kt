@@ -7,7 +7,6 @@ package io.opentelemetry.kotlin.semconv
  */
 @Suppress("unused")
 object DeploymentAttributes {
-  
 
     /**
     * <p>Deprecated, use <c>deployment.environment.name</c> instead.</p>
@@ -28,24 +27,6 @@ object DeploymentAttributes {
     * </ul>
     */
     const val DEPLOYMENT_ENVIRONMENT_NAME: String = "deployment.environment.name"
-
-    /**
-    * <p>The id of the deployment.</p>
-    */
-    @IncubatingApi
-    const val DEPLOYMENT_ID: String = "deployment.id"
-
-    /**
-    * <p>The name of the deployment.</p>
-    */
-    @IncubatingApi
-    const val DEPLOYMENT_NAME: String = "deployment.name"
-
-    /**
-    * <p>The status of the deployment.</p>
-    */
-    @IncubatingApi
-    const val DEPLOYMENT_STATUS: String = "deployment.status"
 
     /**
     * <p>DEPLOYMENT_ENVIRONMENT_NAME</p>
@@ -73,20 +54,4 @@ object DeploymentAttributes {
         DEVELOPMENT("development"),
     }
 
-    /**
-    * <p>DEPLOYMENT_STATUS</p>
-    */
-    @IncubatingApi
-    enum class DeploymentStatusValues(val value: String) {
-
-        /**
-        * <p>failed</p>
-        */
-        FAILED("failed"),
-
-        /**
-        * <p>succeeded</p>
-        */
-        SUCCEEDED("succeeded"),
-    }
 }
