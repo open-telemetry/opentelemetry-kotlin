@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.export
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.toByteReadPacket
+import io.ktor.client.plugins.HttpTimeoutConfig.Companion.INFINITE_TIMEOUT_MS
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.toMap
@@ -23,6 +24,7 @@ import kotlin.test.assertEquals
 
 internal class OtlpClientTest {
 
+    private val requestTimeoutMs = 250L
     private val logRecords = listOf(FakeReadableLogRecord())
     private val spans = listOf(FakeSpanData())
     private val baseUrl = "http://localhost:1234"
@@ -44,7 +46,7 @@ internal class OtlpClientTest {
                 status = mockResponseStatus
             )
         }
-        val httpClient = createDefaultHttpClient(250, server)
+        val httpClient = createDefaultHttpClient(INFINITE_TIMEOUT_MS, server)
         client = OtlpClient(baseUrl, httpClient = httpClient)
     }
 
@@ -128,7 +130,8 @@ internal class OtlpClientTest {
 
     @Test
     fun testExportLogClientTimeout() = runTest {
-        serverDelayMs = 10000
+        serverDelayMs = 10_000
+        useRequestTimeout()
         sendAndAssertLogRequest(
             telemetry = logRecords,
             mockResponseStatus = HttpStatusCode.OK,
@@ -138,7 +141,8 @@ internal class OtlpClientTest {
 
     @Test
     fun testExportTraceClientTimeout() = runTest {
-        serverDelayMs = 10000
+        serverDelayMs = 10_000
+        useRequestTimeout()
         sendAndAssertTraceRequest(
             telemetry = spans,
             mockResponseStatus = HttpStatusCode.OK,
@@ -224,5 +228,10 @@ internal class OtlpClientTest {
 
         val bytes = request.body.toByteReadPacket().readByteArray()
         return bytes
+    }
+
+    private fun useRequestTimeout() {
+        val httpClient = createDefaultHttpClient(requestTimeoutMs, server)
+        client = OtlpClient(baseUrl, httpClient = httpClient)
     }
 }
