@@ -1,6 +1,8 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.baggage.NoopBaggage
+import io.opentelemetry.kotlin.config.NoopConfigProperties
+import io.opentelemetry.kotlin.config.NoopConfigProvider
 import io.opentelemetry.kotlin.context.NoopContext
 import io.opentelemetry.kotlin.context.NoopContextKey
 import io.opentelemetry.kotlin.factory.NoopBaggageFactory
@@ -259,6 +261,23 @@ internal class NoopTests {
     fun testNoopOpenTelemetryBaggage() {
         assertSame(NoopBaggageFactory, NoopOpenTelemetry.baggage)
         assertSame(NoopBaggage, NoopOpenTelemetry.baggage.create { put("k", "v") })
+    }
+
+    @Test
+    fun testNoopConfigProvider() {
+        assertSame(NoopConfigProperties, NoopConfigProvider.instrumentationConfig)
+
+        assertNull(NoopConfigProperties.getString(""))
+        assertNull(NoopConfigProperties.getBoolean(""))
+        assertNull(NoopConfigProperties.getLong(""))
+        assertNull(NoopConfigProperties.getDouble(""))
+        assertNull(NoopConfigProperties.getStringList(""))
+        assertNull(NoopConfigProperties.getBooleanList(""))
+        assertNull(NoopConfigProperties.getLongList(""))
+        assertNull(NoopConfigProperties.getDoubleList(""))
+        assertNull(NoopConfigProperties.getStructured(""))
+        assertNull(NoopConfigProperties.getStructuredList(""))
+        assertSame(emptySet(), NoopConfigProperties.propertyKeys)
     }
 
     private fun verifySpanOperationsAreNoop(span: NoopSpan) {
