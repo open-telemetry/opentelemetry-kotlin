@@ -219,7 +219,66 @@ public final class io/opentelemetry/kotlin/logging/SeverityNumber : java/lang/En
 	public static fun values ()[Lio/opentelemetry/kotlin/logging/SeverityNumber;
 }
 
+public abstract interface class io/opentelemetry/kotlin/metrics/DoubleCounter {
+	public abstract fun add (DLkotlin/jvm/functions/Function1;)V
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getUnit ()Ljava/lang/String;
+	public abstract fun isEnabled ()Z
+}
+
+public final class io/opentelemetry/kotlin/metrics/DoubleCounter$DefaultImpls {
+	public static synthetic fun add$default (Lio/opentelemetry/kotlin/metrics/DoubleCounter;DLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/metrics/FloatCounter {
+	public abstract fun add (FLkotlin/jvm/functions/Function1;)V
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getUnit ()Ljava/lang/String;
+	public abstract fun isEnabled ()Z
+}
+
+public final class io/opentelemetry/kotlin/metrics/FloatCounter$DefaultImpls {
+	public static synthetic fun add$default (Lio/opentelemetry/kotlin/metrics/FloatCounter;FLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/metrics/IntegerCounter {
+	public abstract fun add-qim9Vi0 (ILkotlin/jvm/functions/Function1;)V
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getUnit ()Ljava/lang/String;
+	public abstract fun isEnabled ()Z
+}
+
+public final class io/opentelemetry/kotlin/metrics/IntegerCounter$DefaultImpls {
+	public static synthetic fun add-qim9Vi0$default (Lio/opentelemetry/kotlin/metrics/IntegerCounter;ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/metrics/LongCounter {
+	public abstract fun add (JLkotlin/jvm/functions/Function1;)V
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getUnit ()Ljava/lang/String;
+	public abstract fun isEnabled ()Z
+}
+
+public final class io/opentelemetry/kotlin/metrics/LongCounter$DefaultImpls {
+	public static synthetic fun add$default (Lio/opentelemetry/kotlin/metrics/LongCounter;JLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
 public abstract interface class io/opentelemetry/kotlin/metrics/Meter {
+	public abstract fun createDoubleCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/DoubleCounter;
+	public abstract fun createFloatCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/FloatCounter;
+	public abstract fun createIntegerCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/IntegerCounter;
+	public abstract fun createLongCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/LongCounter;
+}
+
+public final class io/opentelemetry/kotlin/metrics/Meter$DefaultImpls {
+	public static synthetic fun createDoubleCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/DoubleCounter;
+	public static synthetic fun createFloatCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/FloatCounter;
+	public static synthetic fun createIntegerCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/IntegerCounter;
+	public static synthetic fun createLongCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/LongCounter;
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/MeterProvider {
