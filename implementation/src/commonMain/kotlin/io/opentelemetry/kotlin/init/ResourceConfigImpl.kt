@@ -15,7 +15,6 @@ internal fun sdkDefaultResource(): Resource = ResourceImpl(
         attributeLimit = NO_ATTRIBUTE_LIMIT,
         attrs = mutableMapOf(
             ServiceAttributes.SERVICE_NAME to "unknown_service",
-            ServiceAttributes.SERVICE_VERSION to BuildKonfig.SDK_VERSION,
             TelemetryAttributes.TELEMETRY_SDK_NAME to "opentelemetry",
             TelemetryAttributes.TELEMETRY_SDK_LANGUAGE to "kotlin",
             TelemetryAttributes.TELEMETRY_SDK_VERSION to BuildKonfig.SDK_VERSION,
