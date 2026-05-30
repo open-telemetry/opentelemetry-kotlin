@@ -25,8 +25,10 @@ internal class TelemetryExporter<T>(
      */
     fun export(telemetry: List<T>): OperationResultCode =
         shutdownState.ifActive {
-            scope.launch {
-                exportTelemetry(telemetry)
+            if (telemetry.isNotEmpty()) {
+                scope.launch {
+                    exportTelemetry(telemetry)
+                }
             }
             Success
         }
