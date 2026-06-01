@@ -1,14 +1,16 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.factory.isValidLowercaseHex
+import kotlin.jvm.JvmInline
 
-internal data class Threshold(internal val value: Long) : Comparable<Threshold> {
+@JvmInline
+internal value class Threshold(internal val value: Long) {
 
     init {
         require(value in 0..<MAX) { "threshold must be between 0 and 2^56, got $value" }
     }
 
-    override fun compareTo(other: Threshold): Int {
+    operator fun compareTo(other: Threshold): Int {
         return value.compareTo(other.value)
     }
 

@@ -1,8 +1,11 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.factory.isValidLowercaseHex
+import kotlin.jvm.JvmInline
 
-internal data class Randomness(internal val value: Long) {
+@JvmInline
+internal value class Randomness(internal val value: Long) {
+
     operator fun compareTo(threshold: Threshold): Int {
         return this.value.compareTo(threshold.value)
     }
