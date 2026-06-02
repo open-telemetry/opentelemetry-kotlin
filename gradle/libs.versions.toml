@@ -30,7 +30,7 @@ protobufKotlin = "4.35.0"
 protobufPlugin = "0.10.0"
 wire = "6.2.0"
 buildKonfig = "0.21.2"
-composeMultiplatform = "1.10.3"
+composeMultiplatform = "1.11.1"
 androidxActivityCompose = "1.13.0"
 kotest = "6.1.11"
 
