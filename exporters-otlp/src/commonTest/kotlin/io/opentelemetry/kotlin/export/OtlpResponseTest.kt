@@ -28,6 +28,18 @@ internal class OtlpResponseTest {
     }
 
     @Test
+    fun testRetryableError() {
+        val retryable = OtlpResponse.RetryableError(429, 1500L, "slow down")
+        assertEquals(429, retryable.statusCode)
+        assertEquals(1500L, retryable.retryAfterMs)
+        assertEquals("slow down", retryable.errorMessage)
+        assertEquals(
+            "RetryableError(errorMessage=slow down, retryAfterMs=1500, statusCode=429)",
+            retryable.toString()
+        )
+    }
+
+    @Test
     fun testUnknownCode() {
         assertEquals(-1, OtlpResponse.Unknown.statusCode)
     }
