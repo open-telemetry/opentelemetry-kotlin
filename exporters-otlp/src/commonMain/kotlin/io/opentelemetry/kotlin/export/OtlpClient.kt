@@ -14,6 +14,7 @@ import io.ktor.http.contentType
 import io.ktor.utils.io.readRemaining
 import io.opentelemetry.kotlin.export.OtlpClient.Companion.MAX_ERROR_BODY_BYTES
 import io.opentelemetry.kotlin.export.OtlpResponse.ClientError
+import io.opentelemetry.kotlin.export.OtlpResponse.RetryableError
 import io.opentelemetry.kotlin.export.OtlpResponse.ServerError
 import io.opentelemetry.kotlin.export.OtlpResponse.Success
 import io.opentelemetry.kotlin.export.OtlpResponse.Unknown
@@ -60,6 +61,11 @@ internal class OtlpClient(
             }
             when (val code = response.status.value) {
                 200 -> Success
+                429, 502, 503, 504 -> RetryableError(
+                    code,
+                    response.parseRetryAfterMs(),
+                    onError(response.boundedBodyBytes()),
+                )
                 in 400..499 -> ClientError(code, onError(response.boundedBodyBytes()))
                 in 500..599 -> ServerError(code, onError(response.boundedBodyBytes()))
                 else -> Unknown
@@ -74,6 +80,14 @@ internal class OtlpClient(
      */
     private suspend fun HttpResponse.boundedBodyBytes(): ByteArray =
         bodyAsChannel().readRemaining(MAX_ERROR_BODY_BYTES).readByteArray()
+
+    /**
+     * Parses the Retry-After header (in seconds) as milliseconds.
+     */
+    private fun HttpResponse.parseRetryAfterMs(): Long? {
+        val header = headers[HttpHeaders.RetryAfter] ?: return null
+        return header.toLongOrNull()?.takeIf { it >= 0 }?.let { it * 1000L }
+    }
 
     private companion object {
         const val MAX_ERROR_BODY_BYTES: Long = 4 * 1024 * 1024
