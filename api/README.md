@@ -18,6 +18,24 @@ Please see the [contributing doc](../CONTRIBUTING.md) for design guidance on API
 use interfaces to obscure concrete types & avoid default implementations as these tend to blend
 separate concerns.
 
+## Component Stability Matrix
+
+Until the entire API can be marked stable, we are tracking the status of each
+api component here. Components marked as "stable" may still change until the 1.0 release,
+but we will take great pains to minimize and eliminate breaking changes before then.
+Any component marked stable here should NOT have api surface marked with `@ExperimentalApi`.
+
+| component   | development | stable |
+|-------------|-------------|--------|
+| attributes  | ⚠️          |        |
+| baggage     | ⚠️          | ️      |
+| context     | ⚠️          | ️      |
+| factory     | ⚠️          | ️      |
+| logging     | ⚠️          | ️      |
+| metrics     | ⚠️          | ️      |
+| propagation | ⚠️          | ️      |
+| tracing     | ⚠️          | ️      |
+
 ## Implicit Context API - an explanation
 
 The [implicit Context API](https://opentelemetry.io/docs/specs/otel/context/#optional-global-operations)
