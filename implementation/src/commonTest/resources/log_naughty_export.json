@@ -21,7 +21,7 @@
     "spanContext": {
       "traceId": "2cc2b48c50aefe53b3974ed91e6b4ea9",
       "spanId": "e77bcc2f537f0b02",
-      "traceFlags": "01",
+      "traceFlags": "03",
       "traceState": {}
     },
     "severity": "WARN2",
