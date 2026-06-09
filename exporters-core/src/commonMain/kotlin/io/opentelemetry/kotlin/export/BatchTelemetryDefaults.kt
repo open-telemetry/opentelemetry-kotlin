@@ -16,7 +16,7 @@ public object BatchTelemetryDefaults {
     /**
      * Delay in ms before a flush is triggered
      */
-    public const val SCHEDULE_DELAY_MS: Long = 1000
+    public const val SCHEDULE_DELAY_MS: Long = 5000
 
     /**
      * Timeout in ms for exporting telemetry
