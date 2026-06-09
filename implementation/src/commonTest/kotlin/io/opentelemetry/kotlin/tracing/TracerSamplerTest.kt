@@ -99,6 +99,7 @@ internal class TracerSamplerTest {
         val span = tracer.startSpan("test")
         assertTrue(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
+        assertTrue(span.spanContext.traceFlags.isRandom)
     }
 
     @Test
