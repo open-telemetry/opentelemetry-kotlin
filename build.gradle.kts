@@ -16,6 +16,7 @@ plugins.withType<YarnPlugin> {
         resolution("js-yaml", ">=4.1.1")
         resolution("minimatch", ">=9.0.7")
         resolution("serialize-javascript", ">=7.0.5")
+        resolution("ws", "~8.20.1")
     }
 }
 
