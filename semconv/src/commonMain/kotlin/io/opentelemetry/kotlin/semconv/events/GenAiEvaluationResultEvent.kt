@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.semconv.events
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 
@@ -14,7 +15,7 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * <p>none</p>
 */
 @ExperimentalApi
-@OptIn(IncubatingApi::class)
+@IncubatingApi
 class GenAiEvaluationResultEvent(
     /**
     * <p>Describes a class of error the operation ended with.</p>
@@ -52,7 +53,10 @@ class GenAiEvaluationResultEvent(
     val genAiResponseId: String? = null,
 ) : OpenTelemetryEvent {
 
-    override fun emit(logger: Logger) {
+    override fun emit(
+        logger: Logger,
+        attributes: (AttributesMutator.() -> Unit)?,
+    ) {
         logger.emit(
             eventName = "gen_ai.evaluation.result",
         ) {
@@ -62,6 +66,7 @@ class GenAiEvaluationResultEvent(
             genAiEvaluationScoreLabel?.let { setStringAttribute("gen_ai.evaluation.score.label", it) }
             genAiEvaluationScoreValue?.let { setDoubleAttribute("gen_ai.evaluation.score.value", it) }
             genAiResponseId?.let { setStringAttribute("gen_ai.response.id", it) }
+            attributes?.invoke(this)
         }
     }
 }

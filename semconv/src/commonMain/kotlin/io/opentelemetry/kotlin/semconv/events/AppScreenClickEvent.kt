@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.semconv.events
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 
@@ -14,7 +15,7 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * <p>The <c>app.screen.click</c> event can be used to indicate that a user has clicked or tapped on the screen portion of an application. Clicks outside of an application's active area SHOULD NOT generate this event. This event does not differentiate between touch/mouse down and touch/mouse up. Implementations SHOULD give preference to generating this event at the time the click is complete, typically on touch release or mouse up. The location of the click event MUST be provided in absolute screen pixels.</p>
 */
 @ExperimentalApi
-@OptIn(IncubatingApi::class)
+@IncubatingApi
 class AppScreenClickEvent(
     /**
     * <p>The x (horizontal) coordinate of a screen coordinate, in screen pixels.</p>
@@ -38,7 +39,10 @@ class AppScreenClickEvent(
     val appScreenName: String? = null,
 ) : OpenTelemetryEvent {
 
-    override fun emit(logger: Logger) {
+    override fun emit(
+        logger: Logger,
+        attributes: (AttributesMutator.() -> Unit)?,
+    ) {
         logger.emit(
             eventName = "app.screen.click",
         ) {
@@ -46,6 +50,7 @@ class AppScreenClickEvent(
             setLongAttribute("app.screen.coordinate.y", appScreenCoordinateY)
             appScreenId?.let { setStringAttribute("app.screen.id", it) }
             appScreenName?.let { setStringAttribute("app.screen.name", it) }
+            attributes?.invoke(this)
         }
     }
 }

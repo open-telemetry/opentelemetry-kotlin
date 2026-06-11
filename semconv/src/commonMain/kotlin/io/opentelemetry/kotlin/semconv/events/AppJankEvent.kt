@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.semconv.events
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 
@@ -14,7 +15,7 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * <p>Jank happens when the UI is rendered slowly enough for the user to experience some disruption or sluggishness.</p>
 */
 @ExperimentalApi
-@OptIn(IncubatingApi::class)
+@IncubatingApi
 class AppJankEvent(
     /**
     * <p>A number of frame renders that experienced jank.</p>
@@ -32,13 +33,17 @@ class AppJankEvent(
     val appJankThreshold: Double? = null,
 ) : OpenTelemetryEvent {
 
-    override fun emit(logger: Logger) {
+    override fun emit(
+        logger: Logger,
+        attributes: (AttributesMutator.() -> Unit)?,
+    ) {
         logger.emit(
             eventName = "app.jank",
         ) {
             appJankFrameCount?.let { setLongAttribute("app.jank.frame_count", it) }
             appJankPeriod?.let { setDoubleAttribute("app.jank.period", it) }
             appJankThreshold?.let { setDoubleAttribute("app.jank.threshold", it) }
+            attributes?.invoke(this)
         }
     }
 }

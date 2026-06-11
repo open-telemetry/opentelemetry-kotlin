@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.semconv.events
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 
@@ -15,7 +16,7 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * When the <c>session.start</c> event contains both <c>session.id</c> and <c>session.previous_id</c> fields, the event indicates that the previous session has ended. If the session ID in <c>session.previous_id</c> has not yet ended via explicit <c>session.end</c> event, then the consumer SHOULD treat this continuation event as semantically equivalent to <c>session.end(session.previous_id)</c> and <c>session.start(session.id)</c>.</p>
 */
 @ExperimentalApi
-@OptIn(IncubatingApi::class)
+@IncubatingApi
 class SessionStartEvent(
     /**
     * <p>The ID of the new session being started.</p>
@@ -27,12 +28,16 @@ class SessionStartEvent(
     val sessionPreviousId: String? = null,
 ) : OpenTelemetryEvent {
 
-    override fun emit(logger: Logger) {
+    override fun emit(
+        logger: Logger,
+        attributes: (AttributesMutator.() -> Unit)?,
+    ) {
         logger.emit(
             eventName = "session.start",
         ) {
             setStringAttribute("session.id", sessionId)
             sessionPreviousId?.let { setStringAttribute("session.previous_id", it) }
+            attributes?.invoke(this)
         }
     }
 }

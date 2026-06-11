@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.semconv.events
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 
@@ -16,7 +17,7 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * The <c>android.app.state</c> and <c>ios.app.state</c> fields are mutually exclusive and MUST NOT be used together, each field MUST be used with its corresponding <c>os.name</c> value.</p>
 */
 @ExperimentalApi
-@OptIn(IncubatingApi::class)
+@IncubatingApi
 class DeviceAppLifecycleEvent(
     /**
     * <p>This attribute represents the state of the application.</p>
@@ -32,12 +33,16 @@ class DeviceAppLifecycleEvent(
     val iosAppState: String? = null,
 ) : OpenTelemetryEvent {
 
-    override fun emit(logger: Logger) {
+    override fun emit(
+        logger: Logger,
+        attributes: (AttributesMutator.() -> Unit)?,
+    ) {
         logger.emit(
             eventName = "device.app.lifecycle",
         ) {
             androidAppState?.let { setStringAttribute("android.app.state", it) }
             iosAppState?.let { setStringAttribute("ios.app.state", it) }
+            attributes?.invoke(this)
         }
     }
 }

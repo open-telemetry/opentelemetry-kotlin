@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.semconv.events
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 
@@ -14,7 +15,7 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * <p>For instrumentation that tracks user behavior during user sessions, a <c>session.end</c> event SHOULD be emitted every time a session ends. When a session ends and continues as a new session, this event SHOULD be emitted prior to the <c>session.start</c> event.</p>
 */
 @ExperimentalApi
-@OptIn(IncubatingApi::class)
+@IncubatingApi
 class SessionEndEvent(
     /**
     * <p>The ID of the session being ended.</p>
@@ -22,11 +23,15 @@ class SessionEndEvent(
     val sessionId: String,
 ) : OpenTelemetryEvent {
 
-    override fun emit(logger: Logger) {
+    override fun emit(
+        logger: Logger,
+        attributes: (AttributesMutator.() -> Unit)?,
+    ) {
         logger.emit(
             eventName = "session.end",
         ) {
             setStringAttribute("session.id", sessionId)
+            attributes?.invoke(this)
         }
     }
 }

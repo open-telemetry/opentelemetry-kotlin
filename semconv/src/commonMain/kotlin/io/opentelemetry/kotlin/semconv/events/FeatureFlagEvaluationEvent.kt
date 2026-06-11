@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.semconv.events
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 
@@ -14,7 +15,7 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * <p>A <c>feature_flag.evaluation</c> event SHOULD be emitted whenever a feature flag value is evaluated, which may happen many times over the course of an application lifecycle. For example, a website A/B testing different animations may evaluate a flag each time a button is clicked. A <c>feature_flag.evaluation</c> event is emitted on each evaluation even if the result is the same.</p>
 */
 @ExperimentalApi
-@OptIn(IncubatingApi::class)
+@IncubatingApi
 class FeatureFlagEvaluationEvent(
     /**
     * <p>Describes a class of error the operation ended with.</p>
@@ -82,7 +83,10 @@ class FeatureFlagEvaluationEvent(
     val featureFlagVersion: String? = null,
 ) : OpenTelemetryEvent {
 
-    override fun emit(logger: Logger) {
+    override fun emit(
+        logger: Logger,
+        attributes: (AttributesMutator.() -> Unit)?,
+    ) {
         logger.emit(
             eventName = "feature_flag.evaluation",
         ) {
@@ -96,6 +100,7 @@ class FeatureFlagEvaluationEvent(
             featureFlagResultVariant?.let { setStringAttribute("feature_flag.result.variant", it) }
             featureFlagSetId?.let { setStringAttribute("feature_flag.set.id", it) }
             featureFlagVersion?.let { setStringAttribute("feature_flag.version", it) }
+            attributes?.invoke(this)
         }
     }
 }

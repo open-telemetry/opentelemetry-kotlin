@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.semconv.events
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 
@@ -17,7 +18,7 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * Instrumentations MAY provide a configuration option to populate exception events with the attributes captured on the corresponding HTTP client span.</p>
 */
 @ExperimentalApi
-@OptIn(IncubatingApi::class)
+@IncubatingApi
 class HttpClientRequestExceptionEvent(
     /**
     * <p>The exception message.</p>
@@ -43,13 +44,17 @@ class HttpClientRequestExceptionEvent(
     val exceptionType: String? = null,
 ) : OpenTelemetryEvent {
 
-    override fun emit(logger: Logger) {
+    override fun emit(
+        logger: Logger,
+        attributes: (AttributesMutator.() -> Unit)?,
+    ) {
         logger.emit(
             eventName = "http.client.request.exception",
         ) {
             exceptionMessage?.let { setStringAttribute("exception.message", it) }
             exceptionStacktrace?.let { setStringAttribute("exception.stacktrace", it) }
             exceptionType?.let { setStringAttribute("exception.type", it) }
+            attributes?.invoke(this)
         }
     }
 }

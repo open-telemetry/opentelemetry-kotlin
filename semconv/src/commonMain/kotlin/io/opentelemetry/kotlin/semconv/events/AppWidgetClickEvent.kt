@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.semconv.events
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 
@@ -14,7 +15,7 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * <p>Use this event to indicate that visual application component has been clicked, typically through a user's manual interaction.</p>
 */
 @ExperimentalApi
-@OptIn(IncubatingApi::class)
+@IncubatingApi
 class AppWidgetClickEvent(
     /**
     * <p>The x (horizontal) coordinate of a screen coordinate, in screen pixels.</p>
@@ -50,7 +51,10 @@ class AppWidgetClickEvent(
     val appWidgetName: String? = null,
 ) : OpenTelemetryEvent {
 
-    override fun emit(logger: Logger) {
+    override fun emit(
+        logger: Logger,
+        attributes: (AttributesMutator.() -> Unit)?,
+    ) {
         logger.emit(
             eventName = "app.widget.click",
         ) {
@@ -60,6 +64,7 @@ class AppWidgetClickEvent(
             appScreenName?.let { setStringAttribute("app.screen.name", it) }
             setStringAttribute("app.widget.id", appWidgetId)
             appWidgetName?.let { setStringAttribute("app.widget.name", it) }
+            attributes?.invoke(this)
         }
     }
 }

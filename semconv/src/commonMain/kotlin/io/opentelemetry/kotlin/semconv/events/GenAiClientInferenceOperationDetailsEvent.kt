@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.semconv.events
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 
@@ -14,7 +15,7 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * <p>This event is opt-in and could be used to store input and output details independently from traces.</p>
 */
 @ExperimentalApi
-@OptIn(IncubatingApi::class)
+@IncubatingApi
 class GenAiClientInferenceOperationDetailsEvent(
     /**
     * <p>Describes a class of error the operation ended with.</p>
@@ -229,7 +230,10 @@ class GenAiClientInferenceOperationDetailsEvent(
     val serverPort: Long? = null,
 ) : OpenTelemetryEvent {
 
-    override fun emit(logger: Logger) {
+    override fun emit(
+        logger: Logger,
+        attributes: (AttributesMutator.() -> Unit)?,
+    ) {
         logger.emit(
             eventName = "gen_ai.client.inference.operation.details",
         ) {
@@ -262,6 +266,7 @@ class GenAiClientInferenceOperationDetailsEvent(
             genAiUsageReasoningOutputTokens?.let { setLongAttribute("gen_ai.usage.reasoning.output_tokens", it) }
             serverAddress?.let { setStringAttribute("server.address", it) }
             serverPort?.let { setLongAttribute("server.port", it) }
+            attributes?.invoke(this)
         }
     }
 }

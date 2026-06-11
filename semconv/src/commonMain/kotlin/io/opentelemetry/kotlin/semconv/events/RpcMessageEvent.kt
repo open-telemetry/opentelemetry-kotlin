@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.semconv.events
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 
@@ -14,7 +15,7 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * <p>In the lifetime of an RPC stream, an event for each message sent/received on client and server spans SHOULD be created. In case of unary calls message events SHOULD NOT be recorded.</p>
 */
 @ExperimentalApi
-@OptIn(IncubatingApi::class)
+@IncubatingApi
 @Deprecated("Deprecated, no replacement at this time.")
 class RpcMessageEvent(
     /**
@@ -37,7 +38,10 @@ class RpcMessageEvent(
     val rpcMessageUncompressedSize: Long? = null,
 ) : OpenTelemetryEvent {
 
-    override fun emit(logger: Logger) {
+    override fun emit(
+        logger: Logger,
+        attributes: (AttributesMutator.() -> Unit)?,
+    ) {
         logger.emit(
             eventName = "rpc.message",
         ) {
@@ -45,6 +49,7 @@ class RpcMessageEvent(
             rpcMessageId?.let { setLongAttribute("rpc.message.id", it) }
             rpcMessageType?.let { setStringAttribute("rpc.message.type", it) }
             rpcMessageUncompressedSize?.let { setLongAttribute("rpc.message.uncompressed_size", it) }
+            attributes?.invoke(this)
         }
     }
 }
