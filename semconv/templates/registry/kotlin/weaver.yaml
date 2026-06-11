@@ -1,5 +1,5 @@
 params:
-  excluded_namespaces: ["dotnet", "aspnetcore", "signalr"]
+  excluded_namespaces: ["dotnet", "ios", "aspnetcore", "signalr"]
   excluded_attributes: []
 comment_formats:
   kdoc:
@@ -21,7 +21,51 @@ templates:
 
     application_mode: each
     file_name: "{{ctx.root_namespace | pascal_case}}Attributes.kt"
+  - pattern: kotlin_event_template.kt.j2
+    filter: >
+      semconv_signal("event"; {
+        "exclude_root_namespace": $excluded_namespaces,
+        "exclude_stability": []
+      })
+      | sort_by(.name)
+      | map({
+          name: .name,
+          brief: .brief,
+          note: .note,
+          stability: .stability,
+          deprecated: .deprecated,
+          attributes: ((.attributes // []) | unique_by(.name)),
+          excluded_attributes: $excluded_attributes
+        })
+    application_mode: each
+    file_name: "events/{{ctx.name | pascal_case}}Event.kt"
 text_maps:
   kotlin_enum_type:
     int: Int
     string: String
+  kotlin_event_type:
+    int: Long
+    double: Double
+    boolean: Boolean
+    string: String
+    string[]: List<String>
+    int[]: List<Long>
+    double[]: List<Double>
+    boolean[]: List<Boolean>
+    any: AnyValue
+    any[]: List<AnyValue>
+    object: AnyValue
+    object[]: List<AnyValue>
+  kotlin_event_attribute_setter:
+    int: setLongAttribute
+    double: setDoubleAttribute
+    boolean: setBooleanAttribute
+    string: setStringAttribute
+    string[]: setStringListAttribute
+    int[]: setLongListAttribute
+    double[]: setDoubleListAttribute
+    boolean[]: setBooleanListAttribute
+    any: setAnyValueAttribute
+    any[]: setAnyValueAttribute
+    object: setAnyValueAttribute
+    object[]: setAnyValueAttribute

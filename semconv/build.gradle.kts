@@ -24,6 +24,17 @@ tasks.register<GenerateSemanticConventionsTask>("generateSemanticConventions").c
     dependsOn(refreshSemanticConventions)
 }
 
+
+kotlin {
+    sourceSets {
+        commonMain {
+            dependencies {
+                api(project(":api"))
+            }
+        }
+    }
+}
+
 abstract class GenerateSemanticConventionsTask @Inject constructor(
     objectFactory: ObjectFactory,
     private val execOps: ExecOperations
