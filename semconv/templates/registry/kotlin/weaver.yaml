@@ -1,5 +1,5 @@
 params:
-  excluded_namespaces: ["dotnet", "ios", "aspnetcore", "signalr"]
+  excluded_namespaces: ["dotnet", "aspnetcore", "signalr"]
   excluded_attributes: []
 comment_formats:
   kdoc:
