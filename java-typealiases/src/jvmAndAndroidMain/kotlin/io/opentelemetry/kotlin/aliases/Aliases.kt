@@ -45,6 +45,7 @@ import io.opentelemetry.sdk.common.Clock
 import io.opentelemetry.sdk.common.CompletableResultCode
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.AlwaysRecordSampler
 import io.opentelemetry.sdk.logs.LogLimits
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.ReadWriteLogRecord
@@ -143,3 +144,4 @@ typealias OtelJavaLogLimits = LogLimits
 typealias OtelJavaSampler = Sampler
 typealias OtelJavaSamplingResult = SamplingResult
 typealias OtelJavaSamplingDecision = SamplingDecision
+typealias OtelJavaAlwaysRecordSampler = AlwaysRecordSampler

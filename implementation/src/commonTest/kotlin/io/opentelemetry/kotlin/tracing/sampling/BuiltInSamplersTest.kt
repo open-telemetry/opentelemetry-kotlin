@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
+import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -13,7 +14,9 @@ import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
 import io.opentelemetry.kotlin.resource.FakeResource
+import io.opentelemetry.kotlin.tracing.FakeTraceState
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
+import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
 import io.opentelemetry.kotlin.tracing.TracerImpl
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -132,5 +135,74 @@ internal class BuiltInSamplersTest {
         val span = tracer.startSpan("child", parentContext = contextWithParent(sampled = false, isRemote = false))
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
+    fun testAlwaysRecordSamplerDescription() {
+        val sampler = samplerDsl.alwaysRecord(root = FakeSampler())
+        assertEquals("AlwaysRecordSampler{FakeSampler}", sampler.description)
+    }
+
+    @Test
+    fun testAlwaysRecordSamplerDrop() {
+        val fakeSampler = FakeSampler(SamplingResult.Decision.DROP)
+        val result = samplerDsl.alwaysRecord(root = fakeSampler).shouldSample(
+            context = contextFactory.root(),
+            traceId = "000000000000000000ffffffffffffff",
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+        assertEquals(SamplingResult.Decision.RECORD_ONLY, result.decision)
+    }
+
+    @Test
+    fun testAlwaysRecordSamplerRecordOnly() {
+        val fakeSampler = FakeSampler(SamplingResult.Decision.RECORD_ONLY)
+        val result = samplerDsl.alwaysRecord(root = fakeSampler).shouldSample(
+            context = contextFactory.root(),
+            traceId = "000000000000000000ffffffffffffff",
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+        assertEquals(SamplingResult.Decision.RECORD_ONLY, result.decision)
+    }
+
+    @Test
+    fun testAlwaysRecordSamplerRecordAndSample() {
+        val fakeSampler = FakeSampler(SamplingResult.Decision.RECORD_AND_SAMPLE)
+        val result = samplerDsl.alwaysRecord(root = fakeSampler).shouldSample(
+            context = contextFactory.root(),
+            traceId = "000000000000000000ffffffffffffff",
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+        assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, result.decision)
+    }
+
+    @Test
+    fun testAlwaysRecordSamplerDropPreservesAttributesAndTraceState() {
+        val traceState = FakeTraceState(mapOf("vendor" to "data"))
+        val fakeSampler = FakeSampler(
+            decision = SamplingResult.Decision.DROP,
+            samplerAttributes = mapOf("key" to "value"),
+            samplerTraceState = traceState,
+        )
+        val result = samplerDsl.alwaysRecord(root = fakeSampler).shouldSample(
+            context = contextFactory.root(),
+            traceId = "000000000000000000ffffffffffffff",
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+        assertEquals(SamplingResult.Decision.RECORD_ONLY, result.decision)
+        assertEquals("value", result.attributes.attributes["key"])
+        assertEquals("data", result.traceState.get("vendor"))
     }
 }
