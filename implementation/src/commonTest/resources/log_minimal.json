@@ -20,7 +20,7 @@
     "spanContext": {
       "traceId": "00000000000000000000000000000000",
       "spanId": "0000000000000000",
-      "traceFlags": "01",
+      "traceFlags": "03",
       "traceState": {}
     },
     "severity": "UNKNOWN",
