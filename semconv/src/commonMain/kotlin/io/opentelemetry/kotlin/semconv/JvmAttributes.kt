@@ -7,15 +7,6 @@ package io.opentelemetry.kotlin.semconv
  */
 @Suppress("unused")
 object JvmAttributes {
-  
-
-    /**
-    * <p>Name of the buffer pool.</p>
-    * <p>Notes:</p>
-    * <p>Pool names are generally obtained via <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/java/lang/management/BufferPoolMXBean.html#getName()">BufferPoolMXBean#getName()</a>.</p>
-    */
-    @IncubatingApi
-    const val JVM_BUFFER_POOL_NAME: String = "jvm.buffer.pool.name"
 
     /**
     * <p>Name of the garbage collector action.</p>
@@ -23,14 +14,6 @@ object JvmAttributes {
     * <p>Garbage collector action is generally obtained via <a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.management/com/sun/management/GarbageCollectionNotificationInfo.html#getGcAction()">GarbageCollectionNotificationInfo#getGcAction()</a>.</p>
     */
     const val JVM_GC_ACTION: String = "jvm.gc.action"
-
-    /**
-    * <p>Name of the garbage collector cause.</p>
-    * <p>Notes:</p>
-    * <p>Garbage collector cause is generally obtained via <a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.management/com/sun/management/GarbageCollectionNotificationInfo.html#getGcCause()">GarbageCollectionNotificationInfo#getGcCause()</a>.</p>
-    */
-    @IncubatingApi
-    const val JVM_GC_CAUSE: String = "jvm.gc.cause"
 
     /**
     * <p>Name of the garbage collector.</p>

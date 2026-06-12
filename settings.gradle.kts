@@ -31,6 +31,7 @@ include(
     ":integration-test",
     ":compat-bom",
     ":semconv",
+    ":semconv-incubating",
     ":benchmark-android",
     ":benchmark-jvm",
     ":benchmark-fixtures",
