@@ -20,6 +20,15 @@ public fun SamplerConfigDsl.alwaysOn(): Sampler = AlwaysOnSampler()
 public fun SamplerConfigDsl.alwaysOff(): Sampler = AlwaysOffSampler()
 
 /**
+ * Configures sampling so that spans are always recorded, even if the delegate sampler
+ * would otherwise drop them.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#alwaysrecord
+ */
+@ExperimentalApi
+public fun SamplerConfigDsl.alwaysRecord(root: Sampler): Sampler = AlwaysRecordSampler(root)
+
+/**
  * Configures sampling based on the parent span's sampling decision.
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#parentbased
