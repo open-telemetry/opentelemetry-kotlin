@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.aliases.OtelJavaAlwaysRecordSampler
 import io.opentelemetry.kotlin.aliases.OtelJavaSampler
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
 
@@ -19,6 +20,16 @@ public fun SamplerConfigDsl.alwaysOn(): Sampler = SamplerAdapter(OtelJavaSampler
  */
 @ExperimentalApi
 public fun SamplerConfigDsl.alwaysOff(): Sampler = SamplerAdapter(OtelJavaSampler.alwaysOff())
+
+/**
+ * Configures sampling so that spans are always recorded, even if the delegate sampler
+ * would otherwise drop them.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#alwaysrecord
+ */
+@ExperimentalApi
+public fun SamplerConfigDsl.alwaysRecord(root: Sampler): Sampler =
+    SamplerAdapter(OtelJavaAlwaysRecordSampler.create(root.toOtelJavaSampler()))
 
 /**
  * Configures sampling based on the parent span's sampling decision.
