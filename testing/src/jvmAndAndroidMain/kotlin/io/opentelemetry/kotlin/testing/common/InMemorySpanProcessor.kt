@@ -12,6 +12,9 @@ internal class InMemorySpanProcessor(private val exporter: InMemorySpanExporter)
     override fun isStartRequired(): Boolean = true
 
     override fun onEnd(span: OtelJavaReadableSpan) {
+        if (!span.spanContext.traceFlags.isSampled) {
+            return
+        }
         exporter.export(mutableListOf(span.toSpanData()))
     }
 

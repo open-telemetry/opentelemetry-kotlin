@@ -33,7 +33,12 @@ internal class BatchSpanProcessorImpl(
             exportAction = exporter::export
         )
 
-    override fun onEnd(span: ReadableSpan) = shutdownState.execute { processor.processTelemetry(span) }
+    override fun onEnd(span: ReadableSpan) {
+        if (!span.spanContext.traceFlags.isSampled) {
+            return
+        }
+        shutdownState.execute { processor.processTelemetry(span) }
+    }
 
     override fun isStartRequired(): Boolean = true
     override fun isEndRequired(): Boolean = true

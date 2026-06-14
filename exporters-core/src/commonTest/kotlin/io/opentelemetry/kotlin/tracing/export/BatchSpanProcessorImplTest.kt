@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
+import io.opentelemetry.kotlin.tracing.FakeSpanContext
+import io.opentelemetry.kotlin.tracing.FakeTraceFlags
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -52,5 +54,19 @@ internal class BatchSpanProcessorImplTest {
         processor.shutdown()
         advanceUntilIdle()
         assertEquals(OperationResultCode.Success, processor.forceFlush())
+    }
+
+    @Test
+    fun testOnEndSkipsUnsampledSpan() = runTest {
+        val span = FakeReadWriteSpan(
+            spanContext = FakeSpanContext(traceFlags = FakeTraceFlags(isSampled = false))
+        )
+
+        processor.onEnd(span)
+        processor.forceFlush()
+        processor.shutdown()
+        advanceUntilIdle()
+
+        assertTrue(exporter.exports.isEmpty())
     }
 }

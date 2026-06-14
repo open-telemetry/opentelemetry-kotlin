@@ -35,7 +35,7 @@
         "spanContext": {
           "traceId": "00000000000000000000000000000000",
           "spanId": "0000000000000000",
-          "traceFlags": "00",
+          "traceFlags": "01",
           "traceState": {
             "foo": "bar"
           }
