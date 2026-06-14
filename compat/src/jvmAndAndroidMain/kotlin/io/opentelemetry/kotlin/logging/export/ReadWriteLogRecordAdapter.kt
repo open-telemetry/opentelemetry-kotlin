@@ -44,6 +44,11 @@ internal class ReadWriteLogRecordAdapter(
         set(value) {
         }
 
+    override var spanContext: SpanContext
+        get() = SpanContextAdapter(impl.spanContext)
+        set(value) {
+        }
+
     override var eventName: String?
         get() = impl.eventName
         set(value) {
@@ -91,9 +96,6 @@ internal class ReadWriteLogRecordAdapter(
 
     override val attributes: Map<String, Any>
         get() = impl.attributes.convertToMap()
-
-    override val spanContext: SpanContext
-        get() = SpanContextAdapter(impl.spanContext)
 
     override val resource: Resource
         get() = ResourceAdapter(impl.toLogRecordData().resource)

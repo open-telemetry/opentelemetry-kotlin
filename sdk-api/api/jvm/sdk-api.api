@@ -192,12 +192,14 @@ public abstract interface class io/opentelemetry/kotlin/logging/model/ReadWriteL
 	public abstract fun getObservedTimestamp ()Ljava/lang/Long;
 	public abstract fun getSeverityNumber ()Lio/opentelemetry/kotlin/logging/SeverityNumber;
 	public abstract fun getSeverityText ()Ljava/lang/String;
+	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/SpanContext;
 	public abstract fun getTimestamp ()Ljava/lang/Long;
 	public abstract fun setBody (Ljava/lang/Object;)V
 	public abstract fun setEventName (Ljava/lang/String;)V
 	public abstract fun setObservedTimestamp (Ljava/lang/Long;)V
 	public abstract fun setSeverityNumber (Lio/opentelemetry/kotlin/logging/SeverityNumber;)V
 	public abstract fun setSeverityText (Ljava/lang/String;)V
+	public abstract fun setSpanContext (Lio/opentelemetry/kotlin/tracing/SpanContext;)V
 	public abstract fun setTimestamp (Ljava/lang/Long;)V
 }
 
