@@ -9,7 +9,7 @@ fun Project.configurePublishing() {
 
         mavenPublishing.apply {
             publishToMavenCentral(automaticRelease = true)
-            if (project.hasProperty("signingKey") || project.hasProperty("signing.keyId")) {
+            if (!project.hasProperty("signing.skip")) {
                 signAllPublications()
             }
             coordinates("io.opentelemetry.kotlin", project.name, project.version.toString())

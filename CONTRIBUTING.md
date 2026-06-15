@@ -41,8 +41,8 @@ a race condition with Kotlin/Native:
 ./gradlew build                  # runs all tests including the integration test
 ```
 
-No GPG signing key is required for local development — signing is skipped automatically when no
-key is configured.
+No GPG signing key is required for local development — pass `-Psigning.skip=true` to skip signing,
+or add `signing.skip=true` to your local `gradle.properties`.
 
 ## Development guidelines
 
