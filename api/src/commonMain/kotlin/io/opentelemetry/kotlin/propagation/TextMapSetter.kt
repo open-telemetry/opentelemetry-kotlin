@@ -16,5 +16,5 @@ public fun interface TextMapSetter<C> {
      * Sets [key] to [value] on [carrier], replacing any existing value.
      * Values must consist only of US-ASCII characters valid for HTTP headers.
      */
-    public fun set(carrier: C, key: String, value: String)
+    public fun set(carrier: C?, key: String, value: String)
 }

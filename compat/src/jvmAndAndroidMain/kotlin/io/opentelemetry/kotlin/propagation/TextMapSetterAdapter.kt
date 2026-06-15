@@ -6,7 +6,7 @@ internal class TextMapSetterAdapter<C : Any>(
     private val delegate: OtelJavaTextMapSetter<C>,
 ) : TextMapSetter<C> {
 
-    override fun set(carrier: C, key: String, value: String) {
+    override fun set(carrier: C?, key: String, value: String) {
         delegate.set(carrier, key, value)
     }
 }
