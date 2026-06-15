@@ -21,7 +21,7 @@ public interface TextMapGetter<C> {
      * Returns the first value for [key] in [carrier], or null if absent.
      * Key lookup must be case-insensitive for HTTP carriers.
      */
-    public fun get(carrier: C, key: String): String?
+    public fun get(carrier: C?, key: String): String?
 
     /**
      * Returns all values associated with [key] in [carrier], in the order they appear,
