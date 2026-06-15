@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.logging.Logger
 
-@OptIn(ExperimentalApi::class)
+@ExperimentalApi
 interface OpenTelemetryEvent {
     fun emit(
         logger: Logger,
