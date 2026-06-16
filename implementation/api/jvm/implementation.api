@@ -3,6 +3,17 @@ public final class io/opentelemetry/kotlin/OpenTelemetryImplEntrypointKt {
 	public static synthetic fun createOpenTelemetry$default (Lio/opentelemetry/kotlin/Clock;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/OpenTelemetry;
 }
 
+public final class io/opentelemetry/kotlin/propagation/B3Propagator : io/opentelemetry/kotlin/propagation/TextMapPropagator {
+	public static final field Companion Lio/opentelemetry/kotlin/propagation/B3Propagator$Companion;
+	public fun <init> (Lio/opentelemetry/kotlin/init/B3Format;Lio/opentelemetry/kotlin/factory/TraceFlagsFactory;Lio/opentelemetry/kotlin/factory/TraceStateFactory;Lio/opentelemetry/kotlin/factory/SpanContextFactory;Lio/opentelemetry/kotlin/factory/SpanFactory;)V
+	public fun extract (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/Object;Lio/opentelemetry/kotlin/propagation/TextMapGetter;)Lio/opentelemetry/kotlin/context/Context;
+	public fun fields ()Ljava/util/Collection;
+	public fun inject (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/Object;Lio/opentelemetry/kotlin/propagation/TextMapSetter;)V
+}
+
+public final class io/opentelemetry/kotlin/propagation/B3Propagator$Companion {
+}
+
 public final class io/opentelemetry/kotlin/tracing/sampling/BuiltInSamplerApiKt {
 	public static final fun alwaysOff (Lio/opentelemetry/kotlin/init/SamplerConfigDsl;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
 	public static final fun alwaysOn (Lio/opentelemetry/kotlin/init/SamplerConfigDsl;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
