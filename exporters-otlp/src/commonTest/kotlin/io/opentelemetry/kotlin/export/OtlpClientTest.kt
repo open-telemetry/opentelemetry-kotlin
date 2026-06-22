@@ -4,8 +4,11 @@ import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.toByteReadPacket
 import io.ktor.client.plugins.HttpTimeoutConfig.Companion.INFINITE_TIMEOUT_MS
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.headersOf
 import io.ktor.util.toMap
 import io.ktor.utils.io.ByteReadChannel
 import io.opentelemetry.kotlin.logging.export.toProtobufByteArray
@@ -21,6 +24,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertNull
 
 internal class OtlpClientTest {
 
@@ -33,6 +38,7 @@ internal class OtlpClientTest {
     private lateinit var client: OtlpClient
     private lateinit var server: MockEngine
     private lateinit var mockResponseStatus: HttpStatusCode
+    private var mockResponseHeaders: Headers = Headers.Empty
     private var serverDelayMs: Long = 0
 
     @BeforeTest
@@ -43,7 +49,8 @@ internal class OtlpClientTest {
             }
             respond(
                 content = ByteReadChannel(""),
-                status = mockResponseStatus
+                status = mockResponseStatus,
+                headers = mockResponseHeaders,
             )
         }
         val httpClient = createDefaultHttpClient(INFINITE_TIMEOUT_MS, server)
@@ -170,6 +177,42 @@ internal class OtlpClientTest {
         val headers = request.headers.toMap().mapValues { it.value.joinToString() }
         val userAgent = headers["User-Agent"]
         assertEquals(expectedUserAgent, userAgent)
+    }
+
+    @Test
+    fun testExportLogRetryableError() = runTest {
+        mockResponseStatus = HttpStatusCode.TooManyRequests
+        val response = client.exportLogs(logRecords)
+        assertIs<OtlpResponse.RetryableError>(response)
+        assertEquals(429, response.statusCode)
+        assertNull(response.retryAfterMs)
+    }
+
+    @Test
+    fun testExportTraceRetryableError() = runTest {
+        mockResponseStatus = HttpStatusCode.TooManyRequests
+        val response = client.exportTraces(spans)
+        assertIs<OtlpResponse.RetryableError>(response)
+        assertEquals(429, response.statusCode)
+        assertNull(response.retryAfterMs)
+    }
+
+    @Test
+    fun testExportLogRetryableErrorHonoursRetryAfter() = runTest {
+        mockResponseStatus = HttpStatusCode.TooManyRequests
+        mockResponseHeaders = headersOf(HttpHeaders.RetryAfter, "5")
+        val response = client.exportLogs(logRecords)
+        assertIs<OtlpResponse.RetryableError>(response)
+        assertEquals(5000L, response.retryAfterMs)
+    }
+
+    @Test
+    fun testExportTraceRetryableErrorHonoursRetryAfter() = runTest {
+        mockResponseStatus = HttpStatusCode.ServiceUnavailable
+        mockResponseHeaders = headersOf(HttpHeaders.RetryAfter, "12")
+        val response = client.exportTraces(spans)
+        assertIs<OtlpResponse.RetryableError>(response)
+        assertEquals(12_000L, response.retryAfterMs)
     }
 
     private suspend fun sendAndAssertLogRequest(

@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.logging.SeverityNumber
+import io.opentelemetry.kotlin.tracing.SpanContext
 
 /**
  * A read-write representation of a log record.
@@ -44,4 +45,9 @@ public interface ReadWriteLogRecord : ReadableLogRecord, AttributesMutator, Attr
      * Contains the event name if this is an event, otherwise null
      */
     public override var eventName: String?
+
+    /**
+     * The span context associated with the log record
+     */
+    public override var spanContext: SpanContext
 }

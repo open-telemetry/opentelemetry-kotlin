@@ -6,6 +6,8 @@ import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
+import io.opentelemetry.kotlin.tracing.FakeSpanContext
+import io.opentelemetry.kotlin.tracing.model.hex
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -78,6 +80,10 @@ internal class LogProcessorOnEmitTest {
             assertEquals(true, attributes["experiment_enabled"])
             assertEquals("test_logger", instrumentationScopeInfo.name)
             assertEquals("bar", resource.attributes["resource.foo"])
+            assertEquals("2cc2b48c50aefe53b3974ed91e6b4ea9", spanContext.traceId)
+            assertEquals("e77bcc2f537f0b02", spanContext.spanId)
+            assertEquals("01", spanContext.traceFlags.hex)
+            assertEquals(emptyMap(), spanContext.traceState.asMap())
             assertTrue(spanContext.isValid)
         }
 
@@ -89,6 +95,7 @@ internal class LogProcessorOnEmitTest {
             severityNumber = SeverityNumber.INFO
             severityText = "info"
             setStringAttribute("key", "value")
+            spanContext = FakeSpanContext.VALID
         }
 
         override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success

@@ -20,6 +20,16 @@ internal sealed class OtlpResponse(val statusCode: Int) {
         }
     }
 
+    class RetryableError(
+        statusCode: Int,
+        val retryAfterMs: Long?,
+        val errorMessage: String?,
+    ) : OtlpResponse(statusCode) {
+        override fun toString(): String {
+            return "RetryableError(errorMessage=$errorMessage, retryAfterMs=$retryAfterMs, statusCode=$statusCode)"
+        }
+    }
+
     object Unknown : OtlpResponse(-1) {
         override fun toString(): String {
             return "Unknown(statusCode=$statusCode)"

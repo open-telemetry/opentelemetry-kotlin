@@ -36,13 +36,18 @@ internal class TelemetryExporter<T>(
     private suspend fun exportTelemetry(telemetry: List<T>) {
         var delayMs = initialDelayMs
         repeat(maxAttempts) {
-            when (exportAction(telemetry)) {
+            when (val response = exportAction(telemetry)) {
                 is OtlpResponse.Success -> {
                     return
                 }
 
                 is OtlpResponse.ClientError -> {
                     return
+                }
+
+                is OtlpResponse.RetryableError -> {
+                    delay(response.retryAfterMs ?: delayMs)
+                    delayMs = (delayMs * 2).coerceAtMost(maxAttemptIntervalMs)
                 }
 
                 is OtlpResponse.ServerError, is OtlpResponse.Unknown -> {

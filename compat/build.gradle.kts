@@ -18,8 +18,10 @@ kotlin {
                 implementation(project(":java-typealiases"))
                 implementation(project(":implementation"))
                 implementation(project.dependencies.platform(libs.opentelemetry.bom))
+                implementation(project.dependencies.platform(libs.opentelemetry.bom.alpha))
                 implementation(libs.opentelemetry.api)
                 implementation(libs.opentelemetry.sdk)
+                implementation(libs.opentelemetry.sdk.extension.incubator)
             }
         }
         val jvmTest by getting {
