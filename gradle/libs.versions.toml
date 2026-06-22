@@ -33,7 +33,7 @@ wire = "6.4.0"
 buildKonfig = "0.21.2"
 composeMultiplatform = "1.11.1"
 androidxActivityCompose = "1.13.0"
-kotest = "6.1.11"
+kotest = "6.2.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
