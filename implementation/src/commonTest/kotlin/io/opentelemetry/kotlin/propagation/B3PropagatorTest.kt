@@ -42,8 +42,6 @@ internal class B3PropagatorTest {
         assertEquals(listOf("X-B3-TraceId", "X-B3-SpanId", "X-B3-Sampled"), multiPropagator.fields().toList())
     }
 
-    // ── inject single ────────────────────────────────────────────────────────
-
     @Test
     fun `inject single does nothing when span is invalid`() {
         val carrier = mutableMapOf<String, String>()
@@ -73,8 +71,6 @@ internal class B3PropagatorTest {
         singlePropagator.inject(ctx, carrier, MapTextMapSetter)
         assertEquals("$traceId-$spanId-d", carrier["b3"])
     }
-
-    // ── inject multi ─────────────────────────────────────────────────────────
 
     @Test
     fun `inject multi does nothing when span is invalid`() {

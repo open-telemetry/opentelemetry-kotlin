@@ -8,6 +8,8 @@ import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.TraceStateFactory
+import io.opentelemetry.kotlin.factory.isAllZerosHex
+import io.opentelemetry.kotlin.factory.isValidHex
 import io.opentelemetry.kotlin.init.B3Format
 import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.tracing.SpanContext
@@ -99,89 +101,69 @@ internal class B3Propagator(
             return null
         }
         val rawSpanId = parts[1]
-        if (!isValidSpanId(rawSpanId)) {
+        val sampled = parts.getOrNull(2)
+        val debug = sampled == "d"
+        val spanContext = buildContext(debug, sampled, traceId, rawSpanId)
+        if (!spanContext.isValid) {
             platformLog("B3 invalid spanId in single header: $rawSpanId")
             return null
         }
-        val sampled = parts.getOrNull(2)
-        val debug = sampled == "d"
+        return context.storeSpan(spanFactory.fromSpanContext(spanContext)).let {
+            if (debug) { it.withB3Debug() } else { it }
+        }
+    }
+
+    private fun <T> extractMulti(context: Context, carrier: T, getter: TextMapGetter<T>): Context? {
+        val rawTraceId = getter.get(carrier, TRACE_ID_HEADER)
+        val rawSpanId = getter.get(carrier, SPAN_ID_HEADER) ?: return null
+        val traceId = normalizeTraceId(rawTraceId) ?: run {
+            if (rawTraceId != null) { platformLog("B3 invalid traceId in multi header: $rawTraceId") }
+            return null
+        }
+        val debug = getter.get(carrier, DEBUG_HEADER) == "1"
+        val sampled = getter.get(carrier, SAMPLED_HEADER)
+        val spanContext = buildContext(debug, sampled, traceId, rawSpanId)
+        if (!spanContext.isValid) {
+            platformLog("B3 invalid spanId in multi header: $rawSpanId")
+            return null
+        }
+        return context.storeSpan(spanFactory.fromSpanContext(spanContext)).let {
+            if (debug) { it.withB3Debug() } else { it }
+        }
+    }
+
+    private fun buildContext(
+        debug: Boolean,
+        sampled: String?,
+        traceId: String,
+        rawSpanId: String
+    ): SpanContext {
         val traceFlags = if (debug || isSampledValue(sampled)) {
             traceFlagsFactory.fromHex("01")
         } else {
             traceFlagsFactory.fromHex("00")
         }
-        val spanContext = spanContextFactory.create(
+        return spanContextFactory.create(
             traceId = traceId,
             spanId = rawSpanId,
             traceFlags = traceFlags,
             traceState = traceStateFactory.default,
             isRemote = true,
         )
-        if (!spanContext.isValid) { return null }
-        return context.storeSpan(spanFactory.fromSpanContext(spanContext)).let {
-            if (debug) {
-                it.withB3Debug()
-            } else {
-                it
-            }
-        }
-    }
-
-    private fun <T> extractMulti(context: Context, carrier: T, getter: TextMapGetter<T>): Context? {
-        val rawTraceId = getter.get(carrier, TRACE_ID_HEADER)
-        val rawSpanId = getter.get(carrier, SPAN_ID_HEADER)
-        val traceId = normalizeTraceId(rawTraceId) ?: run {
-            if (rawTraceId != null) { platformLog("B3 invalid traceId in multi header: $rawTraceId") }
-            return null
-        }
-        if (!isValidSpanId(rawSpanId)) {
-            if (rawSpanId != null) { platformLog("B3 invalid spanId in multi header: $rawSpanId") }
-            return null
-        }
-        val debug = getter.get(carrier, DEBUG_HEADER) == "1"
-        val sampled = getter.get(carrier, SAMPLED_HEADER)
-        val traceFlags = if (debug || isSampledValue(sampled)) {
-            traceFlagsFactory.fromHex("01")
-        } else {
-            traceFlagsFactory.fromHex("00")
-        }
-        val spanContext = spanContextFactory.create(
-            traceId = traceId,
-            spanId = rawSpanId!!,
-            traceFlags = traceFlags,
-            traceState = traceStateFactory.default,
-            isRemote = true,
-        )
-        if (!spanContext.isValid) { return null }
-        return context.storeSpan(spanFactory.fromSpanContext(spanContext)).let {
-            if (debug) {
-                it.withB3Debug()
-            } else {
-                it
-            }
-        }
     }
 
     private fun normalizeTraceId(raw: String?): String? {
         if (raw == null) { return null }
         return when (raw.length) {
-            TRACE_ID_LENGTH -> raw.takeIf { it.isValidHex() && !it.isAllZeros() }
+            TRACE_ID_LENGTH -> raw.takeIf { it.isValidHex() && !it.isAllZerosHex() }
             TRACE_ID_LENGTH / 2 -> raw.padStart(TRACE_ID_LENGTH, '0')
-                .takeIf { it.isValidHex() && !it.isAllZeros() }
+                .takeIf { it.isValidHex() && !it.isAllZerosHex() }
             else -> null
         }
     }
 
-    private fun isValidSpanId(raw: String?): Boolean =
-        raw != null && raw.length == SPAN_ID_LENGTH && raw.isValidHex() && !raw.isAllZeros()
-
     private fun isSampledValue(value: String?): Boolean =
         value == "1" || value?.lowercase() == "true"
-
-    private fun String.isValidHex(): Boolean =
-        all { it in '0'..'9' || it.lowercaseChar() in 'a'..'f' }
-
-    private fun String.isAllZeros(): Boolean = all { it == '0' }
 
     private fun Context.withB3Debug(): Context = set(DEBUG_CONTEXT_KEY, true)
     private fun Context.isB3Debug(): Boolean = get(DEBUG_CONTEXT_KEY) == true
@@ -196,7 +178,6 @@ internal class B3Propagator(
         private const val COMBINED_HEADER = "b3"
         private const val DELIMITER = "-"
         private const val TRACE_ID_LENGTH = 32
-        private const val SPAN_ID_LENGTH = 16
         private const val SINGLE_HEADER_SIZE = 51 // 32 + 1 + 16 + 1 + 1
 
         private val SINGLE_FIELDS = listOf(COMBINED_HEADER)
