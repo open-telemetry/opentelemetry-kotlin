@@ -6,6 +6,12 @@ import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanLinkImpl
 
+/**
+ * Builds a single [SpanLink] with per-link attribute limits applied.
+ *
+ * Extracted as a shared helper so that [SpanModel] and [SpanCreationCollector]
+ * apply the same limits without duplicating the logic.
+ */
 internal fun buildSpanLink(
     spanContext: SpanContext,
     attributes: (AttributesMutator.() -> Unit)?,
