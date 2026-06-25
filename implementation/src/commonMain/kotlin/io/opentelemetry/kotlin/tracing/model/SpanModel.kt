@@ -13,7 +13,6 @@ import io.opentelemetry.kotlin.tracing.SpanCreationAction
 import io.opentelemetry.kotlin.tracing.SpanDataImpl
 import io.opentelemetry.kotlin.tracing.SpanEventImpl
 import io.opentelemetry.kotlin.tracing.SpanKind
-import io.opentelemetry.kotlin.tracing.SpanLinkImpl
 import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
@@ -126,14 +125,7 @@ internal class SpanModel(
     ) {
         lock.write {
             if (isRecording() && linksList.size < spanLimitConfig.linkCountLimit && !hasSpanContext(spanContext)) {
-                val container = AttributesModel(
-                    attributeLimit = spanLimitConfig.attributeCountPerLinkLimit,
-                    attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
-                )
-                if (attributes != null) {
-                    attributes(container)
-                }
-                val link = SpanLinkImpl(spanContext, container)
+                val link = buildSpanLink(spanContext, attributes, spanLimitConfig)
                 linksList.add(link)
             }
         }
