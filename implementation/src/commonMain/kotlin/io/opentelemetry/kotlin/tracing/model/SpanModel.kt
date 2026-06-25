@@ -33,7 +33,8 @@ internal class SpanModel(
     override val resource: Resource,
     override val parent: SpanContext,
     spanContext: SpanContext,
-    private val spanLimitConfig: SpanLimitConfig
+    private val spanLimitConfig: SpanLimitConfig,
+    initialLinks: List<SpanLink>
 ) : ReadWriteSpan, SpanCreationAction {
 
     private enum class State {
@@ -112,7 +113,7 @@ internal class SpanModel(
             eventsList.toList()
         }
 
-    private val linksList = mutableListOf<SpanLinkData>()
+    private val linksList = initialLinks.toMutableList<SpanLinkData>()
 
     override val links: List<SpanLinkData>
         get() = lock.read {
