@@ -27,7 +27,7 @@ Any component marked stable here should NOT have api surface marked with `@Exper
 
 | component   | development | stable |
 |-------------|-------------|--------|
-| attributes  | ⚠️          |        |
+| attributes  |             | ⚠️     |
 | baggage     | ⚠️          | ️      |
 | context     | ⚠️          | ️      |
 | factory     | ⚠️          | ️      |
