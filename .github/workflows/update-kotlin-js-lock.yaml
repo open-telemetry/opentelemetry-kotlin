@@ -24,22 +24,7 @@ jobs:
       pull-requests: read
     runs-on: ubuntu-latest
     steps:
-      - name: Check commenter association
-        id: commenter-association
-        env:
-          AUTHOR_ASSOCIATION: ${{ github.event.comment.author_association }}
-        run: |
-          case "$AUTHOR_ASSOCIATION" in
-            OWNER|MEMBER|COLLABORATOR)
-              echo "needs_team_check=false" >> "$GITHUB_OUTPUT"
-              ;;
-            *)
-              echo "needs_team_check=true" >> "$GITHUB_OUTPUT"
-              ;;
-          esac
-
       - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        if: steps.commenter-association.outputs.needs_team_check == 'true'
         id: team-auth-token
         with:
           app-id: ${{ vars.OTELBOT_APP_ID }}
@@ -48,7 +33,6 @@ jobs:
           permission-members: read
 
       - name: Authorize Kotlin team member
-        if: steps.commenter-association.outputs.needs_team_check == 'true'
         env:
           GH_TOKEN: ${{ steps.team-auth-token.outputs.token }}
           COMMENTER: ${{ github.event.comment.user.login }}
