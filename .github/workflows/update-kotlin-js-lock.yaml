@@ -1,0 +1,145 @@
+name: Update Kotlin JS lockfile
+
+# Renovate updates Gradle dependencies, but it does not regenerate the Kotlin/JS
+# Yarn lockfile in kotlin-js-store. Maintainers can use this command on Renovate
+# PRs when dependency updates require lockfile changes by commenting exactly:
+#
+# /otelbot update-kotlin-js-lock
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  update-kotlin-js-lock:
+    if: >
+      github.event.issue.pull_request &&
+      github.event.comment.body == '/otelbot update-kotlin-js-lock'
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check commenter association
+        id: commenter-association
+        env:
+          AUTHOR_ASSOCIATION: ${{ github.event.comment.author_association }}
+        run: |
+          case "$AUTHOR_ASSOCIATION" in
+            OWNER|MEMBER|COLLABORATOR)
+              echo "needs_team_check=false" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "needs_team_check=true" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        if: steps.commenter-association.outputs.needs_team_check == 'true'
+        id: team-auth-token
+        with:
+          app-id: ${{ vars.OTELBOT_APP_ID }}
+          private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
+          permission-issues: write
+          permission-members: read
+
+      - name: Authorize Kotlin team member
+        if: steps.commenter-association.outputs.needs_team_check == 'true'
+        env:
+          GH_TOKEN: ${{ steps.team-auth-token.outputs.token }}
+          COMMENTER: ${{ github.event.comment.user.login }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          if gh api "orgs/open-telemetry/teams/kotlin-approvers/memberships/${COMMENTER}" --silent ||
+             gh api "orgs/open-telemetry/teams/kotlin-maintainers/memberships/${COMMENTER}" --silent; then
+            exit 0
+          fi
+
+          gh issue comment "$PR_NUMBER" --body "Only members of \`@open-telemetry/kotlin-approvers\` or \`@open-telemetry/kotlin-maintainers\` can run \`/otelbot update-kotlin-js-lock\`."
+          exit 1
+
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: otelbot-token
+        with:
+          app-id: ${{ vars.OTELBOT_APP_ID }}
+          private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
+          permission-contents: write
+          permission-issues: write
+          permission-pull-requests: read
+
+      - name: Read pull request
+        id: pr
+        env:
+          GH_TOKEN: ${{ steps.otelbot-token.outputs.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          pr_json=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")
+          head_repo=$(jq -r '.head.repo.full_name' <<< "$pr_json")
+          head_ref=$(jq -r '.head.ref' <<< "$pr_json")
+          head_sha=$(jq -r '.head.sha' <<< "$pr_json")
+
+          if [[ "$head_repo" != "$GITHUB_REPOSITORY" ]]; then
+            gh issue comment "$PR_NUMBER" --body "Cannot update Kotlin JS lockfile for forked PRs."
+            exit 1
+          fi
+
+          echo "head_ref=${head_ref}" >> "$GITHUB_OUTPUT"
+          echo "head_sha=${head_sha}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ steps.pr.outputs.head_sha }}
+          persist-credentials: false
+
+      - name: Setup Java
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
+        with:
+          distribution: 'adopt'
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+
+      - name: Update Kotlin JS lockfile
+        run: ./gradlew kotlinUpgradeYarnLock --no-configuration-cache
+
+      - name: Check for lockfile changes
+        id: changes
+        run: |
+          if git diff --quiet -- kotlin-js-store/yarn.lock; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Use CLA approved github bot
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name otelbot
+          git config user.email 197425009+otelbot@users.noreply.github.com
+
+      - name: Commit and push lockfile
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ steps.otelbot-token.outputs.token }}
+          HEAD_REF: ${{ steps.pr.outputs.head_ref }}
+        run: |
+          git add kotlin-js-store/yarn.lock
+          git commit -m "Update Kotlin JS yarn lock"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${HEAD_REF}"
+
+      - name: Comment with result
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          CHANGED: ${{ steps.changes.outputs.changed }}
+        run: |
+          if [[ "$CHANGED" == "true" ]]; then
+            gh issue comment "$PR_NUMBER" --body "Updated \`kotlin-js-store/yarn.lock\`."
+          else
+            gh issue comment "$PR_NUMBER" --body "\`kotlin-js-store/yarn.lock\` is already up to date."
+          fi
