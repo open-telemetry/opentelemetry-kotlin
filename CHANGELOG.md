@@ -1,6 +1,6 @@
 # opentelemetry-kotlin changelog
 
-## Unreleased
+## Version 0.5.0 (2026-07-06)
 
 * Attributes are now considered a stable API. 🚀
 
