@@ -21,8 +21,6 @@ internal fun buildSpanLink(
         attributeLimit = spanLimitConfig.attributeCountPerLinkLimit,
         attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
     )
-    if (attributes != null) {
-        attributes(container)
-    }
+    attributes?.invoke(container)
     return SpanLinkImpl(spanContext, container)
 }
