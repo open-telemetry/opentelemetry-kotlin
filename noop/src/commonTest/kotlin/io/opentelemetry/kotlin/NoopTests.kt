@@ -36,6 +36,8 @@ internal class NoopTests {
         assertSame(span, anotherSpan)
         assertTrue(span is NoopSpan)
 
+        assertFalse(tracer.enabled())
+
         // Span operations should be no-ops
         verifySpanOperationsAreNoop(span)
 

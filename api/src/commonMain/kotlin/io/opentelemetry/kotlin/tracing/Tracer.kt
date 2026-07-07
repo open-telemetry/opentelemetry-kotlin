@@ -14,6 +14,20 @@ import io.opentelemetry.kotlin.context.Context
 public interface Tracer {
 
     /**
+     * Returns whether a span should be created based on the provided parameters.
+     *
+     * This method allows callers to avoid the cost of creating spans that will be dropped by
+     * returning false if a span shouldn't be created. This should be invoked each time before
+     * calling [startSpan] to ensure an up-to-date response.
+     *
+     * @return true if a span should be created
+     *
+     * https://opentelemetry.io/docs/specs/otel/trace/api/#enabled
+     */
+    @ThreadSafe
+    public fun enabled(): Boolean
+
+    /**
      * Creates a new span. A span must have a non-empty name, and can optionally include:
      *
      * @param parentContext - a context object containing the parent span. If this is not set
