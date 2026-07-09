@@ -138,11 +138,32 @@ internal class AttributesModel(
         }
     }
 
+    private var droppedAttributesCountImpl = 0
+
+    /**
+     * The number of attributes that were dropped because [attributeLimit] was exceeded.
+     */
+    val droppedAttributesCount: Int
+        get() = droppedAttributesCountImpl
+
     override val attributes: Map<String, Any>
         get() = attrs.toMap()
 
-    private fun canAddAttribute(key: String): Boolean =
-        key.isNotEmpty() && (attrs.size < attributeLimit || attrs.contains(key))
+    private fun canAddAttribute(key: String): Boolean {
+        if (key.isEmpty()) {
+            // Invalid key: ignored, not counted as a dropped attribute.
+            return false
+        }
+        if (attrs.contains(key)) {
+            // Overwriting an existing attribute never drops.
+            return true
+        }
+        if (attrs.size < attributeLimit) {
+            return true
+        }
+        droppedAttributesCountImpl++
+        return false
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) {

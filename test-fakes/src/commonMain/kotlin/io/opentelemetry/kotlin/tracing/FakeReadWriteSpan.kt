@@ -24,7 +24,8 @@ class FakeReadWriteSpan(
     override val endTimestamp: Long? = 0,
     override val resource: Resource = FakeResource(),
     override val instrumentationScopeInfo: InstrumentationScopeInfo = FakeInstrumentationScopeInfo(),
-    override val hasEnded: Boolean = false
+    override val hasEnded: Boolean = false,
+    override val droppedAttributesCount: Int = 0
 ) : ReadWriteSpan {
 
     override var spanContext: SpanContext = spanContext

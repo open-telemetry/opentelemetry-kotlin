@@ -29,4 +29,5 @@ internal class SpanDataAdapter(
     override val resource: Resource = ResourceAdapter(impl.resource)
     override val instrumentationScopeInfo: InstrumentationScopeInfo = impl.instrumentationScopeInfo.toOtelKotlinInstrumentationScopeInfo()
     override val hasEnded: Boolean = impl.hasEnded()
+    override val droppedAttributesCount: Int = impl.totalAttributeCount - impl.attributes.size()
 }

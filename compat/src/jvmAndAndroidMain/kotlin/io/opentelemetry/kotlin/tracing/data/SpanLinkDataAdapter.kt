@@ -10,4 +10,5 @@ internal class SpanLinkDataAdapter(
 ) : SpanLinkData {
     override val spanContext: SpanContext = SpanContextAdapter(impl.spanContext)
     override val attributes: Map<String, Any> = impl.attributes.convertToMap()
+    override val droppedAttributesCount: Int = impl.totalAttributeCount - impl.attributes.size()
 }

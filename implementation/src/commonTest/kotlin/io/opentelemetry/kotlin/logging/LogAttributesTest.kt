@@ -96,6 +96,23 @@ internal class LogAttributesTest {
     }
 
     @Test
+    fun testLogDroppedAttributesCount() {
+        logger.emit("test") {
+            addTestAttributes() // fills the limit of 8
+            addTestAttributes("extra") // 8 more, all dropped
+        }
+        val log = processor.logs.single()
+        assertEquals(8, log.attributes.size)
+        assertEquals(8, log.droppedAttributesCount)
+    }
+
+    @Test
+    fun testLogNoDroppedAttributesWithinLimit() {
+        logger.emit("test") { addTestAttributes() }
+        assertEquals(0, processor.logs.single().droppedAttributesCount)
+    }
+
+    @Test
     fun testStringAttrTruncated() {
         val logger = loggerWithValueLengthLimit(3)
         logger.emit("test") { setStringAttribute("key", "abcdef") }

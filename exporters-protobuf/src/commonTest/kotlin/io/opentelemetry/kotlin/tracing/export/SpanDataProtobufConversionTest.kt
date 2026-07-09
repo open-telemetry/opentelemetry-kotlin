@@ -1,8 +1,12 @@
 package io.opentelemetry.kotlin.tracing.export
 
+import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.export.assertAttributesMatch
 import io.opentelemetry.kotlin.factory.toHexString
+import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.SpanKind
+import io.opentelemetry.kotlin.tracing.data.FakeSpanEventData
+import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
@@ -40,6 +44,25 @@ class SpanDataProtobufConversionTest {
         assertAttributesMatch(obj.attributes, protobuf.attributes)
         assertEventsMatch(obj.events, protobuf.events)
         assertLinksMatch(obj.links, protobuf.links)
+    }
+
+    @Test
+    fun testDroppedAttributesCountConversion() {
+        val obj = FakeSpanData(
+            droppedAttributesCount = 3,
+            events = listOf(FakeSpanEventData(droppedAttributesCount = 4)),
+            links = listOf(FakeSpanLinkData(droppedAttributesCount = 5)),
+        )
+        val protobuf = obj.toProtobuf()
+
+        assertEquals(3, protobuf.dropped_attributes_count)
+        assertEquals(4, protobuf.events.single().dropped_attributes_count)
+        assertEquals(5, protobuf.links.single().dropped_attributes_count)
+
+        val roundTrip = protobuf.toSpanData(FakeResource(), FakeInstrumentationScopeInfo())
+        assertEquals(3, roundTrip.droppedAttributesCount)
+        assertEquals(4, roundTrip.events.single().droppedAttributesCount)
+        assertEquals(5, roundTrip.links.single().droppedAttributesCount)
     }
 
     @Test

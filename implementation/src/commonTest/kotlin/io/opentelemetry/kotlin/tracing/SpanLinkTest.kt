@@ -151,6 +151,7 @@ internal class SpanLinkTest {
         })
         val link = (span.toReadableSpan()).links.single()
         assertEquals(fakeSpanLimitsConfig.attributeCountLimit, link.attributes.size)
+        assertEquals(1, link.droppedAttributesCount)
     }
 
     @Test
@@ -164,6 +165,7 @@ internal class SpanLinkTest {
         }
         val link = (span.toReadableSpan()).links.single()
         assertEquals(fakeSpanLimitsConfig.attributeCountLimit, link.attributes.size)
+        assertEquals(1, link.droppedAttributesCount)
     }
 
     private fun retrieveLinks(expected: Int): List<SpanLinkData> {

@@ -113,6 +113,11 @@ internal class LogRecordModel(
             attrs.attributes.toMap()
         }
 
+    override val droppedAttributesCount: Int
+        get() = lock.read {
+            attrs.droppedAttributesCount
+        }
+
     override fun setBooleanAttribute(key: String, value: Boolean) {
         lock.write {
             attrs.setBooleanAttribute(key, value)

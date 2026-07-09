@@ -21,4 +21,5 @@ class SpanDataImpl(
     override val resource: Resource,
     override val instrumentationScopeInfo: InstrumentationScopeInfo,
     override val hasEnded: Boolean,
+    override val droppedAttributesCount: Int = 0,
 ) : SpanData
