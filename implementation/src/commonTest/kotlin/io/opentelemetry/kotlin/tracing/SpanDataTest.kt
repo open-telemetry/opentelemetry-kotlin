@@ -107,6 +107,7 @@ internal class SpanDataTest {
         assertEquals(span.attributes, data.attributes)
         assertEquals(span.events, data.events)
         assertEquals(span.links, data.links)
+        assertEquals(span.droppedLinksCount, data.droppedLinksCount)
         assertSame(fakeResource, data.resource)
         assertSame(key, data.instrumentationScopeInfo)
     }

@@ -34,7 +34,8 @@ fun SpanData.toProtobuf() = Span(
             ?: Status.StatusCode.STATUS_CODE_UNSET
     ),
     events = events.toSpanEvent(),
-    links = links.toSpanLink()
+    links = links.toSpanLink(),
+    dropped_links_count = droppedLinksCount
 )
 
 internal fun Span.toSpanData(
@@ -61,6 +62,7 @@ internal fun Span.toSpanData(
     attributes = attributes.toAttributeMap(),
     events = events.map { it.toEventData() },
     links = links.map { it.toLinkData() },
+    droppedLinksCount = dropped_links_count,
     hasEnded = true
 )
 
@@ -129,6 +131,7 @@ private class DeserializedSpanData(
     override val attributes: Map<String, Any>,
     override val events: List<SpanEventData>,
     override val links: List<SpanLinkData>,
+    override val droppedLinksCount: Int,
     override val hasEnded: Boolean
 ) : SpanData
 

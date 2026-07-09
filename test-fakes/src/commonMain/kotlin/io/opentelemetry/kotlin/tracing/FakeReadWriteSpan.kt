@@ -20,6 +20,7 @@ class FakeReadWriteSpan(
     override val startTimestamp: Long = 0,
     override val events: List<SpanEventData> = emptyList(),
     override val links: List<SpanLinkData> = emptyList(),
+    override val droppedLinksCount: Int = 0,
     override val attributes: Map<String, Any> = emptyMap(),
     override val endTimestamp: Long? = 0,
     override val resource: Resource = FakeResource(),

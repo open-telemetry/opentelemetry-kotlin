@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
+import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.proto.trace.v1.Span
@@ -40,6 +41,17 @@ class SpanDataProtobufConversionTest {
         assertAttributesMatch(obj.attributes, protobuf.attributes)
         assertEventsMatch(obj.events, protobuf.events)
         assertLinksMatch(obj.links, protobuf.links)
+        assertEquals(0, protobuf.dropped_links_count)
+    }
+
+    @Test
+    fun testDroppedLinksCount() {
+        val links = listOf(FakeSpanLinkData(), FakeSpanLinkData())
+        val obj = FakeSpanData(links = links, droppedLinksCount = 3)
+        val protobuf = obj.toProtobuf()
+
+        assertEquals(links.size, protobuf.links.size)
+        assertEquals(3, protobuf.dropped_links_count)
     }
 
     @Test
