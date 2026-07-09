@@ -9,9 +9,9 @@ plugins {
     alias(libs.plugins.download)
 }
 
-val semanticConventionsVersion = "main"
+val semanticConventionsVersion = "0.1.0-dev"
 val semanticConventionsRepoZip =
-    "https://github.com/bidetofevil/semantic-conventions-end-user-client/archive/${semanticConventionsVersion}.zip"
+    "https://github.com/bidetofevil/semantic-conventions-end-user-client/archive/v${semanticConventionsVersion}.zip"
 
 // Disable Detekt tasks for generated code
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
