@@ -54,6 +54,12 @@ object AzureAttributes {
     const val AZURE_COSMOSDB_RESPONSE_SUB_STATUS_CODE: String = "azure.cosmosdb.response.sub_status_code"
 
     /**
+    * <p>The name of the Azure <a href="https://learn.microsoft.com/azure/azure-resource-manager/management/manage-resource-groups-portal">resource group</a> the resource belongs to.</p>
+    */
+    @IncubatingApi
+    const val AZURE_RESOURCE_GROUP_NAME: String = "azure.resource_group.name"
+
+    /**
     * <p><a href="https://learn.microsoft.com/azure/azure-resource-manager/management/azure-services-resource-providers">Azure Resource Provider Namespace</a> as recognized by the client.</p>
     */
     @IncubatingApi

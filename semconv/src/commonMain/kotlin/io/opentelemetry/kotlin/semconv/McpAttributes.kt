@@ -12,13 +12,13 @@ object McpAttributes {
     /**
     * <p>The name of the request or notification method.</p>
     */
-    @IncubatingApi
+    @Deprecated("Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).")
     const val MCP_METHOD_NAME: String = "mcp.method.name"
 
     /**
     * <p>The <a href="https://modelcontextprotocol.io/specification/versioning">version</a> of the Model Context Protocol used.</p>
     */
-    @IncubatingApi
+    @Deprecated("Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).")
     const val MCP_PROTOCOL_VERSION: String = "mcp.protocol.version"
 
     /**
@@ -26,19 +26,19 @@ object McpAttributes {
     * <p>Notes:</p>
     * <p>This is a URI of the resource provided in the following requests or notifications: <c>resources/read</c>, <c>resources/subscribe</c>, <c>resources/unsubscribe</c>, or <c>notifications/resources/updated</c>.</p>
     */
-    @IncubatingApi
+    @Deprecated("Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).")
     const val MCP_RESOURCE_URI: String = "mcp.resource.uri"
 
     /**
     * <p>Identifies <a href="https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#session-management">MCP session</a>.</p>
     */
-    @IncubatingApi
+    @Deprecated("Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).")
     const val MCP_SESSION_ID: String = "mcp.session.id"
 
     /**
     * <p>MCP_METHOD_NAME</p>
     */
-    @IncubatingApi
+    @Deprecated("Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).")
     enum class McpMethodNameValues(val value: String) {
 
         /**

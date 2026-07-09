@@ -63,7 +63,7 @@ object CpuAttributes {
         STEAL("steal"),
 
         /**
-        * <p>Kernel</p>
+        * <p>Deprecated. Use <c>system</c> instead.</p>
         */
         KERNEL("kernel"),
     }

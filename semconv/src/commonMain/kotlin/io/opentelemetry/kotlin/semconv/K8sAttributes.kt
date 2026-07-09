@@ -12,7 +12,6 @@ object K8sAttributes {
     /**
     * <p>The name of the cluster.</p>
     */
-    @IncubatingApi
     const val K8S_CLUSTER_NAME: String = "k8s.cluster.name"
 
     /**
@@ -39,19 +38,24 @@ object K8sAttributes {
     * <p>Therefore, UIDs between clusters should be extremely unlikely to
     * conflict.</p>
     */
-    @IncubatingApi
     const val K8S_CLUSTER_UID: String = "k8s.cluster.uid"
+
+    /**
+    * <p>The type of file system component for ephemeral storage.</p>
+    * <p>Notes:</p>
+    * <p>Eviction decisions based on ephemeral-storage resource limits are made based on the total container usage.</p>
+    */
+    @IncubatingApi
+    const val K8S_CONTAINER_EPHEMERAL_STORAGE_FS_TYPE: String = "k8s.container.ephemeral_storage.fs_type"
 
     /**
     * <p>The name of the Container from Pod specification, must be unique within a Pod. Container runtime usually uses different globally unique name (<c>container.name</c>).</p>
     */
-    @IncubatingApi
     const val K8S_CONTAINER_NAME: String = "k8s.container.name"
 
     /**
     * <p>Number of times the container was restarted. This attribute can be used to identify a particular container (running or stopped) within a container spec.</p>
     */
-    @IncubatingApi
     const val K8S_CONTAINER_RESTART_COUNT: String = "k8s.container.restart_count"
 
     /**
@@ -61,13 +65,13 @@ object K8sAttributes {
     const val K8S_CONTAINER_STATUS_LAST_TERMINATED_REASON: String = "k8s.container.status.last_terminated_reason"
 
     /**
-    * <p>The reason for the container state. Corresponds to the <c>reason</c> field of the: <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstatewaiting-v1-core">K8s ContainerStateWaiting</a> or <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstateterminated-v1-core">K8s ContainerStateTerminated</a></p>
+    * <p>The reason for the container state. Corresponds to the <c>reason</c> field of the: <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstatewaiting-v1-core">K8s ContainerStateWaiting</a> or <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstateterminated-v1-core">K8s ContainerStateTerminated</a></p>
     */
     @IncubatingApi
     const val K8S_CONTAINER_STATUS_REASON: String = "k8s.container.status.reason"
 
     /**
-    * <p>The state of the container. <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstate-v1-core">K8s ContainerState</a></p>
+    * <p>The state of the container. <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstate-v1-core">K8s ContainerState</a></p>
     */
     @IncubatingApi
     const val K8S_CONTAINER_STATUS_STATE: String = "k8s.container.status.state"
@@ -83,7 +87,6 @@ object K8sAttributes {
     * the <c>k8s.cronjob.annotation.data</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_CRONJOB_ANNOTATION: String = "k8s.cronjob.annotation"
 
     /**
@@ -97,19 +100,16 @@ object K8sAttributes {
     * the <c>k8s.cronjob.label.automated</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_CRONJOB_LABEL: String = "k8s.cronjob.label"
 
     /**
     * <p>The name of the CronJob.</p>
     */
-    @IncubatingApi
     const val K8S_CRONJOB_NAME: String = "k8s.cronjob.name"
 
     /**
     * <p>The UID of the CronJob.</p>
     */
-    @IncubatingApi
     const val K8S_CRONJOB_UID: String = "k8s.cronjob.uid"
 
     /**
@@ -117,13 +117,12 @@ object K8sAttributes {
     * <p>Notes:</p>
     * <p>Examples:</p>
     * <ul>
-    *   <li>A label <c>replicas</c> with value <c>1</c> SHOULD be recorded
+    *   <li>An annotation <c>replicas</c> with value <c>1</c> SHOULD be recorded
     * as the <c>k8s.daemonset.annotation.replicas</c> attribute with value <c>"1"</c>.</li>
-    *   <li>A label <c>data</c> with empty string value SHOULD be recorded as
+    *   <li>An annotation <c>data</c> with empty string value SHOULD be recorded as
     * the <c>k8s.daemonset.annotation.data</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_DAEMONSET_ANNOTATION: String = "k8s.daemonset.annotation"
 
     /**
@@ -133,23 +132,20 @@ object K8sAttributes {
     * <ul>
     *   <li>A label <c>app</c> with value <c>guestbook</c> SHOULD be recorded
     * as the <c>k8s.daemonset.label.app</c> attribute with value <c>"guestbook"</c>.</li>
-    *   <li>A label <c>data</c> with empty string value SHOULD be recorded as
+    *   <li>A label <c>injected</c> with empty string value SHOULD be recorded as
     * the <c>k8s.daemonset.label.injected</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_DAEMONSET_LABEL: String = "k8s.daemonset.label"
 
     /**
     * <p>The name of the DaemonSet.</p>
     */
-    @IncubatingApi
     const val K8S_DAEMONSET_NAME: String = "k8s.daemonset.name"
 
     /**
     * <p>The UID of the DaemonSet.</p>
     */
-    @IncubatingApi
     const val K8S_DAEMONSET_UID: String = "k8s.daemonset.uid"
 
     /**
@@ -157,13 +153,12 @@ object K8sAttributes {
     * <p>Notes:</p>
     * <p>Examples:</p>
     * <ul>
-    *   <li>A label <c>replicas</c> with value <c>1</c> SHOULD be recorded
+    *   <li>An annotation <c>replicas</c> with value <c>1</c> SHOULD be recorded
     * as the <c>k8s.deployment.annotation.replicas</c> attribute with value <c>"1"</c>.</li>
-    *   <li>A label <c>data</c> with empty string value SHOULD be recorded as
+    *   <li>An annotation <c>data</c> with empty string value SHOULD be recorded as
     * the <c>k8s.deployment.annotation.data</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_DEPLOYMENT_ANNOTATION: String = "k8s.deployment.annotation"
 
     /**
@@ -171,25 +166,22 @@ object K8sAttributes {
     * <p>Notes:</p>
     * <p>Examples:</p>
     * <ul>
-    *   <li>A label <c>replicas</c> with value <c>0</c> SHOULD be recorded
+    *   <li>A label <c>app</c> with value <c>guestbook</c> SHOULD be recorded
     * as the <c>k8s.deployment.label.app</c> attribute with value <c>"guestbook"</c>.</li>
     *   <li>A label <c>injected</c> with empty string value SHOULD be recorded as
     * the <c>k8s.deployment.label.injected</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_DEPLOYMENT_LABEL: String = "k8s.deployment.label"
 
     /**
     * <p>The name of the Deployment.</p>
     */
-    @IncubatingApi
     const val K8S_DEPLOYMENT_NAME: String = "k8s.deployment.name"
 
     /**
     * <p>The UID of the Deployment.</p>
     */
-    @IncubatingApi
     const val K8S_DEPLOYMENT_UID: String = "k8s.deployment.uid"
 
     /**
@@ -247,13 +239,12 @@ object K8sAttributes {
     * <p>Notes:</p>
     * <p>Examples:</p>
     * <ul>
-    *   <li>A label <c>number</c> with value <c>1</c> SHOULD be recorded
+    *   <li>An annotation <c>number</c> with value <c>1</c> SHOULD be recorded
     * as the <c>k8s.job.annotation.number</c> attribute with value <c>"1"</c>.</li>
-    *   <li>A label <c>data</c> with empty string value SHOULD be recorded as
+    *   <li>An annotation <c>data</c> with empty string value SHOULD be recorded as
     * the <c>k8s.job.annotation.data</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_JOB_ANNOTATION: String = "k8s.job.annotation"
 
     /**
@@ -263,23 +254,20 @@ object K8sAttributes {
     * <ul>
     *   <li>A label <c>jobtype</c> with value <c>ci</c> SHOULD be recorded
     * as the <c>k8s.job.label.jobtype</c> attribute with value <c>"ci"</c>.</li>
-    *   <li>A label <c>data</c> with empty string value SHOULD be recorded as
+    *   <li>A label <c>automated</c> with empty string value SHOULD be recorded as
     * the <c>k8s.job.label.automated</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_JOB_LABEL: String = "k8s.job.label"
 
     /**
     * <p>The name of the Job.</p>
     */
-    @IncubatingApi
     const val K8S_JOB_NAME: String = "k8s.job.name"
 
     /**
     * <p>The UID of the Job.</p>
     */
-    @IncubatingApi
     const val K8S_JOB_UID: String = "k8s.job.uid"
 
     /**
@@ -287,13 +275,12 @@ object K8sAttributes {
     * <p>Notes:</p>
     * <p>Examples:</p>
     * <ul>
-    *   <li>A label <c>ttl</c> with value <c>0</c> SHOULD be recorded
+    *   <li>An annotation <c>ttl</c> with value <c>0</c> SHOULD be recorded
     * as the <c>k8s.namespace.annotation.ttl</c> attribute with value <c>"0"</c>.</li>
-    *   <li>A label <c>data</c> with empty string value SHOULD be recorded as
+    *   <li>An annotation <c>data</c> with empty string value SHOULD be recorded as
     * the <c>k8s.namespace.annotation.data</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_NAMESPACE_ANNOTATION: String = "k8s.namespace.annotation"
 
     /**
@@ -307,20 +294,18 @@ object K8sAttributes {
     * the <c>k8s.namespace.label.data</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_NAMESPACE_LABEL: String = "k8s.namespace.label"
 
     /**
     * <p>The name of the namespace that the pod is running in.</p>
     */
-    @IncubatingApi
     const val K8S_NAMESPACE_NAME: String = "k8s.namespace.name"
 
     /**
     * <p>The phase of the K8s namespace.</p>
     * <p>Notes:</p>
     * <p>This attribute aligns with the <c>phase</c> field of the
-    * <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#namespacestatus-v1-core">K8s NamespaceStatus</a></p>
+    * <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#namespacestatus-v1-core">K8s NamespaceStatus</a></p>
     */
     @IncubatingApi
     const val K8S_NAMESPACE_PHASE: String = "k8s.namespace.phase"
@@ -336,14 +321,13 @@ object K8sAttributes {
     * the <c>k8s.node.annotation.data</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_NODE_ANNOTATION: String = "k8s.node.annotation"
 
     /**
     * <p>The status of the condition, one of True, False, Unknown.</p>
     * <p>Notes:</p>
     * <p>This attribute aligns with the <c>status</c> field of the
-    * <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#nodecondition-v1-core">NodeCondition</a></p>
+    * <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#nodecondition-v1-core">NodeCondition</a></p>
     */
     @IncubatingApi
     const val K8S_NODE_CONDITION_STATUS: String = "k8s.node.condition.status"
@@ -352,9 +336,9 @@ object K8sAttributes {
     * <p>The condition type of a K8s Node.</p>
     * <p>Notes:</p>
     * <p>K8s Node conditions as described
-    * by <a href="https://v1-32.docs.kubernetes.io/docs/reference/node/node-status/#condition">K8s documentation</a>.</p>
+    * by <a href="https://kubernetes.io/docs/reference/node/node-status/#condition">K8s documentation</a>.</p>
     * <p>This attribute aligns with the <c>type</c> field of the
-    * <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#nodecondition-v1-core">NodeCondition</a></p>
+    * <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#nodecondition-v1-core">NodeCondition</a></p>
     * <p>The set of possible values is not limited to those listed here. Managed Kubernetes environments,
     * or custom controllers MAY introduce additional node condition types.
     * When this occurs, the exact value as reported by the Kubernetes API SHOULD be used.</p>
@@ -373,13 +357,11 @@ object K8sAttributes {
     * the <c>k8s.node.label.data</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_NODE_LABEL: String = "k8s.node.label"
 
     /**
     * <p>The name of the Node.</p>
     */
-    @IncubatingApi
     const val K8S_NODE_NAME: String = "k8s.node.name"
 
     /**
@@ -391,7 +373,6 @@ object K8sAttributes {
     /**
     * <p>The UID of the Node.</p>
     */
-    @IncubatingApi
     const val K8S_NODE_UID: String = "k8s.node.uid"
 
     /**
@@ -514,7 +495,6 @@ object K8sAttributes {
     * the <c>k8s.pod.annotation.data</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_POD_ANNOTATION: String = "k8s.pod.annotation"
 
     /**
@@ -526,7 +506,6 @@ object K8sAttributes {
     * <p>This attribute aligns with the <c>hostname</c> field of the
     * <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podspec-v1-core">K8s PodSpec</a>.</p>
     */
-    @IncubatingApi
     const val K8S_POD_HOSTNAME: String = "k8s.pod.hostname"
 
     /**
@@ -535,7 +514,6 @@ object K8sAttributes {
     * <p>This attribute aligns with the <c>podIP</c> field of the
     * <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podstatus-v1-core">K8s PodStatus</a>.</p>
     */
-    @IncubatingApi
     const val K8S_POD_IP: String = "k8s.pod.ip"
 
     /**
@@ -551,7 +529,6 @@ object K8sAttributes {
     * the <c>k8s.pod.label.data</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_POD_LABEL: String = "k8s.pod.label"
 
     /**
@@ -563,7 +540,6 @@ object K8sAttributes {
     /**
     * <p>The name of the Pod.</p>
     */
-    @IncubatingApi
     const val K8S_POD_NAME: String = "k8s.pod.name"
 
     /**
@@ -575,7 +551,6 @@ object K8sAttributes {
     * <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podstatus-v1-core">K8s PodStatus</a>,
     * in ISO 8601 (RFC 3339 compatible) format.</p>
     */
-    @IncubatingApi
     const val K8S_POD_START_TIME: String = "k8s.pod.start_time"
 
     /**
@@ -593,7 +568,6 @@ object K8sAttributes {
     /**
     * <p>The UID of the Pod.</p>
     */
-    @IncubatingApi
     const val K8S_POD_UID: String = "k8s.pod.uid"
 
     /**
@@ -601,13 +575,12 @@ object K8sAttributes {
     * <p>Notes:</p>
     * <p>Examples:</p>
     * <ul>
-    *   <li>A label <c>replicas</c> with value <c>0</c> SHOULD be recorded
+    *   <li>An annotation <c>replicas</c> with value <c>0</c> SHOULD be recorded
     * as the <c>k8s.replicaset.annotation.replicas</c> attribute with value <c>"0"</c>.</li>
-    *   <li>A label <c>data</c> with empty string value SHOULD be recorded as
+    *   <li>An annotation <c>data</c> with empty string value SHOULD be recorded as
     * the <c>k8s.replicaset.annotation.data</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_REPLICASET_ANNOTATION: String = "k8s.replicaset.annotation"
 
     /**
@@ -621,19 +594,16 @@ object K8sAttributes {
     * the <c>k8s.replicaset.label.injected</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_REPLICASET_LABEL: String = "k8s.replicaset.label"
 
     /**
     * <p>The name of the ReplicaSet.</p>
     */
-    @IncubatingApi
     const val K8S_REPLICASET_NAME: String = "k8s.replicaset.name"
 
     /**
     * <p>The UID of the ReplicaSet.</p>
     */
-    @IncubatingApi
     const val K8S_REPLICASET_UID: String = "k8s.replicaset.uid"
 
     /**
@@ -799,13 +769,12 @@ object K8sAttributes {
     * <p>Notes:</p>
     * <p>Examples:</p>
     * <ul>
-    *   <li>A label <c>replicas</c> with value <c>1</c> SHOULD be recorded
+    *   <li>An annotation <c>replicas</c> with value <c>1</c> SHOULD be recorded
     * as the <c>k8s.statefulset.annotation.replicas</c> attribute with value <c>"1"</c>.</li>
-    *   <li>A label <c>data</c> with empty string value SHOULD be recorded as
+    *   <li>An annotation <c>data</c> with empty string value SHOULD be recorded as
     * the <c>k8s.statefulset.annotation.data</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_STATEFULSET_ANNOTATION: String = "k8s.statefulset.annotation"
 
     /**
@@ -813,29 +782,26 @@ object K8sAttributes {
     * <p>Notes:</p>
     * <p>Examples:</p>
     * <ul>
-    *   <li>A label <c>replicas</c> with value <c>0</c> SHOULD be recorded
+    *   <li>A label <c>app</c> with value <c>guestbook</c> SHOULD be recorded
     * as the <c>k8s.statefulset.label.app</c> attribute with value <c>"guestbook"</c>.</li>
     *   <li>A label <c>injected</c> with empty string value SHOULD be recorded as
     * the <c>k8s.statefulset.label.injected</c> attribute with value <c>""</c>.</li>
     * </ul>
     */
-    @IncubatingApi
     const val K8S_STATEFULSET_LABEL: String = "k8s.statefulset.label"
 
     /**
     * <p>The name of the StatefulSet.</p>
     */
-    @IncubatingApi
     const val K8S_STATEFULSET_NAME: String = "k8s.statefulset.name"
 
     /**
     * <p>The UID of the StatefulSet.</p>
     */
-    @IncubatingApi
     const val K8S_STATEFULSET_UID: String = "k8s.statefulset.uid"
 
     /**
-    * <p>The name of K8s <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#storageclass-v1-storage-k8s-io">StorageClass</a> object.</p>
+    * <p>The name of K8s <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#storageclass-v1-storage-k8s-io">StorageClass</a> object.</p>
     */
     @IncubatingApi
     const val K8S_STORAGECLASS_NAME: String = "k8s.storageclass.name"
@@ -851,6 +817,23 @@ object K8sAttributes {
     */
     @IncubatingApi
     const val K8S_VOLUME_TYPE: String = "k8s.volume.type"
+
+    /**
+    * <p>K8S_CONTAINER_EPHEMERAL_STORAGE_FS_TYPE</p>
+    */
+    @IncubatingApi
+    enum class K8sContainerEphemeralStorageFsTypeValues(val value: String) {
+
+        /**
+        * <p>For the container's writable layer usage.</p>
+        */
+        ROOTFS("rootfs"),
+
+        /**
+        * <p>For the container's log files usage (stdout/stderr).</p>
+        */
+        LOGS("logs"),
+    }
 
     /**
     * <p>K8S_CONTAINER_STATUS_REASON</p>
@@ -1215,32 +1198,32 @@ object K8sAttributes {
     enum class K8sVolumeTypeValues(val value: String) {
 
         /**
-        * <p>A <a href="https://v1-30.docs.kubernetes.io/docs/concepts/storage/volumes/#persistentvolumeclaim">persistentVolumeClaim</a> volume</p>
+        * <p>A <a href="https://kubernetes.io/docs/concepts/storage/volumes/#persistentvolumeclaim">persistentVolumeClaim</a> volume</p>
         */
         PERSISTENT_VOLUME_CLAIM("persistentVolumeClaim"),
 
         /**
-        * <p>A <a href="https://v1-30.docs.kubernetes.io/docs/concepts/storage/volumes/#configmap">configMap</a> volume</p>
+        * <p>A <a href="https://kubernetes.io/docs/concepts/storage/volumes/#configmap">configMap</a> volume</p>
         */
         CONFIG_MAP("configMap"),
 
         /**
-        * <p>A <a href="https://v1-30.docs.kubernetes.io/docs/concepts/storage/volumes/#downwardapi">downwardAPI</a> volume</p>
+        * <p>A <a href="https://kubernetes.io/docs/concepts/storage/volumes/#downwardapi">downwardAPI</a> volume</p>
         */
         DOWNWARD_API("downwardAPI"),
 
         /**
-        * <p>An <a href="https://v1-30.docs.kubernetes.io/docs/concepts/storage/volumes/#emptydir">emptyDir</a> volume</p>
+        * <p>An <a href="https://kubernetes.io/docs/concepts/storage/volumes/#emptydir">emptyDir</a> volume</p>
         */
         EMPTY_DIR("emptyDir"),
 
         /**
-        * <p>A <a href="https://v1-30.docs.kubernetes.io/docs/concepts/storage/volumes/#secret">secret</a> volume</p>
+        * <p>A <a href="https://kubernetes.io/docs/concepts/storage/volumes/#secret">secret</a> volume</p>
         */
         SECRET("secret"),
 
         /**
-        * <p>A <a href="https://v1-30.docs.kubernetes.io/docs/concepts/storage/volumes/#local">local</a> volume</p>
+        * <p>A <a href="https://kubernetes.io/docs/concepts/storage/volumes/#local">local</a> volume</p>
         */
         LOCAL("local"),
     }

@@ -75,6 +75,11 @@ object TelemetryAttributes {
         JAVA("java"),
 
         /**
+        * <p>kotlin.</p>
+        */
+        KOTLIN("kotlin"),
+
+        /**
         * <p>nodejs.</p>
         */
         NODEJS("nodejs"),
