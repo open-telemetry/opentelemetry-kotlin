@@ -70,14 +70,48 @@ internal class SpanLinkTest {
     }
 
     @Test
-    fun testTwoSpanLinksWithSameKey() {
+    fun testDuplicateSpanContextsAppended() {
         tracer.startSpan("test").apply {
             addLink(fakeSpanContext)
             addLink(fakeSpanContext)
             end()
         }
-        val links = retrieveLinks(1)
+        val links = retrieveLinks(2)
         assertLinkData(links[0], fakeSpanContext, emptyMap())
+        assertLinkData(links[1], fakeSpanContext, emptyMap())
+    }
+
+    @Test
+    fun testDuplicateSpanContextsKeepDistinctAttributes() {
+        tracer.startSpan("test").apply {
+            addLink(fakeSpanContext) {
+                setStringAttribute("foo", "first")
+            }
+            addLink(fakeSpanContext) {
+                setStringAttribute("foo", "second")
+            }
+            end()
+        }
+        val links = retrieveLinks(2)
+        assertLinkData(links[0], fakeSpanContext, mapOf("foo" to "first"))
+        assertLinkData(links[1], fakeSpanContext, mapOf("foo" to "second"))
+    }
+
+    @Test
+    fun testDuplicateSpanContextsAppendedDuringCreation() {
+        tracer.startSpan("test", action = {
+            addLink(fakeSpanContext) {
+                setStringAttribute("foo", "first")
+            }
+            addLink(fakeSpanContext) {
+                setStringAttribute("foo", "second")
+            }
+        }).apply {
+            end()
+        }
+        val links = retrieveLinks(2)
+        assertLinkData(links[0], fakeSpanContext, mapOf("foo" to "first"))
+        assertLinkData(links[1], fakeSpanContext, mapOf("foo" to "second"))
     }
 
     @Test

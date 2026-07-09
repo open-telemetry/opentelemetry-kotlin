@@ -125,16 +125,10 @@ internal class SpanModel(
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         lock.write {
-            if (isRecording() && linksList.size < spanLimitConfig.linkCountLimit && !hasSpanContext(spanContext)) {
+            if (isRecording() && linksList.size < spanLimitConfig.linkCountLimit) {
                 val link = buildSpanLink(spanContext, attributes, spanLimitConfig)
                 linksList.add(link)
             }
-        }
-    }
-
-    private fun hasSpanContext(spanContext: SpanContext): Boolean {
-        return linksList.any {
-            it.spanContext.traceId == spanContext.traceId && it.spanContext.spanId == spanContext.spanId
         }
     }
 
