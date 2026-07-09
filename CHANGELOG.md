@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Raise the minimum supported AGP version to 8.0.2. Through no fault of
+  opentelemetry-kotlin, AGP 8.0.0 bundles an R8 that fails to dex Kotlin 2.0
+  `@Metadata`, so projects on that version can't build against these artifacts
+  without an unusual manual R8 override. Later 8.0.x patches ship a working R8,
+  making 8.0.2 — the final 8.0.x patch — a more sensible floor.
+  ([#614](https://github.com/open-telemetry/opentelemetry-kotlin/pull/614))
+- Raise the minimum supported Gradle version from 8.0 to 8.0.2, matching the
+  AGP floor on the final 8.0.x patch.
+  ([#614](https://github.com/open-telemetry/opentelemetry-kotlin/pull/614))
+
 ## Version 0.5.0 (2026-07-06)
 
 * Attributes are now considered a stable API. 🚀

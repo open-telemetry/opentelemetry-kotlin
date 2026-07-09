@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "min-versions-android-app"
+include(":consumer-app")
