@@ -93,7 +93,8 @@ wire = { id = "com.squareup.wire", version.ref = "wire" }
 buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-test-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "minSupportedKotlinPlugin" }
+test-kotlin-multiplatform-jvm = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "minSupportedKotlinPlugin" }
+test-kotlin-multiplatform-klib = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 test-android-library = { id = "com.android.library", version.ref = "android-minAgpVersion" }
 
 [bundles]
