@@ -8,6 +8,15 @@ internal sealed class OtlpResponse(val statusCode: Int) {
         }
     }
 
+    class PartialSuccess(
+        val rejectedCount: Long,
+        val errorMessage: String?,
+    ) : OtlpResponse(200) {
+        override fun toString(): String {
+            return "PartialSuccess(rejectedCount=$rejectedCount, errorMessage=$errorMessage, statusCode=$statusCode)"
+        }
+    }
+
     class ClientError(statusCode: Int, val errorMessage: String?) : OtlpResponse(statusCode) {
         override fun toString(): String {
             return "ClientError(errorMessage=$errorMessage, statusCode=$statusCode)"

@@ -14,15 +14,16 @@ import io.ktor.http.contentType
 import io.ktor.utils.io.readRemaining
 import io.opentelemetry.kotlin.export.OtlpClient.Companion.MAX_ERROR_BODY_BYTES
 import io.opentelemetry.kotlin.export.OtlpResponse.ClientError
+import io.opentelemetry.kotlin.export.OtlpResponse.PartialSuccess
 import io.opentelemetry.kotlin.export.OtlpResponse.RetryableError
 import io.opentelemetry.kotlin.export.OtlpResponse.ServerError
 import io.opentelemetry.kotlin.export.OtlpResponse.Success
 import io.opentelemetry.kotlin.export.OtlpResponse.Unknown
-import io.opentelemetry.kotlin.logging.export.deserializeLogRecordErrorMessage
+import io.opentelemetry.kotlin.logging.export.deserializeLogRecordPartialSuccess
 import io.opentelemetry.kotlin.logging.export.toProtobufByteArray
 import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import io.opentelemetry.kotlin.tracing.data.SpanData
-import io.opentelemetry.kotlin.tracing.export.deserializeTraceRecordErrorMessage
+import io.opentelemetry.kotlin.tracing.export.deserializeTraceRecordPartialSuccess
 import io.opentelemetry.kotlin.tracing.export.toProtobufByteArray
 import kotlinx.io.readByteArray
 
@@ -37,19 +38,19 @@ internal class OtlpClient(
     suspend fun exportLogs(telemetry: List<ReadableLogRecord>): OtlpResponse = exportTelemetry(
         OtlpEndpoint.Logs,
         telemetry::toProtobufByteArray,
-        ByteArray::deserializeLogRecordErrorMessage
+        ByteArray::deserializeLogRecordPartialSuccess
     )
 
     suspend fun exportTraces(telemetry: List<SpanData>): OtlpResponse = exportTelemetry(
         OtlpEndpoint.Traces,
         telemetry::toProtobufByteArray,
-        ByteArray::deserializeTraceRecordErrorMessage
+        ByteArray::deserializeTraceRecordPartialSuccess
     )
 
     private suspend fun exportTelemetry(
         endpoint: OtlpEndpoint,
         requestSerializer: () -> ByteArray,
-        onError: (body: ByteArray) -> String?,
+        parsePartialSuccess: (body: ByteArray) -> OtlpPartialSuccess?,
     ): OtlpResponse {
         return try {
             val url = "$baseUrl/${endpoint.path}"
@@ -59,15 +60,21 @@ internal class OtlpClient(
                 header(HttpHeaders.UserAgent, userAgent)
                 setBody(requestSerializer())
             }
+            // A 200 can still be a partial success and error responses can carry an error message,
+            // so the body is always parsed rather than relying on the status code alone (see #558).
+            val body = parsePartialSuccess(response.boundedBodyBytes())
             when (val code = response.status.value) {
-                200 -> Success
+                200 -> when (body) {
+                    null -> Success
+                    else -> PartialSuccess(body.rejectedCount, body.errorMessage)
+                }
                 429, 502, 503, 504 -> RetryableError(
                     code,
                     response.parseRetryAfterMs(),
-                    onError(response.boundedBodyBytes()),
+                    body?.errorMessage,
                 )
-                in 400..499 -> ClientError(code, onError(response.boundedBodyBytes()))
-                in 500..599 -> ServerError(code, onError(response.boundedBodyBytes()))
+                in 400..499 -> ClientError(code, body?.errorMessage)
+                in 500..599 -> ServerError(code, body?.errorMessage)
                 else -> Unknown
             }
         } catch (ignored: HttpRequestTimeoutException) {

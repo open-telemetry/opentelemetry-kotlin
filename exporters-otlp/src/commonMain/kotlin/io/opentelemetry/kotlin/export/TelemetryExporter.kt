@@ -41,6 +41,12 @@ internal class TelemetryExporter<T>(
                     return
                 }
 
+                // The server accepted the request; retrying would only re-send the rejected
+                // portion, so treat a partial success as terminal.
+                is OtlpResponse.PartialSuccess -> {
+                    return
+                }
+
                 is OtlpResponse.ClientError -> {
                     return
                 }
