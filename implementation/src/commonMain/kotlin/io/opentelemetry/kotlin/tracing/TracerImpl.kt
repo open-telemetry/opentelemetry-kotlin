@@ -41,6 +41,8 @@ internal class TracerImpl(
     private val invalidSpanContext = spanContextFactory.invalid
     private val traceFlagsDefault = traceFlagsFactory.default
 
+    override fun enabled(): Boolean = !shutdownState.isShutdown && processor != null
+
     override fun startSpan(
         name: String,
         parentContext: Context?,

@@ -19,6 +19,7 @@ class FakeReadWriteSpan(
     override val spanKind: SpanKind = SpanKind.INTERNAL,
     override val startTimestamp: Long = 0,
     override val events: List<SpanEventData> = emptyList(),
+    override val droppedEventsCount: Int = 0,
     override val links: List<SpanLinkData> = emptyList(),
     override val droppedLinksCount: Int = 0,
     override val attributes: Map<String, Any> = emptyMap(),

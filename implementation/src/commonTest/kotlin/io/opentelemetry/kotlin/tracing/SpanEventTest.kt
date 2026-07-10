@@ -66,6 +66,7 @@ internal class SpanEventTest {
         assertEventData(events[0], "event", clock.time, emptyMap())
         assertEventData(events[1], "event2", 5, emptyMap())
         assertEventData(events[2], "event3", 10, mapOf("foo" to "bar"))
+        assertEquals(0, processor.endCalls.single().droppedEventsCount)
     }
 
     @Test
@@ -99,6 +100,19 @@ internal class SpanEventTest {
         }
 
         retrieveEvents(3)
+        // events beyond the limit are dropped and counted
+        assertEquals(1, processor.endCalls.single().droppedEventsCount)
+    }
+
+    @Test
+    fun testEventsAfterEndNotCounted() {
+        val span = tracer.startSpan("test").apply {
+            addEvent("event")
+            end()
+            addEvent("event after end")
+        }
+        // an event added after the span ends is ignored, not counted as dropped
+        assertEquals(0, span.toReadableSpan().droppedEventsCount)
     }
 
     @Test

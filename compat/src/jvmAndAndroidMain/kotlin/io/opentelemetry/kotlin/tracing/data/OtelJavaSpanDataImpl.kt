@@ -26,6 +26,7 @@ internal class OtelJavaSpanDataImpl(
     private val startEpochNanosImpl: Long,
     private val attributesImpl: OtelJavaAttributes,
     private val eventsImpl: List<OtelJavaEventData>,
+    private val totalRecordedEventsImpl: Int,
     private val linksImpl: List<OtelJavaLinkData>,
     private val totalRecordedLinksImpl: Int,
     private val endEpochNanosImpl: Long,
@@ -45,7 +46,7 @@ internal class OtelJavaSpanDataImpl(
     override fun getLinks(): List<OtelJavaLinkData> = linksImpl
     override fun getEndEpochNanos(): Long = endEpochNanosImpl
     override fun hasEnded(): Boolean = hasEndedImpl
-    override fun getTotalRecordedEvents(): Int = eventsImpl.size
+    override fun getTotalRecordedEvents(): Int = totalRecordedEventsImpl
     override fun getTotalRecordedLinks(): Int = totalRecordedLinksImpl
     override fun getTotalAttributeCount(): Int = attributesImpl.size()
 

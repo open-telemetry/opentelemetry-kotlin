@@ -6,6 +6,8 @@ import io.opentelemetry.kotlin.context.Context
 @ExperimentalApi
 internal object NoopTracer : Tracer {
 
+    override fun enabled(): Boolean = false
+
     override fun startSpan(
         name: String,
         parentContext: Context?,

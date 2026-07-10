@@ -196,6 +196,7 @@ internal class TracerExportTest {
             with(exportedSpan) {
                 assertEquals(spanAttributeLimit, attributes.size)
                 assertEquals(eventLimit, events.size)
+                assertEquals(1, droppedEventsCount)
                 assertEquals(linkLimit, links.size)
                 assertEquals(1, droppedLinksCount)
                 assertEquals(spanAttributeLimit, events.first().attributes.size)

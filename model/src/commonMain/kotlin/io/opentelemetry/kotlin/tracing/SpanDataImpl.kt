@@ -17,6 +17,7 @@ class SpanDataImpl(
     override val endTimestamp: Long?,
     override val attributes: Map<String, Any>,
     override val events: List<SpanEventData>,
+    override val droppedEventsCount: Int,
     override val links: List<SpanLinkData>,
     override val droppedLinksCount: Int,
     override val resource: Resource,

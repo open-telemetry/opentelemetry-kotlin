@@ -3,8 +3,11 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.context.Context
 
 class FakeTracer(
-    val name: String
+    val name: String,
+    var enabledResult: () -> Boolean = { true },
 ) : Tracer {
+
+    override fun enabled(): Boolean = enabledResult()
 
     override fun startSpan(
         name: String,

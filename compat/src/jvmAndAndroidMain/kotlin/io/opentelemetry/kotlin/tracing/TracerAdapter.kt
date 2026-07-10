@@ -17,6 +17,8 @@ internal class TracerAdapter(
     private val spanLimitsConfig: CompatSpanLimitsConfig
 ) : Tracer {
 
+    override fun enabled(): Boolean = true
+
     override fun startSpan(
         name: String,
         parentContext: Context?,

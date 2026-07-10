@@ -33,17 +33,10 @@ internal class SpanCreationCollector(
         spanContext: SpanContext,
         attributes: (AttributesMutator.() -> Unit)?,
     ) {
-        if (!hasSpanContext(spanContext)) {
-            if (linksList.size < spanLimitConfig.linkCountLimit) {
-                linksList.add(buildSpanLink(spanContext, attributes, spanLimitConfig))
-            } else {
-                droppedLinksCountImpl++
-            }
+        if (linksList.size < spanLimitConfig.linkCountLimit) {
+            linksList.add(buildSpanLink(spanContext, attributes, spanLimitConfig))
+        } else {
+            droppedLinksCountImpl++
         }
     }
-
-    private fun hasSpanContext(spanContext: SpanContext): Boolean =
-        linksList.any {
-            it.spanContext.traceId == spanContext.traceId && it.spanContext.spanId == spanContext.spanId
-        }
 }

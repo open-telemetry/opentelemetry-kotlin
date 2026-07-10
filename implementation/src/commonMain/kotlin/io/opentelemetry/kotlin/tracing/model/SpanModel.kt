@@ -109,9 +109,16 @@ internal class SpanModel(
 
     private val eventsList = mutableListOf<SpanEventData>()
 
+    private var droppedEventsCountImpl = 0
+
     override val events: List<SpanEventData>
         get() = lock.read {
             eventsList.toList()
+        }
+
+    override val droppedEventsCount: Int
+        get() = lock.read {
+            droppedEventsCountImpl
         }
 
     private val linksList = initialLinks.toMutableList<SpanLinkData>()
@@ -133,7 +140,7 @@ internal class SpanModel(
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         lock.write {
-            if (isRecording() && !hasSpanContext(spanContext)) {
+            if (isRecording()) {
                 if (linksList.size < spanLimitConfig.linkCountLimit) {
                     val link = buildSpanLink(spanContext, attributes, spanLimitConfig)
                     linksList.add(link)
@@ -144,28 +151,26 @@ internal class SpanModel(
         }
     }
 
-    private fun hasSpanContext(spanContext: SpanContext): Boolean {
-        return linksList.any {
-            it.spanContext.traceId == spanContext.traceId && it.spanContext.spanId == spanContext.spanId
-        }
-    }
-
     override fun addEvent(
         name: String,
         timestamp: Long?,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         lock.write {
-            if (isRecording() && eventsList.size < spanLimitConfig.eventCountLimit) {
-                val container = AttributesModel(
-                    attributeLimit = spanLimitConfig.attributeCountPerEventLimit,
-                    attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
-                )
-                if (attributes != null) {
-                    attributes(container)
+            if (isRecording()) {
+                if (eventsList.size < spanLimitConfig.eventCountLimit) {
+                    val container = AttributesModel(
+                        attributeLimit = spanLimitConfig.attributeCountPerEventLimit,
+                        attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
+                    )
+                    if (attributes != null) {
+                        attributes(container)
+                    }
+                    val event = SpanEventImpl(name, timestamp ?: clock.now(), container)
+                    eventsList.add(event)
+                } else {
+                    droppedEventsCountImpl++
                 }
-                val event = SpanEventImpl(name, timestamp ?: clock.now(), container)
-                eventsList.add(event)
             }
         }
     }
@@ -180,6 +185,7 @@ internal class SpanModel(
         endTimestamp,
         attributes,
         events,
+        droppedEventsCount,
         links,
         droppedLinksCount,
         resource,
