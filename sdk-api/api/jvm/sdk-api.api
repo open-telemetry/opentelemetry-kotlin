@@ -263,10 +263,15 @@ public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanExpor
 
 public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanProcessor : io/opentelemetry/kotlin/export/TelemetryCloseable {
 	public abstract fun isEndRequired ()Z
+	public abstract fun isOnEndingRequired ()Z
 	public abstract fun isStartRequired ()Z
 	public abstract fun onEnd (Lio/opentelemetry/kotlin/tracing/model/ReadableSpan;)V
 	public abstract fun onEnding (Lio/opentelemetry/kotlin/tracing/model/ReadWriteSpan;)V
 	public abstract fun onStart (Lio/opentelemetry/kotlin/tracing/model/ReadWriteSpan;Lio/opentelemetry/kotlin/context/Context;)V
+}
+
+public final class io/opentelemetry/kotlin/tracing/export/SpanProcessor$DefaultImpls {
+	public static fun isOnEndingRequired (Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;)Z
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadWriteSpan : io/opentelemetry/kotlin/tracing/Span, io/opentelemetry/kotlin/tracing/model/ReadableSpan {
