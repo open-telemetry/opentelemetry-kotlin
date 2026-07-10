@@ -70,6 +70,7 @@ import io.opentelemetry.sdk.trace.data.LinkData
 import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.data.StatusData
 import io.opentelemetry.sdk.trace.export.SpanExporter
+import io.opentelemetry.sdk.trace.internal.ExtendedSpanProcessor
 import io.opentelemetry.sdk.trace.samplers.Sampler
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision
 import io.opentelemetry.sdk.trace.samplers.SamplingResult
@@ -112,6 +113,7 @@ typealias OtelJavaSpanExporter = SpanExporter
 typealias OtelJavaReadWriteSpan = ReadWriteSpan
 typealias OtelJavaReadableSpan = ReadableSpan
 typealias OtelJavaSpanProcessor = SpanProcessor
+typealias OtelJavaExtendedSpanProcessor = ExtendedSpanProcessor
 typealias OtelJavaOpenTelemetrySdk = OpenTelemetrySdk
 typealias OtelJavaSdkLoggerProvider = SdkLoggerProvider
 typealias OtelJavaSdkLoggerProviderBuilder = SdkLoggerProviderBuilder
