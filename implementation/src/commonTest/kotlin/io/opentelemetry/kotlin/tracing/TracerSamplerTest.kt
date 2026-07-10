@@ -172,14 +172,14 @@ internal class TracerSamplerTest {
     }
 
     @Test
-    fun testSamplerReceivesDedupedLinks() {
+    fun testSamplerReceivesDuplicateLinks() {
         val sampler = FakeSampler()
         val tracer = buildTracer(sampler)
         tracer.startSpan("test") {
             addLink(FakeSpanContext.VALID)
             addLink(FakeSpanContext.VALID)
         }
-        assertEquals(1, sampler.lastLinks.size)
+        assertEquals(2, sampler.lastLinks.size)
     }
 
     @Test

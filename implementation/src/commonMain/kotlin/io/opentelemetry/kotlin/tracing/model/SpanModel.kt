@@ -35,7 +35,8 @@ internal class SpanModel(
     spanContext: SpanContext,
     private val spanLimitConfig: SpanLimitConfig,
     initialLinks: List<SpanLink>,
-    private val initialDroppedAttributesCount: Int = 0
+    private val initialDroppedAttributesCount: Int = 0,
+    initialDroppedLinksCount: Int = 0
 ) : ReadWriteSpan, SpanCreationAction {
 
     private enum class State {
@@ -109,16 +110,30 @@ internal class SpanModel(
 
     private val eventsList = mutableListOf<SpanEventData>()
 
+    private var droppedEventsCountImpl = 0
+
     override val events: List<SpanEventData>
         get() = lock.read {
             eventsList.toList()
         }
 
+    override val droppedEventsCount: Int
+        get() = lock.read {
+            droppedEventsCountImpl
+        }
+
     private val linksList = initialLinks.toMutableList<SpanLinkData>()
+
+    private var droppedLinksCountImpl = initialDroppedLinksCount
 
     override val links: List<SpanLinkData>
         get() = lock.read {
             linksList.toList()
+        }
+
+    override val droppedLinksCount: Int
+        get() = lock.read {
+            droppedLinksCountImpl
         }
 
     override fun addLink(
@@ -126,16 +141,14 @@ internal class SpanModel(
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         lock.write {
-            if (isRecording() && linksList.size < spanLimitConfig.linkCountLimit && !hasSpanContext(spanContext)) {
-                val link = buildSpanLink(spanContext, attributes, spanLimitConfig)
-                linksList.add(link)
+            if (isRecording()) {
+                if (linksList.size < spanLimitConfig.linkCountLimit) {
+                    val link = buildSpanLink(spanContext, attributes, spanLimitConfig)
+                    linksList.add(link)
+                } else {
+                    droppedLinksCountImpl++
+                }
             }
-        }
-    }
-
-    private fun hasSpanContext(spanContext: SpanContext): Boolean {
-        return linksList.any {
-            it.spanContext.traceId == spanContext.traceId && it.spanContext.spanId == spanContext.spanId
         }
     }
 
@@ -145,16 +158,20 @@ internal class SpanModel(
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         lock.write {
-            if (isRecording() && eventsList.size < spanLimitConfig.eventCountLimit) {
-                val container = AttributesModel(
-                    attributeLimit = spanLimitConfig.attributeCountPerEventLimit,
-                    attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
-                )
-                if (attributes != null) {
-                    attributes(container)
+            if (isRecording()) {
+                if (eventsList.size < spanLimitConfig.eventCountLimit) {
+                    val container = AttributesModel(
+                        attributeLimit = spanLimitConfig.attributeCountPerEventLimit,
+                        attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
+                    )
+                    if (attributes != null) {
+                        attributes(container)
+                    }
+                    val event = SpanEventImpl(name, timestamp ?: clock.now(), container)
+                    eventsList.add(event)
+                } else {
+                    droppedEventsCountImpl++
                 }
-                val event = SpanEventImpl(name, timestamp ?: clock.now(), container)
-                eventsList.add(event)
             }
         }
     }
@@ -169,7 +186,9 @@ internal class SpanModel(
         endTimestamp,
         attributes,
         events,
+        droppedEventsCount,
         links,
+        droppedLinksCount,
         resource,
         instrumentationScopeInfo,
         hasEnded,

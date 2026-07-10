@@ -44,6 +44,28 @@ class SpanDataProtobufConversionTest {
         assertAttributesMatch(obj.attributes, protobuf.attributes)
         assertEventsMatch(obj.events, protobuf.events)
         assertLinksMatch(obj.links, protobuf.links)
+        assertEquals(0, protobuf.dropped_links_count)
+        assertEquals(0, protobuf.dropped_events_count)
+    }
+
+    @Test
+    fun testDroppedLinksCount() {
+        val links = listOf(FakeSpanLinkData(), FakeSpanLinkData())
+        val obj = FakeSpanData(links = links, droppedLinksCount = 3)
+        val protobuf = obj.toProtobuf()
+
+        assertEquals(links.size, protobuf.links.size)
+        assertEquals(3, protobuf.dropped_links_count)
+    }
+
+    @Test
+    fun testDroppedEventsCount() {
+        val events = listOf(FakeSpanEventData(), FakeSpanEventData())
+        val obj = FakeSpanData(events = events, droppedEventsCount = 3)
+        val protobuf = obj.toProtobuf()
+
+        assertEquals(events.size, protobuf.events.size)
+        assertEquals(3, protobuf.dropped_events_count)
     }
 
     @Test

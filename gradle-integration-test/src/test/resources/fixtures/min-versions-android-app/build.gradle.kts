@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
-    alias(libs.plugins.test.kotlin.multiplatform)
+    alias(libs.plugins.test.kotlin.multiplatform.jvm)
     alias(libs.plugins.test.android.library)
 }
 

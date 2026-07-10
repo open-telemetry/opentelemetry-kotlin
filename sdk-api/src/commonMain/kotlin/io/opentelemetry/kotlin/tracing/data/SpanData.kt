@@ -58,10 +58,24 @@ public interface SpanData : AttributeContainer {
     public val events: List<SpanEventData>
 
     /**
+     * The number of events that were dropped because the span's event limit was exceeded. The
+     * total number of events recorded can be derived as `events.size + droppedEventsCount`.
+     */
+    @ThreadSafe
+    public val droppedEventsCount: Int
+
+    /**
      * A list of links associated with the span.
      */
     @ThreadSafe
     public val links: List<SpanLinkData>
+
+    /**
+     * The number of links that were dropped because the span's link limit was exceeded. The
+     * total number of links recorded can be derived as `links.size + droppedLinksCount`.
+     */
+    @ThreadSafe
+    public val droppedLinksCount: Int
 
     /**
      * The timestamp at which this span ended, in nanoseconds. If it has not ended null will return.

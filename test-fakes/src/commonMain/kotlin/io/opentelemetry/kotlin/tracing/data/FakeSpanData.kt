@@ -21,7 +21,9 @@ class FakeSpanData(
     override val instrumentationScopeInfo: InstrumentationScopeInfo = FakeInstrumentationScopeInfo(),
     override val attributes: Map<String, Any> = mapOf("key" to "value"),
     override val events: List<SpanEventData> = listOf(FakeSpanEventData()),
+    override val droppedEventsCount: Int = 0,
     override val links: List<SpanLinkData> = listOf(FakeSpanLinkData()),
+    override val droppedLinksCount: Int = 0,
     override val hasEnded: Boolean = true,
     override val droppedAttributesCount: Int = 0,
 ) : SpanData

@@ -24,8 +24,10 @@ internal class SpanCreationCollector(
     )
 ) : SpanCreationAction, AttributesMutator by attrs {
     private val linksList = mutableListOf<SpanLink>()
+    private var droppedLinksCountImpl = 0
     val attributes: AttributeContainer get() = attrs
     val links: List<SpanLink> get() = linksList.toList()
+    val droppedLinksCount: Int get() = droppedLinksCountImpl
 
     /**
      * The number of creation-time attributes dropped here because the span's attribute limit was
@@ -38,13 +40,10 @@ internal class SpanCreationCollector(
         spanContext: SpanContext,
         attributes: (AttributesMutator.() -> Unit)?,
     ) {
-        if (linksList.size < spanLimitConfig.linkCountLimit && !hasSpanContext(spanContext)) {
+        if (linksList.size < spanLimitConfig.linkCountLimit) {
             linksList.add(buildSpanLink(spanContext, attributes, spanLimitConfig))
+        } else {
+            droppedLinksCountImpl++
         }
     }
-
-    private fun hasSpanContext(spanContext: SpanContext): Boolean =
-        linksList.any {
-            it.spanContext.traceId == spanContext.traceId && it.spanContext.spanId == spanContext.spanId
-        }
 }

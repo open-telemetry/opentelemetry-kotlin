@@ -21,5 +21,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "min-versions-android-app"
-include(":consumer-app")
+rootProject.name = "min-versions-kmp-app"

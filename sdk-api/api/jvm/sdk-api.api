@@ -230,6 +230,8 @@ public abstract interface class io/opentelemetry/kotlin/resource/Resource : io/o
 
 public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanData : io/opentelemetry/kotlin/attributes/AttributeContainer {
 	public abstract fun getDroppedAttributesCount ()I
+	public abstract fun getDroppedEventsCount ()I
+	public abstract fun getDroppedLinksCount ()I
 	public abstract fun getEndTimestamp ()Ljava/lang/Long;
 	public abstract fun getEvents ()Ljava/util/List;
 	public abstract fun getHasEnded ()Z
