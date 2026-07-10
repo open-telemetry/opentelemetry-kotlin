@@ -12,13 +12,21 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 /**
 * <p>Fired when an app navigation event has completed.</p>
 * <p>Notes:</p>
-* <p>none</p>
+* <p>Navigation completion SHOULD be reported after the destination is loaded, not when the navigation is merely triggered.</p>
 */
 @ExperimentalApi
 @IncubatingApi
 class AppNavCompleteEvent(
     /**
-    * <p>A human-readable string that uniquely identifies the destination of app navigation. This value should not contain high-cardinality dimensions like user ID, which should be replaced with a generic token if programmatically determined.</p>
+    * <p>Types of ending for an app action.</p>
+    * <p>Notes:</p>
+    * <p>Events that model app actions can specify this attribute to determine if it was successful or not. Any action event that omits this attribute is assumed to be successfully completed.</p>
+    */
+    val appActionEndType: String? = null,
+    /**
+    * <p>A human-readable string that uniquely identifies the destination of app navigation.</p>
+    * <p>Notes:</p>
+    * <p>This value SHOULD NOT contain high-cardinality dimensions like user ID. If such dimensions can be programmatically determined, they SHOULD be replaced with a generic token (e.g. <c>{userId} Profile</c> rather than the actual user ID).</p>
     */
     val appNavDestination: String? = null,
     /**
@@ -34,6 +42,7 @@ class AppNavCompleteEvent(
         logger.emit(
             eventName = "app.nav_complete",
         ) {
+            appActionEndType?.let { setStringAttribute("app.action.end_type", it) }
             appNavDestination?.let { setStringAttribute("app.nav.destination", it) }
             sessionId?.let { setStringAttribute("session.id", it) }
             attributes?.invoke(this)

@@ -9,7 +9,7 @@ plugins {
     alias(libs.plugins.download)
 }
 
-val semanticConventionsVersion = "0.1.0-dev"
+val semanticConventionsVersion = "0.2.0-dev"
 val semanticConventionsRepoZip =
     "https://github.com/bidetofevil/semantic-conventions-end-user-client/archive/v${semanticConventionsVersion}.zip"
 
