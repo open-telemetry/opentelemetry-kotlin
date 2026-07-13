@@ -19,8 +19,10 @@ class MinSupportedVersionsTest {
         )
     }
 
-    // Klib (iOS/JS) consumers need at least the Kotlin version this library is built with,
-    // so the fixture builds with exactly that version. iOS coverage requires a macOS host.
+    // Klib (iOS/JS) consumers need at least the Kotlin version this library is built with, so the
+    // fixture builds with the declared klib floor (minSupportedKotlinKlib). A Kotlin bump that
+    // outgrows that pin fails here — raising the floor must be a deliberate decision, not a side
+    // effect of a dependency update. iOS coverage requires a macOS host.
     @Test
     fun `min supported versions can consume klib artifacts`(@TempDir tmp: Path) {
         assembleFixture(

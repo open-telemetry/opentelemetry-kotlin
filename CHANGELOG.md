@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Pin the minimum supported Kotlin version for iOS and JS (klib) consumers at 2.4.0 in the
+  version catalog, instead of implicitly tracking the Kotlin version this library is built
+  with. A Kotlin update that would raise this floor now fails the min-versions integration
+  test, so raising it becomes a deliberate, documented decision.
+  ([#647](https://github.com/open-telemetry/opentelemetry-kotlin/pull/647))
 - Clarify the minimum supported Kotlin version per target family: 2.0.0 applies to JVM
   and Android consumers only, while iOS and JS consumers need at least the Kotlin version
   this library is built with (currently 2.4.0) — a klib toolchain constraint shared by
