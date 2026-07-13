@@ -16,6 +16,8 @@ ktor = "3.5.1"
 okio = "3.17.0"
 otel = "1.63.0"
 otel-alpha = "1.63.0-alpha"
+semanticConventionsCore = "1.43.0"
+semanticConventionsEndUserClient = "0.2.0-dev"
 kotlinSerialization = "1.11.0"
 mavenPublish = "0.37.0"
 nexus = "2.0.0"
@@ -41,6 +43,7 @@ kotlin-test-common = { module = "org.jetbrains.kotlin:kotlin-test-common", versi
 kotlin-test-common-annotations = { module = "org.jetbrains.kotlin:kotlin-test-annotations-common", version.ref = "kotlin" }
 kotlinMultiplatform = { module = "org.jetbrains.kotlin.multiplatform:org.jetbrains.kotlin.multiplatform.gradle.plugin", version.ref = "kotlin" }
 agp = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+downloadPlugin = { module = "de.undercouch:gradle-download-task", version.ref = "downloadPlugin" }
 detekt-api = { module = "io.gitlab.arturbosch.detekt:detekt-api", version.ref = "detekt" }
 detekt-test = { module = "io.gitlab.arturbosch.detekt:detekt-test", version.ref = "detekt" }
 detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }

@@ -16,6 +16,7 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 */
 @ExperimentalApi
 @IncubatingApi
+@Deprecated("Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).")
 class GenAiEvaluationResultEvent(
     /**
     * <p>Describes a class of error the operation ended with.</p>

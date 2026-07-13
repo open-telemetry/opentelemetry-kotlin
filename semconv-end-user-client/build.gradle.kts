@@ -8,13 +8,13 @@ plugins {
     id("com.vanniktech.maven.publish")
 }
 
-val semanticConventionsVersion = libs.versions.semanticConventionsCore.get()
+val semanticConventionsVersion = libs.versions.semanticConventionsEndUserClient.get()
 
 registerSemanticConventionGeneration(
-    registryName = "core",
+    registryName = "end-user-client",
     version = semanticConventionsVersion,
-    repoZipUrl = "https://github.com/open-telemetry/semantic-conventions/archive/v${semanticConventionsVersion}.zip",
-    packageName = "io.opentelemetry.kotlin.semconv",
+    repoZipUrl = "https://github.com/bidetofevil/semantic-conventions-end-user-client/archive/v${semanticConventionsVersion}.zip",
+    packageName = "io.opentelemetry.kotlin.semconv.enduserclient",
 )
 
 // Disable Detekt tasks for generated code
@@ -26,7 +26,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                api(project(":api"))
+                api(project(":semconv"))
             }
         }
     }

@@ -8,7 +8,7 @@ plugins {
     id("signing")
     id("com.vanniktech.maven.publish")
     id("org.jetbrains.kotlinx.kover")
-    alias(libs.plugins.download)
+    id("de.undercouch.download")
     alias(libs.plugins.wire)
 }
 

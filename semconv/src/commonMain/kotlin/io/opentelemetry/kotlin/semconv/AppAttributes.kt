@@ -10,14 +10,6 @@ object AppAttributes {
   
 
     /**
-    * <p>Types of ending for an app action.</p>
-    * <p>Notes:</p>
-    * <p>Events that model app actions can specify this attribute to determine if it was successful or not. Any action event that omits this attribute is assumed to be successfully completed.</p>
-    */
-    @IncubatingApi
-    const val APP_ACTION_END_TYPE: String = "app.action.end_type"
-
-    /**
     * <p>Unique identifier for a particular build or compilation of the application.</p>
     */
     @IncubatingApi
@@ -33,12 +25,6 @@ object AppAttributes {
     */
     @IncubatingApi
     const val APP_CRASH_ID: String = "app.crash.id"
-
-    /**
-    * <p>The runtime environment in which the app is deployed.</p>
-    */
-    @IncubatingApi
-    const val APP_ENVIRONMENT: String = "app.environment"
 
     /**
     * <p>A unique identifier representing the installation of an application on a specific device</p>
@@ -83,14 +69,6 @@ object AppAttributes {
     const val APP_JANK_THRESHOLD: String = "app.jank.threshold"
 
     /**
-    * <p>A human-readable string that uniquely identifies the destination of app navigation.</p>
-    * <p>Notes:</p>
-    * <p>This value SHOULD NOT contain high-cardinality dimensions like user ID. If such dimensions can be programmatically determined, they SHOULD be replaced with a generic token (e.g. <c>{userId} Profile</c> rather than the actual user ID).</p>
-    */
-    @IncubatingApi
-    const val APP_NAV_DESTINATION: String = "app.nav.destination"
-
-    /**
     * <p>The x (horizontal) coordinate of a screen coordinate, in screen pixels.</p>
     */
     @IncubatingApi
@@ -133,31 +111,4 @@ object AppAttributes {
     */
     @IncubatingApi
     const val APP_WIDGET_NAME: String = "app.widget.name"
-
-    /**
-    * <p>APP_ACTION_END_TYPE</p>
-    */
-    @IncubatingApi
-    enum class AppActionEndTypeValues(val value: String) {
-
-        /**
-        * <p>Action completed successfully</p>
-        */
-        SUCCESS("success"),
-
-        /**
-        * <p>Action ended due to an application error</p>
-        */
-        ERROR("error"),
-
-        /**
-        * <p>Action ended due to user abandonment</p>
-        */
-        ABANDON("abandon"),
-
-        /**
-        * <p>Action ended without confirmation of success, error, or abandonment</p>
-        */
-        UNKNOWN("unknown"),
-    }
 }

@@ -13,6 +13,32 @@
     {
       "matchUpdateTypes": ["minor", "major"],
       "schedule": ["before 8am on Monday"]
+    },
+    {
+      "matchDepNames": [
+        "open-telemetry/semantic-conventions",
+        "bidetofevil/semantic-conventions-end-user-client"
+      ],
+      "ignoreUnstable": false
+    }
+  ],
+  // Tracks the semantic convention registry versions in gradle/libs.versions.toml
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["gradle/libs.versions.toml"],
+      "matchStrings": ["semanticConventionsCore = \"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "open-telemetry/semantic-conventions",
+      "extractVersionTemplate": "^v?(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["gradle/libs.versions.toml"],
+      "matchStrings": ["semanticConventionsEndUserClient = \"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "bidetofevil/semantic-conventions-end-user-client",
+      "extractVersionTemplate": "^v?(?<version>.*)$"
     }
   ],
   "labels": [

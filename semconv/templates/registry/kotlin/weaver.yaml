@@ -1,3 +1,5 @@
+# The `package` parameter must supply it via `--param package=...` at invocation time
+# so that the registry-to-package mapping is always explicitly set by the caller.
 params:
   excluded_namespaces: ["dotnet", "aspnetcore", "signalr"]
   excluded_attributes: []

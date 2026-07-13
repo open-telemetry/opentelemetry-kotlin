@@ -1,45 +1,41 @@
-name: Update semantic conventions
+name: Regenerate semantic conventions
+
+# Regenerates the Kotlin sources in the semconv modules whenever relevant files change
 
 on:
-  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'gradle/libs.versions.toml'
+      - 'semconv/templates/**'
 
 permissions:
   contents: read
 
+env:
+  WEAVER_VERSION: v0.24.2
+
 jobs:
-  update-semconv:
+  regenerate:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       contents: write
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: otelbot-token
+        with:
+          client-id: ${{ vars.OTELBOT_CLIENT_ID }}
+          private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-
-      - name: Check for new semconv version
-        run: |
-          latest=$(gh api repos/open-telemetry/semantic-conventions/releases/latest --jq '.tag_name' | sed 's/^v//')
-          current=$(grep 'val semanticConventionsVersion' semconv/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
-
-          echo "Latest semconv version: $latest"
-          echo "Current semconv version: $current"
-
-          if [[ "$latest" == "$current" ]]; then
-            echo "Already up to date, nothing to do."
-            echo "UP_TO_DATE=true" >> $GITHUB_ENV
-          else
-            echo "New version available: $latest"
-            echo "UP_TO_DATE=false" >> $GITHUB_ENV
-            echo "LATEST=$latest" >> $GITHUB_ENV
-            echo "CURRENT=$current" >> $GITHUB_ENV
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ steps.otelbot-token.outputs.token }}
 
       - name: Install weaver
-        if: env.UP_TO_DATE == 'false'
         run: |
-          weaver_tag=$(gh api repos/open-telemetry/weaver/releases/latest --jq '.tag_name')
-          echo "Installing weaver $weaver_tag"
-          gh release download "$weaver_tag" \
+          echo "Installing weaver $WEAVER_VERSION"
+          gh release download "$WEAVER_VERSION" \
             --repo open-telemetry/weaver \
             --pattern '*x86_64-unknown-linux-gnu.tar.xz' \
             --output weaver.tar.xz
@@ -50,48 +46,26 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Java
-        if: env.UP_TO_DATE == 'false'
         uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
         with:
           distribution: 'adopt'
           java-version: 21
 
       - name: Setup Gradle
-        if: env.UP_TO_DATE == 'false'
         uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
 
-      - name: Update semconv version in build file
-        if: env.UP_TO_DATE == 'false'
-        run: |
-          sed -Ei "s/(val semanticConventionsVersion = \").*\"/\1${LATEST}\"/" semconv/build.gradle.kts
-
       - name: Regenerate semantic conventions
-        if: env.UP_TO_DATE == 'false'
-        run: ./gradlew :semconv:generateSemanticConventions
+        run: ./gradlew :semconv:generateSemanticConventions :semconv-end-user-client:generateSemanticConventions --stacktrace
 
       - name: Use CLA approved github bot
-        if: env.UP_TO_DATE == 'false'
         run: .github/scripts/use-cla-approved-github-bot.sh
 
-      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        if: env.UP_TO_DATE == 'false'
-        id: otelbot-token
-        with:
-          client-id: ${{ vars.OTELBOT_CLIENT_ID }}
-          private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
-
-      - name: Create pull request
-        if: env.UP_TO_DATE == 'false'
-        env:
-          GH_TOKEN: ${{ steps.otelbot-token.outputs.token }}
+      - name: Push regenerated sources
         run: |
-          message="Update semantic conventions to v${LATEST}"
-          branch="otelbot/update-semconv-to-${LATEST}"
-
-          git checkout -b $branch
-          git add semconv/build.gradle.kts semconv/src/
-          git commit -m "$message"
-          git push --set-upstream origin $branch
-          gh pr create --title "$message" \
-                       --body "Updates semantic conventions from \`${CURRENT}\` to \`v${LATEST}\`." \
-                       --base main
+          if [[ -n "$(git status --porcelain semconv/src semconv-end-user-client/src)" ]]; then
+            git add semconv/src semconv-end-user-client/src
+            git commit -m "Regenerate semantic conventions"
+            git push
+          else
+            echo "Generated sources are up to date."
+          fi

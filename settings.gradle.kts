@@ -32,6 +32,7 @@ include(
     ":integration-test",
     ":compat-bom",
     ":semconv",
+    ":semconv-end-user-client",
     ":benchmark-android",
     ":benchmark-jvm",
     ":benchmark-fixtures",
