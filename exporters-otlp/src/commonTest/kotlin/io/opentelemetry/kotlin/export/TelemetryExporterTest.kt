@@ -43,4 +43,17 @@ internal class TelemetryExporterTest {
     fun testExportSucceedsBeforeShutdown() {
         assertEquals(OperationResultCode.Success, exporter.export(listOf("data")))
     }
+
+    @Test
+    fun testExportDoesNotPropagateExportActionFailure() {
+        val throwingExporter = TelemetryExporter<String>(
+            initialDelayMs = 1,
+            maxAttemptIntervalMs = 1,
+            maxAttempts = 1,
+            exportAction = { error("network unreachable") }
+        )
+        // The failure occurs on a background coroutine whose scope has a CoroutineExceptionHandler,
+        // so it must not propagate to the caller nor crash the process.
+        assertEquals(OperationResultCode.Success, throwingExporter.export(listOf("data")))
+    }
 }
