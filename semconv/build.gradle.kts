@@ -9,10 +9,9 @@ plugins {
     alias(libs.plugins.download)
 }
 
-// The release version of https://github.com/open-telemetry/semantic-conventions used to generate classes
-val semanticConventionsVersion = "1.41.1"
+val semanticConventionsVersion = "0.2.0-dev"
 val semanticConventionsRepoZip =
-    "https://github.com/open-telemetry/semantic-conventions/archive/v${semanticConventionsVersion}.zip"
+    "https://github.com/bidetofevil/semantic-conventions-end-user-client/archive/v${semanticConventionsVersion}.zip"
 
 // Disable Detekt tasks for generated code
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
@@ -50,6 +49,7 @@ abstract class GenerateSemanticConventionsTask @Inject constructor(
                 commandLine(
                     "weaver", "registry", "generate",
                     "-r", "build/semantic-conventions-${version.get()}/model", // directory for semantic convention schemas
+                    "--include-unreferenced", // generate dependency registries' conventions too
                     "--templates", "templates", // directory containing jinja2 templates
                     "kotlin", // use the Kotlin jinja2 template
                     "src/commonMain/kotlin/io/opentelemetry/kotlin/semconv" // output directory

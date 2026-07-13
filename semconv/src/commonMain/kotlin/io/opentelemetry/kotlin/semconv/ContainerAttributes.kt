@@ -54,7 +54,6 @@ object ContainerAttributes {
     /**
     * <p>Container ID. Usually a UUID, as for example used to <a href="https://docs.docker.com/engine/containers/run/#container-identification">identify Docker containers</a>. The UUID might be abbreviated.</p>
     */
-    @IncubatingApi
     const val CONTAINER_ID: String = "container.id"
 
     /**
@@ -70,7 +69,6 @@ object ContainerAttributes {
     /**
     * <p>Name of the image the container was built on.</p>
     */
-    @IncubatingApi
     const val CONTAINER_IMAGE_NAME: String = "container.image.name"
 
     /**
@@ -78,13 +76,11 @@ object ContainerAttributes {
     * <p>Notes:</p>
     * <p><a href="https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Image/operation/ImageInspect">Docker</a> and <a href="https://github.com/kubernetes/cri-api/blob/c75ef5b473bbe2d0a4fc92f82235efd665ea8e9f/pkg/apis/runtime/v1/api.proto#L1237-L1238">CRI</a> report those under the <c>RepoDigests</c> field.</p>
     */
-    @IncubatingApi
     const val CONTAINER_IMAGE_REPO_DIGESTS: String = "container.image.repo_digests"
 
     /**
     * <p>Container image tags. An example can be found in <a href="https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Image/operation/ImageInspect">Docker Image Inspect</a>. Should be only the <c><tag></c> section of the full name for example from <c>registry.example.com/my-org/my-image:<tag></c>.</p>
     */
-    @IncubatingApi
     const val CONTAINER_IMAGE_TAGS: String = "container.image.tags"
 
     /**
