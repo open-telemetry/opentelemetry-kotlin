@@ -11,35 +11,38 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class CompatB3PropagatorApiTest {
 
-    private val dsl = CompatPropagatorConfigImpl()
-    private val contextFactory = CompatContextFactory()
-
     @Test
     fun `b3 single returns propagator with b3 field`() {
+        val dsl = CompatPropagatorConfigImpl()
         val propagator = dsl.b3(B3Format.SINGLE)
         assertEquals(listOf("b3"), propagator.fields().toList())
     }
 
     @Test
     fun `b3 multi returns propagator with X-B3 fields`() {
+        val dsl = CompatPropagatorConfigImpl()
         val propagator = dsl.b3(B3Format.MULTI)
         assertEquals(listOf("X-B3-TraceId", "X-B3-SpanId", "X-B3-Sampled"), propagator.fields().toList())
     }
 
     @Test
     fun `b3 default format is SINGLE`() {
+        val dsl = CompatPropagatorConfigImpl()
         val propagator = dsl.b3()
         assertEquals(listOf("b3"), propagator.fields().toList())
     }
 
     @Test
     fun `b3 call captures result and buildPropagator returns it`() {
+        val dsl = CompatPropagatorConfigImpl()
         val captured = dsl.b3(B3Format.SINGLE)
         assertSame(captured, dsl.buildPropagator())
     }
 
     @Test
     fun `b3 single round-trips a sampled span`() {
+        val dsl = CompatPropagatorConfigImpl()
+        val contextFactory = CompatContextFactory()
         val propagator = dsl.b3(B3Format.SINGLE)
         val traceId = "0af7651916cd43dd8448eb211c80319c"
         val spanId = "b7ad6b7169203331"
@@ -52,6 +55,8 @@ internal class CompatB3PropagatorApiTest {
 
     @Test
     fun `b3 multi round-trips a sampled span`() {
+        val dsl = CompatPropagatorConfigImpl()
+        val contextFactory = CompatContextFactory()
         val propagator = dsl.b3(B3Format.MULTI)
         val traceId = "0af7651916cd43dd8448eb211c80319c"
         val spanId = "b7ad6b7169203331"
@@ -70,6 +75,7 @@ internal class CompatB3PropagatorApiTest {
 
     @Test
     fun `b3 returns an adapter wrapping the Java B3Propagator`() {
+        val dsl = CompatPropagatorConfigImpl()
         assertTrue(dsl.b3(B3Format.SINGLE) is TextMapPropagatorAdapter)
     }
 }

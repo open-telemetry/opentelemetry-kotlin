@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.factory
 
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -172,13 +171,14 @@ internal class HexTest {
 
     @Test
     fun testIsAllZerosHex() {
-        assertEquals(true, "0000000000000000".isAllZerosHex(), "16-char all-zero span ID")
-        assertEquals(true, "00000000000000000000000000000000".isAllZerosHex(), "32-char all-zero trace ID")
-        assertEquals(false, "b7ad6b7169203331".isAllZerosHex(), "non-zero span ID")
-        assertEquals(false, "0af7651916cd43dd8448eb211c80319c".isAllZerosHex(), "non-zero trace ID")
-        assertEquals(false, "ffffffffffffffff".isAllZerosHex(), "max value span ID")
-        assertEquals(false, "ffffffffffffffffffffffffffffffff".isAllZerosHex(), "max value trace ID")
-        assertEquals(false, "00000000000000010000000000000000".isAllZerosHex(), "non-zero high half only")
-        assertEquals(false, "00000000000000000000000000000001".isAllZerosHex(), "non-zero low half only")
+        assertTrue("0000000000000000".isAllZerosHex(), "16-char all-zero span ID")
+        assertTrue("00000000000000000000000000000000".isAllZerosHex(), "32-char all-zero trace ID")
+        assertTrue("".isAllZerosHex(), "empty is the same than all 0")
+        assertFalse("b7ad6b7169203331".isAllZerosHex(), "non-zero span ID")
+        assertFalse("0af7651916cd43dd8448eb211c80319c".isAllZerosHex(), "non-zero trace ID")
+        assertFalse("ffffffffffffffff".isAllZerosHex(), "max value span ID")
+        assertFalse("ffffffffffffffffffffffffffffffff".isAllZerosHex(), "max value trace ID")
+        assertFalse("00000000000000010000000000000000".isAllZerosHex(), "non-zero high half only")
+        assertFalse("00000000000000000000000000000001".isAllZerosHex(), "non-zero low half only")
     }
 }

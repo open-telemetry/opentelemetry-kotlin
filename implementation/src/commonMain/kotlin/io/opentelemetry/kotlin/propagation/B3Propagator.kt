@@ -58,9 +58,9 @@ internal class B3Propagator(
         setter: TextMapSetter<T>,
     ) {
         val flag = when {
-            debug -> 'd'
-            spanContext.traceFlags.isSampled -> '1'
-            else -> '0'
+            debug -> FLAGS.DEBUG
+            spanContext.traceFlags.isSampled -> FLAGS.SAMPLED
+            else -> FLAGS.DEFAULT
         }
         val value = buildString(SINGLE_HEADER_SIZE) {
             append(spanContext.traceId)
@@ -182,5 +182,11 @@ internal class B3Propagator(
 
         private val SINGLE_FIELDS = listOf(COMBINED_HEADER)
         private val MULTI_FIELDS = listOf(TRACE_ID_HEADER, SPAN_ID_HEADER, SAMPLED_HEADER)
+
+        private object FLAGS {
+            const val DEBUG = 'd'
+            const val SAMPLED = '1'
+            const val DEFAULT = '0'
+        }
     }
 }
