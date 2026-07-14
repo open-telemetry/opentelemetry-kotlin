@@ -60,7 +60,7 @@ object NetworkAttributes {
     const val NETWORK_INTERFACE_NAME: String = "network.interface.name"
 
     /**
-    * <p>The network IO operation direction.</p>
+    * <p>The direction of traffic from the perspective of the observing host's physical or virtual network interface. It should not be used to represent the logical direction of a stateful connection or network flow.</p>
     */
     @IncubatingApi
     const val NETWORK_IO_DIRECTION: String = "network.io.direction"

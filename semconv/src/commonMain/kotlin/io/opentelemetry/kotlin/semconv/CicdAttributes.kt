@@ -78,25 +78,25 @@ object CicdAttributes {
     const val CICD_PIPELINE_TASK_TYPE: String = "cicd.pipeline.task.type"
 
     /**
-    * <p>The name of a component of the CICD system.</p>
+    * <p>The name of a component of the CI/CD system.</p>
     */
     @IncubatingApi
     const val CICD_SYSTEM_COMPONENT: String = "cicd.system.component"
 
     /**
-    * <p>The unique identifier of a worker within a CICD system.</p>
+    * <p>The unique identifier of a worker within a CI/CD system.</p>
     */
     @IncubatingApi
     const val CICD_WORKER_ID: String = "cicd.worker.id"
 
     /**
-    * <p>The name of a worker within a CICD system.</p>
+    * <p>The name of a worker within a CI/CD system.</p>
     */
     @IncubatingApi
     const val CICD_WORKER_NAME: String = "cicd.worker.name"
 
     /**
-    * <p>The state of a CICD worker / agent.</p>
+    * <p>The state of a CI/CD worker / agent.</p>
     */
     @IncubatingApi
     const val CICD_WORKER_STATE: String = "cicd.worker.state"
@@ -146,7 +146,7 @@ object CicdAttributes {
         FAILURE("failure"),
 
         /**
-        * <p>The pipeline run failed due to an error in the CICD system, eg. due to the worker being killed.</p>
+        * <p>The pipeline run failed due to an error in the CI/CD system, eg. due to the worker being killed.</p>
         */
         ERROR("error"),
 
@@ -205,7 +205,7 @@ object CicdAttributes {
         FAILURE("failure"),
 
         /**
-        * <p>The task run failed due to an error in the CICD system, eg. due to the worker being killed.</p>
+        * <p>The task run failed due to an error in the CI/CD system, eg. due to the worker being killed.</p>
         */
         ERROR("error"),
 
@@ -254,17 +254,17 @@ object CicdAttributes {
     enum class CicdWorkerStateValues(val value: String) {
 
         /**
-        * <p>The worker is not performing work for the CICD system. It is available to the CICD system to perform work on (online / idle).</p>
+        * <p>The worker is not performing work for the CI/CD system. It is available to the CI/CD system to perform work on (online / idle).</p>
         */
         AVAILABLE("available"),
 
         /**
-        * <p>The worker is performing work for the CICD system.</p>
+        * <p>The worker is performing work for the CI/CD system.</p>
         */
         BUSY("busy"),
 
         /**
-        * <p>The worker is not available to the CICD system (disconnected / down).</p>
+        * <p>The worker is not available to the CI/CD system (disconnected / down).</p>
         */
         OFFLINE("offline"),
     }
