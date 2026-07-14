@@ -10,6 +10,9 @@ on:
   issue_comment:
     types: [created]
 
+permissions:
+  contents: read
+
 jobs:
   update-kotlin-js-lock:
     if: >
