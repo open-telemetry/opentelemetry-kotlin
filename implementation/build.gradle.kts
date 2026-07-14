@@ -24,7 +24,6 @@ kotlin {
             dependencies {
                 implementation(project(":sdk-api"))
                 implementation(project(":sdk-common"))
-                implementation(project(":config"))
                 implementation(project(":api-ext"))
                 implementation(project(":sdk-api"))
                 implementation(project(":model"))
