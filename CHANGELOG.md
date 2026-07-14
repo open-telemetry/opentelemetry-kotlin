@@ -2,6 +2,90 @@
 
 ## Unreleased
 
+- Pin the minimum supported Kotlin version for iOS and JS (klib) consumers at 2.4.0 in the
+  version catalog, instead of implicitly tracking the Kotlin version this library is built
+  with. A Kotlin update that would raise this floor now fails the min-versions integration
+  test, so raising it becomes a deliberate, documented decision.
+  ([#647](https://github.com/open-telemetry/opentelemetry-kotlin/pull/647))
+- Clarify the minimum supported Kotlin version per target family: 2.0.0 applies to JVM
+  and Android consumers only, while iOS and JS consumers need at least the Kotlin version
+  this library is built with (currently 2.4.0) — a klib toolchain constraint shared by
+  all KMP libraries. Both floors are now enforced by integration tests.
+  ([#633](https://github.com/open-telemetry/opentelemetry-kotlin/pull/633))
+- Raise the minimum supported AGP version to 8.0.2. Through no fault of
+  opentelemetry-kotlin, AGP 8.0.0 bundles an R8 that fails to dex Kotlin 2.0
+  `@Metadata`, so projects on that version can't build against these artifacts
+  without an unusual manual R8 override. Later 8.0.x patches ship a working R8,
+  making 8.0.2 — the final 8.0.x patch — a more sensible floor.
+  ([#614](https://github.com/open-telemetry/opentelemetry-kotlin/pull/614))
+- Raise the minimum supported Gradle version from 8.0 to 8.0.2, matching the
+  AGP floor on the final 8.0.x patch.
+  ([#614](https://github.com/open-telemetry/opentelemetry-kotlin/pull/614))
+
+## Version 0.5.0 (2026-07-06)
+
+* Attributes are now considered a stable API. 🚀
+
+### Migration notes
+
+- The default resource no longer includes `service.version`.
+  ([#561](https://github.com/open-telemetry/opentelemetry-kotlin/pull/561))
+- The default scheduled batch export delay is now 5000ms.
+  ([#580](https://github.com/open-telemetry/opentelemetry-kotlin/pull/580))
+
+### 📈 Enhancements
+
+- Metrics now include a minimal `MeterProvider` implementation wired through the
+  OpenTelemetry entry points.
+  ([#527](https://github.com/open-telemetry/opentelemetry-kotlin/pull/527))
+- Add initial declarative config provider interfaces.
+  ([#598](https://github.com/open-telemetry/opentelemetry-kotlin/pull/598))
+- Add the `AlwaysRecordSampler` implementation.
+  ([#587](https://github.com/open-telemetry/opentelemetry-kotlin/pull/587))
+- Add generated event semantic convention classes.
+  ([#585](https://github.com/open-telemetry/opentelemetry-kotlin/pull/585))
+- Attributes are now stable and no longer marked with `@ExperimentalApi`.
+  ([#609](https://github.com/open-telemetry/opentelemetry-kotlin/pull/609))
+- `TextMapGetter` and `TextMapSetter` carrier arguments are now nullable to align
+  with the OpenTelemetry propagator API specification.
+  ([#595](https://github.com/open-telemetry/opentelemetry-kotlin/pull/595))
+
+### 🛠️ Bug fixes
+
+- Remove println output from OTLP exporters.
+  ([#560](https://github.com/open-telemetry/opentelemetry-kotlin/pull/560))
+- Log a warning when an instrumentation scope name is invalid.
+  ([#563](https://github.com/open-telemetry/opentelemetry-kotlin/pull/563))
+- Skip OTLP HTTP export requests when there is no telemetry to export.
+  ([#562](https://github.com/open-telemetry/opentelemetry-kotlin/pull/562))
+- Use the trace service response model for OTLP trace responses.
+  ([#573](https://github.com/open-telemetry/opentelemetry-kotlin/pull/573))
+- Retry OTLP HTTP requests on retryable status codes.
+  ([#574](https://github.com/open-telemetry/opentelemetry-kotlin/pull/574))
+- Make `ReadWriteLogRecord.spanContext` mutable.
+  ([#590](https://github.com/open-telemetry/opentelemetry-kotlin/pull/590))
+- Do not export spans when `isSampled` is false.
+  ([#589](https://github.com/open-telemetry/opentelemetry-kotlin/pull/589))
+- Pass span links to samplers.
+  ([#608](https://github.com/open-telemetry/opentelemetry-kotlin/pull/608))
+
+### 📖 Docs
+
+- API stability levels are now documented in a matrix in
+  [api/README.md](https://github.com/open-telemetry/opentelemetry-kotlin/blob/main/api/README.md#component-stability-matrix).
+  ([#579](https://github.com/open-telemetry/opentelemetry-kotlin/pull/579))
+- Improve `CONTRIBUTING.md` for new contributors.
+  ([#588](https://github.com/open-telemetry/opentelemetry-kotlin/pull/588))
+
+### 🧰 Tooling
+
+- test: add test that enforces min supported versions
+  ([#521](https://github.com/open-telemetry/opentelemetry-kotlin/pull/521))
+- build: attempt to fix build
+  ([#524](https://github.com/open-telemetry/opentelemetry-kotlin/pull/524))
+- test: add a test that cross checks propagation between impl/compat
+  ([#525](https://github.com/open-telemetry/opentelemetry-kotlin/pull/525))
+
 ## Version 0.4.0 (2026-05-20)
 
 ### ⚠️ Breaking changes

@@ -8,4 +8,7 @@ import io.opentelemetry.kotlin.tracing.model.SpanLink
 internal class SpanLinkImpl(
     override val spanContext: SpanContext,
     private val attrs: AttributesModel
-) : SpanLink, AttributesMutator by attrs, AttributeContainer by attrs
+) : SpanLink, AttributesMutator by attrs, AttributeContainer by attrs {
+    override val droppedAttributesCount: Int
+        get() = attrs.droppedAttributesCount
+}

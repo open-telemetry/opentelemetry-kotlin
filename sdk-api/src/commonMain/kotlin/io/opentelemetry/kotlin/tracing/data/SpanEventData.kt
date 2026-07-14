@@ -21,4 +21,10 @@ public interface SpanEventData : AttributeContainer {
      */
     @ThreadSafe
     public val timestamp: Long
+
+    /**
+     * The number of attributes that were dropped because the event's attribute limit was exceeded.
+     */
+    @ThreadSafe
+    public val droppedAttributesCount: Int
 }

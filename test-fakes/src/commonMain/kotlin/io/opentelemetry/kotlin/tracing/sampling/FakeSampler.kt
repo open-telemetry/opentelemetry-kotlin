@@ -16,6 +16,12 @@ class FakeSampler(
     var callCount = 0
         private set
 
+    var lastAttributes: Map<String, Any> = emptyMap()
+        private set
+
+    var lastLinks: List<SpanLink> = emptyList()
+        private set
+
     override fun shouldSample(
         context: Context,
         traceId: String,
@@ -25,6 +31,8 @@ class FakeSampler(
         links: List<SpanLink>,
     ): SamplingResult {
         callCount++
+        lastAttributes = attributes.attributes
+        lastLinks = links
         return FakeSamplingResult(decision, FakeAttributeContainer(samplerAttributes), samplerTraceState)
     }
 

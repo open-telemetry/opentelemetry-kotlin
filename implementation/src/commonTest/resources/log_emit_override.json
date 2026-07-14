@@ -21,7 +21,7 @@
     "spanContext": {
       "traceId": "12345678901234567890123456789012",
       "spanId": "1234567890123456",
-      "traceFlags": "00",
+      "traceFlags": "01",
       "traceState": {
         "foo": "bar"
       }

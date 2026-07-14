@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.NoopOpenTelemetry
-import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.ShutdownState
@@ -17,6 +16,7 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.model.CreatedSpan
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpanImpl
+import io.opentelemetry.kotlin.tracing.model.SpanCreationCollector
 import io.opentelemetry.kotlin.tracing.model.SpanModel
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
@@ -41,6 +41,8 @@ internal class TracerImpl(
     private val invalidSpanContext = spanContextFactory.invalid
     private val traceFlagsDefault = traceFlagsFactory.default
 
+    override fun enabled(): Boolean = !shutdownState.isShutdown && processor != null
+
     override fun startSpan(
         name: String,
         parentContext: Context?,
@@ -61,13 +63,16 @@ internal class TracerImpl(
             }
             val spanIdBytes = idGenerator.generateSpanIdBytes()
 
+            val collector = SpanCreationCollector(spanLimitConfig)
+            action?.invoke(collector)
+
             val result = sampler.shouldSample(
                 context = ctx,
                 traceId = traceIdBytes.toHexString(),
                 name = name,
                 spanKind = spanKind,
-                attributes = AttributesModel(),
-                links = emptyList(),
+                attributes = collector.attributes,
+                links = collector.links
             )
 
             val sampled = result.decision == SamplingResult.Decision.RECORD_AND_SAMPLE
@@ -87,12 +92,13 @@ internal class TracerImpl(
                 resource = resource,
                 parent = parentSpanContext,
                 spanContext = spanContext,
-                spanLimitConfig = spanLimitConfig
+                spanLimitConfig = spanLimitConfig,
+                initialLinks = collector.links,
+                initialDroppedAttributesCount = collector.droppedAttributesCount,
+                initialDroppedLinksCount = collector.droppedLinksCount
             )
             spanModel.setAttributes(result.attributes)
-            if (action != null) {
-                action(spanModel)
-            }
+            spanModel.setAttributes(collector.attributes)
             processor?.onStart(ReadWriteSpanImpl(spanModel), ctx)
             CreatedSpan(spanModel)
         }

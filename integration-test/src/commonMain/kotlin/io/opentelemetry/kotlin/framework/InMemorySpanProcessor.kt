@@ -20,6 +20,9 @@ internal class InMemorySpanProcessor(
     }
 
     override fun onEnd(span: ReadableSpan) {
+        if (!span.spanContext.traceFlags.isSampled) {
+            return
+        }
         scope.launch {
             exporter.export(listOf(span.toSpanData()))
         }

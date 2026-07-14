@@ -9,4 +9,7 @@ internal class SpanEventImpl(
     override val name: String,
     override val timestamp: Long,
     private val attrs: AttributesModel
-) : SpanEvent, AttributesMutator by attrs, AttributeContainer by attrs
+) : SpanEvent, AttributesMutator by attrs, AttributeContainer by attrs {
+    override val droppedAttributesCount: Int
+        get() = attrs.droppedAttributesCount
+}

@@ -97,6 +97,9 @@ internal class ReadWriteLogRecordAdapter(
     override val attributes: Map<String, Any>
         get() = impl.attributes.convertToMap()
 
+    override val droppedAttributesCount: Int
+        get() = impl.toLogRecordData().totalAttributeCount - impl.attributes.size()
+
     override val resource: Resource
         get() = ResourceAdapter(impl.toLogRecordData().resource)
 

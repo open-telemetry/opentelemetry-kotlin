@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.attributes
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
 
 /**
@@ -10,7 +9,6 @@ import io.opentelemetry.kotlin.ThreadSafe
  *
  * https://opentelemetry.io/docs/specs/otel/common/#attribute
  */
-@ExperimentalApi
 @ThreadSafe
 public fun AttributesMutator.setAttributes(attributes: Map<String, Any>) {
     attributes.forEach {

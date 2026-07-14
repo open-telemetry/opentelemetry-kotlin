@@ -11,18 +11,41 @@ import java.nio.file.StandardCopyOption
 class MinSupportedVersionsTest {
 
     @Test
-    fun `min supported versions can consume artifacts`(@TempDir tmp: Path) {
-        val fixtureSrc = File(systemProperty("fixtureSrcDir"), "min-versions-android-app").toPath()
+    fun `min supported versions can consume jvm and android artifacts`(@TempDir tmp: Path) {
+        assembleFixture(
+            fixtureName = "min-versions-android-app",
+            gradleVersion = systemProperty("minSupportedGradle"),
+            tmp = tmp,
+        )
+    }
+
+    // Klib (iOS/JS) consumers need at least the Kotlin version this library is built with, so the
+    // fixture builds with the declared klib floor (minSupportedKotlinKlib). A Kotlin bump that
+    // outgrows that pin fails here — raising the floor must be a deliberate decision, not a side
+    // effect of a dependency update. iOS coverage requires a macOS host.
+    @Test
+    fun `min supported versions can consume klib artifacts`(@TempDir tmp: Path) {
+        assembleFixture(
+            fixtureName = "min-versions-kmp-app",
+            gradleVersion = systemProperty("minSupportedGradle"),
+            tmp = tmp,
+        )
+    }
+
+    private fun assembleFixture(
+        fixtureName: String,
+        gradleVersion: String,
+        tmp: Path,
+    ) {
+        val fixtureSrc = File(systemProperty("fixtureSrcDir"), fixtureName).toPath()
         copyRecursively(fixtureSrc, tmp)
 
         val runner = GradleRunner.create()
             .withProjectDir(tmp.toFile())
-            .withGradleVersion(systemProperty("minSupportedGradle"))
+            .withGradleVersion(gradleVersion)
             .withArguments(
                 "-PcatalogPath=${systemProperty("catalogPath")}",
                 "-PotelKotlinVersion=${systemProperty("otelKotlinVersion")}",
-                "-Pandroid.useAndroidX=true",
-                "-Pandroid.nonTransitiveRClass=true",
                 "assemble",
                 "--info",
                 "--stacktrace",

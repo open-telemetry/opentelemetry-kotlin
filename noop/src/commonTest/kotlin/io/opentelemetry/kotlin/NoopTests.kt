@@ -36,6 +36,8 @@ internal class NoopTests {
         assertSame(span, anotherSpan)
         assertTrue(span is NoopSpan)
 
+        assertFalse(tracer.enabled())
+
         // Span operations should be no-ops
         verifySpanOperationsAreNoop(span)
 
@@ -239,7 +241,7 @@ internal class NoopTests {
         // extract returns the original context unchanged
         val getter = object : TextMapGetter<MutableMap<String, String>> {
             override fun keys(carrier: MutableMap<String, String>) = carrier.keys
-            override fun get(carrier: MutableMap<String, String>, key: String) = carrier[key]
+            override fun get(carrier: MutableMap<String, String>?, key: String) = carrier?.get(key)
             override fun getAll(carrier: MutableMap<String, String>, key: String): List<String> =
                 carrier[key]?.let { listOf(it) } ?: emptyList()
         }

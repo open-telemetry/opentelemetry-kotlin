@@ -63,4 +63,9 @@ public interface ReadableLogRecord : AttributeContainer {
      * The instrumentation scope information associated with the log record
      */
     public val instrumentationScopeInfo: InstrumentationScopeInfo
+
+    /**
+     * The number of attributes that were dropped because the log record's attribute limit was exceeded.
+     */
+    public val droppedAttributesCount: Int
 }

@@ -32,7 +32,8 @@ internal class SpanModelTest {
                 eventCountLimit = 100,
                 attributeCountPerEventLimit = 100,
                 attributeCountPerLinkLimit = 100
-            )
+            ),
+            initialLinks = emptyList(),
         )
         assertTrue(span.isRecording())
         span.end()

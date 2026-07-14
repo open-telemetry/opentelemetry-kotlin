@@ -355,6 +355,7 @@ public abstract interface class io/opentelemetry/kotlin/tracing/TraceState {
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/Tracer {
+	public abstract fun enabled ()Z
 	public abstract fun startSpan (Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/SpanKind;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/Span;
 }
 

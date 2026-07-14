@@ -90,7 +90,7 @@ internal class OtelJavaSpanBuilderAdapter(
     }
 
     override fun setStartTimestamp(startTimestamp: Long, unit: TimeUnit): OtelJavaSpanBuilder {
-        start = startTimestamp
+        start = unit.toNanos(startTimestamp)
         return this
     }
 

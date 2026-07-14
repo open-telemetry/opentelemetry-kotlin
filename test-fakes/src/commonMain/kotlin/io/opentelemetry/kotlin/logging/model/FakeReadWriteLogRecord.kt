@@ -21,6 +21,7 @@ class FakeReadWriteLogRecord(
     override val resource: Resource = FakeResource(),
     override val instrumentationScopeInfo: InstrumentationScopeInfo =
         FakeInstrumentationScopeInfo(),
+    override val droppedAttributesCount: Int = 0,
 ) : ReadWriteLogRecord {
 
     override fun setBooleanAttribute(key: String, value: Boolean) {

@@ -1,13 +1,10 @@
 package io.opentelemetry.kotlin.attributes
 
-import io.opentelemetry.kotlin.ExperimentalApi
-
 /**
  * Represents an attribute value as defined by the OpenTelemetry specification.
  *
  * https://opentelemetry.io/docs/specs/otel/common/#anyvalue
  */
-@ExperimentalApi
 public sealed class AnyValue {
 
     public object NullValue : AnyValue() {

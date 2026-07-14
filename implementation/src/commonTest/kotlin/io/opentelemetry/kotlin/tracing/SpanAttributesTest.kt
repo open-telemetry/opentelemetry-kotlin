@@ -116,6 +116,43 @@ internal class SpanAttributesTest {
     }
 
     @Test
+    fun testSpanDroppedAttributesCount() {
+        val span = tracer.startSpan("test") {
+            addTestAttributes() // fills the limit of 8
+            addTestAttributes("extra") // 8 more, all dropped
+        }.apply { end() }
+
+        val readable = span.toReadableSpan()
+        assertEquals(attributeLimit, readable.attributes.size)
+        assertEquals(8, readable.droppedAttributesCount)
+    }
+
+    @Test
+    fun testSpanNoDroppedAttributesWithinLimit() {
+        val span = tracer.startSpan("test") { addTestAttributes() }.apply { end() }
+        assertEquals(0, span.toReadableSpan().droppedAttributesCount)
+    }
+
+    @Test
+    fun testSpanOverwriteDoesNotDropAttributes() {
+        val span = tracer.startSpan("test") {
+            addTestAttributes()
+            addTestAttributesAlternateValues() // overwrites the same 8 keys
+        }.apply { end() }
+        assertEquals(0, span.toReadableSpan().droppedAttributesCount)
+    }
+
+    @Test
+    fun testEmptyKeyNotCountedAsDropped() {
+        val span = tracer.startSpan("test").apply {
+            setStringAttribute("", "value")
+            end()
+        }
+        assertTrue(span.toReadableSpan().attributes.isEmpty())
+        assertEquals(0, span.toReadableSpan().droppedAttributesCount)
+    }
+
+    @Test
     fun testSpanStringAttrTruncated() {
         val tracer = tracerWithValueLengthLimit(3)
         val span = tracer.startSpan("test")
