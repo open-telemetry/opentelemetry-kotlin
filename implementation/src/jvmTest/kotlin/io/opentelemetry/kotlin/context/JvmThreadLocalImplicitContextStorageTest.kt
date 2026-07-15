@@ -14,7 +14,7 @@ internal class JvmThreadLocalImplicitContextStorageTest {
     @Test
     fun testContextIsIsolatedPerThread() {
         val factory = ContextFactoryImpl(SpanFactoryImpl(SpanContextFactoryImpl(IdGeneratorImpl())))
-        val storage = threadLocalImplicitContextStorage(factory::root)
+        val storage = ThreadLocalImplicitContextStorage(factory::root)
 
         val mainContext = FakeContext()
         storage.setImplicitContext(mainContext)
