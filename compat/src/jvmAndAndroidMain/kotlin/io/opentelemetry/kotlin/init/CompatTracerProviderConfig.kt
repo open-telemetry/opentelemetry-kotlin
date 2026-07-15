@@ -12,6 +12,7 @@ import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
+import io.opentelemetry.kotlin.factory.OtelJavaIdGeneratorAdapter
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
@@ -26,7 +27,6 @@ import io.opentelemetry.kotlin.tracing.sampling.SamplerAdapter
 @ExperimentalApi
 internal class CompatTracerProviderConfig(
     private val clock: Clock,
-    idGenerator: IdGenerator,
 ) : TracerProviderConfigDsl {
 
     private val builder: OtelJavaSdkTracerProviderBuilder = OtelJavaSdkTracerProvider.builder()
@@ -36,12 +36,6 @@ internal class CompatTracerProviderConfig(
 
     private val resourceAttrs = CompatAttributesModel()
     private var resourceSchemaUrl: String? = null
-
-    init {
-        if (idGenerator is OtelJavaIdGenerator) {
-            builder.setIdGenerator(idGenerator)
-        }
-    }
 
     override var serviceName: String
         get() = serviceNameOverride ?: "unknown_service"
@@ -82,9 +76,16 @@ internal class CompatTracerProviderConfig(
 
     fun build(
         clock: Clock,
+        idGenerator: IdGenerator,
         baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build()),
         globalLimits: CompatAttributeLimitsConfig? = null,
     ): TracerProvider {
+        builder.setIdGenerator(
+            when (idGenerator) {
+                is OtelJavaIdGenerator -> idGenerator
+                else -> OtelJavaIdGeneratorAdapter(idGenerator)
+            }
+        )
         if (globalLimits?.attributeCountLimitSet == true) {
             spanLimitsConfig.attributeCountLimit = globalLimits.attributeCountLimit
         }

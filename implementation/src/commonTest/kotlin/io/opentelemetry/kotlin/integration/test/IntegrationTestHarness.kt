@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.integration.test
 
 import io.opentelemetry.kotlin.OpenTelemetry
-import io.opentelemetry.kotlin.createOpenTelemetryImpl
+import io.opentelemetry.kotlin.createOpenTelemetry
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.framework.OtelKotlinTestRule
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -13,13 +13,13 @@ import kotlin.random.Random
  */
 internal class IntegrationTestHarness(scheduler: TestCoroutineScheduler) : OtelKotlinTestRule(scheduler) {
     override val kotlinApi: OpenTelemetry by lazy {
-        createOpenTelemetryImpl(
+        createOpenTelemetry(
             clock = fakeClock,
             config = {
+                idGenerator { IdGeneratorImpl(Random(0)) }
                 tracerProvider { tracerProviderConfig() }
                 loggerProvider { loggerProviderConfig() }
             },
-            idGenerator = IdGeneratorImpl(Random(0))
         )
     }
 }
