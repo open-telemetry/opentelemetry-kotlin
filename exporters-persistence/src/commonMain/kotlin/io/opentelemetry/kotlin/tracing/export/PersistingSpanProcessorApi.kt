@@ -33,7 +33,7 @@ public fun TraceExportConfigDsl.persistingSpanProcessor(
     exporter: SpanExporter,
     cacheDirectory: Path,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
-    scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
+    scheduleDelayMs: Long = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
 ): SpanProcessor {
@@ -54,7 +54,7 @@ internal fun TraceExportConfigDsl.persistingSpanProcessorImpl(
     exporter: SpanExporter,
     fileSystem: TelemetryFileSystem,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
-    scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
+    scheduleDelayMs: Long = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
     sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,

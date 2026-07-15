@@ -49,13 +49,13 @@ public fun TraceExportConfigDsl.compositeSpanExporter(vararg exporters: SpanExpo
 
 /**
  * Creates a batching processor that sends telemetry in batches.
- * See https://opentelemetry.io/docs/specs/otel/logs/sdk/#batching-processor
+ * See https://opentelemetry.io/docs/specs/otel/trace/sdk/#batching-processor
  */
 @ExperimentalApi
 public fun TraceExportConfigDsl.batchSpanProcessor(
     exporter: SpanExporter,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
-    scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
+    scheduleDelayMs: Long = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
