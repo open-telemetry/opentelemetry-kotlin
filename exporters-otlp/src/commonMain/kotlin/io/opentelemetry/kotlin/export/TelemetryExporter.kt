@@ -22,7 +22,8 @@ internal class TelemetryExporter<T>(
 ) : TelemetryCloseable {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + coroutineContext + telemetryExceptionHandler("OTLP exporter"))
+    private val scope: CoroutineScope =
+        CoroutineScope(SupervisorJob() + coroutineContext + telemetryExceptionHandler("OTLP exporter"))
 
     /**
      * Exports telemetry via coroutines and uses exponential backoff when a failure
