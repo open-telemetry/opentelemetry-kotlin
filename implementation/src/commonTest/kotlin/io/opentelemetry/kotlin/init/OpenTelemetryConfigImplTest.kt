@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.DefaultImplicitContextStorage
 import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.context.FakeImplicitContextStorage
@@ -156,6 +157,23 @@ internal class OpenTelemetryConfigImplTest {
             }
         }
         assertSame(custom, cfg.contextConfig.generateStorage(::FakeContext))
+    }
+
+    @Test
+    fun testCustomStorageReceivesRootSupplier() {
+        val root = FakeContext()
+        var captured: (() -> Context)? = null
+        val cfg = OpenTelemetryConfigImpl(clock).apply {
+            context {
+                storage { rootSupplier ->
+                    captured = rootSupplier
+                    DefaultImplicitContextStorage(rootSupplier)
+                }
+            }
+        }
+        val storage = cfg.contextConfig.generateStorage { root }
+        assertSame(root, captured?.invoke())
+        assertSame(root, storage.implicitContext())
     }
 
     @Test
