@@ -4,7 +4,9 @@ import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
+import io.opentelemetry.kotlin.tracing.sampling.AlwaysOffSampler
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
+import io.opentelemetry.kotlin.tracing.sampling.ParentBasedSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 
 /**
@@ -31,5 +33,13 @@ internal class TracingConfig(
     /**
      * Factory that produces the sampler to use when creating spans.
      */
-    val samplerFactory: (SpanFactory) -> Sampler = { _ -> AlwaysOnSampler() },
+    val samplerFactory: (SpanFactory) -> Sampler = { _ ->
+        ParentBasedSampler(
+            root = AlwaysOnSampler(),
+            remoteParentSampled = AlwaysOnSampler(),
+            remoteParentNotSampled = AlwaysOffSampler(),
+            localParentSampled = AlwaysOnSampler(),
+            localParentNotSampled = AlwaysOffSampler(),
+        )
+    },
 )
