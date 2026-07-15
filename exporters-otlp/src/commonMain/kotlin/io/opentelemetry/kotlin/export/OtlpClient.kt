@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.export
 
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.compression.compress
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -21,10 +20,12 @@ import io.opentelemetry.kotlin.export.OtlpResponse.Unknown
 import io.opentelemetry.kotlin.logging.export.deserializeLogRecordErrorMessage
 import io.opentelemetry.kotlin.logging.export.toProtobufByteArray
 import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
+import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.export.deserializeTraceRecordErrorMessage
 import io.opentelemetry.kotlin.tracing.export.toProtobufByteArray
 import kotlinx.io.readByteArray
+import kotlin.coroutines.cancellation.CancellationException
 
 internal class OtlpClient(
     private val baseUrl: String,
@@ -70,7 +71,10 @@ internal class OtlpClient(
                 in 500..599 -> ServerError(code, onError(response.boundedBodyBytes()))
                 else -> Unknown
             }
-        } catch (ignored: HttpRequestTimeoutException) {
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            platformLog("OTLP export failed: ${e.message}")
             Unknown
         }
     }

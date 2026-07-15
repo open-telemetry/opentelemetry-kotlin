@@ -14,6 +14,7 @@ import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryRepositoryImpl
 import io.opentelemetry.kotlin.export.TimeoutTelemetryCloseable
+import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.LogExportConfigDsl
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
@@ -81,7 +82,9 @@ internal class PersistingLogRecordProcessor(
     private val telemetryCloseable: TelemetryCloseable = TimeoutTelemetryCloseable(composite)
 
     private val flushMutex = Mutex()
-    private val flushScope = CoroutineScope(SupervisorJob() + dispatcher)
+    private val flushScope = CoroutineScope(
+        SupervisorJob() + dispatcher + telemetryExceptionHandler("Persisting log record processor")
+    )
 
     init {
         flushScope.launch {

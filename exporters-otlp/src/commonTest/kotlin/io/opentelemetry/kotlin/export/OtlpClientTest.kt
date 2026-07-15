@@ -40,10 +40,14 @@ internal class OtlpClientTest {
     private lateinit var mockResponseStatus: HttpStatusCode
     private var mockResponseHeaders: Headers = Headers.Empty
     private var serverDelayMs: Long = 0
+    private var serverThrows: Boolean = false
 
     @BeforeTest
     fun setUp() {
         server = MockEngine {
+            if (serverThrows) {
+                error("network unreachable")
+            }
             if (serverDelayMs > 0) {
                 delay(serverDelayMs)
             }
@@ -155,6 +159,20 @@ internal class OtlpClientTest {
             mockResponseStatus = HttpStatusCode.OK,
             expectedResponse = OtlpResponse.Unknown,
         )
+    }
+
+    @Test
+    fun testExportLogNetworkFailureDoesNotThrow() = runTest {
+        serverThrows = true
+        val response = client.exportLogs(logRecords)
+        assertIs<OtlpResponse.Unknown>(response)
+    }
+
+    @Test
+    fun testExportTraceNetworkFailureDoesNotThrow() = runTest {
+        serverThrows = true
+        val response = client.exportTraces(spans)
+        assertIs<OtlpResponse.Unknown>(response)
     }
 
     @Test

@@ -45,6 +45,10 @@ public abstract class io/opentelemetry/kotlin/export/ShutdownState {
 	public abstract fun isShutdown ()Z
 }
 
+public final class io/opentelemetry/kotlin/export/TelemetryExceptionHandlerKt {
+	public static final fun telemetryExceptionHandler (Ljava/lang/String;)Lkotlinx/coroutines/CoroutineExceptionHandler;
+}
+
 public final class io/opentelemetry/kotlin/export/TimeoutOperationKt {
 	public static final fun runWithTimeout (JLkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
