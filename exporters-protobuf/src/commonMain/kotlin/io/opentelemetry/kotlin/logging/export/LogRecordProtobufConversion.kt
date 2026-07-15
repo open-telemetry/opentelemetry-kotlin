@@ -54,6 +54,7 @@ internal fun ReadableLogRecord.toProtobuf(): LogRecord = LogRecord(
     body = body?.toAnyValue(),
     attributes = attributes.createKeyValues(),
     event_name = eventName ?: "",
+    dropped_attributes_count = droppedAttributesCount,
 )
 
 internal fun LogRecord.toReadableLogRecord(
@@ -73,7 +74,8 @@ internal fun LogRecord.toReadableLogRecord(
         flags = flags,
     ),
     resource = resource,
-    instrumentationScopeInfo = instrumentationScopeInfo
+    instrumentationScopeInfo = instrumentationScopeInfo,
+    droppedAttributesCount = dropped_attributes_count
 )
 
 private fun Any.toAnyValue(): AnyValue = when (this) {
@@ -202,5 +204,6 @@ private class DeserializedReadableLogRecord(
     override val attributes: Map<String, Any>,
     override val spanContext: SpanContext,
     override val resource: Resource,
-    override val instrumentationScopeInfo: InstrumentationScopeInfo
+    override val instrumentationScopeInfo: InstrumentationScopeInfo,
+    override val droppedAttributesCount: Int
 ) : ReadableLogRecord

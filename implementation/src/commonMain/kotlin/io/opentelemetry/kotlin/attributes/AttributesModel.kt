@@ -11,25 +11,25 @@ internal class AttributesModel(
 ) : AttributesMutator, AttributeContainer {
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
-        if (canAddAttribute(key)) {
+        ifPreconditionsOk(key) {
             attrs[key] = value
         }
     }
 
     override fun setStringAttribute(key: String, value: String) {
-        if (canAddAttribute(key)) {
+        ifPreconditionsOk(key) {
             attrs[key] = truncateString(value)
         }
     }
 
     override fun setLongAttribute(key: String, value: Long) {
-        if (canAddAttribute(key)) {
+        ifPreconditionsOk(key) {
             attrs[key] = value
         }
     }
 
     override fun setDoubleAttribute(key: String, value: Double) {
-        if (canAddAttribute(key)) {
+        ifPreconditionsOk(key) {
             attrs[key] = value
         }
     }
@@ -38,7 +38,7 @@ internal class AttributesModel(
         key: String,
         value: List<Boolean>
     ) {
-        if (canAddAttribute(key)) {
+        ifPreconditionsOk(key) {
             attrs[key] = value
         }
     }
@@ -47,7 +47,7 @@ internal class AttributesModel(
         key: String,
         value: List<String>
     ) {
-        if (canAddAttribute(key)) {
+        ifPreconditionsOk(key) {
             attrs[key] = value.map(::truncateString)
         }
     }
@@ -56,7 +56,7 @@ internal class AttributesModel(
         key: String,
         value: List<Long>
     ) {
-        if (canAddAttribute(key)) {
+        ifPreconditionsOk(key) {
             attrs[key] = value
         }
     }
@@ -65,19 +65,19 @@ internal class AttributesModel(
         key: String,
         value: List<Double>
     ) {
-        if (canAddAttribute(key)) {
+        ifPreconditionsOk(key) {
             attrs[key] = value
         }
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
-        if (canAddAttribute(key)) {
+        ifPreconditionsOk(key) {
             attrs[key] = truncateByteArray(value)
         }
     }
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
-        if (canAddAttribute(key)) {
+        ifPreconditionsOk(key) {
             attrs[key] = truncateAnyValue(value)
         }
     }
@@ -138,11 +138,37 @@ internal class AttributesModel(
         }
     }
 
+    private var droppedAttributesCountImpl = 0
+
+    /**
+     * The number of attributes that were dropped because [attributeLimit] was exceeded.
+     */
+    val droppedAttributesCount: Int
+        get() = droppedAttributesCountImpl
+
     override val attributes: Map<String, Any>
         get() = attrs.toMap()
 
-    private fun canAddAttribute(key: String): Boolean =
-        key.isNotEmpty() && (attrs.size < attributeLimit || attrs.contains(key))
+    /**
+     * Runs [setter] only if [key] passes the attribute preconditions, keeping the drop check and
+     * the write coupled so an attribute can never be counted as dropped without also being skipped.
+     */
+    private fun ifPreconditionsOk(key: String, setter: () -> Unit) {
+        if (key.isEmpty()) {
+            // Invalid key: ignored, not counted as a dropped attribute.
+            return
+        }
+        if (attrs.contains(key)) {
+            // Overwriting an existing attribute never drops.
+            setter()
+            return
+        }
+        if (attrs.size >= attributeLimit) {
+            droppedAttributesCountImpl++
+            return
+        }
+        setter()
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) {

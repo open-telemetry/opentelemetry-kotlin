@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
+import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 import io.opentelemetry.kotlin.platformLog
 import kotlinx.coroutines.CoroutineDispatcher
@@ -28,7 +29,9 @@ public fun TraceExportConfigDsl.compositeSpanProcessor(vararg processors: SpanPr
 @ExperimentalApi
 public fun TraceExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): SpanProcessor {
     val dispatcher: CoroutineDispatcher = Dispatchers.Default
-    val scope = CoroutineScope(SupervisorJob() + dispatcher)
+    val scope = CoroutineScope(
+        SupervisorJob() + dispatcher + telemetryExceptionHandler("Simple span processor")
+    )
     return SimpleSpanProcessor(exporter, scope)
 }
 

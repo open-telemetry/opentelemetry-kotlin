@@ -18,6 +18,12 @@ object BrowserAttributes {
     const val BROWSER_BRANDS: String = "browser.brands"
 
     /**
+    * <p>Absolute URL of the current browser document according to <a href="https://www.rfc-editor.org/rfc/rfc3986">RFC3986</a>.</p>
+    */
+    @IncubatingApi
+    const val BROWSER_DOCUMENT_URL_FULL: String = "browser.document.url.full"
+
+    /**
     * <p>Preferred language of the user using the browser</p>
     * <p>Notes:</p>
     * <p>This value is intended to be taken from the Navigator API <c>navigator.language</c>.</p>

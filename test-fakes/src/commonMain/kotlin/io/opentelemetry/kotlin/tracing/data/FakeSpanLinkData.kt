@@ -5,5 +5,6 @@ import io.opentelemetry.kotlin.tracing.SpanContext
 
 class FakeSpanLinkData(
     override val spanContext: SpanContext = FakeSpanContext.INVALID,
-    override val attributes: Map<String, Any> = mapOf("key" to "value")
+    override val attributes: Map<String, Any> = mapOf("key" to "value"),
+    override val droppedAttributesCount: Int = 0
 ) : SpanLinkData

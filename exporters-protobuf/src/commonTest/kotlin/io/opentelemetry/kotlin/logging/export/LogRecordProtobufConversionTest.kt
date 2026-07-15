@@ -59,6 +59,16 @@ class LogRecordProtobufConversionTest {
     }
 
     @Test
+    fun testDroppedAttributesCountConversion() {
+        val obj = FakeReadableLogRecord(droppedAttributesCount = 7)
+        val protobuf = obj.toProtobuf()
+        assertEquals(7, protobuf.dropped_attributes_count)
+
+        val restored = protobuf.toReadableLogRecord(obj.resource, obj.instrumentationScopeInfo)
+        assertEquals(7, restored.droppedAttributesCount)
+    }
+
+    @Test
     fun testAnyValueStringBodySerialisesAsString() {
         val protobuf = FakeReadableLogRecord(body = AnyValue.StringValue("hi")).toProtobuf()
         assertEquals("hi", protobuf.body?.string_value)

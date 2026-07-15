@@ -16,4 +16,10 @@ public interface SpanLinkData : AttributeContainer {
      */
     @ThreadSafe
     public val spanContext: SpanContext
+
+    /**
+     * The number of attributes that were dropped because the link's attribute limit was exceeded.
+     */
+    @ThreadSafe
+    public val droppedAttributesCount: Int
 }

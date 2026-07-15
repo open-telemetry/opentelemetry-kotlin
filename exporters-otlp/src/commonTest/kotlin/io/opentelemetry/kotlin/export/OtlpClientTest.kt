@@ -17,6 +17,10 @@ import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.export.toProtobufByteArray
+import io.opentelemetry.proto.collector.logs.v1.ExportLogsPartialSuccess
+import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse
+import io.opentelemetry.proto.collector.trace.v1.ExportTracePartialSuccess
+import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlinx.io.readByteArray
@@ -24,8 +28,10 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class OtlpClientTest {
 
@@ -39,16 +45,21 @@ internal class OtlpClientTest {
     private lateinit var server: MockEngine
     private lateinit var mockResponseStatus: HttpStatusCode
     private var mockResponseHeaders: Headers = Headers.Empty
+    private var mockResponseBody: ByteArray = ByteArray(0)
     private var serverDelayMs: Long = 0
+    private var serverThrows: Boolean = false
 
     @BeforeTest
     fun setUp() {
         server = MockEngine {
+            if (serverThrows) {
+                error("network unreachable")
+            }
             if (serverDelayMs > 0) {
-                delay(serverDelayMs)
+                delay(serverDelayMs.milliseconds)
             }
             respond(
-                content = ByteReadChannel(""),
+                content = ByteReadChannel(mockResponseBody),
                 status = mockResponseStatus,
                 headers = mockResponseHeaders,
             )
@@ -158,6 +169,20 @@ internal class OtlpClientTest {
     }
 
     @Test
+    fun testExportLogNetworkFailureDoesNotThrow() = runTest {
+        serverThrows = true
+        val response = client.exportLogs(logRecords)
+        assertIs<OtlpResponse.Unknown>(response)
+    }
+
+    @Test
+    fun testExportTraceNetworkFailureDoesNotThrow() = runTest {
+        serverThrows = true
+        val response = client.exportTraces(spans)
+        assertIs<OtlpResponse.Unknown>(response)
+    }
+
+    @Test
     fun testExportLogsSetsUserAgentHeader() = runTest {
         mockResponseStatus = HttpStatusCode.OK
         client.exportLogs(logRecords)
@@ -214,6 +239,91 @@ internal class OtlpClientTest {
         assertIs<OtlpResponse.RetryableError>(response)
         assertEquals(12_000L, response.retryAfterMs)
     }
+
+    @Test
+    fun testExportLog4xxDeserialization() = runTest {
+        mockResponseStatus = HttpStatusCode.BadRequest
+        mockResponseBody = logResponseBody(rejected = 0L, msg = "bad request")
+        val response = client.exportLogs(logRecords)
+        assertIs<OtlpResponse.ClientError>(response)
+        assertEquals("bad request", response.errorMessage)
+    }
+
+    @Test
+    fun testExportLog5xxDeserialization() = runTest {
+        mockResponseStatus = HttpStatusCode.InternalServerError
+        mockResponseBody = logResponseBody(rejected = 0L, msg = "internal error")
+        val response = client.exportLogs(logRecords)
+        assertIs<OtlpResponse.ServerError>(response)
+        assertEquals("internal error", response.errorMessage)
+    }
+
+    @Test
+    fun testExportTrace4xxDeserialization() = runTest {
+        mockResponseStatus = HttpStatusCode.BadRequest
+        mockResponseBody = traceResponseBody(rejected = 0L, msg = "bad request")
+        val response = client.exportTraces(spans)
+        assertIs<OtlpResponse.ClientError>(response)
+        assertEquals("bad request", response.errorMessage)
+    }
+
+    @Test
+    fun testExportTrace5xxDeserialization() = runTest {
+        mockResponseStatus = HttpStatusCode.InternalServerError
+        mockResponseBody = traceResponseBody(rejected = 0L, msg = "internal error")
+        val response = client.exportTraces(spans)
+        assertIs<OtlpResponse.ServerError>(response)
+        assertEquals("internal error", response.errorMessage)
+    }
+
+    @Test
+    fun testExportLogPartialSuccess() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        mockResponseBody = logResponseBody(rejected = 2L, msg = "2 log records rejected")
+        val response = client.exportLogs(logRecords)
+        assertFalse(response is OtlpResponse.Success)
+    }
+
+    @Test
+    fun testExportTracePartialSuccess() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        mockResponseBody = traceResponseBody(rejected = 3L, msg = "3 spans rejected")
+        val response = client.exportTraces(spans)
+        assertFalse(response is OtlpResponse.Success)
+    }
+
+    @Test
+    fun testExportLog200EmptyBodyIsSuccess() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        mockResponseBody = ByteArray(0)
+        assertEquals(OtlpResponse.Success, client.exportLogs(logRecords))
+    }
+
+    @Test
+    fun testExportLogMalformedErrorBody() = runTest {
+        mockResponseStatus = HttpStatusCode.BadRequest
+        mockResponseBody = byteArrayOf(0xFF.toByte(), 0xFE.toByte(), 0x00, 0x42)
+        val response = client.exportLogs(logRecords)
+        assertEquals(400, response.statusCode)
+    }
+
+    @Test
+    fun testExportTraceMalformedErrorBody() = runTest {
+        mockResponseStatus = HttpStatusCode.BadRequest
+        mockResponseBody = byteArrayOf(0xFF.toByte(), 0xFE.toByte(), 0x00, 0x42)
+        val response = client.exportTraces(spans)
+        assertEquals(400, response.statusCode)
+    }
+
+    private fun logResponseBody(rejected: Long, msg: String): ByteArray =
+        ExportLogsServiceResponse.ADAPTER.encode(
+            ExportLogsServiceResponse(partial_success = ExportLogsPartialSuccess(rejected, msg))
+        )
+
+    private fun traceResponseBody(rejected: Long, msg: String): ByteArray =
+        ExportTraceServiceResponse.ADAPTER.encode(
+            ExportTraceServiceResponse(partial_success = ExportTracePartialSuccess(rejected, msg))
+        )
 
     private suspend fun sendAndAssertLogRequest(
         telemetry: List<ReadableLogRecord>,

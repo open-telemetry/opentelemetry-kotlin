@@ -74,6 +74,18 @@ internal class OtelJavaSpanExportTest {
     }
 
     @Test
+    fun `test start timestamp is converted to nanos from given unit`() = runTest {
+        val span = tracer.spanBuilder("start_timestamp_span")
+            .setStartTimestamp(5, TimeUnit.MILLISECONDS)
+            .startSpan()
+        span.end()
+
+        harness.assertSpans(1, null) { spans ->
+            assertEquals(TimeUnit.MILLISECONDS.toNanos(5), spans[0].startTimestamp)
+        }
+    }
+
+    @Test
     fun `test span attributes export`() = runTest {
         val spanName = "span_attrs"
         val span = tracer.spanBuilder(spanName).startSpan()

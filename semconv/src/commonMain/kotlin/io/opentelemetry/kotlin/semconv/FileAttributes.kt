@@ -83,6 +83,24 @@ object FileAttributes {
     const val FILE_INODE: String = "file.inode"
 
     /**
+    * <p>The lock mechanism such as noted by <a href="https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html">POSIX</a></p>
+    */
+    @IncubatingApi
+    const val FILE_LOCK_MECHANISM: String = "file.lock.mechanism"
+
+    /**
+    * <p>Mode of lock or operation such as documented by <a href="https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html">POSIX</a></p>
+    */
+    @IncubatingApi
+    const val FILE_LOCK_MODE: String = "file.lock.mode"
+
+    /**
+    * <p>The lock type as represented by i.e. <a href="https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html">POSIX</a>'s l_type.</p>
+    */
+    @IncubatingApi
+    const val FILE_LOCK_TYPE: String = "file.lock.type"
+
+    /**
     * <p>Mode of the file in octal representation.</p>
     */
     @IncubatingApi
@@ -131,4 +149,21 @@ object FileAttributes {
     */
     @IncubatingApi
     const val FILE_SYMBOLIC_LINK_TARGET_PATH: String = "file.symbolic_link.target_path"
+
+    /**
+    * <p>FILE_LOCK_TYPE</p>
+    */
+    @IncubatingApi
+    enum class FileLockTypeValues(val value: String) {
+
+        /**
+        * <p>read.</p>
+        */
+        READ("read"),
+
+        /**
+        * <p>write.</p>
+        */
+        WRITE("write"),
+    }
 }

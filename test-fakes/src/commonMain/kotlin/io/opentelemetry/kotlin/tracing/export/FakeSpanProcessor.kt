@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 class FakeSpanProcessor(
     var startRequired: Boolean = true,
     var endRequired: Boolean = true,
+    var onEndingRequired: Boolean = true,
     var flushCode: () -> OperationResultCode = { OperationResultCode.Success },
     var shutdownCode: () -> OperationResultCode = { OperationResultCode.Success },
     var startAction: (ReadWriteSpan, Context) -> Unit = { _, _ -> },
@@ -39,6 +40,7 @@ class FakeSpanProcessor(
 
     override fun isStartRequired(): Boolean = startRequired
     override fun isEndRequired(): Boolean = endRequired
+    override fun isOnEndingRequired(): Boolean = onEndingRequired
     override suspend fun forceFlush(): OperationResultCode = flushCode()
     override suspend fun shutdown(): OperationResultCode = shutdownCode()
 }

@@ -22,7 +22,7 @@ class DeviceAppLifecycleEvent(
     /**
     * <p>This attribute represents the state of the application.</p>
     * <p>Notes:</p>
-    * <p>The Android lifecycle states are defined in <a href="https://developer.android.com/guide/components/activities/activity-lifecycle#lc">Activity lifecycle callbacks</a>, and from which the <c>OS identifiers</c> are derived.</p>
+    * <p>The Android lifecycle states are defined in <a href="https://developer.android.com/guide/components/activities/activity-lifecycle#lifecycle-callbacks">Activity lifecycle callbacks</a>, and from which the <c>OS identifiers</c> are derived.</p>
     */
     val androidAppState: String? = null,
     /**

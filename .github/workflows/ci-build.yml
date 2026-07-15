@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Java
-        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
+        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5.5.0
         with:
           distribution: 'adopt'
           java-version: |
@@ -38,12 +38,6 @@ jobs:
       - name: Gradle Build
         run: ./gradlew build :benchmark-android:assemble :benchmark-android:compileReleaseAndroidTestKotlin :benchmark-jvm:assemble :examples:example-app-android:assembleRelease koverXmlReport -x :gradle-integration-test:test --stacktrace
 
-      - name: Publish snapshot to Maven local
-        run: ./gradlew publishToMavenLocal -PsnapshotPublish=true --stacktrace
-
-      - name: Gradle Integration Test
-        run: ./gradlew :gradle-integration-test:test --stacktrace
-
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
@@ -52,15 +46,44 @@ jobs:
           fail_ci_if_error: false
           files: build/reports/kover/reportRelease.xml
 
+  # Runs on macOS because the klib fixture consumes the library's iOS klibs, which KGP only
+  # publishes from a macOS host. The rest of the suite is host-independent, so it all runs here.
+  integration-test:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout Branch
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5.5.0
+        with:
+          distribution: 'adopt'
+          java-version: |
+            17
+            21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+
+      - name: Publish snapshot to Maven local
+        run: ./gradlew publishToMavenLocal -PsnapshotPublish=true --stacktrace
+
+      - name: Gradle Integration Test
+        run: ./gradlew :gradle-integration-test:test --stacktrace
+
   required-status-check:
     permissions:
       contents: read
       issues: write
     needs:
       - gradle-test
+      - integration-test
     runs-on: ubuntu-latest
     if: always()
     steps:
       - if: |
-          needs.gradle-test.result != 'success'
+          needs.gradle-test.result != 'success' || needs.integration-test.result != 'success'
         run: exit 1

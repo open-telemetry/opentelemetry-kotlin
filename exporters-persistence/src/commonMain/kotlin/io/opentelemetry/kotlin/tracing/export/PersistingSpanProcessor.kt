@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryRepositoryImpl
 import io.opentelemetry.kotlin.export.TimeoutTelemetryCloseable
+import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
@@ -80,7 +81,9 @@ internal class PersistingSpanProcessor(
     private val telemetryCloseable: TelemetryCloseable = TimeoutTelemetryCloseable(composite)
 
     private val flushMutex = Mutex()
-    private val flushScope = CoroutineScope(SupervisorJob() + dispatcher)
+    private val flushScope = CoroutineScope(
+        SupervisorJob() + dispatcher + telemetryExceptionHandler("Persisting span processor")
+    )
 
     init {
         flushScope.launch {

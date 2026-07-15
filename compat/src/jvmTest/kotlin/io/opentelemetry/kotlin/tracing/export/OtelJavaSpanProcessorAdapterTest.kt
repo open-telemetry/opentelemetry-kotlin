@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
+import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.ext.storeInContext
@@ -31,6 +32,29 @@ internal class OtelJavaSpanProcessorAdapterTest {
     fun `span propagated correctly`() {
         with(harness) {
             val fakeTime = 5_000_000L
+            var startCalled = false
+            var endingCalled = false
+            var endCalled = false
+            config.spanProcessors.add(
+                FakeSpanProcessor(
+                    startAction = { span, context ->
+                        startCalled = true
+                        assertInputForSpan(
+                            expectedName = "test",
+                            expectedParentSpanContextSupplier = { OtelJavaSpan.getInvalid().spanContext.toOtelKotlinSpanContext() },
+                        )(span, context)
+                    },
+                    endAction = {
+                        endCalled = true
+                        assertReadableSpan(expectedName = "test")(it)
+                    },
+                    endingAction = {
+                        endingCalled = true
+                        assertReadWriteSpan(expectedName = "test")(it)
+                    }
+                )
+            )
+
             val span = tracer.startSpan(
                 name = "test",
                 spanKind = SpanKind.CLIENT,
@@ -46,39 +70,66 @@ internal class OtelJavaSpanProcessorAdapterTest {
                     setStringAttribute("eventAttr", "value")
                 }
             }
-            config.spanProcessors.add(
-                FakeSpanProcessor(
-                    startAction = assertInputForSpan(
-                        expectedName = "test",
-                        expectedParentSpanContextSupplier = { OtelJavaSpan.getInvalid().spanContext.toOtelKotlinSpanContext() },
-                    ),
-                    endAction = assertReadableSpan(expectedName = "test"),
-                    endingAction = assertReadableSpan(expectedName = "test")
-                )
-            )
             span.end()
+
+            assertEquals(true, startCalled)
+            assertEquals(true, endingCalled)
+            assertEquals(true, endCalled)
         }
+    }
+
+    @Test
+    fun `onEnding invoked when required`() {
+        with(harness) {
+            val processor = FakeSpanProcessor(onEndingRequired = true)
+            config.spanProcessors.add(processor)
+
+            tracer.startSpan("test").end()
+
+            assertEquals(1, processor.endingCalls.size)
+            assertEquals("test", processor.endingCalls.single().name)
+        }
+    }
+
+    @Test
+    fun `isOnEndingRequired delegates to impl`() {
+        assertEquals(
+            true,
+            OtelJavaSpanProcessorAdapter(FakeSpanProcessor(onEndingRequired = true)).isOnEndingRequired()
+        )
+        assertEquals(
+            false,
+            OtelJavaSpanProcessorAdapter(FakeSpanProcessor(onEndingRequired = false)).isOnEndingRequired()
+        )
     }
 
     @Test
     fun `parent context propagated correctly`() {
         with(harness) {
-            val parentSpan = tracer.startSpan("parent")
+            lateinit var parentSpan: Span
+            var startCalled = false
+
+            config.spanProcessors.add(
+                FakeSpanProcessor(
+                    startAction = { span, context ->
+                        startCalled = true
+                        assertInputForSpan(
+                            expectedName = "name",
+                            expectedParentSpanContextSupplier = { parentSpan.spanContext },
+                        )(span, context)
+                    },
+                    endAction = assertReadableSpan(expectedName = "name")
+                )
+            )
+
+            parentSpan = tracer.startSpan("parent")
             val childSpan = tracer.startSpan(
                 name = "name",
                 parentContext = parentSpan.storeInContext(rootContext)
             )
-
-            config.spanProcessors.add(
-                FakeSpanProcessor(
-                    startAction = assertInputForSpan(
-                        expectedName = "name",
-                        expectedParentSpanContextSupplier = { parentSpan.spanContext },
-                    ),
-                    endAction = assertReadableSpan(expectedName = "name")
-                )
-            )
             childSpan.end()
+
+            assertEquals(true, startCalled)
         }
     }
 
@@ -108,6 +159,17 @@ internal class OtelJavaSpanProcessorAdapterTest {
         return fun(span: ReadableSpan) {
             if (span.name == expectedName) {
                 assertEquals(expectedName, span.name)
+            }
+        }
+    }
+
+    private fun assertReadWriteSpan(
+        expectedName: String,
+    ): (span: ReadWriteSpan) -> Unit {
+        return fun(span: ReadWriteSpan) {
+            if (span.name == expectedName) {
+                assertEquals(expectedName, span.name)
+                assertEquals("value", span.attributes["key"])
             }
         }
     }

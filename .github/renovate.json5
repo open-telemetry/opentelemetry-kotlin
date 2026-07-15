@@ -13,6 +13,14 @@
     {
       "matchUpdateTypes": ["minor", "major"],
       "schedule": ["before 8am on Monday"]
+    },
+    {
+      "description": "Never bump the minimum-supported version pins in the version catalog. sharedVariableName is the version.ref of the catalog entry, with '-'/'_' normalized to '.'",
+      "matchManagers": ["gradle"],
+      "matchJsonata": [
+        "sharedVariableName in ['android.minSdk', 'android.minCompileSdk', 'android.minAgpVersion', 'minSupportedKotlinLang', 'minSupportedKotlinPlugin', 'minSupportedKotlinKlib', 'minSupportedGradle']"
+      ],
+      "enabled": false
     }
   ],
   "labels": [

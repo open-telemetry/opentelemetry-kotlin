@@ -22,7 +22,7 @@ internal class TelemetryExporter<T>(
 ) : TelemetryCloseable {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + coroutineContext)
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + coroutineContext + telemetryExceptionHandler("OTLP exporter"))
 
     /**
      * Exports telemetry via coroutines and uses exponential backoff when a failure
@@ -43,6 +43,12 @@ internal class TelemetryExporter<T>(
         repeat(maxAttempts) {
             when (val response = exportAction(telemetry)) {
                 is OtlpResponse.Success -> {
+                    return
+                }
+
+                // The server accepted the request; retrying would only re-send the rejected
+                // portion, so treat a partial success as terminal.
+                is OtlpResponse.PartialSuccess -> {
                     return
                 }
 
