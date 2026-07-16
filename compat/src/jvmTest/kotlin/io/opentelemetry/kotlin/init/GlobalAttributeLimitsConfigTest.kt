@@ -10,6 +10,7 @@ import kotlin.test.assertTrue
 internal class GlobalAttributeLimitsConfigTest {
 
     private val clock = FakeClock()
+    private val idGenerator = CompatIdGenerator()
 
     @Test
     fun `CompatAttributeLimitsConfig default state`() {
@@ -35,8 +36,8 @@ internal class GlobalAttributeLimitsConfigTest {
     fun `global only - applies to spans and logs`() {
         val globalLimits = CompatAttributeLimitsConfig().apply { attributeCountLimit = 64 }
 
-        val tracerConfig = CompatTracerProviderConfig(clock, CompatIdGenerator())
-        tracerConfig.build(clock, globalLimits = globalLimits)
+        val tracerConfig = CompatTracerProviderConfig(clock)
+        tracerConfig.build(clock, idGenerator, globalLimits = globalLimits)
         assertEquals(64, tracerConfig.spanLimitsConfig.attributeCountLimit)
 
         val loggerConfig = CompatLoggerProviderConfig(clock)
@@ -48,10 +49,10 @@ internal class GlobalAttributeLimitsConfigTest {
     fun `signal-specific overrides global`() {
         val globalLimits = CompatAttributeLimitsConfig().apply { attributeCountLimit = 64 }
 
-        val tracerConfig = CompatTracerProviderConfig(clock, CompatIdGenerator()).apply {
+        val tracerConfig = CompatTracerProviderConfig(clock).apply {
             spanLimits { attributeCountLimit = 32 }
         }
-        tracerConfig.build(clock, globalLimits = globalLimits)
+        tracerConfig.build(clock, idGenerator, globalLimits = globalLimits)
         assertEquals(32, tracerConfig.spanLimitsConfig.attributeCountLimit)
 
         val loggerConfig = CompatLoggerProviderConfig(clock)
@@ -63,18 +64,18 @@ internal class GlobalAttributeLimitsConfigTest {
     fun `partial signal override - other global properties still apply`() {
         val globalLimits = CompatAttributeLimitsConfig().apply { attributeCountLimit = 64 }
 
-        val tracerConfig = CompatTracerProviderConfig(clock, CompatIdGenerator()).apply {
+        val tracerConfig = CompatTracerProviderConfig(clock).apply {
             spanLimits { attributeValueLengthLimit = 256 }
         }
-        tracerConfig.build(clock, globalLimits = globalLimits)
+        tracerConfig.build(clock, idGenerator, globalLimits = globalLimits)
         assertEquals(64, tracerConfig.spanLimitsConfig.attributeCountLimit)
         assertEquals(256, tracerConfig.spanLimitsConfig.attributeValueLengthLimit)
     }
 
     @Test
     fun `no global - defaults are zero (Java SDK uses its own defaults)`() {
-        val tracerConfig = CompatTracerProviderConfig(clock, CompatIdGenerator())
-        tracerConfig.build(clock)
+        val tracerConfig = CompatTracerProviderConfig(clock)
+        tracerConfig.build(clock, idGenerator)
         assertEquals(DEFAULT_ATTR_LIMIT, tracerConfig.spanLimitsConfig.attributeCountLimit)
         assertEquals(DEFAULT_ATTR_VALUE_LENGTH_LIMIT, tracerConfig.spanLimitsConfig.attributeValueLengthLimit)
 

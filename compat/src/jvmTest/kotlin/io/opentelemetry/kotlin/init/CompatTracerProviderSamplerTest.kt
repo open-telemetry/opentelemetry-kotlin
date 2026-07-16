@@ -19,11 +19,13 @@ import org.junit.Test
 @OptIn(ExperimentalApi::class)
 internal class CompatTracerProviderSamplerTest {
 
+    private val idGenerator = CompatIdGenerator()
+
     @Test
     fun `default sampler records and samples spans`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, CompatIdGenerator())
-        val provider = config.build(clock)
+        val config = CompatTracerProviderConfig(clock)
+        val provider = config.build(clock, idGenerator)
         val span = provider.getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
@@ -32,10 +34,10 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `builtin ALWAYS_ON sampler records and samples spans`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, CompatIdGenerator()).apply {
+        val config = CompatTracerProviderConfig(clock).apply {
             sampler { alwaysOn() }
         }
-        val span = config.build(clock).getTracer("test").startSpan("span")
+        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -43,20 +45,20 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `custom sampler DROP produces non-recording span`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, CompatIdGenerator()).apply {
+        val config = CompatTracerProviderConfig(clock).apply {
             sampler { FakeSampler(SamplingResult.Decision.DROP) }
         }
-        val span = config.build(clock).getTracer("test").startSpan("span")
+        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
     }
 
     @Test
     fun `custom sampler RECORD_AND_SAMPLE produces recording and sampled span`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, CompatIdGenerator()).apply {
+        val config = CompatTracerProviderConfig(clock).apply {
             sampler { FakeSampler(SamplingResult.Decision.RECORD_AND_SAMPLE) }
         }
-        val span = config.build(clock).getTracer("test").startSpan("span")
+        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -64,10 +66,10 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `builtin ALWAYS_OFF sampler drops spans`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, CompatIdGenerator()).apply {
+        val config = CompatTracerProviderConfig(clock).apply {
             sampler { alwaysOff() }
         }
-        val span = config.build(clock).getTracer("test").startSpan("span")
+        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
     }
@@ -88,10 +90,10 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `parentBased samples root spans with alwaysOn`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, CompatIdGenerator()).apply {
+        val config = CompatTracerProviderConfig(clock).apply {
             sampler { parentBased(root = alwaysOn()) }
         }
-        val span = config.build(clock).getTracer("test").startSpan("span")
+        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -99,10 +101,10 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `parentBased drops root spans with alwaysOff`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, CompatIdGenerator()).apply {
+        val config = CompatTracerProviderConfig(clock).apply {
             sampler { parentBased(root = alwaysOff()) }
         }
-        val span = config.build(clock).getTracer("test").startSpan("span")
+        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
     }
