@@ -1,5 +1,7 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.BaggageFactoryImpl
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
@@ -29,7 +31,8 @@ public fun createOpenTelemetry(
      */
     config: OpenTelemetryConfigDsl.() -> Unit = {}
 ): OpenTelemetry {
-    val cfg = OpenTelemetryConfigImpl(clock).apply(config)
+    val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler
+    val cfg = OpenTelemetryConfigImpl(clock, sdkErrorHandler).apply(config)
     val idGenerator = cfg.resolveIdGenerator()
 
     val resourceFactory = ResourceFactoryImpl()

@@ -4,6 +4,8 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.FakeTelemetryFileSystem
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
@@ -603,8 +605,10 @@ internal class PersistingSpanProcessorTest {
         )
     }
 
-    private class FakeTraceExportConfig(override val clock: Clock = FakeClock()) :
-        TraceExportConfigDsl
+    private class FakeTraceExportConfig(
+        override val clock: Clock = FakeClock(),
+        override val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
+    ) : TraceExportConfigDsl
 
     private class DelayingSpanProcessor(
         private val flushDelayMs: Long = 0,

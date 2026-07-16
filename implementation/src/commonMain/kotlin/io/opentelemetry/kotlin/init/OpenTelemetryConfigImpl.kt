@@ -1,18 +1,20 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 
 internal class OpenTelemetryConfigImpl(
     clock: Clock,
+    sdkErrorHandler: SdkErrorHandler,
     private val globalResourceConfig: ResourceConfigImpl = ResourceConfigImpl(),
 ) : OpenTelemetryConfigDsl, ResourceConfigDsl by globalResourceConfig {
 
-    internal val tracingConfig: TracerProviderConfigImpl = TracerProviderConfigImpl(clock)
-    internal val loggingConfig: LoggerProviderConfigImpl = LoggerProviderConfigImpl(clock)
-    internal val metricsConfig: MeterProviderConfigImpl = MeterProviderConfigImpl()
+    internal val tracingConfig: TracerProviderConfigImpl = TracerProviderConfigImpl(clock, sdkErrorHandler)
+    internal val loggingConfig: LoggerProviderConfigImpl = LoggerProviderConfigImpl(clock, sdkErrorHandler)
+    internal val metricsConfig: MeterProviderConfigImpl = MeterProviderConfigImpl(sdkErrorHandler)
     internal val contextConfig: ContextConfigImpl = ContextConfigImpl()
     internal val propagatorCfg: PropagatorConfigImpl = PropagatorConfigImpl()
     private val globalAttributeLimits = AttributeLimitsConfigImpl()

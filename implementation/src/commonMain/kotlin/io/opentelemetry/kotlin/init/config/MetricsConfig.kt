@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init.config
 
 import io.opentelemetry.kotlin.ThreadSafe
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.resource.Resource
 
 /**
@@ -13,4 +14,9 @@ internal class MetricsConfig(
      * A resource to append to metrics.
      */
     val resource: Resource,
+
+    /**
+     * Handler used to report errors and misuse of the SDK.
+     */
+    val sdkErrorHandler: SdkErrorHandler,
 )

@@ -30,7 +30,8 @@ internal class TracerProviderImpl(
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
     private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(
-        tracingConfig.processor?.let { listOf(it) } ?: emptyList()
+        tracingConfig.processor?.let { listOf(it) } ?: emptyList(),
+        tracingConfig.sdkErrorHandler,
     )
     private val noopTracer = NoopOpenTelemetry.tracerProvider.getTracer("")
 

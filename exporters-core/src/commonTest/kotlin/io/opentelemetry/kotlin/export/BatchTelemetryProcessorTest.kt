@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -52,6 +53,7 @@ internal class BatchTelemetryProcessorTest {
                 maxExportBatchSize = 1,
                 scheduleDelayMs = 1,
                 exportTimeoutMs = 1000,
+                sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,
             exportAction = {
@@ -79,6 +81,7 @@ internal class BatchTelemetryProcessorTest {
                 maxExportBatchSize = 1,
                 scheduleDelayMs = 1,
                 exportTimeoutMs = 1000,
+                sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,
             exportAction = { OperationResultCode.Success }
@@ -96,6 +99,7 @@ internal class BatchTelemetryProcessorTest {
                 maxExportBatchSize = 1,
                 scheduleDelayMs = 1,
                 exportTimeoutMs = 1000,
+                sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,
             exportAction = { OperationResultCode.Success }
@@ -159,6 +163,7 @@ internal class BatchTelemetryProcessorTest {
                 maxExportBatchSize = batchSize,
                 scheduleDelayMs = 1,
                 exportTimeoutMs = exportTimeoutMs,
+                sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,
             exportAction = {

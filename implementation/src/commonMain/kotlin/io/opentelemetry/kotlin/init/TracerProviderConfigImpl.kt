@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
@@ -13,6 +14,7 @@ import io.opentelemetry.kotlin.tracing.sampling.parentBased
 
 internal class TracerProviderConfigImpl(
     private val clock: Clock,
+    private val sdkErrorHandler: SdkErrorHandler,
     private val resourceConfigImpl: ResourceConfigImpl = ResourceConfigImpl()
 ) : TracerProviderConfigDsl, ResourceConfigDsl by resourceConfigImpl {
 
@@ -29,7 +31,7 @@ internal class TracerProviderConfigImpl(
             platformLog("export() should only be called once.")
             return
         }
-        processor = TraceExportConfigImpl(clock).action()
+        processor = TraceExportConfigImpl(clock, sdkErrorHandler).action()
     }
 
     override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
@@ -40,6 +42,7 @@ internal class TracerProviderConfigImpl(
         processor = processor,
         spanLimits = generateSpanLimitsConfig(globalLimits),
         resource = base.merge(resourceConfigImpl.generateResource()),
+        sdkErrorHandler = sdkErrorHandler,
         samplerFactory = { spanFactory -> SamplerConfigImpl(spanFactory).samplerAction() },
     )
 

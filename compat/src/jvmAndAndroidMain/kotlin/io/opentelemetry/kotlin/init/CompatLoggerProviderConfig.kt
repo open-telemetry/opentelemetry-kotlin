@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProviderBuilder
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setAttributes
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.logging.LoggerProviderAdapter
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
@@ -19,6 +20,7 @@ import io.opentelemetry.kotlin.semconv.ServiceAttributes
 @ExperimentalApi
 internal class CompatLoggerProviderConfig(
     private val clock: Clock,
+    private val sdkErrorHandler: SdkErrorHandler,
 ) : LoggerProviderConfigDsl {
 
     private val builder: OtelJavaSdkLoggerProviderBuilder = OtelJavaSdkLoggerProvider.builder()
@@ -46,7 +48,7 @@ internal class CompatLoggerProviderConfig(
     }
 
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
-        val processor = LogExportConfigCompat(clock).action()
+        val processor = LogExportConfigCompat(clock, sdkErrorHandler).action()
         builder.addLogRecordProcessor(OtelJavaLogRecordProcessorAdapter(processor))
     }
 
@@ -79,5 +81,8 @@ internal class CompatLoggerProviderConfig(
         return LoggerProviderAdapter(builder.build())
     }
 
-    private class LogExportConfigCompat(override val clock: Clock) : LogExportConfigDsl
+    private class LogExportConfigCompat(
+        override val clock: Clock,
+        override val sdkErrorHandler: SdkErrorHandler,
+    ) : LogExportConfigDsl
 }

@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProviderBuilder
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setAttributes
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
@@ -27,6 +28,7 @@ import io.opentelemetry.kotlin.tracing.sampling.SamplerAdapter
 @ExperimentalApi
 internal class CompatTracerProviderConfig(
     private val clock: Clock,
+    private val sdkErrorHandler: SdkErrorHandler,
 ) : TracerProviderConfigDsl {
 
     private val builder: OtelJavaSdkTracerProviderBuilder = OtelJavaSdkTracerProvider.builder()
@@ -58,7 +60,7 @@ internal class CompatTracerProviderConfig(
     }
 
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
-        val processor = TraceExportConfigCompat(clock).action()
+        val processor = TraceExportConfigCompat(clock, sdkErrorHandler).action()
         builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor))
     }
 
@@ -106,5 +108,8 @@ internal class CompatTracerProviderConfig(
         return TracerProviderAdapter(builder.build(), clock, spanLimitsConfig)
     }
 
-    private class TraceExportConfigCompat(override val clock: Clock) : TraceExportConfigDsl
+    private class TraceExportConfigCompat(
+        override val clock: Clock,
+        override val sdkErrorHandler: SdkErrorHandler,
+    ) : TraceExportConfigDsl
 }

@@ -17,7 +17,7 @@ internal class MeterProviderImpl(
 ) : MeterProvider, TelemetryCloseable {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
-    private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(emptyList())
+    private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(emptyList(), metricsConfig.sdkErrorHandler)
     private val noopMeter = NoopOpenTelemetry.meterProvider.getMeter("")
 
     private val apiProvider by lazy {

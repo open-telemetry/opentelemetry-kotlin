@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
@@ -25,7 +26,8 @@ internal class LoggerProviderImplTest {
     private val loggingConfig = LoggingConfig(
         null,
         LogLimitConfig(100, 100),
-        ResourceImpl(AttributesModel(), null)
+        ResourceImpl(AttributesModel(), null),
+        NoopSdkErrorHandler,
     )
     private val contextFactory = FakeContextFactory()
     private val spanContextFactory = FakeSpanContextFactory()
@@ -120,6 +122,7 @@ internal class LoggerProviderImplTest {
             processor,
             LogLimitConfig(100, 100),
             FakeResource(),
+            NoopSdkErrorHandler,
         )
         impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
         impl.getLogger(name = "test")
@@ -142,6 +145,7 @@ internal class LoggerProviderImplTest {
             processor,
             LogLimitConfig(100, 100),
             FakeResource(),
+            NoopSdkErrorHandler,
         )
         impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
         impl.getLogger(name = "test")
@@ -165,6 +169,7 @@ internal class LoggerProviderImplTest {
             processor,
             LogLimitConfig(100, 100),
             FakeResource(),
+            NoopSdkErrorHandler,
         )
         impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
         val logger = impl.getLogger(name = "test")

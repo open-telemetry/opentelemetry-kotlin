@@ -109,6 +109,7 @@ public abstract interface class io/opentelemetry/kotlin/init/ContextConfigDsl {
 
 public abstract interface class io/opentelemetry/kotlin/init/LogExportConfigDsl {
 	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
+	public abstract fun getSdkErrorHandler ()Lio/opentelemetry/kotlin/error/SdkErrorHandler;
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/LogLimitsConfigDsl : io/opentelemetry/kotlin/init/AttributeLimitsConfigDsl {
@@ -166,6 +167,7 @@ public abstract interface class io/opentelemetry/kotlin/init/SpanLimitsConfigDsl
 
 public abstract interface class io/opentelemetry/kotlin/init/TraceExportConfigDsl {
 	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
+	public abstract fun getSdkErrorHandler ()Lio/opentelemetry/kotlin/error/SdkErrorHandler;
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/TracerProviderConfigDsl : io/opentelemetry/kotlin/init/ResourceConfigDsl {
