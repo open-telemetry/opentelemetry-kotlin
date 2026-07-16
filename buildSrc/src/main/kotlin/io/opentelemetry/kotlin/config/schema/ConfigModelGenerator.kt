@@ -5,6 +5,7 @@ import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.BOOLEAN
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.DOUBLE
+import com.squareup.kotlinpoet.Documentable
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
@@ -63,7 +64,7 @@ internal class ConfigModelGenerator(private val packageName: String) {
         val typeBuilder = TypeSpec.classBuilder(name)
             .addModifiers(KModifier.DATA, KModifier.INTERNAL)
             .addAnnotation(serializable)
-            .apply { kdoc(def)?.let { addKdoc("%L", it) } }
+            .deriveKDoc(def)
 
         for ((wireName, rawSchema) in properties) {
             val propSchema = asMap(rawSchema)
@@ -86,7 +87,7 @@ internal class ConfigModelGenerator(private val packageName: String) {
             typeBuilder.addProperty(
                 PropertySpec.builder(kotlinName, type, KModifier.INTERNAL)
                     .initializer(kotlinName)
-                    .apply { kdoc(propSchema)?.let { addKdoc("%L", it) } }
+                    .deriveKDoc(propSchema)
                     .build()
             )
         }
@@ -98,7 +99,7 @@ internal class ConfigModelGenerator(private val packageName: String) {
         val builder = TypeSpec.enumBuilder(name)
             .addModifiers(KModifier.INTERNAL)
             .addAnnotation(serializable)
-            .apply { kdoc(def)?.let { addKdoc("%L", it) } }
+            .deriveKDoc(def)
 
         for (value in asStringList(def["enum"])) {
             builder.addEnumConstant(
@@ -116,7 +117,7 @@ internal class ConfigModelGenerator(private val packageName: String) {
     private fun buildMapTypeAlias(name: String, def: Map<String, Any?>): FileSpec {
         val alias = TypeAliasSpec.builder(name, MAP.parameterizedBy(STRING, contextualAnyNullable))
             .addModifiers(KModifier.INTERNAL)
-            .apply { kdoc(def)?.let { addKdoc("%L", it) } }
+            .deriveKDoc(def)
             .build()
         return FileSpec.builder(packageName, name).addFileComment(HEADER).addTypeAlias(alias)
             .build()
@@ -126,7 +127,7 @@ internal class ConfigModelGenerator(private val packageName: String) {
         val marker = TypeSpec.classBuilder(name)
             .addModifiers(KModifier.INTERNAL)
             .addAnnotation(serializable)
-            .apply { kdoc(def)?.let { addKdoc("%L", it) } }
+            .deriveKDoc(def)
             .build()
         return fileOf(name, marker)
     }
@@ -180,12 +181,12 @@ internal class ConfigModelGenerator(private val packageName: String) {
         return oneOf.any { asMap(it)["type"] == "null" }
     }
 
-    private fun kdoc(schema: Map<String, Any?>): String? {
+    private fun <T : Documentable.Builder<T>> T.deriveKDoc(schema: Map<String, Any?>): T {
         val description = (schema["description"] as? String)?.trim().orEmpty()
         if (description.isEmpty()) {
-            return null
+            return this
         }
-        return description.replace("*/", "* /")
+        return addKdoc("%L", description.replace("*/", "* /"))
     }
 
     @Suppress("UNCHECKED_CAST")
