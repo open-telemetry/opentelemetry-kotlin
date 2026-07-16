@@ -4,8 +4,11 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaIdGenerator
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
+import io.opentelemetry.kotlin.aliases.OtelJavaScopeConfigurator
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProviderBuilder
+import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProviderUtil
+import io.opentelemetry.kotlin.aliases.OtelJavaTracerConfig
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setAttributes
@@ -15,7 +18,9 @@ import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.OtelJavaIdGeneratorAdapter
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
+import io.opentelemetry.kotlin.scope.toOtelKotlinInstrumentationScopeInfo
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
+import io.opentelemetry.kotlin.tracing.TracerConfigurator
 import io.opentelemetry.kotlin.tracing.TracerProvider
 import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
 import io.opentelemetry.kotlin.tracing.export.OtelJavaSpanProcessorAdapter
@@ -32,6 +37,7 @@ internal class CompatTracerProviderConfig(
     private val builder: OtelJavaSdkTracerProviderBuilder = OtelJavaSdkTracerProvider.builder()
     internal val spanLimitsConfig = CompatSpanLimitsConfig()
     private var spanLimitsAction: (SpanLimitsConfigDsl.() -> Unit)? = null
+    private var tracerConfigurator: TracerConfigurator? = null
     private var serviceNameOverride: String? = null
 
     private val resourceAttrs = CompatAttributesModel()
@@ -74,6 +80,21 @@ internal class CompatTracerProviderConfig(
         builder.setSampler(otelJavaSampler)
     }
 
+    override fun tracerConfigurator(configurator: TracerConfigurator) {
+        tracerConfigurator = configurator
+    }
+
+    private fun applyTracerConfigurator(configurator: TracerConfigurator) {
+        val scopeConfigurator = OtelJavaScopeConfigurator<OtelJavaTracerConfig> { javaScope ->
+            val scope = javaScope.toOtelKotlinInstrumentationScopeInfo()
+            when (configurator.tracerConfig(scope).enabled) {
+                true -> OtelJavaTracerConfig.enabled()
+                false -> OtelJavaTracerConfig.disabled()
+            }
+        }
+        OtelJavaSdkTracerProviderUtil.setTracerConfigurator(builder, scopeConfigurator)
+    }
+
     fun build(
         clock: Clock,
         idGenerator: IdGenerator,
@@ -94,6 +115,7 @@ internal class CompatTracerProviderConfig(
         }
         spanLimitsAction?.invoke(spanLimitsConfig)
         builder.setSpanLimits(spanLimitsConfig.build())
+        tracerConfigurator?.let(::applyTracerConfigurator)
         val resource = ResourceAdapter(
             OtelJavaResource.create(resourceAttrs.otelJavaAttributes(), resourceSchemaUrl)
         )

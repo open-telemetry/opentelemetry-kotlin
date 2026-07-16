@@ -78,6 +78,7 @@ abstract class OtelKotlinTestRule(context: TestCoroutineScheduler) {
             )
         }
         spanLimits(config.spanLimits)
+        config.tracerProvider(this)
     }
 
     /**

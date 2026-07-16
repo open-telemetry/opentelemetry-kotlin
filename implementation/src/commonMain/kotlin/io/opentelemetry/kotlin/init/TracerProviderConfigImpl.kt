@@ -6,6 +6,8 @@ import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.resource.Resource
+import io.opentelemetry.kotlin.tracing.TracerConfigImpl
+import io.opentelemetry.kotlin.tracing.TracerConfigurator
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
@@ -19,6 +21,10 @@ internal class TracerProviderConfigImpl(
     private var processor: SpanProcessor? = null
     private var spanLimitsAction: SpanLimitsConfigDsl.() -> Unit = {}
     private var samplerAction: SamplerConfigDsl.() -> Sampler = { parentBased(root = alwaysOn()) }
+    private val defaultTracerConfig = TracerConfigImpl(true)
+    private var tracerConfigurator: TracerConfigurator = TracerConfigurator {
+        defaultTracerConfig
+    }
 
     override fun spanLimits(action: SpanLimitsConfigDsl.() -> Unit) {
         spanLimitsAction = action
@@ -36,11 +42,16 @@ internal class TracerProviderConfigImpl(
         samplerAction = action
     }
 
+    override fun tracerConfigurator(configurator: TracerConfigurator) {
+        tracerConfigurator = configurator
+    }
+
     fun generateTracingConfig(base: Resource, globalLimits: AttributeLimitsConfigImpl? = null): TracingConfig = TracingConfig(
         processor = processor,
         spanLimits = generateSpanLimitsConfig(globalLimits),
         resource = base.merge(resourceConfigImpl.generateResource()),
         samplerFactory = { spanFactory -> SamplerConfigImpl(spanFactory).samplerAction() },
+        tracerConfigurator = tracerConfigurator,
     )
 
     private class SamplerConfigImpl(override val spanFactory: SpanFactory) : SamplerConfigDsl

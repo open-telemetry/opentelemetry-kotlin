@@ -172,6 +172,7 @@ public abstract interface class io/opentelemetry/kotlin/init/TracerProviderConfi
 	public abstract fun export (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun sampler (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun spanLimits (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun tracerConfigurator (Lio/opentelemetry/kotlin/tracing/TracerConfigurator;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/export/LogRecordExporter : io/opentelemetry/kotlin/export/TelemetryCloseable {
@@ -227,6 +228,14 @@ public abstract interface class io/opentelemetry/kotlin/resource/Resource : io/o
 	public abstract fun asNewResource (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/resource/Resource;
 	public abstract fun getSchemaUrl ()Ljava/lang/String;
 	public abstract fun merge (Lio/opentelemetry/kotlin/resource/Resource;)Lio/opentelemetry/kotlin/resource/Resource;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/TracerConfig {
+	public abstract fun getEnabled ()Z
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/TracerConfigurator {
+	public abstract fun tracerConfig (Lio/opentelemetry/kotlin/InstrumentationScopeInfo;)Lio/opentelemetry/kotlin/tracing/TracerConfig;
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanData : io/opentelemetry/kotlin/attributes/AttributeContainer {

@@ -37,19 +37,24 @@ internal class TracerProviderImpl(
     private val sampler = tracingConfig.samplerFactory(spanFactory)
 
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
-        TracerImpl(
-            clock = clock,
-            processor = tracingConfig.processor,
-            contextFactory = contextFactory,
-            spanContextFactory = spanContextFactory,
-            traceFlagsFactory = traceFlagsFactory,
-            scope = key,
-            resource = tracingConfig.resource,
-            spanLimitConfig = tracingConfig.spanLimits,
-            idGenerator = idGenerator,
-            shutdownState = shutdownState,
-            sampler = sampler,
-        )
+        val tracerConfig = tracingConfig.tracerConfigurator.tracerConfig(key)
+        if (!tracerConfig.enabled) {
+            noopTracer
+        } else {
+            TracerImpl(
+                clock = clock,
+                processor = tracingConfig.processor,
+                contextFactory = contextFactory,
+                spanContextFactory = spanContextFactory,
+                traceFlagsFactory = traceFlagsFactory,
+                scope = key,
+                resource = tracingConfig.resource,
+                spanLimitConfig = tracingConfig.spanLimits,
+                idGenerator = idGenerator,
+                shutdownState = shutdownState,
+                sampler = sampler,
+            )
+        }
     }
 
     override fun getTracer(
