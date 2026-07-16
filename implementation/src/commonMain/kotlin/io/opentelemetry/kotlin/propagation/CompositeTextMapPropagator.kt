@@ -12,13 +12,13 @@ internal class CompositeTextMapPropagator(
 
     override fun fields(): Collection<String> = fields
 
-    override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {
+    override fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>) {
         delegates.forEach { delegate ->
             delegate.inject(context, carrier, setter)
         }
     }
 
-    override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context {
+    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context {
         var result = context
         delegates.forEach { delegate ->
             result = delegate.extract(result, carrier, getter)

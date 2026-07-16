@@ -22,7 +22,7 @@ internal class W3CTraceContextPropagator(
 
     override fun fields(): Collection<String> = FIELDS
 
-    override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {
+    override fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>) {
         val spanContext = context.extractSpan().spanContext
         if (!spanContext.isValid) {
             return
@@ -43,7 +43,7 @@ internal class W3CTraceContextPropagator(
         }
     }
 
-    override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context {
+    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context {
         val rawTraceparent = getter.get(carrier, TRACEPARENT) ?: return context
         val parsed = TraceParent.decode(rawTraceparent, traceFlagsFactory) ?: return context
 

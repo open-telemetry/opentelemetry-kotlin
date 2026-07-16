@@ -66,10 +66,10 @@ private class DeferredW3CTraceContextPropagator : TextMapPropagator {
 
     override fun fields(): Collection<String> = resolveDelegate().fields()
 
-    override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) =
+    override fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>) =
         resolveDelegate().inject(context, carrier, setter)
 
-    override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context =
+    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context =
         resolveDelegate().extract(context, carrier, getter)
 
     private fun resolveDelegate(): TextMapPropagator {
