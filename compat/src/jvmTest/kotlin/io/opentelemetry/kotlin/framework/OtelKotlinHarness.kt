@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.framework
 
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.aliases.OtelJavaIdGenerator
-import io.opentelemetry.kotlin.createCompatOpenTelemetryImpl
+import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.toOtelJavaApi
@@ -13,13 +13,13 @@ internal class OtelKotlinHarness(scheduler: TestCoroutineScheduler) :
     OtelKotlinTestRule(scheduler) {
 
     override val kotlinApi: OpenTelemetry by lazy {
-        createCompatOpenTelemetryImpl(
+        createCompatOpenTelemetry(
             clock = fakeClock,
             config = {
+                idGenerator { FakeIdGenerator() }
                 tracerProvider { tracerProviderConfig() }
                 loggerProvider { loggerProviderConfig() }
             },
-            idGenerator = FakeIdGenerator()
         )
     }
 

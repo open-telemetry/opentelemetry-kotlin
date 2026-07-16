@@ -30,6 +30,12 @@ public final class io/opentelemetry/kotlin/ReentrantReadWriteLock {
 	public final fun write (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
+public final class io/opentelemetry/kotlin/ThreadLocal {
+	public fun <init> ()V
+	public final fun get ()Ljava/lang/Object;
+	public final fun set (Ljava/lang/Object;)V
+}
+
 public final class io/opentelemetry/kotlin/ThreadSafeList_jvmKt {
 	public static final fun threadSafeList ()Ljava/util/List;
 }

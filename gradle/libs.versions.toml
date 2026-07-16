@@ -36,6 +36,7 @@ composeMultiplatform = "1.11.1"
 androidxActivityCompose = "1.13.0"
 kotest = "6.2.2"
 kotlinpoet = "2.2.0"
+yamlkt = "0.13.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -57,7 +58,9 @@ ktor-client-encoding = { module = "io.ktor:ktor-client-encoding", version.ref = 
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 okio-fakefilesystem = { module = "com.squareup.okio:okio-fakefilesystem", version.ref = "okio" }
+yamlkt = { module = "net.mamoe.yamlkt:yamlkt", version.ref = "yamlkt" }
 opentelemetry-bom = { group = "io.opentelemetry", name = "opentelemetry-bom", version.ref = "otel" }
 opentelemetry-bom-alpha = { group = "io.opentelemetry", name = "opentelemetry-bom-alpha", version.ref = "otel-alpha" }
 opentelemetry-api = { group = "io.opentelemetry", name = "opentelemetry-api"}

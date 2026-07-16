@@ -3,13 +3,11 @@ package io.opentelemetry.kotlin
 import io.opentelemetry.kotlin.clock.ClockAdapter
 import io.opentelemetry.kotlin.factory.CompatBaggageFactory
 import io.opentelemetry.kotlin.factory.CompatContextFactory
-import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.factory.CompatTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.CompatTraceStateFactory
-import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.init.CompatOpenTelemetryConfig
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 
@@ -27,29 +25,17 @@ public fun createCompatOpenTelemetry(
     clock: Clock = ClockAdapter(io.opentelemetry.sdk.common.Clock.getDefault()),
     config: OpenTelemetryConfigDsl.() -> Unit = {}
 ): OpenTelemetry {
-    return createCompatOpenTelemetryImpl(clock, config)
-}
-
-/**
- * Internal implementation of [createCompatOpenTelemetry]. This is not publicly visible as
- * we don't want to allow users to supply a custom [IdGenerator].
- */
-@ExperimentalApi
-internal fun createCompatOpenTelemetryImpl(
-    clock: Clock,
-    config: OpenTelemetryConfigDsl.() -> Unit,
-    idGenerator: IdGenerator = CompatIdGenerator(),
-): OpenTelemetry {
     val traceFlags = CompatTraceFlagsFactory()
     val traceState = CompatTraceStateFactory()
     val spanContext = CompatSpanContextFactory()
     val contextFactory = CompatContextFactory()
     val span = CompatSpanFactory(spanContext)
 
-    val cfg = CompatOpenTelemetryConfig(clock, idGenerator).apply(config)
+    val cfg = CompatOpenTelemetryConfig(clock).apply(config)
+    val resolvedIdGenerator = cfg.resolveIdGenerator()
     val base = cfg.buildGlobalResource()
     return CompatOpenTelemetryImpl(
-        tracerProvider = cfg.tracerProviderConfig.build(clock, base, cfg.globalAttributeLimits),
+        tracerProvider = cfg.tracerProviderConfig.build(clock, resolvedIdGenerator, base, cfg.globalAttributeLimits),
         loggerProvider = cfg.loggerProviderConfig.build(clock, base, cfg.globalAttributeLimits),
         meterProvider = cfg.meterProviderConfig.build(clock, base),
         clock = clock,
@@ -59,7 +45,7 @@ internal fun createCompatOpenTelemetryImpl(
         context = contextFactory,
         span = span,
         baggage = CompatBaggageFactory(),
-        idGenerator = idGenerator,
+        idGenerator = resolvedIdGenerator,
         resource = CompatResourceFactory,
         propagator = cfg.propagatorCfg.buildPropagator(),
     )

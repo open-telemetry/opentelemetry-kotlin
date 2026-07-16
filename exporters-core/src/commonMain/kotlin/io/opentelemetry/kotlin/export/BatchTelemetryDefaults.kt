@@ -14,9 +14,16 @@ public object BatchTelemetryDefaults {
     public const val MAX_QUEUE_SIZE: Int = 2048
 
     /**
-     * Delay in ms before a flush is triggered
+     * Delay in ms before a flush is triggered for spans.
+     * See https://opentelemetry.io/docs/specs/otel/trace/sdk/#batching-processor
      */
-    public const val SCHEDULE_DELAY_MS: Long = 5000
+    public const val SPAN_SCHEDULE_DELAY_MS: Long = 5000
+
+    /**
+     * Delay in ms before a flush is triggered for log records.
+     * See https://opentelemetry.io/docs/specs/otel/logs/sdk/#batching-processor
+     */
+    public const val LOG_SCHEDULE_DELAY_MS: Long = 1000
 
     /**
      * Timeout in ms for exporting telemetry

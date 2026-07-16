@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 
 internal class BatchTelemetryConfig(
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
-    scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
+    scheduleDelayMs: Long = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
     forceFlushTimeoutMs: Long = BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS,
@@ -31,7 +31,7 @@ internal class BatchTelemetryConfig(
         api = API,
         configParameterName = "scheduleDelayMs",
         value = scheduleDelayMs,
-        default = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
+        default = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS,
     ) { it > 0 }
 
     /**

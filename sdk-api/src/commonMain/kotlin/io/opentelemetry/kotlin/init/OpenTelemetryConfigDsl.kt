@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 
 /**
@@ -41,4 +42,11 @@ public interface OpenTelemetryConfigDsl : ResourceConfigDsl {
      * https://opentelemetry.io/docs/specs/otel/context/api-propagators/
      */
     public fun propagator(action: PropagatorConfigDsl.() -> TextMapPropagator)
+
+    /**
+     * Configures a custom [IdGenerator] that is used to generate trace and span IDs. If this is
+     * not set the SDK will provide its own default implementation.
+     * https://opentelemetry.io/docs/specs/otel/trace/sdk/#id-generators
+     */
+    public fun idGenerator(action: () -> IdGenerator)
 }

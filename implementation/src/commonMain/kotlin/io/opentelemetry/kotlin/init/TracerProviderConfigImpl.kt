@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
+import io.opentelemetry.kotlin.tracing.sampling.parentBased
 
 internal class TracerProviderConfigImpl(
     private val clock: Clock,
@@ -17,7 +18,7 @@ internal class TracerProviderConfigImpl(
 
     private var processor: SpanProcessor? = null
     private var spanLimitsAction: SpanLimitsConfigDsl.() -> Unit = {}
-    private var samplerAction: SamplerConfigDsl.() -> Sampler = { alwaysOn() }
+    private var samplerAction: SamplerConfigDsl.() -> Sampler = { parentBased(root = alwaysOn()) }
 
     override fun spanLimits(action: SpanLimitsConfigDsl.() -> Unit) {
         spanLimitsAction = action
