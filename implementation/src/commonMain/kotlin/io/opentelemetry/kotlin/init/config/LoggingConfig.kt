@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init.config
 
 import io.opentelemetry.kotlin.ThreadSafe
+import io.opentelemetry.kotlin.logging.LoggerConfigurator
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.resource.Resource
 
@@ -23,5 +24,10 @@ internal class LoggingConfig(
     /**
      * A resource to append to spans.
      */
-    val resource: Resource
+    val resource: Resource,
+
+    /**
+     * Computes the per-logger config
+     */
+    val loggerConfigurator: LoggerConfigurator
 )

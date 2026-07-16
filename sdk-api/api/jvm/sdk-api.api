@@ -117,6 +117,7 @@ public abstract interface class io/opentelemetry/kotlin/init/LogLimitsConfigDsl 
 public abstract interface class io/opentelemetry/kotlin/init/LoggerProviderConfigDsl : io/opentelemetry/kotlin/init/ResourceConfigDsl {
 	public abstract fun export (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun logLimits (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun loggerConfigurator (Lio/opentelemetry/kotlin/logging/LoggerConfigurator;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/MeterProviderConfigDsl : io/opentelemetry/kotlin/init/ResourceConfigDsl {
@@ -172,6 +173,14 @@ public abstract interface class io/opentelemetry/kotlin/init/TracerProviderConfi
 	public abstract fun export (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun sampler (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun spanLimits (Lkotlin/jvm/functions/Function1;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/logging/LoggerConfig {
+	public abstract fun getEnabled ()Z
+}
+
+public abstract interface class io/opentelemetry/kotlin/logging/LoggerConfigurator {
+	public abstract fun loggerConfig (Lio/opentelemetry/kotlin/InstrumentationScopeInfo;)Lio/opentelemetry/kotlin/logging/LoggerConfig;
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/export/LogRecordExporter : io/opentelemetry/kotlin/export/TelemetryCloseable {
