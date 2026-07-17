@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.init.config.LoggingConfig
+import io.opentelemetry.kotlin.logging.LoggerConfigImpl
+import io.opentelemetry.kotlin.logging.LoggerConfigurator
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.resource.Resource
@@ -14,6 +16,10 @@ internal class LoggerProviderConfigImpl(
 
     private var processor: LogRecordProcessor? = null
     private var logLimitsAction: LogLimitsConfigDsl.() -> Unit = {}
+    private val defaultLoggerConfig = LoggerConfigImpl(true)
+    private var loggerConfigurator: LoggerConfigurator = LoggerConfigurator {
+        defaultLoggerConfig
+    }
 
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
         if (processor != null) {
@@ -27,10 +33,18 @@ internal class LoggerProviderConfigImpl(
         logLimitsAction = action
     }
 
-    fun generateLoggingConfig(base: Resource, globalLimits: AttributeLimitsConfigImpl? = null): LoggingConfig = LoggingConfig(
+    override fun loggerConfigurator(configurator: LoggerConfigurator) {
+        loggerConfigurator = configurator
+    }
+
+    fun generateLoggingConfig(
+        base: Resource,
+        globalLimits: AttributeLimitsConfigImpl? = null
+    ): LoggingConfig = LoggingConfig(
         processor = processor,
         logLimits = generateLogLimitsConfig(globalLimits),
         resource = base.merge(resourceConfigImpl.generateResource()),
+        loggerConfigurator = loggerConfigurator,
     )
 
     private fun generateLogLimitsConfig(globalLimits: AttributeLimitsConfigImpl?): LogLimitConfig {

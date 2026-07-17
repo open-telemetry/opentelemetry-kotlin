@@ -51,6 +51,10 @@ internal class TracerImpl(
         action: (SpanCreationAction.() -> Unit)?
     ): Span =
         shutdownState.ifActiveOrElse(noopSpan) {
+            if (name.isBlank()) {
+                return@ifActiveOrElse NonRecordingSpan(invalidSpanContext, invalidSpanContext)
+            }
+
             val ctx = parentContext ?: contextFactory.implicit()
 
             val parentSpanContext = when (ctx) {

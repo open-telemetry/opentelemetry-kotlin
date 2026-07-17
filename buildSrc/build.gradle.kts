@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.detekt.gradle.plugin)
     implementation(libs.mavenPublish)
     implementation(libs.binary.compatibility.validator)
+    implementation(libs.kotlinpoet)
 }
 
 gradlePlugin {

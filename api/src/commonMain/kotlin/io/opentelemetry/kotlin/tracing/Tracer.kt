@@ -28,7 +28,7 @@ public interface Tracer {
     public fun enabled(): Boolean
 
     /**
-     * Creates a new span. A span must have a non-empty name, and can optionally include:
+     * Creates a new span. A span must have a non-empty, non-blank name, and can optionally include:
      *
      * @param parentContext - a context object containing the parent span. If this is not set
      * explicitly, the implicit context via [io.opentelemetry.kotlin.factory.ContextFactory.implicit] will be used.

@@ -29,17 +29,22 @@ internal class LoggerProviderImpl(
     private val noopLogger = NoopOpenTelemetry.loggerProvider.getLogger("")
 
     private val apiProvider by lazy {
-        ApiProviderImpl<Logger> { key ->
-            LoggerImpl(
-                clock,
-                loggingConfig.processor,
-                contextFactory,
-                spanContextFactory,
-                key,
-                loggingConfig.resource,
-                loggingConfig.logLimits,
-                shutdownState,
-            )
+        ApiProviderImpl { key ->
+            val loggerConfig = loggingConfig.loggerConfigurator.loggerConfig(key)
+            if (!loggerConfig.enabled) {
+                noopLogger
+            } else {
+                LoggerImpl(
+                    clock,
+                    loggingConfig.processor,
+                    contextFactory,
+                    spanContextFactory,
+                    key,
+                    loggingConfig.resource,
+                    loggingConfig.logLimits,
+                    shutdownState,
+                )
+            }
         }
     }
 
