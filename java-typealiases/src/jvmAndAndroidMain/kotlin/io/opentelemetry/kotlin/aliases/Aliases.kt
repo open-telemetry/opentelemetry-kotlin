@@ -134,7 +134,6 @@ typealias OtelJavaSdkTracerProvider = SdkTracerProvider
 typealias OtelJavaSdkTracerProviderBuilder = SdkTracerProviderBuilder
 typealias OtelJavaSdkTracerProviderUtil = SdkTracerProviderUtil
 typealias OtelJavaTracerConfig = TracerConfig
-typealias OtelJavaScopeConfigurator<T> = ScopeConfigurator<T>
 typealias OtelJavaBody = Body
 typealias OtelJavaInstrumentationLibraryInfo = InstrumentationLibraryInfo
 typealias OtelJavaAttributesBuilder = AttributesBuilder
