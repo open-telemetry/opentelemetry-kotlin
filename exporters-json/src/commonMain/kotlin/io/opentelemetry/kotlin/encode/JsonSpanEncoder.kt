@@ -8,8 +8,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 internal class JsonSpanEncoder : OtlpJsonEncoder<SpanData> {
-    override fun encode(value: SpanData): String =
-        Json.encodeToString(value.toSerializable())
+    override fun encode(value: SpanData): Sequence<String> =
+        sequence {
+            Json.encodeToString(value.toSerializable())
+        }
 }
 
 fun SpanData.toSerializable() =

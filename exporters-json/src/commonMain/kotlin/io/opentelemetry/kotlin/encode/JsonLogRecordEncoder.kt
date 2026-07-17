@@ -11,8 +11,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 internal class JsonLogRecordEncoder : OtlpJsonEncoder<ReadableLogRecord> {
-    override fun encode(value: ReadableLogRecord): String =
-        Json.encodeToString(value.toSerializable())
+    override fun encode(value: ReadableLogRecord): Sequence<String> =
+        sequence {
+            Json.encodeToString(value.toSerializable())
+        }
 }
 
 @Serializable
