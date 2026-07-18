@@ -93,7 +93,6 @@ fun SpanContext.toSerializable() =
         traceState = traceState.asMap(),
     )
 
-
 fun InstrumentationScopeInfo.toSerializable() =
     SerializableInstrumentationScopeInfo(
         name = name,
