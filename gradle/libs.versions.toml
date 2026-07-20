@@ -1,38 +1,42 @@
 [versions]
 agp = "9.2.1"
-kotlin = "2.3.21"
+kotlin = "2.4.10"
 android-minSdk = "21"
 android-compileSdk = "36"
 android-minCompileSdk = "34"
-android-minAgpVersion = "8.0.0"
+android-minAgpVersion = "8.0.2"
 minSupportedKotlinLang = "2.0"
 minSupportedKotlinPlugin = "2.0.0"
-minSupportedGradle = "8.0"
+minSupportedKotlinKlib = "2.4.0"
+minSupportedGradle = "8.0.2"
 detekt = "1.23.8"
 binaryCompatibilityValidator = "0.18.1"
 kotlinxBenchmarkRuntime = "0.4.17"
 kotlinxCoroutines = "1.10.2"
-ktor = "3.4.2"
+ktor = "3.5.1"
 okio = "3.17.0"
-otel = "1.62.0"
+otel = "1.64.0"
+otel-alpha = "1.63.0-alpha"
 kotlinSerialization = "1.11.0"
-mavenPublish = "0.36.0"
+mavenPublish = "0.37.0"
 nexus = "2.0.0"
-junit = "6.0.3"
+junit = "6.1.2"
 koverGradlePlugin = "0.9.8"
 downloadPlugin = "5.7.0"
-androidxBenchmark = "1.5.0-alpha05"
-kotlinxBenchmark = "0.4.16"
+androidxBenchmark = "1.5.0-alpha07"
+kotlinxBenchmark = "0.4.17"
 androidxTest = "1.7.0"
 androidxRunner = "1.7.0"
 androidxJunit = "1.3.0"
-protobufKotlin = "4.34.1"
+protobufKotlin = "4.35.1"
 protobufPlugin = "0.10.0"
-wire = "6.2.0"
-buildKonfig = "0.18.0"
-composeMultiplatform = "1.10.3"
+wire = "6.4.5"
+buildKonfig = "0.22.0"
+composeMultiplatform = "1.11.1"
 androidxActivityCompose = "1.13.0"
-kotest = "6.1.11"
+kotest = "6.2.2"
+kotlinpoet = "2.2.0"
+yamlkt = "0.13.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -54,16 +58,21 @@ ktor-client-encoding = { module = "io.ktor:ktor-client-encoding", version.ref = 
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 okio-fakefilesystem = { module = "com.squareup.okio:okio-fakefilesystem", version.ref = "okio" }
+yamlkt = { module = "net.mamoe.yamlkt:yamlkt", version.ref = "yamlkt" }
 opentelemetry-bom = { group = "io.opentelemetry", name = "opentelemetry-bom", version.ref = "otel" }
+opentelemetry-bom-alpha = { group = "io.opentelemetry", name = "opentelemetry-bom-alpha", version.ref = "otel-alpha" }
 opentelemetry-api = { group = "io.opentelemetry", name = "opentelemetry-api"}
 opentelemetry-sdk = { group = "io.opentelemetry", name = "opentelemetry-sdk"}
+opentelemetry-sdk-extension-incubator = { group = "io.opentelemetry", name = "opentelemetry-sdk-extension-incubator"}
+opentelemetry-extension-trace-propagators = { group = "io.opentelemetry", name = "opentelemetry-extension-trace-propagators" }
 kotlin-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 mavenPublish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version.ref = "mavenPublish" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit" }
-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version = "6.0.3" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version = "6.1.2" }
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTest" }
 androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxRunner" }
@@ -72,6 +81,7 @@ protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref 
 wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidxActivityCompose" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
+kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
 
 [plugins]
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
@@ -90,7 +100,8 @@ wire = { id = "com.squareup.wire", version.ref = "wire" }
 buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-test-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "minSupportedKotlinPlugin" }
+test-kotlin-multiplatform-jvm = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "minSupportedKotlinPlugin" }
+test-kotlin-multiplatform-klib = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "minSupportedKotlinKlib" }
 test-android-library = { id = "com.android.library", version.ref = "android-minAgpVersion" }
 
 [bundles]

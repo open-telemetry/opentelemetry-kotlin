@@ -21,6 +21,8 @@ include(
     ":sdk-ext",
     ":sdk-api",
     ":sdk-common",
+    ":config",
+    ":config-schema",
     ":noop",
     ":implementation",
     ":model",

@@ -80,5 +80,10 @@ object ProfileAttributes {
         * <p><a href="https://wikipedia.org/wiki/Rust_(programming_language)">Rust</a></p>
         */
         RUST("rust"),
+
+        /**
+        * <p><a href="https://en.wikipedia.org/wiki/LuaJIT">LuaJIT</a></p>
+        */
+        LUAJIT("luajit"),
     }
 }

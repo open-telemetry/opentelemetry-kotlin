@@ -8,6 +8,15 @@ internal sealed class OtlpResponse(val statusCode: Int) {
         }
     }
 
+    class PartialSuccess(
+        val rejectedCount: Long,
+        val errorMessage: String?,
+    ) : OtlpResponse(200) {
+        override fun toString(): String {
+            return "PartialSuccess(rejectedCount=$rejectedCount, errorMessage=$errorMessage, statusCode=$statusCode)"
+        }
+    }
+
     class ClientError(statusCode: Int, val errorMessage: String?) : OtlpResponse(statusCode) {
         override fun toString(): String {
             return "ClientError(errorMessage=$errorMessage, statusCode=$statusCode)"
@@ -17,6 +26,16 @@ internal sealed class OtlpResponse(val statusCode: Int) {
     class ServerError(statusCode: Int, val errorMessage: String?) : OtlpResponse(statusCode) {
         override fun toString(): String {
             return "ServerError(errorMessage=$errorMessage, statusCode=$statusCode)"
+        }
+    }
+
+    class RetryableError(
+        statusCode: Int,
+        val retryAfterMs: Long?,
+        val errorMessage: String?,
+    ) : OtlpResponse(statusCode) {
+        override fun toString(): String {
+            return "RetryableError(errorMessage=$errorMessage, retryAfterMs=$retryAfterMs, statusCode=$statusCode)"
         }
     }
 

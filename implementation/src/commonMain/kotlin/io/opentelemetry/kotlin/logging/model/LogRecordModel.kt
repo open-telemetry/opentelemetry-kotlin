@@ -22,7 +22,7 @@ internal class LogRecordModel(
     eventName: String?,
     severityText: String?,
     severityNumber: SeverityNumber?,
-    override val spanContext: SpanContext,
+    spanContext: SpanContext,
     logLimitConfig: LogLimitConfig,
 ) : ReadWriteLogRecord {
 
@@ -80,6 +80,16 @@ internal class LogRecordModel(
             }
         }
 
+    override var spanContext: SpanContext = spanContext
+        get() = lock.read {
+            field
+        }
+        set(value) {
+            lock.write {
+                field = value
+            }
+        }
+
     override var eventName: String? = eventName
         get() = lock.read {
             field
@@ -101,6 +111,11 @@ internal class LogRecordModel(
     override val attributes: Map<String, Any>
         get() = lock.read {
             attrs.attributes.toMap()
+        }
+
+    override val droppedAttributesCount: Int
+        get() = lock.read {
+            attrs.droppedAttributesCount
         }
 
     override fun setBooleanAttribute(key: String, value: Boolean) {

@@ -31,8 +31,7 @@
       "schemaUrl": "https://example.com/some_schema.json",
       "attributes": {
         "environment": "test",
-        "service.name": "test-service",
-        "service.version": "UNKNOWN"
+        "service.name": "test-service"
       }
     },
     "instrumentationScopeInfo": {

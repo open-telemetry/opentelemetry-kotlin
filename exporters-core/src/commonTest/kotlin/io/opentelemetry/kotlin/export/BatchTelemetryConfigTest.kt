@@ -10,7 +10,7 @@ internal class BatchTelemetryConfigTest {
     fun testDefaults() {
         val cfg = BatchTelemetryConfig()
         assertEquals(BatchTelemetryDefaults.MAX_QUEUE_SIZE, cfg.maxQueueSize)
-        assertEquals(BatchTelemetryDefaults.SCHEDULE_DELAY_MS, cfg.scheduleDelayMs)
+        assertEquals(BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS, cfg.scheduleDelayMs)
         assertEquals(BatchTelemetryDefaults.EXPORT_TIMEOUT_MS, cfg.exportTimeoutMs)
         assertEquals(BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE, cfg.maxExportBatchSize)
         assertEquals(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS, cfg.forceFlushTimeoutMs)

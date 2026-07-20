@@ -10,7 +10,7 @@ plugins {
 }
 
 // The release version of https://github.com/open-telemetry/semantic-conventions used to generate classes
-val semanticConventionsVersion = "1.41.1"
+val semanticConventionsVersion = "1.43.0"
 val semanticConventionsRepoZip =
     "https://github.com/open-telemetry/semantic-conventions/archive/v${semanticConventionsVersion}.zip"
 
@@ -22,6 +22,17 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
 tasks.register<GenerateSemanticConventionsTask>("generateSemanticConventions").configure {
     version.set(semanticConventionsVersion)
     dependsOn(refreshSemanticConventions)
+}
+
+
+kotlin {
+    sourceSets {
+        commonMain {
+            dependencies {
+                api(project(":api"))
+            }
+        }
+    }
 }
 
 abstract class GenerateSemanticConventionsTask @Inject constructor(

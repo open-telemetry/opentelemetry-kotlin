@@ -9,4 +9,5 @@ internal class SpanEventDataAdapter(
     override val name: String = impl.name
     override val timestamp: Long = impl.epochNanos
     override val attributes: Map<String, Any> = impl.attributes.convertToMap()
+    override val droppedAttributesCount: Int = impl.totalAttributeCount - impl.attributes.size()
 }

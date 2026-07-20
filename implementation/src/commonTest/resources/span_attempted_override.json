@@ -35,7 +35,7 @@
         "spanContext": {
           "traceId": "00000000000000000000000000000000",
           "spanId": "0000000000000000",
-          "traceFlags": "00",
+          "traceFlags": "01",
           "traceState": {
             "foo": "bar"
           }
@@ -53,7 +53,6 @@
       "schemaUrl": "null",
       "attributes": {
         "service.name": "unknown_service",
-        "service.version": "UNKNOWN",
         "telemetry.sdk.name": "opentelemetry",
         "telemetry.sdk.language": "kotlin",
         "telemetry.sdk.version": "UNKNOWN"

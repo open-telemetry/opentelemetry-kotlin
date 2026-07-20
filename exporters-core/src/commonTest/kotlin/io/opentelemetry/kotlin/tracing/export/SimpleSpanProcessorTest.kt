@@ -4,6 +4,8 @@ import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.export.FakeTraceExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
+import io.opentelemetry.kotlin.tracing.FakeSpanContext
+import io.opentelemetry.kotlin.tracing.FakeTraceFlags
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -35,6 +37,21 @@ internal class SimpleSpanProcessorTest {
 
         val export = exporter.exports.single()
         assertEquals(span.name, export.name)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testSpanProcessorSkipsUnsampledSpan() = runTest {
+        val exporter = FakeSpanExporter()
+        val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
+        val processor = SimpleSpanProcessor(exporter, scope)
+        val span = FakeReadWriteSpan(
+            spanContext = FakeSpanContext(traceFlags = FakeTraceFlags(isSampled = false))
+        )
+
+        processor.onEnd(span)
+
+        assertTrue(exporter.exports.isEmpty())
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

@@ -307,8 +307,8 @@ internal class W3CBaggagePropagatorTest {
 
     private object MultiValueMapTextMapGetter : TextMapGetter<Map<String, List<String>>> {
         override fun keys(carrier: Map<String, List<String>>): Collection<String> = carrier.keys
-        override fun get(carrier: Map<String, List<String>>, key: String): String? =
-            carrier[key]?.firstOrNull()
+        override fun get(carrier: Map<String, List<String>>?, key: String): String? =
+            carrier?.get(key)?.firstOrNull()
         override fun getAll(carrier: Map<String, List<String>>, key: String): List<String> =
             carrier[key].orEmpty()
     }

@@ -1,6 +1,8 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.baggage.NoopBaggage
+import io.opentelemetry.kotlin.config.NoopConfigProperties
+import io.opentelemetry.kotlin.config.NoopConfigProvider
 import io.opentelemetry.kotlin.context.NoopContext
 import io.opentelemetry.kotlin.context.NoopContextKey
 import io.opentelemetry.kotlin.factory.NoopBaggageFactory
@@ -33,6 +35,8 @@ internal class NoopTests {
         val anotherSpan = tracer.startSpan("span2", spanKind = SpanKind.CLIENT)
         assertSame(span, anotherSpan)
         assertTrue(span is NoopSpan)
+
+        assertFalse(tracer.enabled())
 
         // Span operations should be no-ops
         verifySpanOperationsAreNoop(span)
@@ -237,7 +241,7 @@ internal class NoopTests {
         // extract returns the original context unchanged
         val getter = object : TextMapGetter<MutableMap<String, String>> {
             override fun keys(carrier: MutableMap<String, String>) = carrier.keys
-            override fun get(carrier: MutableMap<String, String>, key: String) = carrier[key]
+            override fun get(carrier: MutableMap<String, String>?, key: String) = carrier?.get(key)
             override fun getAll(carrier: MutableMap<String, String>, key: String): List<String> =
                 carrier[key]?.let { listOf(it) } ?: emptyList()
         }
@@ -259,6 +263,23 @@ internal class NoopTests {
     fun testNoopOpenTelemetryBaggage() {
         assertSame(NoopBaggageFactory, NoopOpenTelemetry.baggage)
         assertSame(NoopBaggage, NoopOpenTelemetry.baggage.create { put("k", "v") })
+    }
+
+    @Test
+    fun testNoopConfigProvider() {
+        assertSame(NoopConfigProperties, NoopConfigProvider.instrumentationConfig)
+
+        assertNull(NoopConfigProperties.getString(""))
+        assertNull(NoopConfigProperties.getBoolean(""))
+        assertNull(NoopConfigProperties.getLong(""))
+        assertNull(NoopConfigProperties.getDouble(""))
+        assertNull(NoopConfigProperties.getStringList(""))
+        assertNull(NoopConfigProperties.getBooleanList(""))
+        assertNull(NoopConfigProperties.getLongList(""))
+        assertNull(NoopConfigProperties.getDoubleList(""))
+        assertNull(NoopConfigProperties.getStructured(""))
+        assertNull(NoopConfigProperties.getStructuredList(""))
+        assertSame(emptySet(), NoopConfigProperties.propertyKeys)
     }
 
     private fun verifySpanOperationsAreNoop(span: NoopSpan) {

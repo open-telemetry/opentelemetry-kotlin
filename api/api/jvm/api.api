@@ -120,6 +120,24 @@ public abstract interface class io/opentelemetry/kotlin/baggage/BaggageEntryMeta
 	public abstract fun getValue ()Ljava/lang/String;
 }
 
+public abstract interface class io/opentelemetry/kotlin/config/ConfigProperties {
+	public abstract fun getBoolean (Ljava/lang/String;)Ljava/lang/Boolean;
+	public abstract fun getBooleanList (Ljava/lang/String;)Ljava/util/List;
+	public abstract fun getDouble (Ljava/lang/String;)Ljava/lang/Double;
+	public abstract fun getDoubleList (Ljava/lang/String;)Ljava/util/List;
+	public abstract fun getLong (Ljava/lang/String;)Ljava/lang/Long;
+	public abstract fun getLongList (Ljava/lang/String;)Ljava/util/List;
+	public abstract fun getPropertyKeys ()Ljava/util/Set;
+	public abstract fun getString (Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun getStringList (Ljava/lang/String;)Ljava/util/List;
+	public abstract fun getStructured (Ljava/lang/String;)Lio/opentelemetry/kotlin/config/ConfigProperties;
+	public abstract fun getStructuredList (Ljava/lang/String;)Ljava/util/List;
+}
+
+public abstract interface class io/opentelemetry/kotlin/config/ConfigProvider {
+	public abstract fun getInstrumentationConfig ()Lio/opentelemetry/kotlin/config/ConfigProperties;
+}
+
 public abstract interface class io/opentelemetry/kotlin/context/Context {
 	public abstract fun attach ()Lio/opentelemetry/kotlin/context/Scope;
 	public abstract fun clearBaggage ()Lio/opentelemetry/kotlin/context/Context;
@@ -350,6 +368,7 @@ public abstract interface class io/opentelemetry/kotlin/tracing/TraceState {
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/Tracer {
+	public abstract fun enabled ()Z
 	public abstract fun startSpan (Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/SpanKind;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/Span;
 }
 

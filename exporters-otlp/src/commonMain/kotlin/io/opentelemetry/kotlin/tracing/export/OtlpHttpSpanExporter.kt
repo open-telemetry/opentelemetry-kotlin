@@ -13,9 +13,7 @@ internal class OtlpHttpSpanExporter(
 ) : SpanExporter {
 
     private val exporter = TelemetryExporter(initialDelayMs, maxAttemptIntervalMs, maxAttempts) {
-        otlpClient.exportTraces(it).also { response ->
-            println("OTLP exported trace: $response")
-        }
+        otlpClient.exportTraces(it)
     }
 
     override suspend fun export(telemetry: List<SpanData>): OperationResultCode {

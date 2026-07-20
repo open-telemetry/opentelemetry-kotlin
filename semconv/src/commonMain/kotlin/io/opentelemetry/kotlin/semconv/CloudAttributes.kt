@@ -11,6 +11,8 @@ object CloudAttributes {
 
     /**
     * <p>The cloud account ID the resource is assigned to.</p>
+    * <p>Notes:</p>
+    * <p>For Azure, this is the subscription ID.</p>
     */
     @IncubatingApi
     const val CLOUD_ACCOUNT_ID: String = "cloud.account.id"

@@ -17,7 +17,7 @@ internal class ThreadLocalImplicitContextStorageTest {
     @BeforeTest
     fun setUp() {
         factory = ContextFactoryImpl(SpanFactoryImpl(SpanContextFactoryImpl(IdGeneratorImpl())))
-        storage = threadLocalImplicitContextStorage(factory::root)
+        storage = ThreadLocalImplicitContextStorage(factory::root)
     }
 
     @Test
@@ -36,7 +36,7 @@ internal class ThreadLocalImplicitContextStorageTest {
     fun testSeparateInstancesAreIndependent() {
         val first = FakeContext()
         val second = FakeContext()
-        val otherStorage = threadLocalImplicitContextStorage(factory::root)
+        val otherStorage = ThreadLocalImplicitContextStorage(factory::root)
         storage.setImplicitContext(first)
         otherStorage.setImplicitContext(second)
         assertSame(first, storage.implicitContext())

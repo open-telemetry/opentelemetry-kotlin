@@ -70,14 +70,48 @@ internal class SpanLinkTest {
     }
 
     @Test
-    fun testTwoSpanLinksWithSameKey() {
+    fun testDuplicateSpanContextsAppended() {
         tracer.startSpan("test").apply {
             addLink(fakeSpanContext)
             addLink(fakeSpanContext)
             end()
         }
-        val links = retrieveLinks(1)
+        val links = retrieveLinks(2)
         assertLinkData(links[0], fakeSpanContext, emptyMap())
+        assertLinkData(links[1], fakeSpanContext, emptyMap())
+    }
+
+    @Test
+    fun testDuplicateSpanContextsKeepDistinctAttributes() {
+        tracer.startSpan("test").apply {
+            addLink(fakeSpanContext) {
+                setStringAttribute("foo", "first")
+            }
+            addLink(fakeSpanContext) {
+                setStringAttribute("foo", "second")
+            }
+            end()
+        }
+        val links = retrieveLinks(2)
+        assertLinkData(links[0], fakeSpanContext, mapOf("foo" to "first"))
+        assertLinkData(links[1], fakeSpanContext, mapOf("foo" to "second"))
+    }
+
+    @Test
+    fun testDuplicateSpanContextsAppendedDuringCreation() {
+        tracer.startSpan("test", action = {
+            addLink(fakeSpanContext) {
+                setStringAttribute("foo", "first")
+            }
+            addLink(fakeSpanContext) {
+                setStringAttribute("foo", "second")
+            }
+        }).apply {
+            end()
+        }
+        val links = retrieveLinks(2)
+        assertLinkData(links[0], fakeSpanContext, mapOf("foo" to "first"))
+        assertLinkData(links[1], fakeSpanContext, mapOf("foo" to "second"))
     }
 
     @Test
@@ -87,6 +121,8 @@ internal class SpanLinkTest {
             addLink(fakeSpanContext)
         }
         retrieveLinks(0)
+        // a link added after the span ends is ignored, not counted as dropped
+        assertEquals(0, processor.endCalls.single().droppedLinksCount)
     }
 
     @Test
@@ -121,6 +157,8 @@ internal class SpanLinkTest {
         }
 
         retrieveLinks(3)
+        // links beyond the limit supplied during creation are dropped and counted
+        assertEquals(1, processor.endCalls.single().droppedLinksCount)
     }
 
     @Test
@@ -138,6 +176,8 @@ internal class SpanLinkTest {
         }
 
         retrieveLinks(3)
+        // links beyond the limit added after creation are dropped and counted
+        assertEquals(1, processor.endCalls.single().droppedLinksCount)
     }
 
     @Test
@@ -151,6 +191,7 @@ internal class SpanLinkTest {
         })
         val link = (span.toReadableSpan()).links.single()
         assertEquals(fakeSpanLimitsConfig.attributeCountLimit, link.attributes.size)
+        assertEquals(1, link.droppedAttributesCount)
     }
 
     @Test
@@ -164,6 +205,7 @@ internal class SpanLinkTest {
         }
         val link = (span.toReadableSpan()).links.single()
         assertEquals(fakeSpanLimitsConfig.attributeCountLimit, link.attributes.size)
+        assertEquals(1, link.droppedAttributesCount)
     }
 
     private fun retrieveLinks(expected: Int): List<SpanLinkData> {

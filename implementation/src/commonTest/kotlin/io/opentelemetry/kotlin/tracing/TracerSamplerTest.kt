@@ -159,4 +159,70 @@ internal class TracerSamplerTest {
         val span = tracer.startSpan("test")
         assertEquals(2, span.toReadableSpan().attributes.size)
     }
+
+    @Test
+    fun testSamplerReceiverUserAttributes() {
+        val sampler = FakeSampler()
+        val tracer = buildTracer(sampler)
+        tracer.startSpan("test") {
+            setStringAttribute("user.key", "user.value")
+        }
+
+        assertEquals("user.value", sampler.lastAttributes["user.key"])
+    }
+
+    @Test
+    fun testSamplerReceivesDuplicateLinks() {
+        val sampler = FakeSampler()
+        val tracer = buildTracer(sampler)
+        tracer.startSpan("test") {
+            addLink(FakeSpanContext.VALID)
+            addLink(FakeSpanContext.VALID)
+        }
+        assertEquals(2, sampler.lastLinks.size)
+    }
+
+    @Test
+    fun testSamplerReceiversUserLinks() {
+        val sampler = FakeSampler()
+        val tracer = buildTracer(sampler)
+
+        val ctxA = FakeSpanContext.INVALID
+        val ctxB = FakeSpanContext.VALID
+
+        tracer.startSpan("test") {
+            addLink(ctxA)
+            addLink(ctxB)
+        }
+
+        assertEquals(2, sampler.lastLinks.size)
+        assertEquals(ctxA.spanId, sampler.lastLinks[0].spanContext.spanId)
+        assertEquals(ctxB.spanId, sampler.lastLinks[1].spanContext.spanId)
+    }
+
+    @Test
+    fun testSamplerReceiverCappedLinks() {
+        val sampler = FakeSampler()
+
+        val cfg = SpanLimitConfig(
+            attributeCountLimit = fakeSpanLimitsConfig.attributeCountLimit,
+            attributeValueLengthLimit = fakeSpanLimitsConfig.attributeValueLengthLimit,
+            linkCountLimit = 1,
+            eventCountLimit = fakeSpanLimitsConfig.eventCountLimit,
+            attributeCountPerEventLimit = fakeSpanLimitsConfig.attributeCountPerEventLimit,
+            attributeCountPerLinkLimit = fakeSpanLimitsConfig.attributeCountPerLinkLimit,
+        )
+
+        val tracer = buildTracer(sampler, cfg)
+        val ctxA = FakeSpanContext.INVALID
+        val ctxB = FakeSpanContext.VALID
+
+        tracer.startSpan("test") {
+            addLink(ctxA)
+            addLink(ctxB)
+        }
+
+        assertEquals(1, sampler.lastLinks.size)
+        assertEquals(ctxA.spanId, sampler.lastLinks[0].spanContext.spanId)
+    }
 }

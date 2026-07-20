@@ -14,6 +14,10 @@ Example usage of the library can be found [here](examples).
 
 Got feedback or found a bug? Please open a GitHub issue and we'll get back to you.
 
+## Roadmap
+
+Read our [roadmap here](ROADMAP.md).
+
 # Contributing
 
 We are currently resource constrained and are actively seeking new contributors interested in working towards [approver](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#approver) / [maintainer](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#maintainer) roles.

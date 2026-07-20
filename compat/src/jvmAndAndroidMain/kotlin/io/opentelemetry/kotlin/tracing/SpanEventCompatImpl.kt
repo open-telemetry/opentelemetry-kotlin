@@ -11,4 +11,7 @@ internal class SpanEventCompatImpl(
     override val name: String,
     override val timestamp: Long,
     private val attrs: CompatAttributesModel
-) : SpanEvent, AttributesMutator by attrs, AttributeContainer by attrs
+) : SpanEvent, AttributesMutator by attrs, AttributeContainer by attrs {
+    // opentelemetry-java's attribute builder does not track dropped attributes on the write path.
+    override val droppedAttributesCount: Int = 0
+}

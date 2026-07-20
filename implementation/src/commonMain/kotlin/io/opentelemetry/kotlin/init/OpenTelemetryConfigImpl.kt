@@ -1,6 +1,8 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.factory.IdGenerator
+import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 
 internal class OpenTelemetryConfigImpl(
@@ -14,6 +16,8 @@ internal class OpenTelemetryConfigImpl(
     internal val contextConfig: ContextConfigImpl = ContextConfigImpl()
     internal val propagatorCfg: PropagatorConfigImpl = PropagatorConfigImpl()
     private val globalAttributeLimits = AttributeLimitsConfigImpl()
+
+    private var customIdGenerator: (() -> IdGenerator)? = null
 
     override fun attributeLimits(action: AttributeLimitsConfigDsl.() -> Unit) {
         globalAttributeLimits.action()
@@ -38,6 +42,12 @@ internal class OpenTelemetryConfigImpl(
     override fun propagator(action: PropagatorConfigDsl.() -> TextMapPropagator) {
         propagatorCfg.action()
     }
+
+    override fun idGenerator(action: () -> IdGenerator) {
+        customIdGenerator = action
+    }
+
+    internal fun resolveIdGenerator(): IdGenerator = customIdGenerator?.invoke() ?: IdGeneratorImpl()
 
     private val defaultResource by lazy(::sdkDefaultResource)
 

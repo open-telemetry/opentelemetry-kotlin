@@ -18,7 +18,8 @@ internal class BatchTelemetryProcessor<T>(
 ) : TelemetryCloseable {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
-    private val scope = CoroutineScope(SupervisorJob() + dispatcher)
+    private val scope =
+        CoroutineScope(SupervisorJob() + dispatcher + telemetryExceptionHandler("Batch processor"))
     private val mutex = Mutex()
     private val queue = mutableListOf<T>()
 

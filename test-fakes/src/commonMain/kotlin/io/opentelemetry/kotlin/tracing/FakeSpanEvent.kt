@@ -10,6 +10,8 @@ class FakeSpanEvent(
 
     override val attributes = mutableMapOf<String, Any>()
 
+    override val droppedAttributesCount: Int = 0
+
     override fun setStringAttribute(key: String, value: String) {
         attributes[key] = value
     }

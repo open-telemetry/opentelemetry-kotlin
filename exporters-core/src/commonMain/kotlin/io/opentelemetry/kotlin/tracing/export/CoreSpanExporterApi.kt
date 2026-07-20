@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
+import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 import io.opentelemetry.kotlin.platformLog
 import kotlinx.coroutines.CoroutineDispatcher
@@ -28,7 +29,9 @@ public fun TraceExportConfigDsl.compositeSpanProcessor(vararg processors: SpanPr
 @ExperimentalApi
 public fun TraceExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): SpanProcessor {
     val dispatcher: CoroutineDispatcher = Dispatchers.Default
-    val scope = CoroutineScope(SupervisorJob() + dispatcher)
+    val scope = CoroutineScope(
+        SupervisorJob() + dispatcher + telemetryExceptionHandler("Simple span processor")
+    )
     return SimpleSpanProcessor(exporter, scope)
 }
 
@@ -46,13 +49,13 @@ public fun TraceExportConfigDsl.compositeSpanExporter(vararg exporters: SpanExpo
 
 /**
  * Creates a batching processor that sends telemetry in batches.
- * See https://opentelemetry.io/docs/specs/otel/logs/sdk/#batching-processor
+ * See https://opentelemetry.io/docs/specs/otel/trace/sdk/#batching-processor
  */
 @ExperimentalApi
 public fun TraceExportConfigDsl.batchSpanProcessor(
     exporter: SpanExporter,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
-    scheduleDelayMs: Long = BatchTelemetryDefaults.SCHEDULE_DELAY_MS,
+    scheduleDelayMs: Long = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
     dispatcher: CoroutineDispatcher = Dispatchers.Default,

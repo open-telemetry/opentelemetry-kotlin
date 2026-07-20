@@ -3,12 +3,16 @@
 ## Checklist
 
 1. Run the
-   [draft-change-log-entries.yml](https://github.com/open-telemetry/opentelemetry-kotlin/actions/workflows/draft-change-log-entries.yaml)
-   GitHub Action
-2. Create a PR updating the CHANGELOG.md and merge it after approval
-3. Run [prepare-release-branch.yml](.github/workflows/prepare-release-branch.yml) on GitHub Actions
-4. Merge the two PRs created by the previous workflow
-5. Run [release.yml](.github/workflows/release.yml) on GitHub Actions using the `release/vX.X.X` branch
+   ["Draft CHANGELOG entries"](https://github.com/open-telemetry/opentelemetry-kotlin/actions/workflows/draft-change-log-entries.yaml)
+   GitHub Action.
+2. Create a PR updating the CHANGELOG.md and merge it after approval.
+3. Run the
+   ["Prepare release branch"](https://github.com/open-telemetry/opentelemetry-kotlin/actions/workflows/prepare-release-branch.yml)
+   GitHub Action.
+4. Merge the two PRs created by the previous workflow.
+5. Run the
+   ["Release"](https://github.com/open-telemetry/opentelemetry-kotlin/actions/workflows/release.yml)
+   GitHub Action using the `release/vX.X.X` branch.
 
 ## Release cadence
 

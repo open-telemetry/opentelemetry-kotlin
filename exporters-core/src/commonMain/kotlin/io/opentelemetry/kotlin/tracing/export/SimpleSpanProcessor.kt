@@ -34,6 +34,9 @@ internal class SimpleSpanProcessor(
     }
 
     override fun onEnd(span: ReadableSpan) {
+        if (!span.spanContext.traceFlags.isSampled) {
+            return
+        }
         shutdownState.execute {
             scope.launch {
                 lock.write {

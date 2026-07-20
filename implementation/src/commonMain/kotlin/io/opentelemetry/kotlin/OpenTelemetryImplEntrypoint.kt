@@ -2,8 +2,6 @@ package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.factory.BaggageFactoryImpl
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.IdGenerator
-import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
@@ -31,25 +29,14 @@ public fun createOpenTelemetry(
      */
     config: OpenTelemetryConfigDsl.() -> Unit = {}
 ): OpenTelemetry {
-    return createOpenTelemetryImpl(clock, config)
-}
+    val cfg = OpenTelemetryConfigImpl(clock).apply(config)
+    val idGenerator = cfg.resolveIdGenerator()
 
-/**
- * Internal implementation of [createOpenTelemetry]. This is not publicly visible as
- * we don't want to allow users to supply a custom [IdGenerator].
- */
-@ExperimentalApi
-internal fun createOpenTelemetryImpl(
-    clock: Clock,
-    config: OpenTelemetryConfigDsl.() -> Unit,
-    idGenerator: IdGenerator = IdGeneratorImpl(),
-): OpenTelemetry {
     val resourceFactory = ResourceFactoryImpl()
     val traceFlags = TraceFlagsFactoryImpl()
     val traceState = TraceStateFactoryImpl()
     val spanContext = SpanContextFactoryImpl(idGenerator, traceFlags, traceState)
 
-    val cfg = OpenTelemetryConfigImpl(clock).apply(config)
     val span = SpanFactoryImpl(spanContext)
     val contextFactory = ContextFactoryImpl(span, cfg.contextConfig::generateStorage)
     cfg.propagatorCfg.installFactories(

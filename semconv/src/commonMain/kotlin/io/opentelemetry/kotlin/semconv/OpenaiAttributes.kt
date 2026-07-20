@@ -12,31 +12,31 @@ object OpenaiAttributes {
     /**
     * <p>The type of OpenAI API being used.</p>
     */
-    @IncubatingApi
+    @Deprecated("Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).")
     const val OPENAI_API_TYPE: String = "openai.api.type"
 
     /**
     * <p>The service tier requested. May be a specific tier, default, or auto.</p>
     */
-    @IncubatingApi
+    @Deprecated("Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).")
     const val OPENAI_REQUEST_SERVICE_TIER: String = "openai.request.service_tier"
 
     /**
     * <p>The service tier used for the response.</p>
     */
-    @IncubatingApi
+    @Deprecated("Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).")
     const val OPENAI_RESPONSE_SERVICE_TIER: String = "openai.response.service_tier"
 
     /**
     * <p>A fingerprint to track any eventual change in the Generative AI environment.</p>
     */
-    @IncubatingApi
+    @Deprecated("Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).")
     const val OPENAI_RESPONSE_SYSTEM_FINGERPRINT: String = "openai.response.system_fingerprint"
 
     /**
     * <p>OPENAI_API_TYPE</p>
     */
-    @IncubatingApi
+    @Deprecated("Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).")
     enum class OpenaiApiTypeValues(val value: String) {
 
         /**
@@ -53,7 +53,7 @@ object OpenaiAttributes {
     /**
     * <p>OPENAI_REQUEST_SERVICE_TIER</p>
     */
-    @IncubatingApi
+    @Deprecated("Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).")
     enum class OpenaiRequestServiceTierValues(val value: String) {
 
         /**
