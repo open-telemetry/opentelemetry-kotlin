@@ -35,7 +35,7 @@ buildKonfig = "0.22.0"
 composeMultiplatform = "1.11.1"
 androidxActivityCompose = "1.13.0"
 kotest = "6.2.2"
-kotlinpoet = "2.2.0"
+kotlinpoet = "2.3.0"
 yamlkt = "0.13.0"
 
 [libraries]
