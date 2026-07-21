@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.logging.LoggerConfigurator
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 
 /**
@@ -19,4 +20,9 @@ public interface LoggerProviderConfigDsl : ResourceConfigDsl {
      * Configures how log records should be processed and exported.
      */
     public fun export(action: LogExportConfigDsl.() -> LogRecordProcessor)
+
+    /**
+     * Configures behavior of the logger.
+     */
+    public fun loggerConfigurator(configurator: LoggerConfigurator)
 }

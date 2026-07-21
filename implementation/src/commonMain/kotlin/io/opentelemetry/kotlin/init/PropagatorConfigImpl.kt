@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.TraceStateFactory
-import io.opentelemetry.kotlin.platformLog
+import io.opentelemetry.kotlin.propagation.B3Propagator
 import io.opentelemetry.kotlin.propagation.CompositeTextMapPropagator
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
@@ -20,7 +20,12 @@ import kotlin.concurrent.Volatile
 internal class PropagatorConfigImpl : PropagatorConfigDsl {
 
     private var configured: TextMapPropagator = NoopOpenTelemetry.propagator
-    private val w3cTraceContext: DeferredW3CTraceContextPropagator = DeferredW3CTraceContextPropagator()
+
+    @Volatile private var w3cTraceContextImpl: TextMapPropagator = NoopOpenTelemetry.propagator
+
+    @Volatile private var b3SingleImpl: TextMapPropagator = NoopOpenTelemetry.propagator
+
+    @Volatile private var b3MultiImpl: TextMapPropagator = NoopOpenTelemetry.propagator
 
     override fun composite(vararg propagators: TextMapPropagator): TextMapPropagator {
         configured = CompositeTextMapPropagator(propagators.toList())
@@ -33,55 +38,49 @@ internal class PropagatorConfigImpl : PropagatorConfigDsl {
     }
 
     override fun w3cTraceContext(): TextMapPropagator {
-        configured = w3cTraceContext
-        return w3cTraceContext
+        val forwarder = ForwardingPropagator { w3cTraceContextImpl }
+        configured = forwarder
+        return forwarder
     }
 
-    // The W3C trace context propagator depends on factories that are constructed after user
-    // config is applied, so we install them once they are available.
+    override fun b3(format: B3Format): TextMapPropagator {
+        val forwarder = when (format) {
+            B3Format.SINGLE -> ForwardingPropagator { b3SingleImpl }
+            B3Format.MULTI -> ForwardingPropagator { b3MultiImpl }
+        }
+        configured = forwarder
+        return forwarder
+    }
+
+    // Factories are constructed after user config is applied, so we install them once available.
     internal fun installFactories(
         traceFlagsFactory: TraceFlagsFactory,
         traceStateFactory: TraceStateFactory,
         spanContextFactory: SpanContextFactory,
         spanFactory: SpanFactory,
     ) {
-        w3cTraceContext.delegate = W3CTraceContextPropagator(
+        w3cTraceContextImpl = W3CTraceContextPropagator(
             traceFlagsFactory = traceFlagsFactory,
             traceStateFactory = traceStateFactory,
             spanContextFactory = spanContextFactory,
             spanFactory = spanFactory,
         )
+        b3SingleImpl = B3Propagator(B3Format.SINGLE, traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory)
+        b3MultiImpl = B3Propagator(B3Format.MULTI, traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory)
     }
 
     internal fun buildPropagator(): TextMapPropagator = configured
 }
 
 @OptIn(ExperimentalApi::class)
-private class DeferredW3CTraceContextPropagator : TextMapPropagator {
-
-    @Volatile
-    var delegate: TextMapPropagator? = null
-
-    private var noDelegateWarningLogged = false
-
-    override fun fields(): Collection<String> = resolveDelegate().fields()
+private class ForwardingPropagator(
+    private val delegate: () -> TextMapPropagator,
+) : TextMapPropagator {
+    override fun fields(): Collection<String> = delegate().fields()
 
     override fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>) =
-        resolveDelegate().inject(context, carrier, setter)
+        delegate().inject(context, carrier, setter)
 
     override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context =
-        resolveDelegate().extract(context, carrier, getter)
-
-    private fun resolveDelegate(): TextMapPropagator {
-        val resolvedDelegate = delegate
-        return if (resolvedDelegate != null) {
-            resolvedDelegate
-        } else {
-            if (!noDelegateWarningLogged) {
-                noDelegateWarningLogged = true
-                platformLog("W3C trace context propagator accessed before SDK init completed")
-            }
-            NoopOpenTelemetry.propagator
-        }
-    }
+        delegate().extract(context, carrier, getter)
 }

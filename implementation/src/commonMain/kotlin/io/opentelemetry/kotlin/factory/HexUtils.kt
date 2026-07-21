@@ -27,3 +27,8 @@ internal fun String.isValidHex(): Boolean {
 internal fun String.isValidLowercaseHex(): Boolean {
     return this.all { it.isLowercaseHexDigit() }
 }
+
+/**
+ * Returns true if the hex-encoded value represents zero.
+ */
+internal fun String.isAllZerosHex(): Boolean = all { it == '0' }
