@@ -98,6 +98,14 @@ public abstract interface class io/opentelemetry/kotlin/init/AttributeLimitsConf
 	public abstract fun setAttributeValueLengthLimit (I)V
 }
 
+public final class io/opentelemetry/kotlin/init/B3Format : java/lang/Enum {
+	public static final field MULTI Lio/opentelemetry/kotlin/init/B3Format;
+	public static final field SINGLE Lio/opentelemetry/kotlin/init/B3Format;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/init/B3Format;
+	public static fun values ()[Lio/opentelemetry/kotlin/init/B3Format;
+}
+
 public abstract interface annotation class io/opentelemetry/kotlin/init/ConfigDsl : java/lang/annotation/Annotation {
 }
 
@@ -118,6 +126,7 @@ public abstract interface class io/opentelemetry/kotlin/init/LogLimitsConfigDsl 
 public abstract interface class io/opentelemetry/kotlin/init/LoggerProviderConfigDsl : io/opentelemetry/kotlin/init/ResourceConfigDsl {
 	public abstract fun export (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun logLimits (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun loggerConfigurator (Lio/opentelemetry/kotlin/logging/LoggerConfigurator;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/MeterProviderConfigDsl : io/opentelemetry/kotlin/init/ResourceConfigDsl {
@@ -134,9 +143,14 @@ public abstract interface class io/opentelemetry/kotlin/init/OpenTelemetryConfig
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/PropagatorConfigDsl {
+	public abstract fun b3 (Lio/opentelemetry/kotlin/init/B3Format;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public abstract fun composite ([Lio/opentelemetry/kotlin/propagation/TextMapPropagator;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public abstract fun w3cBaggage ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public abstract fun w3cTraceContext ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
+}
+
+public final class io/opentelemetry/kotlin/init/PropagatorConfigDsl$DefaultImpls {
+	public static synthetic fun b3$default (Lio/opentelemetry/kotlin/init/PropagatorConfigDsl;Lio/opentelemetry/kotlin/init/B3Format;ILjava/lang/Object;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/ResourceConfigDsl {
@@ -174,6 +188,14 @@ public abstract interface class io/opentelemetry/kotlin/init/TracerProviderConfi
 	public abstract fun export (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun sampler (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun spanLimits (Lkotlin/jvm/functions/Function1;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/logging/LoggerConfig {
+	public abstract fun getEnabled ()Z
+}
+
+public abstract interface class io/opentelemetry/kotlin/logging/LoggerConfigurator {
+	public abstract fun loggerConfig (Lio/opentelemetry/kotlin/InstrumentationScopeInfo;)Lio/opentelemetry/kotlin/logging/LoggerConfig;
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/export/LogRecordExporter : io/opentelemetry/kotlin/export/TelemetryCloseable {

@@ -34,4 +34,13 @@ public interface PropagatorConfigDsl {
      * https://www.w3.org/TR/trace-context/
      */
     public fun w3cTraceContext(): TextMapPropagator
+
+    /**
+     * Returns a [TextMapPropagator] that injects and extracts the current span context
+     * via B3 headers. Always extracts both single (`b3`) and multi-header (`X-B3-*`) formats,
+     * with single taking precedence. Injects using [format] (default: [B3Format.SINGLE]).
+     *
+     * https://github.com/openzipkin/b3-propagation
+     */
+    public fun b3(format: B3Format = B3Format.SINGLE): TextMapPropagator
 }

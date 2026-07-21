@@ -23,11 +23,13 @@ import kotlin.test.assertSame
 internal class LoggerProviderImplTest {
 
     private val clock = FakeClock()
+    private val loggerConfigurator = LoggerConfigurator { LoggerConfigImpl(true) }
     private val loggingConfig = LoggingConfig(
         null,
         LogLimitConfig(100, 100),
         ResourceImpl(AttributesModel(), null),
         NoopSdkErrorHandler,
+        loggerConfigurator,
     )
     private val contextFactory = FakeContextFactory()
     private val spanContextFactory = FakeSpanContextFactory()
@@ -123,6 +125,7 @@ internal class LoggerProviderImplTest {
             LogLimitConfig(100, 100),
             FakeResource(),
             NoopSdkErrorHandler,
+            loggerConfigurator,
         )
         impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
         impl.getLogger(name = "test")
@@ -146,6 +149,7 @@ internal class LoggerProviderImplTest {
             LogLimitConfig(100, 100),
             FakeResource(),
             NoopSdkErrorHandler,
+            loggerConfigurator,
         )
         impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
         impl.getLogger(name = "test")
@@ -170,6 +174,7 @@ internal class LoggerProviderImplTest {
             LogLimitConfig(100, 100),
             FakeResource(),
             NoopSdkErrorHandler,
+            loggerConfigurator,
         )
         impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
         val logger = impl.getLogger(name = "test")

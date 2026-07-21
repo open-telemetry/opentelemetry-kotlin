@@ -35,6 +35,7 @@ buildKonfig = "0.22.0"
 composeMultiplatform = "1.11.1"
 androidxActivityCompose = "1.13.0"
 kotest = "6.2.2"
+kotlinpoet = "2.2.0"
 yamlkt = "0.13.0"
 
 [libraries]
@@ -65,6 +66,7 @@ opentelemetry-bom-alpha = { group = "io.opentelemetry", name = "opentelemetry-bo
 opentelemetry-api = { group = "io.opentelemetry", name = "opentelemetry-api"}
 opentelemetry-sdk = { group = "io.opentelemetry", name = "opentelemetry-sdk"}
 opentelemetry-sdk-extension-incubator = { group = "io.opentelemetry", name = "opentelemetry-sdk-extension-incubator"}
+opentelemetry-extension-trace-propagators = { group = "io.opentelemetry", name = "opentelemetry-extension-trace-propagators" }
 kotlin-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 mavenPublish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version.ref = "mavenPublish" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
@@ -79,6 +81,7 @@ protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref 
 wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidxActivityCompose" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
+kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
 
 [plugins]
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }

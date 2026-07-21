@@ -13,11 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # zizmor: ignore[artipacked]: credentials are required by the update branch push below
+          persist-credentials: true
 
       - name: Check for new opentelemetry-configuration version
         run: |
           latest=$(gh api repos/open-telemetry/opentelemetry-configuration/releases/latest --jq '.tag_name' | sed 's/^v//')
-          current=$(grep 'val openTelemetryConfigurationVersion' config/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
+          current=$(grep 'val openTelemetryConfigurationVersion' config-schema/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
 
           echo "Latest opentelemetry-configuration version: $latest"
           echo "Current opentelemetry-configuration version: $current"
@@ -48,11 +51,11 @@ jobs:
       - name: Update opentelemetry-configuration version in build file
         if: env.UP_TO_DATE == 'false'
         run: |
-          sed -Ei "s/(val openTelemetryConfigurationVersion = \").*\"/\1${LATEST}\"/" config/build.gradle.kts
+          sed -Ei "s/(val openTelemetryConfigurationVersion = \").*\"/\1${LATEST}\"/" config-schema/build.gradle.kts
 
       - name: Regenerate declarative configuration classes
         if: env.UP_TO_DATE == 'false'
-        run: ./gradlew :config:generateOpenTelemetryConfiguration
+        run: ./gradlew :config-schema:generateOpenTelemetryConfiguration
 
       - name: Use CLA approved github bot
         if: env.UP_TO_DATE == 'false'
@@ -64,6 +67,7 @@ jobs:
         with:
           client-id: ${{ vars.OTELBOT_CLIENT_ID }}
           private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
+          permission-pull-requests: write
 
       - name: Create pull request
         if: env.UP_TO_DATE == 'false'
@@ -74,7 +78,7 @@ jobs:
           branch="otelbot/update-config-to-${LATEST}"
 
           git checkout -b $branch
-          git add config/build.gradle.kts config/src/
+          git add config-schema/build.gradle.kts config-schema/src/
           git commit -m "$message"
           git push --set-upstream origin $branch
           gh pr create --title "$message" \

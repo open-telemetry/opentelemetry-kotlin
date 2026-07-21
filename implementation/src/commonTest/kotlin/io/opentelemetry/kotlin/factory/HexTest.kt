@@ -168,4 +168,17 @@ internal class HexTest {
     fun testMixedValidAndInvalidIsNotValidLowercaseHex() {
         assertFalse("0123456789abcdefg".isValidLowercaseHex())
     }
+
+    @Test
+    fun testIsAllZerosHex() {
+        assertTrue("0000000000000000".isAllZerosHex(), "16-char all-zero span ID")
+        assertTrue("00000000000000000000000000000000".isAllZerosHex(), "32-char all-zero trace ID")
+        assertTrue("".isAllZerosHex(), "empty is the same than all 0")
+        assertFalse("b7ad6b7169203331".isAllZerosHex(), "non-zero span ID")
+        assertFalse("0af7651916cd43dd8448eb211c80319c".isAllZerosHex(), "non-zero trace ID")
+        assertFalse("ffffffffffffffff".isAllZerosHex(), "max value span ID")
+        assertFalse("ffffffffffffffffffffffffffffffff".isAllZerosHex(), "max value trace ID")
+        assertFalse("00000000000000010000000000000000".isAllZerosHex(), "non-zero high half only")
+        assertFalse("00000000000000000000000000000001".isAllZerosHex(), "non-zero low half only")
+    }
 }
