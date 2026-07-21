@@ -8,7 +8,7 @@ settings](https://github.com/open-telemetry/community/blob/main/docs/how-to-conf
 
 ### `protected` environment
 
-Deployment branches: `release/*`
+Deployment branches: `main`, `release/*`
 
 Secrets (stored in OpenTelemetry-Kotlin 1Password):
 
