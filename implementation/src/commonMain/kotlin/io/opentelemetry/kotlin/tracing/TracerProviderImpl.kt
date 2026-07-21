@@ -30,26 +30,32 @@ internal class TracerProviderImpl(
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
     private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(
-        tracingConfig.processor?.let { listOf(it) } ?: emptyList()
+        tracingConfig.processor?.let { listOf(it) } ?: emptyList(),
+        tracingConfig.sdkErrorHandler,
     )
     private val noopTracer = NoopOpenTelemetry.tracerProvider.getTracer("")
 
     private val sampler = tracingConfig.samplerFactory(spanFactory)
 
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
-        TracerImpl(
-            clock = clock,
-            processor = tracingConfig.processor,
-            contextFactory = contextFactory,
-            spanContextFactory = spanContextFactory,
-            traceFlagsFactory = traceFlagsFactory,
-            scope = key,
-            resource = tracingConfig.resource,
-            spanLimitConfig = tracingConfig.spanLimits,
-            idGenerator = idGenerator,
-            shutdownState = shutdownState,
-            sampler = sampler,
-        )
+        val tracerConfig = tracingConfig.tracerConfigurator.tracerConfig(key)
+        if (!tracerConfig.enabled) {
+            noopTracer
+        } else {
+            TracerImpl(
+                clock = clock,
+                processor = tracingConfig.processor,
+                contextFactory = contextFactory,
+                spanContextFactory = spanContextFactory,
+                traceFlagsFactory = traceFlagsFactory,
+                scope = key,
+                resource = tracingConfig.resource,
+                spanLimitConfig = tracingConfig.spanLimits,
+                idGenerator = idGenerator,
+                shutdownState = shutdownState,
+                sampler = sampler,
+            )
+        }
     }
 
     override fun getTracer(

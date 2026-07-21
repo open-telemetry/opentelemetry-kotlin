@@ -12,6 +12,7 @@ import io.ktor.util.toMap
 import io.ktor.utils.io.ByteReadChannel
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpClient
 import io.opentelemetry.kotlin.export.createDefaultHttpClient
@@ -112,6 +113,7 @@ internal class OtlpHttpLogRecordExporterTest {
         }
         val fakeConfig = object : LogExportConfigDsl {
             override val clock: Clock = FakeClock()
+            override val sdkErrorHandler = NoopSdkErrorHandler
         }
         val customExporter = fakeConfig.otlpHttpLogRecordExporter(baseUrl, customClient)
         customExporter.export(logRecords)

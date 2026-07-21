@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.LoggerConfigImpl
@@ -11,6 +12,7 @@ import io.opentelemetry.kotlin.resource.Resource
 
 internal class LoggerProviderConfigImpl(
     private val clock: Clock,
+    private val sdkErrorHandler: SdkErrorHandler,
     private val resourceConfigImpl: ResourceConfigImpl = ResourceConfigImpl()
 ) : LoggerProviderConfigDsl, ResourceConfigDsl by resourceConfigImpl {
 
@@ -26,7 +28,7 @@ internal class LoggerProviderConfigImpl(
             platformLog("export() should only be called once.")
             return
         }
-        processor = LogExportConfigImpl(clock).action()
+        processor = LogExportConfigImpl(clock, sdkErrorHandler).action()
     }
 
     override fun logLimits(action: LogLimitsConfigDsl.() -> Unit) {
@@ -44,6 +46,7 @@ internal class LoggerProviderConfigImpl(
         processor = processor,
         logLimits = generateLogLimitsConfig(globalLimits),
         resource = base.merge(resourceConfigImpl.generateResource()),
+        sdkErrorHandler = sdkErrorHandler,
         loggerConfigurator = loggerConfigurator,
     )
 

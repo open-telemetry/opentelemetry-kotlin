@@ -24,7 +24,8 @@ internal class LoggerProviderImpl(
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
     private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(
-        loggingConfig.processor?.let { listOf(it) } ?: emptyList()
+        loggingConfig.processor?.let { listOf(it) } ?: emptyList(),
+        loggingConfig.sdkErrorHandler,
     )
     private val noopLogger = NoopOpenTelemetry.loggerProvider.getLogger("")
 

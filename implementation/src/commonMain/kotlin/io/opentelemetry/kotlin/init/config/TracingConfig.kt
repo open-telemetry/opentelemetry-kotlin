@@ -1,8 +1,11 @@
 package io.opentelemetry.kotlin.init.config
 
 import io.opentelemetry.kotlin.ThreadSafe
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.resource.Resource
+import io.opentelemetry.kotlin.tracing.TracerConfigImpl
+import io.opentelemetry.kotlin.tracing.TracerConfigurator
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOffSampler
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
@@ -31,6 +34,11 @@ internal class TracingConfig(
     val resource: Resource,
 
     /**
+     * Handler used to report errors and misuse of the SDK.
+     */
+    val sdkErrorHandler: SdkErrorHandler,
+
+    /**
      * Factory that produces the sampler to use when creating spans.
      */
     val samplerFactory: (SpanFactory) -> Sampler = { _ ->
@@ -42,4 +50,9 @@ internal class TracingConfig(
             localParentNotSampled = AlwaysOffSampler(),
         )
     },
+
+    /**
+     * Computes the per-tracer config.
+     */
+    val tracerConfigurator: TracerConfigurator = TracerConfigurator { TracerConfigImpl(true) },
 )

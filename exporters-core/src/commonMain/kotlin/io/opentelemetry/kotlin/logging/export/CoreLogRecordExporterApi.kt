@@ -2,7 +2,6 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.LogExportConfigDsl
@@ -21,7 +20,7 @@ public fun LogExportConfigDsl.compositeLogRecordProcessor(vararg processors: Log
         platformLog("At least one processor must be provided")
         return NoopLogRecordProcessor
     }
-    return CompositeLogRecordProcessor(processors.toList(), NoopSdkErrorHandler)
+    return CompositeLogRecordProcessor(processors.toList(), sdkErrorHandler)
 }
 
 /**
@@ -45,7 +44,7 @@ public fun LogExportConfigDsl.compositeLogRecordExporter(vararg exporters: LogRe
         platformLog("At least one exporter must be provided")
         return NoopLogRecordExporter
     }
-    return CompositeLogRecordExporter(exporters.toList(), NoopSdkErrorHandler)
+    return CompositeLogRecordExporter(exporters.toList(), sdkErrorHandler)
 }
 
 /**
@@ -66,6 +65,7 @@ public fun LogExportConfigDsl.batchLogRecordProcessor(
     scheduleDelayMs,
     exportTimeoutMs,
     maxExportBatchSize,
+    sdkErrorHandler,
     dispatcher,
 )
 

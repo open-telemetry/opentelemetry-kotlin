@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
@@ -26,7 +27,8 @@ internal class TracerProviderImplTest {
     private val tracingConfig = TracingConfig(
         null,
         fakeSpanLimitsConfig,
-        ResourceImpl(AttributesModel(), null)
+        ResourceImpl(AttributesModel(), null),
+        NoopSdkErrorHandler,
     )
 
     private lateinit var impl: TracerProviderImpl
@@ -128,6 +130,7 @@ internal class TracerProviderImplTest {
             processor,
             fakeSpanLimitsConfig,
             FakeResource(),
+            NoopSdkErrorHandler,
         )
         val provider = TracerProviderImpl(
             clock = FakeClock(),
@@ -158,6 +161,7 @@ internal class TracerProviderImplTest {
             processor,
             fakeSpanLimitsConfig,
             FakeResource(),
+            NoopSdkErrorHandler,
         )
         val provider = TracerProviderImpl(
             clock = FakeClock(),

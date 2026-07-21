@@ -2,7 +2,6 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.PersistedTelemetryConfig
@@ -57,7 +56,7 @@ internal fun TraceExportConfigDsl.persistingSpanProcessorImpl(
     scheduleDelayMs: Long = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
-    sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
+    sdkErrorHandler: SdkErrorHandler = this.sdkErrorHandler,
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ): SpanProcessor {
     return PersistingSpanProcessor(
@@ -67,7 +66,7 @@ internal fun TraceExportConfigDsl.persistingSpanProcessorImpl(
         dsl = this,
         serializer = { it.toProtobufByteArray() },
         deserializer = { it.toSpanDataList() },
-        config = PersistedTelemetryConfig(),
+        config = PersistedTelemetryConfig(sdkErrorHandler = sdkErrorHandler),
         maxQueueSize = maxQueueSize,
         scheduleDelayMs = scheduleDelayMs,
         exportTimeoutMs = exportTimeoutMs,

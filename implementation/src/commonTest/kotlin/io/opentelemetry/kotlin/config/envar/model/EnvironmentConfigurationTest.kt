@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.config.envar.model
 
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import kotlin.test.Test
@@ -11,7 +12,7 @@ internal class EnvironmentConfigurationTest {
     fun `should successfully create an environment configuration`() {
         // given
         val clock = FakeClock()
-        val otelConfig = OpenTelemetryConfigImpl(clock)
+        val otelConfig = OpenTelemetryConfigImpl(clock, NoopSdkErrorHandler)
         otelConfig.loggerProvider {
             export { FakeLogRecordProcessor() }
         }
