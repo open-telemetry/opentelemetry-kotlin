@@ -118,7 +118,7 @@ internal class TracerImpl(
             spanIdBytes = spanIdBytes,
             traceFlags = when {
                 sampled -> traceFlagsDefault
-                else -> TraceFlagsImpl(isSampled = false, isRandom = false)
+                else -> TraceFlagsImpl(isSampled = false, isRandom = true)
             },
             isValid = true,
             isRemote = false,

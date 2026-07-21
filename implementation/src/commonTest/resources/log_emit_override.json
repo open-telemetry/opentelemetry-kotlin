@@ -22,9 +22,7 @@
       "traceId": "12345678901234567890123456789012",
       "spanId": "1234567890123456",
       "traceFlags": "01",
-      "traceState": {
-        "foo": "bar"
-      }
+      "traceState": { "foo": "bar" }
     },
     "severity": "INFO",
     "severityText": "info",
