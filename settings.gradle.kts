@@ -18,6 +18,7 @@ include(
     ":core",
     ":api",
     ":api-ext",
+    ":context-coroutines",
     ":sdk-ext",
     ":sdk-api",
     ":sdk-common",

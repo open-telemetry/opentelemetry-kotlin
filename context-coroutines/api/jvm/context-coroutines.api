@@ -1,0 +1,4 @@
+public final class io/opentelemetry/kotlin/context/CoroutineContextElementKt {
+	public static final fun asCoroutineContextElement (Lio/opentelemetry/kotlin/context/Context;)Lkotlin/coroutines/CoroutineContext$Element;
+}
+
