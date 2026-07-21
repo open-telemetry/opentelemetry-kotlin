@@ -18,7 +18,10 @@ public class ComposableAlwaysOffSampler : ComposableSampler {
         spanKind: SpanKind,
         attributes: AttributeContainer,
         links: List<SpanLink>
-    ): SamplingIntent = TODO()
+    ): SamplingIntent = SamplingIntentImpl(
+        threshold = null,
+        adjustedCountReliable = false
+    )
 
     override val description: String
         get() = "ComposableAlwaysOffSampler"

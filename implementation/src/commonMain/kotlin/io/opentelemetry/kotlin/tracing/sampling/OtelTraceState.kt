@@ -24,6 +24,10 @@ internal class OtelTraceState private constructor(
         pairs.remove("th")
     }
 
+    fun eraseRandomValue() {
+        pairs.remove("rv")
+    }
+
     fun encode(): String = pairs.entries.joinToString(";") { (key, value) -> "$key:$value" }
 
     companion object {
