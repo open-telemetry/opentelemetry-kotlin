@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
+import io.opentelemetry.kotlin.init.SamplerConfigDsl
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
@@ -19,7 +20,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
-internal class CompositeSamplerTest {
+internal class BuiltInCompositeSamplerTest {
 
     private val idGenerator = IdGeneratorImpl()
     private val traceFlagsFactory = TraceFlagsFactoryImpl()
@@ -27,6 +28,10 @@ internal class CompositeSamplerTest {
     private val spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlagsFactory, traceStateFactory)
     private val spanFactory = SpanFactoryImpl(spanContextFactory)
     private val contextFactory = ContextFactoryImpl(spanFactory)
+
+    private val samplerDsl = object : SamplerConfigDsl {
+        override val spanFactory = this@BuiltInCompositeSamplerTest.spanFactory
+    }
 
     private val traceId = "000000000000000000ffffffffffffff"
 
@@ -48,8 +53,8 @@ internal class CompositeSamplerTest {
     }
 
     @Test
-    fun `always samples when delegate is ComposableAlwaysOn`() {
-        val result = CompositeSampler(ComposableAlwaysOnSampler()).shouldSample(
+    fun `always samples when delegate is composableAlwaysOn`() {
+        val result = samplerDsl.composite(samplerDsl.composableAlwaysOn()).shouldSample(
             context = contextFactory.root(),
             traceId = traceId,
             name = "span",
@@ -63,8 +68,8 @@ internal class CompositeSamplerTest {
     }
 
     @Test
-    fun `never samples when delegate is ComposableAlwaysOff`() {
-        val result = CompositeSampler(ComposableAlwaysOffSampler()).shouldSample(
+    fun `never samples when delegate is composableAlwaysOff`() {
+        val result = samplerDsl.composite(samplerDsl.composableAlwaysOff()).shouldSample(
             context = contextFactory.root(),
             traceId = traceId,
             name = "span",
@@ -78,8 +83,21 @@ internal class CompositeSamplerTest {
     }
 
     @Test
-    fun `always samples when delegate is ComposableProbability at ratio 1 - without publishing threshold`() {
-        val result = CompositeSampler(ComposableProbabilitySampler(1.0), random = Random(1)).shouldSample(
+    fun `composableProbability with ratio 0 behaves like composableAlwaysOff`() {
+        val result = samplerDsl.composite(samplerDsl.composableProbability(0.0)).shouldSample(
+            context = contextFactory.root(),
+            traceId = traceId,
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+        assertEquals(SamplingResult.Decision.DROP, result.decision)
+    }
+
+    @Test
+    fun `always samples when delegate is composableProbability at ratio 1 without publishing threshold`() {
+        val result = samplerDsl.composite(samplerDsl.composableProbability(1.0)).shouldSample(
             context = contextFactory.root(),
             traceId = traceId,
             name = "span",
@@ -92,7 +110,7 @@ internal class CompositeSamplerTest {
     }
 
     @Test
-    fun `decision matches injected randomness when delegate is ComposableProbability`() {
+    fun `decision matches injected randomness when delegate is composableProbability`() {
         val seed = 42L
         val ratio = 0.5
         val expectedRandomValue = Random(seed).nextLong() and 0x00FFFFFFFFFFFFFFL
@@ -102,7 +120,8 @@ internal class CompositeSamplerTest {
             SamplingResult.Decision.DROP
         }
 
-        val result = CompositeSampler(ComposableProbabilitySampler(ratio), random = Random(seed)).shouldSample(
+        val sampler = CompositeSampler(samplerDsl.composableProbability(ratio), random = Random(seed))
+        val result = sampler.shouldSample(
             context = contextFactory.root(),
             traceId = traceId,
             name = "span",
@@ -114,8 +133,9 @@ internal class CompositeSamplerTest {
     }
 
     @Test
-    fun `delegates to root when delegate is ComposableParentThreshold and there is no valid parent`() {
-        val result = CompositeSampler(ComposableParentThresholdSampler(root = ComposableAlwaysOnSampler())).shouldSample(
+    fun `delegates to root when delegate is composableParentThreshold and there is no valid parent`() {
+        val delegate = samplerDsl.composableParentThreshold(root = samplerDsl.composableAlwaysOn())
+        val result = samplerDsl.composite(delegate).shouldSample(
             context = contextFactory.root(),
             traceId = traceId,
             name = "span",
@@ -127,9 +147,10 @@ internal class CompositeSamplerTest {
     }
 
     @Test
-    fun `propagates parent threshold when delegate is ComposableParentThreshold`() {
+    fun `propagates parent threshold when delegate is composableParentThreshold`() {
         val context = contextWithParent(sampled = true, isRemote = true, otValue = "th:8")
-        val result = CompositeSampler(ComposableParentThresholdSampler(root = ComposableAlwaysOffSampler())).shouldSample(
+        val delegate = samplerDsl.composableParentThreshold(root = samplerDsl.composableAlwaysOff())
+        val result = samplerDsl.composite(delegate).shouldSample(
             context = context,
             traceId = traceId,
             name = "span",
@@ -142,9 +163,10 @@ internal class CompositeSamplerTest {
     }
 
     @Test
-    fun `does not publish threshold when parent sampled without a threshold via ComposableParentThreshold`() {
+    fun `does not publish threshold when parent sampled without a threshold via composableParentThreshold`() {
         val context = contextWithParent(sampled = true, isRemote = true)
-        val result = CompositeSampler(ComposableParentThresholdSampler(root = ComposableAlwaysOffSampler())).shouldSample(
+        val delegate = samplerDsl.composableParentThreshold(root = samplerDsl.composableAlwaysOff())
+        val result = samplerDsl.composite(delegate).shouldSample(
             context = context,
             traceId = traceId,
             name = "span",
@@ -157,9 +179,10 @@ internal class CompositeSamplerTest {
     }
 
     @Test
-    fun `drops when parent not sampled without a threshold via ComposableParentThreshold`() {
+    fun `drops when parent not sampled without a threshold via composableParentThreshold`() {
         val context = contextWithParent(sampled = false, isRemote = true)
-        val result = CompositeSampler(ComposableParentThresholdSampler(root = ComposableAlwaysOnSampler())).shouldSample(
+        val delegate = samplerDsl.composableParentThreshold(root = samplerDsl.composableAlwaysOn())
+        val result = samplerDsl.composite(delegate).shouldSample(
             context = context,
             traceId = traceId,
             name = "span",
