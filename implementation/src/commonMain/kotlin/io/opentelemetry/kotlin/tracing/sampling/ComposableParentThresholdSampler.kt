@@ -21,19 +21,14 @@ public class ComposableParentThresholdSampler(private val root: ComposableSample
         links: List<SpanLink>
     ): SamplingIntent {
         val parent = context.extractSpan().spanContext
-        if (!parent.isValid) {
-            return root.getSamplingIntent(context, name, spanKind, attributes, links)
-        }
-
         val parentThreshold = parent.traceState.get(KnownTraceState.OT)?.let(OtelTraceState::parse)?.th
-        if (parentThreshold != null) {
-            return SamplingIntentImpl(threshold = parentThreshold, adjustedCountReliable = true)
-        }
 
-        if (parent.traceFlags.isSampled) {
-            return SamplingIntentImpl(threshold = 0, adjustedCountReliable = false)
+        return when {
+            !parent.isValid -> root.getSamplingIntent(context, name, spanKind, attributes, links)
+            parentThreshold != null -> SamplingIntentImpl(threshold = parentThreshold, adjustedCountReliable = true)
+            parent.traceFlags.isSampled -> SamplingIntentImpl(threshold = 0, adjustedCountReliable = false)
+            else -> SamplingIntentImpl(threshold = null, adjustedCountReliable = false)
         }
-        return SamplingIntentImpl(threshold = null, adjustedCountReliable = false)
     }
 
     override val description: String

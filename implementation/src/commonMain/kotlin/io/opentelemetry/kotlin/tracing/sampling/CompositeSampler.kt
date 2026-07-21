@@ -30,20 +30,19 @@ public class CompositeSampler(
         val otelTraceState = OtelTraceState.parse(traceState.get(KnownTraceState.OT))
 
         val intent = delegate.getSamplingIntent(context, name, spanKind, attributes, links)
+        // this unlocks smart-cast
+        val intentThreshold = intent.threshold
 
-        var adjustableThreshold = false
-        var sampled = false
-
-        if (intent.threshold != null) {
-            adjustableThreshold = intent.adjustedCountReliable
+        val adjustableThreshold = intentThreshold != null && intent.adjustedCountReliable
+        val sampled = intentThreshold?.let {
             val randomVal = if (adjustableThreshold) {
                 otelTraceState.rv ?: randomnessFromTraceId(traceId)
             } else {
                 // Use last 56 bits of random number
                 random.nextLong() and 0x00FFFFFFFFFFFFFFL
             }
-            sampled = intent.threshold!! <= randomVal
-        }
+            intentThreshold <= randomVal
+        } ?: false
 
         val decision = if (sampled) {
             SamplingResult.Decision.RECORD_AND_SAMPLE
@@ -57,7 +56,7 @@ public class CompositeSampler(
             ?.let(OtelTraceState::parse)
             ?: otelTraceState
         if (sampled && adjustableThreshold) {
-            derivedOtelTraceState.setThreshold(intent.threshold!!)
+            intentThreshold?.let(derivedOtelTraceState::setThreshold)
         } else {
             derivedOtelTraceState.eraseThreshold()
         }

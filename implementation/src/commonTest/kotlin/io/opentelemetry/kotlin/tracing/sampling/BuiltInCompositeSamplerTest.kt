@@ -36,9 +36,10 @@ internal class BuiltInCompositeSamplerTest {
     private val traceId = "000000000000000000ffffffffffffff"
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean, otValue: String? = null): Context {
-        val traceFlags = when {
-            sampled -> traceFlagsFactory.default
-            else -> TraceFlagsImpl(isSampled = false, isRandom = false)
+        val traceFlags = if (sampled) {
+            traceFlagsFactory.default
+        } else {
+            TraceFlagsImpl(isSampled = false, isRandom = false)
         }
         val traceState = otValue?.let { traceStateFactory.default.put("ot", it) } ?: traceStateFactory.default
         val parentSpanContext = spanContextFactory.create(
