@@ -8,13 +8,10 @@ import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
 import kotlin.concurrent.Volatile
-import kotlin.math.max
 
 internal class ProbabilitySampler(ratio: Double) : Sampler {
 
     private companion object {
-        private const val MAX_THRESHOLD: Long = 1L shl 56
-
         @Volatile
         private var compatibilityWarningLogged = false
         const val COMPATIBILITY_WARNING = "WARNING: The ProbabilitySampler sampler is presuming TraceIDs are random " +
@@ -23,10 +20,10 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
     }
 
     init {
-        require(ratio in (1.0 / MAX_THRESHOLD)..1.0) { "ratio must be between 2^-56 and 1, got $ratio" }
+        require(ratio in (1.0 / Threshold.MAX)..1.0) { "ratio must be between 2^-56 and 1, got $ratio" }
     }
 
-    private val rejectionThreshold: Long = MAX_THRESHOLD - (ratio * MAX_THRESHOLD).toLong()
+    private val rejectionThreshold = Threshold.fromRatio(ratio)
 
     override val description: String = "ProbabilitySampler{$ratio}"
 
@@ -50,7 +47,7 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
                 compatibilityWarningLogged = true
                 platformLog(COMPATIBILITY_WARNING)
             }
-            randomnessFromTraceId(traceId)
+            Randomness.fromTraceId(traceId)
         }
 
         val incomingTh = otelTraceState.th
@@ -62,7 +59,7 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
             otelTraceState.eraseThreshold()
         }
 
-        otelTraceState.setThreshold(max(otelTraceState.th ?: 0L, rejectionThreshold))
+        otelTraceState.applyThreshold(rejectionThreshold)
 
         val decision = if (randomness >= rejectionThreshold) {
             Decision.RECORD_AND_SAMPLE
@@ -76,16 +73,4 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
             traceState = traceState.put("ot", otelTraceState.encode()),
         )
     }
-
-    private fun randomnessFromTraceId(traceId: String): Long =
-        (byteFromBase16(traceId[18], traceId[19]) shl 48) or
-            (byteFromBase16(traceId[20], traceId[21]) shl 40) or
-            (byteFromBase16(traceId[22], traceId[23]) shl 32) or
-            (byteFromBase16(traceId[24], traceId[25]) shl 24) or
-            (byteFromBase16(traceId[26], traceId[27]) shl 16) or
-            (byteFromBase16(traceId[28], traceId[29]) shl 8) or
-            byteFromBase16(traceId[30], traceId[31])
-
-    private fun byteFromBase16(first: Char, second: Char): Long =
-        ((first.digitToInt(16) shl 4) or second.digitToInt(16)).toLong()
 }
