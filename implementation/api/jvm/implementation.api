@@ -11,3 +11,34 @@ public final class io/opentelemetry/kotlin/tracing/sampling/BuiltInSamplerApiKt 
 	public static synthetic fun parentBased$default (Lio/opentelemetry/kotlin/init/SamplerConfigDsl;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
 }
 
+public final class io/opentelemetry/kotlin/tracing/sampling/ComposableAlwaysOffSampler : io/opentelemetry/kotlin/tracing/sampling/ComposableSampler {
+	public fun <init> ()V
+	public fun getDescription ()Ljava/lang/String;
+	public fun getSamplingIntent (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/SpanKind;Lio/opentelemetry/kotlin/attributes/AttributeContainer;Ljava/util/List;)Lio/opentelemetry/kotlin/tracing/sampling/SamplingIntent;
+}
+
+public final class io/opentelemetry/kotlin/tracing/sampling/ComposableAlwaysOnSampler : io/opentelemetry/kotlin/tracing/sampling/ComposableSampler {
+	public fun <init> ()V
+	public fun getDescription ()Ljava/lang/String;
+	public fun getSamplingIntent (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/SpanKind;Lio/opentelemetry/kotlin/attributes/AttributeContainer;Ljava/util/List;)Lio/opentelemetry/kotlin/tracing/sampling/SamplingIntent;
+}
+
+public final class io/opentelemetry/kotlin/tracing/sampling/ComposableParentThresholdSampler : io/opentelemetry/kotlin/tracing/sampling/ComposableSampler {
+	public fun <init> (Lio/opentelemetry/kotlin/tracing/sampling/ComposableSampler;)V
+	public fun getDescription ()Ljava/lang/String;
+	public fun getSamplingIntent (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/SpanKind;Lio/opentelemetry/kotlin/attributes/AttributeContainer;Ljava/util/List;)Lio/opentelemetry/kotlin/tracing/sampling/SamplingIntent;
+}
+
+public final class io/opentelemetry/kotlin/tracing/sampling/ComposableProbabilitySampler : io/opentelemetry/kotlin/tracing/sampling/ComposableSampler {
+	public fun <init> (D)V
+	public fun getDescription ()Ljava/lang/String;
+	public fun getSamplingIntent (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/SpanKind;Lio/opentelemetry/kotlin/attributes/AttributeContainer;Ljava/util/List;)Lio/opentelemetry/kotlin/tracing/sampling/SamplingIntent;
+}
+
+public final class io/opentelemetry/kotlin/tracing/sampling/CompositeSampler : io/opentelemetry/kotlin/tracing/sampling/Sampler {
+	public fun <init> (Lio/opentelemetry/kotlin/tracing/sampling/ComposableSampler;Lkotlin/random/Random;)V
+	public synthetic fun <init> (Lio/opentelemetry/kotlin/tracing/sampling/ComposableSampler;Lkotlin/random/Random;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getDescription ()Ljava/lang/String;
+	public fun shouldSample (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/SpanKind;Lio/opentelemetry/kotlin/attributes/AttributeContainer;Ljava/util/List;)Lio/opentelemetry/kotlin/tracing/sampling/SamplingResult;
+}
+
