@@ -258,7 +258,7 @@ public final class io/opentelemetry/kotlin/metrics/MeterProvider$DefaultImpls {
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/SynchronousInstrument : io/opentelemetry/kotlin/metrics/Instrument {
-	public abstract fun isEnabled ()Z
+	public abstract fun enabled ()Z
 }
 
 public abstract interface class io/opentelemetry/kotlin/propagation/TextMapGetter {

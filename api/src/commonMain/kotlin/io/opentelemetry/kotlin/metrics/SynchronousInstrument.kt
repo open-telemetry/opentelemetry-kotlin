@@ -19,5 +19,5 @@ public interface SynchronousInstrument : Instrument {
      * is recorded, immediately before performing expensive work needed only to produce the
      * measurement.
      */
-    public fun isEnabled(): Boolean
+    public fun enabled(): Boolean
 }
