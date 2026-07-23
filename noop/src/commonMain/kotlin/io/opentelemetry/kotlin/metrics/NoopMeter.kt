@@ -9,21 +9,6 @@ import io.opentelemetry.kotlin.ExperimentalApi
  */
 @ExperimentalApi
 internal object NoopMeter : Meter {
-    override fun createIntegerCounter(
-        name: String,
-        description: String?,
-        unit: String?
-    ): IntegerCounter {
-        return NoopIntegerCounter
-    }
-
-    override fun createFloatCounter(
-        name: String,
-        description: String?,
-        unit: String?
-    ): FloatCounter {
-        return NoopFloatCounter
-    }
 
     override fun createLongCounter(
         name: String,
@@ -33,19 +18,4 @@ internal object NoopMeter : Meter {
         return NoopLongCounter
     }
 
-    override fun createDoubleCounter(
-        name: String,
-        description: String?,
-        unit: String?
-    ): DoubleCounter {
-        return NoopDoubleCounter
-    }
-
-    override fun createGenericDoubleCounter(
-        name: String,
-        description: String?,
-        unit: String?
-    ): GenericCounter<Double> {
-        return NoopGenericDoubleCounter
-    }
 }

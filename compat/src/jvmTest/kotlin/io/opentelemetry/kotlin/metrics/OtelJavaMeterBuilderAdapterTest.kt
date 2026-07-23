@@ -79,13 +79,6 @@ internal class OtelJavaMeterBuilderAdapterTest {
             capturedVersion = version
             capturedSchemaUrl = schemaUrl
             return object : Meter {
-                override fun createIntegerCounter(
-                    name: String,
-                    description: String?,
-                    unit: String?
-                ): IntegerCounter {
-                    return NoopTestIntegerCounter
-                }
 
                 override fun createLongCounter(
                     name: String,
@@ -95,29 +88,6 @@ internal class OtelJavaMeterBuilderAdapterTest {
                     return NoopTestLongCounter
                 }
 
-                override fun createFloatCounter(
-                    name: String,
-                    description: String?,
-                    unit: String?
-                ): FloatCounter {
-                    return NoopTestFloatCounter
-                }
-
-                override fun createDoubleCounter(
-                    name: String,
-                    description: String?,
-                    unit: String?
-                ): DoubleCounter {
-                    return NoopTestDoubleCounter
-                }
-
-                override fun createGenericDoubleCounter(
-                    name: String,
-                    description: String?,
-                    unit: String?
-                ): GenericCounter<Double> {
-                    return NoopTestGenericDoubleCounter
-                }
             }
         }
     }

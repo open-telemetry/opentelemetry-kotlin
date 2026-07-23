@@ -3,19 +3,7 @@ package io.opentelemetry.kotlin.metrics
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
 
-internal object NoopLongCounter: LongCounter {
-
-    override val name: String
-        get() = "noop"
-
-    override val unit: String? = null
-
-
-    override val description: String? = null
-
-    override fun enabled(): Boolean {
-        return false
-    }
+class FakeLongCounter: LongCounter {
 
     override fun add(
         value: Long,
@@ -24,4 +12,15 @@ internal object NoopLongCounter: LongCounter {
     ) {
 
     }
+
+    override fun enabled(): Boolean {
+        return true
+    }
+
+    override val name: String
+        get() = "fake"
+    override val unit: String?
+        get() = null
+    override val description: String?
+        get() = null
 }

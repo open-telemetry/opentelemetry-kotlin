@@ -4,11 +4,13 @@ import io.opentelemetry.kotlin.aliases.OtelJavaDoubleCounter
 import io.opentelemetry.kotlin.aliases.OtelJavaMeter
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.toOtelJavaContext
 
 internal class DoubleCounterAdapter(
-    private val nameValue: String,
-    private val unit: String?,
-    private val description: String?,
+    override val name: String,
+    override val unit: String?,
+    override val description: String?,
     meter: OtelJavaMeter
 ): DoubleCounter {
 
@@ -25,29 +27,20 @@ internal class DoubleCounterAdapter(
         counter = builder.build()
     }
 
-    override val name: String
-        get() = nameValue
 
-    override fun getUnit(): String? {
-        return unit
-    }
-
-    override fun getDescription(): String? {
-        return description
-    }
-
-    override fun isEnabled(): Boolean {
+    override fun enabled(): Boolean {
         return counter.isEnabled()
     }
 
     override fun add(
         value: Double,
+        context: Context?,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         val model = CompatAttributesModel()
-        counter.add(value)
         if (attributes != null) {
             attributes(model)
         }
+        counter.add(value, model.otelJavaAttributes())
     }
 }
