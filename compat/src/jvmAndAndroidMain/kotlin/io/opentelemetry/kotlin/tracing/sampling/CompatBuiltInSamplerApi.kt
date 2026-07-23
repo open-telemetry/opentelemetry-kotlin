@@ -2,6 +2,8 @@ package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAlwaysRecordSampler
+import io.opentelemetry.kotlin.aliases.OtelJavaComposableSampler
+import io.opentelemetry.kotlin.aliases.OtelJavaCompositeSampler
 import io.opentelemetry.kotlin.aliases.OtelJavaSampler
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
 
@@ -52,7 +54,59 @@ public fun SamplerConfigDsl.parentBased(
         .build()
 )
 
+/**
+ * Configures sampling by delegating to a [ComposableSampler], using consistent probability
+ * sampling over the OpenTelemetry TraceState `ot` `th`/`rv` sub-keys.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#compositesampler
+ */
+@ExperimentalApi
+public fun SamplerConfigDsl.composite(delegate: ComposableSampler): Sampler =
+    SamplerAdapter(OtelJavaCompositeSampler.wrap(delegate.toOtelJavaComposableSampler()))
+
+/**
+ * A [ComposableSampler] that always samples, regardless of parent trace state.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composablealwayson
+ */
+@ExperimentalApi
+public fun SamplerConfigDsl.composableAlwaysOn(): ComposableSampler =
+    OtelJavaBackedComposableSampler(OtelJavaComposableSampler.alwaysOn())
+
+/**
+ * A [ComposableSampler] that never samples.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composablealwaysoff
+ */
+@ExperimentalApi
+public fun SamplerConfigDsl.composableAlwaysOff(): ComposableSampler =
+    OtelJavaBackedComposableSampler(OtelJavaComposableSampler.alwaysOff())
+
+/**
+ * A [ComposableSampler] that samples spans with the given probability [ratio].
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composableprobability
+ */
+@ExperimentalApi
+public fun SamplerConfigDsl.composableProbability(ratio: Double): ComposableSampler =
+    OtelJavaBackedComposableSampler(OtelJavaComposableSampler.probability(ratio))
+
+/**
+ * A [ComposableSampler] that honors the parent's sampling threshold when present, falling back
+ * to [root] when there is no valid parent.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composableparentthreshold
+ */
+@ExperimentalApi
+public fun SamplerConfigDsl.composableParentThreshold(root: ComposableSampler): ComposableSampler =
+    OtelJavaBackedComposableSampler(OtelJavaComposableSampler.parentThreshold(root.toOtelJavaComposableSampler()))
+
 private fun Sampler.toOtelJavaSampler(): OtelJavaSampler = when (this) {
     is SamplerAdapter -> impl
     else -> OtelJavaSamplerAdapter(this)
+}
+
+private fun ComposableSampler.toOtelJavaComposableSampler(): OtelJavaComposableSampler = when (this) {
+    is OtelJavaBackedComposableSampler -> impl
+    else -> KotlinComposableSamplerAdapter(this)
 }
