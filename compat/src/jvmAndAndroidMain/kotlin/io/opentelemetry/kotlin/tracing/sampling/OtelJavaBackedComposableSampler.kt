@@ -13,9 +13,6 @@ import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceState
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import io.opentelemetry.kotlin.tracing.model.TraceStateAdapter
 
-/** Valid thresholds lie in `[0, 2^56)`; anything outside that range means "never sample". */
-private const val MAX_THRESHOLD: Long = 1L shl 56
-
 internal class OtelJavaBackedComposableSampler(internal val impl: OtelJavaComposableSampler) : ComposableSampler {
 
     override fun getSamplingIntent(
@@ -43,7 +40,7 @@ internal class OtelJavaBackedComposableSampler(internal val impl: OtelJavaCompos
 
         return object : SamplingIntent {
             override val threshold: Long? =
-                javaThreshold.takeIf { it in 0 until MAX_THRESHOLD }
+                javaThreshold.takeIf { it in VALID_THRESHOLD_RANGE }
             override val adjustedCountReliable: Boolean = javaIntent.isThresholdReliable
             override val attributesProvider: (() -> AttributeContainer)? = if (javaSamplingAttributes.isEmpty) {
                 null
@@ -62,4 +59,10 @@ internal class OtelJavaBackedComposableSampler(internal val impl: OtelJavaCompos
 
     override val description: String
         get() = impl.description
+
+    companion object {
+        /** Valid thresholds lie in `[0, 2^56)`; anything outside that range means "never sample". */
+        private const val MAX_THRESHOLD: Long = 1L shl 56
+        private val VALID_THRESHOLD_RANGE = 0 until MAX_THRESHOLD
+    }
 }

@@ -6,14 +6,14 @@ internal class OtelTraceState private constructor(
     private val pairs: LinkedHashMap<String, String>
 ) {
     val rv: Long?
-        get() = pairs["rv"]?.randomness()
+        get() = pairs[RANDOM_VAL_KEY]?.randomness()
 
     val th: Long?
-        get() = pairs["th"]?.threshold()
+        get() = pairs[THRESHOLD_KEY]?.threshold()
 
     fun setThreshold(threshold: Long) {
         require(threshold in 0x0..0xffffffffffffff)
-        pairs["th"] = if (threshold == 0L) {
+        pairs[THRESHOLD_KEY] = if (threshold == 0L) {
             "0"
         } else {
             threshold.toString(16).padStart(14, '0').trimEnd('0')
@@ -21,16 +21,19 @@ internal class OtelTraceState private constructor(
     }
 
     fun eraseThreshold() {
-        pairs.remove("th")
+        pairs.remove(THRESHOLD_KEY)
     }
 
     fun eraseRandomValue() {
-        pairs.remove("rv")
+        pairs.remove(RANDOM_VAL_KEY)
     }
 
     fun encode(): String = pairs.entries.joinToString(";") { (key, value) -> "$key:$value" }
 
     companion object {
+        private const val RANDOM_VAL_KEY = "rv"
+        private const val THRESHOLD_KEY = "th"
+
         fun parse(raw: String?): OtelTraceState {
             val pairs = linkedMapOf<String, String>()
             if (raw.isNullOrBlank()) {

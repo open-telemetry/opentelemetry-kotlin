@@ -55,7 +55,7 @@ internal class BuiltInCompositeSamplerTest {
 
     @Test
     fun `always samples when delegate is composableAlwaysOn`() {
-        val result = samplerDsl.composite(samplerDsl.composableAlwaysOn()).shouldSample(
+        val result = samplerDsl.composite { composableAlwaysOn() }.shouldSample(
             context = contextFactory.root(),
             traceId = traceId,
             name = "span",
@@ -70,7 +70,7 @@ internal class BuiltInCompositeSamplerTest {
 
     @Test
     fun `never samples when delegate is composableAlwaysOff`() {
-        val result = samplerDsl.composite(samplerDsl.composableAlwaysOff()).shouldSample(
+        val result = samplerDsl.composite { composableAlwaysOff() }.shouldSample(
             context = contextFactory.root(),
             traceId = traceId,
             name = "span",
@@ -85,7 +85,7 @@ internal class BuiltInCompositeSamplerTest {
 
     @Test
     fun `composableProbability with ratio 0 behaves like composableAlwaysOff`() {
-        val result = samplerDsl.composite(samplerDsl.composableProbability(0.0)).shouldSample(
+        val result = samplerDsl.composite { composableProbability(0.0) }.shouldSample(
             context = contextFactory.root(),
             traceId = traceId,
             name = "span",
@@ -98,7 +98,7 @@ internal class BuiltInCompositeSamplerTest {
 
     @Test
     fun `always samples when delegate is composableProbability at ratio 1 without publishing threshold`() {
-        val result = samplerDsl.composite(samplerDsl.composableProbability(1.0)).shouldSample(
+        val result = samplerDsl.composite { composableProbability(1.0) }.shouldSample(
             context = contextFactory.root(),
             traceId = traceId,
             name = "span",
@@ -135,8 +135,7 @@ internal class BuiltInCompositeSamplerTest {
 
     @Test
     fun `delegates to root when delegate is composableParentThreshold and there is no valid parent`() {
-        val delegate = samplerDsl.composableParentThreshold(root = samplerDsl.composableAlwaysOn())
-        val result = samplerDsl.composite(delegate).shouldSample(
+        val result = samplerDsl.composite { composableParentThreshold(root = composableAlwaysOn()) }.shouldSample(
             context = contextFactory.root(),
             traceId = traceId,
             name = "span",
@@ -150,8 +149,7 @@ internal class BuiltInCompositeSamplerTest {
     @Test
     fun `propagates parent threshold when delegate is composableParentThreshold`() {
         val context = contextWithParent(sampled = true, isRemote = true, otValue = "th:8")
-        val delegate = samplerDsl.composableParentThreshold(root = samplerDsl.composableAlwaysOff())
-        val result = samplerDsl.composite(delegate).shouldSample(
+        val result = samplerDsl.composite { composableParentThreshold(root = composableAlwaysOff()) }.shouldSample(
             context = context,
             traceId = traceId,
             name = "span",
@@ -166,8 +164,7 @@ internal class BuiltInCompositeSamplerTest {
     @Test
     fun `does not publish threshold when parent sampled without a threshold via composableParentThreshold`() {
         val context = contextWithParent(sampled = true, isRemote = true)
-        val delegate = samplerDsl.composableParentThreshold(root = samplerDsl.composableAlwaysOff())
-        val result = samplerDsl.composite(delegate).shouldSample(
+        val result = samplerDsl.composite { composableParentThreshold(root = composableAlwaysOff()) }.shouldSample(
             context = context,
             traceId = traceId,
             name = "span",
@@ -182,8 +179,7 @@ internal class BuiltInCompositeSamplerTest {
     @Test
     fun `drops when parent not sampled without a threshold via composableParentThreshold`() {
         val context = contextWithParent(sampled = false, isRemote = true)
-        val delegate = samplerDsl.composableParentThreshold(root = samplerDsl.composableAlwaysOn())
-        val result = samplerDsl.composite(delegate).shouldSample(
+        val result = samplerDsl.composite { composableParentThreshold(root = composableAlwaysOn()) }.shouldSample(
             context = context,
             traceId = traceId,
             name = "span",

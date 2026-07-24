@@ -49,7 +49,8 @@ public fun SamplerConfigDsl.parentBased(
 )
 
 @ExperimentalApi
-public fun SamplerConfigDsl.composite(delegate: ComposableSampler): Sampler = CompositeSampler(delegate)
+public fun SamplerConfigDsl.composite(block: SamplerConfigDsl.() -> ComposableSampler): Sampler =
+    CompositeSampler(block())
 
 @ExperimentalApi
 public fun SamplerConfigDsl.composableAlwaysOn(): ComposableSampler = ComposableAlwaysOnSampler()

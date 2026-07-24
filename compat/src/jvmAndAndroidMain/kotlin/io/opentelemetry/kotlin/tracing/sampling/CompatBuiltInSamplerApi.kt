@@ -61,8 +61,8 @@ public fun SamplerConfigDsl.parentBased(
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#compositesampler
  */
 @ExperimentalApi
-public fun SamplerConfigDsl.composite(delegate: ComposableSampler): Sampler =
-    SamplerAdapter(OtelJavaCompositeSampler.wrap(delegate.toOtelJavaComposableSampler()))
+public fun SamplerConfigDsl.composite(block: SamplerConfigDsl.() -> ComposableSampler): Sampler =
+    SamplerAdapter(OtelJavaCompositeSampler.wrap(block().toOtelJavaComposableSampler()))
 
 /**
  * A [ComposableSampler] that always samples, regardless of parent trace state.
