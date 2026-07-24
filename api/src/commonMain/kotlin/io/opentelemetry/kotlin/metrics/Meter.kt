@@ -25,6 +25,4 @@ public interface Meter {
      * * Consists of alphabets, numbers, and the following: '_', '.', '-', '/'
      */
     public fun createLongCounter(name: String, description: String? = null, unit: String? = null): LongCounter
-
-
 }

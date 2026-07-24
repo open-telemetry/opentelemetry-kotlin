@@ -19,15 +19,15 @@ internal class FloatCounterAdapterTest {
     @Test
     fun nullNameAndDescriptionTest() {
         adapter = FloatCounterAdapter("test_counter", null, null, meterProvider.get("test-scope"))
-        assertNull(adapter.getUnit())
-        assertNull(adapter.getDescription())
+        assertNull(adapter.unit)
+        assertNull(adapter.description)
     }
 
     @Test
     fun nonNullNameAndDescriptionTest() {
         adapter = FloatCounterAdapter("test_counter", "units", "This is a test counter", meterProvider.get("test-scope"))
 
-        assertNotNull(adapter.getUnit())
-        assertNotNull(adapter.getDescription())
+        assertNotNull(adapter.unit)
+        assertNotNull(adapter.description)
     }
 }
