@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 internal class OtelTraceStateTest {
     @Test
@@ -94,9 +95,11 @@ internal class OtelTraceStateTest {
     }
 
     @Test
-    fun erasesThreshold() {
+    fun erasesAttributes() {
         val ot = OtelTraceState.parse("rv:123456789abcde;th:123")
         ot.eraseThreshold()
         assertEquals("rv:123456789abcde", ot.encode())
+        ot.eraseRandomValue()
+        assertTrue(ot.encode().isEmpty())
     }
 }

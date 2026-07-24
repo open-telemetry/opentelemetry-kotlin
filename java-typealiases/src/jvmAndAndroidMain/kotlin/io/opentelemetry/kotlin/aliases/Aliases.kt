@@ -47,6 +47,9 @@ import io.opentelemetry.sdk.common.InstrumentationLibraryInfo
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo
 import io.opentelemetry.sdk.common.internal.ScopeConfigurator
 import io.opentelemetry.sdk.extension.incubator.trace.samplers.AlwaysRecordSampler
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.CompositeSampler
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.SamplingIntent
 import io.opentelemetry.sdk.logs.LogLimits
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.ReadWriteLogRecord
@@ -157,3 +160,6 @@ typealias OtelJavaSampler = Sampler
 typealias OtelJavaSamplingResult = SamplingResult
 typealias OtelJavaSamplingDecision = SamplingDecision
 typealias OtelJavaAlwaysRecordSampler = AlwaysRecordSampler
+typealias OtelJavaComposableSampler = ComposableSampler
+typealias OtelJavaCompositeSampler = CompositeSampler
+typealias OtelJavaSamplingIntent = SamplingIntent
