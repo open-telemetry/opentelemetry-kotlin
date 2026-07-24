@@ -13,9 +13,7 @@ internal class JsonLogRecordExporterImpl(
 
     override suspend fun export(telemetry: List<ReadableLogRecord>): OperationResultCode =
         shutdownState.ifActive {
-            val result = telemetry.map {
-                encoder.encode(it)
-            }
+            telemetry.forEach { encoder.encode(it) }
             OperationResultCode.Success
         }
 
