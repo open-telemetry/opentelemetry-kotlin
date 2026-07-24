@@ -41,6 +41,7 @@ include(
     ":exporters-otlp",
     ":exporters-persistence",
     ":exporters-protobuf",
+    ":exporters-json",
     ":java-typealiases",
     "examples:example-app",
     "examples:example-app-android",
