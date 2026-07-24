@@ -70,6 +70,7 @@ public fun createOpenTelemetry(
         ),
         meterProvider = MeterProviderImpl(
             metricsConfig = metricsConfig,
+            contextFactory = contextFactory
         ),
         clock = clock,
         spanContext = spanContext,

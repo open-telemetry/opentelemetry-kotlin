@@ -8,12 +8,14 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.runWithTimeout
+import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.init.config.MetricsConfig
 import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
 
 internal class MeterProviderImpl(
     metricsConfig: MetricsConfig,
+    contextFactory: ContextFactory,
 ) : MeterProvider, TelemetryCloseable {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
@@ -25,6 +27,7 @@ internal class MeterProviderImpl(
             MeterImpl(
                 instrumentationScopeInfo = key,
                 resource = metricsConfig.resource,
+                contextFactory = contextFactory
             )
         }
     }

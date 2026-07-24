@@ -242,6 +242,23 @@ public abstract interface class io/opentelemetry/kotlin/logging/model/ReadableLo
 	public abstract fun getTimestamp ()Ljava/lang/Long;
 }
 
+public abstract interface class io/opentelemetry/kotlin/metrics/export/LongMetricRecord : io/opentelemetry/kotlin/attributes/AttributeContainer, io/opentelemetry/kotlin/attributes/AttributesMutator {
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getType ()Ljava/lang/String;
+	public abstract fun getUnit ()Ljava/lang/String;
+	public abstract fun getValue ()J
+}
+
+public abstract interface class io/opentelemetry/kotlin/metrics/export/MetricProcessor : io/opentelemetry/kotlin/export/TelemetryCloseable {
+	public abstract fun enabled (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/String;)Z
+	public abstract fun onEmit (Lio/opentelemetry/kotlin/metrics/export/LongMetricRecord;Lio/opentelemetry/kotlin/context/Context;)V
+}
+
+public final class io/opentelemetry/kotlin/metrics/export/MetricProcessor$DefaultImpls {
+	public static fun enabled (Lio/opentelemetry/kotlin/metrics/export/MetricProcessor;Lio/opentelemetry/kotlin/context/Context;Ljava/lang/String;)Z
+}
+
 public abstract interface class io/opentelemetry/kotlin/resource/MutableResource {
 	public abstract fun getAttributes ()Ljava/util/Map;
 	public abstract fun getSchemaUrl ()Ljava/lang/String;

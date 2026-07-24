@@ -16,6 +16,10 @@ import io.opentelemetry.api.logs.Logger
 import io.opentelemetry.api.logs.LoggerBuilder
 import io.opentelemetry.api.logs.LoggerProvider
 import io.opentelemetry.api.logs.Severity
+import io.opentelemetry.api.metrics.DoubleCounter
+import io.opentelemetry.api.metrics.DoubleCounterBuilder
+import io.opentelemetry.api.metrics.LongCounter
+import io.opentelemetry.api.metrics.LongCounterBuilder
 import io.opentelemetry.api.metrics.Meter
 import io.opentelemetry.api.metrics.MeterBuilder
 import io.opentelemetry.api.metrics.MeterProvider
@@ -156,4 +160,8 @@ typealias OtelJavaLogLimits = LogLimits
 typealias OtelJavaSampler = Sampler
 typealias OtelJavaSamplingResult = SamplingResult
 typealias OtelJavaSamplingDecision = SamplingDecision
+typealias OtelJavaLongCounter = LongCounter
+typealias OtelJavaLongCounterBuilder = LongCounterBuilder
+typealias OtelJavaDoubleCounter = DoubleCounter
+typealias OtelJavaDoubleCounterBuilder = DoubleCounterBuilder
 typealias OtelJavaAlwaysRecordSampler = AlwaysRecordSampler

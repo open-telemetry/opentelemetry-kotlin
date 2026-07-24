@@ -240,13 +240,50 @@ public final class io/opentelemetry/kotlin/logging/SeverityNumber : java/lang/En
 public abstract interface class io/opentelemetry/kotlin/metrics/AsynchronousInstrument : io/opentelemetry/kotlin/metrics/Instrument, java/lang/AutoCloseable {
 }
 
+public abstract interface class io/opentelemetry/kotlin/metrics/DoubleCounter : io/opentelemetry/kotlin/metrics/SynchronousInstrument {
+	public abstract fun add (DLio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/opentelemetry/kotlin/metrics/DoubleCounter$DefaultImpls {
+	public static synthetic fun add$default (Lio/opentelemetry/kotlin/metrics/DoubleCounter;DLio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/metrics/FloatCounter : io/opentelemetry/kotlin/metrics/SynchronousInstrument {
+	public abstract fun add (FLio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/opentelemetry/kotlin/metrics/FloatCounter$DefaultImpls {
+	public static synthetic fun add$default (Lio/opentelemetry/kotlin/metrics/FloatCounter;FLio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
 public abstract interface class io/opentelemetry/kotlin/metrics/Instrument {
 	public abstract fun getDescription ()Ljava/lang/String;
 	public abstract fun getName ()Ljava/lang/String;
 	public abstract fun getUnit ()Ljava/lang/String;
 }
 
+public abstract interface class io/opentelemetry/kotlin/metrics/IntegerCounter : io/opentelemetry/kotlin/metrics/SynchronousInstrument {
+	public abstract fun add-OzbTU-A (ILio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/opentelemetry/kotlin/metrics/IntegerCounter$DefaultImpls {
+	public static synthetic fun add-OzbTU-A$default (Lio/opentelemetry/kotlin/metrics/IntegerCounter;ILio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/metrics/LongCounter : io/opentelemetry/kotlin/metrics/SynchronousInstrument {
+	public abstract fun add (JLio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/opentelemetry/kotlin/metrics/LongCounter$DefaultImpls {
+	public static synthetic fun add$default (Lio/opentelemetry/kotlin/metrics/LongCounter;JLio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
 public abstract interface class io/opentelemetry/kotlin/metrics/Meter {
+	public abstract fun createLongCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/LongCounter;
+}
+
+public final class io/opentelemetry/kotlin/metrics/Meter$DefaultImpls {
+	public static synthetic fun createLongCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/LongCounter;
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/MeterProvider {
