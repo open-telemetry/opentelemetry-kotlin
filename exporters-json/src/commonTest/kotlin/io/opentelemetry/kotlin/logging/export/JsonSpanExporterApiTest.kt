@@ -1,9 +1,6 @@
 package io.opentelemetry.kotlin.logging.export
 
-import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.init.LogExportConfigDsl
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import io.opentelemetry.kotlin.tracing.export.jsonSpanExporter
 import kotlinx.coroutines.test.runTest
@@ -12,7 +9,7 @@ import kotlin.test.assertEquals
 
 internal class JsonLogRecordExporterApiTest {
 
-    private val config = FakeLogExportConfig()
+    private val config = FakeTraceExportConfig()
     private val fakeSpan = FakeReadWriteSpan()
 
     @Test
@@ -34,7 +31,3 @@ internal class JsonLogRecordExporterApiTest {
         }
     }
 }
-
-internal class FakeLogExportConfig(
-    override val clock: Clock = FakeClock()
-) : LogExportConfigDsl
