@@ -1,4 +1,4 @@
-package io.opentelemetry.kotlin.tracing.export
+package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.clock.FakeClock

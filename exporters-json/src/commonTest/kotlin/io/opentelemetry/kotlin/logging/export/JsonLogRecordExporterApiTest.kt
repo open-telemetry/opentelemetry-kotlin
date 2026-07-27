@@ -1,7 +1,6 @@
-package io.opentelemetry.kotlin.tracing.export
+package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.logging.export.jsonLogRecordExporter
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -23,7 +22,8 @@ internal class JsonLogRecordExporterApiTest {
     @Test
     fun `should successfully export log records, force flush and shutdown`() = runTest {
         config.jsonLogRecordExporter().apply {
-            assertEquals(OperationResultCode.Failure,
+            assertEquals(
+                OperationResultCode.Failure,
                 export(listOf(fakeLogRecord))
             )
             assertEquals(OperationResultCode.Success, forceFlush())

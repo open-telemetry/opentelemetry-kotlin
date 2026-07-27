@@ -1,13 +1,12 @@
-package io.opentelemetry.kotlin.logging.export
+package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
-import io.opentelemetry.kotlin.tracing.export.jsonSpanExporter
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-internal class JsonLogRecordExporterApiTest {
+internal class JsonSpanExporterApiTest {
 
     private val config = FakeTraceExportConfig()
     private val fakeSpan = FakeReadWriteSpan()
@@ -23,7 +22,8 @@ internal class JsonLogRecordExporterApiTest {
     @Test
     fun `should successfully export span data, force flush and shutdown`() = runTest {
         config.jsonSpanExporter().apply {
-            assertEquals(OperationResultCode.Failure,
+            assertEquals(
+                OperationResultCode.Failure,
                 export(listOf(fakeSpan))
             )
             assertEquals(OperationResultCode.Success, forceFlush())
