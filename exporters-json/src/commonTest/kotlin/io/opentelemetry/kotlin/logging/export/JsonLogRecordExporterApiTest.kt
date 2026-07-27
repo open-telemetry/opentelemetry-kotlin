@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.logging.export
 
+import io.opentelemetry.kotlin.export.FakeLogExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
 import kotlinx.coroutines.test.runTest
