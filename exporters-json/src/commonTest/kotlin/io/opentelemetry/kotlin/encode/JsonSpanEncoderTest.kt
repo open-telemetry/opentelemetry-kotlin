@@ -8,13 +8,13 @@ internal class JsonSpanEncoderTest {
 
     @Test
     fun `should successfully encode span data in JSON format`() {
-        //given
+        // given
         val foo = JsonSpanEncoder()
 
-        //when
+        // when
         val result = foo.encode(FakeSpanData())
 
-        //then
+        // then
         assertTrue { result.count() > 0 }
     }
 }

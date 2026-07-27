@@ -8,13 +8,13 @@ internal class JsonLogRecordEncoderTest {
 
     @Test
     fun `should successfully encode a log record data in JSON format`() {
-        //given
+        // given
         val foo = JsonLogRecordEncoder()
 
-        //when
+        // when
         val result = foo.encode(FakeReadableLogRecord())
 
-        //then
+        // then
         assertTrue { result.count() > 0 }
     }
 }

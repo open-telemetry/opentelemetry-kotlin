@@ -9,50 +9,50 @@ internal class JsonSpanExporterTest {
 
     @Test
     fun `should successfully shutdown exporter`() = runTest {
-        //given
+        // given
         val exporter = JsonSpanExporterImpl()
 
-        //when
+        // when
         val result = exporter.shutdown()
 
-        //then
+        // then
         assertEquals(OperationResultCode.Success, result)
     }
 
     @Test
     fun `should successfully force flush exporter`() = runTest {
-        //given
+        // given
         val exporter = JsonSpanExporterImpl()
 
-        //when
+        // when
         val result = exporter.forceFlush()
 
-        //then
+        // then
         assertEquals(OperationResultCode.Success, result)
     }
 
     @Test
     fun `should successfully shutdown on second call`() = runTest {
-        //given
+        // given
         val exporter = JsonSpanExporterImpl()
 
-        //when
+        // when
         val initialResult = exporter.shutdown()
 
-        //then
+        // then
         assertEquals(OperationResultCode.Success, initialResult)
         assertEquals(OperationResultCode.Success, exporter.shutdown())
     }
 
     @Test
     fun `should successfully force flush after shutdown`() = runTest {
-        //given
+        // given
         val exporter = JsonSpanExporterImpl()
 
-        //when
+        // when
         exporter.shutdown()
 
-        //then
+        // then
         assertEquals(OperationResultCode.Success, exporter.forceFlush())
     }
 }
