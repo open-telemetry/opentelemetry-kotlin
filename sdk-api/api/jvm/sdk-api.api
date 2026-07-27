@@ -193,6 +193,14 @@ public abstract interface class io/opentelemetry/kotlin/init/TracerProviderConfi
 
 public abstract interface class io/opentelemetry/kotlin/logging/LoggerConfig {
 	public abstract fun getEnabled ()Z
+	public abstract fun getMinimumSeverity ()Lio/opentelemetry/kotlin/logging/SeverityNumber;
+	public abstract fun getTraceBased ()Z
+}
+
+public final class io/opentelemetry/kotlin/logging/LoggerConfig$DefaultImpls {
+	public static fun getEnabled (Lio/opentelemetry/kotlin/logging/LoggerConfig;)Z
+	public static fun getMinimumSeverity (Lio/opentelemetry/kotlin/logging/LoggerConfig;)Lio/opentelemetry/kotlin/logging/SeverityNumber;
+	public static fun getTraceBased (Lio/opentelemetry/kotlin/logging/LoggerConfig;)Z
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/LoggerConfigurator {

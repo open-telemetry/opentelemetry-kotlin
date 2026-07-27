@@ -21,8 +21,12 @@ internal class LoggerAdapter(
         severityNumber: SeverityNumber?,
         eventName: String?,
     ): Boolean {
-        // no implementation in opentelemetry-java. Return true to allow all logs
-        return true
+        // eventName has no equivalent in opentelemetry-java, so it is not taken into account
+        val severity = (severityNumber ?: SeverityNumber.UNKNOWN).toOtelJavaSeverityNumber()
+        return when (context) {
+            null -> impl.isEnabled(severity)
+            else -> impl.isEnabled(severity, OtelJavaContextAdapter(context, contextKeyRepository))
+        }
     }
 
     override fun emit(

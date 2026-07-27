@@ -44,6 +44,7 @@ internal class LoggerProviderImpl(
                     loggingConfig.resource,
                     loggingConfig.logLimits,
                     shutdownState,
+                    loggerConfig,
                 )
             }
         }

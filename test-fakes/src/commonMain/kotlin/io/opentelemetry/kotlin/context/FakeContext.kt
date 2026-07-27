@@ -9,10 +9,11 @@ class FakeContext(
     val attrs: Map<ContextKey<*>, Any?> = emptyMap(),
     private val onAttach: () -> Unit = {},
     private val onDetach: () -> Boolean = { true },
+    private val span: Span = FakeSpan(),
 ) : Context {
 
     override fun <T> set(key: ContextKey<T>, value: T?): Context {
-        return FakeContext(attrs + (key to value), onAttach, onDetach)
+        return FakeContext(attrs + (key to value), onAttach, onDetach, span)
     }
 
     override fun <T> get(key: ContextKey<T>): T? {
@@ -24,13 +25,14 @@ class FakeContext(
         return FakeScope(onDetach)
     }
 
-    override fun storeSpan(span: Span): Context = FakeContext(attrs, onAttach, onDetach)
+    override fun storeSpan(span: Span): Context = FakeContext(attrs, onAttach, onDetach, span)
 
-    override fun extractSpan(): Span = FakeSpan()
+    override fun extractSpan(): Span = span
 
-    override fun storeBaggage(baggage: Baggage): Context = FakeContext(attrs, onAttach, onDetach)
+    override fun storeBaggage(baggage: Baggage): Context =
+        FakeContext(attrs, onAttach, onDetach, span)
 
     override fun extractBaggage(): Baggage = FakeBaggage()
 
-    override fun clearBaggage(): Context = FakeContext(attrs, onAttach, onDetach)
+    override fun clearBaggage(): Context = FakeContext(attrs, onAttach, onDetach, span)
 }
