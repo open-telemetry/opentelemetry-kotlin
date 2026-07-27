@@ -13,7 +13,7 @@ internal class JsonLogRecordExporterApiTest {
     private val fakeLogRecord = FakeReadWriteLogRecord()
 
     @Test
-    fun `should successfully create log record exporter, force flush and shutdown`() = runTest {
+    fun `should successfully create log record exporter force flush and shutdown`() = runTest {
         config.jsonLogRecordExporter().apply {
             assertEquals(OperationResultCode.Success, forceFlush())
             assertEquals(OperationResultCode.Success, shutdown())
@@ -21,7 +21,7 @@ internal class JsonLogRecordExporterApiTest {
     }
 
     @Test
-    fun `should successfully export log records, force flush and shutdown`() = runTest {
+    fun `should successfully export log records force flush and shutdown`() = runTest {
         config.jsonLogRecordExporter().apply {
             assertEquals(
                 OperationResultCode.Failure,

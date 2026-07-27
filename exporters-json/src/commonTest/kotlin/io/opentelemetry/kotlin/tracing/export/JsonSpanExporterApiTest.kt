@@ -13,7 +13,7 @@ internal class JsonSpanExporterApiTest {
     private val fakeSpan = FakeReadWriteSpan()
 
     @Test
-    fun `should successfully create span exporter, force flush and shutdown`() = runTest {
+    fun `should successfully create span exporter force flush and shutdown`() = runTest {
         config.jsonSpanExporter().apply {
             assertEquals(OperationResultCode.Success, forceFlush())
             assertEquals(OperationResultCode.Success, shutdown())
@@ -21,7 +21,7 @@ internal class JsonSpanExporterApiTest {
     }
 
     @Test
-    fun `should successfully export span data, force flush and shutdown`() = runTest {
+    fun `should successfully export span data force flush and shutdown`() = runTest {
         config.jsonSpanExporter().apply {
             assertEquals(
                 OperationResultCode.Failure,
