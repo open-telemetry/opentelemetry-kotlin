@@ -1,11 +1,14 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.resource.Resource
+import io.opentelemetry.kotlin.tracing.TracerConfigImpl
+import io.opentelemetry.kotlin.tracing.TracerConfigurator
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
@@ -13,12 +16,17 @@ import io.opentelemetry.kotlin.tracing.sampling.parentBased
 
 internal class TracerProviderConfigImpl(
     private val clock: Clock,
+    private val sdkErrorHandler: SdkErrorHandler,
     private val resourceConfigImpl: ResourceConfigImpl = ResourceConfigImpl()
 ) : TracerProviderConfigDsl, ResourceConfigDsl by resourceConfigImpl {
 
     private var processor: SpanProcessor? = null
     private var spanLimitsAction: SpanLimitsConfigDsl.() -> Unit = {}
     private var samplerAction: SamplerConfigDsl.() -> Sampler = { parentBased(root = alwaysOn()) }
+    private val defaultTracerConfig = TracerConfigImpl(true)
+    private var tracerConfigurator: TracerConfigurator = TracerConfigurator {
+        defaultTracerConfig
+    }
 
     override fun spanLimits(action: SpanLimitsConfigDsl.() -> Unit) {
         spanLimitsAction = action
@@ -29,18 +37,24 @@ internal class TracerProviderConfigImpl(
             platformLog("export() should only be called once.")
             return
         }
-        processor = TraceExportConfigImpl(clock).action()
+        processor = TraceExportConfigImpl(clock, sdkErrorHandler).action()
     }
 
     override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
         samplerAction = action
     }
 
+    override fun tracerConfigurator(configurator: TracerConfigurator) {
+        tracerConfigurator = configurator
+    }
+
     fun generateTracingConfig(base: Resource, globalLimits: AttributeLimitsConfigImpl? = null): TracingConfig = TracingConfig(
         processor = processor,
         spanLimits = generateSpanLimitsConfig(globalLimits),
         resource = base.merge(resourceConfigImpl.generateResource()),
+        sdkErrorHandler = sdkErrorHandler,
         samplerFactory = { spanFactory -> SamplerConfigImpl(spanFactory).samplerAction() },
+        tracerConfigurator = tracerConfigurator,
     )
 
     private class SamplerConfigImpl(override val spanFactory: SpanFactory) : SamplerConfigDsl

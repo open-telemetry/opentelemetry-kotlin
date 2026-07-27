@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
@@ -20,7 +19,7 @@ public fun TraceExportConfigDsl.compositeSpanProcessor(vararg processors: SpanPr
         platformLog("At least one processor must be provided")
         return NoopSpanProcessor
     }
-    return CompositeSpanProcessor(processors.toList(), NoopSdkErrorHandler)
+    return CompositeSpanProcessor(processors.toList(), sdkErrorHandler)
 }
 
 /**
@@ -44,7 +43,7 @@ public fun TraceExportConfigDsl.compositeSpanExporter(vararg exporters: SpanExpo
         platformLog("At least one exporter must be provided")
         return NoopSpanExporter
     }
-    return CompositeSpanExporter(exporters.toList(), NoopSdkErrorHandler)
+    return CompositeSpanExporter(exporters.toList(), sdkErrorHandler)
 }
 
 /**
@@ -65,6 +64,7 @@ public fun TraceExportConfigDsl.batchSpanProcessor(
     scheduleDelayMs,
     exportTimeoutMs,
     maxExportBatchSize,
+    sdkErrorHandler,
     dispatcher,
 )
 

@@ -1,6 +1,8 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.clock.ClockAdapter
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatBaggageFactory
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
@@ -31,7 +33,8 @@ public fun createCompatOpenTelemetry(
     val contextFactory = CompatContextFactory()
     val span = CompatSpanFactory(spanContext)
 
-    val cfg = CompatOpenTelemetryConfig(clock).apply(config)
+    val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler
+    val cfg = CompatOpenTelemetryConfig(clock, sdkErrorHandler).apply(config)
     val resolvedIdGenerator = cfg.resolveIdGenerator()
     val base = cfg.buildGlobalResource()
     return CompatOpenTelemetryImpl(

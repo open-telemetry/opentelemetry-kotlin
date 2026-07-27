@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.init.config.MetricsConfig
 import io.opentelemetry.kotlin.resource.ResourceImpl
@@ -17,6 +18,7 @@ internal class MeterProviderImplTest {
 
     private val metricsConfig = MetricsConfig(
         resource = ResourceImpl(AttributesModel(), null),
+        sdkErrorHandler = NoopSdkErrorHandler,
     )
     private lateinit var impl: MeterProviderImpl
 

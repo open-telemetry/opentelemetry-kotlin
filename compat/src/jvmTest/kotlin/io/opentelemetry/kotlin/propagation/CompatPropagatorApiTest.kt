@@ -143,12 +143,12 @@ private class RecordingPropagator(private val keys: List<String>) : TextMapPropa
 
     override fun fields(): Collection<String> = keys
 
-    override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {
+    override fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>) {
         injectCalled = true
         keys.forEach { setter.set(carrier, it, "set-by-$it") }
     }
 
-    override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context {
+    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context {
         extractCalled = true
         return context
     }
@@ -160,7 +160,7 @@ private class ContextWritingPropagator(
     private val value: String,
 ) : TextMapPropagator {
     override fun fields(): Collection<String> = emptyList()
-    override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {}
-    override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context =
+    override fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>) {}
+    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context =
         context.set(key, value)
 }

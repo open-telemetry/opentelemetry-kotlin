@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setAttributes
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.propagation.CompatPropagatorConfigImpl
@@ -17,10 +18,11 @@ import io.opentelemetry.kotlin.semconv.ServiceAttributes
 @ExperimentalApi
 internal class CompatOpenTelemetryConfig(
     clock: Clock,
+    sdkErrorHandler: SdkErrorHandler,
 ) : OpenTelemetryConfigDsl {
 
-    internal val tracerProviderConfig = CompatTracerProviderConfig(clock)
-    internal val loggerProviderConfig = CompatLoggerProviderConfig(clock)
+    internal val tracerProviderConfig = CompatTracerProviderConfig(clock, sdkErrorHandler)
+    internal val loggerProviderConfig = CompatLoggerProviderConfig(clock, sdkErrorHandler)
     internal val meterProviderConfig = CompatMeterProviderConfig(clock)
     internal val globalAttributeLimits = CompatAttributeLimitsConfig()
     internal val propagatorCfg = CompatPropagatorConfigImpl()

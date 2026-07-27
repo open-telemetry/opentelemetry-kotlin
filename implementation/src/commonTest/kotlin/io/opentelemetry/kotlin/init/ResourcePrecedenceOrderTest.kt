@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,7 +14,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testSdkDefaults() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl(clock, NoopSdkErrorHandler)
         val tracing = cfg.generateTracingConfig()
         val logging = cfg.generateLoggingConfig()
 
@@ -30,7 +31,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testGlobalOverrides() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl(clock, NoopSdkErrorHandler)
         cfg.resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to "custom-sdk"))
 
         assertEquals(
@@ -45,7 +46,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testSpecificOverrides() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl(clock, NoopSdkErrorHandler)
         cfg.tracerProvider {
             resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to "tracer-sdk"))
         }
@@ -58,7 +59,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testOverridePrecedence() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl(clock, NoopSdkErrorHandler)
         cfg.resource(mapOf(testKey to "top"))
         cfg.tracerProvider {
             resource(mapOf(testKey to "provider"))
@@ -70,7 +71,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testOverridePrecedence2() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl(clock, NoopSdkErrorHandler)
         cfg.resource(mapOf(testKey to "top"))
         cfg.tracerProvider {
             resource(mapOf(testKey to "tracer-only"))

@@ -5,12 +5,12 @@ plugins {
     id("com.android.kotlin.multiplatform.library") apply false
     id("org.jetbrains.kotlin.multiplatform") apply false
     id("com.vanniktech.maven.publish") apply false
-    id("org.jetbrains.kotlinx.kover") version "0.9.8"
+    id("org.jetbrains.kotlinx.kover") version "0.9.9"
 }
 
 plugins.withType<YarnPlugin> {
     extensions.configure<YarnRootExtension> {
-        resolution("brace-expansion", ">=5.0.6")
+        resolution("brace-expansion", ">=5.0.7")
         resolution("diff", ">=8.0.3")
         resolution("glob", ">=10.5.0")
         resolution("js-yaml", ">=4.2.0")
