@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 0.6.0 (2026-07-28)
+
 ### Migration notes
 
 - Pin the minimum supported Kotlin version for iOS and JS (klib) consumers at 2.4.0 in the
