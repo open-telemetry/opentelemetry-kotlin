@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.config.envar.logging
 
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.config.envar.EnvVarConstants
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import kotlin.test.Test
@@ -17,7 +16,7 @@ internal class LogLimitEnvVarConfigProcessorImplTest {
             envVars = EnvVarConstants.LogLimits.envVars
         )
         val clock = FakeClock()
-        val otelConfig = OpenTelemetryConfigImpl(clock, NoopSdkErrorHandler)
+        val otelConfig = OpenTelemetryConfigImpl(clock)
         otelConfig.loggerProvider {
             export { FakeLogRecordProcessor() }
         }
@@ -40,7 +39,7 @@ internal class LogLimitEnvVarConfigProcessorImplTest {
             envVars = EnvVarConstants.LogLimits.envVars
         )
         val clock = FakeClock()
-        val otelConfig = OpenTelemetryConfigImpl(clock, NoopSdkErrorHandler)
+        val otelConfig = OpenTelemetryConfigImpl(clock)
         otelConfig.loggerProvider {
             export { FakeLogRecordProcessor() }
         }
@@ -61,7 +60,7 @@ internal class LogLimitEnvVarConfigProcessorImplTest {
             envVars = EnvVarConstants.LogLimits.envVars
         )
         val clock = FakeClock()
-        val otelConfig = OpenTelemetryConfigImpl(clock, NoopSdkErrorHandler)
+        val otelConfig = OpenTelemetryConfigImpl(clock)
         otelConfig.loggerProvider {
             export { FakeLogRecordProcessor() }
         }
@@ -80,7 +79,7 @@ internal class LogLimitEnvVarConfigProcessorImplTest {
         // given
         val processor = LogLimitEnvVarConfigProcessorImpl(envVars = emptyList())
         val clock = FakeClock()
-        val otelConfig = OpenTelemetryConfigImpl(clock, NoopSdkErrorHandler)
+        val otelConfig = OpenTelemetryConfigImpl(clock)
         otelConfig.loggerProvider {
             export { FakeLogRecordProcessor() }
         }

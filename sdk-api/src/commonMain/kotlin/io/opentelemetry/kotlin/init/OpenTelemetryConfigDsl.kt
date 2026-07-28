@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 
@@ -49,4 +50,11 @@ public interface OpenTelemetryConfigDsl : ResourceConfigDsl {
      * https://opentelemetry.io/docs/specs/otel/trace/sdk/#id-generators
      */
     public fun idGenerator(action: () -> IdGenerator)
+
+    /**
+     * Configures the [SdkErrorHandler] that is notified of errors and misuse detected by the SDK.
+     * If this is not set the SDK discards these reports silently.
+     * https://opentelemetry.io/docs/specs/otel/error-handling/#configuring-error-handlers
+     */
+    public fun errorHandler(handler: SdkErrorHandler)
 }
