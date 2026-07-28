@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+### Migration notes
+
 - Pin the minimum supported Kotlin version for iOS and JS (klib) consumers at 2.4.0 in the
   version catalog, instead of implicitly tracking the Kotlin version this library is built
   with. A Kotlin update that would raise this floor now fails the min-versions integration
@@ -21,6 +23,34 @@
 - Raise the minimum supported Gradle version from 8.0 to 8.0.2, matching the
   AGP floor on the final 8.0.x patch.
   ([#614](https://github.com/open-telemetry/opentelemetry-kotlin/pull/614))
+- Use the new name for the app id / client id
+    ([#623](https://github.com/open-telemetry/opentelemetry-kotlin/pull/623))
+
+### 🌟 New instrumentation
+
+### 📈 Enhancements
+- Implement `enabled()` on `Tracer` interface
+  ([#625](https://github.com/open-telemetry/opentelemetry-kotlin/pull/625))
+- Record dropped link/attribute/event counts
+  ([#630](https://github.com/open-telemetry/opentelemetry-kotlin/pull/630))
+  ([#631](https://github.com/open-telemetry/opentelemetry-kotlin/pull/631))
+  ([#629](https://github.com/open-telemetry/opentelemetry-kotlin/pull/629))
+- Implement `LoggerConfig`
+  ([#704](https://github.com/open-telemetry/opentelemetry-kotlin/pull/704))
+- Implementation of implicit context for coroutines
+  ([#684](https://github.com/open-telemetry/opentelemetry-kotlin/pull/684))
+
+### 🛠️ Bug fixes
+- `SpanProcessor.onEnding` should be forwarded by `OtelJavaSpanProcessorAdapter`
+  ([#637](https://github.com/open-telemetry/opentelemetry-kotlin/pull/637))
+- `OtelJavaSpanBuilderAdapter.setStartTimestamp` should convert the startTimestamp into nanos from the specified `TimeUnit`
+  ([#638](https://github.com/open-telemetry/opentelemetry-kotlin/pull/638))
+
+### 🧰 Tooling
+- Add helper action to regenerate yarn lockfile
+  ([#616](https://github.com/open-telemetry/opentelemetry-kotlin/pull/616))
+- Enable gradle tooling parallelism
+  ([#697](https://github.com/open-telemetry/opentelemetry-kotlin/pull/697))
 
 ## Version 0.5.0 (2026-07-06)
 
