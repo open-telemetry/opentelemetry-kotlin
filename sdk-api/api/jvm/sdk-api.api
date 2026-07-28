@@ -323,9 +323,21 @@ public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanEvent 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/SpanLink : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/data/SpanLinkData {
 }
 
+public abstract interface class io/opentelemetry/kotlin/tracing/sampling/ComposableSampler {
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun getSamplingIntent (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/SpanKind;Lio/opentelemetry/kotlin/attributes/AttributeContainer;Ljava/util/List;)Lio/opentelemetry/kotlin/tracing/sampling/SamplingIntent;
+}
+
 public abstract interface class io/opentelemetry/kotlin/tracing/sampling/Sampler {
 	public abstract fun getDescription ()Ljava/lang/String;
 	public abstract fun shouldSample (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/SpanKind;Lio/opentelemetry/kotlin/attributes/AttributeContainer;Ljava/util/List;)Lio/opentelemetry/kotlin/tracing/sampling/SamplingResult;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/sampling/SamplingIntent {
+	public abstract fun getAdjustedCountReliable ()Z
+	public abstract fun getAttributesProvider ()Lkotlin/jvm/functions/Function0;
+	public abstract fun getThreshold ()Ljava/lang/Long;
+	public abstract fun getTraceStateProvider ()Lkotlin/jvm/functions/Function2;
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/sampling/SamplingResult {

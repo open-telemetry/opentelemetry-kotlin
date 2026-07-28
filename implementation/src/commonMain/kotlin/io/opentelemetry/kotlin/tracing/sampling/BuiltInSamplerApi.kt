@@ -47,3 +47,25 @@ public fun SamplerConfigDsl.parentBased(
     localParentSampled = localParentSampled,
     localParentNotSampled = localParentNotSampled,
 )
+
+@ExperimentalApi
+public fun SamplerConfigDsl.composite(block: SamplerConfigDsl.() -> ComposableSampler): Sampler =
+    CompositeSampler(block())
+
+@ExperimentalApi
+public fun SamplerConfigDsl.composableAlwaysOn(): ComposableSampler = ComposableAlwaysOnSampler()
+
+@ExperimentalApi
+public fun SamplerConfigDsl.composableAlwaysOff(): ComposableSampler = ComposableAlwaysOffSampler()
+
+@ExperimentalApi
+public fun SamplerConfigDsl.composableProbability(ratio: Double): ComposableSampler =
+    if (ratio == 0.0) {
+        ComposableAlwaysOffSampler()
+    } else {
+        ComposableProbabilitySampler(ratio)
+    }
+
+@ExperimentalApi
+public fun SamplerConfigDsl.composableParentThreshold(root: ComposableSampler): ComposableSampler =
+    ComposableParentThresholdSampler(root)
