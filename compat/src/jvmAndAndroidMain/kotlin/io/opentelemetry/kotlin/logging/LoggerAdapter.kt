@@ -6,14 +6,12 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.OtelJavaContextAdapter
-import io.opentelemetry.kotlin.context.OtelJavaContextKeyRepository
+import io.opentelemetry.kotlin.context.toOtelJavaContext
 import java.util.concurrent.TimeUnit
 
 @ExperimentalApi
 internal class LoggerAdapter(
     private val impl: OtelJavaLogger,
-    private val contextKeyRepository: OtelJavaContextKeyRepository = OtelJavaContextKeyRepository.INSTANCE,
 ) : Logger {
 
     override fun enabled(
@@ -25,7 +23,7 @@ internal class LoggerAdapter(
         val severity = (severityNumber ?: SeverityNumber.UNKNOWN).toOtelJavaSeverityNumber()
         return when (context) {
             null -> impl.isEnabled(severity)
-            else -> impl.isEnabled(severity, OtelJavaContextAdapter(context, contextKeyRepository))
+            else -> impl.isEnabled(severity, context.toOtelJavaContext())
         }
     }
 
@@ -79,7 +77,7 @@ internal class LoggerAdapter(
             builder.setObservedTimestamp(observedTimestamp, TimeUnit.NANOSECONDS)
         }
         if (context != null) {
-            builder.setContext(OtelJavaContextAdapter(context, contextKeyRepository))
+            builder.setContext(context.toOtelJavaContext())
         }
         if (severityNumber != null) {
             builder.setSeverity(severityNumber.toOtelJavaSeverityNumber())
