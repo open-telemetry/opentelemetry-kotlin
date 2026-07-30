@@ -97,7 +97,19 @@ internal class BuiltInCompositeSamplerTest {
     }
 
     @Test
-    fun `always samples when delegate is composableProbability at ratio 1 without publishing threshold`() {
+    fun `composableProbability reports adjustedCountReliable true per spec`() {
+        val intent = samplerDsl.composableProbability(0.5).getSamplingIntent(
+            context = contextFactory.root(),
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+        assertTrue(intent.adjustedCountReliable)
+    }
+
+    @Test
+    fun `always samples when delegate is composableProbability at ratio 1 and publishes threshold`() {
         val result = samplerDsl.composite { composableProbability(1.0) }.shouldSample(
             context = contextFactory.root(),
             traceId = traceId,
@@ -107,21 +119,75 @@ internal class BuiltInCompositeSamplerTest {
             links = emptyList(),
         )
         assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, result.decision)
+        assertEquals("th:0", result.traceState.get("ot"))
+    }
+
+    @Test
+    fun `samples using trace id derived randomness when delegate is composableProbability`() {
+        val result = samplerDsl.composite { composableProbability(0.5) }.shouldSample(
+            context = contextFactory.root(),
+            traceId = "000000000000000000ffffffffffffff",
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+        assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, result.decision)
+        assertEquals("th:8", result.traceState.get("ot"))
+    }
+
+    @Test
+    fun `drops using trace id derived randomness when delegate is composableProbability`() {
+        val result = samplerDsl.composite { composableProbability(0.5) }.shouldSample(
+            context = contextFactory.root(),
+            traceId = "ffffffffffffffffff00000000000000",
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+        assertEquals(SamplingResult.Decision.DROP, result.decision)
         assertNull(result.traceState.get("ot"))
     }
 
     @Test
-    fun `decision matches injected randomness when delegate is composableProbability`() {
+    fun `rewrites stale parent threshold when delegate is composableProbability`() {
+        val context = contextWithParent(sampled = true, isRemote = true, otValue = "th:123")
+        val result = samplerDsl.composite { composableProbability(0.5) }.shouldSample(
+            context = context,
+            traceId = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+        assertEquals("th:8", result.traceState.get("ot"))
+    }
+
+    @Test
+    fun `decision matches injected randomness when delegate reports adjustedCountReliable false`() {
         val seed = 42L
-        val ratio = 0.5
+        val threshold = thresholdFromRatio(0.5)
         val expectedRandomValue = Random(seed).nextLong() and 0x00FFFFFFFFFFFFFFL
-        val expectedDecision = if (thresholdFromRatio(ratio) <= expectedRandomValue) {
+        val expectedDecision = if (threshold <= expectedRandomValue) {
             SamplingResult.Decision.RECORD_AND_SAMPLE
         } else {
             SamplingResult.Decision.DROP
         }
 
-        val sampler = CompositeSampler(samplerDsl.composableProbability(ratio), random = Random(seed))
+        val unreliableDelegate = object : ComposableSampler {
+            override fun getSamplingIntent(
+                context: Context,
+                name: String,
+                spanKind: SpanKind,
+                attributes: io.opentelemetry.kotlin.attributes.AttributeContainer,
+                links: List<io.opentelemetry.kotlin.tracing.model.SpanLink>
+            ) = SamplingIntentImpl(threshold = threshold, adjustedCountReliable = false)
+
+            override val description = "Unreliable"
+        }
+
+        val sampler = CompositeSampler(unreliableDelegate, random = Random(seed))
         val result = sampler.shouldSample(
             context = contextFactory.root(),
             traceId = traceId,
@@ -131,6 +197,7 @@ internal class BuiltInCompositeSamplerTest {
             links = emptyList(),
         )
         assertEquals(expectedDecision, result.decision)
+        assertNull(result.traceState.get("ot"))
     }
 
     @Test

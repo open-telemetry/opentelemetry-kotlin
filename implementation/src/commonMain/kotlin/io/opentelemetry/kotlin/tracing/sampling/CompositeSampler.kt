@@ -13,7 +13,7 @@ import kotlin.random.Random
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#compositesampler
  */
-public class CompositeSampler(
+internal class CompositeSampler(
     private val delegate: ComposableSampler,
     private val random: Random = Random.Default,
 ) : Sampler {

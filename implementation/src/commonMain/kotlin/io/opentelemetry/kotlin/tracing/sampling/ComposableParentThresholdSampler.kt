@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.tracing.model.SpanLink
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composableparentthreshold
  */
-public class ComposableParentThresholdSampler(private val root: ComposableSampler) : ComposableSampler {
+internal class ComposableParentThresholdSampler(private val root: ComposableSampler) : ComposableSampler {
 
     override fun getSamplingIntent(
         context: Context,
