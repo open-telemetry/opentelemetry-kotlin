@@ -49,12 +49,13 @@ internal class OtlpHttpLogRecordExporterTest {
             )
         }
         val httpClient = createDefaultHttpClient(engine = server)
-        client = OtlpClient(baseUrl, httpClient = httpClient)
+        client = OtlpClient(baseUrl, httpClient = httpClient, sdkErrorHandler = NoopSdkErrorHandler)
         exporter = OtlpHttpLogRecordExporter(
             client,
             initialDelayMs = 3,
             maxAttemptIntervalMs = 5,
-            maxAttempts = 3
+            maxAttempts = 3,
+            sdkErrorHandler = NoopSdkErrorHandler,
         )
     }
 
