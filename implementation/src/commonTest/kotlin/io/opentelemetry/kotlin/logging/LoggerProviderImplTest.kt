@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.FakeContextFactory
@@ -43,6 +44,22 @@ internal class LoggerProviderImplTest {
     @Test
     fun testMinimalLoggerProvider() {
         assertNotNull(impl.getLogger(name = ""))
+    }
+
+    @Test
+    fun testEmptyLoggerNameReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        val config = LoggingConfig(
+            null,
+            LogLimitConfig(100, 100),
+            ResourceImpl(AttributesModel(), null),
+            handler,
+            loggerConfigurator,
+        )
+        val provider = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
+        provider.getLogger(name = "")
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals("LoggerProvider.getLogger", handler.apiMisuses.single().api)
     }
 
     @Test

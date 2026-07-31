@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -12,7 +14,6 @@ import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.init.config.LoggingConfig
-import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
 
 internal class LoggerProviderImpl(
@@ -23,6 +24,7 @@ internal class LoggerProviderImpl(
 ) : LoggerProvider, TelemetryCloseable {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
+    private val sdkErrorHandler = loggingConfig.sdkErrorHandler
     private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(
         loggingConfig.processor?.let { listOf(it) } ?: emptyList(),
         loggingConfig.sdkErrorHandler,
@@ -58,7 +60,13 @@ internal class LoggerProviderImpl(
     ): Logger =
         shutdownState.ifActiveOrElse(noopLogger) {
             if (name.isEmpty()) {
-                platformLog("Logger requested without instrumentation scope name")
+                sdkErrorHandler.onError(
+                    SdkError.ApiMisuse(
+                        api = "LoggerProvider.getLogger",
+                        message = "Logger requested without instrumentation scope name",
+                        severity = SdkErrorSeverity.WARNING,
+                    )
+                )
             }
             val key = apiProvider.createInstrumentationScopeInfo(name, version, schemaUrl, attributes)
             apiProvider.getOrCreate(key)

@@ -13,13 +13,13 @@ internal class OpenTelemetryConfigImpl(
     private val globalResourceConfig: ResourceConfigImpl = ResourceConfigImpl(),
 ) : OpenTelemetryConfigDsl, ResourceConfigDsl by globalResourceConfig {
 
-    @Volatile private var configuredErrorHandler: SdkErrorHandler = NoopSdkErrorHandler
-
     /**
      * The handler is configured after the sub-configs below have been created, so they receive a
      * forwarder that resolves the configured handler on each report instead.
      */
-    private val sdkErrorHandler = SdkErrorHandler { configuredErrorHandler.onError(it) }
+    internal val sdkErrorHandler = SdkErrorHandler { configuredErrorHandler.onError(it) }
+
+    @Volatile private var configuredErrorHandler: SdkErrorHandler = NoopSdkErrorHandler
 
     internal val tracingConfig: TracerProviderConfigImpl = TracerProviderConfigImpl(clock, sdkErrorHandler)
     internal val loggingConfig: LoggerProviderConfigImpl = LoggerProviderConfigImpl(clock, sdkErrorHandler)

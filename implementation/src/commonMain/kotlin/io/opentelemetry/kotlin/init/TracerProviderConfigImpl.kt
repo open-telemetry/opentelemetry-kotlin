@@ -1,11 +1,12 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
-import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.TracerConfigImpl
 import io.opentelemetry.kotlin.tracing.TracerConfigurator
@@ -34,7 +35,13 @@ internal class TracerProviderConfigImpl(
 
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
         if (processor != null) {
-            platformLog("export() should only be called once.")
+            sdkErrorHandler.onError(
+                SdkError.ApiMisuse(
+                    api = "TracerProviderConfigDsl.export",
+                    message = "export() should only be called once.",
+                    severity = SdkErrorSeverity.WARNING,
+                )
+            )
             return
         }
         processor = TraceExportConfigImpl(clock, sdkErrorHandler).action()

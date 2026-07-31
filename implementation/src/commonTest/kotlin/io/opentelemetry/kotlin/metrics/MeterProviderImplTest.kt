@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.init.config.MetricsConfig
@@ -30,6 +31,19 @@ internal class MeterProviderImplTest {
     @Test
     fun testMinimalMeterProvider() {
         assertNotNull(impl.getMeter(name = ""))
+    }
+
+    @Test
+    fun testEmptyMeterNameReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        val config = MetricsConfig(
+            resource = ResourceImpl(AttributesModel(), null),
+            sdkErrorHandler = handler,
+        )
+        val provider = MeterProviderImpl(config)
+        provider.getMeter(name = "")
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals("MeterProvider.getMeter", handler.apiMisuses.single().api)
     }
 
     @Test

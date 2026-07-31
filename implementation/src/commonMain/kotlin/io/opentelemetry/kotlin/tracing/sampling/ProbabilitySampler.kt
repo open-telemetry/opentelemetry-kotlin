@@ -3,14 +3,19 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.platformLog
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
 import kotlin.concurrent.Volatile
 import kotlin.math.max
 
-internal class ProbabilitySampler(ratio: Double) : Sampler {
+internal class ProbabilitySampler(
+    ratio: Double,
+    private val sdkErrorHandler: SdkErrorHandler,
+) : Sampler {
 
     private companion object {
         @Volatile
@@ -46,7 +51,13 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
         } else {
             if (parentSpanContext.isValid && !parentSpanContext.traceFlags.isRandom && !compatibilityWarningLogged) {
                 compatibilityWarningLogged = true
-                platformLog(COMPATIBILITY_WARNING)
+                sdkErrorHandler.onError(
+                    SdkError.ApiMisuse(
+                        api = "ProbabilitySampler.shouldSample",
+                        message = COMPATIBILITY_WARNING,
+                        severity = SdkErrorSeverity.WARNING,
+                    )
+                )
             }
             randomnessFromTraceId(traceId)
         }

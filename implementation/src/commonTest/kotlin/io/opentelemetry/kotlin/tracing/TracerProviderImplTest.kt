@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.FakeContextFactory
@@ -49,6 +50,29 @@ internal class TracerProviderImplTest {
     @Test
     fun testMinimalTracerProvider() {
         assertNotNull(impl.getTracer(name = ""))
+    }
+
+    @Test
+    fun testEmptyTracerNameReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        val config = TracingConfig(
+            null,
+            fakeSpanLimitsConfig,
+            ResourceImpl(AttributesModel(), null),
+            handler,
+        )
+        val provider = TracerProviderImpl(
+            clock = FakeClock(),
+            tracingConfig = config,
+            contextFactory = FakeContextFactory(),
+            spanContextFactory = FakeSpanContextFactory(),
+            traceFlagsFactory = FakeTraceFlagsFactory(),
+            spanFactory = FakeSpanFactory(),
+            idGenerator = FakeIdGenerator(),
+        )
+        provider.getTracer(name = "")
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals("TracerProvider.getTracer", handler.apiMisuses.single().api)
     }
 
     @Test

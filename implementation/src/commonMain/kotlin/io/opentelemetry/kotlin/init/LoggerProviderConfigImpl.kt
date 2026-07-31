@@ -1,13 +1,14 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.LoggerConfigImpl
 import io.opentelemetry.kotlin.logging.LoggerConfigurator
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
-import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.resource.Resource
 
 internal class LoggerProviderConfigImpl(
@@ -25,7 +26,13 @@ internal class LoggerProviderConfigImpl(
 
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
         if (processor != null) {
-            platformLog("export() should only be called once.")
+            sdkErrorHandler.onError(
+                SdkError.ApiMisuse(
+                    api = "LoggerProviderConfigDsl.export",
+                    message = "export() should only be called once.",
+                    severity = SdkErrorSeverity.WARNING,
+                )
+            )
             return
         }
         processor = LogExportConfigImpl(clock, sdkErrorHandler).action()

@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
@@ -186,6 +187,18 @@ internal class TracerProviderConfigImplTest {
         }.generateTracingConfig(base)
         assertSame(first, cfg.processor)
         assertNotSame(second, cfg.processor)
+    }
+
+    @Test
+    fun testDoubleExportReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        TracerProviderConfigImpl(clock, handler).apply {
+            export { compositeSpanProcessor(FakeSpanProcessor()) }
+            export { compositeSpanProcessor(FakeSpanProcessor()) }
+        }.generateTracingConfig(base)
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals("TracerProviderConfigDsl.export", handler.apiMisuses.single().api)
+        assertEquals("export() should only be called once.", handler.apiMisuses.single().message)
     }
 
     @Test

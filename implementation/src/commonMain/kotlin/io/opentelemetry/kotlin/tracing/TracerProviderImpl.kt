@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -15,7 +17,6 @@ import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.init.config.TracingConfig
-import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
 
 internal class TracerProviderImpl(
@@ -29,6 +30,7 @@ internal class TracerProviderImpl(
 ) : TracerProvider, TelemetryCloseable {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
+    private val sdkErrorHandler = tracingConfig.sdkErrorHandler
     private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(
         tracingConfig.processor?.let { listOf(it) } ?: emptyList(),
         tracingConfig.sdkErrorHandler,
@@ -66,7 +68,13 @@ internal class TracerProviderImpl(
     ): Tracer =
         shutdownState.ifActiveOrElse(noopTracer) {
             if (name.isEmpty()) {
-                platformLog("Tracer requested without instrumentation scope name")
+                sdkErrorHandler.onError(
+                    SdkError.ApiMisuse(
+                        api = "TracerProvider.getTracer",
+                        message = "Tracer requested without instrumentation scope name",
+                        severity = SdkErrorSeverity.WARNING,
+                    )
+                )
             }
             val key = apiProvider.createInstrumentationScopeInfo(
                 name = name,
