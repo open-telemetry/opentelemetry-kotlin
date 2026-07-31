@@ -9,7 +9,7 @@ internal class BatchTelemetryConfig(
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
     forceFlushTimeoutMs: Long = BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS,
-    sdkErrorHandler: SdkErrorHandler,
+    val sdkErrorHandler: SdkErrorHandler,
 ) {
     /**
      * Maximum number of telemetry items the queue can hold before items are dropped.

@@ -1,10 +1,11 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
-import io.opentelemetry.kotlin.platformLog
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +17,13 @@ import kotlinx.coroutines.SupervisorJob
 @ExperimentalApi
 public fun TraceExportConfigDsl.compositeSpanProcessor(vararg processors: SpanProcessor): SpanProcessor {
     if (processors.isEmpty()) {
-        platformLog("At least one processor must be provided")
+        sdkErrorHandler.onError(
+            SdkError.ApiMisuse(
+                api = "TraceExportConfigDsl.compositeSpanProcessor",
+                message = "At least one processor must be provided",
+                severity = SdkErrorSeverity.WARNING,
+            )
+        )
         return NoopSpanProcessor
     }
     return CompositeSpanProcessor(processors.toList(), sdkErrorHandler)
@@ -29,7 +36,7 @@ public fun TraceExportConfigDsl.compositeSpanProcessor(vararg processors: SpanPr
 public fun TraceExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): SpanProcessor {
     val dispatcher: CoroutineDispatcher = Dispatchers.Default
     val scope = CoroutineScope(
-        SupervisorJob() + dispatcher + telemetryExceptionHandler("Simple span processor")
+        SupervisorJob() + dispatcher + telemetryExceptionHandler("Simple span processor", sdkErrorHandler)
     )
     return SimpleSpanProcessor(exporter, scope)
 }
@@ -40,7 +47,13 @@ public fun TraceExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): Spa
 @ExperimentalApi
 public fun TraceExportConfigDsl.compositeSpanExporter(vararg exporters: SpanExporter): SpanExporter {
     if (exporters.isEmpty()) {
-        platformLog("At least one exporter must be provided")
+        sdkErrorHandler.onError(
+            SdkError.ApiMisuse(
+                api = "TraceExportConfigDsl.compositeSpanExporter",
+                message = "At least one exporter must be provided",
+                severity = SdkErrorSeverity.WARNING,
+            )
+        )
         return NoopSpanExporter
     }
     return CompositeSpanExporter(exporters.toList(), sdkErrorHandler)

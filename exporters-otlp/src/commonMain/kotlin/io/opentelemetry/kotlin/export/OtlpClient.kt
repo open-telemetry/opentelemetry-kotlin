@@ -11,6 +11,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.utils.io.readRemaining
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.export.OtlpClient.Companion.MAX_ERROR_BODY_BYTES
 import io.opentelemetry.kotlin.export.OtlpResponse.ClientError
 import io.opentelemetry.kotlin.export.OtlpResponse.PartialSuccess
@@ -21,7 +24,6 @@ import io.opentelemetry.kotlin.export.OtlpResponse.Unknown
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.export.deserializeLogRecordPartialSuccess
 import io.opentelemetry.kotlin.logging.export.toProtobufByteArray
-import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.export.deserializeTraceRecordPartialSuccess
 import io.opentelemetry.kotlin.tracing.export.toProtobufByteArray
@@ -30,7 +32,8 @@ import kotlin.coroutines.cancellation.CancellationException
 
 internal class OtlpClient(
     private val baseUrl: String,
-    private val httpClient: HttpClient = defaultHttpClient
+    private val httpClient: HttpClient = defaultHttpClient,
+    private val sdkErrorHandler: SdkErrorHandler,
 ) {
 
     private val contentType = ContentType.parse("application/x-protobuf")
@@ -81,7 +84,13 @@ internal class OtlpClient(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Throwable) {
-            platformLog("OTLP export failed: ${e.message}")
+            sdkErrorHandler.onError(
+                SdkError.UserCodeError(
+                    e,
+                    "OTLP export failed",
+                    SdkErrorSeverity.WARNING,
+                )
+            )
             Unknown
         }
     }

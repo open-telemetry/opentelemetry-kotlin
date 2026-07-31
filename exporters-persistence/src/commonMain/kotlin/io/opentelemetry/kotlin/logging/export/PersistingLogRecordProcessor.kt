@@ -84,7 +84,7 @@ internal class PersistingLogRecordProcessor(
 
     private val flushMutex = Mutex()
     private val flushScope = CoroutineScope(
-        SupervisorJob() + dispatcher + telemetryExceptionHandler("Persisting log record processor")
+        SupervisorJob() + dispatcher + telemetryExceptionHandler("Persisting log record processor", sdkErrorHandler)
     )
 
     init {
