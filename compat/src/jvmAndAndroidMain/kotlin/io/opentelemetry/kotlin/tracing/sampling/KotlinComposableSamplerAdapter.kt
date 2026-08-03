@@ -39,13 +39,15 @@ internal class KotlinComposableSamplerAdapter(private val delegate: ComposableSa
         val javaAttributes = (intent.attributesProvider?.invoke() as? CompatAttributesModel)
             ?.otelJavaAttributes()
             ?: OtelJavaAttributes.empty()
-        val traceStateUpdater: Function<OtelJavaTraceState, OtelJavaTraceState>? =
-            intent.traceStateProvider?.let { provider ->
-                Function { javaTraceState ->
-                    provider(TraceStateAdapter(javaTraceState), SamplingResult.Decision.RECORD_AND_SAMPLE)
-                        .toOtelJavaTraceState()
-                }
+        val traceStateProvider = intent.traceStateProvider
+        val traceStateUpdater: Function<OtelJavaTraceState, OtelJavaTraceState> = if (traceStateProvider == null) {
+            Function.identity()
+        } else {
+            Function { javaTraceState ->
+                traceStateProvider(TraceStateAdapter(javaTraceState), SamplingResult.Decision.RECORD_AND_SAMPLE)
+                    .toOtelJavaTraceState()
             }
+        }
 
         return OtelJavaSamplingIntent.create(threshold, intent.adjustedCountReliable, javaAttributes, traceStateUpdater)
     }
