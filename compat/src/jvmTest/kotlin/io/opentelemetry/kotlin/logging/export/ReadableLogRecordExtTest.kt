@@ -18,6 +18,14 @@ internal class ReadableLogRecordExtTest {
         assertEquals(record.severityText, observed.severityText)
         assertEquals(OtelJavaSeverity.WARN, observed.severity)
         assertEquals(record.body, observed.bodyValue?.asString())
+        assertNull(observed.eventName)
+    }
+
+    @Test
+    fun testLogRecordEventNameConversion() {
+        val record = FakeReadableLogRecord(eventName = "my_event_name")
+        val observed = record.toLogRecordData()
+        assertEquals("my_event_name", observed.eventName)
     }
 
     @Test
@@ -58,5 +66,6 @@ internal class ReadableLogRecordExtTest {
         assertEquals(OtelJavaSeverity.UNDEFINED_SEVERITY_NUMBER, observed.severity)
         assertNull(observed.severityText)
         assertNull(observed.bodyValue?.asString())
+        assertNull(observed.eventName)
     }
 }

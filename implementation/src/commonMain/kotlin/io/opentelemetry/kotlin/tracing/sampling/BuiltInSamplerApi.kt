@@ -48,16 +48,37 @@ public fun SamplerConfigDsl.parentBased(
     localParentNotSampled = localParentNotSampled,
 )
 
+/**
+ * Configures sampling by delegating to a [ComposableSampler], using consistent probability
+ * sampling over the OpenTelemetry TraceState `ot` `th`/`rv` sub-keys.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#compositesampler
+ */
 @ExperimentalApi
 public fun SamplerConfigDsl.composite(block: SamplerConfigDsl.() -> ComposableSampler): Sampler =
     CompositeSampler(block())
 
+/**
+ * A [ComposableSampler] that always samples, regardless of parent trace state.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composablealwayson
+ */
 @ExperimentalApi
 public fun SamplerConfigDsl.composableAlwaysOn(): ComposableSampler = ComposableAlwaysOnSampler()
 
+/**
+ * A [ComposableSampler] that never samples.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composablealwaysoff
+ */
 @ExperimentalApi
 public fun SamplerConfigDsl.composableAlwaysOff(): ComposableSampler = ComposableAlwaysOffSampler()
 
+/**
+ * A [ComposableSampler] that samples spans with the given probability [ratio].
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composableprobability
+ */
 @ExperimentalApi
 public fun SamplerConfigDsl.composableProbability(ratio: Double): ComposableSampler =
     if (ratio == 0.0) {
@@ -66,6 +87,12 @@ public fun SamplerConfigDsl.composableProbability(ratio: Double): ComposableSamp
         ComposableProbabilitySampler(ratio)
     }
 
+/**
+ * A [ComposableSampler] that honors the parent's sampling threshold when present, falling back
+ * to [root] when there is no valid parent.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composableparentthreshold
+ */
 @ExperimentalApi
 public fun SamplerConfigDsl.composableParentThreshold(root: ComposableSampler): ComposableSampler =
     ComposableParentThresholdSampler(root)

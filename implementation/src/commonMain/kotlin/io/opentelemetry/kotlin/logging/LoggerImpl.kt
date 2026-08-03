@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.LogRecordModel
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecordImpl
 import io.opentelemetry.kotlin.resource.Resource
+import io.opentelemetry.kotlin.tracing.SpanContext
 
 internal class LoggerImpl(
     private val clock: Clock,
@@ -23,6 +24,7 @@ internal class LoggerImpl(
     private val resource: Resource,
     private val logLimitConfig: LogLimitConfig,
     private val shutdownState: ShutdownState,
+    private val loggerConfig: LoggerConfig = LoggerConfigImpl(),
 ) : Logger {
 
     private val contextFactory = contextFactory
@@ -38,7 +40,10 @@ internal class LoggerImpl(
             false
         } else {
             val ctx = context ?: contextFactory.implicit()
-            processor.enabled(ctx, key, severityNumber, eventName)
+            when {
+                !allowedByConfig(severityNumber, spanContextFrom(ctx)) -> false
+                else -> processor.enabled(ctx, key, severityNumber, eventName)
+            }
         }
 
     override fun emit(
@@ -78,9 +83,10 @@ internal class LoggerImpl(
     ) {
         shutdownState.execute {
             val ctx = context ?: contextFactory.implicit()
-            val spanContext = when (ctx) {
-                root -> invalidSpanContext
-                else -> ctx.extractSpan().spanContext
+            val spanContext = spanContextFrom(ctx)
+
+            if (!allowedByConfig(severityNumber, spanContext)) {
+                return@execute
             }
 
             val now = clock.now()
@@ -104,5 +110,28 @@ internal class LoggerImpl(
             }
             processor?.onEmit(ReadWriteLogRecordImpl(log), ctx)
         }
+    }
+
+    private fun spanContextFrom(ctx: Context): SpanContext = when (ctx) {
+        root -> invalidSpanContext
+        else -> ctx.extractSpan().spanContext
+    }
+
+    /**
+     * Whether [loggerConfig] permits a log record with the given severity and span context to be
+     * processed.
+     */
+    private fun allowedByConfig(
+        severityNumber: SeverityNumber?,
+        spanContext: SpanContext,
+    ): Boolean {
+        val severity = severityNumber ?: SeverityNumber.UNKNOWN
+        val belowMinimumSeverity = severity != SeverityNumber.UNKNOWN &&
+            severity.severityNumber < loggerConfig.minimumSeverity.severityNumber
+        if (belowMinimumSeverity) {
+            return false
+        }
+        val unsampledTrace = spanContext.isValid && !spanContext.traceFlags.isSampled
+        return !(loggerConfig.traceBased && unsampledTrace)
     }
 }

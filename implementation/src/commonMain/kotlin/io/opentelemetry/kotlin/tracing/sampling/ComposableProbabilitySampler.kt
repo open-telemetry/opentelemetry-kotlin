@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.tracing.model.SpanLink
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composableprobabilitybased
  */
-public class ComposableProbabilitySampler(private val ratio: Double) : ComposableSampler {
+internal class ComposableProbabilitySampler(private val ratio: Double) : ComposableSampler {
 
     init {
         validateRatio(ratio)
@@ -27,7 +27,7 @@ public class ComposableProbabilitySampler(private val ratio: Double) : Composabl
         links: List<SpanLink>
     ): SamplingIntent = SamplingIntentImpl(
         threshold = threshold,
-        adjustedCountReliable = false
+        adjustedCountReliable = true
     )
 
     override val description: String

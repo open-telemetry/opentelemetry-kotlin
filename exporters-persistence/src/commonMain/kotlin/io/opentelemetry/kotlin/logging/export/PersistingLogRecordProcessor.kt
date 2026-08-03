@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -100,10 +101,12 @@ internal class PersistingLogRecordProcessor(
             try {
                 composite.onEmit(log, context)
             } catch (e: Throwable) {
-                sdkErrorHandler.onUserCodeError(
-                    e,
-                    "LogRecordProcessor.onEmit failed",
-                    SdkErrorSeverity.WARNING
+                sdkErrorHandler.onError(
+                    SdkError.UserCodeError(
+                        e,
+                        "LogRecordProcessor.onEmit failed",
+                        SdkErrorSeverity.WARNING
+                    )
                 )
             }
         }

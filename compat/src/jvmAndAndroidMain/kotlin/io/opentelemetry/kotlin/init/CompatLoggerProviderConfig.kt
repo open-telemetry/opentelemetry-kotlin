@@ -17,6 +17,7 @@ import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.logging.LoggerProviderAdapter
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.OtelJavaLogRecordProcessorAdapter
+import io.opentelemetry.kotlin.logging.toOtelJavaSeverityNumber
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
 import io.opentelemetry.kotlin.scope.toOtelKotlinInstrumentationScopeInfo
@@ -69,10 +70,12 @@ internal class CompatLoggerProviderConfig(
     private fun applyLoggerConfigurator(configurator: LoggerConfigurator) {
         val scopeConfigurator = OtelJavaScopeConfigurator<OtelJavaLoggerConfig> { javaScope ->
             val scope = javaScope.toOtelKotlinInstrumentationScopeInfo()
-            when (configurator.loggerConfig(scope).enabled) {
-                true -> OtelJavaLoggerConfig.enabled()
-                false -> OtelJavaLoggerConfig.disabled()
-            }
+            val config = configurator.loggerConfig(scope)
+            OtelJavaLoggerConfig.builder()
+                .setEnabled(config.enabled)
+                .setMinimumSeverity(config.minimumSeverity.toOtelJavaSeverityNumber())
+                .setTraceBased(config.traceBased)
+                .build()
         }
         OtelJavaSdkLoggerProviderUtil.setLoggerConfigurator(builder, scopeConfigurator)
     }

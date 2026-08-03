@@ -24,6 +24,7 @@ internal fun ReadableLogRecord.toLogRecordData(): OtelJavaLogRecordData {
             ?: OtelJavaSeverity.UNDEFINED_SEVERITY_NUMBER,
         bodyImpl = body.toOtelJavaBody(),
         attributesImpl = attrsFromMap(attributes),
+        eventNameImpl = eventName,
         resourceImpl = resourceFromMap(resource),
         scopeImpl = instrumentationScopeInfo.toOtelJavaInstrumentationScopeInfo()
     )
