@@ -24,7 +24,7 @@ internal class JsonSpanExporterApiTest {
     fun `should successfully export span data force flush and shutdown`() = runTest {
         config.jsonSpanExporter().apply {
             assertEquals(
-                OperationResultCode.Failure,
+                OperationResultCode.Success,
                 export(listOf(fakeSpan))
             )
             assertEquals(OperationResultCode.Success, forceFlush())

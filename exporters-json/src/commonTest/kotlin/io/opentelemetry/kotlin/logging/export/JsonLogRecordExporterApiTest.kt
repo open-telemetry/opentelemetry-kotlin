@@ -24,7 +24,7 @@ internal class JsonLogRecordExporterApiTest {
     fun `should successfully export log records force flush and shutdown`() = runTest {
         config.jsonLogRecordExporter().apply {
             assertEquals(
-                OperationResultCode.Failure,
+                OperationResultCode.Success,
                 export(listOf(fakeLogRecord))
             )
             assertEquals(OperationResultCode.Success, forceFlush())
