@@ -10,7 +10,6 @@ import io.opentelemetry.kotlin.context.Context
  *
  * https://opentelemetry.io/docs/specs/otel/logs/api/#logger
  */
-@ExperimentalApi
 @ThreadSafe
 public interface Logger {
 
@@ -25,6 +24,7 @@ public interface Logger {
      * @param eventName The event name of the log record (optional)
      * @return true if a log record should be emitted
      */
+    @OptIn(ExperimentalApi::class)
     public fun enabled(
         context: Context? = null,
         severityNumber: SeverityNumber? = null,
@@ -46,6 +46,7 @@ public interface Logger {
      * - [exception] - an optional exception to associate with the log record
      * - [attributes] - additional attributes to associate with the log
      */
+    @OptIn(ExperimentalApi::class)
     public fun emit(
         body: Any? = null,
         eventName: String? = null,
