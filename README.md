@@ -31,6 +31,10 @@ In addition to the documentation for approver / maintainer roles and the [contri
 
 The SIG meeting is open for all to join. We invite everyone to join our meeting, regardless of your experience level. Whether you're a seasoned OpenTelemetry contributor, just starting your journey, or simply curious about the work we do, you're more than welcome to participate!
 
+## Community roles
+
+Ongoing contributions are formally acknowledged via OpenTelemetry's [membership levels](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md). Generally the maintainers will reach out and offer a specific role after seeing evidence of continued contributions that match a given role. However, do feel free to contact the maintainers if you think you already meet the requirements, or if you want guidance on doing so.
+
 ## Maintainers
 
 - [Jamie Lynch](https://github.com/fractalwrench), Embrace
