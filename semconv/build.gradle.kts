@@ -1,3 +1,4 @@
+import com.codingfeline.buildkonfig.compiler.FieldSpec
 import de.undercouch.gradle.tasks.download.Download
 
 plugins {
@@ -7,12 +8,29 @@ plugins {
     id("signing")
     id("com.vanniktech.maven.publish")
     alias(libs.plugins.download)
+    alias(libs.plugins.buildKonfig)
 }
 
 // The release version of https://github.com/open-telemetry/semantic-conventions used to generate classes
 val semanticConventionsVersion = "1.43.0"
 val semanticConventionsRepoZip =
     "https://github.com/open-telemetry/semantic-conventions/archive/v${semanticConventionsVersion}.zip"
+
+// Exposes the generated semantic convention version at runtime, so that the SDK can record a schema
+// URL that matches the conventions it uses. See https://opentelemetry.io/docs/specs/otel/schemas/
+buildkonfig {
+    packageName = "io.opentelemetry.kotlin.semconv"
+    exposeObjectWithName = "SemconvBuildKonfig"
+
+    defaultConfigs {
+        buildConfigField(FieldSpec.Type.STRING, "SEMCONV_VERSION", semanticConventionsVersion)
+        buildConfigField(
+            FieldSpec.Type.STRING,
+            "SCHEMA_URL",
+            "https://opentelemetry.io/schemas/$semanticConventionsVersion",
+        )
+    }
+}
 
 // Disable Detekt tasks for generated code
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {

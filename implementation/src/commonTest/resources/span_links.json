@@ -28,7 +28,7 @@
     "totalRecordedLinks": 0,
     "totalAttributeCount": 0,
     "resource": {
-      "schemaUrl": "null",
+      "schemaUrl": "SEMCONV_SCHEMA_URL",
       "attributes": {
         "service.name": "unknown_service",
         "telemetry.sdk.name": "opentelemetry",
@@ -85,7 +85,7 @@
     "totalRecordedLinks": 1,
     "totalAttributeCount": 0,
     "resource": {
-      "schemaUrl": "null",
+      "schemaUrl": "SEMCONV_SCHEMA_URL",
       "attributes": {
         "service.name": "unknown_service",
         "telemetry.sdk.name": "opentelemetry",

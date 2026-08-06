@@ -37,7 +37,7 @@
     "totalRecordedLinks": 0,
     "totalAttributeCount": 1,
     "resource": {
-      "schemaUrl": "null",
+      "schemaUrl": "SEMCONV_SCHEMA_URL",
       "attributes": {
         "service.name": "unknown_service",
         "telemetry.sdk.name": "opentelemetry",

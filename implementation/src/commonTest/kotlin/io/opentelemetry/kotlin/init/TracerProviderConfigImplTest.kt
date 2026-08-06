@@ -14,6 +14,7 @@ import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.sdkDefaultAttributes
+import io.opentelemetry.kotlin.sdkDefaultSchemaUrl
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
@@ -107,7 +108,7 @@ internal class TracerProviderConfigImplTest {
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).generateTracingConfig(base)
         assertNull(cfg.processor)
         assertEquals(sdkDefaultAttributes, cfg.resource.attributes)
-        assertNull(cfg.resource.schemaUrl)
+        assertEquals(sdkDefaultSchemaUrl, cfg.resource.schemaUrl)
 
         with(cfg.spanLimits) {
             assertEquals(128, linkCountLimit)
