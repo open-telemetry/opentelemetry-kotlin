@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.IdGenerator
@@ -19,7 +20,7 @@ internal class OpenTelemetryConfigImpl(
      * The handler is configured after the sub-configs below have been created, so they receive a
      * forwarder that resolves the configured handler on each report instead.
      */
-    private val sdkErrorHandler = SdkErrorHandler { configuredErrorHandler.onError(it) }
+    private val sdkErrorHandler = GuardedSdkErrorHandler { configuredErrorHandler.onError(it) }
 
     internal val tracingConfig: TracerProviderConfigImpl = TracerProviderConfigImpl(clock, sdkErrorHandler)
     internal val loggingConfig: LoggerProviderConfigImpl = LoggerProviderConfigImpl(clock, sdkErrorHandler)
