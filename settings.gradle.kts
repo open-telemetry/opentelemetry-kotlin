@@ -23,6 +23,7 @@ include(
     ":sdk-api",
     ":sdk-common",
     ":config",
+    ":config-model",
     ":config-schema",
     ":noop",
     ":implementation",
