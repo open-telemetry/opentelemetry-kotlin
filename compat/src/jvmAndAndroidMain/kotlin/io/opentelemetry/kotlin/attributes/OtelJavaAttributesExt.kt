@@ -8,13 +8,11 @@ internal fun OtelJavaAttributes.convertToMap(): Map<String, Any> {
     return this.asMap().mapKeys { it.key.key }
 }
 
-internal fun attrsFromMap(map: Map<String, Any>): OtelJavaAttributes {
-    val builder = OtelJavaAttributes.builder()
-    map.forEach {
-        builder.put(it.key, it.value.toString())
-    }
-    return builder.build()
-}
+/**
+ * Converts an attribute map to Java OTel's [OtelJavaAttributes], preserving each value's type.
+ */
+internal fun attrsFromMap(map: Map<String, Any>): OtelJavaAttributes =
+    CompatAttributesModel().apply { setTypedAttributes(map) }.otelJavaAttributes()
 
 internal fun resourceFromMap(resource: Resource): OtelJavaResource {
     val map = resource.attributes

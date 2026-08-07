@@ -44,6 +44,27 @@ internal class ReadableLogRecordExtTest {
     }
 
     @Test
+    fun testLogRecordAnyValuePrimitiveBodies() {
+        // Primitive variants are unwrapped to their payload rather than rendered via
+        // AnyValue.toString(), which would yield e.g. "LongValue(value=3)".
+        mapOf<AnyValue, String>(
+            AnyValue.LongValue(3) to "3",
+            AnyValue.BoolValue(true) to "true",
+            AnyValue.DoubleValue(3.14) to "3.14"
+        ).forEach { (body, expected) ->
+            val observed = FakeReadableLogRecord(body = body).toLogRecordData()
+            assertEquals(expected, observed.bodyValue?.asString())
+        }
+    }
+
+    @Test
+    fun testLogRecordAnyValueNullBody() {
+        val record = FakeReadableLogRecord(body = AnyValue.NullValue)
+        val observed = record.toLogRecordData()
+        assertNull(observed.bodyValue?.asString())
+    }
+
+    @Test
     fun testLogRecordAnyValueMapBody() {
         val map = AnyValue.MapValue(mapOf("k" to AnyValue.StringValue("v")))
         val record = FakeReadableLogRecord(body = map)

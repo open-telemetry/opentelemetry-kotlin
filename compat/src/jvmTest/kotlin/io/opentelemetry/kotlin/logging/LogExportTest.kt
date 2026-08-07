@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
@@ -13,6 +14,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -40,6 +42,25 @@ internal class LogExportTest {
             expectedCount = 1,
             goldenFileName = "log_minimal.json",
         )
+    }
+
+    @Test
+    fun `test primitive AnyValue body is unwrapped`() = runTest {
+        // Java OTel's Body is a string, so the payload is rendered rather than AnyValue.toString().
+        harness.logger.emit(AnyValue.LongValue(3))
+
+        harness.assertLogRecords(1, null) { logs ->
+            assertEquals("3", logs[0].body)
+        }
+    }
+
+    @Test
+    fun `test null AnyValue body leaves the body unset`() = runTest {
+        harness.logger.emit(AnyValue.NullValue)
+
+        harness.assertLogRecords(1, null) { logs ->
+            assertNull(logs[0].body)
+        }
     }
 
     @Test
