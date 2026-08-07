@@ -42,6 +42,7 @@ include(
     ":exporters-otlp",
     ":exporters-persistence",
     ":exporters-protobuf",
+    ":span-event-bridge",
     ":java-typealiases",
     "examples:example-app",
     "examples:example-app-android",
