@@ -148,6 +148,18 @@ class CommonProtobufConversionTest {
     }
 
     @Test
+    fun testDeserializedSpanContext_remote() {
+        val context = DeserializedSpanContext(
+            traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
+            spanIdBytes = "1234567890123456".hexToByteArray(),
+            flags = 1,
+            isRemote = true
+        )
+        assertTrue(context.isRemote)
+        assertTrue(context.traceFlags.isSampled)
+    }
+
+    @Test
     fun testDeserializedSpanContext_withTraceState() {
         val context = DeserializedSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),

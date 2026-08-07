@@ -62,12 +62,12 @@ internal class DeserializedSpanContext(
     override val spanIdBytes: ByteArray,
     flags: Int = 0,
     traceStateString: String = "",
+    override val isRemote: Boolean = false,
 ) : SpanContext {
     override val traceId: String by lazy { traceIdBytes.toHexString() }
     override val spanId: String by lazy { spanIdBytes.toHexString() }
     override val traceFlags: TraceFlags = DeserializedTraceFlags(flags and 0xFF)
     override val isValid: Boolean by lazy { traceId != "0".repeat(32) && spanId != "0".repeat(16) }
-    override val isRemote: Boolean = false
     override val traceState: TraceState = parseTraceState(traceStateString)
 }
 
