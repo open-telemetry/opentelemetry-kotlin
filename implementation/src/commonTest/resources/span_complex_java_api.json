@@ -9,7 +9,7 @@
     "spanContext": {
       "traceId": "2cc2b48c50aefe53b3974ed91e6b4ea9",
       "spanId": "e77bcc2f537f0b02",
-      "traceFlags": "01",
+      "traceFlags": "03",
       "traceState": {}
     },
     "parentSpanContext": {
@@ -53,7 +53,7 @@
     "spanContext": {
       "traceId": "ac2c315346a8f5dcc0a79602f9a51310",
       "spanId": "9d46ef3bafda11b1",
-      "traceFlags": "01",
+      "traceFlags": "03",
       "traceState": {}
     },
     "parentSpanContext": {
@@ -97,7 +97,7 @@
     "spanContext": {
       "traceId": "64f6c8f22faf620c7229690068c4b09c",
       "spanId": "17765490bce89c73",
-      "traceFlags": "01",
+      "traceFlags": "03",
       "traceState": {}
     },
     "parentSpanContext": {
@@ -120,7 +120,7 @@
         "spanContext": {
           "traceId": "2cc2b48c50aefe53b3974ed91e6b4ea9",
           "spanId": "e77bcc2f537f0b02",
-          "traceFlags": "01",
+          "traceFlags": "03",
           "traceState": {}
         },
         "attributes": {},
@@ -130,7 +130,7 @@
         "spanContext": {
           "traceId": "ac2c315346a8f5dcc0a79602f9a51310",
           "spanId": "9d46ef3bafda11b1",
-          "traceFlags": "01",
+          "traceFlags": "03",
           "traceState": {}
         },
         "attributes": {},
