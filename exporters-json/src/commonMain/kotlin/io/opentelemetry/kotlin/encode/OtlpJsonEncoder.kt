@@ -9,8 +9,9 @@ sealed interface OtlpJsonEncoder<in T, S> {
     fun encode(value: T): Sequence<String> =
         sequence {
             yield(
-                Json.encodeToString(
-                    getSerializer(), getSerializable(value)
+                value = Json.encodeToString(
+                    serializer = getSerializer(),
+                    value = getSerializable(value)
                 )
             )
         }
