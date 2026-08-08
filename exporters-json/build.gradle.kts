@@ -16,6 +16,7 @@ kotlin {
                 implementation(project(":sdk-common"))
                 implementation(project(":semconv"))
                 implementation(project(":exporters-core"))
+                implementation(project(":integration-test"))
                 implementation(libs.ktor.serialization.kotlinx.json)
                 implementation(libs.okio)
             }
