@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryConfig
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.BatchTelemetryProcessor
@@ -18,6 +19,7 @@ internal class BatchLogRecordProcessorImpl(
     scheduleDelayMs: Long,
     exportTimeoutMs: Long,
     maxExportBatchSize: Int,
+    sdkErrorHandler: SdkErrorHandler,
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : LogRecordProcessor {
 
@@ -29,6 +31,7 @@ internal class BatchLogRecordProcessorImpl(
                 scheduleDelayMs = scheduleDelayMs,
                 exportTimeoutMs = exportTimeoutMs,
                 maxExportBatchSize = maxExportBatchSize,
+                sdkErrorHandler = sdkErrorHandler,
             ),
             dispatcher = dispatcher,
             exportAction = exporter::export

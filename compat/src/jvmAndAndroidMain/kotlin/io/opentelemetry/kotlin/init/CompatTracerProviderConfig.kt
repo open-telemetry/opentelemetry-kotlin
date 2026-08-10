@@ -4,18 +4,24 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaIdGenerator
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
+import io.opentelemetry.kotlin.aliases.OtelJavaScopeConfigurator
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProviderBuilder
+import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProviderUtil
+import io.opentelemetry.kotlin.aliases.OtelJavaTracerConfig
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setAttributes
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.OtelJavaIdGeneratorAdapter
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
+import io.opentelemetry.kotlin.scope.toOtelKotlinInstrumentationScopeInfo
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
+import io.opentelemetry.kotlin.tracing.TracerConfigurator
 import io.opentelemetry.kotlin.tracing.TracerProvider
 import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
 import io.opentelemetry.kotlin.tracing.export.OtelJavaSpanProcessorAdapter
@@ -27,11 +33,13 @@ import io.opentelemetry.kotlin.tracing.sampling.SamplerAdapter
 @ExperimentalApi
 internal class CompatTracerProviderConfig(
     private val clock: Clock,
+    private val sdkErrorHandler: SdkErrorHandler,
 ) : TracerProviderConfigDsl {
 
     private val builder: OtelJavaSdkTracerProviderBuilder = OtelJavaSdkTracerProvider.builder()
     internal val spanLimitsConfig = CompatSpanLimitsConfig()
     private var spanLimitsAction: (SpanLimitsConfigDsl.() -> Unit)? = null
+    private var tracerConfigurator: TracerConfigurator? = null
     private var serviceNameOverride: String? = null
 
     private val resourceAttrs = CompatAttributesModel()
@@ -58,7 +66,7 @@ internal class CompatTracerProviderConfig(
     }
 
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
-        val processor = TraceExportConfigCompat(clock).action()
+        val processor = TraceExportConfigCompat(clock, sdkErrorHandler).action()
         builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor))
     }
 
@@ -72,6 +80,21 @@ internal class CompatTracerProviderConfig(
             else -> OtelJavaSamplerAdapter(sampler)
         }
         builder.setSampler(otelJavaSampler)
+    }
+
+    override fun tracerConfigurator(configurator: TracerConfigurator) {
+        tracerConfigurator = configurator
+    }
+
+    private fun applyTracerConfigurator(configurator: TracerConfigurator) {
+        val scopeConfigurator = OtelJavaScopeConfigurator<OtelJavaTracerConfig> { javaScope ->
+            val scope = javaScope.toOtelKotlinInstrumentationScopeInfo()
+            when (configurator.tracerConfig(scope).enabled) {
+                true -> OtelJavaTracerConfig.enabled()
+                false -> OtelJavaTracerConfig.disabled()
+            }
+        }
+        OtelJavaSdkTracerProviderUtil.setTracerConfigurator(builder, scopeConfigurator)
     }
 
     fun build(
@@ -94,6 +117,7 @@ internal class CompatTracerProviderConfig(
         }
         spanLimitsAction?.invoke(spanLimitsConfig)
         builder.setSpanLimits(spanLimitsConfig.build())
+        tracerConfigurator?.let(::applyTracerConfigurator)
         val resource = ResourceAdapter(
             OtelJavaResource.create(resourceAttrs.otelJavaAttributes(), resourceSchemaUrl)
         )
@@ -106,5 +130,8 @@ internal class CompatTracerProviderConfig(
         return TracerProviderAdapter(builder.build(), clock, spanLimitsConfig)
     }
 
-    private class TraceExportConfigCompat(override val clock: Clock) : TraceExportConfigDsl
+    private class TraceExportConfigCompat(
+        override val clock: Clock,
+        override val sdkErrorHandler: SdkErrorHandler,
+    ) : TraceExportConfigDsl
 }

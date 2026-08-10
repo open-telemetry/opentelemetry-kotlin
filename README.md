@@ -46,6 +46,11 @@ For more information about the maintainer role, see the [community repository](h
 
 For more information about the approver role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#approver).
 
+## Triagers
+- [Juan Vega](https://github.com/jdvr), New Relic
+
+For more information about the triager role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#triager).
+
 ### Thanks to all of our contributors!
 
 <a href="https://github.com/open-telemetry/opentelemetry-kotlin/graphs/contributors">

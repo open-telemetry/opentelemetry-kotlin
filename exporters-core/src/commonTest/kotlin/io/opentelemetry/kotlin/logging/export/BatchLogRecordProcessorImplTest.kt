@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,6 +30,7 @@ internal class BatchLogRecordProcessorImplTest {
             scheduleDelayMs = 1,
             exportTimeoutMs = 1000,
             maxExportBatchSize = 10,
+            sdkErrorHandler = NoopSdkErrorHandler,
         )
     }
 

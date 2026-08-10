@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.tracing.TracerConfigurator
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 
@@ -26,4 +27,9 @@ public interface TracerProviderConfigDsl : ResourceConfigDsl {
      * Configures the strategy that should be used for sampling.
      */
     public fun sampler(action: SamplerConfigDsl.() -> Sampler)
+
+    /**
+     * Configures behavior of the tracer.
+     */
+    public fun tracerConfigurator(configurator: TracerConfigurator)
 }

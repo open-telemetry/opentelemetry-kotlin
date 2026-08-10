@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.PersistedTelemetryType.LOGS
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -166,7 +167,7 @@ internal class TelemetryRepositoryImplTest {
 
     @Test
     fun testMaxStorageLimitExceeded() {
-        val config = PersistedTelemetryConfig(maxBatchedItemsPerSignal = 3)
+        val config = PersistedTelemetryConfig(maxBatchedItemsPerSignal = 3, sdkErrorHandler = NoopSdkErrorHandler)
         val repository = createRepository(config = config)
 
         val items = listOf("first", "second", "third", "fourth")
@@ -186,7 +187,7 @@ internal class TelemetryRepositoryImplTest {
 
     @Test
     fun testOldTelemetryPolicy() {
-        val config = PersistedTelemetryConfig(maxTelemetryAgeInDays = 7)
+        val config = PersistedTelemetryConfig(maxTelemetryAgeInDays = 7, sdkErrorHandler = NoopSdkErrorHandler)
         val repository = createRepository(config = config)
 
         repository.store(listOf(FakeTelemetryObject("a")))
@@ -238,7 +239,7 @@ internal class TelemetryRepositoryImplTest {
     private class FakeTelemetryObject(val value: String)
 
     private fun createRepository(
-        config: PersistedTelemetryConfig = PersistedTelemetryConfig(),
+        config: PersistedTelemetryConfig = PersistedTelemetryConfig(sdkErrorHandler = NoopSdkErrorHandler),
         serializer: (List<FakeTelemetryObject>) -> ByteArray = { telemetry ->
             telemetry.joinToString(DELIMITER) { it.value }.encodeToByteArray()
         },

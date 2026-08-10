@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.assertHasSdkDefaultAttributes
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.sdkDefaultAttributes
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
@@ -15,14 +16,14 @@ internal class MeterProviderConfigImplTest {
 
     @Test
     fun testDefaultMetricsConfig() {
-        val cfg = MeterProviderConfigImpl().generateMetricsConfig(base)
+        val cfg = MeterProviderConfigImpl(NoopSdkErrorHandler).generateMetricsConfig(base)
         assertEquals(sdkDefaultAttributes, cfg.resource.attributes)
         assertNull(cfg.resource.schemaUrl)
     }
 
     @Test
     fun testSdkDefaultAttributes() {
-        val cfg = MeterProviderConfigImpl().generateMetricsConfig(base)
+        val cfg = MeterProviderConfigImpl(NoopSdkErrorHandler).generateMetricsConfig(base)
         assertHasSdkDefaultAttributes(cfg.resource.attributes)
     }
 
@@ -30,7 +31,7 @@ internal class MeterProviderConfigImplTest {
     fun testOverrideMetricsConfig() {
         val schemaUrl = "https://example.com/schema"
 
-        val cfg = MeterProviderConfigImpl().apply {
+        val cfg = MeterProviderConfigImpl(NoopSdkErrorHandler).apply {
             resource(schemaUrl) {
                 setStringAttribute("key", "value")
             }
@@ -42,7 +43,7 @@ internal class MeterProviderConfigImplTest {
 
     @Test
     fun testResourceOverride() {
-        val cfg = MeterProviderConfigImpl().apply {
+        val cfg = MeterProviderConfigImpl(NoopSdkErrorHandler).apply {
             resource(mapOf("extra" to true))
         }.generateMetricsConfig(base)
         assertEquals(sdkDefaultAttributes + mapOf("extra" to true), cfg.resource.attributes)
@@ -50,7 +51,7 @@ internal class MeterProviderConfigImplTest {
 
     @Test
     fun testSimpleResourceConfig() {
-        val cfg = MeterProviderConfigImpl().apply {
+        val cfg = MeterProviderConfigImpl(NoopSdkErrorHandler).apply {
             resource(mapOf("key" to "value"))
         }.generateMetricsConfig(base)
         assertEquals(sdkDefaultAttributes + mapOf("key" to "value"), cfg.resource.attributes)
@@ -60,7 +61,7 @@ internal class MeterProviderConfigImplTest {
     fun testNoResourceLimit() {
         val count = DEFAULT_ATTRIBUTE_LIMIT + 3
         val attrs = (0 until count).associate { "key$it" to "value$it" }
-        val cfg = MeterProviderConfigImpl().apply {
+        val cfg = MeterProviderConfigImpl(NoopSdkErrorHandler).apply {
             resource(attrs)
         }.generateMetricsConfig(base)
         assertEquals(count + sdkDefaultAttributes.size, cfg.resource.attributes.size)
@@ -69,7 +70,7 @@ internal class MeterProviderConfigImplTest {
     @Test
     fun testSdkDefaultAttributesOverride() {
         val value = "my-custom-sdk"
-        val cfg = MeterProviderConfigImpl().apply {
+        val cfg = MeterProviderConfigImpl(NoopSdkErrorHandler).apply {
             resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to value))
         }.generateMetricsConfig(base)
         assertEquals(value, cfg.resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME])
@@ -78,7 +79,7 @@ internal class MeterProviderConfigImplTest {
     @Test
     fun testServiceNameDefaults() {
         val value = "my-service"
-        val cfg = MeterProviderConfigImpl().apply {
+        val cfg = MeterProviderConfigImpl(NoopSdkErrorHandler).apply {
             resource(mapOf(ServiceAttributes.SERVICE_NAME to value))
         }.generateMetricsConfig(base)
         assertEquals(value, cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
@@ -87,7 +88,7 @@ internal class MeterProviderConfigImplTest {
     @Test
     fun testServiceNameOverride() {
         val value = "my-service"
-        val cfg = MeterProviderConfigImpl().apply {
+        val cfg = MeterProviderConfigImpl(NoopSdkErrorHandler).apply {
             serviceName = value
         }.generateMetricsConfig(base)
         assertEquals(value, cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
@@ -96,7 +97,7 @@ internal class MeterProviderConfigImplTest {
     @Test
     fun testServiceNamePrecedence() {
         val value = "custom"
-        val cfg = MeterProviderConfigImpl().apply {
+        val cfg = MeterProviderConfigImpl(NoopSdkErrorHandler).apply {
             resource(mapOf(ServiceAttributes.SERVICE_NAME to "res"))
             serviceName = value
         }.generateMetricsConfig(base)
