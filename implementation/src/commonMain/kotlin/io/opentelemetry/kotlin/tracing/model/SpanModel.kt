@@ -6,6 +6,8 @@ import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
@@ -36,7 +38,8 @@ internal class SpanModel(
     private val spanLimitConfig: SpanLimitConfig,
     initialLinks: List<SpanLink>,
     private val initialDroppedAttributesCount: Int = 0,
-    initialDroppedLinksCount: Int = 0
+    initialDroppedLinksCount: Int = 0,
+    private val sdkErrorHandler: SdkErrorHandler
 ) : ReadWriteSpan, SpanCreationAction {
 
     private enum class State {
@@ -99,9 +102,13 @@ internal class SpanModel(
             if (state == State.STARTED) {
                 state = State.ENDING
                 endTimestamp = timestamp
-                processor?.onEnding(ReadWriteSpanImpl(this))
+                sdkErrorHandler.guard {
+                    processor?.onEnding(ReadWriteSpanImpl(this))
+                }
                 state = State.ENDED
-                processor?.onEnd(ReadableSpanImpl(this))
+                sdkErrorHandler.guard {
+                    processor?.onEnd(ReadableSpanImpl(this))
+                }
             }
         }
     }

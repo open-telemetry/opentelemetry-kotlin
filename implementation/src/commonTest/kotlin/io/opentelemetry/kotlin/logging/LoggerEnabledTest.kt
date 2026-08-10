@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
@@ -121,6 +122,7 @@ internal class LoggerEnabledTest {
             logLimitConfig = fakeLogLimitsConfig,
             shutdownState = MutableShutdownState(),
             loggerConfig = config,
+            sdkErrorHandler = NoopSdkErrorHandler,
         )
         return logger
     }

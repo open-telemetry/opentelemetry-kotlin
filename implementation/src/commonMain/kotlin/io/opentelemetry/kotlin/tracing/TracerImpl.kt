@@ -5,6 +5,8 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
@@ -34,6 +36,7 @@ internal class TracerImpl(
     private val spanLimitConfig: SpanLimitConfig,
     private val shutdownState: ShutdownState,
     private val sampler: Sampler = AlwaysOnSampler(),
+    private val sdkErrorHandler: SdkErrorHandler,
 ) : Tracer {
 
     private val noopSpan = NoopOpenTelemetry.tracerProvider.getTracer("").startSpan("")
@@ -99,11 +102,14 @@ internal class TracerImpl(
                 spanLimitConfig = spanLimitConfig,
                 initialLinks = collector.links,
                 initialDroppedAttributesCount = collector.droppedAttributesCount,
-                initialDroppedLinksCount = collector.droppedLinksCount
+                initialDroppedLinksCount = collector.droppedLinksCount,
+                sdkErrorHandler = sdkErrorHandler
             )
             spanModel.setAttributes(result.attributes)
             spanModel.setAttributes(collector.attributes)
-            processor?.onStart(ReadWriteSpanImpl(spanModel), ctx)
+            sdkErrorHandler.guard {
+                processor?.onStart(ReadWriteSpanImpl(spanModel), ctx)
+            }
             CreatedSpan(spanModel)
         }
 

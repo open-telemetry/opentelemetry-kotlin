@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
@@ -54,6 +55,7 @@ internal class LogContextTest {
             FakeResource(),
             fakeLogLimitsConfig,
             MutableShutdownState(),
+            sdkErrorHandler = NoopSdkErrorHandler,
         )
         tracer = TracerImpl(
             clock = clock,
@@ -66,6 +68,7 @@ internal class LogContextTest {
             spanLimitConfig = fakeSpanLimitsConfig,
             idGenerator = FakeIdGenerator(),
             shutdownState = MutableShutdownState(),
+            sdkErrorHandler = NoopSdkErrorHandler,
         )
     }
 

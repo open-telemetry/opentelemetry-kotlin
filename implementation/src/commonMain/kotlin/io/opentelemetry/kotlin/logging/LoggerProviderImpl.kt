@@ -45,6 +45,7 @@ internal class LoggerProviderImpl(
                     loggingConfig.logLimits,
                     shutdownState,
                     loggerConfig,
+                    loggingConfig.sdkErrorHandler,
                 )
             }
         }
