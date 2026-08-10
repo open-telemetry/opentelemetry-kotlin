@@ -5,16 +5,16 @@ import kotlin.collections.List
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalResourceDetection(
+public data class ExperimentalResourceDetection(
   /**
    * Configure attributes provided by resource detectors.
    * If omitted, all attributes from resource detectors are added.
    */
-  internal val attributes: IncludeExclude? = null,
+  public val attributes: IncludeExclude? = null,
   /**
    * Configure resource detectors.
    * Resource detector names are dependent on the SDK language ecosystem. Please consult documentation for each respective language. 
    * If omitted, no resource detectors are enabled.
    */
-  internal val detectors: List<ExperimentalResourceDetector>? = null,
+  public val detectors: List<ExperimentalResourceDetector>? = null,
 )

@@ -7,17 +7,17 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalSemconvConfig(
+public data class ExperimentalSemconvConfig(
   /**
    * The target semantic convention version for this domain (e.g., 1).
    * If omitted or null, the latest stable version is used, or if no stable version is available and .experimental is true then the latest experimental version is used.
    */
-  internal val version: Long? = null,
+  public val version: Long? = null,
   /**
    * Use latest experimental semantic conventions (before stable is available or to enable experimental features on top of stable conventions).
    * If omitted or null, false is used.
    */
-  internal val experimental: Boolean? = null,
+  public val experimental: Boolean? = null,
   /**
    * When true, also emit the previous major version alongside the target version.
    * For version=1, the previous version refers to the pre-stable conventions that the instrumentation emitted before the first stable semantic convention version was defined.
@@ -26,5 +26,5 @@ internal data class ExperimentalSemconvConfig(
    * If omitted or null, false is used.
    */
   @SerialName("dual_emit")
-  internal val dualEmit: Boolean? = null,
+  public val dualEmit: Boolean? = null,
 )

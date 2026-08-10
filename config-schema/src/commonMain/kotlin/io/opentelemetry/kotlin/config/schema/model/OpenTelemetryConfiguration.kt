@@ -7,7 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class OpenTelemetryConfiguration(
+public data class OpenTelemetryConfiguration(
   /**
    * The file format version.
    * Represented as a string including the semver major, minor version numbers (and optionally the meta tag). For example: "0.4", "1.0-rc.2", "1.0" (after stable release).
@@ -16,12 +16,12 @@ internal data class OpenTelemetryConfiguration(
    * Property is required and must be non-null.
    */
   @SerialName("file_format")
-  internal val fileFormat: String,
+  public val fileFormat: String,
   /**
    * Configure if the SDK is disabled or not.
    * If omitted or null, false is used.
    */
-  internal val disabled: Boolean? = null,
+  public val disabled: Boolean? = null,
   /**
    * Configure the log level of the internal logger used by the SDK.
    * Values include:
@@ -52,47 +52,47 @@ internal data class OpenTelemetryConfiguration(
    * If omitted, INFO is used.
    */
   @SerialName("log_level")
-  internal val logLevel: SeverityNumber? = null,
+  public val logLevel: SeverityNumber? = null,
   /**
    * Configure general attribute limits. See also tracer_provider.limits, logger_provider.limits.
    * If omitted, default values as described in AttributeLimits are used.
    */
   @SerialName("attribute_limits")
-  internal val attributeLimits: AttributeLimits? = null,
+  public val attributeLimits: AttributeLimits? = null,
   /**
    * Configure logger provider.
    * If omitted, a noop logger provider is used.
    */
   @SerialName("logger_provider")
-  internal val loggerProvider: LoggerProvider? = null,
+  public val loggerProvider: LoggerProvider? = null,
   /**
    * Configure meter provider.
    * If omitted, a noop meter provider is used.
    */
   @SerialName("meter_provider")
-  internal val meterProvider: MeterProvider? = null,
+  public val meterProvider: MeterProvider? = null,
   /**
    * Configure text map context propagators.
    * If omitted, a noop propagator is used.
    */
-  internal val propagator: Propagator? = null,
+  public val propagator: Propagator? = null,
   /**
    * Configure tracer provider.
    * If omitted, a noop tracer provider is used.
    */
   @SerialName("tracer_provider")
-  internal val tracerProvider: TracerProvider? = null,
+  public val tracerProvider: TracerProvider? = null,
   /**
    * Configure resource for all signals.
    * If omitted, the default resource is used.
    */
-  internal val resource: Resource? = null,
+  public val resource: Resource? = null,
   /**
    * Configure instrumentation.
    * If omitted, instrumentation defaults are used.
    */
   @SerialName("instrumentation/development")
-  internal val instrumentationDevelopment: ExperimentalInstrumentation? = null,
+  public val instrumentationDevelopment: ExperimentalInstrumentation? = null,
   /**
    * Defines configuration parameters specific to a particular OpenTelemetry distribution or vendor.
    * This section provides a standardized location for distribution-specific settings
@@ -100,5 +100,5 @@ internal data class OpenTelemetryConfiguration(
    * It allows vendors to expose their own extensions and general configuration options.
    * If omitted, distribution defaults are used.
    */
-  internal val distribution: Distribution? = null,
+  public val distribution: Distribution? = null,
 )
