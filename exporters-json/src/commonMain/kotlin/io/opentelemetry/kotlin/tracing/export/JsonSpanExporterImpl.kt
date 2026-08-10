@@ -4,11 +4,10 @@ import io.opentelemetry.kotlin.encode.JsonSpanEncoder
 import io.opentelemetry.kotlin.encode.OtlpJsonEncoder
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.framework.serialization.SerializableSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
 
 internal class JsonSpanExporterImpl(
-    val encoder: OtlpJsonEncoder<SpanData, SerializableSpanData> = JsonSpanEncoder()
+    val encoder: OtlpJsonEncoder<SpanData> = JsonSpanEncoder()
 ) : JsonSpanExporter {
     private val shutdownState = MutableShutdownState()
 

@@ -4,11 +4,10 @@ import io.opentelemetry.kotlin.encode.JsonLogRecordEncoder
 import io.opentelemetry.kotlin.encode.OtlpJsonEncoder
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.framework.serialization.SerializableLogRecordData
 import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 
 internal class JsonLogRecordExporterImpl(
-    val encoder: OtlpJsonEncoder<ReadableLogRecord, SerializableLogRecordData> = JsonLogRecordEncoder()
+    val encoder: OtlpJsonEncoder<ReadableLogRecord> = JsonLogRecordEncoder()
 ) : JsonLogRecordExporter {
     private val shutdownState = MutableShutdownState()
 
