@@ -46,6 +46,8 @@ class MinSupportedVersionsTest {
             .withArguments(
                 "-PcatalogPath=${systemProperty("catalogPath")}",
                 "-PotelKotlinVersion=${systemProperty("otelKotlinVersion")}",
+                "-PjvmAndroidModules=${systemProperty("jvmAndroidModules")}",
+                "-PklibModules=${systemProperty("klibModules")}",
                 "assemble",
                 "--info",
                 "--stacktrace",
