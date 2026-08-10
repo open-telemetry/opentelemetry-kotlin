@@ -1,5 +1,7 @@
 package io.opentelemetry.kotlin.file.export
 
+import io.opentelemetry.kotlin.encode.JsonLogRecordEncoder
+import io.opentelemetry.kotlin.encode.JsonSpanEncoder
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.export.LogRecordExporter
@@ -13,7 +15,7 @@ import okio.BufferedSink
  */
 internal class FileLogRecordExporter(
     private val sink: BufferedSink,
-    private val encoder: JsonLogRecordExporter
+    private val encoder: JsonLogRecordEncoder
 ) : LogRecordExporter {
     private val shutdownState = MutableShutdownState()
 
@@ -40,7 +42,7 @@ internal class FileLogRecordExporter(
  */
 internal class FileSpanExporter(
     private val sink: BufferedSink,
-    private val encoder: OtlpJsonSpanEncoder
+    private val encoder: JsonSpanEncoder
 ) : SpanExporter {
     private val shutdownState = MutableShutdownState()
 
