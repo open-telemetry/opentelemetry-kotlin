@@ -23,7 +23,6 @@ buildkonfig {
     exposeObjectWithName = "SemconvBuildKonfig"
 
     defaultConfigs {
-        buildConfigField(FieldSpec.Type.STRING, "SEMCONV_VERSION", semanticConventionsVersion)
         buildConfigField(
             FieldSpec.Type.STRING,
             "SCHEMA_URL",
