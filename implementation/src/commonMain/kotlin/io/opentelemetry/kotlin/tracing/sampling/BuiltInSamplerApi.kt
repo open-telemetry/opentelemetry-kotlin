@@ -1,6 +1,8 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.init.ComposableRuleBasedConfigDsl
+import io.opentelemetry.kotlin.init.ComposableRuleBasedConfigImpl
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
 
 /**
@@ -96,3 +98,14 @@ public fun SamplerConfigDsl.composableProbability(ratio: Double): ComposableSamp
 @ExperimentalApi
 public fun SamplerConfigDsl.composableParentThreshold(root: ComposableSampler): ComposableSampler =
     ComposableParentThresholdSampler(root)
+
+/**
+ * A [ComposableSampler] that evaluates rules in the order they are declared, delegating to the
+ * first matching rule's sampler. Spans that match no rule are not sampled.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composablerulebased
+ */
+@ExperimentalApi
+public fun SamplerConfigDsl.composableRuleBased(
+    block: ComposableRuleBasedConfigDsl.() -> Unit,
+): ComposableSampler = ComposableRuleBasedConfigImpl(this).apply(block).buildSampler()

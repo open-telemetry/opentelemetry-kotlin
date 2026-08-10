@@ -126,6 +126,10 @@ public final class io/opentelemetry/kotlin/init/B3Format : java/lang/Enum {
 	public static fun values ()[Lio/opentelemetry/kotlin/init/B3Format;
 }
 
+public abstract interface class io/opentelemetry/kotlin/init/ComposableRuleBasedConfigDsl : io/opentelemetry/kotlin/init/SamplerConfigDsl {
+	public abstract fun rule (Lio/opentelemetry/kotlin/tracing/sampling/SamplingPredicate;Lkotlin/jvm/functions/Function1;)V
+}
+
 public abstract interface annotation class io/opentelemetry/kotlin/init/ConfigDsl : java/lang/annotation/Annotation {
 }
 
@@ -367,6 +371,10 @@ public abstract interface class io/opentelemetry/kotlin/tracing/sampling/Samplin
 	public abstract fun getAttributesProvider ()Lkotlin/jvm/functions/Function0;
 	public abstract fun getThreshold ()Ljava/lang/Long;
 	public abstract fun getTraceStateProvider ()Lkotlin/jvm/functions/Function2;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/sampling/SamplingPredicate {
+	public abstract fun matches (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/SpanKind;Lio/opentelemetry/kotlin/attributes/AttributeContainer;Ljava/util/List;)Z
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/sampling/SamplingResult {
