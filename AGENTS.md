@@ -11,6 +11,7 @@ This repo is a Kotlin Multiplatform (KMP) implementation of the [OpenTelemetry s
 | `implementation` | KMP implementation of OpenTelemetry |
 | `compat` | Facade of `api` that uses opentelemetry-java under the hood |
 | `exporters-*` | OTLP, in-memory, etc. |
+| `instrumentation/*` | Instrumentation for third-party libraries |
 | `testing` / `test-fakes` | Test utilities |
 | `semconv` | Semantic conventions |
 | `examples` | Example apps |
