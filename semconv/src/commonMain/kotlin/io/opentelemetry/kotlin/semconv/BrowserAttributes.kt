@@ -47,4 +47,136 @@ object BrowserAttributes {
     */
     @IncubatingApi
     const val BROWSER_PLATFORM: String = "browser.platform"
+
+    /**
+    * <p>The delta between the current value and the last-reported value. See <a href="https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#report-only-the-delta-of-changes">delta</a>.</p>
+    */
+    @IncubatingApi
+    const val BROWSER_WEB_VITAL_DELTA: String = "browser.web_vital.delta"
+
+    /**
+    * <p>A unique ID representing this particular metric instance.</p>
+    */
+    @IncubatingApi
+    const val BROWSER_WEB_VITAL_ID: String = "browser.web_vital.id"
+
+    /**
+    * <p>Name of the web vital.</p>
+    */
+    @IncubatingApi
+    const val BROWSER_WEB_VITAL_NAME: String = "browser.web_vital.name"
+
+    /**
+    * <p>The type of navigation, as reported by the <a href="https://developer.mozilla.org/docs/Web/API/PerformanceNavigationTiming/type">Navigation Timing API</a>, with additional values reported by the web-vitals library.</p>
+    */
+    @IncubatingApi
+    const val BROWSER_WEB_VITAL_NAVIGATION_TYPE: String = "browser.web_vital.navigation_type"
+
+    /**
+    * <p>The rating of the web vital value against the "good", "needs improvement", and "poor" thresholds defined for the metric.</p>
+    */
+    @IncubatingApi
+    const val BROWSER_WEB_VITAL_RATING: String = "browser.web_vital.rating"
+
+    /**
+    * <p>Value of the web vital.</p>
+    */
+    @IncubatingApi
+    const val BROWSER_WEB_VITAL_VALUE: String = "browser.web_vital.value"
+
+    /**
+    * <p>BROWSER_WEB_VITAL_NAME</p>
+    */
+    @IncubatingApi
+    enum class BrowserWebVitalNameValues(val value: String) {
+
+        /**
+        * <p>Cumulative Layout Shift. See <a href="https://web.dev/articles/cls">cls</a>.</p>
+        */
+        CLS("cls"),
+
+        /**
+        * <p>Largest Contentful Paint. See <a href="https://web.dev/articles/lcp">lcp</a>.</p>
+        */
+        LCP("lcp"),
+
+        /**
+        * <p>First Contentful Paint. See <a href="https://web.dev/articles/fcp">fcp</a>.</p>
+        */
+        FCP("fcp"),
+
+        /**
+        * <p>Interaction to Next Paint. See <a href="https://web.dev/articles/inp">inp</a>.</p>
+        */
+        INP("inp"),
+
+        /**
+        * <p>Time to First Byte. See <a href="https://web.dev/articles/ttfb">ttfb</a>.</p>
+        */
+        TTFB("ttfb"),
+
+        /**
+        * <p>First Input Delay. See <a href="https://web.dev/articles/fid">fid</a>.</p>
+        */
+        FID("fid"),
+    }
+
+    /**
+    * <p>BROWSER_WEB_VITAL_NAVIGATION_TYPE</p>
+    */
+    @IncubatingApi
+    enum class BrowserWebVitalNavigationTypeValues(val value: String) {
+
+        /**
+        * <p>Navigation started by clicking a link, entering a URL, form submission, or a script operation.</p>
+        */
+        NAVIGATE("navigate"),
+
+        /**
+        * <p>Navigation through a reload operation or a <c>Location.reload()</c> call.</p>
+        */
+        RELOAD("reload"),
+
+        /**
+        * <p>Navigation through the browser's history traversal (e.g. back/forward buttons).</p>
+        */
+        BACK_FORWARD("back-forward"),
+
+        /**
+        * <p>Navigation restoring a page from the back/forward cache (bfcache).</p>
+        */
+        BACK_FORWARD_CACHE("back-forward-cache"),
+
+        /**
+        * <p>Navigation to a page that was prerendered.</p>
+        */
+        PRERENDER("prerender"),
+
+        /**
+        * <p>Navigation restoring a page that was previously discarded by the browser.</p>
+        */
+        RESTORE("restore"),
+    }
+
+    /**
+    * <p>BROWSER_WEB_VITAL_RATING</p>
+    */
+    @IncubatingApi
+    enum class BrowserWebVitalRatingValues(val value: String) {
+
+        /**
+        * <p>The metric value is within the "good" threshold.</p>
+        */
+        GOOD("good"),
+
+        /**
+        * <p>The metric value is within the "needs improvement" threshold.</p>
+        */
+        NEEDS_IMPROVEMENT("needs-improvement"),
+
+        /**
+        * <p>The metric value is within the "poor" threshold.</p>
+        */
+        POOR("poor"),
+    }
 }

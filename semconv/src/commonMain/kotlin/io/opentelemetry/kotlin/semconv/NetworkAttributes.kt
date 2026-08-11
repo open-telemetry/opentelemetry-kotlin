@@ -42,7 +42,7 @@ object NetworkAttributes {
     const val NETWORK_CONNECTION_STATE: String = "network.connection.state"
 
     /**
-    * <p>This describes more details regarding the connection.type. It may be the type of cell technology connection, but it could be used for describing details about a wifi connection.</p>
+    * <p>This describes more details regarding the connection.type. It may be the type of cell technology connection, but it could be used for describing details about a Wi-Fi connection.</p>
     */
     @IncubatingApi
     const val NETWORK_CONNECTION_SUBTYPE: String = "network.connection.subtype"
@@ -66,7 +66,7 @@ object NetworkAttributes {
     const val NETWORK_IO_DIRECTION: String = "network.io.direction"
 
     /**
-    * <p>Local address of the network connection - IP address or Unix domain socket name.</p>
+    * <p>Local address of the network connection - IP address or UNIX domain socket name.</p>
     */
     const val NETWORK_LOCAL_ADDRESS: String = "network.local.address"
 
@@ -76,7 +76,7 @@ object NetworkAttributes {
     const val NETWORK_LOCAL_PORT: String = "network.local.port"
 
     /**
-    * <p>Peer address of the network connection - IP address or Unix domain socket name.</p>
+    * <p>Peer address of the network connection - IP address or UNIX domain socket name.</p>
     */
     const val NETWORK_PEER_ADDRESS: String = "network.peer.address"
 
@@ -297,7 +297,7 @@ object NetworkAttributes {
     enum class NetworkConnectionTypeValues(val value: String) {
 
         /**
-        * <p>wifi.</p>
+        * <p>Wi-Fi</p>
         */
         WIFI("wifi"),
 
@@ -360,7 +360,7 @@ object NetworkAttributes {
         PIPE("pipe"),
 
         /**
-        * <p>Unix domain socket</p>
+        * <p>UNIX domain socket</p>
         */
         UNIX("unix"),
 

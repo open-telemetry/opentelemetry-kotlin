@@ -10,7 +10,7 @@ object SourceAttributes {
   
 
     /**
-    * <p>Source address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.</p>
+    * <p>Source address - domain name if available without reverse DNS lookup; otherwise, IP address or UNIX domain socket name.</p>
     * <p>Notes:</p>
     * <p>When observed from the destination side, and when communicating through an intermediary, <c>source.address</c> SHOULD represent the source address behind any intermediaries, for example proxies, if it's available.</p>
     */

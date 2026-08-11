@@ -21,7 +21,7 @@ object CodeAttributes {
     const val CODE_COLUMN_NUMBER: String = "code.column.number"
 
     /**
-    * <p>The source code file name that identifies the code unit as uniquely as possible (preferably an absolute file path). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.</p>
+    * <p>The source code filename that identifies the code unit as uniquely as possible (preferably an absolute file path). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.</p>
     */
     const val CODE_FILE_PATH: String = "code.file.path"
 

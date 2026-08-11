@@ -54,13 +54,13 @@ object PprofAttributes {
     const val PPROF_PROFILE_DOC_URL: String = "pprof.profile.doc_url"
 
     /**
-    * <p>Frames with Function.function_name fully matching the regexp will be dropped from the samples, along with their successors.</p>
+    * <p>Frames with Function.function_name fully matching the regular expression will be dropped from the samples, along with their successors.</p>
     */
     @IncubatingApi
     const val PPROF_PROFILE_DROP_FRAMES: String = "pprof.profile.drop_frames"
 
     /**
-    * <p>Frames with Function.function_name fully matching the regexp will be kept, even if it matches drop_frames.</p>
+    * <p>Frames with Function.function_name fully matching the regular expression will be kept, even if it matches drop_frames.</p>
     */
     @IncubatingApi
     const val PPROF_PROFILE_KEEP_FRAMES: String = "pprof.profile.keep_frames"
