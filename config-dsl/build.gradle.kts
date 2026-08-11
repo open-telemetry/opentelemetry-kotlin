@@ -12,9 +12,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(project(":behavior"))
-                api(project(":config-dsl"))
-                api(project(":config-envar"))
-                api(project(":config-yaml"))
+                api(project(":sdk-api"))
             }
         }
         val commonTest by getting {

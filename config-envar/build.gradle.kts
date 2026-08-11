@@ -11,10 +11,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(project(":behavior"))
-                api(project(":config-dsl"))
-                api(project(":config-envar"))
-                api(project(":config-yaml"))
+                api(project(":api"))
             }
         }
         val commonTest by getting {

@@ -11,15 +11,17 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(project(":behavior"))
-                api(project(":config-dsl"))
-                api(project(":config-envar"))
-                api(project(":config-yaml"))
+                implementation(project(":sdk-api"))
+                api(project(":config-schema"))
+                implementation(libs.yamlkt)
+                implementation(libs.okio)
             }
         }
         val commonTest by getting {
             dependencies {
+                implementation(project(":test-fakes"))
                 implementation(libs.kotlin.test)
+                implementation(libs.okio.fakefilesystem)
             }
         }
         val jvmTest by getting {
@@ -28,4 +30,13 @@ kotlin {
             }
         }
     }
+}
+
+tasks.register<Copy>("copyiOSTestResources") {
+    from("src/commonTest/resources")
+    into("build/bin/iosSimulatorArm64/debugTest/resources")
+}
+
+tasks.named("iosSimulatorArm64Test").configure {
+    dependsOn("copyiOSTestResources")
 }

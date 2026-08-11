@@ -26,5 +26,3 @@ internal class OpenTelemetryEnvVarConfigProcessorImpl(
         )
     }
 }
-
-internal expect fun getEnvVarValue(envVar: String): String?
