@@ -6,4 +6,4 @@ import kotlin.String
 import kotlin.collections.Map
 import kotlinx.serialization.Contextual
 
-internal typealias ExperimentalLanguageSpecificInstrumentation = Map<String, @Contextual Any?>
+public typealias ExperimentalLanguageSpecificInstrumentation = Map<String, @Contextual Any?>

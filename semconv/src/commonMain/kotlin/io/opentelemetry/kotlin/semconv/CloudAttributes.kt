@@ -228,6 +228,11 @@ object CloudAttributes {
         ORACLE_CLOUD_OKE("oracle_cloud_oke"),
 
         /**
+        * <p>Compute on Scaleway Cloud</p>
+        */
+        SCALEWAY_CLOUD_COMPUTE("scaleway_cloud_compute"),
+
+        /**
         * <p>Tencent Cloud Cloud Virtual Machine (CVM)</p>
         */
         TENCENT_CLOUD_CVM("tencent_cloud_cvm"),
@@ -298,6 +303,11 @@ object CloudAttributes {
         * <p>Oracle Cloud Infrastructure (OCI)</p>
         */
         ORACLE_CLOUD("oracle_cloud"),
+
+        /**
+        * <p>Scaleway Cloud</p>
+        */
+        SCALEWAY_CLOUD("scaleway_cloud"),
 
         /**
         * <p>Tencent Cloud</p>

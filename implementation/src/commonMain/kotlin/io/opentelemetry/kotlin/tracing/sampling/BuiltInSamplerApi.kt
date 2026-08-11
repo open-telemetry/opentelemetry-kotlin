@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
 
 /**
@@ -96,3 +97,15 @@ public fun SamplerConfigDsl.composableProbability(ratio: Double): ComposableSamp
 @ExperimentalApi
 public fun SamplerConfigDsl.composableParentThreshold(root: ComposableSampler): ComposableSampler =
     ComposableParentThresholdSampler(root)
+
+/**
+ * A [ComposableSampler] that leaves the sampling decision to [delegate] but adds attributes to
+ * spans that are sampled.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composableannotating
+ */
+@ExperimentalApi
+public fun SamplerConfigDsl.composableAnnotating(
+    delegate: ComposableSampler,
+    attributes: AttributesMutator.() -> Unit,
+): ComposableSampler = ComposableAnnotatingSampler(delegate, attributes)

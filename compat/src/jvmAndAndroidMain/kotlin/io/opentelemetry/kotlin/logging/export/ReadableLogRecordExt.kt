@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.resourceFromMap
+import io.opentelemetry.kotlin.attributes.toFlattenedBodyString
 import io.opentelemetry.kotlin.logging.OtelJavaLogRecordDataImpl
 import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import io.opentelemetry.kotlin.logging.toOtelJavaSeverityNumber
@@ -31,7 +32,6 @@ internal fun ReadableLogRecord.toLogRecordData(): OtelJavaLogRecordData {
 }
 
 private fun Any?.toOtelJavaBody(): OtelJavaBody = when (this) {
-    null -> OtelJavaBody.empty()
-    is AnyValue.StringValue -> OtelJavaBody.string(value)
-    else -> OtelJavaBody.string(toString())
+    null, AnyValue.NullValue -> OtelJavaBody.empty()
+    else -> OtelJavaBody.string(toFlattenedBodyString())
 }

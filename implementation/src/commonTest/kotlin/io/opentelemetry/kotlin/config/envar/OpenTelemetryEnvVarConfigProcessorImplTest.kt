@@ -17,9 +17,12 @@ internal class OpenTelemetryEnvVarConfigProcessorImplTest {
             export { FakeLogRecordProcessor() }
         }
         val logLimitProcessor = FakeLogLimitEnvVarConfigProcessor()
+        val spanLimitProcessor = FakeSpanLimitEnvVarConfigProcessor()
         val configProcessor = OpenTelemetryEnvVarConfigProcessorImpl(
             loggingConfig = cfg.generateLoggingConfig(),
-            logLimitProcessor = logLimitProcessor
+            logLimitProcessor = logLimitProcessor,
+            tracingConfig = cfg.generateTracingConfig(),
+            spanLimitProcessor = spanLimitProcessor,
         )
 
         // when
@@ -33,6 +36,30 @@ internal class OpenTelemetryEnvVarConfigProcessorImplTest {
         assertEquals(
             expected = 128,
             actual = environmentConfiguration.logLimitConfig.attributeCountLimit
+        )
+        assertEquals(
+            expected = Int.MAX_VALUE,
+            actual = environmentConfiguration.spanLimitConfig.attributeValueLengthLimit
+        )
+        assertEquals(
+            expected = 128,
+            actual = environmentConfiguration.spanLimitConfig.attributeCountLimit
+        )
+        assertEquals(
+            expected = 128,
+            actual = environmentConfiguration.spanLimitConfig.eventCountLimit
+        )
+        assertEquals(
+            expected = 128,
+            actual = environmentConfiguration.spanLimitConfig.linkCountLimit
+        )
+        assertEquals(
+            expected = 128,
+            actual = environmentConfiguration.spanLimitConfig.attributeCountPerEventLimit
+        )
+        assertEquals(
+            expected = 128,
+            actual = environmentConfiguration.spanLimitConfig.attributeCountPerLinkLimit
         )
     }
 }

@@ -11,4 +11,5 @@ internal class CompatIdGenerator(
     override fun generateTraceIdBytes(): ByteArray = generator.generateTraceId().hexToByteArray()
     override val invalidTraceId: ByteArray = OtelJavaTraceId.getInvalid().hexToByteArray()
     override val invalidSpanId: ByteArray = OtelJavaSpanId.getInvalid().hexToByteArray()
+    override val generatesRandomTraceIds: Boolean = generator.generatesRandomTraceIds()
 }

@@ -7,7 +7,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSdkMeterProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkMeterProviderBuilder
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
-import io.opentelemetry.kotlin.attributes.setAttributes
+import io.opentelemetry.kotlin.attributes.attrsFromMap
+import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.metrics.MeterProvider
 import io.opentelemetry.kotlin.metrics.MeterProviderAdapter
 import io.opentelemetry.kotlin.resource.Resource
@@ -35,7 +36,7 @@ internal class CompatMeterProviderConfig(
     }
 
     override fun resource(map: Map<String, Any>) {
-        resourceAttrs.apply { setAttributes(map) }
+        resourceAttrs.apply { setTypedAttributes(map) }
     }
 
     fun build(
@@ -47,7 +48,7 @@ internal class CompatMeterProviderConfig(
         )
         val merged = baseResource.merge(resource)
         if (merged.attributes.isNotEmpty() || merged.schemaUrl != null) {
-            val attrs = CompatAttributesModel().apply { setAttributes(merged.attributes) }.otelJavaAttributes()
+            val attrs = attrsFromMap(merged.attributes)
             builder.setResource(OtelJavaResource.create(attrs, merged.schemaUrl))
         }
         builder.setClock(OtelJavaClockWrapper(clock))

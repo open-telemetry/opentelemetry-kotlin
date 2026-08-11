@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal enum class ExperimentalSpanParent {
+public enum class ExperimentalSpanParent {
   @SerialName("none")
   NONE,
   @SerialName("remote")

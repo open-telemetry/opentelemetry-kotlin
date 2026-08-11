@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ConsoleMetricExporter(
+public data class ConsoleMetricExporter(
   /**
    * Configure temporality preference.
    * Values include:
@@ -15,7 +15,7 @@ internal data class ConsoleMetricExporter(
    * If omitted, cumulative is used.
    */
   @SerialName("temporality_preference")
-  internal val temporalityPreference: ExporterTemporalityPreference? = null,
+  public val temporalityPreference: ExporterTemporalityPreference? = null,
   /**
    * Configure default histogram aggregation.
    * Values include:
@@ -24,5 +24,5 @@ internal data class ConsoleMetricExporter(
    * If omitted, explicit_bucket_histogram is used.
    */
   @SerialName("default_histogram_aggregation")
-  internal val defaultHistogramAggregation: ExporterDefaultHistogramAggregation? = null,
+  public val defaultHistogramAggregation: ExporterDefaultHistogramAggregation? = null,
 )

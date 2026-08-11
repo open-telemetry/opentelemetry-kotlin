@@ -42,7 +42,10 @@ internal class TracerImpl(
     private val noopSpan = NoopOpenTelemetry.tracerProvider.getTracer("").startSpan("")
     private val root = contextFactory.root()
     private val invalidSpanContext = spanContextFactory.invalid
-    private val traceFlagsDefault = traceFlagsFactory.default
+    private val sampledFlags = traceFlagsFactory.default
+    private val sampledRandomFlags = TraceFlagsImpl(isSampled = true, isRandom = true)
+    private val unsampledFlags = TraceFlagsImpl(isSampled = false, isRandom = false)
+    private val unsampledRandomFlags = TraceFlagsImpl(isSampled = false, isRandom = true)
 
     override fun enabled(): Boolean = !shutdownState.isShutdown && processor != null
 
@@ -68,6 +71,10 @@ internal class TracerImpl(
                 parentSpanContext.isValid -> parentSpanContext.traceIdBytes
                 else -> idGenerator.generateTraceIdBytes()
             }
+            val randomTraceId = when {
+                parentSpanContext.isValid -> parentSpanContext.traceFlags.isRandom
+                else -> idGenerator.generatesRandomTraceIds
+            }
             val spanIdBytes = idGenerator.generateSpanIdBytes()
 
             val collector = SpanCreationCollector(spanLimitConfig)
@@ -83,7 +90,8 @@ internal class TracerImpl(
             )
 
             val sampled = result.decision == SamplingResult.Decision.RECORD_AND_SAMPLE
-            val spanContext = calculateSpanContext(traceIdBytes, spanIdBytes, sampled, result.traceState)
+            val spanContext =
+                calculateSpanContext(traceIdBytes, spanIdBytes, sampled, randomTraceId, result.traceState)
 
             if (result.decision == SamplingResult.Decision.DROP) {
                 return@ifActiveOrElse NonRecordingSpan(parentSpanContext, spanContext)
@@ -117,14 +125,17 @@ internal class TracerImpl(
         traceIdBytes: ByteArray,
         spanIdBytes: ByteArray,
         sampled: Boolean,
+        randomTraceId: Boolean,
         traceState: TraceState,
     ): SpanContext {
         return SpanContextImpl(
             traceIdBytes = traceIdBytes,
             spanIdBytes = spanIdBytes,
             traceFlags = when {
-                sampled -> traceFlagsDefault
-                else -> TraceFlagsImpl(isSampled = false, isRandom = false)
+                sampled && randomTraceId -> sampledRandomFlags
+                sampled -> sampledFlags
+                randomTraceId -> unsampledRandomFlags
+                else -> unsampledFlags
             },
             isValid = true,
             isRemote = false,

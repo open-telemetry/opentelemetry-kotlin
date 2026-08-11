@@ -29,10 +29,10 @@ public fun createOpenTelemetry(
      */
     config: OpenTelemetryConfigDsl.() -> Unit = {}
 ): OpenTelemetry {
-    val cfg = OpenTelemetryConfigImpl(clock).apply(config)
+    val resourceFactory = ResourceFactoryImpl()
+    val cfg = OpenTelemetryConfigImpl(clock, resourceFactory).apply(config)
     val idGenerator = cfg.resolveIdGenerator()
 
-    val resourceFactory = ResourceFactoryImpl()
     val traceFlags = TraceFlagsFactoryImpl()
     val traceState = TraceStateFactoryImpl()
     val spanContext = SpanContextFactoryImpl(idGenerator, traceFlags, traceState)
