@@ -61,6 +61,17 @@ internal class CreateOpenTelemetryErrorHandlerTest {
         assertFalse(handler.hasErrors())
     }
 
+    @Test
+    fun `a handler that throws does not escape the SDK`() = runTest {
+        val api = createOpenTelemetry {
+            errorHandler { throw IllegalStateException("handler boom") }
+            tracerProvider {
+                export { throwingProcessor() }
+            }
+        }
+        assertEquals(OperationResultCode.Failure, tracerCloseable(api).shutdown())
+    }
+
     private fun throwingProcessor() = FakeSpanProcessor(
         shutdownCode = { throw IllegalStateException("boom") }
     )

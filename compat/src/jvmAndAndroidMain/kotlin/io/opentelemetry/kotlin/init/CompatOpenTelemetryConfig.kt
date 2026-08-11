@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
@@ -23,7 +24,7 @@ internal class CompatOpenTelemetryConfig(
 ) : OpenTelemetryConfigDsl {
 
     @Volatile private var configuredErrorHandler: SdkErrorHandler = NoopSdkErrorHandler
-    private val sdkErrorHandler = SdkErrorHandler { configuredErrorHandler.onError(it) }
+    private val sdkErrorHandler = GuardedSdkErrorHandler { configuredErrorHandler.onError(it) }
 
     internal val tracerProviderConfig = CompatTracerProviderConfig(clock, sdkErrorHandler)
     internal val loggerProviderConfig = CompatLoggerProviderConfig(clock, sdkErrorHandler)

@@ -50,67 +50,67 @@ object TelemetryAttributes {
     enum class TelemetrySdkLanguageValues(val value: String) {
 
         /**
-        * <p>cpp.</p>
+        * <p><a href="https://opentelemetry.io/docs/languages/cpp/">C++</a></p>
         */
         CPP("cpp"),
 
         /**
-        * <p>dotnet.</p>
+        * <p><a href="https://opentelemetry.io/docs/languages/dotnet/">.NET</a></p>
         */
         DOTNET("dotnet"),
 
         /**
-        * <p>erlang.</p>
+        * <p><a href="https://opentelemetry.io/docs/languages/erlang/">Erlang/Elixir</a></p>
         */
         ERLANG("erlang"),
 
         /**
-        * <p>go.</p>
+        * <p><a href="https://opentelemetry.io/docs/languages/go/">Go</a></p>
         */
         GO("go"),
 
         /**
-        * <p>java.</p>
+        * <p><a href="https://opentelemetry.io/docs/languages/java/">Java</a></p>
         */
         JAVA("java"),
 
         /**
-        * <p>kotlin.</p>
+        * <p><a href="https://opentelemetry.io/docs/languages/kotlin/">Kotlin</a></p>
         */
         KOTLIN("kotlin"),
 
         /**
-        * <p>nodejs.</p>
+        * <p><a href="https://opentelemetry.io/docs/languages/js/">Node.js</a></p>
         */
         NODEJS("nodejs"),
 
         /**
-        * <p>php.</p>
+        * <p><a href="https://opentelemetry.io/docs/languages/php/">PHP</a></p>
         */
         PHP("php"),
 
         /**
-        * <p>python.</p>
+        * <p><a href="https://opentelemetry.io/docs/languages/python/">Python</a></p>
         */
         PYTHON("python"),
 
         /**
-        * <p>ruby.</p>
+        * <p><a href="https://opentelemetry.io/docs/languages/ruby/">Ruby</a></p>
         */
         RUBY("ruby"),
 
         /**
-        * <p>rust.</p>
+        * <p><a href="https://opentelemetry.io/docs/languages/rust/">Rust</a></p>
         */
         RUST("rust"),
 
         /**
-        * <p>swift.</p>
+        * <p><a href="https://opentelemetry.io/docs/languages/swift/">Swift</a></p>
         */
         SWIFT("swift"),
 
         /**
-        * <p>webjs.</p>
+        * <p><a href="https://opentelemetry.io/docs/languages/js/">Browser</a></p>
         */
         WEBJS("webjs"),
     }

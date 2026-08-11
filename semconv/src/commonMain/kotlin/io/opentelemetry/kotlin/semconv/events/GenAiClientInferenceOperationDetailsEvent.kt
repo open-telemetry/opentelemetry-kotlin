@@ -29,7 +29,7 @@ class GenAiClientInferenceOperationDetailsEvent(
     /**
     * <p>The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation.</p>
     * <p>Notes:</p>
-    * <p>Instrumentations SHOULD populate conversation id when they have it readily available
+    * <p>Instrumentations SHOULD populate conversation ID when they have it readily available
     * for a given operation, for example:</p>
     * <ul>
     *   <li>when client framework being instrumented manages conversation history
@@ -38,7 +38,7 @@ class GenAiClientInferenceOperationDetailsEvent(
     * (see <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/agents-session-state.html">AWS Bedrock agent sessions</a>,
     * <a href="https://platform.openai.com/docs/api-reference/threads">OpenAI Assistant threads</a>)</li>
     * </ul>
-    * <p>Application developers that manage conversation history MAY add conversation id to GenAI and other
+    * <p>Application developers that manage conversation history MAY add conversation ID to GenAI and other
     * spans or logs using custom span or log record processors or hooks provided by instrumentation
     * libraries.</p>
     */

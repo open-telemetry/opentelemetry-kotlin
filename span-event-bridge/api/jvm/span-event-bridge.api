@@ -1,0 +1,4 @@
+public final class io/opentelemetry/kotlin/logging/export/SpanEventBridgeApiKt {
+	public static final fun spanEventBridgeLogRecordProcessor (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
+}
+

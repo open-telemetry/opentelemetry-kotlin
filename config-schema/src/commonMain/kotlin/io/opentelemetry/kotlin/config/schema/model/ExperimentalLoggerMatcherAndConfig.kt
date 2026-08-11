@@ -5,7 +5,7 @@ import kotlin.String
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalLoggerMatcherAndConfig(
+public data class ExperimentalLoggerMatcherAndConfig(
   /**
    * Configure logger names to match. Matching is case-sensitive, evaluated as follows:
    *
@@ -13,10 +13,10 @@ internal data class ExperimentalLoggerMatcherAndConfig(
    *  * If the logger name matches the wildcard pattern, where '?' matches any single character and '*' matches any number of characters including none.
    * Property is required and must be non-null.
    */
-  internal val name: String,
+  public val name: String,
   /**
    * The logger config.
    * Property is required and must be non-null.
    */
-  internal val config: ExperimentalLoggerConfig,
+  public val config: ExperimentalLoggerConfig,
 )

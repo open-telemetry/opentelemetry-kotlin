@@ -12,12 +12,14 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":sdk-api"))
+                api(project(":config-schema"))
                 implementation(libs.yamlkt)
                 implementation(libs.okio)
             }
         }
         val commonTest by getting {
             dependencies {
+                implementation(project(":test-fakes"))
                 implementation(libs.kotlin.test)
                 implementation(libs.okio.fakefilesystem)
             }

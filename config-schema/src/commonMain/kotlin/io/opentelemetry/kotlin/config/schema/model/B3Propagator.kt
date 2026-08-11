@@ -4,4 +4,4 @@ package io.opentelemetry.kotlin.config.schema.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal class B3Propagator
+public class B3Propagator

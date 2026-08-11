@@ -5,10 +5,10 @@ import kotlin.Boolean
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalMeterConfig(
+public data class ExperimentalMeterConfig(
   /**
    * Configure if the meter is enabled or not.
    * If omitted, true is used.
    */
-  internal val enabled: Boolean? = null,
+  public val enabled: Boolean? = null,
 )
