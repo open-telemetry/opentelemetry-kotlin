@@ -45,9 +45,7 @@ internal class SpanModel(
         ENDED
     }
 
-    private val lock by lazy {
-        ReentrantReadWriteLock()
-    }
+    private val lock = ReentrantReadWriteLock()
 
     private var state: State = State.STARTED
 
