@@ -1,9 +1,12 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.semconv.SemconvBuildKonfig
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+
+internal val sdkDefaultSchemaUrl: String = SemconvBuildKonfig.SCHEMA_URL
 
 internal val sdkDefaultAttributes: Map<String, Any> = mapOf(
     ServiceAttributes.SERVICE_NAME to "unknown_service",

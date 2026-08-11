@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal enum class ExemplarFilter {
+public enum class ExemplarFilter {
   @SerialName("always_on")
   ALWAYS_ON,
   @SerialName("always_off")

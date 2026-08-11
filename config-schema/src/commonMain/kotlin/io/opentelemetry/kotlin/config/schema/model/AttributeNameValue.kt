@@ -7,18 +7,18 @@ import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class AttributeNameValue(
+public data class AttributeNameValue(
   /**
    * The attribute name.
    * Property is required and must be non-null.
    */
-  internal val name: String,
+  public val name: String,
   /**
    * The attribute value.
    * The type of value must match .type.
    * Property must be present, but if null the entry is ignored.
    */
-  internal val `value`: @Contextual Any? = null,
+  public val `value`: @Contextual Any? = null,
   /**
    * The attribute type.
    * Values include:
@@ -32,5 +32,5 @@ internal data class AttributeNameValue(
    * * string_array: String array attribute value.
    * If omitted, string is used.
    */
-  internal val type: AttributeType? = null,
+  public val type: AttributeType? = null,
 )

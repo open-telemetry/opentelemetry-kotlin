@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.logging.export.compositeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.stdoutLogRecordExporter
 import io.opentelemetry.kotlin.sdkDefaultAttributes
+import io.opentelemetry.kotlin.sdkDefaultSchemaUrl
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 import kotlin.test.Test
@@ -28,7 +29,7 @@ internal class LoggerProviderConfigImplTest {
         val cfg = LoggerProviderConfigImpl(clock, NoopSdkErrorHandler).generateLoggingConfig(base)
         assertNull(cfg.processor)
         assertEquals(sdkDefaultAttributes, cfg.resource.attributes)
-        assertNull(cfg.resource.schemaUrl)
+        assertEquals(sdkDefaultSchemaUrl, cfg.resource.schemaUrl)
 
         with(cfg.logLimits) {
             assertEquals(128, attributeCountLimit)

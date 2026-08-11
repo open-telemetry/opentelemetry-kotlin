@@ -93,8 +93,13 @@ public abstract interface class io/opentelemetry/kotlin/export/TelemetryCloseabl
 public abstract interface class io/opentelemetry/kotlin/factory/IdGenerator {
 	public abstract fun generateSpanIdBytes ()[B
 	public abstract fun generateTraceIdBytes ()[B
+	public abstract fun getGeneratesRandomTraceIds ()Z
 	public abstract fun getInvalidSpanId ()[B
 	public abstract fun getInvalidTraceId ()[B
+}
+
+public final class io/opentelemetry/kotlin/factory/IdGenerator$DefaultImpls {
+	public static fun getGeneratesRandomTraceIds (Lio/opentelemetry/kotlin/factory/IdGenerator;)Z
 }
 
 public final class io/opentelemetry/kotlin/factory/IdGeneratorKt {

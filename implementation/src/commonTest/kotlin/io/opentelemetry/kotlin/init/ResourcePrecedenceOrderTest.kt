@@ -2,16 +2,19 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.resource.FakeResourceDetector
+import io.opentelemetry.kotlin.sdkDefaultSchemaUrl
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 internal class ResourcePrecedenceOrderTest {
 
     private val clock = FakeClock()
     private val testKey = "test.key"
+    private val customSchemaUrl = "https://example.com/schema"
 
     @Test
     fun testSdkDefaults() {
@@ -28,6 +31,39 @@ internal class ResourcePrecedenceOrderTest {
         assertNotNull(logAttrs[TelemetryAttributes.TELEMETRY_SDK_NAME])
         assertNotNull(logAttrs[TelemetryAttributes.TELEMETRY_SDK_LANGUAGE])
         assertNotNull(logAttrs[TelemetryAttributes.TELEMETRY_SDK_VERSION])
+    }
+
+    @Test
+    fun testSdkDefaultSchemaUrl() {
+        val schemaUrl = sdkDefaultResource().schemaUrl
+        assertNotNull(schemaUrl)
+        assertTrue(
+            schemaUrl.startsWith("https://opentelemetry.io/schemas/"),
+            "Invalid schema URL: $schemaUrl",
+        )
+
+        val cfg = OpenTelemetryConfigImpl(clock)
+        assertEquals(schemaUrl, cfg.generateTracingConfig().resource.schemaUrl)
+        assertEquals(schemaUrl, cfg.generateLoggingConfig().resource.schemaUrl)
+        assertEquals(schemaUrl, cfg.generateMetricsConfig().resource.schemaUrl)
+    }
+
+    @Test
+    fun testSdkDefaultSchemaUrlSurvivesGlobalResource() {
+        val cfg = OpenTelemetryConfigImpl(clock)
+        cfg.resource(mapOf(testKey to "top"))
+
+        assertEquals(sdkDefaultSchemaUrl, cfg.generateTracingConfig().resource.schemaUrl)
+        assertEquals(sdkDefaultSchemaUrl, cfg.generateLoggingConfig().resource.schemaUrl)
+    }
+
+    @Test
+    fun testSchemaUrlOverrides() {
+        val cfg = OpenTelemetryConfigImpl(clock)
+        cfg.resource(customSchemaUrl) { }
+
+        assertEquals(customSchemaUrl, cfg.generateTracingConfig().resource.schemaUrl)
+        assertEquals(customSchemaUrl, cfg.generateLoggingConfig().resource.schemaUrl)
     }
 
     @Test

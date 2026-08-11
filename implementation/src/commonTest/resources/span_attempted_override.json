@@ -9,7 +9,7 @@
     "spanContext": {
       "traceId": "2cc2b48c50aefe53b3974ed91e6b4ea9",
       "spanId": "e77bcc2f537f0b02",
-      "traceFlags": "01",
+      "traceFlags": "03",
       "traceState": {}
     },
     "parentSpanContext": {
@@ -50,7 +50,7 @@
     "totalRecordedLinks": 1,
     "totalAttributeCount": 1,
     "resource": {
-      "schemaUrl": "null",
+      "schemaUrl": "SEMCONV_SCHEMA_URL",
       "attributes": {
         "service.name": "unknown_service",
         "telemetry.sdk.name": "opentelemetry",

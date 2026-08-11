@@ -123,6 +123,6 @@ internal class TracerSpanContextTest {
         assertNotEquals(idGenerator.invalidTraceId.toHexString(), spanContext.traceId)
         assertNotEquals(idGenerator.invalidSpanId.toHexString(), spanContext.spanId)
         assertEquals(emptyMap(), spanContext.traceState.asMap())
-        assertEquals("01", spanContext.traceFlags.hex)
+        assertEquals("03", spanContext.traceFlags.hex)
     }
 }
