@@ -17,3 +17,15 @@ internal fun AttributesMutator.setFlattenedAnyValueAttribute(key: String, value:
         is AnyValue.MapValue -> {}
     }
 }
+
+/**
+ * Java OTel's log record body is a plain string so we unwrap primitive [AnyValue] objects to
+ * strings.
+ */
+internal fun Any.toFlattenedBodyString(): String = when (this) {
+    is AnyValue.StringValue -> value
+    is AnyValue.BoolValue -> value.toString()
+    is AnyValue.LongValue -> value.toString()
+    is AnyValue.DoubleValue -> value.toString()
+    else -> toString()
+}

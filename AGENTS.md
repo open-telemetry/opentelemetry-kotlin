@@ -26,6 +26,18 @@ Targets: JVM, Android (API 21+), iOS, JS.
 - **AI contributions**: all AI-generated code must be manually reviewed before committing.
 - **OTel spec** Search the OpenTelemetry specification when relevant and keep changes compliant
 
+## Error handling
+
+This SDK is embedded in other people's apps. **Telemetry must never destabilize the host.** Follow the
+[OTel error-handling spec](https://opentelemetry.io/docs/specs/otel/error-handling/) and these general principles:
+
+- Never crash the host.** Nothing may escape a public API method, a callback the SDK invokes,
+  or coroutines
+- Invalid input should degrade to a safe default
+- Fast fail should only happen when the SDK has been misconfigured at initialization
+- All user-supplied code should be assumed as hostile
+- Errors should be routed to SdkErrorHandler rather than swallowing (at an appropriate cadence)
+
 ## AI agent guidelines
 
 - Do NOT inspect the gradle cache or decompile JARs.

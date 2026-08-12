@@ -8,35 +8,35 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalPrometheusMetricExporter(
+public data class ExperimentalPrometheusMetricExporter(
   /**
    * Configure host.
    * If omitted or null, localhost is used.
    */
-  internal val host: String? = null,
+  public val host: String? = null,
   /**
    * Configure port.
    * If omitted or null, 9464 is used.
    */
-  internal val port: Long? = null,
+  public val port: Long? = null,
   /**
    * Configure Prometheus Exporter to produce metrics with scope labels.
    * If omitted or null, true is used.
    */
   @SerialName("scope_info_enabled")
-  internal val scopeInfoEnabled: Boolean? = null,
+  public val scopeInfoEnabled: Boolean? = null,
   /**
    * Configure Prometheus Exporter to produce metrics with a target info metric for the resource.
    * If omitted or null, true is used.
    */
   @SerialName("target_info_enabled/development")
-  internal val targetInfoEnabledDevelopment: Boolean? = null,
+  public val targetInfoEnabledDevelopment: Boolean? = null,
   /**
    * Configure Prometheus Exporter to add resource attributes as metrics attributes, where the resource attribute keys match the patterns.
    * If omitted, no resource attributes are added.
    */
   @SerialName("resource_constant_labels")
-  internal val resourceConstantLabels: IncludeExclude? = null,
+  public val resourceConstantLabels: IncludeExclude? = null,
   /**
    * Configure how metric names are translated to Prometheus metric names.
    * Values include:
@@ -47,5 +47,5 @@ internal data class ExperimentalPrometheusMetricExporter(
    * If omitted, underscore_escaping_with_suffixes is used.
    */
   @SerialName("translation_strategy")
-  internal val translationStrategy: ExperimentalPrometheusTranslationStrategy? = null,
+  public val translationStrategy: ExperimentalPrometheusTranslationStrategy? = null,
 )

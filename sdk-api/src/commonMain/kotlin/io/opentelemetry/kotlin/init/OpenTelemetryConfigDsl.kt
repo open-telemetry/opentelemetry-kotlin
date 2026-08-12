@@ -34,6 +34,13 @@ public interface OpenTelemetryConfigDsl : ResourceConfigDsl {
     public fun meterProvider(action: MeterProviderConfigDsl.() -> Unit)
 
     /**
+     * Defines configuration for detecting resource information from the environment. Detected
+     * values are overridden by anything declared explicitly via [resource] or [serviceName].
+     * https://opentelemetry.io/docs/specs/otel/resource/sdk/#detecting-resource-information-from-the-environment
+     */
+    public fun resourceDetection(action: ResourceDetectionConfigDsl.() -> Unit)
+
+    /**
      * Defines configuration for how Context behaves.
      */
     public fun context(action: ContextConfigDsl.() -> Unit)

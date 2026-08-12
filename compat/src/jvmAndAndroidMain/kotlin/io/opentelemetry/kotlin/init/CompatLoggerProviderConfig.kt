@@ -10,7 +10,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProviderBuilder
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProviderUtil
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
-import io.opentelemetry.kotlin.attributes.setAttributes
+import io.opentelemetry.kotlin.attributes.attrsFromMap
+import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.logging.LoggerConfigurator
 import io.opentelemetry.kotlin.logging.LoggerProvider
@@ -51,7 +52,7 @@ internal class CompatLoggerProviderConfig(
     }
 
     override fun resource(map: Map<String, Any>) {
-        resourceAttrs.apply { setAttributes(map) }
+        resourceAttrs.apply { setTypedAttributes(map) }
     }
 
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
@@ -99,7 +100,7 @@ internal class CompatLoggerProviderConfig(
         )
         val merged = baseResource.merge(resource)
         if (merged.attributes.isNotEmpty() || merged.schemaUrl != null) {
-            val attrs = CompatAttributesModel().apply { setAttributes(merged.attributes) }.otelJavaAttributes()
+            val attrs = attrsFromMap(merged.attributes)
             builder.setResource(OtelJavaResource.create(attrs, merged.schemaUrl))
         }
         builder.setClock(OtelJavaClockWrapper(clock))

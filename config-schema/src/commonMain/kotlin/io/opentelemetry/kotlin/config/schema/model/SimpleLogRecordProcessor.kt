@@ -4,10 +4,10 @@ package io.opentelemetry.kotlin.config.schema.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class SimpleLogRecordProcessor(
+public data class SimpleLogRecordProcessor(
   /**
    * Configure exporter.
    * Property is required and must be non-null.
    */
-  internal val exporter: LogRecordExporter,
+  public val exporter: LogRecordExporter,
 )

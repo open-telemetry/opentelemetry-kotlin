@@ -5,6 +5,9 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guard
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactory
@@ -25,6 +28,7 @@ internal class LoggerImpl(
     private val logLimitConfig: LogLimitConfig,
     private val shutdownState: ShutdownState,
     private val loggerConfig: LoggerConfig = LoggerConfigImpl(),
+    private val sdkErrorHandler: SdkErrorHandler,
 ) : Logger {
 
     private val contextFactory = contextFactory
@@ -42,7 +46,9 @@ internal class LoggerImpl(
             val ctx = context ?: contextFactory.implicit()
             when {
                 !allowedByConfig(severityNumber, spanContextFrom(ctx)) -> false
-                else -> processor.enabled(ctx, key, severityNumber, eventName)
+                else -> sdkErrorHandler.guardOrDefault(true) {
+                    processor.enabled(ctx, key, severityNumber, eventName)
+                }
             }
         }
 
@@ -108,7 +114,9 @@ internal class LoggerImpl(
             if (attributes != null) {
                 attributes(log)
             }
-            processor?.onEmit(ReadWriteLogRecordImpl(log), ctx)
+            sdkErrorHandler.guard {
+                processor?.onEmit(ReadWriteLogRecordImpl(log), ctx)
+            }
         }
     }
 

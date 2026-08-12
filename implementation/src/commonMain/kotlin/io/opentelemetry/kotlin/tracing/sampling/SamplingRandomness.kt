@@ -1,20 +1,32 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
+import io.opentelemetry.kotlin.factory.isValidHex
+
+/** Length in characters of a hex-encoded trace ID (16 bytes). */
+private const val TRACE_ID_LENGTH = 32
+
 /**
  * Derives the 56-bit randomness value (R) from the least-significant 7 bytes of a hex-encoded
  * trace ID, per W3C Trace Context Level 2.
  *
+ * Returns `0` if [traceId] is not a well-formed hex-encoded trace ID. A third-party SpanContext
+ * implementation can supply a malformed trace ID, and sampling must not throw in that case.
+ *
  * https://opentelemetry.io/docs/specs/otel/trace/tracestate-probability-sampling/#randomness-value-r
  * https://www.w3.org/TR/trace-context-2/#randomness-of-trace-id
  */
-internal fun randomnessFromTraceId(traceId: String): Long =
-    (byteFromBase16(traceId[18], traceId[19]) shl 48) or
+internal fun randomnessFromTraceId(traceId: String): Long {
+    if (traceId.length != TRACE_ID_LENGTH || !traceId.isValidHex()) {
+        return 0L
+    }
+    return (byteFromBase16(traceId[18], traceId[19]) shl 48) or
         (byteFromBase16(traceId[20], traceId[21]) shl 40) or
         (byteFromBase16(traceId[22], traceId[23]) shl 32) or
         (byteFromBase16(traceId[24], traceId[25]) shl 24) or
         (byteFromBase16(traceId[26], traceId[27]) shl 16) or
         (byteFromBase16(traceId[28], traceId[29]) shl 8) or
         byteFromBase16(traceId[30], traceId[31])
+}
 
 /** Parses a single byte (two hex characters) into its numeric value. */
 internal fun byteFromBase16(first: Char, second: Char): Long =

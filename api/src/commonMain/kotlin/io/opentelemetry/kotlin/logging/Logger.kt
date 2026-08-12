@@ -18,7 +18,8 @@ public interface Logger {
      * Returns whether a log record should be emitted based on the provided parameters.
      *
      * This method allows callers to avoid the cost of creating log records that will be dropped by
-     * returning false if a log shouldn't be created.
+     * returning false if a log shouldn't be created. This should be invoked each time before
+     * calling [emit] to ensure an up-to-date response.
      *
      * @param context The context associated with the log record. If null, the implicit context is used.
      * @param severityNumber The severity of the log record (optional)

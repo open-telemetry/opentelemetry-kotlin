@@ -7,19 +7,19 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalHttpServerInstrumentation(
+public data class ExperimentalHttpServerInstrumentation(
   /**
    * Configure headers to capture for inbound http requests.
    * If omitted, no request headers are captured.
    */
   @SerialName("request_captured_headers")
-  internal val requestCapturedHeaders: List<String>? = null,
+  public val requestCapturedHeaders: List<String>? = null,
   /**
    * Configure headers to capture for outbound http responses.
    * If omitted, no response headers are captures.
    */
   @SerialName("response_captured_headers")
-  internal val responseCapturedHeaders: List<String>? = null,
+  public val responseCapturedHeaders: List<String>? = null,
   /**
    * Override the default list of known HTTP methods.
    * Known methods are case-sensitive.
@@ -27,5 +27,5 @@ internal data class ExperimentalHttpServerInstrumentation(
    * If omitted, HTTP methods GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH are known.
    */
   @SerialName("known_methods")
-  internal val knownMethods: List<String>? = null,
+  public val knownMethods: List<String>? = null,
 )

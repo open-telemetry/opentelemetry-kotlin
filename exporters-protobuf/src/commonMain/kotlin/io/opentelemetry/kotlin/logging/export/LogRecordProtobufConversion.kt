@@ -6,14 +6,14 @@ import io.opentelemetry.kotlin.export.conversion.DeserializedSpanContext
 import io.opentelemetry.kotlin.export.conversion.createKeyValues
 import io.opentelemetry.kotlin.export.conversion.toAttributeMap
 import io.opentelemetry.kotlin.export.conversion.toFlagsInt
+import io.opentelemetry.kotlin.export.conversion.toMapValue
+import io.opentelemetry.kotlin.export.conversion.toNestedAnyValue
+import io.opentelemetry.kotlin.export.conversion.toProtoAnyValue
 import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.proto.common.v1.AnyValue
-import io.opentelemetry.proto.common.v1.ArrayValue
-import io.opentelemetry.proto.common.v1.KeyValue
-import io.opentelemetry.proto.common.v1.KeyValueList
 import io.opentelemetry.proto.logs.v1.LogRecord
 import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_DEBUG
 import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_DEBUG2
@@ -79,20 +79,7 @@ internal fun LogRecord.toReadableLogRecord(
 )
 
 private fun Any.toAnyValue(): AnyValue = when (this) {
-    is KotlinAnyValue.NullValue   -> AnyValue()
-    is KotlinAnyValue.StringValue -> AnyValue(string_value = value)
-    is KotlinAnyValue.BoolValue   -> AnyValue(bool_value = value)
-    is KotlinAnyValue.LongValue   -> AnyValue(int_value = value)
-    is KotlinAnyValue.DoubleValue -> AnyValue(double_value = value)
-    is KotlinAnyValue.BytesValue  -> AnyValue(bytes_value = value.toByteString())
-    is KotlinAnyValue.ListValue   -> AnyValue(
-        array_value = ArrayValue(values = values.map { it.toAnyValue() })
-    )
-    is KotlinAnyValue.MapValue    -> AnyValue(
-        kvlist_value = KeyValueList(
-            values = values.map { (k, v) -> KeyValue(key = k, value_ = v.toAnyValue()) }
-        )
-    )
+    is KotlinAnyValue -> toProtoAnyValue()
     is String  -> AnyValue(string_value = this)
     is Boolean -> AnyValue(bool_value = this)
     is Long    -> AnyValue(int_value = this)
@@ -111,29 +98,8 @@ private fun AnyValue.toAny(): Any? = when {
     array_value  != null -> KotlinAnyValue.ListValue(
         values = array_value.values.map { it.toNestedAnyValue() }
     )
-    kvlist_value != null -> KotlinAnyValue.MapValue(
-        values = kvlist_value.values.associate { kv ->
-            kv.key to (kv.value_?.toNestedAnyValue() ?: KotlinAnyValue.NullValue)
-        }
-    )
+    kvlist_value != null -> kvlist_value.toMapValue()
     else                 -> null
-}
-
-private fun AnyValue.toNestedAnyValue(): KotlinAnyValue = when {
-    string_value != null -> KotlinAnyValue.StringValue(string_value)
-    bool_value   != null -> KotlinAnyValue.BoolValue(bool_value)
-    int_value    != null -> KotlinAnyValue.LongValue(int_value)
-    double_value != null -> KotlinAnyValue.DoubleValue(double_value)
-    bytes_value  != null -> KotlinAnyValue.BytesValue(bytes_value.toByteArray())
-    array_value  != null -> KotlinAnyValue.ListValue(
-        values = array_value.values.map { it.toNestedAnyValue() }
-    )
-    kvlist_value != null -> KotlinAnyValue.MapValue(
-        values = kvlist_value.values.associate { kv ->
-            kv.key to (kv.value_?.toNestedAnyValue() ?: KotlinAnyValue.NullValue)
-        }
-    )
-    else                 -> KotlinAnyValue.NullValue
 }
 
 private fun SeverityNumber.convertSeverityNumber(): io.opentelemetry.proto.logs.v1.SeverityNumber =
