@@ -117,10 +117,10 @@ public final class io/opentelemetry/kotlin/factory/ResourceFactory$DefaultImpls 
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/AttributeLimitsConfigDsl {
-	public abstract fun getAttributeCountLimit ()I
-	public abstract fun getAttributeValueLengthLimit ()I
-	public abstract fun setAttributeCountLimit (I)V
-	public abstract fun setAttributeValueLengthLimit (I)V
+	public abstract fun getAttributeCountLimit ()Ljava/lang/Integer;
+	public abstract fun getAttributeValueLengthLimit ()Ljava/lang/Integer;
+	public abstract fun setAttributeCountLimit (Ljava/lang/Integer;)V
+	public abstract fun setAttributeValueLengthLimit (Ljava/lang/Integer;)V
 }
 
 public final class io/opentelemetry/kotlin/init/B3Format : java/lang/Enum {
@@ -204,14 +204,14 @@ public abstract interface class io/opentelemetry/kotlin/init/SamplerConfigDsl {
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/SpanLimitsConfigDsl : io/opentelemetry/kotlin/init/AttributeLimitsConfigDsl {
-	public abstract fun getAttributeCountPerEventLimit ()I
-	public abstract fun getAttributeCountPerLinkLimit ()I
-	public abstract fun getEventCountLimit ()I
-	public abstract fun getLinkCountLimit ()I
-	public abstract fun setAttributeCountPerEventLimit (I)V
-	public abstract fun setAttributeCountPerLinkLimit (I)V
-	public abstract fun setEventCountLimit (I)V
-	public abstract fun setLinkCountLimit (I)V
+	public abstract fun getAttributeCountPerEventLimit ()Ljava/lang/Integer;
+	public abstract fun getAttributeCountPerLinkLimit ()Ljava/lang/Integer;
+	public abstract fun getEventCountLimit ()Ljava/lang/Integer;
+	public abstract fun getLinkCountLimit ()Ljava/lang/Integer;
+	public abstract fun setAttributeCountPerEventLimit (Ljava/lang/Integer;)V
+	public abstract fun setAttributeCountPerLinkLimit (Ljava/lang/Integer;)V
+	public abstract fun setEventCountLimit (Ljava/lang/Integer;)V
+	public abstract fun setLinkCountLimit (Ljava/lang/Integer;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/TraceExportConfigDsl {
