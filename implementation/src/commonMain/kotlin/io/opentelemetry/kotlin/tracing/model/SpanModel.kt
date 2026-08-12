@@ -16,14 +16,14 @@ import io.opentelemetry.kotlin.tracing.SpanDataImpl
 import io.opentelemetry.kotlin.tracing.SpanEventImpl
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.StatusData
-import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 
 /**
  * The single source of truth for span state. This is not exposed to consumers of the API - they
- * are presented with views such as [CreatedSpan], depending on which API call they make.
+ * are presented with views such as [CreatedSpan], or an immutable snapshot once the
+ * span has ended, depending on which API call they make.
  */
 internal class SpanModel(
     private val clock: Clock,
@@ -105,7 +105,10 @@ internal class SpanModel(
                 }
                 state = State.ENDED
                 sdkErrorHandler.guard {
-                    processor?.onEnd(ReadableSpanImpl(this))
+                    // take a snapshot so that processors retain plain data rather than this
+                    // model, releasing its properties once the span
+                    // has ended. Only built if a processor needs it.
+                    processor?.takeIf(SpanProcessor::isEndRequired)?.onEnd(toSpanData())
                 }
             }
         }
@@ -181,7 +184,7 @@ internal class SpanModel(
         }
     }
 
-    override fun toSpanData(): SpanData = SpanDataImpl(
+    override fun toSpanData(): ReadableSpan = SpanDataImpl(
         name,
         status,
         parent,
