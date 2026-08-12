@@ -10,6 +10,11 @@ internal class AttributesModel(
     private val attrs: MutableMap<String, Any> = threadSafeMap()
 ) : AttributesMutator, AttributeContainer {
 
+    /**
+     * True when [attributeValueLengthLimit] doesn't truncate anything, which is the default.
+     */
+    private val truncationDisabled = attributeValueLengthLimit == Int.MAX_VALUE
+
     override fun setBooleanAttribute(key: String, value: Boolean) {
         ifPreconditionsOk(key) {
             attrs[key] = value
@@ -48,7 +53,11 @@ internal class AttributesModel(
         value: List<String>
     ) {
         ifPreconditionsOk(key) {
-            attrs[key] = value.map(::truncateString)
+            attrs[key] = if (truncationDisabled) {
+                value.toList()
+            } else {
+                value.map(::truncateString)
+            }
         }
     }
 
@@ -82,7 +91,12 @@ internal class AttributesModel(
         }
     }
 
-    private fun truncateString(value: String): String = value.take(attributeValueLengthLimit)
+    private fun truncateString(value: String): String =
+        if (value.length > attributeValueLengthLimit) {
+            value.take(attributeValueLengthLimit)
+        } else {
+            value
+        }
 
     private fun truncateByteArray(value: ByteArray): ByteArray =
         if (value.size > attributeValueLengthLimit) {
@@ -92,12 +106,25 @@ internal class AttributesModel(
         }
 
     private fun truncateAnyValue(value: AnyValue): AnyValue {
+        if (truncationDisabled) {
+            return value
+        }
         return when (value) {
             is AnyValue.StringValue -> {
-                AnyValue.StringValue(truncateString(value.value))
+                val truncated = truncateString(value.value)
+                if (truncated === value.value) {
+                    value
+                } else {
+                    AnyValue.StringValue(truncated)
+                }
             }
             is AnyValue.BytesValue -> {
-                AnyValue.BytesValue(truncateByteArray(value.value))
+                val truncated = truncateByteArray(value.value)
+                if (truncated === value.value) {
+                    value
+                } else {
+                    AnyValue.BytesValue(truncated)
+                }
             }
             is AnyValue.ListValue -> {
                 var changed = false
