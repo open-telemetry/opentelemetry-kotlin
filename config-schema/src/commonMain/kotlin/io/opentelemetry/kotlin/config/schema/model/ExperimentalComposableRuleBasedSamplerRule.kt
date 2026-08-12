@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
  * If no conditions are specified, the rule matches all spans that reach it.
  */
 @Serializable
-internal data class ExperimentalComposableRuleBasedSamplerRule(
+public data class ExperimentalComposableRuleBasedSamplerRule(
   /**
    * Values to match against a single attribute. Non-string attributes are matched using their string representation:
    * for example, a value of "404" would match the http.response.status_code 404. For array attributes, if any
@@ -18,7 +18,7 @@ internal data class ExperimentalComposableRuleBasedSamplerRule(
    * If omitted, ignore.
    */
   @SerialName("attribute_values")
-  internal val attributeValues: ExperimentalComposableRuleBasedSamplerRuleAttributeValues? = null,
+  public val attributeValues: ExperimentalComposableRuleBasedSamplerRuleAttributeValues? = null,
   /**
    * Patterns to match against a single attribute. Non-string attributes are matched using their string representation:
    * for example, a pattern of "4*" would match any http.response.status_code in 400-499. For array attributes, if any
@@ -26,8 +26,7 @@ internal data class ExperimentalComposableRuleBasedSamplerRule(
    * If omitted, ignore.
    */
   @SerialName("attribute_patterns")
-  internal val attributePatterns:
-      ExperimentalComposableRuleBasedSamplerRuleAttributePatterns? = null,
+  public val attributePatterns: ExperimentalComposableRuleBasedSamplerRuleAttributePatterns? = null,
   /**
    * The span kinds to match. If the span's kind matches any of these, it matches.
    * Values include:
@@ -39,7 +38,7 @@ internal data class ExperimentalComposableRuleBasedSamplerRule(
    * If omitted, ignore.
    */
   @SerialName("span_kinds")
-  internal val spanKinds: List<SpanKind>? = null,
+  public val spanKinds: List<SpanKind>? = null,
   /**
    * The parent span types to match.
    * Values include:
@@ -48,10 +47,10 @@ internal data class ExperimentalComposableRuleBasedSamplerRule(
    * * remote: remote, a remote parent.
    * If omitted, ignore.
    */
-  internal val parent: List<ExperimentalSpanParent>? = null,
+  public val parent: List<ExperimentalSpanParent>? = null,
   /**
    * The sampler to use for matching spans.
    * Property is required and must be non-null.
    */
-  internal val sampler: ExperimentalComposableSampler,
+  public val sampler: ExperimentalComposableSampler,
 )

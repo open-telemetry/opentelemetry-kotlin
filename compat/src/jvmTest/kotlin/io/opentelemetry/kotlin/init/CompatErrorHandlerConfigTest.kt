@@ -40,6 +40,14 @@ internal class CompatErrorHandlerConfigTest {
         captured.onError(sdkError())
     }
 
+    @Test
+    fun `a handler that throws does not terminate the process`() {
+        val captured = captureExportErrorHandler {
+            errorHandler { throw IllegalStateException("handler boom") }
+        }
+        captured.onError(sdkError())
+    }
+
     /**
      * Builds a compat config, capturing the [SdkErrorHandler] handed to the `export` block. When
      * [configureHandlerFirst] is false the handler is configured after that block has already run.

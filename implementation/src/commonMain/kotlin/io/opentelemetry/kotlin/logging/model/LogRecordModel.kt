@@ -26,9 +26,7 @@ internal class LogRecordModel(
     logLimitConfig: LogLimitConfig,
 ) : ReadWriteLogRecord {
 
-    private val lock by lazy {
-        ReentrantReadWriteLock()
-    }
+    private val lock = ReentrantReadWriteLock()
 
     override var timestamp: Long? = timestamp
         get() = lock.read {

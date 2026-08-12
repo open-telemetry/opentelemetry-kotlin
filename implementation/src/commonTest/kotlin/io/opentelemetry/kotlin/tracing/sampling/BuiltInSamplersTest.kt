@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
@@ -54,6 +55,7 @@ internal class BuiltInSamplersTest {
         idGenerator = idGenerator,
         shutdownState = MutableShutdownState(),
         sampler = sampler,
+        sdkErrorHandler = NoopSdkErrorHandler,
     )
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean): Context {

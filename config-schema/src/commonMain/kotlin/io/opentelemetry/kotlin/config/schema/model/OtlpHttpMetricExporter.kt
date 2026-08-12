@@ -8,42 +8,42 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class OtlpHttpMetricExporter(
+public data class OtlpHttpMetricExporter(
   /**
    * Configure endpoint.
    * If omitted or null, http://localhost:4318/v1/metrics is used.
    */
-  internal val endpoint: String? = null,
+  public val endpoint: String? = null,
   /**
    * Configure TLS settings for the exporter.
    * If omitted, system default TLS settings are used.
    */
-  internal val tls: HttpTls? = null,
+  public val tls: HttpTls? = null,
   /**
    * Configure headers. Entries have higher priority than entries from .headers_list.
    * If an entry's .value is null, the entry is ignored.
    * If omitted, no headers are added.
    */
-  internal val headers: List<NameStringValuePair>? = null,
+  public val headers: List<NameStringValuePair>? = null,
   /**
    * Configure headers. Entries have lower priority than entries from .headers.
    * The value is a list of comma separated key-value pairs matching the format of OTEL_EXPORTER_OTLP_HEADERS. See https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#configuration-options for details.
    * If omitted or null, no headers are added.
    */
   @SerialName("headers_list")
-  internal val headersList: String? = null,
+  public val headersList: String? = null,
   /**
    * Configure compression.
    * Known values include: gzip, none. Implementations may support other compression algorithms.
    * If omitted or null, none is used.
    */
-  internal val compression: String? = null,
+  public val compression: String? = null,
   /**
    * Configure max time (in milliseconds) to wait for each export.
    * Value must be non-negative. A value of 0 indicates no limit (infinity).
    * If omitted or null, 10000 is used.
    */
-  internal val timeout: Long? = null,
+  public val timeout: Long? = null,
   /**
    * Configure the encoding used for messages. 
    * Implementations may not support json.
@@ -52,7 +52,7 @@ internal data class OtlpHttpMetricExporter(
    * * protobuf: Protobuf binary encoding.
    * If omitted, protobuf is used.
    */
-  internal val encoding: OtlpHttpEncoding? = null,
+  public val encoding: OtlpHttpEncoding? = null,
   /**
    * Configure temporality preference.
    * Values include:
@@ -62,7 +62,7 @@ internal data class OtlpHttpMetricExporter(
    * If omitted, cumulative is used.
    */
   @SerialName("temporality_preference")
-  internal val temporalityPreference: ExporterTemporalityPreference? = null,
+  public val temporalityPreference: ExporterTemporalityPreference? = null,
   /**
    * Configure default histogram aggregation.
    * Values include:
@@ -71,5 +71,5 @@ internal data class OtlpHttpMetricExporter(
    * If omitted, explicit_bucket_histogram is used.
    */
   @SerialName("default_histogram_aggregation")
-  internal val defaultHistogramAggregation: ExporterDefaultHistogramAggregation? = null,
+  public val defaultHistogramAggregation: ExporterDefaultHistogramAggregation? = null,
 )

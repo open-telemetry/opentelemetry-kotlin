@@ -5,34 +5,34 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ParentBasedSampler(
+public data class ParentBasedSampler(
   /**
    * Configure root sampler.
    * If omitted, always_on is used.
    */
-  internal val root: Sampler? = null,
+  public val root: Sampler? = null,
   /**
    * Configure remote_parent_sampled sampler.
    * If omitted, always_on is used.
    */
   @SerialName("remote_parent_sampled")
-  internal val remoteParentSampled: Sampler? = null,
+  public val remoteParentSampled: Sampler? = null,
   /**
    * Configure remote_parent_not_sampled sampler.
    * If omitted, always_off is used.
    */
   @SerialName("remote_parent_not_sampled")
-  internal val remoteParentNotSampled: Sampler? = null,
+  public val remoteParentNotSampled: Sampler? = null,
   /**
    * Configure local_parent_sampled sampler.
    * If omitted, always_on is used.
    */
   @SerialName("local_parent_sampled")
-  internal val localParentSampled: Sampler? = null,
+  public val localParentSampled: Sampler? = null,
   /**
    * Configure local_parent_not_sampled sampler.
    * If omitted, always_off is used.
    */
   @SerialName("local_parent_not_sampled")
-  internal val localParentNotSampled: Sampler? = null,
+  public val localParentNotSampled: Sampler? = null,
 )

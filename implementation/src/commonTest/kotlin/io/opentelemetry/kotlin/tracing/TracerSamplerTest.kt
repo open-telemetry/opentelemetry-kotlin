@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
@@ -64,6 +65,7 @@ internal class TracerSamplerTest {
         idGenerator = idGenerator,
         shutdownState = MutableShutdownState(),
         sampler = sampler,
+        sdkErrorHandler = NoopSdkErrorHandler,
     )
 
     @Test

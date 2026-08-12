@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal enum class InstrumentType {
+public enum class InstrumentType {
   @SerialName("counter")
   COUNTER,
   @SerialName("gauge")

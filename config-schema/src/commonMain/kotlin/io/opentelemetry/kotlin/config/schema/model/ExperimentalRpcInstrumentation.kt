@@ -4,7 +4,7 @@ package io.opentelemetry.kotlin.config.schema.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalRpcInstrumentation(
+public data class ExperimentalRpcInstrumentation(
   /**
    * Configure RPC semantic convention version and migration behavior.
    *
@@ -13,5 +13,5 @@ internal data class ExperimentalRpcInstrumentation(
    * See RPC semantic conventions: https://opentelemetry.io/docs/specs/semconv/rpc/
    * If omitted, uses the general stability_opt_in_list setting, or instrumentations continue emitting their default semantic convention version if not set.
    */
-  internal val semconv: ExperimentalSemconvConfig? = null,
+  public val semconv: ExperimentalSemconvConfig? = null,
 )

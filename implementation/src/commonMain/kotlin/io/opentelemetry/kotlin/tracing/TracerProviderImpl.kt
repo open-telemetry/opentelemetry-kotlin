@@ -54,6 +54,7 @@ internal class TracerProviderImpl(
                 idGenerator = idGenerator,
                 shutdownState = shutdownState,
                 sampler = sampler,
+                sdkErrorHandler = tracingConfig.sdkErrorHandler,
             )
         }
     }

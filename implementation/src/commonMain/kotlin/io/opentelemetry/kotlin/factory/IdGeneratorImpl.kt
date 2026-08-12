@@ -26,6 +26,12 @@ internal class IdGeneratorImpl(
     override val invalidTraceId: ByteArray = ByteArray(TRACE_ID_BYTES)
     override val invalidSpanId: ByteArray = ByteArray(SPAN_ID_BYTES)
 
+    /**
+     * Every byte is drawn from [Random], so the generated trace IDs satisfy the W3C Trace Context
+     * Level 2 randomness requirements.
+     */
+    override val generatesRandomTraceIds: Boolean = true
+
     private fun generateId(length: Int): ByteArray {
         val bytes = ByteArray(length)
         do {

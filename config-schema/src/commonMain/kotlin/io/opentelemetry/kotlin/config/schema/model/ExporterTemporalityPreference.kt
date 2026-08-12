@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal enum class ExporterTemporalityPreference {
+public enum class ExporterTemporalityPreference {
   @SerialName("cumulative")
   CUMULATIVE,
   @SerialName("delta")

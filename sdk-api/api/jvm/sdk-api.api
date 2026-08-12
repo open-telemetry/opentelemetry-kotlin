@@ -93,8 +93,13 @@ public abstract interface class io/opentelemetry/kotlin/export/TelemetryCloseabl
 public abstract interface class io/opentelemetry/kotlin/factory/IdGenerator {
 	public abstract fun generateSpanIdBytes ()[B
 	public abstract fun generateTraceIdBytes ()[B
+	public abstract fun getGeneratesRandomTraceIds ()Z
 	public abstract fun getInvalidSpanId ()[B
 	public abstract fun getInvalidTraceId ()[B
+}
+
+public final class io/opentelemetry/kotlin/factory/IdGenerator$DefaultImpls {
+	public static fun getGeneratesRandomTraceIds (Lio/opentelemetry/kotlin/factory/IdGenerator;)Z
 }
 
 public final class io/opentelemetry/kotlin/factory/IdGeneratorKt {
@@ -164,6 +169,7 @@ public abstract interface class io/opentelemetry/kotlin/init/OpenTelemetryConfig
 	public abstract fun loggerProvider (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun meterProvider (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun propagator (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun resourceDetection (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun tracerProvider (Lkotlin/jvm/functions/Function1;)V
 }
 
@@ -187,6 +193,10 @@ public abstract interface class io/opentelemetry/kotlin/init/ResourceConfigDsl {
 
 public final class io/opentelemetry/kotlin/init/ResourceConfigDsl$DefaultImpls {
 	public static synthetic fun resource$default (Lio/opentelemetry/kotlin/init/ResourceConfigDsl;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/init/ResourceDetectionConfigDsl {
+	public abstract fun detector (Lio/opentelemetry/kotlin/resource/ResourceDetector;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/SamplerConfigDsl {
@@ -285,6 +295,11 @@ public abstract interface class io/opentelemetry/kotlin/resource/Resource : io/o
 	public abstract fun asNewResource (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/resource/Resource;
 	public abstract fun getSchemaUrl ()Ljava/lang/String;
 	public abstract fun merge (Lio/opentelemetry/kotlin/resource/Resource;)Lio/opentelemetry/kotlin/resource/Resource;
+}
+
+public abstract interface class io/opentelemetry/kotlin/resource/ResourceDetector {
+	public abstract fun detect (Lio/opentelemetry/kotlin/factory/ResourceFactory;)Lio/opentelemetry/kotlin/resource/Resource;
+	public abstract fun getName ()Ljava/lang/String;
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/TracerConfig {
