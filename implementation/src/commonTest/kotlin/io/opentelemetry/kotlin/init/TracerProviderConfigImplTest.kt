@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
+import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.sdkDefaultAttributes
 import io.opentelemetry.kotlin.sdkDefaultSchemaUrl
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
@@ -273,7 +274,7 @@ internal class TracerProviderConfigImplTest {
 
     private fun Sampler.decisionFor(context: Context): Decision = shouldSample(
         context = context,
-        traceId = "12345678901234567890123456789012",
+        traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
         name = "span",
         spanKind = SpanKind.INTERNAL,
         attributes = AttributesModel(),

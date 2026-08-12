@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
+import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeTraceState
@@ -150,7 +151,7 @@ internal class BuiltInSamplersTest {
         val fakeSampler = FakeSampler(SamplingResult.Decision.DROP)
         val result = samplerDsl.alwaysRecord(root = fakeSampler).shouldSample(
             context = contextFactory.root(),
-            traceId = "000000000000000000ffffffffffffff",
+            traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
             attributes = AttributesModel(),
@@ -164,7 +165,7 @@ internal class BuiltInSamplersTest {
         val fakeSampler = FakeSampler(SamplingResult.Decision.RECORD_ONLY)
         val result = samplerDsl.alwaysRecord(root = fakeSampler).shouldSample(
             context = contextFactory.root(),
-            traceId = "000000000000000000ffffffffffffff",
+            traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
             attributes = AttributesModel(),
@@ -178,7 +179,7 @@ internal class BuiltInSamplersTest {
         val fakeSampler = FakeSampler(SamplingResult.Decision.RECORD_AND_SAMPLE)
         val result = samplerDsl.alwaysRecord(root = fakeSampler).shouldSample(
             context = contextFactory.root(),
-            traceId = "000000000000000000ffffffffffffff",
+            traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
             attributes = AttributesModel(),
@@ -197,7 +198,7 @@ internal class BuiltInSamplersTest {
         )
         val result = samplerDsl.alwaysRecord(root = fakeSampler).shouldSample(
             context = contextFactory.root(),
-            traceId = "000000000000000000ffffffffffffff",
+            traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
             attributes = AttributesModel(),

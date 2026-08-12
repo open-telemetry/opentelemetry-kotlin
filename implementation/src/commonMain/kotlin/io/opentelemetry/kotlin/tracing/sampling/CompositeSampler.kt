@@ -20,7 +20,7 @@ internal class CompositeSampler(
 
     override fun shouldSample(
         context: Context,
-        traceId: String,
+        traceIdBytes: ByteArray,
         name: String,
         spanKind: SpanKind,
         attributes: AttributeContainer,
@@ -36,7 +36,7 @@ internal class CompositeSampler(
         val adjustableThreshold = intentThreshold != null && intent.adjustedCountReliable
         val sampled = intentThreshold?.let {
             val randomVal = if (adjustableThreshold) {
-                otelTraceState.rv ?: randomnessFromTraceId(traceId)
+                otelTraceState.rv ?: randomnessFromTraceIdBytes(traceIdBytes)
             } else {
                 // Use last 56 bits of random number
                 random.nextLong() and 0x00FFFFFFFFFFFFFFL

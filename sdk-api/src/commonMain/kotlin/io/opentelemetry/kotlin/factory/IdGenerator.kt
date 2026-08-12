@@ -34,17 +34,33 @@ public interface IdGenerator {
         get() = false
 }
 
+/** Lowercase hex digits, indexed by nibble value. */
+private val HEX_DIGITS = "0123456789abcdef".toCharArray()
+
+/** ASCII code point -> nibble value, or -1 if the character is not a hex digit. */
+private val HEX_VALUES = IntArray(128) { -1 }.apply {
+    for (i in 0..9) {
+        this['0'.code + i] = i
+    }
+    for (i in 0..5) {
+        this['a'.code + i] = 10 + i
+        this['A'.code + i] = 10 + i
+    }
+}
+
 /**
  * Encodes Span/Trace ID bytes as a hex string.
  */
 @ExperimentalApi
 public fun ByteArray.toHexString(): String {
-    val result = StringBuilder(size * 2)
+    val chars = CharArray(size * 2)
+    var index = 0
     for (b in this) {
         val i = b.toInt() and 0xFF
-        result.append(i.toString(16).padStart(2, '0'))
+        chars[index++] = HEX_DIGITS[i shr 4]
+        chars[index++] = HEX_DIGITS[i and 0x0F]
     }
-    return result.toString()
+    return chars.concatToString()
 }
 
 /**
@@ -52,14 +68,27 @@ public fun ByteArray.toHexString(): String {
  * A string that is not in the expected format return an empty [ByteArray]
  */
 @ExperimentalApi
-public fun String.hexToByteArray(): ByteArray =
-    runCatching {
-        require(length % 2 == 0)
-        val out = ByteArray(length / 2)
-        for (i in out.indices) {
-            val hi = this[i * 2].digitToInt(16)
-            val lo = this[i * 2 + 1].digitToInt(16)
-            out[i] = ((hi shl 4) or lo).toByte()
+public fun String.hexToByteArray(): ByteArray {
+    if (length % 2 != 0) {
+        return ByteArray(0)
+    }
+    val out = ByteArray(length / 2)
+    for (i in out.indices) {
+        val hi = nibbleAt(i * 2)
+        val lo = nibbleAt(i * 2 + 1)
+        if (hi < 0 || lo < 0) {
+            return ByteArray(0)
         }
-        out
-    }.getOrDefault(ByteArray(0))
+        out[i] = ((hi shl 4) or lo).toByte()
+    }
+    return out
+}
+
+/** Returns the nibble value of the hex digit at [index], or -1 if it isn't one. */
+private fun String.nibbleAt(index: Int): Int {
+    val code = this[index].code
+    if (code >= HEX_VALUES.size) {
+        return -1
+    }
+    return HEX_VALUES[code]
+}

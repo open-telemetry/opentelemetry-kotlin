@@ -30,7 +30,7 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
 
     override fun shouldSample(
         context: Context,
-        traceId: String,
+        traceIdBytes: ByteArray,
         name: String,
         spanKind: SpanKind,
         attributes: AttributeContainer,
@@ -48,7 +48,7 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
                 compatibilityWarningLogged = true
                 platformLog(COMPATIBILITY_WARNING)
             }
-            randomnessFromTraceId(traceId)
+            randomnessFromTraceIdBytes(traceIdBytes)
         }
 
         val incomingTh = otelTraceState.th

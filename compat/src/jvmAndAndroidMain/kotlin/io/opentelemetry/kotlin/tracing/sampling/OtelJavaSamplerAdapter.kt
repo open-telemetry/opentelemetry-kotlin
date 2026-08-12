@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSamplingResult
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
+import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision.DROP
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision.RECORD_AND_SAMPLE
@@ -27,7 +28,7 @@ internal class OtelJavaSamplerAdapter(private val delegate: Sampler) : OtelJavaS
         val ctx = parentContext.toOtelKotlinContext()
         val kind = spanKind.toOtelKotlinSpanKind()
         val attrs = CompatAttributesModel(attributes.toBuilder())
-        val result = delegate.shouldSample(ctx, traceId, name, kind, attrs, emptyList())
+        val result = delegate.shouldSample(ctx, traceId.hexToByteArray(), name, kind, attrs, emptyList())
 
         val decision = when (result.decision) {
             DROP -> OtelJavaSamplingDecision.DROP
