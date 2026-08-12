@@ -15,11 +15,6 @@ internal class IdGeneratorImpl(
     private val random: Random = Random.Default
 ) : IdGenerator {
 
-    private companion object {
-        private const val TRACE_ID_BYTES = 16
-        private const val SPAN_ID_BYTES = 8
-    }
-
     override fun generateTraceIdBytes(): ByteArray = generateId(TRACE_ID_BYTES)
     override fun generateSpanIdBytes(): ByteArray = generateId(SPAN_ID_BYTES)
 
@@ -36,7 +31,7 @@ internal class IdGeneratorImpl(
         val bytes = ByteArray(length)
         do {
             random.nextBytes(bytes)
-        } while (bytes.all { it == 0.toByte() }) // reject all-zero IDs
+        } while (bytes.isAllZeroBytes()) // reject all-zero IDs
         return bytes
     }
 }

@@ -124,6 +124,8 @@ internal class TracerSpanContextTest {
         assertFalse(spanContext.isRemote)
         assertNotEquals(idGenerator.invalidTraceId.toHexString(), spanContext.traceId)
         assertNotEquals(idGenerator.invalidSpanId.toHexString(), spanContext.spanId)
+        assertEquals(16, spanContext.traceIdBytes.size)
+        assertEquals(8, spanContext.spanIdBytes.size)
         assertEquals(emptyMap(), spanContext.traceState.asMap())
         assertEquals("03", spanContext.traceFlags.hex)
     }
