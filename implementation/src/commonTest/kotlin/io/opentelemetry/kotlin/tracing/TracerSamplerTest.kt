@@ -51,7 +51,7 @@ internal class TracerSamplerTest {
     }
 
     private fun buildTracer(
-        sampler: Sampler = AlwaysOnSampler(),
+        sampler: Sampler = AlwaysOnSampler,
         limitsCfg: SpanLimitConfig = fakeSpanLimitsConfig
     ) = TracerImpl(
         clock = clock,

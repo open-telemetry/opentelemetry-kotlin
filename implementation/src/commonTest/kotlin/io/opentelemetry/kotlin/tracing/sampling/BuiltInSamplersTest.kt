@@ -76,14 +76,14 @@ internal class BuiltInSamplersTest {
 
     @Test
     fun testAlwaysOnRecordsAndSamplesSpan() {
-        val span = buildTracer(AlwaysOnSampler()).startSpan("span")
+        val span = buildTracer(AlwaysOnSampler).startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
 
     @Test
     fun testAlwaysOffDropsSpan() {
-        val span = buildTracer(AlwaysOffSampler()).startSpan("span")
+        val span = buildTracer(AlwaysOffSampler).startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
     }

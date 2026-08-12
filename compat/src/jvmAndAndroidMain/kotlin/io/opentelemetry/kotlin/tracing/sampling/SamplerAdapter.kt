@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSamplingDecision
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.attributes.EmptyAttributeContainer
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -42,9 +43,13 @@ internal class SamplerAdapter(
             OtelJavaSamplingDecision.RECORD_ONLY -> SamplingResult.Decision.RECORD_ONLY
             else -> SamplingResult.Decision.RECORD_AND_SAMPLE
         }
+        val resultAttributes: AttributeContainer = when {
+            result.attributes.isEmpty -> EmptyAttributeContainer
+            else -> CompatAttributesModel(result.attributes.toBuilder())
+        }
         return object : SamplingResult {
             override val decision = decision
-            override val attributes = CompatAttributesModel(result.attributes.toBuilder())
+            override val attributes: AttributeContainer = resultAttributes
             override val traceState: TraceState = TraceStateAdapter(
                 result.getUpdatedTraceState(OtelJavaTraceState.getDefault()),
             )

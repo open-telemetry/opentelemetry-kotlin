@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.attributes.AttributeContainer
-import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.attributes.EmptyAttributeContainer
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
@@ -67,9 +67,9 @@ internal class CompositeSampler(
             traceState.put(KnownTraceState.OT, derivedOtelTraceState.encode())
         }
         val attr = if (sampled) {
-            intent.attributesProvider?.invoke() ?: AttributesModel()
+            intent.attributesProvider?.invoke() ?: EmptyAttributeContainer
         } else {
-            AttributesModel()
+            EmptyAttributeContainer
         }
 
         return SamplingResultImpl(decision, attr, derivedTraceState)
