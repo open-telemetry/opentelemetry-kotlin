@@ -11,9 +11,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.util.toMap
 import io.ktor.utils.io.ByteReadChannel
+import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.export.toProtobufByteArray
-import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.export.toProtobufByteArray
@@ -36,7 +36,7 @@ import kotlin.time.Duration.Companion.milliseconds
 internal class OtlpClientTest {
 
     private val requestTimeoutMs = 250L
-    private val logRecords = listOf(FakeReadableLogRecord())
+    private val logRecords = listOf(FakeLogRecordData())
     private val spans = listOf(FakeSpanData())
     private val baseUrl = "http://localhost:1234"
     private val expectedUserAgent = "OTel-OTLP-Exporter-Kotlin/${BuildKonfig.VERSION}"
@@ -81,8 +81,8 @@ internal class OtlpClientTest {
     fun testExportMultiLogSuccess() = runTest {
         sendAndAssertLogRequest(
             telemetry = listOf(
-                FakeReadableLogRecord(body = "a"),
-                FakeReadableLogRecord(body = "b")
+                FakeLogRecordData(body = "a"),
+                FakeLogRecordData(body = "b")
             ),
             mockResponseStatus = HttpStatusCode.OK,
             expectedResponse = OtlpResponse.Success,
@@ -326,7 +326,7 @@ internal class OtlpClientTest {
         )
 
     private suspend fun sendAndAssertLogRequest(
-        telemetry: List<ReadableLogRecord>,
+        telemetry: List<LogRecordData>,
         mockResponseStatus: HttpStatusCode,
         expectedResponse: OtlpResponse
     ) {

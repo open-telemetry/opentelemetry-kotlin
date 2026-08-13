@@ -4,6 +4,8 @@ import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.logging.SeverityNumber
+import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
@@ -65,4 +67,18 @@ class FakeReadWriteLogRecord(
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
     }
+
+    override fun toLogRecordData(): LogRecordData = FakeLogRecordData(
+        timestamp = timestamp,
+        observedTimestamp = observedTimestamp,
+        severityNumber = severityNumber,
+        severityText = severityText,
+        body = body,
+        eventName = eventName,
+        attributes = attributes,
+        spanContext = spanContext,
+        resource = resource,
+        instrumentationScopeInfo = instrumentationScopeInfo,
+        droppedAttributesCount = droppedAttributesCount
+    )
 }

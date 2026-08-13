@@ -5,13 +5,16 @@ import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
+import io.opentelemetry.kotlin.logging.LogRecordDataImpl
 import io.opentelemetry.kotlin.logging.SeverityNumber
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
 
 /**
  * The single source of truth for log record state. This is not exposed to consumers of the API - they
- * are presented with views such as [ReadableLogRecordImpl], depending on which API call they make.
+ * are presented with views such as [ReadWriteLogRecordImpl], or an immutable snapshot taken via
+ * [toLogRecordData], depending on which API call they make.
  */
 internal class LogRecordModel(
     override val resource: Resource,
@@ -187,4 +190,18 @@ internal class LogRecordModel(
             attrs.setAnyValueAttribute(key, value)
         }
     }
+
+    override fun toLogRecordData(): LogRecordData = LogRecordDataImpl(
+        timestamp,
+        observedTimestamp,
+        severityNumber,
+        severityText,
+        body,
+        eventName,
+        spanContext,
+        attributes,
+        resource,
+        instrumentationScopeInfo,
+        droppedAttributesCount
+    )
 }

@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
-import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -15,7 +15,7 @@ import kotlin.test.assertTrue
 
 internal class CompositeLogRecordExporterTest {
 
-    private val fakeTelemetry = listOf(FakeReadableLogRecord())
+    private val fakeTelemetry = listOf(FakeLogRecordData())
     private lateinit var errorHandler: FakeSdkErrorHandler
 
     @BeforeTest

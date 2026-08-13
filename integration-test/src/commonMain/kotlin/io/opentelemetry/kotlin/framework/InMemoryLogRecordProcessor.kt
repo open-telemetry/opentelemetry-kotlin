@@ -13,8 +13,9 @@ internal class InMemoryLogRecordProcessor(
 ) : LogRecordProcessor {
 
     override fun onEmit(log: ReadWriteLogRecord, context: Context) {
+        val data = log.toLogRecordData()
         scope.launch {
-            exporter.export(listOf(log))
+            exporter.export(listOf(data))
         }
     }
 

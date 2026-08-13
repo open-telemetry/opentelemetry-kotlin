@@ -8,8 +8,8 @@ import io.opentelemetry.kotlin.init.LoggerProviderConfigDsl
 import io.opentelemetry.kotlin.init.TracerProviderConfigDsl
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.logging.LoggerProvider
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.export.compositeLogRecordProcessor
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import io.opentelemetry.kotlin.tracing.Tracer
 import io.opentelemetry.kotlin.tracing.TracerProvider
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -52,12 +52,14 @@ abstract class OtelKotlinTestRule(context: TestCoroutineScheduler) {
     protected val loggerProviderConfig: LoggerProviderConfigDsl.() -> Unit = {
         config.attributes?.let { resource(config.schemaUrl, it) }
         export {
+            // the test hook is registered last so that it snapshots the log record after
+            // any other processor has had a chance to mutate it
             compositeLogRecordProcessor(
+                *config.logRecordProcessors.toTypedArray(),
                 InMemoryLogRecordProcessor(
                     logRecordExporter,
                     scope,
                 ),
-                *config.logRecordProcessors.toTypedArray()
             )
         }
         logLimits(config.logLimits)
@@ -109,13 +111,13 @@ abstract class OtelKotlinTestRule(context: TestCoroutineScheduler) {
     fun assertLogRecords(
         expectedCount: Int,
         goldenFileName: String? = null,
-        assertions: (logs: List<ReadableLogRecord>) -> Unit = {},
+        assertions: (logs: List<LogRecordData>) -> Unit = {},
     ) {
-        val observedLogRecords: List<ReadableLogRecord> = logRecordExporter.exportedLogRecords
+        val observedLogRecords: List<LogRecordData> = logRecordExporter.exportedLogRecords
         if (observedLogRecords.size != expectedCount) {
             error("Expected $expectedCount log records, but found ${observedLogRecords.size}")
         }
-        val data = observedLogRecords.map(ReadableLogRecord::toSerializable)
+        val data = observedLogRecords.map(LogRecordData::toSerializable)
         assertions(observedLogRecords)
 
         if (goldenFileName != null) {

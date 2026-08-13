@@ -65,7 +65,7 @@ internal fun LogExportConfigDsl.persistingLogRecordProcessorImpl(
         fileSystem = fileSystem,
         dsl = this,
         serializer = { it.toProtobufByteArray() },
-        deserializer = { it.toReadableLogRecordList() },
+        deserializer = { it.toLogRecordDataList() },
         config = PersistedTelemetryConfig(sdkErrorHandler = sdkErrorHandler),
         maxQueueSize = maxQueueSize,
         scheduleDelayMs = scheduleDelayMs,

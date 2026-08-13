@@ -242,6 +242,19 @@ public abstract interface class io/opentelemetry/kotlin/logging/LoggerConfigurat
 	public abstract fun loggerConfig (Lio/opentelemetry/kotlin/InstrumentationScopeInfo;)Lio/opentelemetry/kotlin/logging/LoggerConfig;
 }
 
+public abstract interface class io/opentelemetry/kotlin/logging/data/LogRecordData : io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun getBody ()Ljava/lang/Object;
+	public abstract fun getDroppedAttributesCount ()I
+	public abstract fun getEventName ()Ljava/lang/String;
+	public abstract fun getInstrumentationScopeInfo ()Lio/opentelemetry/kotlin/InstrumentationScopeInfo;
+	public abstract fun getObservedTimestamp ()Ljava/lang/Long;
+	public abstract fun getResource ()Lio/opentelemetry/kotlin/resource/Resource;
+	public abstract fun getSeverityNumber ()Lio/opentelemetry/kotlin/logging/SeverityNumber;
+	public abstract fun getSeverityText ()Ljava/lang/String;
+	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/SpanContext;
+	public abstract fun getTimestamp ()Ljava/lang/Long;
+}
+
 public abstract interface class io/opentelemetry/kotlin/logging/export/LogRecordExporter : io/opentelemetry/kotlin/export/TelemetryCloseable {
 	public abstract fun export (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -272,17 +285,8 @@ public abstract interface class io/opentelemetry/kotlin/logging/model/ReadWriteL
 	public abstract fun setTimestamp (Ljava/lang/Long;)V
 }
 
-public abstract interface class io/opentelemetry/kotlin/logging/model/ReadableLogRecord : io/opentelemetry/kotlin/attributes/AttributeContainer {
-	public abstract fun getBody ()Ljava/lang/Object;
-	public abstract fun getDroppedAttributesCount ()I
-	public abstract fun getEventName ()Ljava/lang/String;
-	public abstract fun getInstrumentationScopeInfo ()Lio/opentelemetry/kotlin/InstrumentationScopeInfo;
-	public abstract fun getObservedTimestamp ()Ljava/lang/Long;
-	public abstract fun getResource ()Lio/opentelemetry/kotlin/resource/Resource;
-	public abstract fun getSeverityNumber ()Lio/opentelemetry/kotlin/logging/SeverityNumber;
-	public abstract fun getSeverityText ()Ljava/lang/String;
-	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/SpanContext;
-	public abstract fun getTimestamp ()Ljava/lang/Long;
+public abstract interface class io/opentelemetry/kotlin/logging/model/ReadableLogRecord : io/opentelemetry/kotlin/logging/data/LogRecordData {
+	public abstract fun toLogRecordData ()Lio/opentelemetry/kotlin/logging/data/LogRecordData;
 }
 
 public abstract interface class io/opentelemetry/kotlin/resource/MutableResource {
