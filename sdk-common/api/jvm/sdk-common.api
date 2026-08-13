@@ -62,6 +62,12 @@ public final class io/opentelemetry/kotlin/export/TimeoutOperationKt {
 	public static final fun runWithTimeout (JLkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class io/opentelemetry/kotlin/propagation/W3CTraceStateCodec {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/propagation/W3CTraceStateCodec;
+	public final fun decode (Ljava/lang/String;)Ljava/util/Map;
+	public final fun encode (Ljava/util/Map;)Ljava/lang/String;
+}
+
 public final class io/opentelemetry/kotlin/resource/ResourceDetectionKt {
 	public static final fun detectResource (Ljava/util/List;Lio/opentelemetry/kotlin/factory/ResourceFactory;Lio/opentelemetry/kotlin/error/SdkErrorHandler;)Lio/opentelemetry/kotlin/resource/Resource;
 }
