@@ -18,9 +18,11 @@ internal class ContextAdapter(
     private val repository: ContextKeyRepository = ContextKeyRepository.INSTANCE
 ) : Context {
 
-    @Suppress("UNCHECKED_CAST")
     override fun <T> set(key: ContextKey<T>, value: T?): Context {
-        val ctx = impl.with(repository.get(key), value as (T & Any))
+        if (value == null) {
+            return this
+        }
+        val ctx = impl.with(repository.get(key), value)
         return ContextAdapter(ctx, repository)
     }
 
