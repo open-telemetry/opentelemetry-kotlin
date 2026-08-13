@@ -43,7 +43,7 @@ internal class ProbabilitySamplerTest {
     fun testRecordsAndSamplesSpan() {
         val result = ProbabilitySampler(0.5).shouldSample(
             context = contextFactory.root(),
-            traceId = "000000000000000000ffffffffffffff",
+            traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
             attributes = AttributesModel(),
@@ -56,7 +56,7 @@ internal class ProbabilitySamplerTest {
     fun testDropsSpan() {
         val result = ProbabilitySampler(0.5).shouldSample(
             context = contextFactory.root(),
-            traceId = "ffffffffffffffffff00000000000000",
+            traceIdBytes = "ffffffffffffffffff00000000000000".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
             attributes = AttributesModel(),
@@ -70,7 +70,7 @@ internal class ProbabilitySamplerTest {
         val ratio = 1.0 / (1L shl 56).toDouble()
         val result = ProbabilitySampler(ratio).shouldSample(
             context = contextFactory.root(),
-            traceId = "000000000000000000ffffffffffffff",
+            traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
             attributes = AttributesModel(),
@@ -84,7 +84,7 @@ internal class ProbabilitySamplerTest {
         val ratio = 1.0 / (1L shl 56).toDouble()
         val result = ProbabilitySampler(ratio).shouldSample(
             context = contextFactory.root(),
-            traceId = "000000000000000000fffffffffffffe",
+            traceIdBytes = "000000000000000000fffffffffffffe".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
             attributes = AttributesModel(),
@@ -116,7 +116,7 @@ internal class ProbabilitySamplerTest {
         )
         val result = ProbabilitySampler(ratio).shouldSample(
             context = context,
-            traceId = traceId,
+            traceIdBytes = traceId.hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
             attributes = AttributesModel(),
@@ -135,7 +135,7 @@ internal class ProbabilitySamplerTest {
         )
         val result = ProbabilitySampler(0.5).shouldSample(
             context = context,
-            traceId = traceId,
+            traceIdBytes = traceId.hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
             attributes = AttributesModel(),
@@ -154,7 +154,7 @@ internal class ProbabilitySamplerTest {
         )
         val result = ProbabilitySampler(0.5).shouldSample(
             context = context,
-            traceId = traceId,
+            traceIdBytes = traceId.hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
             attributes = AttributesModel(),
@@ -173,7 +173,7 @@ internal class ProbabilitySamplerTest {
         )
         val result = ProbabilitySampler(0.5).shouldSample(
             context = context,
-            traceId = traceId,
+            traceIdBytes = traceId.hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
             attributes = AttributesModel(),

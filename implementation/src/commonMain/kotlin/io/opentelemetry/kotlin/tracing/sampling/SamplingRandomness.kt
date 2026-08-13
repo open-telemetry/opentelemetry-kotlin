@@ -1,36 +1,31 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
-import io.opentelemetry.kotlin.factory.isValidHex
+/** Length in bytes of a trace ID. */
+private const val TRACE_ID_BYTES = 16
 
-/** Length in characters of a hex-encoded trace ID (16 bytes). */
-private const val TRACE_ID_LENGTH = 32
+/** Index of the first of the 7 least-significant bytes that supply the 56-bit randomness value. */
+private const val RANDOMNESS_OFFSET = 9
 
 /**
- * Derives the 56-bit randomness value (R) from the least-significant 7 bytes of a hex-encoded
- * trace ID, per W3C Trace Context Level 2.
+ * Derives the 56-bit randomness value (R) from the least-significant 7 bytes of a trace ID,
+ * per W3C Trace Context Level 2.
  *
- * Returns `0` if [traceId] is not a well-formed hex-encoded trace ID. A third-party SpanContext
+ * Returns `0` if [traceIdBytes] is not a well-formed trace ID. A third-party SpanContext
  * implementation can supply a malformed trace ID, and sampling must not throw in that case.
  *
  * https://opentelemetry.io/docs/specs/otel/trace/tracestate-probability-sampling/#randomness-value-r
  * https://www.w3.org/TR/trace-context-2/#randomness-of-trace-id
  */
-internal fun randomnessFromTraceId(traceId: String): Long {
-    if (traceId.length != TRACE_ID_LENGTH || !traceId.isValidHex()) {
+internal fun randomnessFromTraceIdBytes(traceIdBytes: ByteArray): Long {
+    if (traceIdBytes.size != TRACE_ID_BYTES) {
         return 0L
     }
-    return (byteFromBase16(traceId[18], traceId[19]) shl 48) or
-        (byteFromBase16(traceId[20], traceId[21]) shl 40) or
-        (byteFromBase16(traceId[22], traceId[23]) shl 32) or
-        (byteFromBase16(traceId[24], traceId[25]) shl 24) or
-        (byteFromBase16(traceId[26], traceId[27]) shl 16) or
-        (byteFromBase16(traceId[28], traceId[29]) shl 8) or
-        byteFromBase16(traceId[30], traceId[31])
+    var result = 0L
+    for (i in RANDOMNESS_OFFSET until TRACE_ID_BYTES) {
+        result = (result shl 8) or (traceIdBytes[i].toLong() and 0xFF)
+    }
+    return result
 }
-
-/** Parses a single byte (two hex characters) into its numeric value. */
-internal fun byteFromBase16(first: Char, second: Char): Long =
-    ((first.digitToInt(16) shl 4) or second.digitToInt(16)).toLong()
 
 private const val MAX_THRESHOLD: Long = 1L shl 56
 

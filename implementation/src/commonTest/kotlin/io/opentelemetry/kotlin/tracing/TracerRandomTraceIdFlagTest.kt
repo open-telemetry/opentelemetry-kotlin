@@ -111,7 +111,7 @@ internal class TracerRandomTraceIdFlagTest {
 
     private fun buildTracer(
         idGenerator: IdGenerator,
-        sampler: Sampler = AlwaysOnSampler(),
+        sampler: Sampler = AlwaysOnSampler,
     ): TracerImpl {
         val spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlagsFactory, traceStateFactory)
         return TracerImpl(

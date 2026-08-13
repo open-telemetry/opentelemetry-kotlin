@@ -19,7 +19,7 @@ public interface Sampler {
      * Returns whether the span should be sampled or not.
      *
      * @param context A context containing the parent span
-     * @param traceId The traceId of the span to be created
+     * @param traceIdBytes The 16-byte traceId of the span to be created
      * @param name The name of the span to be created
      * @param spanKind The spanKind of the span to be created
      * @param attributes The initial set of attributes of the span to be created
@@ -27,7 +27,7 @@ public interface Sampler {
      */
     public fun shouldSample(
         context: Context,
-        traceId: String,
+        traceIdBytes: ByteArray,
         name: String,
         spanKind: SpanKind,
         attributes: AttributeContainer,

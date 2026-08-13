@@ -10,7 +10,12 @@ import io.opentelemetry.kotlin.tracing.model.SpanLink
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composablealwaysoff
  */
-internal class ComposableAlwaysOffSampler : ComposableSampler {
+internal object ComposableAlwaysOffSampler : ComposableSampler {
+
+    private val intent = SamplingIntentImpl(
+        threshold = null,
+        adjustedCountReliable = false
+    )
 
     override fun getSamplingIntent(
         context: Context,
@@ -18,10 +23,7 @@ internal class ComposableAlwaysOffSampler : ComposableSampler {
         spanKind: SpanKind,
         attributes: AttributeContainer,
         links: List<SpanLink>
-    ): SamplingIntent = SamplingIntentImpl(
-        threshold = null,
-        adjustedCountReliable = false
-    )
+    ): SamplingIntent = intent
 
     override val description: String
         get() = "ComposableAlwaysOffSampler"

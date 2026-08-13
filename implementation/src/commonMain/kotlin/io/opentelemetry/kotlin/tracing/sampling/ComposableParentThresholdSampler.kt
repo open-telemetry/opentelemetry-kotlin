@@ -26,11 +26,18 @@ internal class ComposableParentThresholdSampler(private val root: ComposableSamp
         return when {
             !parent.isValid -> root.getSamplingIntent(context, name, spanKind, attributes, links)
             parentThreshold != null -> SamplingIntentImpl(threshold = parentThreshold, adjustedCountReliable = true)
-            parent.traceFlags.isSampled -> SamplingIntentImpl(threshold = 0, adjustedCountReliable = false)
-            else -> SamplingIntentImpl(threshold = null, adjustedCountReliable = false)
+            parent.traceFlags.isSampled -> SAMPLED_PARENT_WITHOUT_THRESHOLD
+            else -> NOT_SAMPLED
         }
     }
 
     override val description: String
         get() = "ComposableParentThresholdSampler{root:${root.description}}"
+
+    private companion object {
+        private val SAMPLED_PARENT_WITHOUT_THRESHOLD =
+            SamplingIntentImpl(threshold = 0, adjustedCountReliable = false)
+        private val NOT_SAMPLED =
+            SamplingIntentImpl(threshold = null, adjustedCountReliable = false)
+    }
 }

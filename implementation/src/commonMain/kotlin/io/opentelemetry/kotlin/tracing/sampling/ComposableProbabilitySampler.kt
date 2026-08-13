@@ -17,7 +17,10 @@ internal class ComposableProbabilitySampler(private val ratio: Double) : Composa
         validateRatio(ratio)
     }
 
-    private val threshold: Long = thresholdFromRatio(ratio)
+    private val intent = SamplingIntentImpl(
+        threshold = thresholdFromRatio(ratio),
+        adjustedCountReliable = true
+    )
 
     override fun getSamplingIntent(
         context: Context,
@@ -25,10 +28,7 @@ internal class ComposableProbabilitySampler(private val ratio: Double) : Composa
         spanKind: SpanKind,
         attributes: AttributeContainer,
         links: List<SpanLink>
-    ): SamplingIntent = SamplingIntentImpl(
-        threshold = threshold,
-        adjustedCountReliable = true
-    )
+    ): SamplingIntent = intent
 
     override val description: String
         get() = "ComposableProbabilitySampler{$ratio}"

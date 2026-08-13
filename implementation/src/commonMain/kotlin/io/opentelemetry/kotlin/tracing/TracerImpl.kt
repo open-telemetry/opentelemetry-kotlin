@@ -16,7 +16,6 @@ import io.opentelemetry.kotlin.factory.TRACE_ID_BYTES
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.isValidSpanIdBytes
 import io.opentelemetry.kotlin.factory.isValidTraceIdBytes
-import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
@@ -39,7 +38,7 @@ internal class TracerImpl(
     private val resource: Resource,
     private val spanLimitConfig: SpanLimitConfig,
     private val shutdownState: ShutdownState,
-    private val sampler: Sampler = AlwaysOnSampler(),
+    private val sampler: Sampler = AlwaysOnSampler,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Tracer {
 
@@ -91,7 +90,7 @@ internal class TracerImpl(
 
             val result = sampler.shouldSample(
                 context = ctx,
-                traceId = traceIdBytes.toHexString(),
+                traceIdBytes = traceIdBytes,
                 name = name,
                 spanKind = spanKind,
                 attributes = collector.attributes,
