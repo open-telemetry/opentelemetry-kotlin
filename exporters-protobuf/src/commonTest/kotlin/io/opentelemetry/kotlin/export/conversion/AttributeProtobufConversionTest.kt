@@ -8,7 +8,6 @@ import io.opentelemetry.proto.common.v1.KeyValueList
 import okio.ByteString
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -75,10 +74,45 @@ class AttributeProtobufConversionTest {
     }
 
     @Test
-    fun testUnknownTypeExpectException() {
-        assertFailsWith(UnsupportedOperationException::class) {
-            createForValue(Any())
+    fun testUnknownTypeIsStringified() {
+        val value = object {
+            override fun toString(): String = "custom"
         }
+        assertEquals("custom", createForValue(value).value_?.string_value)
+    }
+
+    @Test
+    fun testUnknownTypeIsStringified_map() {
+        assertEquals("{a=1}", createForValue(mapOf("a" to 1)).value_?.string_value)
+    }
+
+    @Test
+    fun testUnknownTypeIsStringified_char() {
+        assertEquals("x", createForValue('x').value_?.string_value)
+    }
+
+    @Test
+    fun testUnknownTypeIsStringified_enum() {
+        assertEquals("SECOND", createForValue(TestEnum.SECOND).value_?.string_value)
+    }
+
+    @Test
+    fun testListWithNullElementDoesNotThrow() {
+        val array = checkNotNull(createForValue(listOf("a", null)).value_?.array_value?.values)
+        assertEquals(2, array.size)
+        assertEquals("a", array[0].string_value)
+        assertNull(array[1].string_value)
+        assertNull(array[1].int_value)
+        assertNull(array[1].double_value)
+        assertNull(array[1].bool_value)
+    }
+
+    @Test
+    fun testRoundTripListWithNullElementDropsTheNull() {
+        val deserialized = mapOf<String, Any>("key" to listOf("a", null))
+            .createKeyValues()
+            .toAttributeMap()
+        assertEquals(listOf("a"), deserialized["key"])
     }
 
     @Test
@@ -301,4 +335,6 @@ class AttributeProtobufConversionTest {
     private fun createForValue(value: Any): KeyValue {
         return mapOf("key" to value).createKeyValues().first()
     }
+
+    private enum class TestEnum { FIRST, SECOND }
 }
