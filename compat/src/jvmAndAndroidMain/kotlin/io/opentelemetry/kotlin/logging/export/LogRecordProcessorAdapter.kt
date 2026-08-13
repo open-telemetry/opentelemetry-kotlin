@@ -2,13 +2,13 @@ package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordProcessor
+import io.opentelemetry.kotlin.awaitOperationResultCode
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
-import io.opentelemetry.kotlin.toOperationResultCode
 
 internal class LogRecordProcessorAdapter(
     private val impl: OtelJavaLogRecordProcessor
@@ -34,10 +34,11 @@ internal class LogRecordProcessorAdapter(
         eventName: String?,
     ): Boolean = !shutdownState.isShutdown
 
-    override suspend fun forceFlush(): OperationResultCode = impl.forceFlush().toOperationResultCode()
+    override suspend fun forceFlush(): OperationResultCode =
+        awaitOperationResultCode { impl.forceFlush() }
 
     override suspend fun shutdown(): OperationResultCode =
         shutdownState.shutdown {
-            impl.shutdown().toOperationResultCode()
+            awaitOperationResultCode { impl.shutdown() }
         }
 }
