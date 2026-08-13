@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.error.guardOrDefault
+import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -28,10 +30,11 @@ internal class TracerProviderImpl(
     private val idGenerator: IdGenerator,
 ) : TracerProvider, TelemetryCloseable {
 
+    private val sdkErrorHandler = tracingConfig.sdkErrorHandler
     private val shutdownState: MutableShutdownState = MutableShutdownState()
     private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(
         tracingConfig.processor?.let { listOf(it) } ?: emptyList(),
-        tracingConfig.sdkErrorHandler,
+        sdkErrorHandler,
     )
     private val noopTracer = NoopOpenTelemetry.tracerProvider.getTracer("")
 
@@ -65,22 +68,28 @@ internal class TracerProviderImpl(
         schemaUrl: String?,
         attributes: (AttributesMutator.() -> Unit)?
     ): Tracer =
-        shutdownState.ifActiveOrElse(noopTracer) {
-            if (name.isEmpty()) {
-                platformLog("Tracer requested without instrumentation scope name")
+        sdkErrorHandler.guardOrDefault(noopTracer, "TracerProvider.getTracer failed") {
+            shutdownState.ifActiveOrElse(noopTracer) {
+                if (name.isEmpty()) {
+                    platformLog("Tracer requested without instrumentation scope name")
+                }
+                val key = apiProvider.createInstrumentationScopeInfo(
+                    name = name,
+                    version = version,
+                    schemaUrl = schemaUrl,
+                    attributes = attributes
+                )
+                apiProvider.getOrCreate(key)
             }
-            val key = apiProvider.createInstrumentationScopeInfo(
-                name = name,
-                version = version,
-                schemaUrl = schemaUrl,
-                attributes = attributes
-            )
-            apiProvider.getOrCreate(key)
         }
 
     override suspend fun forceFlush(): OperationResultCode =
-        runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS, closeable::forceFlush)
+        sdkErrorHandler.guardOrDefaultSuspend(OperationResultCode.Failure, "TracerProvider.forceFlush failed") {
+            runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS, closeable::forceFlush)
+        }
 
     override suspend fun shutdown(): OperationResultCode =
-        shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS, closeable::shutdown)
+        sdkErrorHandler.guardOrDefaultSuspend(OperationResultCode.Failure, "TracerProvider.shutdown failed") {
+            shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS, closeable::shutdown)
+        }
 }

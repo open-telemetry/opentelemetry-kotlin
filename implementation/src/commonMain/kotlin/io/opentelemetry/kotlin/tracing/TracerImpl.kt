@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
@@ -45,12 +46,16 @@ internal class TracerImpl(
     private val noopSpan = NoopOpenTelemetry.tracerProvider.getTracer("").startSpan("")
     private val root = contextFactory.root()
     private val invalidSpanContext = spanContextFactory.invalid
+    private val invalidSpan = NonRecordingSpan(invalidSpanContext, invalidSpanContext)
     private val sampledFlags = traceFlagsFactory.default
     private val sampledRandomFlags = TraceFlagsImpl(isSampled = true, isRandom = true)
     private val unsampledFlags = TraceFlagsImpl(isSampled = false, isRandom = false)
     private val unsampledRandomFlags = TraceFlagsImpl(isSampled = false, isRandom = true)
 
-    override fun enabled(): Boolean = !shutdownState.isShutdown && processor != null
+    override fun enabled(): Boolean =
+        sdkErrorHandler.guardOrDefault(false, "Tracer.enabled failed") {
+            !shutdownState.isShutdown && processor != null
+        }
 
     override fun startSpan(
         name: String,
@@ -59,80 +64,82 @@ internal class TracerImpl(
         startTimestamp: Long?,
         action: (SpanCreationAction.() -> Unit)?
     ): Span =
-        shutdownState.ifActiveOrElse(noopSpan) {
-            if (name.isBlank()) {
-                return@ifActiveOrElse NonRecordingSpan(invalidSpanContext, invalidSpanContext)
+        sdkErrorHandler.guardOrDefault(invalidSpan, "Tracer.startSpan failed") {
+            shutdownState.ifActiveOrElse(noopSpan) {
+                if (name.isBlank()) {
+                    return@ifActiveOrElse invalidSpan
+                }
+
+                val ctx = parentContext ?: contextFactory.implicit()
+
+                val parentSpanContext = when (ctx) {
+                    root -> invalidSpanContext
+                    else -> ctx.extractSpan().spanContext
+                }
+                // only inherit parent trace ID if it matches the format
+                val parentTraceIdBytes = parentSpanContext.traceIdBytes
+                val inheritTraceId = parentSpanContext.isValid && parentTraceIdBytes.isValidTraceIdBytes()
+
+                val traceIdBytes = when {
+                    inheritTraceId -> parentTraceIdBytes
+                    else -> idGenerator.generateTraceIdBytes()
+                }
+                val randomTraceId = when {
+                    inheritTraceId -> parentSpanContext.traceFlags.isRandom
+                    else -> idGenerator.generatesRandomTraceIds
+                }
+                val remoteParent = inheritTraceId && parentSpanContext.isRemote
+                val spanIdBytes = idGenerator.generateSpanIdBytes()
+
+                val collector = SpanCreationCollector(spanLimitConfig)
+                action?.invoke(collector)
+
+                val result = sampler.shouldSample(
+                    context = ctx,
+                    traceIdBytes = traceIdBytes,
+                    name = name,
+                    spanKind = spanKind,
+                    attributes = collector.attributes,
+                    links = collector.links
+                )
+
+                val sampled = result.decision == SamplingResult.Decision.RECORD_AND_SAMPLE
+                val spanContext = calculateSpanContext(
+                    traceIdBytes = traceIdBytes,
+                    spanIdBytes = spanIdBytes,
+                    sampled = sampled,
+                    randomTraceId = randomTraceId,
+                    remoteParent = remoteParent,
+                    traceState = result.traceState,
+                )
+
+                if (result.decision == SamplingResult.Decision.DROP) {
+                    return@ifActiveOrElse NonRecordingSpan(parentSpanContext, spanContext)
+                }
+
+                val spanModel = SpanModel(
+                    clock = clock,
+                    processor = processor,
+                    name = name,
+                    spanKind = spanKind,
+                    startTimestamp = startTimestamp ?: clock.now(),
+                    instrumentationScopeInfo = scope,
+                    resource = resource,
+                    parent = parentSpanContext,
+                    spanContext = spanContext,
+                    spanLimitConfig = spanLimitConfig,
+                    initialLinks = collector.links,
+                    initialDroppedAttributesCount = collector.droppedAttributesCount,
+                    initialDroppedLinksCount = collector.droppedLinksCount,
+                    sdkErrorHandler = sdkErrorHandler
+                )
+                spanModel.setAttributes(result.attributes)
+                spanModel.setAttributes(collector.attributes)
+                sdkErrorHandler.guard {
+                    processor?.onStart(ReadWriteSpanImpl(spanModel), ctx)
+                }
+                CreatedSpan(spanModel)
             }
-
-            val ctx = parentContext ?: contextFactory.implicit()
-
-            val parentSpanContext = when (ctx) {
-                root -> invalidSpanContext
-                else -> ctx.extractSpan().spanContext
-            }
-            // only inherit parent trace ID if it matches the format
-            val parentTraceIdBytes = parentSpanContext.traceIdBytes
-            val inheritTraceId = parentSpanContext.isValid && parentTraceIdBytes.isValidTraceIdBytes()
-
-            val traceIdBytes = when {
-                inheritTraceId -> parentTraceIdBytes
-                else -> idGenerator.generateTraceIdBytes()
-            }
-            val randomTraceId = when {
-                inheritTraceId -> parentSpanContext.traceFlags.isRandom
-                else -> idGenerator.generatesRandomTraceIds
-            }
-            val remoteParent = inheritTraceId && parentSpanContext.isRemote
-            val spanIdBytes = idGenerator.generateSpanIdBytes()
-
-            val collector = SpanCreationCollector(spanLimitConfig)
-            action?.invoke(collector)
-
-            val result = sampler.shouldSample(
-                context = ctx,
-                traceIdBytes = traceIdBytes,
-                name = name,
-                spanKind = spanKind,
-                attributes = collector.attributes,
-                links = collector.links
-            )
-
-            val sampled = result.decision == SamplingResult.Decision.RECORD_AND_SAMPLE
-            val spanContext = calculateSpanContext(
-                traceIdBytes = traceIdBytes,
-                spanIdBytes = spanIdBytes,
-                sampled = sampled,
-                randomTraceId = randomTraceId,
-                remoteParent = remoteParent,
-                traceState = result.traceState,
-            )
-
-            if (result.decision == SamplingResult.Decision.DROP) {
-                return@ifActiveOrElse NonRecordingSpan(parentSpanContext, spanContext)
-            }
-
-            val spanModel = SpanModel(
-                clock = clock,
-                processor = processor,
-                name = name,
-                spanKind = spanKind,
-                startTimestamp = startTimestamp ?: clock.now(),
-                instrumentationScopeInfo = scope,
-                resource = resource,
-                parent = parentSpanContext,
-                spanContext = spanContext,
-                spanLimitConfig = spanLimitConfig,
-                initialLinks = collector.links,
-                initialDroppedAttributesCount = collector.droppedAttributesCount,
-                initialDroppedLinksCount = collector.droppedLinksCount,
-                sdkErrorHandler = sdkErrorHandler
-            )
-            spanModel.setAttributes(result.attributes)
-            spanModel.setAttributes(collector.attributes)
-            sdkErrorHandler.guard {
-                processor?.onStart(ReadWriteSpanImpl(spanModel), ctx)
-            }
-            CreatedSpan(spanModel)
         }
 
     private fun calculateSpanContext(

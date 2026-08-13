@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.init.config.MetricsConfig
@@ -64,5 +65,20 @@ internal class MeterProviderImplTest {
     fun testGetMeterAfterShutdownReturnsNoopMeter() = runTest {
         impl.shutdown()
         assertSame(NoopOpenTelemetry.meterProvider.getMeter(""), impl.getMeter("test"))
+    }
+
+    @Test
+    fun testThrowingAttributesReturnsNoopMeter() {
+        val errorHandler = FakeSdkErrorHandler()
+        val provider = MeterProviderImpl(
+            MetricsConfig(resource = ResourceImpl(AttributesModel(), null), sdkErrorHandler = errorHandler)
+        )
+
+        val meter = provider.getMeter(name = "name") { error("boom") }
+
+        assertSame(NoopOpenTelemetry.meterProvider.getMeter(""), meter)
+        val recorded = errorHandler.userCodeErrors.single()
+        assertEquals("MeterProvider.getMeter failed", recorded.message)
+        assertEquals("boom", recorded.cause.message)
     }
 }

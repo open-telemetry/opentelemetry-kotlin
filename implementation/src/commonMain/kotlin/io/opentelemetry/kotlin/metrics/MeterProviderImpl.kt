@@ -2,6 +2,8 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.error.guardOrDefault
+import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -16,8 +18,9 @@ internal class MeterProviderImpl(
     metricsConfig: MetricsConfig,
 ) : MeterProvider, TelemetryCloseable {
 
+    private val sdkErrorHandler = metricsConfig.sdkErrorHandler
     private val shutdownState: MutableShutdownState = MutableShutdownState()
-    private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(emptyList(), metricsConfig.sdkErrorHandler)
+    private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(emptyList(), sdkErrorHandler)
     private val noopMeter = NoopOpenTelemetry.meterProvider.getMeter("")
 
     private val apiProvider by lazy {
@@ -35,17 +38,23 @@ internal class MeterProviderImpl(
         schemaUrl: String?,
         attributes: (AttributesMutator.() -> Unit)?,
     ): Meter =
-        shutdownState.ifActiveOrElse(noopMeter) {
-            if (name.isEmpty()) {
-                platformLog("Meter requested without instrumentation scope name")
+        sdkErrorHandler.guardOrDefault(noopMeter, "MeterProvider.getMeter failed") {
+            shutdownState.ifActiveOrElse(noopMeter) {
+                if (name.isEmpty()) {
+                    platformLog("Meter requested without instrumentation scope name")
+                }
+                val key = apiProvider.createInstrumentationScopeInfo(name, version, schemaUrl, attributes)
+                apiProvider.getOrCreate(key)
             }
-            val key = apiProvider.createInstrumentationScopeInfo(name, version, schemaUrl, attributes)
-            apiProvider.getOrCreate(key)
         }
 
     override suspend fun forceFlush(): OperationResultCode =
-        runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS, closeable::forceFlush)
+        sdkErrorHandler.guardOrDefaultSuspend(OperationResultCode.Failure, "MeterProvider.forceFlush failed") {
+            runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS, closeable::forceFlush)
+        }
 
     override suspend fun shutdown(): OperationResultCode =
-        shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS, closeable::shutdown)
+        sdkErrorHandler.guardOrDefaultSuspend(OperationResultCode.Failure, "MeterProvider.shutdown failed") {
+            shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS, closeable::shutdown)
+        }
 }
