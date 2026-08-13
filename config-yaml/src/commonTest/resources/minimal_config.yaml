@@ -8,6 +8,9 @@ resource:
     - name: service.name
       value: unknown_service
       type: string
+attribute_limits:
+  attribute_count_limit: 128
+  attribute_value_length_limit: 4096
 tracer_provider:
   processors: []
   limits:
