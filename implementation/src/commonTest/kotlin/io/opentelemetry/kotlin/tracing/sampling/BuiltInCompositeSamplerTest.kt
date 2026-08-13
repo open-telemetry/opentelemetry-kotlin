@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
+import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -60,7 +61,8 @@ internal class BuiltInCompositeSamplerTest {
     private fun Sampler.sample(
         context: Context = contextFactory.root(),
         traceId: String = this@BuiltInCompositeSamplerTest.traceId,
-    ): SamplingResult = shouldSample(context, traceId, "span", SpanKind.INTERNAL, AttributesModel(), emptyList())
+    ): SamplingResult =
+        shouldSample(context, traceId.hexToByteArray(), "span", SpanKind.INTERNAL, AttributesModel(), emptyList())
 
     private fun ComposableSampler.intent(context: Context = contextFactory.root()): SamplingIntent =
         getSamplingIntent(context, "span", SpanKind.INTERNAL, AttributesModel(), emptyList())

@@ -65,14 +65,14 @@ internal class SpanModel(
     override var spanContext: SpanContext
         get() = lock.read { spanContextImpl }
         set(value) = lock.write {
-            if (isRecording()) {
+            if (isRecordingInternal()) {
                 spanContextImpl = value
             }
         }
 
     override fun setName(name: String) {
         lock.write {
-            if (isRecording()) {
+            if (isRecordingInternal()) {
                 nameImpl = name
             }
         }
@@ -80,7 +80,7 @@ internal class SpanModel(
 
     override fun setStatus(status: StatusData) {
         lock.write {
-            if (isRecording() && statusImpl !is StatusData.Ok) {
+            if (isRecordingInternal() && statusImpl !is StatusData.Ok) {
                 statusImpl = status
             }
         }
@@ -99,7 +99,7 @@ internal class SpanModel(
         lock.write {
             if (state == State.STARTED) {
                 state = State.ENDING
-                endTimestamp = timestamp
+                endTimestampImpl = timestamp
                 sdkErrorHandler.guard {
                     processor?.onEnding(ReadWriteSpanImpl(this))
                 }
@@ -114,7 +114,12 @@ internal class SpanModel(
         }
     }
 
-    override fun isRecording(): Boolean = state != State.ENDED
+    override fun isRecording(): Boolean = lock.read { isRecordingInternal() }
+
+    /**
+     * Reads [state] without acquiring [lock]. Callers must already hold [lock].
+     */
+    private fun isRecordingInternal(): Boolean = state != State.ENDED
 
     private val eventsList = mutableListOf<SpanEventData>()
 
@@ -149,7 +154,7 @@ internal class SpanModel(
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         lock.write {
-            if (isRecording()) {
+            if (isRecordingInternal()) {
                 if (linksList.size < spanLimitConfig.linkCountLimit) {
                     val link = buildSpanLink(spanContext, attributes, spanLimitConfig)
                     linksList.add(link)
@@ -166,7 +171,7 @@ internal class SpanModel(
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         lock.write {
-            if (isRecording()) {
+            if (isRecordingInternal()) {
                 if (eventsList.size < spanLimitConfig.eventCountLimit) {
                     val container = AttributesModel(
                         attributeLimit = spanLimitConfig.attributeCountPerEventLimit,
@@ -184,29 +189,38 @@ internal class SpanModel(
         }
     }
 
-    override fun toSpanData(): ReadableSpan = SpanDataImpl(
-        name,
-        status,
-        parent,
-        spanContext,
-        spanKind,
-        startTimestamp,
-        endTimestamp,
-        attributes,
-        events,
-        droppedEventsCount,
-        links,
-        droppedLinksCount,
-        resource,
-        instrumentationScopeInfo,
-        hasEnded,
-        droppedAttributesCount
-    )
+    /**
+     * Takes the snapshot under a single read lock so that the returned [ReadableSpan] is internally
+     * consistent.
+     */
+    override fun toSpanData(): ReadableSpan = lock.read {
+        SpanDataImpl(
+            nameImpl,
+            statusImpl,
+            parent,
+            spanContextImpl,
+            spanKind,
+            startTimestamp,
+            endTimestampImpl,
+            attrs.attributes,
+            eventsList.toList(),
+            droppedEventsCountImpl,
+            linksList.toList(),
+            droppedLinksCountImpl,
+            resource,
+            instrumentationScopeInfo,
+            state == State.ENDED,
+            attrs.droppedAttributesCount + initialDroppedAttributesCount
+        )
+    }
 
-    override var endTimestamp: Long? = null
+    private var endTimestampImpl: Long? = null
+
+    override val endTimestamp: Long?
+        get() = lock.read { endTimestampImpl }
 
     override val hasEnded: Boolean
-        get() = state == State.ENDED
+        get() = lock.read { state == State.ENDED }
 
     private val attrs by lazy {
         AttributesModel(
@@ -228,7 +242,7 @@ internal class SpanModel(
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
         lock.write {
-            if (isRecording()) {
+            if (isRecordingInternal()) {
                 attrs.setBooleanAttribute(key, value)
             }
         }
@@ -236,7 +250,7 @@ internal class SpanModel(
 
     override fun setStringAttribute(key: String, value: String) {
         lock.write {
-            if (isRecording()) {
+            if (isRecordingInternal()) {
                 attrs.setStringAttribute(key, value)
             }
         }
@@ -244,7 +258,7 @@ internal class SpanModel(
 
     override fun setLongAttribute(key: String, value: Long) {
         lock.write {
-            if (isRecording()) {
+            if (isRecordingInternal()) {
                 attrs.setLongAttribute(key, value)
             }
         }
@@ -252,7 +266,7 @@ internal class SpanModel(
 
     override fun setDoubleAttribute(key: String, value: Double) {
         lock.write {
-            if (isRecording()) {
+            if (isRecordingInternal()) {
                 attrs.setDoubleAttribute(key, value)
             }
         }
@@ -263,7 +277,7 @@ internal class SpanModel(
         value: List<Boolean>
     ) {
         lock.write {
-            if (isRecording()) {
+            if (isRecordingInternal()) {
                 attrs.setBooleanListAttribute(key, value)
             }
         }
@@ -274,7 +288,7 @@ internal class SpanModel(
         value: List<String>
     ) {
         lock.write {
-            if (isRecording()) {
+            if (isRecordingInternal()) {
                 attrs.setStringListAttribute(key, value)
             }
         }
@@ -285,7 +299,7 @@ internal class SpanModel(
         value: List<Long>
     ) {
         lock.write {
-            if (isRecording()) {
+            if (isRecordingInternal()) {
                 attrs.setLongListAttribute(key, value)
             }
         }
@@ -296,7 +310,7 @@ internal class SpanModel(
         value: List<Double>
     ) {
         lock.write {
-            if (isRecording()) {
+            if (isRecordingInternal()) {
                 attrs.setDoubleListAttribute(key, value)
             }
         }
@@ -304,7 +318,7 @@ internal class SpanModel(
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
         lock.write {
-            if (isRecording()) {
+            if (isRecordingInternal()) {
                 attrs.setByteArrayAttribute(key, value)
             }
         }
@@ -312,7 +326,7 @@ internal class SpanModel(
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
         lock.write {
-            if (isRecording()) {
+            if (isRecordingInternal()) {
                 attrs.setAnyValueAttribute(key, value)
             }
         }

@@ -23,7 +23,7 @@ internal data class SamplingRule(
 internal class ComposableRuleBasedSampler(rules: List<SamplingRule>) : ComposableSampler {
 
     private val rules: List<SamplingRule> = rules.toList()
-    private val noMatch = ComposableAlwaysOffSampler()
+    private val noMatch = ComposableAlwaysOffSampler
 
     override fun getSamplingIntent(
         context: Context,

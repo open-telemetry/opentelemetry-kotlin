@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.attributes.AttributeContainer
-import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.attributes.EmptyAttributeContainer
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -30,7 +30,7 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
 
     override fun shouldSample(
         context: Context,
-        traceId: String,
+        traceIdBytes: ByteArray,
         name: String,
         spanKind: SpanKind,
         attributes: AttributeContainer,
@@ -48,7 +48,7 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
                 compatibilityWarningLogged = true
                 platformLog(COMPATIBILITY_WARNING)
             }
-            randomnessFromTraceId(traceId)
+            randomnessFromTraceIdBytes(traceIdBytes)
         }
 
         val incomingTh = otelTraceState.th
@@ -70,7 +70,7 @@ internal class ProbabilitySampler(ratio: Double) : Sampler {
 
         return SamplingResultImpl(
             decision = decision,
-            attributes = AttributesModel(),
+            attributes = EmptyAttributeContainer,
             traceState = traceState.put(KnownTraceState.OT, otelTraceState.encode()),
         )
     }
