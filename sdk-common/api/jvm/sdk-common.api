@@ -1,7 +1,3 @@
-public final class io/opentelemetry/kotlin/attributes/AttributeContainerExtKt {
-	public static final fun setAttributes (Lio/opentelemetry/kotlin/attributes/AttributesMutator;Lio/opentelemetry/kotlin/attributes/AttributeContainer;)V
-}
-
 public final class io/opentelemetry/kotlin/attributes/EmptyAttributeContainer : io/opentelemetry/kotlin/attributes/AttributeContainer {
 	public static final field INSTANCE Lio/opentelemetry/kotlin/attributes/EmptyAttributeContainer;
 	public fun getAttributes ()Ljava/util/Map;
