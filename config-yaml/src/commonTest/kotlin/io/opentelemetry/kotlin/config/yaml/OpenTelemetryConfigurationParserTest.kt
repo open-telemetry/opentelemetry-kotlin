@@ -50,6 +50,12 @@ internal class OpenTelemetryConfigurationParserTest {
     }
 
     @Test
+    fun resourceFieldsMayBeOmitted() {
+        val yaml = "$MINIMAL_DOCUMENT\nresource: {}"
+        assertEquals(Resource(), parser.parse(yaml).resource)
+    }
+
+    @Test
     fun parsesFromFileSystem() {
         val fileSystem = FakeFileSystem()
         val path = "config.yaml".toPath()
