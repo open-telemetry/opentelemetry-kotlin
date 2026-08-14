@@ -12,6 +12,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":sdk-api"))
+                api(project(":behavior"))
                 api(project(":config-schema"))
                 implementation(libs.yamlkt)
                 implementation(libs.okio)
