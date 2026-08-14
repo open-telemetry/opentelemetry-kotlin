@@ -3,14 +3,14 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.FakeAttributesMutator
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 
 class FakeLogger(
     val name: String,
     var enabledResult: () -> Boolean = { true },
 ) : Logger {
 
-    val logs: MutableList<FakeReadableLogRecord> = mutableListOf()
+    val logs: MutableList<FakeLogRecordData> = mutableListOf()
 
     override fun enabled(
         context: Context?,
@@ -51,7 +51,7 @@ class FakeLogger(
     ) {
         eventName.toString()
         logs.add(
-            FakeReadableLogRecord(
+            FakeLogRecordData(
                 timestamp,
                 observedTimestamp,
                 severityNumber,
@@ -59,7 +59,7 @@ class FakeLogger(
                 body,
                 eventName,
                 attributes?.let { FakeAttributesMutator().apply(it).attributes }
-                    ?: FakeReadableLogRecord().attributes,
+                    ?: FakeLogRecordData().attributes,
             )
         )
     }

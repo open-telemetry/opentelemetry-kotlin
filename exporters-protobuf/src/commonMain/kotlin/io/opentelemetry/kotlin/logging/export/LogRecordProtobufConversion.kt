@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.export.conversion.toFlagsInt
 import io.opentelemetry.kotlin.export.conversion.toMapValue
 import io.opentelemetry.kotlin.export.conversion.toNestedAnyValue
 import io.opentelemetry.kotlin.export.conversion.toProtoAnyValue
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
@@ -43,7 +43,7 @@ import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN4
 import okio.ByteString.Companion.toByteString
 
 
-internal fun ReadableLogRecord.toProtobuf(): LogRecord = LogRecord(
+internal fun LogRecordData.toProtobuf(): LogRecord = LogRecord(
     trace_id = spanContext.traceIdBytes.toByteString(),
     span_id = spanContext.spanIdBytes.toByteString(),
     flags = spanContext.traceFlags.toFlagsInt(),
@@ -57,10 +57,10 @@ internal fun ReadableLogRecord.toProtobuf(): LogRecord = LogRecord(
     dropped_attributes_count = droppedAttributesCount,
 )
 
-internal fun LogRecord.toReadableLogRecord(
+internal fun LogRecord.toLogRecordData(
     resource: Resource,
     instrumentationScopeInfo: InstrumentationScopeInfo
-): ReadableLogRecord = DeserializedReadableLogRecord(
+): LogRecordData = DeserializedLogRecordData(
     timestamp = time_unix_nano,
     observedTimestamp = observed_time_unix_nano,
     severityNumber = severity_number.toSeverityNumber(),
@@ -160,7 +160,7 @@ private fun io.opentelemetry.proto.logs.v1.SeverityNumber.toSeverityNumber(): Se
         SEVERITY_NUMBER_FATAL4 -> SeverityNumber.FATAL4
     }
 
-private class DeserializedReadableLogRecord(
+private class DeserializedLogRecordData(
     override val timestamp: Long?,
     override val observedTimestamp: Long?,
     override val severityNumber: SeverityNumber?,
@@ -172,4 +172,4 @@ private class DeserializedReadableLogRecord(
     override val resource: Resource,
     override val instrumentationScopeInfo: InstrumentationScopeInfo,
     override val droppedAttributesCount: Int
-) : ReadableLogRecord
+) : LogRecordData

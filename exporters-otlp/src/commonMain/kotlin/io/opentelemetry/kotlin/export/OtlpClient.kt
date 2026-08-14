@@ -18,9 +18,9 @@ import io.opentelemetry.kotlin.export.OtlpResponse.RetryableError
 import io.opentelemetry.kotlin.export.OtlpResponse.ServerError
 import io.opentelemetry.kotlin.export.OtlpResponse.Success
 import io.opentelemetry.kotlin.export.OtlpResponse.Unknown
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.export.deserializeLogRecordPartialSuccess
 import io.opentelemetry.kotlin.logging.export.toProtobufByteArray
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.export.deserializeTraceRecordPartialSuccess
@@ -36,7 +36,7 @@ internal class OtlpClient(
     private val contentType = ContentType.parse("application/x-protobuf")
     private val userAgent = "OTel-OTLP-Exporter-Kotlin/${BuildKonfig.VERSION}"
 
-    suspend fun exportLogs(telemetry: List<ReadableLogRecord>): OtlpResponse = exportTelemetry(
+    suspend fun exportLogs(telemetry: List<LogRecordData>): OtlpResponse = exportTelemetry(
         OtlpEndpoint.Logs,
         telemetry::toProtobufByteArray,
         ByteArray::deserializeLogRecordPartialSuccess

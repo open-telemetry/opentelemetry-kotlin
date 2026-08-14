@@ -5,17 +5,17 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.export.TelemetryRepository
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 
 @ExperimentalApi
 internal class PersistingLogRecordExporter(
     private val exporter: LogRecordExporter,
-    private val repository: TelemetryRepository<ReadableLogRecord>,
+    private val repository: TelemetryRepository<LogRecordData>,
 ) : LogRecordExporter {
 
     private val shutdownState = MutableShutdownState()
 
-    override suspend fun export(telemetry: List<ReadableLogRecord>): OperationResultCode =
+    override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode =
         shutdownState.ifActive {
             // if persistence failed attempt immediate export as a best-effort fallback
             repository.store(telemetry) ?: return exporter.export(telemetry)

@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setFlattenedAnyValueAttribute
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.StatusData
+import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusData
 import java.util.concurrent.TimeUnit
 
@@ -49,7 +50,7 @@ internal class ReadWriteSpanAdapter(
         if (attributes != null) {
             attributes(container)
         }
-        val ctx = (spanContext as SpanContextAdapter).impl
+        val ctx = spanContext.toOtelJavaSpanContext()
         impl.addLink(ctx, container.otelJavaAttributes())
     }
 

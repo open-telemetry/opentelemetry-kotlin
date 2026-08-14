@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaCompletableResultCode
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordExporter
-import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.runCurrent
@@ -40,7 +40,7 @@ internal class LogRecordExporterAdapterTest {
 
     @Test
     fun `test export`() = runTest {
-        val original = FakeReadableLogRecord()
+        val original = FakeLogRecordData()
         assertEquals(OperationResultCode.Success, wrapper.export(listOf(original)))
 
         val observed = impl.exports.single()
@@ -64,7 +64,7 @@ internal class LogRecordExporterAdapterTest {
     @Test
     fun `test export returns failure after shutdown`() = runTest {
         wrapper.shutdown()
-        val result = wrapper.export(listOf(FakeReadableLogRecord()))
+        val result = wrapper.export(listOf(FakeLogRecordData()))
         assertEquals(OperationResultCode.Failure, result)
         assertTrue(impl.exports.isEmpty())
     }
@@ -86,7 +86,7 @@ internal class LogRecordExporterAdapterTest {
         val pending = OtelJavaCompletableResultCode()
         impl.nextResult = { pending }
 
-        val result = async { wrapper.export(listOf(FakeReadableLogRecord())) }
+        val result = async { wrapper.export(listOf(FakeLogRecordData())) }
         runCurrent()
 
         pending.succeed()
@@ -114,7 +114,7 @@ internal class LogRecordExporterAdapterTest {
     @Test
     fun `test export times out if the result never completes`() = runTest {
         impl.nextResult = { OtelJavaCompletableResultCode() }
-        assertEquals(OperationResultCode.Failure, wrapper.export(listOf(FakeReadableLogRecord())))
+        assertEquals(OperationResultCode.Failure, wrapper.export(listOf(FakeLogRecordData())))
     }
 
     @Test
@@ -122,7 +122,7 @@ internal class LogRecordExporterAdapterTest {
         impl.nextResult = { throw IllegalStateException("boom") }
 
         assertEquals(OperationResultCode.Failure, wrapper.forceFlush())
-        assertEquals(OperationResultCode.Failure, wrapper.export(listOf(FakeReadableLogRecord())))
+        assertEquals(OperationResultCode.Failure, wrapper.export(listOf(FakeLogRecordData())))
         assertEquals(OperationResultCode.Failure, wrapper.shutdown())
     }
 }
