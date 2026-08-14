@@ -138,6 +138,10 @@ public abstract interface class io/opentelemetry/kotlin/init/ComposableRuleBased
 public abstract interface annotation class io/opentelemetry/kotlin/init/ConfigDsl : java/lang/annotation/Annotation {
 }
 
+public abstract interface class io/opentelemetry/kotlin/init/ConfigFileDsl {
+	public abstract fun configFile (Ljava/lang/String;)V
+}
+
 public abstract interface class io/opentelemetry/kotlin/init/ContextConfigDsl {
 	public abstract fun getStorageMode ()Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
 	public abstract fun setStorageMode (Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;)V
@@ -161,7 +165,7 @@ public abstract interface class io/opentelemetry/kotlin/init/LoggerProviderConfi
 public abstract interface class io/opentelemetry/kotlin/init/MeterProviderConfigDsl : io/opentelemetry/kotlin/init/ResourceConfigDsl {
 }
 
-public abstract interface class io/opentelemetry/kotlin/init/OpenTelemetryConfigDsl : io/opentelemetry/kotlin/init/ResourceConfigDsl {
+public abstract interface class io/opentelemetry/kotlin/init/OpenTelemetryConfigDsl : io/opentelemetry/kotlin/init/ConfigFileDsl, io/opentelemetry/kotlin/init/ResourceConfigDsl {
 	public abstract fun attributeLimits (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun context (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun errorHandler (Lio/opentelemetry/kotlin/error/SdkErrorHandler;)V

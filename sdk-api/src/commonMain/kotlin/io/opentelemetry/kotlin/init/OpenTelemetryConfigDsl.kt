@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.propagation.TextMapPropagator
  */
 @ExperimentalApi
 @ConfigDsl
-public interface OpenTelemetryConfigDsl : ResourceConfigDsl {
+public interface OpenTelemetryConfigDsl : ResourceConfigDsl, ConfigFileDsl {
 
     /**
      * Defines global attribute limits. This can be overridden on individual signals.
