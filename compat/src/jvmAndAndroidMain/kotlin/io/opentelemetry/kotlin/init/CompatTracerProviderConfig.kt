@@ -41,16 +41,13 @@ internal class CompatTracerProviderConfig(
     internal val spanLimitsConfig = CompatSpanLimitsConfig()
     private var spanLimitsAction: (SpanLimitsConfigDsl.() -> Unit)? = null
     private var tracerConfigurator: TracerConfigurator? = null
-    private var serviceNameOverride: String? = null
-
     private val resourceAttrs = CompatAttributesModel()
     private var resourceSchemaUrl: String? = null
 
-    override var serviceName: String
-        get() = serviceNameOverride ?: "unknown_service"
+    override var serviceName: String? = null
         set(value) {
-            serviceNameOverride = value
-            resourceAttrs.setStringAttribute(ServiceAttributes.SERVICE_NAME, value)
+            field = value
+            value?.let { resourceAttrs.setStringAttribute(ServiceAttributes.SERVICE_NAME, it) }
         }
 
     override fun resource(schemaUrl: String?, attributes: AttributesMutator.() -> Unit) {
@@ -102,7 +99,7 @@ internal class CompatTracerProviderConfig(
         clock: Clock,
         idGenerator: IdGenerator,
         baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build()),
-        globalLimits: CompatAttributeLimitsConfig? = null,
+        globalLimits: AttributeLimitsConfigDsl? = null,
     ): TracerProvider {
         builder.setIdGenerator(
             when (idGenerator) {
@@ -110,13 +107,11 @@ internal class CompatTracerProviderConfig(
                 else -> OtelJavaIdGeneratorAdapter(idGenerator)
             }
         )
-        if (globalLimits?.attributeCountLimitSet == true) {
-            spanLimitsConfig.attributeCountLimit = globalLimits.attributeCountLimit
-        }
-        if (globalLimits?.attributeValueLengthLimitSet == true) {
-            spanLimitsConfig.attributeValueLengthLimit = globalLimits.attributeValueLengthLimit
-        }
         spanLimitsAction?.invoke(spanLimitsConfig)
+        spanLimitsConfig.attributeCountLimit =
+            spanLimitsConfig.attributeCountLimit ?: globalLimits?.attributeCountLimit
+        spanLimitsConfig.attributeValueLengthLimit =
+            spanLimitsConfig.attributeValueLengthLimit ?: globalLimits?.attributeValueLengthLimit
         builder.setSpanLimits(spanLimitsConfig.build())
         tracerConfigurator?.let(::applyTracerConfigurator)
         val resource = ResourceAdapter(

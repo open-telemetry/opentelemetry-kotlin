@@ -1,6 +1,8 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
+import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.init.config.LoggingConfig
@@ -41,7 +43,7 @@ internal class LoggerProviderConfigImpl(
 
     fun generateLoggingConfig(
         base: Resource,
-        globalLimits: AttributeLimitsConfigImpl? = null
+        globalLimits: AttributeLimitsConfigDsl? = null
     ): LoggingConfig = LoggingConfig(
         processor = processor,
         logLimits = generateLogLimitsConfig(globalLimits),
@@ -50,16 +52,20 @@ internal class LoggerProviderConfigImpl(
         loggerConfigurator = loggerConfigurator,
     )
 
-    private fun generateLogLimitsConfig(globalLimits: AttributeLimitsConfigImpl?): LogLimitConfig {
+    /**
+     * A limit left unset by the log limits falls back to the global attribute limits, then to the
+     * default this SDK applies.
+     */
+    private fun generateLogLimitsConfig(globalLimits: AttributeLimitsConfigDsl?): LogLimitConfig {
         val impl = LogLimitsConfigImpl()
-        globalLimits?.let {
-            impl.attributeCountLimit = it.attributeCountLimit
-            impl.attributeValueLengthLimit = it.attributeValueLengthLimit
-        }
         logLimitsAction(impl)
         return LogLimitConfig(
-            attributeCountLimit = impl.attributeCountLimit,
-            attributeValueLengthLimit = impl.attributeValueLengthLimit,
+            attributeCountLimit = impl.attributeCountLimit
+                ?: globalLimits?.attributeCountLimit
+                ?: DEFAULT_ATTRIBUTE_LIMIT,
+            attributeValueLengthLimit = impl.attributeValueLengthLimit
+                ?: globalLimits?.attributeValueLengthLimit
+                ?: DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
         )
     }
 }

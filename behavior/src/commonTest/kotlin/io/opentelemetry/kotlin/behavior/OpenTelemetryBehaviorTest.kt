@@ -8,7 +8,10 @@ internal class OpenTelemetryBehaviorTest {
 
     @Test
     fun everyFieldStartsUnset() {
-        assertNull(OpenTelemetryBehavior().tracerProvider)
+        val behavior = OpenTelemetryBehavior()
+
+        assertNull(behavior.tracerProvider)
+        assertNull(behavior.loggerProvider)
     }
 
     @Test
@@ -51,6 +54,21 @@ internal class OpenTelemetryBehaviorTest {
 
         assertEquals(1, merged.tracerProvider?.spanLimits?.attributeCountLimit)
         assertEquals(99, merged.tracerProvider?.spanLimits?.eventCountLimit)
+    }
+
+    @Test
+    fun mergesTracingAndLoggingBranchesIndependently() {
+        val tracing = OpenTelemetryBehavior(
+            tracerProvider = TracerProviderBehavior(spanLimits = SpanLimitsBehavior(linkCountLimit = 3)),
+        )
+        val logging = OpenTelemetryBehavior(
+            loggerProvider = LoggerProviderBehavior(logLimits = LogLimitsBehavior(attributeCountLimit = 7)),
+        )
+
+        val merged = tracing.mergeWith(logging)
+
+        assertEquals(3, merged.tracerProvider?.spanLimits?.linkCountLimit)
+        assertEquals(7, merged.loggerProvider?.logLimits?.attributeCountLimit)
     }
 
     @Test

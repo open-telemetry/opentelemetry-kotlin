@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordExporter
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.toOperationResultCode
 
 internal class LogRecordExporterAdapter(
@@ -12,9 +12,10 @@ internal class LogRecordExporterAdapter(
 
     private val shutdownState = MutableShutdownState()
 
-    override suspend fun export(telemetry: List<ReadableLogRecord>): OperationResultCode =
+    override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode =
         shutdownState.ifActive {
-            impl.export(telemetry.map(ReadableLogRecord::toLogRecordData)).toOperationResultCode()
+            impl.export(telemetry.map(LogRecordData::toOtelJavaLogRecordData))
+                .toOperationResultCode()
         }
 
     override suspend fun forceFlush(): OperationResultCode = impl.flush().toOperationResultCode()

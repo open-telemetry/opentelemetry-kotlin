@@ -1,7 +1,3 @@
-public final class io/opentelemetry/kotlin/attributes/AttributeContainerExtKt {
-	public static final fun setAttributes (Lio/opentelemetry/kotlin/attributes/AttributesMutator;Lio/opentelemetry/kotlin/attributes/AttributeContainer;)V
-}
-
 public final class io/opentelemetry/kotlin/attributes/EmptyAttributeContainer : io/opentelemetry/kotlin/attributes/AttributeContainer {
 	public static final field INSTANCE Lio/opentelemetry/kotlin/attributes/EmptyAttributeContainer;
 	public fun getAttributes ()Ljava/util/Map;
@@ -70,6 +66,12 @@ public final class io/opentelemetry/kotlin/export/TelemetryExceptionHandlerKt {
 
 public final class io/opentelemetry/kotlin/export/TimeoutOperationKt {
 	public static final fun runWithTimeout (JLkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/opentelemetry/kotlin/propagation/W3CTraceStateCodec {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/propagation/W3CTraceStateCodec;
+	public final fun decode (Ljava/lang/String;)Ljava/util/Map;
+	public final fun encode (Ljava/util/Map;)Ljava/lang/String;
 }
 
 public final class io/opentelemetry/kotlin/resource/ResourceDetectionKt {

@@ -1,8 +1,12 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
+import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.SpanFactory
+import io.opentelemetry.kotlin.init.config.DEFAULT_EVENT_LIMIT
+import io.opentelemetry.kotlin.init.config.DEFAULT_LINK_LIMIT
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.platformLog
@@ -48,7 +52,7 @@ internal class TracerProviderConfigImpl(
         tracerConfigurator = configurator
     }
 
-    fun generateTracingConfig(base: Resource, globalLimits: AttributeLimitsConfigImpl? = null): TracingConfig = TracingConfig(
+    fun generateTracingConfig(base: Resource, globalLimits: AttributeLimitsConfigDsl? = null): TracingConfig = TracingConfig(
         processor = processor,
         spanLimits = generateSpanLimitsConfig(globalLimits),
         resource = base.merge(resourceConfigImpl.generateResource()),
@@ -59,20 +63,24 @@ internal class TracerProviderConfigImpl(
 
     private class SamplerConfigImpl(override val spanFactory: SpanFactory) : SamplerConfigDsl
 
-    private fun generateSpanLimitsConfig(globalLimits: AttributeLimitsConfigImpl?): SpanLimitConfig {
+    /**
+     * A limit left unset by the span limits falls back to the global attribute limits, then to the
+     * default this SDK applies. Only the attribute limits are configurable globally.
+     */
+    private fun generateSpanLimitsConfig(globalLimits: AttributeLimitsConfigDsl?): SpanLimitConfig {
         val impl = SpanLimitsConfigImpl()
-        globalLimits?.let {
-            impl.attributeCountLimit = it.attributeCountLimit
-            impl.attributeValueLengthLimit = it.attributeValueLengthLimit
-        }
         spanLimitsAction(impl)
         return SpanLimitConfig(
-            attributeCountLimit = impl.attributeCountLimit,
-            attributeValueLengthLimit = impl.attributeValueLengthLimit,
-            linkCountLimit = impl.linkCountLimit,
-            eventCountLimit = impl.eventCountLimit,
-            attributeCountPerEventLimit = impl.attributeCountPerEventLimit,
-            attributeCountPerLinkLimit = impl.attributeCountPerLinkLimit,
+            attributeCountLimit = impl.attributeCountLimit
+                ?: globalLimits?.attributeCountLimit
+                ?: DEFAULT_ATTRIBUTE_LIMIT,
+            attributeValueLengthLimit = impl.attributeValueLengthLimit
+                ?: globalLimits?.attributeValueLengthLimit
+                ?: DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
+            linkCountLimit = impl.linkCountLimit ?: DEFAULT_LINK_LIMIT,
+            eventCountLimit = impl.eventCountLimit ?: DEFAULT_EVENT_LIMIT,
+            attributeCountPerEventLimit = impl.attributeCountPerEventLimit ?: DEFAULT_ATTRIBUTE_LIMIT,
+            attributeCountPerLinkLimit = impl.attributeCountPerLinkLimit ?: DEFAULT_ATTRIBUTE_LIMIT,
         )
     }
 }

@@ -42,13 +42,10 @@ internal class CompatOpenTelemetryConfig(
 
     private val globalResourceAttrs = CompatAttributesModel()
     private var globalResourceSchemaUrl: String? = null
-    private var serviceNameOverride: String? = null
-
-    override var serviceName: String
-        get() = serviceNameOverride ?: "unknown_service"
+    override var serviceName: String? = null
         set(value) {
-            serviceNameOverride = value
-            globalResourceAttrs.setStringAttribute(ServiceAttributes.SERVICE_NAME, value)
+            field = value
+            value?.let { globalResourceAttrs.setStringAttribute(ServiceAttributes.SERVICE_NAME, it) }
         }
 
     override fun resource(schemaUrl: String?, attributes: AttributesMutator.() -> Unit) {

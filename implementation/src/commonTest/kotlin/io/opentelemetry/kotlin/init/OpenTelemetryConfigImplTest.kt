@@ -35,7 +35,7 @@ internal class OpenTelemetryConfigImplTest {
         val cfg = OpenTelemetryConfigImpl(clock)
         assertNull(cfg.generateTracingConfig().processor)
         assertNull(cfg.generateLoggingConfig().processor)
-        assertEquals(ImplicitContextStorageMode.GLOBAL, cfg.contextConfig.storageMode)
+        assertNull(cfg.contextConfig.storageMode)
         assertSame(NoopOpenTelemetry.propagator, cfg.propagatorCfg.buildPropagator())
     }
 
@@ -67,7 +67,7 @@ internal class OpenTelemetryConfigImplTest {
             export { FakeSpanProcessor() }
         }
         cfg.context {
-            assertEquals(ImplicitContextStorageMode.GLOBAL, storageMode)
+            assertNull(storageMode)
         }
         assertNotNull(cfg.generateTracingConfig().processor)
         assertNotNull(cfg.generateLoggingConfig().processor)
@@ -132,6 +132,27 @@ internal class OpenTelemetryConfigImplTest {
             assertEquals(256, attributeValueLengthLimit)
         }
         assertEquals(64, cfg.generateLoggingConfig().logLimits.attributeCountLimit)
+    }
+
+    @Test
+    fun testSignalZeroAttrLimitBeatsGlobal() {
+        val cfg = OpenTelemetryConfigImpl(clock).apply {
+            attributeLimits {
+                attributeCountLimit = 64
+            }
+            tracerProvider {
+                spanLimits {
+                    attributeCountLimit = 0
+                }
+            }
+            loggerProvider {
+                logLimits {
+                    attributeCountLimit = 0
+                }
+            }
+        }
+        assertEquals(0, cfg.generateTracingConfig().spanLimits.attributeCountLimit)
+        assertEquals(0, cfg.generateLoggingConfig().logLimits.attributeCountLimit)
     }
 
     @Test

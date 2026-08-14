@@ -182,6 +182,36 @@ class CommonProtobufConversionTest {
     }
 
     @Test
+    fun testDeserializedSpanContext_malformedTraceState() {
+        val context = DeserializedSpanContext(
+            traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
+            spanIdBytes = "1234567890123456".hexToByteArray(),
+            traceStateString = "foo=bar,nokey,baz=qux"
+        )
+        assertEquals(mapOf("foo" to "bar", "baz" to "qux"), context.traceState.asMap())
+    }
+
+    @Test
+    fun testDeserializedSpanContext_traceStateWithTrailingSeparator() {
+        val context = DeserializedSpanContext(
+            traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
+            spanIdBytes = "1234567890123456".hexToByteArray(),
+            traceStateString = "foo=bar,"
+        )
+        assertEquals(mapOf("foo" to "bar"), context.traceState.asMap())
+    }
+
+    @Test
+    fun testDeserializedSpanContext_traceStateOfOnlySeparators() {
+        val context = DeserializedSpanContext(
+            traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
+            spanIdBytes = "1234567890123456".hexToByteArray(),
+            traceStateString = ",,,"
+        )
+        assertEquals(0, context.traceState.asMap().size)
+    }
+
+    @Test
     fun testDeserializedTraceFlags_sampled() {
         val context = DeserializedSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
