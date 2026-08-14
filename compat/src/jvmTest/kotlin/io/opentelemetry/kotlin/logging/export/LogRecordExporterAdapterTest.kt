@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordExporter
-import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -35,7 +35,7 @@ internal class LogRecordExporterAdapterTest {
 
     @Test
     fun `test export`() = runTest {
-        val original = FakeReadableLogRecord()
+        val original = FakeLogRecordData()
         assertEquals(OperationResultCode.Success, wrapper.export(listOf(original)))
 
         val observed = impl.exports.single()
@@ -59,7 +59,7 @@ internal class LogRecordExporterAdapterTest {
     @Test
     fun `test export returns failure after shutdown`() = runTest {
         wrapper.shutdown()
-        val result = wrapper.export(listOf(FakeReadableLogRecord()))
+        val result = wrapper.export(listOf(FakeLogRecordData()))
         assertEquals(OperationResultCode.Failure, result)
         assertTrue(impl.exports.isEmpty())
     }

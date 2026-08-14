@@ -34,13 +34,10 @@ internal class CompatLoggerProviderConfig(
     internal val logLimitsConfig = CompatLogLimitsConfig()
     private var logLimitsAction: (LogLimitsConfigDsl.() -> Unit)? = null
     private var loggerConfigurator: LoggerConfigurator? = null
-    private var serviceNameOverride: String? = null
-
-    override var serviceName: String
-        get() = serviceNameOverride ?: "unknown_service"
+    override var serviceName: String? = null
         set(value) {
-            serviceNameOverride = value
-            resourceAttrs.setStringAttribute(ServiceAttributes.SERVICE_NAME, value)
+            field = value
+            value?.let { resourceAttrs.setStringAttribute(ServiceAttributes.SERVICE_NAME, it) }
         }
 
     private val resourceAttrs = CompatAttributesModel()
@@ -84,15 +81,13 @@ internal class CompatLoggerProviderConfig(
     fun build(
         clock: Clock,
         baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build()),
-        globalLimits: CompatAttributeLimitsConfig? = null,
+        globalLimits: AttributeLimitsConfigDsl? = null,
     ): LoggerProvider {
-        if (globalLimits?.attributeCountLimitSet == true) {
-            logLimitsConfig.attributeCountLimit = globalLimits.attributeCountLimit
-        }
-        if (globalLimits?.attributeValueLengthLimitSet == true) {
-            logLimitsConfig.attributeValueLengthLimit = globalLimits.attributeValueLengthLimit
-        }
         logLimitsAction?.invoke(logLimitsConfig)
+        logLimitsConfig.attributeCountLimit =
+            logLimitsConfig.attributeCountLimit ?: globalLimits?.attributeCountLimit
+        logLimitsConfig.attributeValueLengthLimit =
+            logLimitsConfig.attributeValueLengthLimit ?: globalLimits?.attributeValueLengthLimit
         builder.setLogLimits(logLimitsConfig::build)
         loggerConfigurator?.let(::applyLoggerConfigurator)
         val resource = ResourceAdapter(

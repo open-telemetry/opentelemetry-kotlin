@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.config.yaml
 import io.opentelemetry.kotlin.config.schema.model.AttributeLimits
 import io.opentelemetry.kotlin.config.schema.model.AttributeNameValue
 import io.opentelemetry.kotlin.config.schema.model.AttributeType
+import io.opentelemetry.kotlin.config.schema.model.LogRecordLimits
+import io.opentelemetry.kotlin.config.schema.model.LoggerProvider
 import io.opentelemetry.kotlin.config.schema.model.OpenTelemetryConfiguration
 import io.opentelemetry.kotlin.config.schema.model.Resource
 import io.opentelemetry.kotlin.config.schema.model.SeverityNumber
@@ -46,6 +48,13 @@ internal class OpenTelemetryConfigurationParserTest {
                 attributeValueLengthLimit = 4096,
                 attributeCountLimit = 128,
             ),
+            loggerProvider = LoggerProvider(
+                processors = emptyList(),
+                limits = LogRecordLimits(
+                    attributeValueLengthLimit = 256,
+                    attributeCountLimit = 64,
+                ),
+            ),
             tracerProvider = TracerProvider(
                 processors = emptyList(),
                 limits = SpanLimits(attributeCountLimit = 128, eventCountLimit = 64),
@@ -76,6 +85,27 @@ internal class OpenTelemetryConfigurationParserTest {
             OpenTelemetryConfiguration(fileFormat = "1.0"),
             parser.parse(fileSystem, path),
         )
+    }
+
+    @Test
+    fun loggerProviderLimitsMayBeOmitted() {
+        val yaml = "$MINIMAL_DOCUMENT\nlogger_provider:\n  processors: []"
+
+        val config = parser.parse(yaml)
+
+        assertEquals(LoggerProvider(processors = emptyList()), config.loggerProvider)
+        assertNull(config.loggerProvider?.limits)
+    }
+
+    @Test
+    fun logRecordLimitFieldsMayBeOmitted() {
+        val yaml = "$MINIMAL_DOCUMENT\nlogger_provider:\n  processors: []\n  limits: {}"
+
+        val limits = parser.parse(yaml).loggerProvider?.limits
+
+        assertEquals(LogRecordLimits(), limits)
+        assertNull(limits?.attributeCountLimit)
+        assertNull(limits?.attributeValueLengthLimit)
     }
 
     @Test

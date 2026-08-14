@@ -10,12 +10,12 @@ import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.resourceFromMap
 import io.opentelemetry.kotlin.attributes.toFlattenedBodyString
 import io.opentelemetry.kotlin.logging.OtelJavaLogRecordDataImpl
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.toOtelJavaSeverityNumber
 import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 
-internal fun ReadableLogRecord.toLogRecordData(): OtelJavaLogRecordData {
+internal fun LogRecordData.toOtelJavaLogRecordData(): OtelJavaLogRecordData {
     return OtelJavaLogRecordDataImpl(
         timestampNanos = timestamp ?: 0,
         observedTimestampNanos = observedTimestamp ?: 0,

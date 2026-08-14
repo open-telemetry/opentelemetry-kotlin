@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 
 internal class InMemoryLogRecordExporterTest {
 
-    private val fakeTelemetry = listOf(FakeReadableLogRecord())
+    private val fakeTelemetry = listOf(FakeLogRecordData())
     private lateinit var exporter: InMemoryLogRecordExporter
 
     @BeforeTest

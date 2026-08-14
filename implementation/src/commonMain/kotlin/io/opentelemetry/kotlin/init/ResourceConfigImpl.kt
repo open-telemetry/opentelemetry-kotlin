@@ -28,13 +28,8 @@ internal class ResourceConfigImpl : ResourceConfigDsl {
 
     private val resourceAttrs = AttributesModel(attributeLimit = NO_ATTRIBUTE_LIMIT)
     private var schemaUrl: String? = null
-    private var serviceNameOverride: String? = null
 
-    override var serviceName: String
-        get() = serviceNameOverride ?: "unknown_service"
-        set(value) {
-            serviceNameOverride = value
-        }
+    override var serviceName: String? = null
 
     override fun resource(
         schemaUrl: String?,
@@ -52,7 +47,7 @@ internal class ResourceConfigImpl : ResourceConfigDsl {
 
     internal fun generateResource(): Resource {
         val attrs = resourceAttrs.attributes.toMutableMap()
-        serviceNameOverride?.let { attrs[ServiceAttributes.SERVICE_NAME] = it }
+        serviceName?.let { attrs[ServiceAttributes.SERVICE_NAME] = it }
         return ResourceImpl(
             schemaUrl = schemaUrl,
             container = AttributesModel(attributeLimit = NO_ATTRIBUTE_LIMIT, attrs = attrs)

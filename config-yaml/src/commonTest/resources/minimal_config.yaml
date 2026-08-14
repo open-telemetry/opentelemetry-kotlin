@@ -11,6 +11,11 @@ resource:
 attribute_limits:
   attribute_count_limit: 128
   attribute_value_length_limit: 4096
+logger_provider:
+  processors: []
+  limits:
+    attribute_count_limit: 64
+    attribute_value_length_limit: 256
 tracer_provider:
   processors: []
   limits:

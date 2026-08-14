@@ -1,46 +1,22 @@
 package io.opentelemetry.kotlin.attributes
 
 /**
- * Copies an attribute map onto an [AttributesMutator], dispatching each value to the setter that
- * matches its runtime type so that no type information is lost.
+ * Copies an attribute map onto an [AttributesMutator], preserving the double-ness of its values.
+ *
+ * The common [setAttributes] widens any whole-valued number to a long, because Kotlin/JS cannot
+ * tell an [Int] from a [Double] at runtime. Java OTel attributes are statically typed, so that
+ * ambiguity does not exist here and a double must survive the round trip as a double. Doubles are
+ * therefore dispatched here and everything else is delegated to the common implementation.
  */
 internal fun AttributesMutator.setTypedAttributes(attributes: Map<String, Any>) {
     attributes.forEach { setTypedAttribute(it.key, it.value) }
 }
 
 internal fun AttributesMutator.setTypedAttribute(key: String, value: Any) {
-    when (value) {
-        is String -> setStringAttribute(key, value)
-        is Boolean -> setBooleanAttribute(key, value)
-        is Long -> setLongAttribute(key, value)
-        is Double -> setDoubleAttribute(key, value)
-        is Float -> setDoubleAttribute(key, value.toDouble())
-        is Int, is Short, is Byte -> setLongAttribute(key, (value as Number).toLong())
-        is ByteArray -> setByteArrayAttribute(key, value)
-        is AnyValue -> setAnyValueAttribute(key, value)
-        is Collection<*> -> setTypedListAttribute(key, value.toList())
-        is Array<*> -> setTypedListAttribute(key, value.toList())
-        else -> setStringAttribute(key, value.toString())
-    }
-}
-
-@Suppress("UNCHECKED_CAST")
-private fun AttributesMutator.setTypedListAttribute(key: String, value: List<*>) {
-    // An empty list is reported as a list of strings, matching the common implementation.
     when {
-        value.all { it is String } -> setStringListAttribute(key, value as List<String>)
-        value.all { it is Boolean } -> setBooleanListAttribute(key, value as List<Boolean>)
-        value.all { it is Long } -> setLongListAttribute(key, value as List<Long>)
-        value.all { it is Double } -> setDoubleListAttribute(key, value as List<Double>)
-        value.all { it is Float } -> setDoubleListAttribute(
-            key,
-            value.filterIsInstance<Float>().map(Float::toDouble)
-        )
-        value.all { it is Int || it is Short || it is Byte } -> setLongListAttribute(
-            key,
-            value.filterIsInstance<Number>().map(Number::toLong)
-        )
-        // A heterogeneous list has no typed equivalent, so fall back to a list of strings.
-        else -> setStringListAttribute(key, value.map { it.toString() })
+        value is Double -> setDoubleAttribute(key, value)
+        value is List<*> && value.isNotEmpty() && value.all { it is Double } ->
+            setDoubleListAttribute(key, value.filterIsInstance<Double>())
+        else -> setAttributes(mapOf(key to value))
     }
 }

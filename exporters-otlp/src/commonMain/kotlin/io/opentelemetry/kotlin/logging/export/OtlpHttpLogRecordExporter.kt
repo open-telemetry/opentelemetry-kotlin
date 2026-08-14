@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpClient
 import io.opentelemetry.kotlin.export.TelemetryExporter
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 
 internal class OtlpHttpLogRecordExporter(
     private val otlpClient: OtlpClient,
@@ -16,7 +16,7 @@ internal class OtlpHttpLogRecordExporter(
         otlpClient.exportLogs(it)
     }
 
-    override suspend fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {
+    override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode {
         return exporter.export(telemetry)
     }
 

@@ -34,7 +34,6 @@ private fun createKeyValue(entry: Map.Entry<String, Any>) = KeyValue(
     key = entry.key, value_ = convertAttributeValue(entry.value)
 )
 
-@Suppress("UNCHECKED_CAST")
 private fun convertAttributeValue(value: Any): AnyValue = when (value) {
     is String -> AnyValue(string_value = value)
     is Long -> AnyValue(int_value = value)
@@ -43,13 +42,13 @@ private fun convertAttributeValue(value: Any): AnyValue = when (value) {
     is Number -> AnyValue(int_value = value.toLong())
     is Boolean -> AnyValue(bool_value = value)
     is ByteArray -> AnyValue(bytes_value = ByteString.of(*value))
-    is List<*> -> AnyValue(array_value = handleList(value as List<Any>))
+    is List<*> -> AnyValue(array_value = handleList(value))
     is KotlinAnyValue -> value.toProtoAnyValue()
-    else -> throw UnsupportedOperationException()
+    else -> AnyValue(string_value = value.toString())
 }
 
-private fun handleList(elements: List<Any>) = ArrayValue(
-    elements.map(::convertAttributeValue)
+private fun handleList(elements: List<*>) = ArrayValue(
+    elements.map { it?.let(::convertAttributeValue) ?: AnyValue() }
 )
 
 internal fun KotlinAnyValue.toProtoAnyValue(): AnyValue = when (this) {

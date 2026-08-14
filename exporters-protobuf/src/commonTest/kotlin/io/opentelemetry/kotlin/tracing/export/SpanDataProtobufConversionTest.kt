@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.FakeTraceFlags
 import io.opentelemetry.kotlin.tracing.FakeTraceState
-import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.data.FakeSpanEventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
@@ -222,12 +221,9 @@ class SpanDataProtobufConversionTest {
             val proto = linksList[index]
             assertEquals(link.spanContext.traceId, proto.trace_id.toByteArray().toHexString())
             assertEquals(link.spanContext.spanId, proto.span_id.toByteArray().toHexString())
-            assertEquals(expectedTraceState(link.spanContext), proto.trace_state)
+            assertEquals("foo=bar", proto.trace_state)
             assertEquals(expectedFlags, proto.flags)
             assertAttributesMatch(link.attributes, proto.attributes)
         }
     }
-
-    private fun expectedTraceState(spanContext: SpanContext) =
-        spanContext.traceState.asMap().entries.joinToString(",") { "${it.key}=${it.value}" }
 }

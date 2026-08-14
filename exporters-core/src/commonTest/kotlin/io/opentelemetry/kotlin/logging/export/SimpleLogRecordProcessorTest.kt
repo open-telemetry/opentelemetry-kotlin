@@ -42,6 +42,25 @@ internal class SimpleLogRecordProcessorTest {
     }
 
     @Test
+    fun testExportReceivesImmutableSnapshot() = runTest {
+        val exporter = FakeLogRecordExporter()
+        val processor = SimpleLogRecordProcessor(
+            exporter,
+            CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
+        )
+
+        val log = FakeReadWriteLogRecord(body = "my_log")
+        processor.onEmit(log, FakeContext())
+
+        // the exporter retains plain data rather than the live log record
+        val export = exporter.logs.single()
+        assertFalse(export === log)
+
+        log.body = "changed"
+        assertEquals("my_log", export.body)
+    }
+
+    @Test
     fun testOnEmitNoOpAfterShutdown() = runTest {
         val exporter = FakeLogRecordExporter()
         val processor = SimpleLogRecordProcessor(
