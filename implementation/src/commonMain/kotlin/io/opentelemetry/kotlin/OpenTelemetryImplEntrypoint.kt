@@ -38,7 +38,7 @@ public fun createOpenTelemetry(
     val spanContext = SpanContextFactoryImpl(idGenerator, traceFlags, traceState)
 
     val span = SpanFactoryImpl(spanContext)
-    val contextFactory = ContextFactoryImpl(span, cfg.contextConfig::generateStorage)
+    val contextFactory = ContextFactoryImpl(span, cfg.sdkErrorHandler, cfg.contextConfig::generateStorage)
     cfg.propagatorCfg.installFactories(
         traceFlagsFactory = traceFlags,
         traceStateFactory = traceState,

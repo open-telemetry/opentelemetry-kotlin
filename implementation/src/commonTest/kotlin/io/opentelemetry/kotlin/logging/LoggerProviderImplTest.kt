@@ -50,6 +50,22 @@ internal class LoggerProviderImplTest {
     }
 
     @Test
+    fun testEmptyLoggerNameReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        val config = LoggingConfig(
+            null,
+            LogLimitConfig(100, 100),
+            ResourceImpl(AttributesModel(), null),
+            handler,
+            loggerConfigurator,
+        )
+        val provider = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
+        provider.getLogger(name = "")
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals("LoggerProvider.getLogger", handler.apiMisuses.single().api)
+    }
+
+    @Test
     fun testFullLoggerProvider() {
         val first = impl.getLogger(
             name = "name",

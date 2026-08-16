@@ -24,7 +24,7 @@ internal class OpenTelemetryConfigImpl(
      * The handler is configured after the sub-configs below have been created, so they receive a
      * forwarder that resolves the configured handler on each report instead.
      */
-    private val sdkErrorHandler = GuardedSdkErrorHandler { configuredErrorHandler.onError(it) }
+    internal val sdkErrorHandler = GuardedSdkErrorHandler { configuredErrorHandler.onError(it) }
 
     internal val tracingConfig: TracerProviderConfigImpl = TracerProviderConfigImpl(clock, sdkErrorHandler)
     internal val loggingConfig: LoggerProviderConfigImpl = LoggerProviderConfigImpl(clock, sdkErrorHandler)

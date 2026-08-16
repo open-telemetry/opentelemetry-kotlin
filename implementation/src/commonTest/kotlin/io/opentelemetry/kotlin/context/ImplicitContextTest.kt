@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.context
 
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
@@ -26,6 +27,7 @@ internal class ImplicitContextTest {
             factory.root(),
             factory.root(),
             DefaultImplicitContextStorage(factory::root),
+            NoopSdkErrorHandler,
         )
         assertTrue(scope.detach())
     }
