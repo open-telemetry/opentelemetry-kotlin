@@ -44,6 +44,7 @@ public fun createOpenTelemetry(
         traceStateFactory = traceState,
         spanContextFactory = spanContext,
         spanFactory = span,
+        sdkErrorHandler = cfg.sdkErrorHandler,
     )
 
     val tracingConfig = cfg.generateTracingConfig()
