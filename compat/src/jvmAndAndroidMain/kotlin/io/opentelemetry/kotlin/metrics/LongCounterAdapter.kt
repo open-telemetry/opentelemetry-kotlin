@@ -1,0 +1,44 @@
+package io.opentelemetry.kotlin.metrics
+
+import io.opentelemetry.kotlin.aliases.OtelJavaLongCounter
+import io.opentelemetry.kotlin.aliases.OtelJavaMeter
+import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.context.Context
+
+internal class LongCounterAdapter(
+    override val name: String,
+    override val unit: String?,
+    override val description: String?,
+    meter: OtelJavaMeter
+) : LongCounter {
+
+    private val counter: OtelJavaLongCounter
+
+    init {
+        val builder = meter.counterBuilder(name)
+        if (unit != null) {
+            builder.setUnit(unit)
+        }
+        if (description != null) {
+            builder.setDescription(description)
+        }
+        counter = builder.build()
+    }
+
+    override fun enabled(): Boolean {
+        return counter.isEnabled()
+    }
+
+    override fun add(
+        value: Long,
+        context: Context?,
+        attributes: (AttributesMutator.() -> Unit)?
+    ) {
+        val model = CompatAttributesModel()
+        if (attributes != null) {
+            attributes(model)
+        }
+        counter.add(value, model.otelJavaAttributes())
+    }
+}

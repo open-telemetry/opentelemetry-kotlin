@@ -5,6 +5,8 @@ import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import io.opentelemetry.kotlin.init.config.MetricsConfig
 import io.opentelemetry.kotlin.resource.ResourceImpl
 import kotlinx.coroutines.test.runTest
@@ -21,11 +23,12 @@ internal class MeterProviderImplTest {
         resource = ResourceImpl(AttributesModel(), null),
         sdkErrorHandler = NoopSdkErrorHandler,
     )
+    private val contextFactory = ContextFactoryImpl(FakeSpanFactory())
     private lateinit var impl: MeterProviderImpl
 
     @BeforeTest
     fun setup() {
-        impl = MeterProviderImpl(metricsConfig)
+        impl = MeterProviderImpl(metricsConfig, contextFactory)
     }
 
     @Test

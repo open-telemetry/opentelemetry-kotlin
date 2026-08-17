@@ -78,7 +78,16 @@ internal class OtelJavaMeterBuilderAdapterTest {
             capturedName = name
             capturedVersion = version
             capturedSchemaUrl = schemaUrl
-            return object : Meter {}
+            return object : Meter {
+
+                override fun createLongCounter(
+                    name: String,
+                    description: String?,
+                    unit: String?
+                ): LongCounter {
+                    return NoopTestLongCounter
+                }
+            }
         }
     }
 }
