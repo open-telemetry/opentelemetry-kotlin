@@ -29,15 +29,16 @@ fun ByteArray.toSpanDataList(): List<SpanData> {
 internal fun List<SpanData>.toExportTraceServiceRequest(): ExportTraceServiceRequest =
     ExportTraceServiceRequest(toResourceSpan())
 
-private fun List<SpanData>.toResourceSpan(): List<ResourceSpans> = map { it.toResourceSpan() }
-
-private fun SpanData.toResourceSpan(): ResourceSpans = ResourceSpans(
-    scope_spans = listOf(toScopedSpan()),
-    resource = resource.toProtobuf()
-)
-
-private fun SpanData.toScopedSpan(): ScopeSpans = ScopeSpans(
-    spans = listOf(toProtobuf()),
-    scope = instrumentationScopeInfo.toProtobuf(),
-    schema_url = instrumentationScopeInfo.schemaUrl ?: ""
-)
+private fun List<SpanData>.toResourceSpan(): List<ResourceSpans> =
+    groupBy { it.resource }.map { (resource, spansForResource) ->
+        ResourceSpans(
+            resource = resource.toProtobuf(),
+            scope_spans = spansForResource.groupBy { it.instrumentationScopeInfo }.map { (scope, spans) ->
+                ScopeSpans(
+                    spans = spans.map { it.toProtobuf() },
+                    scope = scope.toProtobuf(),
+                    schema_url = scope.schemaUrl ?: "",
+                )
+            },
+        )
+    }

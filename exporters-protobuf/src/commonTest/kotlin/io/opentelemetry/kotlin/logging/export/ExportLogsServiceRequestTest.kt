@@ -1,8 +1,10 @@
 package io.opentelemetry.kotlin.logging.export
 
+import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
+import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.FakeTraceFlags
@@ -141,5 +143,45 @@ class ExportLogsServiceRequestTest {
         val logRecords = scopeLogs.log_records[0]
 
         assertEquals(telemetry.body, logRecords.body?.string_value)
+    }
+
+    @Test
+    fun testGroupsLogsWithSameResourceAndScope() {
+        val resource = FakeResource()
+        val scope = FakeInstrumentationScopeInfo()
+        val request = listOf(
+            FakeLogRecordData(body = "a", resource = resource, instrumentationScopeInfo = scope),
+            FakeLogRecordData(body = "b", resource = resource, instrumentationScopeInfo = scope),
+        ).toExportLogsServiceRequest()
+
+        assertEquals(1, request.resource_logs.size)
+        assertEquals(1, request.resource_logs[0].scope_logs.size)
+        assertEquals(2, request.resource_logs[0].scope_logs[0].log_records.size)
+    }
+
+    @Test
+    fun testGroupsLogsWithSameResourceAndDifferentScopes() {
+        val resource = FakeResource()
+        val request = listOf(
+            FakeLogRecordData(body = "a", resource = resource, instrumentationScopeInfo = FakeInstrumentationScopeInfo(name = "one")),
+            FakeLogRecordData(body = "b", resource = resource, instrumentationScopeInfo = FakeInstrumentationScopeInfo(name = "two")),
+        ).toExportLogsServiceRequest()
+
+        assertEquals(1, request.resource_logs.size)
+        assertEquals(2, request.resource_logs[0].scope_logs.size)
+        assertEquals(1, request.resource_logs[0].scope_logs[0].log_records.size)
+        assertEquals(1, request.resource_logs[0].scope_logs[1].log_records.size)
+    }
+
+    @Test
+    fun testGroupsLogsWithDifferentResources() {
+        val request = listOf(
+            FakeLogRecordData(body = "a", resource = FakeResource()),
+            FakeLogRecordData(body = "b", resource = FakeResource()),
+        ).toExportLogsServiceRequest()
+
+        assertEquals(2, request.resource_logs.size)
+        assertEquals(1, request.resource_logs[0].scope_logs.size)
+        assertEquals(1, request.resource_logs[1].scope_logs.size)
     }
 }
