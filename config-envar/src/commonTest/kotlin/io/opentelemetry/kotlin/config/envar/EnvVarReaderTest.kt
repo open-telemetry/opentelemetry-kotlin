@@ -7,7 +7,7 @@ import kotlin.test.assertNull
 
 internal class EnvVarReaderTest {
 
-    private val name = envVarName("OTEL_ATTRIBUTE_COUNT_LIMIT")
+    private val name = envVarName("OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT")
 
     @Test
     fun `should read an int`() {
@@ -24,6 +24,7 @@ internal class EnvVarReaderTest {
             requested = it
             null
         }.readInt(name)
+
         assertEquals(name.value, requested)
     }
 

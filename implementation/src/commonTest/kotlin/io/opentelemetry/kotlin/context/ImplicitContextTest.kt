@@ -34,7 +34,7 @@ internal class ImplicitContextTest {
 
     @Test
     fun testDupeAttach() {
-        val newCtx = factory.with(factory.root(), mapOf("key" to "value"))
+        val newCtx = newContext()
         newCtx.attach()
         assertSame(newCtx, factory.implicit())
 
@@ -49,7 +49,7 @@ internal class ImplicitContextTest {
     fun testDupeDetach() {
         assertSame(factory.root(), factory.implicit())
 
-        val newCtx = factory.with(factory.root(), mapOf("key" to "value"))
+        val newCtx = newContext()
         val scope = newCtx.attach()
         assertSame(newCtx, factory.implicit())
 
@@ -62,14 +62,14 @@ internal class ImplicitContextTest {
 
     @Test
     fun testDetachReturnsTrueOnSuccess() {
-        val newCtx = factory.with(factory.root(), mapOf("key" to "value"))
+        val newCtx = newContext()
         val scope = newCtx.attach()
         assertTrue(scope.detach())
     }
 
     @Test
     fun testDetachReturnsFalseWhenAlreadyDetached() {
-        val newCtx = factory.with(factory.root(), mapOf("key" to "value"))
+        val newCtx = newContext()
         val scope = newCtx.attach()
         assertTrue(scope.detach())
         assertFalse(scope.detach())
@@ -77,9 +77,9 @@ internal class ImplicitContextTest {
 
     @Test
     fun testDetachReturnsFalseWhenOutOfOrder() {
-        val ctx1 = factory.with(factory.root(), mapOf("key" to "value"))
+        val ctx1 = newContext()
         val scope1 = ctx1.attach()
-        val ctx2 = factory.with(factory.root(), mapOf("another" to "value"))
+        val ctx2 = newContext()
         val scope2 = ctx2.attach()
 
         // scope1 is out of order — ctx2 is current
@@ -96,12 +96,12 @@ internal class ImplicitContextTest {
         assertSame(root, factory.implicit())
 
         // set first scope
-        val ctx1 = factory.with(root, mapOf("key" to "value"))
+        val ctx1 = newContext()
         val scope1 = ctx1.attach()
         assertSame(ctx1, factory.implicit())
 
         // set second scope
-        val ctx2 = factory.with(root, mapOf("another" to "value"))
+        val ctx2 = newContext()
         val scope2 = ctx2.attach()
         assertSame(ctx2, factory.implicit())
 
@@ -117,4 +117,7 @@ internal class ImplicitContextTest {
         scope1.detach()
         assertSame(root, factory.implicit())
     }
+
+    private fun newContext(): Context =
+        factory.root().set(factory.createKey<String>("key"), "value")
 }

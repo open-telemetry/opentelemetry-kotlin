@@ -1,40 +1,11 @@
 package io.opentelemetry.kotlin.context
 
-import io.opentelemetry.kotlin.factory.FakeContextFactory
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 internal class ContextExtTest {
-
-    private val factory = FakeContextFactory()
-
-    @Test
-    fun testContext() {
-        val root = FakeContext()
-        val attrs = mapOf(
-            "a" to true,
-            "b" to 1,
-        )
-        val firstCtx = factory.with(root, attrs) as FakeContext
-        assertEquals(attrs, firstCtx.findAttrs())
-
-        val extra = mapOf(
-            "a" to "test",
-            "c" to "test",
-        )
-        val secondCtx = factory.with(firstCtx, extra) as FakeContext
-        val expected = mapOf(
-            "a" to "test",
-            "b" to 1,
-            "c" to "test",
-        )
-        assertEquals(expected, secondCtx.findAttrs())
-
-        val thirdCtx = factory.with(secondCtx, emptyMap()) as FakeContext
-        assertEquals(expected, thirdCtx.findAttrs())
-    }
 
     @Test
     fun testAsImplicitContext() {
@@ -78,6 +49,4 @@ internal class ContextExtTest {
         assertTrue(attached)
         assertTrue(detached)
     }
-
-    private fun FakeContext.findAttrs(): Map<String, Any?> = attrs.mapKeys { it.key.toString() }
 }

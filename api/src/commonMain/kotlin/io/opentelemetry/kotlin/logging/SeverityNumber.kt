@@ -1,13 +1,10 @@
 package io.opentelemetry.kotlin.logging
 
-import io.opentelemetry.kotlin.ExperimentalApi
-
 /**
  * Represents all possible severities of a log message.
  *
  * https://opentelemetry.io/docs/specs/otel/logs/data-model/#field-severitynumber
  */
-@ExperimentalApi
 public enum class SeverityNumber(public val severityNumber: Int) {
     UNKNOWN(0),
     TRACE(1),
