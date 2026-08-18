@@ -53,6 +53,7 @@ For more information about the approver role, see the [community repository](htt
 ## Triagers
 - [Juan Vega](https://github.com/jdvr), New Relic
 - [Andrey Chernov](https://github.com/inetand)
+- [Viorel Alexandrescu](https://github.com/viorel-alexandrescu)
 
 For more information about the triager role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#triager).
 
