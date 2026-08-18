@@ -19,10 +19,12 @@ internal class EnvVarReaderTest {
     @Test
     fun `should look up the name it was asked for`() {
         var requested: String? = null
+
         EnvVarReader {
             requested = it
             null
         }.readInt(name)
+
         assertEquals(name.value, requested)
     }
 

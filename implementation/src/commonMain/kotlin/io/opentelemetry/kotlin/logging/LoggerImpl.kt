@@ -110,6 +110,7 @@ internal class LoggerImpl(
                     spanContext = spanContext,
                     logLimitConfig = logLimitConfig,
                     eventName = eventName,
+                    sdkErrorHandler = sdkErrorHandler,
                 )
                 if (exception != null) {
                     log.setExceptionAttributes(exception)

@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.export.conversion
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.propagation.W3CTraceStateCodec
+import io.opentelemetry.kotlin.propagation.W3CTraceStateValidator
 import io.opentelemetry.kotlin.resource.MutableResource
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
@@ -48,7 +49,12 @@ private class DeserializedResource(
     override val schemaUrl: String? = null
 ) : Resource {
     override fun asNewResource(action: MutableResource.() -> Unit): Resource {
-        throw UnsupportedOperationException()
+        val mutable = DeserializedMutableResource(attributes.toMutableMap(), schemaUrl)
+        mutable.apply(action)
+        return DeserializedResource(
+            attributes = mutable.attributes.toMap(),
+            schemaUrl = mutable.schemaUrl,
+        )
     }
 
     override fun merge(other: Resource): Resource = DeserializedResource(
@@ -56,6 +62,11 @@ private class DeserializedResource(
         schemaUrl = other.schemaUrl ?: schemaUrl,
     )
 }
+
+private class DeserializedMutableResource(
+    override val attributes: MutableMap<String, Any>,
+    override var schemaUrl: String?,
+) : MutableResource
 
 internal class DeserializedSpanContext(
     override val traceIdBytes: ByteArray,
@@ -81,6 +92,14 @@ private class DeserializedTraceFlags(private val value: Int) : TraceFlags {
 private class DeserializedTraceState(private val entries: Map<String, String>) : TraceState {
     override fun get(key: String): String? = entries[key]
     override fun asMap(): Map<String, String> = entries
-    override fun put(key: String, value: String): TraceState = throw UnsupportedOperationException()
-    override fun remove(key: String): TraceState = throw UnsupportedOperationException()
+    override fun put(key: String, value: String): TraceState = when {
+        W3CTraceStateValidator.canPut(entries, key, value) ->
+            DeserializedTraceState(entries + (key to value))
+        else -> this
+    }
+
+    override fun remove(key: String): TraceState = when {
+        entries.containsKey(key) -> DeserializedTraceState(entries - key)
+        else -> this
+    }
 }
