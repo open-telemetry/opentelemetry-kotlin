@@ -15,12 +15,14 @@ internal class ContextKeyRepository {
 
     @Suppress("UNCHECKED_CAST")
     fun <T> get(key: ContextKey<T>): OtelJavaContextKey<T> {
-        return impl.getOrPut(key) {
-            if (key is ContextKeyAdapter) {
-                key.impl
-            } else {
-                OtelJavaContextKey.named(key.toString())
-            }
+        impl[key]?.let { return it as OtelJavaContextKey<T> }
+        val candidate = if (key is ContextKeyAdapter) {
+            key.impl
+        } else {
+            OtelJavaContextKey.named(key.toString())
+        }
+        return synchronized(impl) {
+            impl[key] ?: candidate.also { impl[key] = it }
         } as OtelJavaContextKey<T>
     }
 }

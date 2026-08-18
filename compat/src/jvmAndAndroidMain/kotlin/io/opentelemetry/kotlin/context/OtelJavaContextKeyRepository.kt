@@ -14,8 +14,10 @@ internal class OtelJavaContextKeyRepository {
     private val impl = Collections.synchronizedMap(WeakHashMap<OtelJavaContextKey<*>, ContextKey<*>>())
 
     fun <T> get(key: OtelJavaContextKey<T>): ContextKey<T> {
-        return impl.getOrPut(key) {
-            ContextKeyAdapter(key)
+        impl[key]?.let { return it as ContextKey<T> }
+        val candidate = ContextKeyAdapter(key)
+        return synchronized(impl) {
+            impl[key] ?: candidate.also { impl[key] = it }
         } as ContextKey<T>
     }
 }

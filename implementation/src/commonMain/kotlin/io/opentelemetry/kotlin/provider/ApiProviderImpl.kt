@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.provider
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
+import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.AttributesMutator
@@ -24,9 +25,12 @@ internal class ApiProviderImpl<T>(
 ) {
 
     private val map = threadSafeMap<InstrumentationScopeInfo, T>()
+    private val lock = ReentrantReadWriteLock()
 
-    fun getOrCreate(key: InstrumentationScopeInfo): T = map.getOrPut(key) {
-        supplier(key)
+    fun getOrCreate(key: InstrumentationScopeInfo): T {
+        map[key]?.let { return it }
+        val candidate = supplier(key)
+        return lock.write { map[key] ?: candidate.also { map[key] = it } }
     }
 
     fun createInstrumentationScopeInfo(

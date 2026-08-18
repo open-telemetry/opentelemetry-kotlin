@@ -8,6 +8,8 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.scope.scopeCacheKey
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.concurrent.write
 
 @ExperimentalApi
 internal class TracerProviderAdapter(
@@ -17,6 +19,7 @@ internal class TracerProviderAdapter(
 ) : TracerProvider {
 
     private val map = ConcurrentHashMap<InstrumentationScopeInfo, TracerAdapter>()
+    private val lock = ReentrantReadWriteLock()
 
     override fun getTracer(
         name: String,
@@ -24,13 +27,12 @@ internal class TracerProviderAdapter(
         schemaUrl: String?,
         attributes: (AttributesMutator.() -> Unit)?
     ): Tracer {
-        return map.getOrPut(scopeCacheKey(name, version, schemaUrl)) {
-            val tracerBuilder = tracerProvider.tracerBuilder(name)
-
-            schemaUrl?.let(tracerBuilder::setSchemaUrl)
-            version?.let(tracerBuilder::setInstrumentationVersion)
-            val tracer = tracerBuilder.build()
-            TracerAdapter(tracer, clock, spanLimitsConfig)
-        }
+        val key = scopeCacheKey(name, version, schemaUrl)
+        map[key]?.let { return it }
+        val tracerBuilder = tracerProvider.tracerBuilder(name)
+        schemaUrl?.let(tracerBuilder::setSchemaUrl)
+        version?.let(tracerBuilder::setInstrumentationVersion)
+        val candidate = TracerAdapter(tracerBuilder.build(), clock, spanLimitsConfig)
+        return lock.write { map[key] ?: candidate.also { map[key] = it } }
     }
 }
