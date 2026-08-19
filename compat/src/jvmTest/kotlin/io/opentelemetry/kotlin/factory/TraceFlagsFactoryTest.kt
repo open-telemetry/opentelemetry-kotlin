@@ -95,4 +95,22 @@ internal class TraceFlagsFactoryTest {
         assertFalse(invalidHex.isSampled)
         assertFalse(invalidHex.isRandom)
     }
+
+    @Test
+    fun `fromHex with lowercase hex letters`() {
+        val flags = factory.fromHex("0a")
+        assertFalse(flags.isSampled)
+        assertTrue(flags.isRandom)
+    }
+
+    @Test
+    fun `fromHex with non-ascii digits is invalid`() {
+        val mixed = factory.fromHex("0٠")
+        assertFalse(mixed.isSampled)
+        assertFalse(mixed.isRandom)
+
+        val space = factory.fromHex("0 ")
+        assertFalse(space.isSampled)
+        assertFalse(space.isRandom)
+    }
 }
