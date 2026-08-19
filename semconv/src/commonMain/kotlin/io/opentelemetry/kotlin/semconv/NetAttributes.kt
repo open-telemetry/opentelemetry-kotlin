@@ -116,7 +116,7 @@ object NetAttributes {
         INET6("inet6"),
 
         /**
-        * <p>Unix domain socket path</p>
+        * <p>UNIX domain socket path</p>
         */
         UNIX("unix"),
     }

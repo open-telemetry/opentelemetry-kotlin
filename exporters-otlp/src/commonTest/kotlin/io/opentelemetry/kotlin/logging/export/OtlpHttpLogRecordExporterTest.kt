@@ -17,8 +17,8 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpClient
 import io.opentelemetry.kotlin.export.createDefaultHttpClient
 import io.opentelemetry.kotlin.init.LogExportConfigDsl
-import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
@@ -30,7 +30,7 @@ import kotlin.test.assertTrue
 
 internal class OtlpHttpLogRecordExporterTest {
 
-    private val logRecords = listOf(FakeReadableLogRecord())
+    private val logRecords = listOf(FakeLogRecordData())
     private val baseUrl = "http://localhost:1234"
 
     private lateinit var client: OtlpClient
@@ -49,12 +49,13 @@ internal class OtlpHttpLogRecordExporterTest {
             )
         }
         val httpClient = createDefaultHttpClient(engine = server)
-        client = OtlpClient(baseUrl, httpClient = httpClient)
+        client = OtlpClient(baseUrl, httpClient = httpClient, sdkErrorHandler = NoopSdkErrorHandler)
         exporter = OtlpHttpLogRecordExporter(
             client,
             initialDelayMs = 3,
             maxAttemptIntervalMs = 5,
-            maxAttempts = 3
+            maxAttempts = 3,
+            sdkErrorHandler = NoopSdkErrorHandler,
         )
     }
 
@@ -143,7 +144,7 @@ internal class OtlpHttpLogRecordExporterTest {
         return requests
     }
 
-    private suspend fun assertTelemetryExported(telemetry: List<ReadableLogRecord>) {
+    private suspend fun assertTelemetryExported(telemetry: List<LogRecordData>) {
         val requests = waitForExportedTelemetry()
         val request = requests.single()
         val bytes = request.body.toByteArray()

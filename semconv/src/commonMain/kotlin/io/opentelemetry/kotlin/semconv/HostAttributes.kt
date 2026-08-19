@@ -94,7 +94,7 @@ object HostAttributes {
     const val HOST_MAC: String = "host.mac"
 
     /**
-    * <p>Name of the host. On Unix systems, it may contain what the hostname command returns, or the fully qualified hostname, or another name specified by the user.</p>
+    * <p>Name of the host. On UNIX systems, it may contain what the hostname command returns, or the fully qualified hostname, or another name specified by the user.</p>
     */
     @IncubatingApi
     const val HOST_NAME: String = "host.name"

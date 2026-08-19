@@ -2,13 +2,17 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
+import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.ResourceImpl
 import kotlinx.coroutines.test.runTest
@@ -43,6 +47,22 @@ internal class LoggerProviderImplTest {
     @Test
     fun testMinimalLoggerProvider() {
         assertNotNull(impl.getLogger(name = ""))
+    }
+
+    @Test
+    fun testEmptyLoggerNameReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        val config = LoggingConfig(
+            null,
+            LogLimitConfig(100, 100),
+            ResourceImpl(AttributesModel(), null),
+            handler,
+            loggerConfigurator,
+        )
+        val provider = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
+        provider.getLogger(name = "")
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals("LoggerProvider.getLogger", handler.apiMisuses.single().api)
     }
 
     @Test
@@ -182,4 +202,55 @@ internal class LoggerProviderImplTest {
         logger.emit(body = "should not emit")
         assertEquals(0, processor.logs.size)
     }
+
+    @Test
+    fun testThrowingAttributesReturnsNoopLogger() {
+        val errorHandler = FakeSdkErrorHandler()
+        val provider = createProvider(errorHandler = errorHandler)
+
+        val logger = provider.getLogger(name = "name") { error("boom") }
+
+        assertFalse(logger.enabled())
+        val recorded = errorHandler.userCodeErrors.single()
+        assertEquals("LoggerProvider.getLogger failed", recorded.message)
+        assertEquals("boom", recorded.cause.message)
+    }
+
+    @Test
+    fun testThrowingErrorHandlerDoesNotEscapeForceFlush() = runTest {
+        val provider = createProvider(
+            processor = FakeLogRecordProcessor(flushCode = { error("boom") }),
+            errorHandler = ThrowingSdkErrorHandler(),
+        )
+        provider.getLogger(name = "test")
+
+        assertEquals(OperationResultCode.Failure, provider.forceFlush())
+    }
+
+    @Test
+    fun testThrowingErrorHandlerDoesNotEscapeShutdown() = runTest {
+        val provider = createProvider(
+            processor = FakeLogRecordProcessor(shutdownCode = { error("boom") }),
+            errorHandler = ThrowingSdkErrorHandler(),
+        )
+        provider.getLogger(name = "test")
+
+        assertEquals(OperationResultCode.Failure, provider.shutdown())
+    }
+
+    private fun createProvider(
+        processor: LogRecordProcessor? = null,
+        errorHandler: SdkErrorHandler,
+    ) = LoggerProviderImpl(
+        clock,
+        LoggingConfig(processor, LogLimitConfig(100, 100), FakeResource(), errorHandler, loggerConfigurator),
+        contextFactory,
+        spanContextFactory,
+    )
+
+    private class ThrowingSdkErrorHandler : SdkErrorHandler {
+        override fun onError(error: SdkError): Unit = handlerBoom()
+    }
 }
+
+private fun handlerBoom(): Nothing = error("handler boom")

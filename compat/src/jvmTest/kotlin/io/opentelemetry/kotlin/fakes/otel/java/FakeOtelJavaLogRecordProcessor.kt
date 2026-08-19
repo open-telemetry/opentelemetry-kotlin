@@ -11,6 +11,12 @@ internal class FakeOtelJavaLogRecordProcessor : OtelJavaLogRecordProcessor {
     var shutdownCount = 0
     val exports: MutableList<OtelJavaReadWriteLogRecord> = mutableListOf()
 
+    /**
+     * Supplies the result of every operation, so tests can return results that complete
+     * asynchronously (or not at all).
+     */
+    var nextResult: () -> OtelJavaCompletableResultCode = { OtelJavaCompletableResultCode.ofSuccess() }
+
     override fun onEmit(
         context: OtelJavaContext,
         logRecord: OtelJavaReadWriteLogRecord
@@ -20,11 +26,11 @@ internal class FakeOtelJavaLogRecordProcessor : OtelJavaLogRecordProcessor {
 
     override fun forceFlush(): OtelJavaCompletableResultCode? {
         flushCount += 1
-        return OtelJavaCompletableResultCode.ofSuccess()
+        return nextResult()
     }
 
     override fun shutdown(): OtelJavaCompletableResultCode {
         shutdownCount += 1
-        return OtelJavaCompletableResultCode.ofSuccess()
+        return nextResult()
     }
 }

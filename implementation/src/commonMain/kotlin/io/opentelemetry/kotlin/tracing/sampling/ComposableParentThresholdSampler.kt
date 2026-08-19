@@ -1,0 +1,43 @@
+package io.opentelemetry.kotlin.tracing.sampling
+
+import io.opentelemetry.kotlin.attributes.AttributeContainer
+import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.tracing.SpanKind
+import io.opentelemetry.kotlin.tracing.model.SpanLink
+
+/**
+ * A [ComposableSampler] that honors the parent's sampling threshold when present, falling back
+ * to [root] when there is no valid parent.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composableparentthreshold
+ */
+internal class ComposableParentThresholdSampler(private val root: ComposableSampler) : ComposableSampler {
+
+    override fun getSamplingIntent(
+        context: Context,
+        name: String,
+        spanKind: SpanKind,
+        attributes: AttributeContainer,
+        links: List<SpanLink>
+    ): SamplingIntent {
+        val parent = context.extractSpan().spanContext
+        val parentThreshold = parent.traceState.get(KnownTraceState.OT)?.let(OtelTraceState::parse)?.th
+
+        return when {
+            !parent.isValid -> root.getSamplingIntent(context, name, spanKind, attributes, links)
+            parentThreshold != null -> SamplingIntentImpl(threshold = parentThreshold, adjustedCountReliable = true)
+            parent.traceFlags.isSampled -> SAMPLED_PARENT_WITHOUT_THRESHOLD
+            else -> NOT_SAMPLED
+        }
+    }
+
+    override val description: String
+        get() = "ComposableParentThresholdSampler{root:${root.description}}"
+
+    private companion object {
+        private val SAMPLED_PARENT_WITHOUT_THRESHOLD =
+            SamplingIntentImpl(threshold = 0, adjustedCountReliable = false)
+        private val NOT_SAMPLED =
+            SamplingIntentImpl(threshold = null, adjustedCountReliable = false)
+    }
+}

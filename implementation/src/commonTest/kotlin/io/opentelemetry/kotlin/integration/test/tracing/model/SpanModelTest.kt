@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.integration.test.tracing.model
 
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
@@ -34,6 +35,7 @@ internal class SpanModelTest {
                 attributeCountPerLinkLimit = 100
             ),
             initialLinks = emptyList(),
+            sdkErrorHandler = NoopSdkErrorHandler,
         )
         assertTrue(span.isRecording())
         span.end()

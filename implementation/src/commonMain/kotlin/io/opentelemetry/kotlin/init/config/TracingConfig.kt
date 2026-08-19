@@ -43,11 +43,11 @@ internal class TracingConfig(
      */
     val samplerFactory: (SpanFactory) -> Sampler = { _ ->
         ParentBasedSampler(
-            root = AlwaysOnSampler(),
-            remoteParentSampled = AlwaysOnSampler(),
-            remoteParentNotSampled = AlwaysOffSampler(),
-            localParentSampled = AlwaysOnSampler(),
-            localParentNotSampled = AlwaysOffSampler(),
+            root = AlwaysOnSampler,
+            remoteParentSampled = AlwaysOnSampler,
+            remoteParentNotSampled = AlwaysOffSampler,
+            localParentSampled = AlwaysOnSampler,
+            localParentNotSampled = AlwaysOffSampler,
         )
     },
 

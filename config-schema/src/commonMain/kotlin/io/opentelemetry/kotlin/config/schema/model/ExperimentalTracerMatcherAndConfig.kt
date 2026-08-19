@@ -5,7 +5,7 @@ import kotlin.String
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalTracerMatcherAndConfig(
+public data class ExperimentalTracerMatcherAndConfig(
   /**
    * Configure tracer names to match. Matching is case-sensitive, evaluated as follows:
    *
@@ -13,10 +13,10 @@ internal data class ExperimentalTracerMatcherAndConfig(
    *  * If the tracer name matches the wildcard pattern, where '?' matches any single character and '*' matches any number of characters including none.
    * Property is required and must be non-null.
    */
-  internal val name: String,
+  public val name: String,
   /**
    * The tracer config.
    * Property is required and must be non-null.
    */
-  internal val config: ExperimentalTracerConfig,
+  public val config: ExperimentalTracerConfig,
 )

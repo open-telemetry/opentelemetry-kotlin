@@ -1,5 +1,6 @@
-public final class io/opentelemetry/kotlin/attributes/AttributeContainerExtKt {
-	public static final fun setAttributes (Lio/opentelemetry/kotlin/attributes/AttributesMutator;Lio/opentelemetry/kotlin/attributes/AttributeContainer;)V
+public final class io/opentelemetry/kotlin/attributes/EmptyAttributeContainer : io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/attributes/EmptyAttributeContainer;
+	public fun getAttributes ()Ljava/util/Map;
 }
 
 public final class io/opentelemetry/kotlin/attributes/ExceptionAttributesExtKt {
@@ -8,6 +9,21 @@ public final class io/opentelemetry/kotlin/attributes/ExceptionAttributesExtKt {
 
 public final class io/opentelemetry/kotlin/config/ValidationKt {
 	public static final fun validateOrUseDefault (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+}
+
+public final class io/opentelemetry/kotlin/error/GuardKt {
+	public static final fun guard (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun guard$default (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static final fun guardOrDefault (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static synthetic fun guardOrDefault$default (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun guardOrDefaultSuspend (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun guardOrDefaultSuspend$default (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun reportUserCodeError (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Throwable;Ljava/lang/String;)V
+}
+
+public final class io/opentelemetry/kotlin/error/GuardedSdkErrorHandler : io/opentelemetry/kotlin/error/SdkErrorHandler {
+	public fun <init> (Lio/opentelemetry/kotlin/error/SdkErrorHandler;)V
+	public fun onError (Lio/opentelemetry/kotlin/error/SdkError;)V
 }
 
 public final class io/opentelemetry/kotlin/export/BatchExportOperationKt {
@@ -45,10 +61,27 @@ public abstract class io/opentelemetry/kotlin/export/ShutdownState {
 }
 
 public final class io/opentelemetry/kotlin/export/TelemetryExceptionHandlerKt {
-	public static final fun telemetryExceptionHandler (Ljava/lang/String;)Lkotlinx/coroutines/CoroutineExceptionHandler;
+	public static final fun telemetryExceptionHandler (Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorHandler;)Lkotlinx/coroutines/CoroutineExceptionHandler;
 }
 
 public final class io/opentelemetry/kotlin/export/TimeoutOperationKt {
 	public static final fun runWithTimeout (JLkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/opentelemetry/kotlin/propagation/W3CTraceStateCodec {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/propagation/W3CTraceStateCodec;
+	public final fun decode (Ljava/lang/String;)Ljava/util/Map;
+	public final fun encode (Ljava/util/Map;)Ljava/lang/String;
+}
+
+public final class io/opentelemetry/kotlin/propagation/W3CTraceStateValidator {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/propagation/W3CTraceStateValidator;
+	public final fun canPut (Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun isValidKey (Ljava/lang/String;)Z
+	public final fun isValidValue (Ljava/lang/String;)Z
+}
+
+public final class io/opentelemetry/kotlin/resource/ResourceDetectionKt {
+	public static final fun detectResource (Ljava/util/List;Lio/opentelemetry/kotlin/factory/ResourceFactory;Lio/opentelemetry/kotlin/error/SdkErrorHandler;)Lio/opentelemetry/kotlin/resource/Resource;
 }
 

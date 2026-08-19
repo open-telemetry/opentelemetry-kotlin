@@ -35,6 +35,16 @@ internal class ContextImplTest {
     }
 
     @Test
+    fun testContextSameNamedKeysAreNotInterchangeable() {
+        val key = factory.createKey<String>("my_key")
+        val sameName = factory.createKey<String>("my_key")
+        val ctx = factory.root().set(key, "my_value")
+
+        assertEquals("my_value", ctx.get(key))
+        assertNull(ctx.get(sameName))
+    }
+
+    @Test
     fun testContextGetAbsentValue() {
         val ctx = factory.root()
         val key = factory.createKey<String>("my_key")

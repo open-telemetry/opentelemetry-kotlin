@@ -134,6 +134,30 @@ internal class SpanExportTest {
     }
 
     @Test
+    fun `test span context parent for decorated span`() = runTest {
+        val root = harness.kotlinApi.context.root()
+
+        // a decorating Span is not a SpanAdapter, so storing it must still preserve its span context
+        val parent = DecoratedSpan(harness.tracer.startSpan("decorated_parent"))
+        val child = harness.tracer.startSpan(
+            name = "decorated_child",
+            parentContext = parent.storeInContext(root)
+        )
+
+        parent.end()
+        child.end()
+
+        harness.assertSpans(2, "span_decorated_parent.json") { spans ->
+            val exportedParent = spans.first { it.name == "decorated_parent" }
+            val exportedChild = spans.first { it.name == "decorated_child" }
+
+            assertFalse(exportedParent.parent.isValid)
+            assertSpanContextsMatch(exportedParent.spanContext, exportedChild.parent)
+            assertEquals(exportedParent.spanContext.traceId, exportedChild.spanContext.traceId)
+        }
+    }
+
+    @Test
     fun `test span trace flags`() = runTest {
         val span = harness.tracer.startSpan("my_span")
         val flags = span.spanContext.traceFlags
@@ -437,6 +461,11 @@ internal class SpanExportTest {
         setStringAttribute("key1", "value")
         setStringAttribute("key2", "value")
     }
+
+    /**
+     * Mimics a third party implementation that decorates the span returned by the SDK.
+     */
+    private class DecoratedSpan(impl: Span) : Span by impl
 
     /**
      * Custom processor that captures the context passed to onStart

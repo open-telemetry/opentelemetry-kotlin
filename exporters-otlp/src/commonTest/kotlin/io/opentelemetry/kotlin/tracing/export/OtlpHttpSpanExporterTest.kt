@@ -49,12 +49,13 @@ internal class OtlpHttpSpanExporterTest {
             )
         }
         val httpClient = createDefaultHttpClient(engine = server)
-        client = OtlpClient(baseUrl, httpClient = httpClient)
+        client = OtlpClient(baseUrl, httpClient = httpClient, sdkErrorHandler = NoopSdkErrorHandler)
         exporter = OtlpHttpSpanExporter(
             client,
             initialDelayMs = 3,
             maxAttemptIntervalMs = 5,
-            maxAttempts = 3
+            maxAttempts = 3,
+            sdkErrorHandler = NoopSdkErrorHandler,
         )
     }
 

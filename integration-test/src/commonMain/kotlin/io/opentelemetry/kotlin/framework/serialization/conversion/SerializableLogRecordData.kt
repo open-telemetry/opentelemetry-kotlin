@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.framework.serialization.conversion
 
 import io.opentelemetry.kotlin.framework.serialization.SerializableLogRecordData
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 
-fun ReadableLogRecord.toSerializable() =
+fun LogRecordData.toSerializable() =
     SerializableLogRecordData(
         resource = resource.toSerializable(),
         instrumentationScopeInfo = instrumentationScopeInfo.toSerializable(),

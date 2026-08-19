@@ -15,22 +15,23 @@ internal class IdGeneratorImpl(
     private val random: Random = Random.Default
 ) : IdGenerator {
 
-    private companion object {
-        private const val TRACE_ID_BYTES = 16
-        private const val SPAN_ID_BYTES = 8
-    }
-
     override fun generateTraceIdBytes(): ByteArray = generateId(TRACE_ID_BYTES)
     override fun generateSpanIdBytes(): ByteArray = generateId(SPAN_ID_BYTES)
 
     override val invalidTraceId: ByteArray = ByteArray(TRACE_ID_BYTES)
     override val invalidSpanId: ByteArray = ByteArray(SPAN_ID_BYTES)
 
+    /**
+     * Every byte is drawn from [Random], so the generated trace IDs satisfy the W3C Trace Context
+     * Level 2 randomness requirements.
+     */
+    override val generatesRandomTraceIds: Boolean = true
+
     private fun generateId(length: Int): ByteArray {
         val bytes = ByteArray(length)
         do {
             random.nextBytes(bytes)
-        } while (bytes.all { it == 0.toByte() }) // reject all-zero IDs
+        } while (bytes.isAllZeroBytes()) // reject all-zero IDs
         return bytes
     }
 }

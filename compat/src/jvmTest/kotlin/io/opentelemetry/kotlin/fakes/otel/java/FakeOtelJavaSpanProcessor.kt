@@ -13,6 +13,12 @@ internal class FakeOtelJavaSpanProcessor : OtelJavaSpanProcessor {
     val startCalls: MutableList<OtelJavaReadWriteSpan> = mutableListOf()
     val endCalls: MutableList<OtelJavaReadableSpan> = mutableListOf()
 
+    /**
+     * Supplies the result of every operation, so tests can return results that complete
+     * asynchronously (or not at all).
+     */
+    var nextResult: () -> OtelJavaCompletableResultCode = { OtelJavaCompletableResultCode.ofSuccess() }
+
     override fun onStart(
         parentContext: OtelJavaContext,
         span: OtelJavaReadWriteSpan
@@ -29,11 +35,11 @@ internal class FakeOtelJavaSpanProcessor : OtelJavaSpanProcessor {
 
     override fun forceFlush(): OtelJavaCompletableResultCode? {
         flushCount += 1
-        return OtelJavaCompletableResultCode.ofSuccess()
+        return nextResult()
     }
 
     override fun shutdown(): OtelJavaCompletableResultCode {
         shutdownCount += 1
-        return OtelJavaCompletableResultCode.ofSuccess()
+        return nextResult()
     }
 }

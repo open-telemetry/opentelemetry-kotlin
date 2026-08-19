@@ -51,6 +51,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":sdk-api"))
+                implementation(project(":sdk-common"))
                 implementation(project(":api-ext"))
                 implementation(libs.wire.runtime)
             }

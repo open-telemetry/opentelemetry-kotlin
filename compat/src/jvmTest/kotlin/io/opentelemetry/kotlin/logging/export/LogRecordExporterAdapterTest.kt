@@ -1,15 +1,20 @@
 package io.opentelemetry.kotlin.logging.export
 
+import io.opentelemetry.kotlin.aliases.OtelJavaCompletableResultCode
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordExporter
-import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class LogRecordExporterAdapterTest {
 
     private lateinit var impl: FakeOtelJavaLogRecordExporter
@@ -35,7 +40,7 @@ internal class LogRecordExporterAdapterTest {
 
     @Test
     fun `test export`() = runTest {
-        val original = FakeReadableLogRecord()
+        val original = FakeLogRecordData()
         assertEquals(OperationResultCode.Success, wrapper.export(listOf(original)))
 
         val observed = impl.exports.single()
@@ -59,7 +64,7 @@ internal class LogRecordExporterAdapterTest {
     @Test
     fun `test export returns failure after shutdown`() = runTest {
         wrapper.shutdown()
-        val result = wrapper.export(listOf(FakeReadableLogRecord()))
+        val result = wrapper.export(listOf(FakeLogRecordData()))
         assertEquals(OperationResultCode.Failure, result)
         assertTrue(impl.exports.isEmpty())
     }
@@ -74,5 +79,50 @@ internal class LogRecordExporterAdapterTest {
     fun `test force flush works after shutdown`() = runTest {
         wrapper.shutdown()
         assertEquals(OperationResultCode.Success, wrapper.forceFlush())
+    }
+
+    @Test
+    fun `test export awaits an async result`() = runTest {
+        val pending = OtelJavaCompletableResultCode()
+        impl.nextResult = { pending }
+
+        val result = async { wrapper.export(listOf(FakeLogRecordData())) }
+        runCurrent()
+
+        pending.succeed()
+        assertEquals(OperationResultCode.Success, result.await())
+    }
+
+    @Test
+    fun `test flush awaits an async result`() = runTest {
+        val pending = OtelJavaCompletableResultCode()
+        impl.nextResult = { pending }
+
+        val result = async { wrapper.forceFlush() }
+        runCurrent()
+
+        pending.fail()
+        assertEquals(OperationResultCode.Failure, result.await())
+    }
+
+    @Test
+    fun `test flush times out if the result never completes`() = runTest {
+        impl.nextResult = { OtelJavaCompletableResultCode() }
+        assertEquals(OperationResultCode.Failure, wrapper.forceFlush())
+    }
+
+    @Test
+    fun `test export times out if the result never completes`() = runTest {
+        impl.nextResult = { OtelJavaCompletableResultCode() }
+        assertEquals(OperationResultCode.Failure, wrapper.export(listOf(FakeLogRecordData())))
+    }
+
+    @Test
+    fun `test exception thrown by wrapped exporter does not propagate`() = runTest {
+        impl.nextResult = { throw IllegalStateException("boom") }
+
+        assertEquals(OperationResultCode.Failure, wrapper.forceFlush())
+        assertEquals(OperationResultCode.Failure, wrapper.export(listOf(FakeLogRecordData())))
+        assertEquals(OperationResultCode.Failure, wrapper.shutdown())
     }
 }

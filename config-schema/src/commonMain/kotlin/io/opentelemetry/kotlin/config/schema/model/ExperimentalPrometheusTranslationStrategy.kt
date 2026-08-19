@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal enum class ExperimentalPrometheusTranslationStrategy {
+public enum class ExperimentalPrometheusTranslationStrategy {
   @SerialName("underscore_escaping_with_suffixes")
   UNDERSCORE_ESCAPING_WITH_SUFFIXES,
   @SerialName("underscore_escaping_without_suffixes/development")
