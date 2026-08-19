@@ -88,7 +88,6 @@ internal class TracerImpl(
                     inheritTraceId -> parentSpanContext.traceFlags.isRandom
                     else -> idGenerator.generatesRandomTraceIds
                 }
-                val remoteParent = inheritTraceId && parentSpanContext.isRemote
                 val spanIdBytes = idGenerator.generateSpanIdBytes()
 
                 val collector = SpanCreationCollector(spanLimitConfig)
@@ -109,7 +108,6 @@ internal class TracerImpl(
                     spanIdBytes = spanIdBytes,
                     sampled = sampled,
                     randomTraceId = randomTraceId,
-                    remoteParent = remoteParent,
                     traceState = result.traceState,
                 )
 
@@ -147,7 +145,6 @@ internal class TracerImpl(
         spanIdBytes: ByteArray,
         sampled: Boolean,
         randomTraceId: Boolean,
-        remoteParent: Boolean,
         traceState: TraceState,
     ): SpanContext {
         val validTraceId = traceIdBytes.isValidTraceIdBytes()
@@ -170,7 +167,7 @@ internal class TracerImpl(
                 else -> unsampledFlags
             },
             isValid = validTraceId && validSpanId,
-            isRemote = remoteParent,
+            isRemote = false,
             traceState = traceState,
         )
     }

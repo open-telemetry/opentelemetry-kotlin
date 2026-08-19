@@ -106,15 +106,17 @@ internal class TracerInvalidIdTest {
     }
 
     @Test
-    fun testChildOfRemoteParentIsRemote() {
+    fun testChildOfRemoteParentIsNotRemote() {
         val idGenerator = IdGeneratorImpl()
-        val span = startChildOf(remoteParent(idGenerator), idGenerator)
-        assertTrue(span.spanContext.isRemote)
+        val parent = remoteParent(idGenerator)
+        val span = startChildOf(parent, idGenerator)
+        assertFalse(span.spanContext.isRemote)
+        assertTrue(span.toReadableSpan().parent.isRemote)
         assertTrue(span.spanContext.isValid)
     }
 
     @Test
-    fun testDescendantOfRemoteParentIsRemote() {
+    fun testDescendantOfRemoteParentIsNotRemote() {
         val idGenerator = IdGeneratorImpl()
         val tracer = buildTracer(idGenerator)
         val spanFactory = SpanFactoryImpl(
@@ -136,7 +138,10 @@ internal class TracerInvalidIdTest {
             parentContext = contextFactory.root().storeSpan(child),
         )
 
-        assertTrue(grandchild.spanContext.isRemote)
+        assertFalse(child.spanContext.isRemote)
+        assertFalse(grandchild.spanContext.isRemote)
+        assertTrue(child.toReadableSpan().parent.isRemote)
+        assertFalse(grandchild.toReadableSpan().parent.isRemote)
     }
 
     @Test
