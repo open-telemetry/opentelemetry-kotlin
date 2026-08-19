@@ -1,13 +1,9 @@
 package io.opentelemetry.kotlin.attributes
 
-import io.opentelemetry.kotlin.ThreadSafe
-import io.opentelemetry.kotlin.threadSafeMap
-
-@ThreadSafe
 internal class AttributesModel(
     private val attributeLimit: Int = DEFAULT_ATTRIBUTE_LIMIT,
     private val attributeValueLengthLimit: Int = DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
-    private val attrs: MutableMap<String, Any> = threadSafeMap()
+    private val attrs: MutableMap<String, Any> = mutableMapOf()
 ) : AttributesMutator, AttributeContainer {
 
     /**
