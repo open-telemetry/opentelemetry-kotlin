@@ -41,6 +41,12 @@ internal class HexTest {
     }
 
     @Test
+    fun testNonAsciiDigitIsNotHexDigit() {
+        assertFalse('٠'.isHexDigit())
+        assertFalse("٠١٢".isValidHex())
+    }
+
+    @Test
     fun testEmptyStringIsValidHex() {
         assertTrue("".isValidHex())
     }
@@ -122,6 +128,12 @@ internal class HexTest {
     @Test
     fun testHyphenIsNotLowercaseHexDigit() {
         assertFalse('-'.isLowercaseHexDigit())
+    }
+
+    @Test
+    fun testNonAsciiDigitIsNotLowercaseHexDigit() {
+        assertFalse('٠'.isLowercaseHexDigit())
+        assertFalse("٠١٢".isValidLowercaseHex())
     }
 
     @Test

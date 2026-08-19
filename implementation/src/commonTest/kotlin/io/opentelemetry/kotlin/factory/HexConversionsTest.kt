@@ -50,6 +50,7 @@ internal class HexConversionsTest {
     fun hexToByteArrayNonAsciiCharacterReturnsEmptyByteArray() {
         assertContentEquals(ByteArray(0), "0é".hexToByteArray())
         assertContentEquals(ByteArray(0), "😀".hexToByteArray())
+        assertContentEquals(ByteArray(0), "0٠".hexToByteArray())
     }
 
     @Test

@@ -22,7 +22,7 @@ internal class CompatTraceFlagsFactory : TraceFlagsFactory {
      * Returns true if the character is a valid hexadecimal digit (0-9, a-f, A-F).
      */
     private fun Char.isHexDigit(): Boolean {
-        return this.isDigit() || this in 'a'..'f' || this in 'A'..'F'
+        return this in '0'..'9' || this in 'a'..'f' || this in 'A'..'F'
     }
 
     /**
