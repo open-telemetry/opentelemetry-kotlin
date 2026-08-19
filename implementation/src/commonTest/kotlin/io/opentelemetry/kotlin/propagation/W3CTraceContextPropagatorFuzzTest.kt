@@ -6,6 +6,7 @@ import io.kotest.property.arbitrary.boolean
 import io.kotest.property.arbitrary.filter
 import io.kotest.property.checkAll
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
@@ -40,6 +41,7 @@ internal class W3CTraceContextPropagatorFuzzTest {
         traceStateFactory = traceStateFactory,
         spanContextFactory = spanContextFactory,
         spanFactory = spanFactory,
+        sdkErrorHandler = NoopSdkErrorHandler,
     )
 
     private val headerArb = arbitrary { rs ->

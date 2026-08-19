@@ -61,7 +61,7 @@ public abstract class io/opentelemetry/kotlin/export/ShutdownState {
 }
 
 public final class io/opentelemetry/kotlin/export/TelemetryExceptionHandlerKt {
-	public static final fun telemetryExceptionHandler (Ljava/lang/String;)Lkotlinx/coroutines/CoroutineExceptionHandler;
+	public static final fun telemetryExceptionHandler (Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorHandler;)Lkotlinx/coroutines/CoroutineExceptionHandler;
 }
 
 public final class io/opentelemetry/kotlin/export/TimeoutOperationKt {
@@ -72,6 +72,13 @@ public final class io/opentelemetry/kotlin/propagation/W3CTraceStateCodec {
 	public static final field INSTANCE Lio/opentelemetry/kotlin/propagation/W3CTraceStateCodec;
 	public final fun decode (Ljava/lang/String;)Ljava/util/Map;
 	public final fun encode (Ljava/util/Map;)Ljava/lang/String;
+}
+
+public final class io/opentelemetry/kotlin/propagation/W3CTraceStateValidator {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/propagation/W3CTraceStateValidator;
+	public final fun canPut (Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun isValidKey (Ljava/lang/String;)Z
+	public final fun isValidValue (Ljava/lang/String;)Z
 }
 
 public final class io/opentelemetry/kotlin/resource/ResourceDetectionKt {

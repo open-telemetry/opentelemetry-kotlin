@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
@@ -26,6 +27,7 @@ internal class ProbabilitySamplerTest {
     private val spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlagsFactory, traceStateFactory)
     private val spanFactory = SpanFactoryImpl(spanContextFactory)
     private val contextFactory = ContextFactoryImpl(spanFactory)
+    private val sdkErrorHandler = NoopSdkErrorHandler
 
     private fun createParentContext(traceId: String, otTraceStateValue: String, flags: TraceFlags): Context {
         val traceState = traceStateFactory.default.put("ot", otTraceStateValue)
@@ -41,7 +43,7 @@ internal class ProbabilitySamplerTest {
 
     @Test
     fun testRecordsAndSamplesSpan() {
-        val result = ProbabilitySampler(0.5).shouldSample(
+        val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
             context = contextFactory.root(),
             traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = "span",
@@ -54,7 +56,7 @@ internal class ProbabilitySamplerTest {
 
     @Test
     fun testDropsSpan() {
-        val result = ProbabilitySampler(0.5).shouldSample(
+        val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
             context = contextFactory.root(),
             traceIdBytes = "ffffffffffffffffff00000000000000".hexToByteArray(),
             name = "span",
@@ -68,7 +70,7 @@ internal class ProbabilitySamplerTest {
     @Test
     fun testRecordsAndSamplesSpanAtMinimumRatio() {
         val ratio = 1.0 / (1L shl 56).toDouble()
-        val result = ProbabilitySampler(ratio).shouldSample(
+        val result = ProbabilitySampler(ratio, sdkErrorHandler).shouldSample(
             context = contextFactory.root(),
             traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = "span",
@@ -82,7 +84,7 @@ internal class ProbabilitySamplerTest {
     @Test
     fun testDropsSpanAtMinimumRatio() {
         val ratio = 1.0 / (1L shl 56).toDouble()
-        val result = ProbabilitySampler(ratio).shouldSample(
+        val result = ProbabilitySampler(ratio, sdkErrorHandler).shouldSample(
             context = contextFactory.root(),
             traceIdBytes = "000000000000000000fffffffffffffe".hexToByteArray(),
             name = "span",
@@ -96,10 +98,10 @@ internal class ProbabilitySamplerTest {
     @Test
     fun testThrowsOnInvalidRatio() {
         assertFailsWith(IllegalArgumentException::class) {
-            ProbabilitySampler(0.0)
+            ProbabilitySampler(0.0, sdkErrorHandler)
         }
         assertFailsWith(IllegalArgumentException::class) {
-            ProbabilitySampler(2.0)
+            ProbabilitySampler(2.0, sdkErrorHandler)
         }
     }
 
@@ -114,7 +116,7 @@ internal class ProbabilitySamplerTest {
             otTraceStateValue = "rv:$aboveThreshold",
             flags = traceFlagsFactory.default
         )
-        val result = ProbabilitySampler(ratio).shouldSample(
+        val result = ProbabilitySampler(ratio, sdkErrorHandler).shouldSample(
             context = context,
             traceIdBytes = traceId.hexToByteArray(),
             name = "span",
@@ -133,7 +135,7 @@ internal class ProbabilitySamplerTest {
             otTraceStateValue = "rv:garbage",
             flags = traceFlagsFactory.default
         )
-        val result = ProbabilitySampler(0.5).shouldSample(
+        val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
             context = context,
             traceIdBytes = traceId.hexToByteArray(),
             name = "span",
@@ -152,7 +154,7 @@ internal class ProbabilitySamplerTest {
             otTraceStateValue = "th:123",
             flags = traceFlagsFactory.default
         )
-        val result = ProbabilitySampler(0.5).shouldSample(
+        val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
             context = context,
             traceIdBytes = traceId.hexToByteArray(),
             name = "span",
@@ -171,7 +173,7 @@ internal class ProbabilitySamplerTest {
             otTraceStateValue = "rv:a0000000000000;th:c", // rv < th
             flags = TraceFlagsImpl(isSampled = true, traceFlagsFactory.default.isRandom),
         )
-        val result = ProbabilitySampler(0.5).shouldSample(
+        val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
             context = context,
             traceIdBytes = traceId.hexToByteArray(),
             name = "span",

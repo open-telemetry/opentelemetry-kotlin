@@ -11,6 +11,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.util.toMap
 import io.ktor.utils.io.ByteReadChannel
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.export.toProtobufByteArray
@@ -42,6 +44,7 @@ internal class OtlpClientTest {
     private val expectedUserAgent = "OTel-OTLP-Exporter-Kotlin/${BuildKonfig.VERSION}"
 
     private lateinit var client: OtlpClient
+    private var errorHandler: FakeSdkErrorHandler = FakeSdkErrorHandler()
     private lateinit var server: MockEngine
     private lateinit var mockResponseStatus: HttpStatusCode
     private var mockResponseHeaders: Headers = Headers.Empty
@@ -51,6 +54,7 @@ internal class OtlpClientTest {
 
     @BeforeTest
     fun setUp() {
+        errorHandler = FakeSdkErrorHandler()
         server = MockEngine {
             if (serverThrows) {
                 error("network unreachable")
@@ -65,7 +69,7 @@ internal class OtlpClientTest {
             )
         }
         val httpClient = createDefaultHttpClient(INFINITE_TIMEOUT_MS, server)
-        client = OtlpClient(baseUrl, httpClient = httpClient)
+        client = OtlpClient(baseUrl, httpClient = httpClient, sdkErrorHandler = errorHandler)
     }
 
     @Test
@@ -173,6 +177,8 @@ internal class OtlpClientTest {
         serverThrows = true
         val response = client.exportLogs(logRecords)
         assertIs<OtlpResponse.Unknown>(response)
+        assertEquals(1, errorHandler.userCodeErrors.size)
+        assertEquals("OTLP export failed", errorHandler.userCodeErrors.single().message)
     }
 
     @Test
@@ -180,6 +186,8 @@ internal class OtlpClientTest {
         serverThrows = true
         val response = client.exportTraces(spans)
         assertIs<OtlpResponse.Unknown>(response)
+        assertEquals(1, errorHandler.userCodeErrors.size)
+        assertEquals("OTLP export failed", errorHandler.userCodeErrors.single().message)
     }
 
     @Test
@@ -385,6 +393,6 @@ internal class OtlpClientTest {
 
     private fun useRequestTimeout() {
         val httpClient = createDefaultHttpClient(requestTimeoutMs, server)
-        client = OtlpClient(baseUrl, httpClient = httpClient)
+        client = OtlpClient(baseUrl, httpClient = httpClient, sdkErrorHandler = NoopSdkErrorHandler)
     }
 }

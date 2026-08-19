@@ -1,6 +1,8 @@
 package io.opentelemetry.kotlin.export
 
-import io.opentelemetry.kotlin.platformLog
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import kotlinx.coroutines.CoroutineExceptionHandler
 
 /**
@@ -14,7 +16,13 @@ import kotlinx.coroutines.CoroutineExceptionHandler
  * [kotlinx.coroutines.CancellationException] is never routed here by the framework, so normal
  * cancellation (e.g. on shutdown) is unaffected.
  */
-public fun telemetryExceptionHandler(context: String): CoroutineExceptionHandler =
+public fun telemetryExceptionHandler(context: String, sdkErrorHandler: SdkErrorHandler): CoroutineExceptionHandler =
     CoroutineExceptionHandler { _, throwable ->
-        platformLog("$context coroutine failed: ${throwable.message}")
+        sdkErrorHandler.onError(
+            SdkError.UserCodeError(
+                cause = throwable,
+                message = "$context coroutine failed",
+                severity = SdkErrorSeverity.WARNING,
+            )
+        )
     }

@@ -72,6 +72,7 @@ internal class TracerRandomTraceIdFlagTest {
             traceStateFactory = traceStateFactory,
             spanContextFactory = spanContextFactory,
             spanFactory = spanFactory,
+            sdkErrorHandler = NoopSdkErrorHandler,
         )
         val span = buildTracer(idGenerator).startSpan("test")
         val carrier = mutableMapOf<String, String>()

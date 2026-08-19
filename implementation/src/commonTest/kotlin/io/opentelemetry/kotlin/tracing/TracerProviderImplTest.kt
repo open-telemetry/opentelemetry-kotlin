@@ -56,6 +56,29 @@ internal class TracerProviderImplTest {
     }
 
     @Test
+    fun testEmptyTracerNameReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        val config = TracingConfig(
+            null,
+            fakeSpanLimitsConfig,
+            ResourceImpl(AttributesModel(), null),
+            handler,
+        )
+        val provider = TracerProviderImpl(
+            clock = FakeClock(),
+            tracingConfig = config,
+            contextFactory = FakeContextFactory(),
+            spanContextFactory = FakeSpanContextFactory(),
+            traceFlagsFactory = FakeTraceFlagsFactory(),
+            spanFactory = FakeSpanFactory(),
+            idGenerator = FakeIdGenerator(),
+        )
+        provider.getTracer(name = "")
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals("TracerProvider.getTracer", handler.apiMisuses.single().api)
+    }
+
+    @Test
     fun testFullTracerProvider() {
         val first = impl.getTracer(
             name = "name",

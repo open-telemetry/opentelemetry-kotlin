@@ -12,6 +12,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(project(":api"))
+                api(project(":behavior"))
             }
         }
         val commonTest by getting {

@@ -83,7 +83,7 @@ internal class PersistingSpanProcessor(
 
     private val flushMutex = Mutex()
     private val flushScope = CoroutineScope(
-        SupervisorJob() + dispatcher + telemetryExceptionHandler("Persisting span processor")
+        SupervisorJob() + dispatcher + telemetryExceptionHandler("Persisting span processor", sdkErrorHandler)
     )
 
     init {

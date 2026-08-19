@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
@@ -86,6 +87,18 @@ internal class LoggerProviderConfigImplTest {
         }.generateLoggingConfig(base)
         assertSame(first, cfg.processor)
         assertNotSame(second, cfg.processor)
+    }
+
+    @Test
+    fun testDoubleExportReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        LoggerProviderConfigImpl(clock, handler).apply {
+            export { simpleLogRecordProcessor(stdoutLogRecordExporter()) }
+            export { simpleLogRecordProcessor(stdoutLogRecordExporter()) }
+        }.generateLoggingConfig(base)
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals("LoggerProviderConfigDsl.export", handler.apiMisuses.single().api)
+        assertEquals("export() should only be called once.", handler.apiMisuses.single().message)
     }
 
     @Test

@@ -23,10 +23,11 @@ public fun LogExportConfigDsl.otlpHttpLogRecordExporter(
     timeoutMs: Long = EXPORT_REQUEST_TIMEOUT_MS,
 ): LogRecordExporter =
     OtlpHttpLogRecordExporter(
-        OtlpClient(baseUrl, createDefaultHttpClient(requestTimeoutMs = timeoutMs, engine = httpClientEngine)),
+        OtlpClient(baseUrl, createDefaultHttpClient(requestTimeoutMs = timeoutMs, engine = httpClientEngine), sdkErrorHandler),
         EXPORT_INITIAL_DELAY_MS,
         EXPORT_MAX_ATTEMPT_INTERVAL_MS,
-        EXPORT_MAX_ATTEMPTS
+        EXPORT_MAX_ATTEMPTS,
+        sdkErrorHandler,
     )
 
 /**
@@ -45,8 +46,9 @@ public fun LogExportConfigDsl.otlpHttpLogRecordExporter(
     httpClient: HttpClient,
 ): LogRecordExporter =
     OtlpHttpLogRecordExporter(
-        OtlpClient(baseUrl, httpClient),
+        OtlpClient(baseUrl, httpClient, sdkErrorHandler),
         EXPORT_INITIAL_DELAY_MS,
         EXPORT_MAX_ATTEMPT_INTERVAL_MS,
-        EXPORT_MAX_ATTEMPTS
+        EXPORT_MAX_ATTEMPTS,
+        sdkErrorHandler,
     )
