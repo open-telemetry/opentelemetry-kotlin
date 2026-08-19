@@ -43,8 +43,7 @@ internal class ScopeImplTest {
 
     @Test
     fun testDoubleDetachReportsApiMisuse() {
-        val key = factory.createKey<String>("key")
-        val newCtx = factory.root().set(key, "value")
+        val newCtx = newContext()
         val scope = newCtx.attach()
 
         assertTrue(scope.detach())
@@ -59,10 +58,9 @@ internal class ScopeImplTest {
 
     @Test
     fun testOutOfOrderDetachReportsApiMisuse() {
-        val key = factory.createKey<String>("key")
-        val ctx1 = factory.root().set(key, "value")
+        val ctx1 = newContext()
         val scope1 = ctx1.attach()
-        val ctx2 = factory.root().set(key, "another")
+        val ctx2 = newContext()
         val scope2 = ctx2.attach()
 
         assertFalse(scope1.detach())
@@ -74,4 +72,7 @@ internal class ScopeImplTest {
         assertEquals("Scope.detach() called out of order — context has already changed", error.message)
         assertEquals(SdkErrorSeverity.WARNING, error.severity)
     }
+
+    private fun newContext(): Context =
+        factory.root().set(factory.createKey<String>("key"), "value")
 }

@@ -32,7 +32,7 @@ import kotlin.coroutines.cancellation.CancellationException
 
 internal class OtlpClient(
     private val baseUrl: String,
-    private val httpClient: HttpClient = defaultHttpClient,
+    private val httpClient: HttpClient,
     private val sdkErrorHandler: SdkErrorHandler,
 ) {
 
@@ -72,11 +72,13 @@ internal class OtlpClient(
                     null -> Success
                     else -> PartialSuccess(body.rejectedCount, body.errorMessage)
                 }
+
                 429, 502, 503, 504 -> RetryableError(
                     code,
                     response.parseRetryAfterMs(),
                     body?.errorMessage,
                 )
+
                 in 400..499 -> ClientError(code, body?.errorMessage)
                 in 500..599 -> ServerError(code, body?.errorMessage)
                 else -> Unknown

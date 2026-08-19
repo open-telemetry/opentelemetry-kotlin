@@ -7,8 +7,8 @@ import io.opentelemetry.kotlin.export.EXPORT_INITIAL_DELAY_MS
 import io.opentelemetry.kotlin.export.EXPORT_MAX_ATTEMPTS
 import io.opentelemetry.kotlin.export.EXPORT_MAX_ATTEMPT_INTERVAL_MS
 import io.opentelemetry.kotlin.export.EXPORT_REQUEST_TIMEOUT_MS
+import io.opentelemetry.kotlin.export.HttpClientRegistry
 import io.opentelemetry.kotlin.export.OtlpClient
-import io.opentelemetry.kotlin.export.createDefaultHttpClient
 import io.opentelemetry.kotlin.export.createHttpEngine
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 
@@ -21,7 +21,11 @@ public fun TraceExportConfigDsl.otlpHttpSpanExporter(
     httpClientEngine: HttpClientEngine = createHttpEngine(),
     timeoutMs: Long = EXPORT_REQUEST_TIMEOUT_MS,
 ): SpanExporter = OtlpHttpSpanExporter(
-    OtlpClient(baseUrl, createDefaultHttpClient(requestTimeoutMs = timeoutMs, engine = httpClientEngine), sdkErrorHandler),
+    OtlpClient(
+        baseUrl,
+        HttpClientRegistry.getOrCreate(requestTimeoutMs = timeoutMs, engine = httpClientEngine),
+        sdkErrorHandler,
+    ),
     EXPORT_INITIAL_DELAY_MS,
     EXPORT_MAX_ATTEMPT_INTERVAL_MS,
     EXPORT_MAX_ATTEMPTS,

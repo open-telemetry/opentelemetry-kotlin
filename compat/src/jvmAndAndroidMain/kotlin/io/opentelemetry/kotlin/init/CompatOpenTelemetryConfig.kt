@@ -36,6 +36,10 @@ internal class CompatOpenTelemetryConfig(
 
     private var customIdGenerator: (() -> IdGenerator)? = null
 
+    override fun configFile(path: String) {
+        // no-op
+    }
+
     override fun attributeLimits(action: AttributeLimitsConfigDsl.() -> Unit) {
         globalAttributeLimits.action()
     }
