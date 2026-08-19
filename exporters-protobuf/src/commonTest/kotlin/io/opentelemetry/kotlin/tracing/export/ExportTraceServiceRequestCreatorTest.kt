@@ -259,4 +259,13 @@ class ExportTraceServiceRequestCreatorTest {
         assertEquals(1, request.resource_spans[0].scope_spans.size)
         assertEquals(1, request.resource_spans[1].scope_spans.size)
     }
+
+    @Test
+    fun testUsesEmptySchemaUrlWhenScopeHasNone() {
+        val request = listOf(
+            FakeSpanData(instrumentationScopeInfo = FakeInstrumentationScopeInfo(schemaUrl = null)),
+        ).toExportTraceServiceRequest()
+
+        assertEquals("", request.resource_spans[0].scope_spans[0].schema_url)
+    }
 }

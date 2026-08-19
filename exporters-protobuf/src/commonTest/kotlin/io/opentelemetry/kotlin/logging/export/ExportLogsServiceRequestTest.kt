@@ -184,4 +184,13 @@ class ExportLogsServiceRequestTest {
         assertEquals(1, request.resource_logs[0].scope_logs.size)
         assertEquals(1, request.resource_logs[1].scope_logs.size)
     }
+
+    @Test
+    fun testUsesEmptySchemaUrlWhenScopeHasNone() {
+        val request = listOf(
+            FakeLogRecordData(instrumentationScopeInfo = FakeInstrumentationScopeInfo(schemaUrl = null)),
+        ).toExportLogsServiceRequest()
+
+        assertEquals("", request.resource_logs[0].scope_logs[0].schema_url)
+    }
 }
