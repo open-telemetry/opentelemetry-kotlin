@@ -1,20 +1,24 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.clock.FakeClock
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.resource.FakeResourceDetector
+import io.opentelemetry.kotlin.sdkDefaultSchemaUrl
+import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 internal class ResourcePrecedenceOrderTest {
 
     private val clock = FakeClock()
     private val testKey = "test.key"
+    private val customSchemaUrl = "https://example.com/schema"
 
     @Test
     fun testSdkDefaults() {
-        val cfg = OpenTelemetryConfigImpl(clock, NoopSdkErrorHandler)
+        val cfg = OpenTelemetryConfigImpl(clock)
         val tracing = cfg.generateTracingConfig()
         val logging = cfg.generateLoggingConfig()
 
@@ -30,8 +34,41 @@ internal class ResourcePrecedenceOrderTest {
     }
 
     @Test
+    fun testSdkDefaultSchemaUrl() {
+        val schemaUrl = sdkDefaultResource().schemaUrl
+        assertNotNull(schemaUrl)
+        assertTrue(
+            schemaUrl.startsWith("https://opentelemetry.io/schemas/"),
+            "Invalid schema URL: $schemaUrl",
+        )
+
+        val cfg = OpenTelemetryConfigImpl(clock)
+        assertEquals(schemaUrl, cfg.generateTracingConfig().resource.schemaUrl)
+        assertEquals(schemaUrl, cfg.generateLoggingConfig().resource.schemaUrl)
+        assertEquals(schemaUrl, cfg.generateMetricsConfig().resource.schemaUrl)
+    }
+
+    @Test
+    fun testSdkDefaultSchemaUrlSurvivesGlobalResource() {
+        val cfg = OpenTelemetryConfigImpl(clock)
+        cfg.resource(mapOf(testKey to "top"))
+
+        assertEquals(sdkDefaultSchemaUrl, cfg.generateTracingConfig().resource.schemaUrl)
+        assertEquals(sdkDefaultSchemaUrl, cfg.generateLoggingConfig().resource.schemaUrl)
+    }
+
+    @Test
+    fun testSchemaUrlOverrides() {
+        val cfg = OpenTelemetryConfigImpl(clock)
+        cfg.resource(customSchemaUrl) { }
+
+        assertEquals(customSchemaUrl, cfg.generateTracingConfig().resource.schemaUrl)
+        assertEquals(customSchemaUrl, cfg.generateLoggingConfig().resource.schemaUrl)
+    }
+
+    @Test
     fun testGlobalOverrides() {
-        val cfg = OpenTelemetryConfigImpl(clock, NoopSdkErrorHandler)
+        val cfg = OpenTelemetryConfigImpl(clock)
         cfg.resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to "custom-sdk"))
 
         assertEquals(
@@ -46,7 +83,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testSpecificOverrides() {
-        val cfg = OpenTelemetryConfigImpl(clock, NoopSdkErrorHandler)
+        val cfg = OpenTelemetryConfigImpl(clock)
         cfg.tracerProvider {
             resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to "tracer-sdk"))
         }
@@ -59,7 +96,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testOverridePrecedence() {
-        val cfg = OpenTelemetryConfigImpl(clock, NoopSdkErrorHandler)
+        val cfg = OpenTelemetryConfigImpl(clock)
         cfg.resource(mapOf(testKey to "top"))
         cfg.tracerProvider {
             resource(mapOf(testKey to "provider"))
@@ -71,7 +108,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testOverridePrecedence2() {
-        val cfg = OpenTelemetryConfigImpl(clock, NoopSdkErrorHandler)
+        val cfg = OpenTelemetryConfigImpl(clock)
         cfg.resource(mapOf(testKey to "top"))
         cfg.tracerProvider {
             resource(mapOf(testKey to "tracer-only"))
@@ -79,5 +116,81 @@ internal class ResourcePrecedenceOrderTest {
 
         assertEquals("tracer-only", cfg.generateTracingConfig().resource.attributes[testKey])
         assertEquals("top", cfg.generateLoggingConfig().resource.attributes[testKey])
+    }
+
+    @Test
+    fun testDetectorOverridesSdkDefaults() {
+        val cfg = OpenTelemetryConfigImpl(clock)
+        cfg.resourceDetection {
+            detector(FakeResourceDetector(attributes = mapOf(ServiceAttributes.SERVICE_NAME to "detected")))
+        }
+
+        assertEquals("detected", cfg.generateTracingConfig().resource.attributes[ServiceAttributes.SERVICE_NAME])
+        assertEquals("detected", cfg.generateLoggingConfig().resource.attributes[ServiceAttributes.SERVICE_NAME])
+        assertEquals("detected", cfg.generateMetricsConfig().resource.attributes[ServiceAttributes.SERVICE_NAME])
+    }
+
+    @Test
+    fun testDetectorAppliesToAllSignals() {
+        val cfg = OpenTelemetryConfigImpl(clock)
+        cfg.resourceDetection {
+            detector(FakeResourceDetector(attributes = mapOf(testKey to "detected")))
+        }
+
+        assertEquals("detected", cfg.generateTracingConfig().resource.attributes[testKey])
+        assertEquals("detected", cfg.generateLoggingConfig().resource.attributes[testKey])
+        assertEquals("detected", cfg.generateMetricsConfig().resource.attributes[testKey])
+    }
+
+    @Test
+    fun testExplicitConfigOverridesDetector() {
+        val cfg = OpenTelemetryConfigImpl(clock)
+        cfg.resourceDetection {
+            detector(FakeResourceDetector(attributes = mapOf(testKey to "detected")))
+        }
+        cfg.resource(mapOf(testKey to "top"))
+        cfg.tracerProvider {
+            resource(mapOf(testKey to "provider"))
+        }
+
+        assertEquals("provider", cfg.generateTracingConfig().resource.attributes[testKey])
+        assertEquals("top", cfg.generateLoggingConfig().resource.attributes[testKey])
+    }
+
+    @Test
+    fun testServiceNameOverridesDetector() {
+        val cfg = OpenTelemetryConfigImpl(clock)
+        cfg.resourceDetection {
+            detector(FakeResourceDetector(attributes = mapOf(ServiceAttributes.SERVICE_NAME to "detected")))
+        }
+        cfg.serviceName = "explicit"
+
+        assertEquals("explicit", cfg.generateTracingConfig().resource.attributes[ServiceAttributes.SERVICE_NAME])
+    }
+
+    @Test
+    fun testDetectorRunsOncePerSdk() {
+        val detector = FakeResourceDetector(attributes = mapOf(testKey to "detected"))
+        val cfg = OpenTelemetryConfigImpl(clock)
+        cfg.resourceDetection {
+            detector(detector)
+        }
+
+        cfg.generateTracingConfig()
+        cfg.generateLoggingConfig()
+        cfg.generateMetricsConfig()
+
+        assertEquals(1, detector.detectCount)
+    }
+
+    @Test
+    fun testDetectorSchemaUrlIsUsed() {
+        val schemaUrl = "https://opentelemetry.io/schemas/1.43.0"
+        val cfg = OpenTelemetryConfigImpl(clock)
+        cfg.resourceDetection {
+            detector(FakeResourceDetector(attributes = mapOf(testKey to "detected"), schemaUrl = schemaUrl))
+        }
+
+        assertEquals(schemaUrl, cfg.generateTracingConfig().resource.schemaUrl)
     }
 }

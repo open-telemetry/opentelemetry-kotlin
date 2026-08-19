@@ -15,6 +15,10 @@ public final class io/opentelemetry/kotlin/ClockImpl_jvmKt {
 	public static final fun getCurrentTimeNanos ()J
 }
 
+public final class io/opentelemetry/kotlin/EnvVar_jvmKt {
+	public static final fun getEnvVarValue (Ljava/lang/String;)Ljava/lang/String;
+}
+
 public final class io/opentelemetry/kotlin/ExceptionType_jvmKt {
 	public static final fun exceptionType (Ljava/lang/Throwable;)Ljava/lang/String;
 }

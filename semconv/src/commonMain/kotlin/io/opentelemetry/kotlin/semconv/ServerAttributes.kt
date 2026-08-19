@@ -10,7 +10,7 @@ object ServerAttributes {
   
 
     /**
-    * <p>Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.</p>
+    * <p>Server domain name if available without reverse DNS lookup; otherwise, IP address or UNIX domain socket name.</p>
     * <p>Notes:</p>
     * <p>When observed from the client side, and when communicating through an intermediary, <c>server.address</c> SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.</p>
     */

@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSdkMeterProvider
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNotSame
 import kotlin.test.assertSame
 
 internal class MeterProviderAdapterTest {
@@ -40,5 +41,19 @@ internal class MeterProviderAdapterTest {
         val third = adapter.getMeter(name = "name", schemaUrl = "https://example.com/bar")
         assertSame(first, second)
         assertNotEquals(first, third)
+    }
+
+    @Test
+    fun testScopePropertyBoundaryCollision() {
+        val first = adapter.getMeter(name = "ab", version = "c")
+        val second = adapter.getMeter(name = "a", version = "bc")
+        assertNotSame(first, second)
+    }
+
+    @Test
+    fun testNullScopePropertyCollision() {
+        val first = adapter.getMeter(name = "name")
+        val second = adapter.getMeter(name = "name", version = "null")
+        assertNotSame(first, second)
     }
 }

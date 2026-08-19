@@ -40,7 +40,9 @@ internal class BatchLogRecordProcessorImpl(
     override fun onEmit(
         log: ReadWriteLogRecord,
         context: Context
-    ) = shutdownState.execute { processor.processTelemetry(log) }
+    ) = shutdownState.execute {
+        processor.processTelemetry(log.toLogRecordData())
+    }
 
     override fun enabled(
         context: Context,

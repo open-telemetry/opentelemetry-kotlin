@@ -15,7 +15,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 internal class SpanProcessOnEndReadTest {
@@ -51,10 +50,10 @@ internal class SpanProcessOnEndReadTest {
             // assert properties can be read
             assertEquals("span", name)
             assertEquals(StatusData.Unset, status)
-            assertFalse(hasEnded)
+            assertTrue(hasEnded)
             assertEquals(SpanKind.INTERNAL, spanKind)
             assertEquals(0, startTimestamp)
-            assertNull(endTimestamp)
+            assertEquals(0L, endTimestamp)
             assertTrue(spanContext.isValid)
             assertFalse(parent.isValid)
             assertHasSdkDefaultAttributes(resource.attributes)

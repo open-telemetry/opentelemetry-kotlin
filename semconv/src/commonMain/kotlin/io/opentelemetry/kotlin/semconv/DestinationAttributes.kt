@@ -10,7 +10,7 @@ object DestinationAttributes {
   
 
     /**
-    * <p>Destination address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.</p>
+    * <p>Destination address - domain name if available without reverse DNS lookup; otherwise, IP address or UNIX domain socket name.</p>
     * <p>Notes:</p>
     * <p>When observed from the source side, and when communicating through an intermediary, <c>destination.address</c> SHOULD represent the destination address behind any intermediaries, for example proxies, if it's available.</p>
     */

@@ -1,13 +1,15 @@
 package io.opentelemetry.kotlin.export.conversion
 
+import io.opentelemetry.kotlin.attributes.AnyValue as KotlinAnyValue
 import io.opentelemetry.proto.common.v1.AnyValue
 import io.opentelemetry.proto.common.v1.ArrayValue
 import io.opentelemetry.proto.common.v1.KeyValue
+import io.opentelemetry.proto.common.v1.KeyValueList
 import okio.ByteString
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class AttributeProtobufConversionTest {
@@ -72,10 +74,45 @@ class AttributeProtobufConversionTest {
     }
 
     @Test
-    fun testUnknownTypeExpectException() {
-        assertFailsWith(UnsupportedOperationException::class) {
-            createForValue(Any())
+    fun testUnknownTypeIsStringified() {
+        val value = object {
+            override fun toString(): String = "custom"
         }
+        assertEquals("custom", createForValue(value).value_?.string_value)
+    }
+
+    @Test
+    fun testUnknownTypeIsStringified_map() {
+        assertEquals("{a=1}", createForValue(mapOf("a" to 1)).value_?.string_value)
+    }
+
+    @Test
+    fun testUnknownTypeIsStringified_char() {
+        assertEquals("x", createForValue('x').value_?.string_value)
+    }
+
+    @Test
+    fun testUnknownTypeIsStringified_enum() {
+        assertEquals("SECOND", createForValue(TestEnum.SECOND).value_?.string_value)
+    }
+
+    @Test
+    fun testListWithNullElementDoesNotThrow() {
+        val array = checkNotNull(createForValue(listOf("a", null)).value_?.array_value?.values)
+        assertEquals(2, array.size)
+        assertEquals("a", array[0].string_value)
+        assertNull(array[1].string_value)
+        assertNull(array[1].int_value)
+        assertNull(array[1].double_value)
+        assertNull(array[1].bool_value)
+    }
+
+    @Test
+    fun testRoundTripListWithNullElementDropsTheNull() {
+        val deserialized = mapOf<String, Any>("key" to listOf("a", null))
+            .createKeyValues()
+            .toAttributeMap()
+        assertEquals(listOf("a"), deserialized["key"])
     }
 
     @Test
@@ -190,7 +227,114 @@ class AttributeProtobufConversionTest {
         assertEquals(originalList, deserializedList)
     }
 
+    @Test
+    fun testAnyValuePrimitiveConversion() {
+        // Previously these threw UnsupportedOperationException, so exporting any span or log
+        // record carrying an AnyValue attribute crashed.
+        assertEquals(3L, createForValue(KotlinAnyValue.LongValue(3)).value_?.int_value)
+        assertEquals("s", createForValue(KotlinAnyValue.StringValue("s")).value_?.string_value)
+        assertEquals(true, createForValue(KotlinAnyValue.BoolValue(true)).value_?.bool_value)
+        assertEquals(3.14, createForValue(KotlinAnyValue.DoubleValue(3.14)).value_?.double_value)
+
+        val bytes = byteArrayOf(0x01, 0x02)
+        assertEquals(
+            ByteString.of(*bytes),
+            createForValue(KotlinAnyValue.BytesValue(bytes)).value_?.bytes_value
+        )
+    }
+
+    @Test
+    fun testAnyValueNullConversion() {
+        val anyValue = checkNotNull(createForValue(KotlinAnyValue.NullValue).value_)
+        assertNull(anyValue.string_value)
+        assertNull(anyValue.int_value)
+        assertNull(anyValue.bool_value)
+        assertNull(anyValue.double_value)
+    }
+
+    @Test
+    fun testAnyValueListConversion() {
+        val value = KotlinAnyValue.ListValue(
+            listOf(KotlinAnyValue.LongValue(1), KotlinAnyValue.StringValue("a"))
+        )
+        val array = checkNotNull(createForValue(value).value_?.array_value?.values)
+        assertEquals(2, array.size)
+        assertEquals(1L, array[0].int_value)
+        assertEquals("a", array[1].string_value)
+    }
+
+    @Test
+    fun testAnyValueMapConversion() {
+        val value = KotlinAnyValue.MapValue(
+            mapOf(
+                "long" to KotlinAnyValue.LongValue(1),
+                "nested" to KotlinAnyValue.MapValue(mapOf("s" to KotlinAnyValue.StringValue("a")))
+            )
+        )
+        val kvlist = checkNotNull(createForValue(value).value_?.kvlist_value?.values)
+        assertEquals(2, kvlist.size)
+        assertEquals("long", kvlist[0].key)
+        assertEquals(1L, kvlist[0].value_?.int_value)
+        assertEquals("a", kvlist[1].value_?.kvlist_value?.values?.first()?.value_?.string_value)
+    }
+
+    @Test
+    fun testAttributeMapDeserialization_kvlist() {
+        val kvlist = KeyValueList(
+            listOf(
+                KeyValue("long", AnyValue(int_value = 1L)),
+                KeyValue("missing", null)
+            )
+        )
+        val keyValues = listOf(KeyValue("key", AnyValue(kvlist_value = kvlist)))
+
+        val map = keyValues.toAttributeMap()
+        assertEquals(
+            KotlinAnyValue.MapValue(
+                mapOf(
+                    "long" to KotlinAnyValue.LongValue(1),
+                    "missing" to KotlinAnyValue.NullValue
+                )
+            ),
+            map["key"]
+        )
+    }
+
+    @Test
+    fun testRoundTripAnyValueMap() {
+        val value = KotlinAnyValue.MapValue(
+            mapOf(
+                "long" to KotlinAnyValue.LongValue(3),
+                "list" to KotlinAnyValue.ListValue(listOf(KotlinAnyValue.StringValue("a")))
+            )
+        )
+        val deserialized = mapOf("key" to value).createKeyValues().toAttributeMap()
+        assertEquals(value, deserialized["key"])
+    }
+
+    @Test
+    fun testAnyValueNullAttributeIsDropped() {
+        // The spec has no null attribute value, so a NullValue serializes to an empty protobuf
+        // AnyValue and comes back with the key absent.
+        val deserialized = mapOf<String, Any>("key" to KotlinAnyValue.NullValue)
+            .createKeyValues()
+            .toAttributeMap()
+        assertEquals(0, deserialized.size)
+    }
+
+    @Test
+    fun testRoundTripAnyValuePrimitivesFlattenToPlainValues() {
+        // Protobuf cannot distinguish AnyValue.LongValue(3) from a plain Long, so a primitive
+        // AnyValue deserializes to the plain Kotlin value. Documenting the asymmetry.
+        val deserialized = mapOf<String, Any>("key" to KotlinAnyValue.LongValue(3))
+            .createKeyValues()
+            .toAttributeMap()
+        assertEquals(3L, deserialized["key"])
+    }
+
     private fun createForValue(value: Any): KeyValue {
         return mapOf("key" to value).createKeyValues().first()
     }
+
+    private enum class TestEnum { FIRST, SECOND }
 }

@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal enum class ExporterDefaultHistogramAggregation {
+public enum class ExporterDefaultHistogramAggregation {
   @SerialName("explicit_bucket_histogram")
   EXPLICIT_BUCKET_HISTOGRAM,
   @SerialName("base2_exponential_bucket_histogram")

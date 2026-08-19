@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal enum class AttributeType {
+public enum class AttributeType {
   @SerialName("string")
   STRING,
   @SerialName("bool")

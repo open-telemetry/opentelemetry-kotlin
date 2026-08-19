@@ -6,4 +6,4 @@ import kotlin.String
 import kotlin.collections.Map
 import kotlinx.serialization.Contextual
 
-internal typealias Distribution = Map<String, @Contextual Any?>
+public typealias Distribution = Map<String, @Contextual Any?>

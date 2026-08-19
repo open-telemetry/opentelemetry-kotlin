@@ -2,45 +2,20 @@ package io.opentelemetry.kotlin.error
 
 class FakeSdkErrorHandler : SdkErrorHandler {
 
-    class ApiMisuseDetails(
-        val api: String,
-        val details: String,
-        val severity: SdkErrorSeverity
-    )
+    val errors = mutableListOf<SdkError>()
 
-    class SdkErrorDetails(
-        val exc: Throwable,
-        val details: String,
-        val severity: SdkErrorSeverity
-    )
+    val apiMisuses: List<SdkError.ApiMisuse>
+        get() = errors.filterIsInstance<SdkError.ApiMisuse>()
 
-    val apiMisuses = mutableListOf<ApiMisuseDetails>()
-    val userCodeErrors = mutableListOf<SdkErrorDetails>()
-    val sdkCodeErrors = mutableListOf<SdkErrorDetails>()
+    val userCodeErrors: List<SdkError.UserCodeError>
+        get() = errors.filterIsInstance<SdkError.UserCodeError>()
 
-    fun hasErrors(): Boolean = apiMisuses.isNotEmpty() || userCodeErrors.isNotEmpty() || sdkCodeErrors.isNotEmpty()
+    val sdkCodeErrors: List<SdkError.SdkCodeError>
+        get() = errors.filterIsInstance<SdkError.SdkCodeError>()
 
-    override fun onApiMisuse(
-        api: String,
-        details: String,
-        severity: SdkErrorSeverity
-    ) {
-        apiMisuses.add(ApiMisuseDetails(api, details, severity))
-    }
+    fun hasErrors(): Boolean = errors.isNotEmpty()
 
-    override fun onUserCodeError(
-        exc: Throwable,
-        details: String,
-        severity: SdkErrorSeverity
-    ) {
-        userCodeErrors.add(SdkErrorDetails(exc, details, severity))
-    }
-
-    override fun onSdkCodeError(
-        exc: Throwable,
-        details: String,
-        severity: SdkErrorSeverity
-    ) {
-        sdkCodeErrors.add(SdkErrorDetails(exc, details, severity))
+    override fun onError(error: SdkError) {
+        errors.add(error)
     }
 }

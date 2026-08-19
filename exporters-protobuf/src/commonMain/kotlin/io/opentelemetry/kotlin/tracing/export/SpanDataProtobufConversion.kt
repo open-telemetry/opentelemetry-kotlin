@@ -14,6 +14,7 @@ import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.proto.trace.v1.Span
+import io.opentelemetry.proto.trace.v1.SpanFlags
 import io.opentelemetry.proto.trace.v1.Status
 import okio.ByteString.Companion.toByteString
 
@@ -22,7 +23,7 @@ fun SpanData.toProtobuf() = Span(
     trace_id = spanContext.traceIdBytes.toByteString(),
     span_id = spanContext.spanIdBytes.toByteString(),
     trace_state = spanContext.traceState.toW3CString(),
-    flags = spanContext.traceFlags.toFlagsInt(),
+    flags = spanContext.toSpanFlagsInt(remoteContext = parent),
     parent_span_id = parent.spanIdBytes.toByteString(),
     kind = spanKind.toProtoSpanKind(),
     start_time_unix_nano = startTimestamp,
@@ -49,6 +50,7 @@ internal fun Span.toSpanData(
     parent = DeserializedSpanContext(
         traceIdBytes = trace_id.toByteArray(),
         spanIdBytes = parent_span_id.toByteArray(),
+        isRemote = flags.isRemoteContext(),
     ),
     spanContext = DeserializedSpanContext(
         traceIdBytes = trace_id.toByteArray(),
@@ -84,9 +86,26 @@ private fun List<SpanLinkData>.toSpanLink() = map { it.toLinkData() }
 private fun SpanLinkData.toLinkData() = Span.Link(
     trace_id = spanContext.traceIdBytes.toByteString(),
     span_id = spanContext.spanIdBytes.toByteString(),
+    trace_state = spanContext.traceState.toW3CString(),
+    flags = spanContext.toSpanFlagsInt(remoteContext = spanContext),
     attributes = attributes.createKeyValues(),
     dropped_attributes_count = droppedAttributesCount
 )
+
+private fun SpanContext.toSpanFlagsInt(remoteContext: SpanContext): Int {
+    var flags = traceFlags.toFlagsInt()
+    if (remoteContext.isValid) {
+        flags = flags or SpanFlags.SPAN_FLAGS_CONTEXT_HAS_IS_REMOTE_MASK.value
+        if (remoteContext.isRemote) {
+            flags = flags or SpanFlags.SPAN_FLAGS_CONTEXT_IS_REMOTE_MASK.value
+        }
+    }
+    return flags
+}
+
+private fun Int.isRemoteContext(): Boolean =
+    (this and SpanFlags.SPAN_FLAGS_CONTEXT_HAS_IS_REMOTE_MASK.value) != 0 &&
+        (this and SpanFlags.SPAN_FLAGS_CONTEXT_IS_REMOTE_MASK.value) != 0
 
 private fun SpanKind.toProtoSpanKind(): Span.SpanKind = when (this) {
     SpanKind.SERVER -> Span.SpanKind.SPAN_KIND_SERVER
@@ -120,7 +139,10 @@ private fun Span.Event.toEventData(): SpanEventData = DeserializedSpanEventData(
 private fun Span.Link.toLinkData(): SpanLinkData = DeserializedSpanLinkData(
     spanContext = DeserializedSpanContext(
         traceIdBytes = trace_id.toByteArray(),
-        spanIdBytes = span_id.toByteArray()
+        spanIdBytes = span_id.toByteArray(),
+        flags = flags,
+        traceStateString = trace_state,
+        isRemote = flags.isRemoteContext(),
     ),
     attributes = attributes.toAttributeMap(),
     droppedAttributesCount = dropped_attributes_count

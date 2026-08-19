@@ -1,11 +1,11 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanProcessor
+import io.opentelemetry.kotlin.awaitOperationResultCode
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.toOperationResultCode
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpanAdapter
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
@@ -42,10 +42,11 @@ internal class SpanProcessorAdapter(
 
     override fun isStartRequired(): Boolean = impl.isStartRequired
     override fun isEndRequired(): Boolean = impl.isEndRequired
-    override suspend fun forceFlush(): OperationResultCode = impl.forceFlush().toOperationResultCode()
+    override suspend fun forceFlush(): OperationResultCode =
+        awaitOperationResultCode { impl.forceFlush() }
 
     override suspend fun shutdown(): OperationResultCode =
         shutdownState.shutdown {
-            impl.shutdown().toOperationResultCode()
+            awaitOperationResultCode { impl.shutdown() }
         }
 }

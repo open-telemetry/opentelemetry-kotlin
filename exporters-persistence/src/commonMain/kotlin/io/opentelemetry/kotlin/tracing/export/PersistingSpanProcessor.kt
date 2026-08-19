@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -82,7 +83,7 @@ internal class PersistingSpanProcessor(
 
     private val flushMutex = Mutex()
     private val flushScope = CoroutineScope(
-        SupervisorJob() + dispatcher + telemetryExceptionHandler("Persisting span processor")
+        SupervisorJob() + dispatcher + telemetryExceptionHandler("Persisting span processor", sdkErrorHandler)
     )
 
     init {
@@ -98,10 +99,12 @@ internal class PersistingSpanProcessor(
         try {
             composite.onStart(span, parentContext)
         } catch (e: Throwable) {
-            sdkErrorHandler.onUserCodeError(
-                e,
-                "SpanProcessor.onStart failed",
-                SdkErrorSeverity.WARNING
+            sdkErrorHandler.onError(
+                SdkError.UserCodeError(
+                    e,
+                    "SpanProcessor.onStart failed",
+                    SdkErrorSeverity.WARNING
+                )
             )
         }
     }
@@ -110,10 +113,12 @@ internal class PersistingSpanProcessor(
         try {
             composite.onEnding(span)
         } catch (e: Throwable) {
-            sdkErrorHandler.onUserCodeError(
-                e,
-                "SpanProcessor.onEnding failed",
-                SdkErrorSeverity.WARNING
+            sdkErrorHandler.onError(
+                SdkError.UserCodeError(
+                    e,
+                    "SpanProcessor.onEnding failed",
+                    SdkErrorSeverity.WARNING
+                )
             )
         }
     }
@@ -122,10 +127,12 @@ internal class PersistingSpanProcessor(
         try {
             composite.onEnd(span)
         } catch (e: Throwable) {
-            sdkErrorHandler.onUserCodeError(
-                e,
-                "SpanProcessor.onEnd failed",
-                SdkErrorSeverity.WARNING
+            sdkErrorHandler.onError(
+                SdkError.UserCodeError(
+                    e,
+                    "SpanProcessor.onEnd failed",
+                    SdkErrorSeverity.WARNING
+                )
             )
         }
     }
