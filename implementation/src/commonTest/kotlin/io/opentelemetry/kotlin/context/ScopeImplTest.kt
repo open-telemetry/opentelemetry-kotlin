@@ -43,7 +43,8 @@ internal class ScopeImplTest {
 
     @Test
     fun testDoubleDetachReportsApiMisuse() {
-        val newCtx = factory.with(factory.root(), mapOf("key" to "value"))
+        val key = factory.createKey<String>("key")
+        val newCtx = factory.root().set(key, "value")
         val scope = newCtx.attach()
 
         assertTrue(scope.detach())
@@ -58,9 +59,10 @@ internal class ScopeImplTest {
 
     @Test
     fun testOutOfOrderDetachReportsApiMisuse() {
-        val ctx1 = factory.with(factory.root(), mapOf("key" to "value"))
+        val key = factory.createKey<String>("key")
+        val ctx1 = factory.root().set(key, "value")
         val scope1 = ctx1.attach()
-        val ctx2 = factory.with(factory.root(), mapOf("another" to "value"))
+        val ctx2 = factory.root().set(key, "another")
         val scope2 = ctx2.attach()
 
         assertFalse(scope1.detach())
