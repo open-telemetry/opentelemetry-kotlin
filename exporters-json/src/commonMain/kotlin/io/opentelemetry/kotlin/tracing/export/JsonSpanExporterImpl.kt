@@ -9,12 +9,12 @@ import io.opentelemetry.kotlin.tracing.data.SpanData
 
 internal class JsonSpanExporterImpl(
     val encoder: OtlpJsonEncoder<SpanData, SerializableSpanData> = JsonSpanEncoder()
-) : JsonSpanExporter {
+) : JsonSpanExporter() {
     private val shutdownState = MutableShutdownState()
 
     override suspend fun export(telemetry: List<SpanData>): OperationResultCode =
         shutdownState.ifActive {
-            telemetry.forEach { encoder.encode(it) }
+            telemetry.forEach { encoder.encode(it, sink) }
             OperationResultCode.Success
         }
 

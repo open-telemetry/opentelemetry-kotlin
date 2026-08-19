@@ -4,6 +4,8 @@ import io.opentelemetry.kotlin.framework.serialization.SerializableLogRecordData
 import io.opentelemetry.kotlin.framework.serialization.conversion.toSerializable
 import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
 import kotlinx.serialization.json.Json
+import okio.blackholeSink
+import okio.buffer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -14,9 +16,10 @@ internal class JsonLogRecordEncoderTest {
     fun `should successfully encode a log record data in JSON format`() {
         // given
         val encoder = JsonLogRecordEncoder()
+        val sink = blackholeSink().buffer()
 
         // when
-        val result = encoder.encode(FakeReadableLogRecord())
+        val result = encoder.encode(FakeReadableLogRecord(), sink)
 
         // then
         assertTrue {
@@ -33,9 +36,10 @@ internal class JsonLogRecordEncoderTest {
         // given
         val encoder = JsonLogRecordEncoder()
         val value = FakeReadableLogRecord()
+        val sink = blackholeSink().buffer()
 
         // when
-        val result = encoder.encode(value)
+        val result = encoder.encode(value, sink)
 
         // then
         assertEquals(

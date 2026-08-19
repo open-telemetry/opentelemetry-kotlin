@@ -2,11 +2,11 @@ package io.opentelemetry.kotlin.encode
 
 import io.opentelemetry.kotlin.framework.serialization.SerializableLogRecordData
 import io.opentelemetry.kotlin.framework.serialization.conversion.toSerializable
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 import kotlinx.serialization.KSerializer
 
-internal class JsonLogRecordEncoder : OtlpJsonEncoder<ReadableLogRecord, SerializableLogRecordData> {
-    override fun getSerializable(value: ReadableLogRecord): SerializableLogRecordData =
+internal class JsonLogRecordEncoder : OtlpJsonEncoder<LogRecordData, SerializableLogRecordData> {
+    override fun getSerializable(value: LogRecordData): SerializableLogRecordData =
         value.toSerializable()
 
     override fun getSerializer(): KSerializer<SerializableLogRecordData> =
