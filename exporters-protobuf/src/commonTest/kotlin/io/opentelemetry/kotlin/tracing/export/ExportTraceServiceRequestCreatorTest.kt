@@ -251,8 +251,14 @@ class ExportTraceServiceRequestCreatorTest {
     @Test
     fun testGroupsSpansWithDifferentResources() {
         val request = listOf(
-            FakeSpanData(name = "a", resource = FakeResource()),
-            FakeSpanData(name = "b", resource = FakeResource()),
+            FakeSpanData(
+                name = "a",
+                resource = FakeResource(attributes = mapOf("service.name" to "a"), schemaUrl = "https://example.com/a"),
+            ),
+            FakeSpanData(
+                name = "b",
+                resource = FakeResource(attributes = mapOf("service.name" to "b"), schemaUrl = "https://example.com/b"),
+            ),
         ).toExportTraceServiceRequest()
 
         assertEquals(2, request.resource_spans.size)

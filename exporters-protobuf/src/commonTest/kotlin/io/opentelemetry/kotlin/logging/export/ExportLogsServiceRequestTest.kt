@@ -176,8 +176,14 @@ class ExportLogsServiceRequestTest {
     @Test
     fun testGroupsLogsWithDifferentResources() {
         val request = listOf(
-            FakeLogRecordData(body = "a", resource = FakeResource()),
-            FakeLogRecordData(body = "b", resource = FakeResource()),
+            FakeLogRecordData(
+                body = "a",
+                resource = FakeResource(attributes = mapOf("service.name" to "a"), schemaUrl = "https://example.com/a"),
+            ),
+            FakeLogRecordData(
+                body = "b",
+                resource = FakeResource(attributes = mapOf("service.name" to "b"), schemaUrl = "https://example.com/b"),
+            ),
         ).toExportLogsServiceRequest()
 
         assertEquals(2, request.resource_logs.size)
