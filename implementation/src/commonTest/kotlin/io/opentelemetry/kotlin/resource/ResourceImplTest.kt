@@ -141,10 +141,22 @@ internal class ResourceImplTest {
 
     @Test
     fun testEqualsAndHashCodeByAttributesAndSchemaUrl() {
-        val a = ResourceImpl(AttributesModel(attrs = mutableMapOf("k" to "v")), "https://example.com/schema")
-        val b = ResourceImpl(AttributesModel(attrs = mutableMapOf("k" to "v")), "https://example.com/schema")
-        val differentAttrs = ResourceImpl(AttributesModel(attrs = mutableMapOf("k" to "other")), "https://example.com/schema")
-        val differentSchema = ResourceImpl(AttributesModel(attrs = mutableMapOf("k" to "v")), "https://example.com/other")
+        val a = ResourceImpl(
+            AttributesModel(attrs = mutableMapOf("k" to "v")),
+            "https://example.com/schema",
+        )
+        val b = ResourceImpl(
+            AttributesModel(attrs = mutableMapOf("k" to "v")),
+            "https://example.com/schema",
+        )
+        val differentAttrs = ResourceImpl(
+            AttributesModel(attrs = mutableMapOf("k" to "other")),
+            "https://example.com/schema",
+        )
+        val differentSchema = ResourceImpl(
+            AttributesModel(attrs = mutableMapOf("k" to "v")),
+            "https://example.com/other",
+        )
 
         assertEquals(a, b)
         assertEquals(a.hashCode(), b.hashCode())
