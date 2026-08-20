@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 

@@ -17,11 +17,11 @@ import io.opentelemetry.kotlin.tracing.SpanDataImpl
 import io.opentelemetry.kotlin.tracing.SpanEventImpl
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.StatusData
-import io.opentelemetry.kotlin.tracing.frozenCopy
-import io.opentelemetry.kotlin.tracing.toSnapshot
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
+import io.opentelemetry.kotlin.tracing.frozenCopy
+import io.opentelemetry.kotlin.tracing.toSnapshot
 
 /**
  * The single source of truth for span state. This is not exposed to consumers of the API - they
