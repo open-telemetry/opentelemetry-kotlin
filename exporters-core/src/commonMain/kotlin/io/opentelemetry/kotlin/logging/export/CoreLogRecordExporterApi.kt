@@ -7,9 +7,9 @@ import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.LogExportConfigDsl
+import io.opentelemetry.kotlin.ioDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 
 /**
@@ -35,9 +35,8 @@ public fun LogExportConfigDsl.compositeLogRecordProcessor(vararg processors: Log
  */
 @ExperimentalApi
 public fun LogExportConfigDsl.simpleLogRecordProcessor(exporter: LogRecordExporter): LogRecordProcessor {
-    val dispatcher: CoroutineDispatcher = Dispatchers.Default
     val scope = CoroutineScope(
-        SupervisorJob() + dispatcher + telemetryExceptionHandler("Simple log record processor", sdkErrorHandler)
+        SupervisorJob() + ioDispatcher + telemetryExceptionHandler("Simple log record processor", sdkErrorHandler)
     )
     return SimpleLogRecordProcessor(exporter, scope)
 }
@@ -71,7 +70,7 @@ public fun LogExportConfigDsl.batchLogRecordProcessor(
     scheduleDelayMs: Long = BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher = ioDispatcher,
 ): LogRecordProcessor = BatchLogRecordProcessorImpl(
     exporter,
     maxQueueSize,

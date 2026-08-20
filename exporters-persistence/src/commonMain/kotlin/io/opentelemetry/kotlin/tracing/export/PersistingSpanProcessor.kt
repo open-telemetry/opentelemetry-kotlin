@@ -16,12 +16,12 @@ import io.opentelemetry.kotlin.export.TelemetryRepositoryImpl
 import io.opentelemetry.kotlin.export.TimeoutTelemetryCloseable
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -54,7 +54,7 @@ internal class PersistingSpanProcessor(
     private val exportTimeoutMs: Long,
     maxExportBatchSize: Int,
     private val sdkErrorHandler: SdkErrorHandler,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher = ioDispatcher,
 ) : SpanProcessor {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()

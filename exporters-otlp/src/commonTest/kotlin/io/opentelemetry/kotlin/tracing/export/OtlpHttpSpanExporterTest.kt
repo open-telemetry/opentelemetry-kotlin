@@ -19,9 +19,9 @@ import io.opentelemetry.kotlin.export.OtlpClient
 import io.opentelemetry.kotlin.export.createDefaultHttpClient
 import io.opentelemetry.kotlin.export.createHttpEngine
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -158,7 +158,7 @@ internal class OtlpHttpSpanExporterTest {
 
         val clients = coroutineScope {
             (1..50).map {
-                async(Dispatchers.Default) {
+                async(ioDispatcher) {
                     HttpClientRegistry.getOrCreate(
                         engine = engine,
                         requestTimeoutMs = 30_000

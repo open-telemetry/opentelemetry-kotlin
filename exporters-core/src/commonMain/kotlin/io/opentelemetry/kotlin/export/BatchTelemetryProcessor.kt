@@ -1,8 +1,8 @@
 package io.opentelemetry.kotlin.export
 
+import io.opentelemetry.kotlin.ioDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -13,7 +13,7 @@ import kotlinx.coroutines.withTimeout
 
 internal class BatchTelemetryProcessor<T>(
     private val config: BatchTelemetryConfig,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher = ioDispatcher,
     private val exportAction: suspend (telemetry: List<T>) -> OperationResultCode,
 ) : TelemetryCloseable {
 

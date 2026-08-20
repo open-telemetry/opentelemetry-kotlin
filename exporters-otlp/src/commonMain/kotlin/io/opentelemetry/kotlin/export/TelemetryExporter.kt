@@ -2,8 +2,8 @@ package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
+import io.opentelemetry.kotlin.ioDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -18,7 +18,7 @@ internal class TelemetryExporter<T>(
     private val maxAttemptIntervalMs: Long,
     private val maxAttempts: Int,
     private val sdkErrorHandler: SdkErrorHandler,
-    coroutineContext: CoroutineContext = Dispatchers.Default,
+    coroutineContext: CoroutineContext = ioDispatcher,
     private val random: Random = Random.Default,
     private val exportAction: suspend (telemetry: List<T>) -> OtlpResponse,
 ) : TelemetryCloseable {
