@@ -16,7 +16,6 @@ internal class SpanContextFactoryImpl(
             traceIdBytes = idGenerator.invalidTraceId,
             spanIdBytes = idGenerator.invalidSpanId,
             traceFlags = traceFlagsFactory.default,
-            isValid = false,
             isRemote = false,
             traceState = traceStateFactory.default
         )
@@ -42,7 +41,6 @@ internal class SpanContextFactoryImpl(
                 else -> idGenerator.invalidSpanId
             },
             traceFlags = traceFlags,
-            isValid = isValidTraceId && isValidSpanId,
             isRemote = isRemote,
             traceState = traceState
         )

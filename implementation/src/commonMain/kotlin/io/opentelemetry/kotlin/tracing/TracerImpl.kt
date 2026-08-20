@@ -166,7 +166,6 @@ internal class TracerImpl(
                 randomTraceId -> unsampledRandomFlags
                 else -> unsampledFlags
             },
-            isValid = validTraceId && validSpanId,
             isRemote = false,
             traceState = traceState,
         )

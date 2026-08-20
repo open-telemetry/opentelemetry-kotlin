@@ -198,4 +198,18 @@ internal class SpanContextFactoryImplTest {
         assertFalse(spanContext.isValid)
         assertFalse(spanContext.isRemote)
     }
+
+    @Test
+    internal fun testZeroIdsAreInvalidEvenWhenSampled() {
+        val spanContext = factory.create(
+            "00000000000000000000000000000000",
+            "0000000000000000",
+            traceFlagsFactory.fromHex("01"),
+            traceStateFactory.default,
+            false,
+        )
+
+        assertTrue(spanContext.traceFlags.isSampled)
+        assertFalse(spanContext.isValid)
+    }
 }
