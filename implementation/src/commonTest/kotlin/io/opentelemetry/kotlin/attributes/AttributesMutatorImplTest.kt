@@ -288,6 +288,51 @@ internal class AttributesMutatorImplTest {
         assertNotEquals(a, b)
     }
 
+    @Test
+    fun testBooleanLongDoubleListsAreCopied() {
+        val bools = mutableListOf(true)
+        val longs = mutableListOf(1L)
+        val doubles = mutableListOf(1.0)
+        val attrs = AttributesModel(attributeLimit).apply {
+            setBooleanListAttribute("bools", bools)
+            setLongListAttribute("longs", longs)
+            setDoubleListAttribute("doubles", doubles)
+        }.attributes
+        bools.add(false)
+        longs.add(2L)
+        doubles.add(2.0)
+        assertEquals(listOf(true), attrs["bools"])
+        assertEquals(listOf(1L), attrs["longs"])
+        assertEquals(listOf(1.0), attrs["doubles"])
+    }
+
+    @Test
+    fun testAnyValueListAndBytesAreCopied() {
+        val items = mutableListOf<AnyValue>(AnyValue.StringValue("a"))
+        val bytes = byteArrayOf(1, 2)
+        val nestedItems = mutableListOf<AnyValue>(AnyValue.LongValue(1L))
+        val nested = mutableMapOf<String, AnyValue>("list" to AnyValue.ListValue(nestedItems))
+        val attrs = AttributesModel(attributeLimit).apply {
+            setAnyValueAttribute("list", AnyValue.ListValue(items))
+            setAnyValueAttribute("bytes", AnyValue.BytesValue(bytes))
+            setAnyValueAttribute("map", AnyValue.MapValue(nested))
+        }.attributes
+        items.add(AnyValue.StringValue("b"))
+        bytes[0] = 9
+        nestedItems.add(AnyValue.LongValue(2L))
+        nested["extra"] = AnyValue.StringValue("x")
+
+        val storedList = (attrs["list"] as AnyValue.ListValue).values
+        assertEquals(listOf(AnyValue.StringValue("a")), storedList)
+        assertTrue((attrs["bytes"] as AnyValue.BytesValue).value.contentEquals(byteArrayOf(1, 2)))
+        val storedMap = attrs["map"] as AnyValue.MapValue
+        assertEquals(
+            listOf(AnyValue.LongValue(1L)),
+            (storedMap.values["list"] as AnyValue.ListValue).values,
+        )
+        assertEquals(null, storedMap.values["extra"])
+    }
+
     private fun AttributesMutator.addTestAttributes(keyToken: String = "") {
         setStringAttribute("string$keyToken", "value")
         setDoubleAttribute("double$keyToken", 3.14)
