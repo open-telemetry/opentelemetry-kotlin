@@ -6,7 +6,8 @@ import io.opentelemetry.kotlin.ThreadSafe
 /**
  * Provides instruments used to record measurements which are aggregated to metrics.
  *
- * Instruments are obtained through methods provided by this interface.
+ * Instruments are obtained through methods provided by this interface. Implementations of
+ * [Meter] and the instruments it creates must be safe for concurrent use.
  *
  * See the [instrument selection guidelines](https://opentelemetry.io/docs/specs/otel/metrics/supplementary-guidelines/#instrument-selection)
  * for help choosing the right instrument.
@@ -15,4 +16,41 @@ import io.opentelemetry.kotlin.ThreadSafe
  */
 @ExperimentalApi
 @ThreadSafe
-public interface Meter
+public interface Meter {
+
+    /**
+     * Creates a [LongUpDownCounter] for recording signed integer increments and decrements.
+     *
+     * [name] is required and should conform to the
+     * [instrument name syntax](https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-name-syntax).
+     * [unit] and [description] are optional.
+     *
+     * There is no API for creating an UpDownCounter other than with a [Meter].
+     *
+     * https://opentelemetry.io/docs/specs/otel/metrics/api/#updowncounter-creation
+     */
+    @ThreadSafe
+    public fun createLongUpDownCounter(
+        name: String,
+        unit: String? = null,
+        description: String? = null,
+    ): LongUpDownCounter
+
+    /**
+     * Creates a [DoubleUpDownCounter] for recording signed floating-point increments and decrements.
+     *
+     * [name] is required and should conform to the
+     * [instrument name syntax](https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-name-syntax).
+     * [unit] and [description] are optional.
+     *
+     * There is no API for creating an UpDownCounter other than with a [Meter].
+     *
+     * https://opentelemetry.io/docs/specs/otel/metrics/api/#updowncounter-creation
+     */
+    @ThreadSafe
+    public fun createDoubleUpDownCounter(
+        name: String,
+        unit: String? = null,
+        description: String? = null,
+    ): DoubleUpDownCounter
+}

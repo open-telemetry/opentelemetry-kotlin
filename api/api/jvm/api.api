@@ -240,13 +240,30 @@ public final class io/opentelemetry/kotlin/logging/SeverityNumber : java/lang/En
 public abstract interface class io/opentelemetry/kotlin/metrics/AsynchronousInstrument : io/opentelemetry/kotlin/metrics/Instrument, java/lang/AutoCloseable {
 }
 
+public abstract interface class io/opentelemetry/kotlin/metrics/DoubleUpDownCounter : io/opentelemetry/kotlin/metrics/SynchronousInstrument {
+	public abstract fun add (D)V
+	public abstract fun add (DLkotlin/jvm/functions/Function1;)V
+}
+
 public abstract interface class io/opentelemetry/kotlin/metrics/Instrument {
 	public abstract fun getDescription ()Ljava/lang/String;
 	public abstract fun getName ()Ljava/lang/String;
 	public abstract fun getUnit ()Ljava/lang/String;
 }
 
+public abstract interface class io/opentelemetry/kotlin/metrics/LongUpDownCounter : io/opentelemetry/kotlin/metrics/SynchronousInstrument {
+	public abstract fun add (J)V
+	public abstract fun add (JLkotlin/jvm/functions/Function1;)V
+}
+
 public abstract interface class io/opentelemetry/kotlin/metrics/Meter {
+	public abstract fun createDoubleUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/DoubleUpDownCounter;
+	public abstract fun createLongUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/LongUpDownCounter;
+}
+
+public final class io/opentelemetry/kotlin/metrics/Meter$DefaultImpls {
+	public static synthetic fun createDoubleUpDownCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/DoubleUpDownCounter;
+	public static synthetic fun createLongUpDownCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/LongUpDownCounter;
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/MeterProvider {
