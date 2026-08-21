@@ -284,6 +284,23 @@ internal class NoopTests {
         assertSame(emptySet(), NoopConfigProperties.propertyKeys)
     }
 
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testNoopMetrics() {
+        val counter = NoopOpenTelemetry.meterProvider.getMeter("test-meter")
+            .createLongUpDownCounter(
+                name = "store.inventory",
+                unit = "{item}",
+                description = "items in stock",
+            )
+        assertEquals("store.inventory", counter.name)
+        assertEquals("{item}", counter.unit)
+        assertEquals("items in stock", counter.description)
+        assertFalse(counter.enabled())
+        counter.add(1)
+        counter.add(-1) { setStringAttribute("account.type", "commercial") }
+    }
+
     private fun verifySpanOperationsAreNoop(span: NoopSpan) {
         // Test primitive attributes
         span.setStringAttribute("key", "value")

@@ -27,4 +27,13 @@ internal class MeterAdapterUpDownCounterTest {
         counter.add(0)
         counter.add(2) { setStringAttribute("account.type", "commercial") }
     }
+
+    @Test
+    fun createLongUpDownCounterOmitsNullUnitAndDescription() {
+        val counter = adapter.createLongUpDownCounter("grocery.customers")
+        assertEquals("grocery.customers", counter.name)
+        assertEquals(null, counter.unit)
+        assertEquals(null, counter.description)
+        counter.add(1)
+    }
 }

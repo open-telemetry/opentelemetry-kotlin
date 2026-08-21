@@ -13,5 +13,5 @@ internal class NoopLongUpDownCounter(
     override val description: String?,
 ) : LongUpDownCounter {
     override fun enabled(): Boolean = false
-    override fun add(value: Long, attributes: AttributesMutator.() -> Unit) {}
+    override fun add(value: Long, attributes: AttributesMutator.() -> Unit) = Unit
 }
