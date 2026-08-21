@@ -104,12 +104,12 @@ internal class SpanSimplePropertiesTest {
     }
 
     @Test
-    fun testSpanStatusErrorCanBeOverridden() {
+    fun testSpanStatusErrorCannotBeOverriddenByUnset() {
         val span = tracer.startSpan("test")
-        span.setStatus(StatusData.Error("Whoops"))
-        val unset = StatusData.Unset
-        span.setStatus(unset)
-        assertEquals(unset, (span.toReadableSpan()).status)
+        val error = StatusData.Error("Whoops")
+        span.setStatus(error)
+        span.setStatus(StatusData.Unset)
+        assertEquals(error, (span.toReadableSpan()).status)
     }
 
     @Test
