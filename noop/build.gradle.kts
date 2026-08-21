@@ -14,5 +14,10 @@ kotlin {
                 api(project(":sdk-api"))
             }
         }
+        val commonTest by getting {
+            dependencies {
+                implementation(libs.kotlinx.coroutines.test)
+            }
+        }
     }
 }

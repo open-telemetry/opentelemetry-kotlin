@@ -1,8 +1,13 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.aliases.OtelJavaClock
+import io.opentelemetry.kotlin.aliases.OtelJavaLoggerProvider
+import io.opentelemetry.kotlin.aliases.OtelJavaMeterProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
+import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetrySdk
+import io.opentelemetry.kotlin.aliases.OtelJavaTracerProvider
 import io.opentelemetry.kotlin.clock.ClockAdapter
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatBaggageFactory
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
@@ -37,9 +42,9 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(): OpenTelemetry {
     val span = CompatSpanFactory(spanContext)
     val clock = ClockAdapter(OtelJavaClock.getDefault())
     return CompatOpenTelemetryImpl(
-        tracerProvider = TracerProviderAdapter(tracerProvider, clock, CompatSpanLimitsConfig()),
-        loggerProvider = LoggerProviderAdapter(logsBridge),
-        meterProvider = MeterProviderAdapter(meterProvider),
+        tracerProvider = TracerProviderAdapter(unobfuscatedTracerProvider(), clock, CompatSpanLimitsConfig()),
+        loggerProvider = LoggerProviderAdapter(unobfuscatedLoggerProvider()),
+        meterProvider = MeterProviderAdapter(unobfuscatedMeterProvider()),
         clock = clock,
         spanContext = spanContext,
         traceFlags = traceFlags,
@@ -50,5 +55,26 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(): OpenTelemetry {
         idGenerator = idGenerator,
         resource = CompatResourceFactory,
         propagator = TextMapPropagatorAdapter(propagators.textMapPropagator),
+        sdkErrorHandler = NoopSdkErrorHandler,
     )
+}
+
+/**
+ * [OtelJavaOpenTelemetrySdk] hides its SDK providers behind obfuscated wrappers, which prevents
+ * the adapters from delegating flush/shutdown to them. These functions return the SDK providers
+ * where they are available.
+ */
+private fun OtelJavaOpenTelemetry.unobfuscatedTracerProvider(): OtelJavaTracerProvider = when (this) {
+    is OtelJavaOpenTelemetrySdk -> sdkTracerProvider
+    else -> tracerProvider
+}
+
+private fun OtelJavaOpenTelemetry.unobfuscatedLoggerProvider(): OtelJavaLoggerProvider = when (this) {
+    is OtelJavaOpenTelemetrySdk -> sdkLoggerProvider
+    else -> logsBridge
+}
+
+private fun OtelJavaOpenTelemetry.unobfuscatedMeterProvider(): OtelJavaMeterProvider = when (this) {
+    is OtelJavaOpenTelemetrySdk -> sdkMeterProvider
+    else -> meterProvider
 }

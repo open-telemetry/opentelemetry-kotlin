@@ -34,7 +34,7 @@ internal class OpenTelemetryImpl(
     override val resource: ResourceFactory,
     override val propagator: TextMapPropagator,
     private val timeoutMs: Long = 3000,
-) : OpenTelemetrySdk, TelemetryCloseable {
+) : OpenTelemetrySdk {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
 

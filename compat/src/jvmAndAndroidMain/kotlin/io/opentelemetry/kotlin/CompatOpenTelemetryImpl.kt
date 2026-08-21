@@ -1,5 +1,10 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
+import io.opentelemetry.kotlin.export.MutableShutdownState
+import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.factory.BaggageFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
@@ -27,4 +32,24 @@ internal class CompatOpenTelemetryImpl(
     override val idGenerator: IdGenerator,
     override val resource: ResourceFactory,
     override val propagator: TextMapPropagator,
-) : OpenTelemetrySdk
+    sdkErrorHandler: SdkErrorHandler,
+) : OpenTelemetrySdk {
+
+    private val shutdownState: MutableShutdownState = MutableShutdownState()
+
+    private val closeable = CompositeTelemetryCloseable(
+        closeables = listOfNotNull(
+            tracerProvider as? TelemetryCloseable,
+            loggerProvider as? TelemetryCloseable,
+            meterProvider as? TelemetryCloseable,
+        ),
+        sdkErrorHandler = sdkErrorHandler,
+    )
+
+    override suspend fun forceFlush(): OperationResultCode = when {
+        shutdownState.isShutdown -> OperationResultCode.Success
+        else -> closeable.forceFlush()
+    }
+
+    override suspend fun shutdown(): OperationResultCode = shutdownState.shutdown { closeable.shutdown() }
+}
