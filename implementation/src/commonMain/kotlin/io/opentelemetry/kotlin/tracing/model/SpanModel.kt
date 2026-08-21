@@ -93,7 +93,9 @@ internal class SpanModel(
     }
 
     override fun setStatus(status: StatusData) {
-        if (status is StatusData.Unset) return
+        if (status is StatusData.Unset) {
+            return
+        }
         mutate("Span.setStatus failed") {
             if (statusImpl !is StatusData.Ok) {
                 statusImpl = status
