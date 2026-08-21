@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -42,7 +43,7 @@ internal class MeterProviderImpl(
         sdkErrorHandler.guardOrDefault(noopMeter, "MeterProvider.getMeter failed") {
             shutdownState.ifActiveOrElse(noopMeter) {
                 if (name.isEmpty()) {
-                    sdkErrorHandler.onError(
+                    sdkErrorHandler.reportError(
                         SdkError.ApiMisuse(
                             api = "MeterProvider.getMeter",
                             message = "Meter requested without instrumentation scope name",

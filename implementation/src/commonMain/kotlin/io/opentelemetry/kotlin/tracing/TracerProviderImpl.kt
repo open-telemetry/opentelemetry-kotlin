@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -72,7 +73,7 @@ internal class TracerProviderImpl(
         sdkErrorHandler.guardOrDefault(noopTracer, "TracerProvider.getTracer failed") {
             shutdownState.ifActiveOrElse(noopTracer) {
                 if (name.isEmpty()) {
-                    sdkErrorHandler.onError(
+                    sdkErrorHandler.reportError(
                         SdkError.ApiMisuse(
                             api = "TracerProvider.getTracer",
                             message = "Tracer requested without instrumentation scope name",

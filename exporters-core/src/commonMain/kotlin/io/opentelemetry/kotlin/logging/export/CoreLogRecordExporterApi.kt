@@ -4,6 +4,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.LogExportConfigDsl
@@ -18,7 +19,7 @@ import kotlinx.coroutines.SupervisorJob
 @ExperimentalApi
 public fun LogExportConfigDsl.compositeLogRecordProcessor(vararg processors: LogRecordProcessor): LogRecordProcessor {
     if (processors.isEmpty()) {
-        sdkErrorHandler.onError(
+        sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
                 api = "LogExportConfigDsl.compositeLogRecordProcessor",
                 message = "At least one processor must be provided",
@@ -48,7 +49,7 @@ public fun LogExportConfigDsl.simpleLogRecordProcessor(exporter: LogRecordExport
 @ExperimentalApi
 public fun LogExportConfigDsl.compositeLogRecordExporter(vararg exporters: LogRecordExporter): LogRecordExporter {
     if (exporters.isEmpty()) {
-        sdkErrorHandler.onError(
+        sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
                 api = "LogExportConfigDsl.compositeLogRecordExporter",
                 message = "At least one exporter must be provided",

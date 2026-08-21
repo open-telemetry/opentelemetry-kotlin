@@ -29,4 +29,22 @@ internal class GuardTest {
         assertEquals("SpanProcessor.onStart failed", error.message)
         assertEquals(SdkErrorSeverity.WARNING, error.severity)
     }
+
+    @Test
+    fun testReportErrorForwardsApiMisuse() {
+        val error = SdkError.ApiMisuse("TestApi", "boom", SdkErrorSeverity.WARNING)
+
+        handler.reportError(error)
+
+        assertSame(error, handler.apiMisuses.single())
+    }
+
+    @Test
+    fun testReportErrorSwallowsThrowingHandler() {
+        val throwingHandler = SdkErrorHandler { throw IllegalStateException("boom") }
+
+        throwingHandler.reportError(
+            SdkError.ApiMisuse("TestApi", "boom", SdkErrorSeverity.WARNING)
+        )
+    }
 }

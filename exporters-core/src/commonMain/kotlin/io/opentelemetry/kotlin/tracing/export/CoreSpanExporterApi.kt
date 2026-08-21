@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
@@ -17,7 +18,7 @@ import kotlinx.coroutines.SupervisorJob
 @ExperimentalApi
 public fun TraceExportConfigDsl.compositeSpanProcessor(vararg processors: SpanProcessor): SpanProcessor {
     if (processors.isEmpty()) {
-        sdkErrorHandler.onError(
+        sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
                 api = "TraceExportConfigDsl.compositeSpanProcessor",
                 message = "At least one processor must be provided",
@@ -47,7 +48,7 @@ public fun TraceExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): Spa
 @ExperimentalApi
 public fun TraceExportConfigDsl.compositeSpanExporter(vararg exporters: SpanExporter): SpanExporter {
     if (exporters.isEmpty()) {
-        sdkErrorHandler.onError(
+        sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
                 api = "TraceExportConfigDsl.compositeSpanExporter",
                 message = "At least one exporter must be provided",

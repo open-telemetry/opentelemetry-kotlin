@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.tracing.TraceFlags
 
@@ -70,7 +71,7 @@ internal class TraceParent private constructor(
             return if (errorMessage == null) {
                 TraceParent(version, traceId, spanId, traceFlags)
             } else {
-                sdkErrorHandler.onError(
+                sdkErrorHandler.reportError(
                     SdkError.ApiMisuse(
                         api = "TraceParent.create",
                         message = errorMessage,

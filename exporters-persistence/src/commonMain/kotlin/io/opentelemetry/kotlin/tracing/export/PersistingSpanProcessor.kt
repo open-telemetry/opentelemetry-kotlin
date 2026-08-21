@@ -1,9 +1,8 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
@@ -96,44 +95,20 @@ internal class PersistingSpanProcessor(
     }
 
     override fun onStart(span: ReadWriteSpan, parentContext: Context) = shutdownState.execute {
-        try {
+        sdkErrorHandler.guard("SpanProcessor.onStart failed") {
             composite.onStart(span, parentContext)
-        } catch (e: Throwable) {
-            sdkErrorHandler.onError(
-                SdkError.UserCodeError(
-                    e,
-                    "SpanProcessor.onStart failed",
-                    SdkErrorSeverity.WARNING
-                )
-            )
         }
     }
 
     override fun onEnding(span: ReadWriteSpan) = shutdownState.execute {
-        try {
+        sdkErrorHandler.guard("SpanProcessor.onEnding failed") {
             composite.onEnding(span)
-        } catch (e: Throwable) {
-            sdkErrorHandler.onError(
-                SdkError.UserCodeError(
-                    e,
-                    "SpanProcessor.onEnding failed",
-                    SdkErrorSeverity.WARNING
-                )
-            )
         }
     }
 
     override fun onEnd(span: ReadableSpan) = shutdownState.execute {
-        try {
+        sdkErrorHandler.guard("SpanProcessor.onEnd failed") {
             composite.onEnd(span)
-        } catch (e: Throwable) {
-            sdkErrorHandler.onError(
-                SdkError.UserCodeError(
-                    e,
-                    "SpanProcessor.onEnd failed",
-                    SdkErrorSeverity.WARNING
-                )
-            )
         }
     }
 

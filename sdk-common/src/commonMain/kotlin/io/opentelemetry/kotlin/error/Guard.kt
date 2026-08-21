@@ -53,19 +53,27 @@ public suspend fun <T> SdkErrorHandler.guardOrDefaultSuspend(
 }
 
 /**
+ * Reports [error] to this handler. A handler that throws in response must not take down the
+ * caller, so any such failure is swallowed.
+ */
+public fun SdkErrorHandler.reportError(error: SdkError) {
+    try {
+        onError(error)
+    } catch (ignored: Throwable) {
+        // swallow
+    }
+}
+
+/**
  * Reports [exc] to this handler as a [SdkError.UserCodeError]. A handler that throws in response
  * must not take down the guard that called it, so any such failure is swallowed.
  */
 public fun SdkErrorHandler.reportUserCodeError(exc: Throwable, details: String?) {
-    try {
-        onError(
-            SdkError.UserCodeError(
-                exc,
-                details ?: DEFAULT_DETAILS,
-                SdkErrorSeverity.WARNING
-            )
+    reportError(
+        SdkError.UserCodeError(
+            exc,
+            details ?: DEFAULT_DETAILS,
+            SdkErrorSeverity.WARNING
         )
-    } catch (ignored: Throwable) {
-        // swallow
-    }
+    )
 }
