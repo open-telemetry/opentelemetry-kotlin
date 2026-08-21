@@ -10,7 +10,7 @@ internal class InMemorySpanExporterImpl : InMemorySpanExporter {
     private val shutdownState = MutableShutdownState()
 
     override val exportedSpans: List<SpanData>
-        get() = impl
+        get() = impl.toList()
 
     override suspend fun export(telemetry: List<SpanData>): OperationResultCode =
         shutdownState.ifActive {

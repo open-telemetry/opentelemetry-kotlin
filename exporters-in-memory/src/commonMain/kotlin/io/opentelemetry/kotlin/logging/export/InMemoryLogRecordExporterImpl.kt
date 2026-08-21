@@ -10,7 +10,7 @@ internal class InMemoryLogRecordExporterImpl : InMemoryLogRecordExporter {
     private val shutdownState = MutableShutdownState()
 
     override val exportedLogRecords: List<LogRecordData>
-        get() = impl
+        get() = impl.toList()
 
     override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode =
         shutdownState.ifActive {
