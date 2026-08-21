@@ -4,8 +4,7 @@ import io.opentelemetry.kotlin.framework.serialization.SerializableSpanData
 import io.opentelemetry.kotlin.framework.serialization.conversion.toSerializable
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import kotlinx.serialization.json.Json
-import okio.blackholeSink
-import okio.buffer
+import okio.Buffer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -16,18 +15,17 @@ internal class JsonSpanEncoderTest {
     fun `should successfully encode span data in JSON format`() {
         // given
         val encoder = JsonSpanEncoder()
-        val sink = blackholeSink().buffer()
+        val buffer = Buffer()
 
         // when
-        val result = encoder.encode(FakeSpanData(), sink)
+        encoder.encode(FakeSpanData(), buffer)
 
         // then
+        buffer.readUtf8()
         assertTrue {
-            result.any {
-                it == Json.encodeToString(
-                    Json.parseToJsonElement(spanDataJson)
-                )
-            }
+            buffer.readUtf8() == Json.encodeToString(
+                Json.parseToJsonElement(spanDataJson)
+            )
         }
     }
 
@@ -36,15 +34,15 @@ internal class JsonSpanEncoderTest {
         // given
         val encoder = JsonSpanEncoder()
         val value = FakeSpanData()
-        val sink = blackholeSink().buffer()
+        val buffer = Buffer()
 
         // when
-        val result = encoder.encode(value, sink)
+        encoder.encode(value, buffer)
 
         // then
         assertEquals(
             expected = value.toSerializable(),
-            actual = Json.decodeFromString<SerializableSpanData>(result.toList().first())
+            actual = Json.decodeFromString<SerializableSpanData>(buffer.readUtf8())
         )
     }
 

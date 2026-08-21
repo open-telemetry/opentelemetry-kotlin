@@ -2,10 +2,9 @@ package io.opentelemetry.kotlin.encode
 
 import io.opentelemetry.kotlin.framework.serialization.SerializableLogRecordData
 import io.opentelemetry.kotlin.framework.serialization.conversion.toSerializable
-import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import kotlinx.serialization.json.Json
-import okio.blackholeSink
-import okio.buffer
+import okio.Buffer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -16,18 +15,17 @@ internal class JsonLogRecordEncoderTest {
     fun `should successfully encode a log record data in JSON format`() {
         // given
         val encoder = JsonLogRecordEncoder()
-        val sink = blackholeSink().buffer()
+        val buffer = Buffer()
 
         // when
-        val result = encoder.encode(FakeReadableLogRecord(), sink)
+        encoder.encode(FakeLogRecordData(), buffer)
 
         // then
+        buffer.readUtf8()
         assertTrue {
-            result.any {
-                it == Json.encodeToString(
-                    Json.parseToJsonElement(logRecordJson)
-                )
-            }
+            buffer.readUtf8() == Json.encodeToString(
+                Json.parseToJsonElement(logRecordJson)
+            )
         }
     }
 
@@ -35,16 +33,16 @@ internal class JsonLogRecordEncoderTest {
     fun `should successfully decode a log record data in JSON format`() {
         // given
         val encoder = JsonLogRecordEncoder()
-        val value = FakeReadableLogRecord()
-        val sink = blackholeSink().buffer()
+        val value = FakeLogRecordData()
+        val buffer = Buffer()
 
         // when
-        val result = encoder.encode(value, sink)
+        encoder.encode(value, buffer)
 
         // then
         assertEquals(
             expected = value.toSerializable(),
-            actual = Json.decodeFromString<SerializableLogRecordData>(result.toList().first())
+            actual = Json.decodeFromString<SerializableLogRecordData>(buffer.readUtf8())
         )
     }
 
