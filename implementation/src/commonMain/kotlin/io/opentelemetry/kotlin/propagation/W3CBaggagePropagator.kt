@@ -85,19 +85,44 @@ internal object W3CBaggagePropagator : TextMapPropagator {
 
     private fun decode(header: String): Baggage? {
         var baggage: Baggage = BaggageImpl.EMPTY
-        for (rawElement in header.split(ENTRY_DELIMITER)) {
-            val parsed = parseElement(rawElement) ?: continue
-            baggage = baggage.set(parsed.key, parsed.value, BaggageEntryMetadataImpl(parsed.metadata))
+        var currentLength = 0
+        var start = 0
+        var headerFull = false
+        while (start <= header.length && !headerFull) {
+            val comma = header.indexOf(ENTRY_DELIMITER, start)
+            val end = if (comma < 0) {
+                header.length
+            } else {
+                comma
+            }
+            val element = header.substring(start, end).trim(SPACE, HTAB)
+            start = if (comma < 0) {
+                header.length + 1
+            } else {
+                comma + 1
+            }
+            if (element.isNotEmpty() && element.length <= MAX_ENTRY_BYTES) {
+                val separator = if (currentLength == 0) {
+                    0
+                } else {
+                    1
+                }
+                if (currentLength + separator + element.length > MAX_HEADER_BYTES) {
+                    headerFull = true
+                } else {
+                    val parsed = decodeEntry(element)
+                    if (parsed != null) {
+                        currentLength += separator + element.length
+                        baggage = baggage.set(
+                            parsed.key,
+                            parsed.value,
+                            BaggageEntryMetadataImpl(parsed.metadata),
+                        )
+                    }
+                }
+            }
         }
         return baggage.takeIf { it !== BaggageImpl.EMPTY }
-    }
-
-    private fun parseElement(rawElement: String): ParsedEntry? {
-        val element = rawElement.trim(SPACE, HTAB)
-        if (element.isEmpty()) {
-            return null
-        }
-        return decodeEntry(element)
     }
 
     private fun decodeEntry(element: String): ParsedEntry? {
