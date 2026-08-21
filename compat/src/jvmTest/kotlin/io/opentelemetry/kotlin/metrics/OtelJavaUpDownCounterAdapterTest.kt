@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
+import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -47,5 +48,39 @@ internal class OtelJavaUpDownCounterAdapterTest {
         assertTrue(adapter.isEnabled)
         fake.enabledResult = { false }
         assertFalse(adapter.isEnabled)
+    }
+
+    @Test
+    fun addWithEmptyAttributesSkipsAttributeMap() {
+        val fake = FakeLongUpDownCounter("n")
+        OtelJavaLongUpDownCounterAdapter(fake).add(3, OtelJavaAttributes.empty())
+        assertEquals(listOf(3L to emptyMap()), fake.adds)
+    }
+
+    @Test
+    fun addWithContextDelegatesToAttributesOverload() {
+        val fake = FakeLongUpDownCounter("n")
+        OtelJavaLongUpDownCounterAdapter(fake).add(
+            4,
+            OtelJavaAttributes.builder().put("account.type", "commercial").build(),
+            OtelJavaContext.root(),
+        )
+        assertEquals(4L, fake.adds.single().first)
+        assertEquals("commercial", fake.adds.single().second["account.type"])
+    }
+
+    @Test
+    fun ofDoublesDelegatesToJavaNoop() {
+        OtelJavaLongUpDownCounterBuilderAdapter(FakeMeter("test"), "n")
+            .ofDoubles()
+            .build()
+            .add(1.0)
+    }
+
+    @Test
+    fun buildWithCallbackDelegatesToJavaNoop() {
+        OtelJavaLongUpDownCounterBuilderAdapter(FakeMeter("test"), "n")
+            .buildWithCallback { }
+            .close()
     }
 }
