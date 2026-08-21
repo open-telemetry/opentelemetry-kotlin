@@ -1,9 +1,12 @@
 package io.opentelemetry.kotlin.context
 
+import io.opentelemetry.kotlin.AtomicBoolean
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
-import kotlin.concurrent.Volatile
+
+private const val ALREADY_DETACHED_MSG = "Scope.detach() called on an already-detached scope"
+private const val OUT_OF_ORDER_MSG = "Scope.detach() called out of order — context has already changed"
 
 internal class ScopeImpl private constructor(
     private val previousContext: Context,
@@ -12,33 +15,33 @@ internal class ScopeImpl private constructor(
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Scope {
 
-    @Volatile
-    private var detached = false
+    private val detached = AtomicBoolean(false)
 
     override fun detach(): Boolean {
-        return if (detached) {
-            sdkErrorHandler.onError(
-                SdkError.ApiMisuse(
-                    api = "Scope.detach",
-                    message = "Scope.detach() called on an already-detached scope",
-                    severity = SdkErrorSeverity.WARNING,
-                )
-            )
-            false
-        } else if (storage.implicitContext() != currentContext) {
-            sdkErrorHandler.onError(
-                SdkError.ApiMisuse(
-                    api = "Scope.detach",
-                    message = "Scope.detach() called out of order — context has already changed",
-                    severity = SdkErrorSeverity.WARNING,
-                )
-            )
-            false
-        } else {
-            detached = true
-            storage.setImplicitContext(previousContext)
-            true
+        if (storage.implicitContext() != currentContext) {
+            val message = when {
+                detached.get() -> ALREADY_DETACHED_MSG
+                else -> OUT_OF_ORDER_MSG
+            }
+            reportMisuse(message)
+            return false
         }
+        if (!detached.compareAndSet(expect = false, update = true)) {
+            reportMisuse(ALREADY_DETACHED_MSG)
+            return false
+        }
+        storage.setImplicitContext(previousContext)
+        return true
+    }
+
+    private fun reportMisuse(message: String) {
+        sdkErrorHandler.onError(
+            SdkError.ApiMisuse(
+                api = "Scope.detach",
+                message = message,
+                severity = SdkErrorSeverity.WARNING,
+            )
+        )
     }
 
     companion object {

@@ -1,3 +1,12 @@
+public final class io/opentelemetry/kotlin/AtomicBoolean {
+	public fun <init> ()V
+	public fun <init> (Z)V
+	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun compareAndSet (ZZ)Z
+	public final fun get ()Z
+	public final fun set (Z)V
+}
+
 public final class io/opentelemetry/kotlin/AtomicLong {
 	public fun <init> ()V
 	public fun <init> (J)V
