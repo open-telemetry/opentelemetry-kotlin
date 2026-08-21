@@ -116,7 +116,7 @@ internal class SpanModel(
     @Suppress("NOTHING_TO_INLINE")
     private inline fun endInternal(timestamp: Long) {
         sdkErrorHandler.guard("Span.end failed") {
-            val snapshot = lock.write {
+            val toExport = lock.write {
                 if (state != State.STARTED) {
                     return@write null
                 }
@@ -129,11 +129,14 @@ internal class SpanModel(
                 // take a snapshot so that processors retain plain data rather than this
                 // model, releasing its properties once the span
                 // has ended. Only built if a processor needs it.
-                processor?.takeIf(SpanProcessor::isEndRequired)?.let { toSpanData() }
+                processor?.takeIf(SpanProcessor::isEndRequired)?.let { endProcessor ->
+                    endProcessor to toSpanData()
+                }
             }
-            if (snapshot != null) {
+            if (toExport != null) {
+                val (endProcessor, snapshot) = toExport
                 sdkErrorHandler.guard {
-                    processor?.onEnd(snapshot)
+                    endProcessor.onEnd(snapshot)
                 }
             }
         }
