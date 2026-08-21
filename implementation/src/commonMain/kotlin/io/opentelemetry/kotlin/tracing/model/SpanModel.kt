@@ -116,20 +116,21 @@ internal class SpanModel(
     @Suppress("NOTHING_TO_INLINE")
     private inline fun endInternal(timestamp: Long) {
         sdkErrorHandler.guard("Span.end failed") {
-            lock.write {
-                if (state == State.STARTED) {
-                    state = State.ENDING
-                    endTimestampImpl = timestamp
-                    sdkErrorHandler.guard {
-                        processor?.onEnding(ReadWriteSpanImpl(this))
-                    }
-                    state = State.ENDED
-                    sdkErrorHandler.guard {
-                        // take a snapshot so that processors retain plain data rather than this
-                        // model, releasing its properties once the span
-                        // has ended. Only built if a processor needs it.
-                        processor?.takeIf(SpanProcessor::isEndRequired)?.onEnd(toSpanData())
-                    }
+            val snapshot = lock.write {
+                if (state != State.STARTED) return@write null
+                state = State.ENDING
+                endTimestampImpl = timestamp
+                sdkErrorHandler.guard {
+                    processor?.onEnding(ReadWriteSpanImpl(this))
+                }
+                state = State.ENDED
+                // Snapshot under the lock so processors retain plain data rather than this
+                // model. onEnd is invoked after release — the snapshot is immutable.
+                processor?.takeIf(SpanProcessor::isEndRequired)?.let { toSpanData() }
+            }
+            if (snapshot != null) {
+                sdkErrorHandler.guard {
+                    processor?.onEnd(snapshot)
                 }
             }
         }
