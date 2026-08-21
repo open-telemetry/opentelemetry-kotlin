@@ -2,6 +2,8 @@ package io.opentelemetry.kotlin.file.export
 
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.logging.data.LogRecordData
+import io.opentelemetry.kotlin.logging.export.JsonLogRecordExporter
 import io.opentelemetry.kotlin.logging.export.LogRecordExporter
 import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -17,10 +19,10 @@ internal class FileLogRecordExporter(
 ) : LogRecordExporter {
     private val shutdownState = MutableShutdownState()
 
-    override suspend fun export(telemetry: List<ReadableLogRecord>): OperationResultCode =
+    override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode =
         shutdownState.ifActive {
             telemetry.forEach { logRecord ->
-                sink.writeUtf8(encoder.encode(logRecord))
+                sink.writeUtf8(encoder.encode(logRecord, sink))
                 sink.writeUtf8("\n")
             }
             sink.flush()
@@ -47,7 +49,7 @@ internal class FileSpanExporter(
     override suspend fun export(telemetry: List<SpanData>): OperationResultCode =
         shutdownState.ifActive {
             telemetry.forEach { spanData ->
-                sink.writeUtf8(encoder.encode(spanData))
+                sink.writeUtf8(encoder.encode(spanData, sink))
                 sink.writeUtf8("\n")
             }
             sink.flush()
