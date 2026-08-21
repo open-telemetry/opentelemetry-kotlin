@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.platformLog
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -84,12 +85,12 @@ public fun TraceExportConfigDsl.batchSpanProcessor(
 
 /**
  * Creates a span exporter that outputs span data to stdout. The destination is configurable
- * via a parameter that defaults to [println].
+ * via a parameter that defaults to [platformLog].
  *
  * This exporter is intended for debugging and learning purposes. It is not recommended for
  * production use. The output format is not standardized and can change at any time.
  */
 @ExperimentalApi
 public fun TraceExportConfigDsl.stdoutSpanExporter(
-    logger: (String) -> Unit = ::println
+    logger: (String) -> Unit = ::platformLog
 ): SpanExporter = StdoutSpanExporter(logger)
