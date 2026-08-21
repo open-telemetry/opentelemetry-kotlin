@@ -8,9 +8,11 @@ sealed interface OtlpJsonEncoder<in T, S> {
     fun getSerializable(value: T): S
     fun getSerializer(): KSerializer<S>
     fun encode(value: T, sink: BufferedSink) {
-        sink.writeUtf8(Json.encodeToString(
-            serializer = getSerializer(),
-            value = getSerializable(value)
-        ))
+        sink.writeUtf8(
+            Json.encodeToString(
+                serializer = getSerializer(),
+                value = getSerializable(value)
+            )
+        )
     }
 }

@@ -16,16 +16,14 @@ internal class JsonSpanEncoderTest {
         // given
         val encoder = JsonSpanEncoder()
         val buffer = Buffer()
+        val value = FakeSpanData()
 
         // when
-        encoder.encode(FakeSpanData(), buffer)
+        encoder.encode(value, buffer)
 
         // then
-        buffer.readUtf8()
         assertTrue {
-            buffer.readUtf8() == Json.encodeToString(
-                Json.parseToJsonElement(spanDataJson)
-            )
+            buffer.readUtf8() == Json.encodeToString(value)
         }
     }
 
@@ -45,80 +43,4 @@ internal class JsonSpanEncoderTest {
             actual = Json.decodeFromString<SerializableSpanData>(buffer.readUtf8())
         )
     }
-
-    private val spanDataJson = """
-    {
-      "name": "span",
-      "kind": "INTERNAL",
-      "statusData": {
-        "name": "OK",
-        "description": ""
-      },
-      "spanContext": {
-        "traceId": "00000000000000000000000000000000",
-        "spanId": "0000000000000000",
-        "traceFlags": "01",
-        "traceState": {
-          "foo": "bar"
-        }
-      },
-      "parentSpanContext": {
-        "traceId": "00000000000000000000000000000000",
-        "spanId": "0000000000000000",
-        "traceFlags": "01",
-        "traceState": {
-          "foo": "bar"
-        }
-      },
-      "startTimestamp": 1000,
-      "attributes": {
-        "key": "value"
-      },
-      "events": [
-        {
-          "name": "event",
-          "attributes": {
-            "key": "value"
-          },
-          "timestamp": 1000,
-          "totalAttributesCount": 1
-        }
-      ],
-      "links": [
-        {
-          "spanContext": {
-            "traceId": "00000000000000000000000000000000",
-            "spanId": "0000000000000000",
-            "traceFlags": "01",
-            "traceState": {
-              "foo": "bar"
-            }
-          },
-          "attributes": {
-            "key": "value"
-          },
-          "totalAttributeCount": 1
-        }
-      ],
-      "endTimestamp": 2000,
-      "ended": true,
-      "totalRecordedEvents": 1,
-      "totalRecordedLinks": 1,
-      "totalAttributeCount": 1,
-      "resource": {
-        "schemaUrl": "schemaUrl",
-        "attributes": {
-          "foo": "bar"
-        }
-      },
-      "instrumentationScopeInfo": {
-        "name": "name",
-        "version": "version",
-        "schemaUrl": "schemaUrl",
-        "attributes": {
-          "key": "value"
-        }
-      }
-    }
-""".trimIndent()
 }

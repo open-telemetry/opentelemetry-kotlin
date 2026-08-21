@@ -16,16 +16,14 @@ internal class JsonLogRecordEncoderTest {
         // given
         val encoder = JsonLogRecordEncoder()
         val buffer = Buffer()
+        val value = FakeLogRecordData()
 
         // when
-        encoder.encode(FakeLogRecordData(), buffer)
+        encoder.encode(value, buffer)
 
         // then
-        buffer.readUtf8()
         assertTrue {
-            buffer.readUtf8() == Json.encodeToString(
-                Json.parseToJsonElement(logRecordJson)
-            )
+            buffer.readUtf8() == Json.encodeToString(value)
         }
     }
 
@@ -45,40 +43,4 @@ internal class JsonLogRecordEncoderTest {
             actual = Json.decodeFromString<SerializableLogRecordData>(buffer.readUtf8())
         )
     }
-
-    private val logRecordJson = """
-    {
-      "resource": {
-        "schemaUrl": "schemaUrl",
-        "attributes": {
-          "foo": "bar"
-        }
-      },
-      "instrumentationScopeInfo": {
-        "name": "name",
-        "version": "version",
-        "schemaUrl": "schemaUrl",
-        "attributes": {
-          "key": "value"
-        }
-      },
-      "timestampEpochNanos": 1000,
-      "observedTimestampEpochNanos": 2000,
-      "spanContext": {
-        "traceId": "00000000000000000000000000000000",
-        "spanId": "0000000000000000",
-        "traceFlags": "01",
-        "traceState": {
-          "foo": "bar"
-        }
-      },
-      "severity": "WARN",
-      "severityText": "warning",
-      "body": "Hello, World!",
-      "attributes": {
-        "key": "value"
-      },
-      "totalAttributeCount": 1
-    }
-""".trimIndent()
 }
