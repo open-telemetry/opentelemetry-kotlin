@@ -27,4 +27,13 @@ internal class MeterAdapterUpDownCounterTest {
         counter.add(0.0)
         counter.add(2.5) { setStringAttribute("account.type", "residential") }
     }
+
+    @Test
+    fun createDoubleUpDownCounterOmitsNullUnitAndDescription() {
+        val counter = adapter.createDoubleUpDownCounter("queue.depth")
+        assertEquals("queue.depth", counter.name)
+        assertEquals(null, counter.unit)
+        assertEquals(null, counter.description)
+        counter.add(1.0)
+    }
 }

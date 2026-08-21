@@ -13,5 +13,5 @@ internal class NoopDoubleUpDownCounter(
     override val description: String?,
 ) : DoubleUpDownCounter {
     override fun enabled(): Boolean = false
-    override fun add(value: Double, attributes: AttributesMutator.() -> Unit) {}
+    override fun add(value: Double, attributes: AttributesMutator.() -> Unit) = Unit
 }
