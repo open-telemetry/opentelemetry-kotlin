@@ -23,7 +23,7 @@ internal class JsonSpanEncoderTest {
 
         // then
         assertTrue {
-            buffer.readUtf8() == Json.encodeToString(value)
+            buffer.readUtf8() == Json.encodeToString(value.toSerializable())
         }
     }
 
