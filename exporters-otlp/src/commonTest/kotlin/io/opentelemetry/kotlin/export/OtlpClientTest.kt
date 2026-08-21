@@ -30,7 +30,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.time.Duration.Companion.milliseconds
@@ -289,7 +288,9 @@ internal class OtlpClientTest {
         mockResponseStatus = HttpStatusCode.OK
         mockResponseBody = logResponseBody(rejected = 2L, msg = "2 log records rejected")
         val response = client.exportLogs(logRecords)
-        assertFalse(response is OtlpResponse.Success)
+        assertIs<OtlpResponse.PartialSuccess>(response)
+        assertEquals(2L, response.rejectedCount)
+        assertEquals("2 log records rejected", response.errorMessage)
     }
 
     @Test
@@ -297,7 +298,39 @@ internal class OtlpClientTest {
         mockResponseStatus = HttpStatusCode.OK
         mockResponseBody = traceResponseBody(rejected = 3L, msg = "3 spans rejected")
         val response = client.exportTraces(spans)
-        assertFalse(response is OtlpResponse.Success)
+        assertIs<OtlpResponse.PartialSuccess>(response)
+        assertEquals(3L, response.rejectedCount)
+        assertEquals("3 spans rejected", response.errorMessage)
+    }
+
+    @Test
+    fun testExportLogUnknownHttpStatus() = runTest {
+        mockResponseStatus = HttpStatusCode.MovedPermanently
+        val response = client.exportLogs(logRecords)
+        assertIs<OtlpResponse.Unknown>(response)
+    }
+
+    @Test
+    fun testExportTraceUnknownHttpStatus() = runTest {
+        mockResponseStatus = HttpStatusCode.MovedPermanently
+        val response = client.exportTraces(spans)
+        assertIs<OtlpResponse.Unknown>(response)
+    }
+
+    @Test
+    fun testExportLogBadGatewayIsRetryable() = runTest {
+        mockResponseStatus = HttpStatusCode.BadGateway
+        val response = client.exportLogs(logRecords)
+        assertIs<OtlpResponse.RetryableError>(response)
+        assertEquals(502, response.statusCode)
+    }
+
+    @Test
+    fun testExportTraceBadGatewayIsRetryable() = runTest {
+        mockResponseStatus = HttpStatusCode.BadGateway
+        val response = client.exportTraces(spans)
+        assertIs<OtlpResponse.RetryableError>(response)
+        assertEquals(502, response.statusCode)
     }
 
     @Test
