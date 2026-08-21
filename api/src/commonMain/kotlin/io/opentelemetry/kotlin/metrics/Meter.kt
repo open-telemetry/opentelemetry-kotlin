@@ -15,4 +15,21 @@ import io.opentelemetry.kotlin.ThreadSafe
  */
 @ExperimentalApi
 @ThreadSafe
-public interface Meter
+public interface Meter {
+
+    /**
+     * Creates a [LongUpDownCounter] for recording signed integer increments and decrements.
+     *
+     * [name] is required and should conform to the
+     * [instrument name syntax](https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-name-syntax).
+     * [unit] and [description] are optional.
+     *
+     * https://opentelemetry.io/docs/specs/otel/metrics/api/#updowncounter-creation
+     */
+    @ThreadSafe
+    public fun createLongUpDownCounter(
+        name: String,
+        unit: String? = null,
+        description: String? = null,
+    ): LongUpDownCounter
+}

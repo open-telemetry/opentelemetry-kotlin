@@ -5,5 +5,16 @@ import io.opentelemetry.kotlin.aliases.OtelJavaMeter
 
 @ExperimentalApi
 internal class MeterAdapter(
-    @Suppress("UnusedPrivateProperty") private val impl: OtelJavaMeter,
-) : Meter
+    private val impl: OtelJavaMeter,
+) : Meter {
+    override fun createLongUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+    ): LongUpDownCounter {
+        val builder = impl.upDownCounterBuilder(name)
+        unit?.let(builder::setUnit)
+        description?.let(builder::setDescription)
+        return LongUpDownCounterAdapter(builder.build(), name, unit, description)
+    }
+}
