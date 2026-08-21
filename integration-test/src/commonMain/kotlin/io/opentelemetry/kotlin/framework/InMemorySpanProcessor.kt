@@ -30,6 +30,7 @@ internal class InMemorySpanProcessor(
 
     override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
     override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
-    override fun isStartRequired(): Boolean = true
+    override fun isStartRequired(): Boolean = false
     override fun isEndRequired(): Boolean = true
+    override fun isOnEndingRequired(): Boolean = false
 }

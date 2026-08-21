@@ -121,7 +121,8 @@ internal class SpanModel(
                     state = State.ENDING
                     endTimestampImpl = timestamp
                     sdkErrorHandler.guard {
-                        processor?.onEnding(ReadWriteSpanImpl(this))
+                        processor?.takeIf(SpanProcessor::isOnEndingRequired)
+                            ?.onEnding(ReadWriteSpanImpl(this))
                     }
                     state = State.ENDED
                     sdkErrorHandler.guard {

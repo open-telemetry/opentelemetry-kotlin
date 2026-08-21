@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
@@ -30,7 +31,7 @@ internal class CompositeSpanProcessor(
                 processors,
                 sdkErrorHandler
             ) {
-                if (it.isStartRequired()) {
+                if (it.requires(START_DETAILS, SpanProcessor::isStartRequired)) {
                     it.onStart(span, parentContext)
                 }
                 OperationResultCode.Success
@@ -44,7 +45,7 @@ internal class CompositeSpanProcessor(
                 processors,
                 sdkErrorHandler
             ) {
-                if (it.isEndRequired()) {
+                if (it.requires(ON_ENDING_DETAILS, SpanProcessor::isOnEndingRequired)) {
                     it.onEnding(span)
                 }
                 OperationResultCode.Success
@@ -58,7 +59,7 @@ internal class CompositeSpanProcessor(
                 processors,
                 sdkErrorHandler
             ) {
-                if (it.isEndRequired()) {
+                if (it.requires(END_DETAILS, SpanProcessor::isEndRequired)) {
                     it.onEnd(span)
                 }
                 OperationResultCode.Success
@@ -66,6 +67,29 @@ internal class CompositeSpanProcessor(
         }
     }
 
-    override fun isStartRequired(): Boolean = true
-    override fun isEndRequired(): Boolean = true
+    override fun isStartRequired(): Boolean =
+        anyRequires(START_DETAILS, SpanProcessor::isStartRequired)
+
+    override fun isEndRequired(): Boolean =
+        anyRequires(END_DETAILS, SpanProcessor::isEndRequired)
+
+    override fun isOnEndingRequired(): Boolean =
+        anyRequires(ON_ENDING_DETAILS, SpanProcessor::isOnEndingRequired)
+
+    private fun anyRequires(details: String, predicate: (SpanProcessor) -> Boolean): Boolean {
+        return processors.any { it.requires(details, predicate) }
+    }
+
+    private fun SpanProcessor.requires(
+        details: String,
+        predicate: (SpanProcessor) -> Boolean,
+    ): Boolean {
+        return sdkErrorHandler.guardOrDefault(true, details) { predicate(this) }
+    }
+
+    private companion object {
+        const val START_DETAILS = "SpanProcessor.isStartRequired failed"
+        const val END_DETAILS = "SpanProcessor.isEndRequired failed"
+        const val ON_ENDING_DETAILS = "SpanProcessor.isOnEndingRequired failed"
+    }
 }
