@@ -19,9 +19,13 @@ internal class OtlpHttpSpanExporter(
         maxAttemptIntervalMs,
         maxAttempts,
         sdkErrorHandler,
-    ) {
-        otlpClient.exportTraces(it)
-    }
+        exportAction = {
+            otlpClient.exportTraces(it)
+        },
+        shutdownAction = {
+            otlpClient.close()
+        }
+    )
 
     override suspend fun export(telemetry: List<SpanData>): OperationResultCode {
         return exporter.export(telemetry)

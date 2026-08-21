@@ -16,15 +16,18 @@ import kotlin.test.assertTrue
 internal class TelemetryExporterTest {
 
     private lateinit var exporter: TelemetryExporter<String>
+    private var shutdownActionCalls = 0
 
     @BeforeTest
     fun setup() {
+        shutdownActionCalls = 0
         exporter = TelemetryExporter(
             initialDelayMs = 100,
             maxAttemptIntervalMs = 1000,
             maxAttempts = 3,
             sdkErrorHandler = NoopSdkErrorHandler,
             exportAction = { OtlpResponse.Success },
+            shutdownAction = { shutdownActionCalls++ },
         )
     }
 
@@ -38,6 +41,12 @@ internal class TelemetryExporterTest {
     fun testShutdownReturnsSuccessOnSecondCall() = runTest {
         assertEquals(OperationResultCode.Success, exporter.shutdown())
         assertEquals(OperationResultCode.Success, exporter.shutdown())
+    }
+
+    @Test
+    fun testShutdownInvokesShutdownAction() = runTest {
+        assertEquals(OperationResultCode.Success, exporter.shutdown())
+        assertEquals(1, shutdownActionCalls)
     }
 
     @Test
@@ -60,10 +69,12 @@ internal class TelemetryExporterTest {
             maxAttempts = 3,
             sdkErrorHandler = NoopSdkErrorHandler,
             coroutineContext = StandardTestDispatcher(testScheduler),
-        ) {
-            attempts++
-            OtlpResponse.ClientError(400, null)
-        }
+            exportAction = {
+                attempts++
+                OtlpResponse.ClientError(400, null)
+            },
+            shutdownAction = {},
+        )
         exporter.export(listOf("data"))
         advanceUntilIdle()
         assertEquals(1, attempts)
@@ -78,10 +89,12 @@ internal class TelemetryExporterTest {
             maxAttempts = 3,
             sdkErrorHandler = NoopSdkErrorHandler,
             coroutineContext = StandardTestDispatcher(testScheduler),
-        ) {
-            attempts++
-            OtlpResponse.Success
-        }
+            exportAction = {
+                attempts++
+                OtlpResponse.Success
+            },
+            shutdownAction = {},
+        )
         exporter.export(listOf("data"))
         advanceUntilIdle()
         assertEquals(1, attempts)
@@ -100,10 +113,12 @@ internal class TelemetryExporterTest {
             sdkErrorHandler = NoopSdkErrorHandler,
             coroutineContext = StandardTestDispatcher(testScheduler),
             random = Random(0),
-        ) {
-            timestamps += testScheduler.currentTime
-            OtlpResponse.RetryableError(503, retryAfterMs = null, errorMessage = null)
-        }
+            exportAction = {
+                timestamps += testScheduler.currentTime
+                OtlpResponse.RetryableError(503, retryAfterMs = null, errorMessage = null)
+            },
+            shutdownAction = {},
+        )
         exporter.export(listOf("data"))
         advanceUntilIdle()
 
@@ -127,19 +142,21 @@ internal class TelemetryExporterTest {
         var attempts = 0
         val exporter = TelemetryExporter<String>(
             initialDelayMs = 100,
-            maxAttemptIntervalMs = 1000,
+            maxAttemptIntervalMs = 5000,
             maxAttempts = 3,
             coroutineContext = StandardTestDispatcher(testScheduler),
             random = Random(0),
             sdkErrorHandler = NoopSdkErrorHandler,
-        ) {
-            timestamps += testScheduler.currentTime
-            if (attempts++ == 0) {
-                OtlpResponse.RetryableError(429, retryAfterMs = retryAfterMs, errorMessage = null)
-            } else {
-                OtlpResponse.Success
-            }
-        }
+            exportAction = {
+                timestamps += testScheduler.currentTime
+                if (attempts++ == 0) {
+                    OtlpResponse.RetryableError(429, retryAfterMs = retryAfterMs, errorMessage = null)
+                } else {
+                    OtlpResponse.Success
+                }
+            },
+            shutdownAction = {},
+        )
         exporter.export(listOf("data"))
         advanceUntilIdle()
 
@@ -154,6 +171,7 @@ internal class TelemetryExporterTest {
             maxAttempts = 1,
             sdkErrorHandler = NoopSdkErrorHandler,
             exportAction = { error("network unreachable") },
+            shutdownAction = {},
         )
         // The failure occurs on a background coroutine whose scope has a CoroutineExceptionHandler,
         // so it must not propagate to the caller nor crash the process.

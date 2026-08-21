@@ -12,10 +12,13 @@ import io.ktor.util.toMap
 import io.ktor.utils.io.ByteReadChannel
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.HttpClientRegistry
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpClient
+import io.opentelemetry.kotlin.export.OtlpResponse
+import io.opentelemetry.kotlin.export.TelemetryExporter
 import io.opentelemetry.kotlin.export.createDefaultHttpClient
 import io.opentelemetry.kotlin.export.createHttpEngine
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
@@ -131,7 +134,8 @@ internal class OtlpHttpSpanExporterTest {
                 delay(1L)
             }
         }
-        val headers = customServer.requestHistory.single().headers.toMap().mapValues { it.value.joinToString() }
+        val headers = customServer.requestHistory.single().headers.toMap()
+            .mapValues { it.value.joinToString() }
         assertEquals("Bearer test-token", headers["Authorization"])
     }
 
@@ -169,6 +173,29 @@ internal class OtlpHttpSpanExporterTest {
 
         assertTrue(clients.all { it === clients.first() })
         HttpClientRegistry.clear()
+    }
+
+    @Test
+    fun testShutdownOtlpClient() = runTest {
+        var shutdownCount = 0
+
+        val exporter = TelemetryExporter<SpanData>(
+            initialDelayMs = 1L,
+            maxAttemptIntervalMs = 100L,
+            maxAttempts = 5,
+            sdkErrorHandler = FakeSdkErrorHandler(),
+            exportAction = {
+                OtlpResponse.Success
+            },
+            shutdownAction = {
+                shutdownCount++
+            },
+        )
+
+        exporter.shutdown()
+        exporter.shutdown()
+
+        assertEquals(1, shutdownCount)
     }
 
     private suspend fun waitForExportedTelemetry(
