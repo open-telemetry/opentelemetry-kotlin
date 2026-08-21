@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.platformLog
 
 /**
@@ -14,7 +14,7 @@ internal class StdoutLogRecordExporter(
 
     private val shutdownState = MutableShutdownState()
 
-    override suspend fun export(telemetry: List<ReadableLogRecord>): OperationResultCode =
+    override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode =
         shutdownState.ifActive {
             telemetry.forEach { logRecord ->
                 logger(formatLogRecord(logRecord))
@@ -29,7 +29,7 @@ internal class StdoutLogRecordExporter(
             OperationResultCode.Success
         }
 
-    private fun formatLogRecord(logRecord: ReadableLogRecord): String = buildString {
+    private fun formatLogRecord(logRecord: LogRecordData): String = buildString {
         append("LogRecord")
         logRecord.severityNumber?.let {
             append(" [")

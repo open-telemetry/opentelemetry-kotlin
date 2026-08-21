@@ -24,6 +24,7 @@ internal class OtelJavaLogRecordDataImpl(
     private val severityTextImpl: String?,
     private val bodyImpl: OtelJavaBody,
     private val attributesImpl: OtelJavaAttributes,
+    private val eventNameImpl: String?,
 ) : OtelJavaLogRecordData {
 
     override fun getResource(): OtelJavaResource = resourceImpl
@@ -33,6 +34,7 @@ internal class OtelJavaLogRecordDataImpl(
     override fun getSpanContext(): OtelJavaSpanContext = spanContextImpl
     override fun getSeverity(): OtelJavaSeverity = severityImpl
     override fun getSeverityText(): String? = severityTextImpl
+    override fun getEventName(): String? = eventNameImpl
 
     @Deprecated("Deprecated in Java")
     override fun getBody(): OtelJavaBody = bodyImpl

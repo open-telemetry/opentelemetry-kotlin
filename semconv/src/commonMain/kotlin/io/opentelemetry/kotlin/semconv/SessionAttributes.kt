@@ -10,7 +10,7 @@ object SessionAttributes {
   
 
     /**
-    * <p>A unique id to identify a session.</p>
+    * <p>A unique ID to identify a session.</p>
     */
     @IncubatingApi
     const val SESSION_ID: String = "session.id"

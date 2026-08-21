@@ -4,4 +4,4 @@ package io.opentelemetry.kotlin.config.schema.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal class ExperimentalContainerResourceDetector
+public class ExperimentalContainerResourceDetector

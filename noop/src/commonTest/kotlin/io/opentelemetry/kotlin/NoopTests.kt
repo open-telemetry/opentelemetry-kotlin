@@ -46,8 +46,8 @@ internal class NoopTests {
 
         // Test span context default values
         val context = span.spanContext
-        assertEquals("", context.traceId)
-        assertEquals("", context.spanId)
+        assertEquals("0".repeat(32), context.traceId)
+        assertEquals("0".repeat(16), context.spanId)
         assertFalse(context.isValid)
         assertFalse(context.isRemote)
 
@@ -163,6 +163,8 @@ internal class NoopTests {
         val invalid = otel.spanContext.invalid
         assertTrue(invalid is NoopSpanContext)
         assertFalse(invalid.isValid)
+        assertEquals(16, invalid.traceIdBytes.size)
+        assertEquals(8, invalid.spanIdBytes.size)
 
         val other = otel.spanContext.create(
             otel.idGenerator.generateTraceIdBytes(),
@@ -242,8 +244,8 @@ internal class NoopTests {
         val getter = object : TextMapGetter<MutableMap<String, String>> {
             override fun keys(carrier: MutableMap<String, String>) = carrier.keys
             override fun get(carrier: MutableMap<String, String>?, key: String) = carrier?.get(key)
-            override fun getAll(carrier: MutableMap<String, String>, key: String): List<String> =
-                carrier[key]?.let { listOf(it) } ?: emptyList()
+            override fun getAll(carrier: MutableMap<String, String>?, key: String): List<String> =
+                carrier?.get(key)?.let { listOf(it) } ?: emptyList()
         }
         assertSame(ctx, NoopTextMapPropagator.extract(ctx, carrier, getter))
     }

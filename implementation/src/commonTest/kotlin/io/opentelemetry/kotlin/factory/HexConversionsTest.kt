@@ -47,8 +47,36 @@ internal class HexConversionsTest {
     }
 
     @Test
+    fun hexToByteArrayNonAsciiCharacterReturnsEmptyByteArray() {
+        assertContentEquals(ByteArray(0), "0é".hexToByteArray())
+        assertContentEquals(ByteArray(0), "😀".hexToByteArray())
+    }
+
+    @Test
     fun toHexStringByteArrayDefaultValueProducesAllZeroString() {
         val bytes = 8
         assertEquals("0".repeat(bytes * 2), ByteArray(bytes).toHexString())
+    }
+
+    @Test
+    fun toHexStringPadsBytesBelow0x10() {
+        assertEquals("00010f", byteArrayOf(0x00, 0x01, 0x0f).toHexString())
+    }
+
+    @Test
+    fun toHexStringEncodesByteExtremes() {
+        assertEquals("00ff", byteArrayOf(0x00, 0xff.toByte()).toHexString())
+    }
+
+    @Test
+    fun toHexStringEncodesFullTraceIdWidth() {
+        val traceId = ByteArray(16) { (it * 0x11).toByte() }
+        assertEquals("00112233445566778899aabbccddeeff", traceId.toHexString())
+    }
+
+    @Test
+    fun hexRoundTripsForEveryByteValue() {
+        val allBytes = ByteArray(256) { it.toByte() }
+        assertContentEquals(allBytes, allBytes.toHexString().hexToByteArray())
     }
 }

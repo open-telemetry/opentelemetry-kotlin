@@ -1,16 +1,20 @@
 package io.opentelemetry.kotlin.logging
 
+import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import io.opentelemetry.kotlin.semconv.ExceptionAttributes
+import io.opentelemetry.kotlin.tracing.Span
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -38,6 +42,25 @@ internal class LogExportTest {
             expectedCount = 1,
             goldenFileName = "log_minimal.json",
         )
+    }
+
+    @Test
+    fun `test primitive AnyValue body is unwrapped`() = runTest {
+        // Java OTel's Body is a string, so the payload is rendered rather than AnyValue.toString().
+        harness.logger.emit(AnyValue.LongValue(3))
+
+        harness.assertLogRecords(1, null) { logs ->
+            assertEquals("3", logs[0].body)
+        }
+    }
+
+    @Test
+    fun `test null AnyValue body leaves the body unset`() = runTest {
+        harness.logger.emit(AnyValue.NullValue)
+
+        harness.assertLogRecords(1, null) { logs ->
+            assertNull(logs[0].body)
+        }
     }
 
     @Test
@@ -158,6 +181,23 @@ internal class LogExportTest {
             goldenFileName = "event.json",
         )
     }
+
+    @Test
+    fun `test log with decorated parent span in context`() = runTest {
+        // a decorating Span is not a SpanAdapter, so storing it must still correlate the log
+        val span = DecoratedSpan(harness.tracer.startSpan("span"))
+        val ctx = harness.kotlinApi.context.root().storeSpan(span)
+        harness.logger.emit("test", context = ctx)
+
+        harness.assertLogRecords(1, "log_decorated_span_context.json") { logs ->
+            assertSpanContextsMatch(span.spanContext, logs.single().spanContext)
+        }
+    }
+
+    /**
+     * Mimics a third party implementation that decorates the span returned by the SDK.
+     */
+    private class DecoratedSpan(impl: Span) : Span by impl
 
     /**
      * Custom processor that captures the context passed to onEmit

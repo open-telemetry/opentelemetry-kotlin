@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.FakeLogExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
@@ -38,5 +39,29 @@ internal class CoreLogRecordExporterApiTest {
             assertEquals(OperationResultCode.Success, shutdown())
         }
         assertSame(NoopLogRecordExporter, emptyExporter)
+    }
+
+    @Test
+    fun compositeLogRecordProcessorEmptyReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        val config = FakeLogExportConfig(sdkErrorHandler = handler)
+        config.compositeLogRecordProcessor()
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals(
+            "LogExportConfigDsl.compositeLogRecordProcessor",
+            handler.apiMisuses.single().api,
+        )
+    }
+
+    @Test
+    fun compositeLogRecordExporterEmptyReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        val config = FakeLogExportConfig(sdkErrorHandler = handler)
+        config.compositeLogRecordExporter()
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals(
+            "LogExportConfigDsl.compositeLogRecordExporter",
+            handler.apiMisuses.single().api,
+        )
     }
 }

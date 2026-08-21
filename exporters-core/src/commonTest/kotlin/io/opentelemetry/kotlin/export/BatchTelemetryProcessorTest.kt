@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -10,7 +11,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
 internal class BatchTelemetryProcessorTest {
@@ -52,6 +52,7 @@ internal class BatchTelemetryProcessorTest {
                 maxExportBatchSize = 1,
                 scheduleDelayMs = 1,
                 exportTimeoutMs = 1000,
+                sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,
             exportAction = {
@@ -79,6 +80,7 @@ internal class BatchTelemetryProcessorTest {
                 maxExportBatchSize = 1,
                 scheduleDelayMs = 1,
                 exportTimeoutMs = 1000,
+                sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,
             exportAction = { OperationResultCode.Success }
@@ -96,6 +98,7 @@ internal class BatchTelemetryProcessorTest {
                 maxExportBatchSize = 1,
                 scheduleDelayMs = 1,
                 exportTimeoutMs = 1000,
+                sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,
             exportAction = { OperationResultCode.Success }
@@ -107,12 +110,19 @@ internal class BatchTelemetryProcessorTest {
 
     @Test
     fun testQueueSaturation() = runTest {
-        val sendAttempts = 1000
         val exports = assertTelemetryBatched(
-            telemetry = (0..sendAttempts).toList()
+            telemetry = (0..1000).toList()
         )
-        val sent = exports.flatten()
-        assertTrue(sent.size < sendAttempts)
+        assertEquals((0..19).toList(), exports.flatten())
+    }
+
+    @Test
+    fun testZeroQueueSizeDropsAllTelemetry() = runTest {
+        val exports = assertTelemetryBatched(
+            telemetry = listOf(1, 2, 3),
+            maxQueueSize = 0,
+        )
+        assertEquals(emptyList(), exports)
     }
 
     @Test
@@ -149,16 +159,18 @@ internal class BatchTelemetryProcessorTest {
         telemetry: List<T>,
         batchSize: Int = 3,
         exportTimeoutMs: Long = 1000,
+        maxQueueSize: Int = 20,
         exportAction: suspend (telemetry: List<T>) -> Unit = {},
     ): List<List<T>> {
         val exports = mutableListOf<List<T>>()
         val dispatcher = StandardTestDispatcher(testScheduler)
         val processor = BatchTelemetryProcessor(
             config = BatchTelemetryConfig(
-                maxQueueSize = 20,
+                maxQueueSize = maxQueueSize,
                 maxExportBatchSize = batchSize,
                 scheduleDelayMs = 1,
                 exportTimeoutMs = exportTimeoutMs,
+                sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,
             exportAction = {

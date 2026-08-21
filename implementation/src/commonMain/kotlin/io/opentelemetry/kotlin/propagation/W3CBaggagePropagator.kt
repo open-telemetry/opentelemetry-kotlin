@@ -29,7 +29,7 @@ internal object W3CBaggagePropagator : TextMapPropagator {
 
     override fun fields(): Collection<String> = FIELDS
 
-    override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {
+    override fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>) {
         val entries = context.extractBaggage().asMap()
         if (entries.isEmpty()) {
             return
@@ -38,7 +38,7 @@ internal object W3CBaggagePropagator : TextMapPropagator {
         setter.set(carrier, FIELD, header)
     }
 
-    override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context {
+    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context {
         val combined = getter.getAll(carrier, FIELD).joinToString(ENTRY_DELIMITER.toString())
         if (combined.isEmpty()) {
             return context

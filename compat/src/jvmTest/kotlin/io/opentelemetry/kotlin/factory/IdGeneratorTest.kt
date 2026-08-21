@@ -1,7 +1,10 @@
 package io.opentelemetry.kotlin.factory
 
+import io.opentelemetry.kotlin.aliases.OtelJavaIdGenerator
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 internal class IdGeneratorTest {
 
@@ -23,5 +26,28 @@ internal class IdGeneratorTest {
     fun `test span ID generation`() {
         val spanId = idGenerator.generateSpanIdBytes()
         assertEquals(16, spanId.toHexString().length)
+    }
+
+    @Test
+    fun `test randomness declaration mirrors the wrapped generator`() {
+        assertTrue(idGenerator.generatesRandomTraceIds)
+        assertFalse(CompatIdGenerator(NonRandomOtelJavaIdGenerator).generatesRandomTraceIds)
+    }
+
+    @Test
+    fun `test randomness declaration is forwarded to opentelemetry-java`() {
+        assertTrue(OtelJavaIdGeneratorAdapter(idGenerator).generatesRandomTraceIds())
+        assertFalse(
+            OtelJavaIdGeneratorAdapter(CompatIdGenerator(NonRandomOtelJavaIdGenerator)).generatesRandomTraceIds()
+        )
+    }
+
+    /**
+     * Inherits opentelemetry-java's default of `generatesRandomTraceIds() == false`.
+     */
+    private object NonRandomOtelJavaIdGenerator : OtelJavaIdGenerator {
+        private val delegate = OtelJavaIdGenerator.random()
+        override fun generateSpanId(): String = delegate.generateSpanId()
+        override fun generateTraceId(): String = delegate.generateTraceId()
     }
 }

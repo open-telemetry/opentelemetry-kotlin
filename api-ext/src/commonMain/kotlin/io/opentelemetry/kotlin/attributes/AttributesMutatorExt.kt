@@ -3,9 +3,17 @@ package io.opentelemetry.kotlin.attributes
 import io.opentelemetry.kotlin.ThreadSafe
 
 /**
- * Sets attributes on an [io.opentelemetry.kotlin.attributes.AttributesMutator] from a [Map].
- * Only values in the map of a type supported by the
- * OpenTelemetry API will be set. Other values will be ignored.
+ * Sets attributes on an [io.opentelemetry.kotlin.attributes.AttributesMutator] from a [Map],
+ * dispatching each value to the setter that matches its runtime type.
+ *
+ * Values of a type that the OpenTelemetry API cannot represent are recorded as their [toString]
+ * rather than dropped. In particular:
+ *
+ * - a heterogeneous collection is recorded as a list of strings, where a `null` element renders
+ *   as `"null"`
+ * - an empty collection is recorded as an empty list of strings
+ * - a [Number] other than a [Long] is widened to a long when its value is whole, and to a double
+ *   otherwise.
  *
  * https://opentelemetry.io/docs/specs/otel/common/#attribute
  */
@@ -21,13 +29,13 @@ public fun AttributesMutator.setAttributes(attributes: Map<String, Any>) {
             is ByteArray -> setByteArrayAttribute(it.key, input)
             is Collection<*> -> handleCollection(it.key, input.toList())
             is Array<*> -> handleCollection(it.key, input.toList())
-            else -> setStringAttribute(it.key, it.value.toString())
+            else -> setStringAttribute(it.key, input.toString())
         }
     }
 }
 
 private fun AttributesMutator.setNumericAttribute(key: String, value: Number) {
-    if (value is Long || value.isWholeNumber()) {
+    if (value.isWholeNumber()) {
         setLongAttribute(key, value.toLong())
     } else {
         setDoubleAttribute(key, value.toDouble())
@@ -44,7 +52,8 @@ private fun AttributesMutator.handleCollection(key: String, input: List<*>) {
             key,
             input.filterIsInstance<Number>()
         )
-        else -> handleCollection(key, input.map { it?.toString() })
+        // stringify null elements if the list is heterogeneous
+        else -> setStringListAttribute(key, input.map { it.toString() })
     }
 }
 

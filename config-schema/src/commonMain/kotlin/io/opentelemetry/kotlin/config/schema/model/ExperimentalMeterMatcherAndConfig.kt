@@ -5,7 +5,7 @@ import kotlin.String
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalMeterMatcherAndConfig(
+public data class ExperimentalMeterMatcherAndConfig(
   /**
    * Configure meter names to match. Matching is case-sensitive, evaluated as follows:
    *
@@ -13,10 +13,10 @@ internal data class ExperimentalMeterMatcherAndConfig(
    *  * If the meter name matches the wildcard pattern, where '?' matches any single character and '*' matches any number of characters including none.
    * Property is required and must be non-null.
    */
-  internal val name: String,
+  public val name: String,
   /**
    * The meter config.
    * Property is required and must be non-null.
    */
-  internal val config: ExperimentalMeterConfig,
+  public val config: ExperimentalMeterConfig,
 )

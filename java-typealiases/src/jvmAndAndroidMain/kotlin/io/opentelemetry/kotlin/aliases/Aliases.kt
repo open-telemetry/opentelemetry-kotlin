@@ -19,6 +19,9 @@ import io.opentelemetry.api.logs.Severity
 import io.opentelemetry.api.metrics.Meter
 import io.opentelemetry.api.metrics.MeterBuilder
 import io.opentelemetry.api.metrics.MeterProvider
+import io.opentelemetry.api.metrics.ObservableDoubleMeasurement
+import io.opentelemetry.api.metrics.ObservableLongMeasurement
+import io.opentelemetry.api.metrics.ObservableMeasurement
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.api.trace.SpanBuilder
 import io.opentelemetry.api.trace.SpanContext
@@ -47,6 +50,9 @@ import io.opentelemetry.sdk.common.InstrumentationLibraryInfo
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo
 import io.opentelemetry.sdk.common.internal.ScopeConfigurator
 import io.opentelemetry.sdk.extension.incubator.trace.samplers.AlwaysRecordSampler
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.CompositeSampler
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.SamplingIntent
 import io.opentelemetry.sdk.logs.LogLimits
 import io.opentelemetry.sdk.logs.LogRecordProcessor
 import io.opentelemetry.sdk.logs.ReadWriteLogRecord
@@ -74,6 +80,8 @@ import io.opentelemetry.sdk.trace.data.SpanData
 import io.opentelemetry.sdk.trace.data.StatusData
 import io.opentelemetry.sdk.trace.export.SpanExporter
 import io.opentelemetry.sdk.trace.internal.ExtendedSpanProcessor
+import io.opentelemetry.sdk.trace.internal.SdkTracerProviderUtil
+import io.opentelemetry.sdk.trace.internal.TracerConfig
 import io.opentelemetry.sdk.trace.samplers.Sampler
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision
 import io.opentelemetry.sdk.trace.samplers.SamplingResult
@@ -126,10 +134,15 @@ typealias OtelJavaScopeConfigurator<T> = ScopeConfigurator<T>
 typealias OtelJavaMeterProvider = MeterProvider
 typealias OtelJavaMeterBuilder = MeterBuilder
 typealias OtelJavaMeter = Meter
+typealias OtelJavaObservableMeasurement = ObservableMeasurement
+typealias OtelJavaObservableLongMeasurement = ObservableLongMeasurement
+typealias OtelJavaObservableDoubleMeasurement = ObservableDoubleMeasurement
 typealias OtelJavaSdkMeterProvider = SdkMeterProvider
 typealias OtelJavaSdkMeterProviderBuilder = SdkMeterProviderBuilder
 typealias OtelJavaSdkTracerProvider = SdkTracerProvider
 typealias OtelJavaSdkTracerProviderBuilder = SdkTracerProviderBuilder
+typealias OtelJavaSdkTracerProviderUtil = SdkTracerProviderUtil
+typealias OtelJavaTracerConfig = TracerConfig
 typealias OtelJavaBody = Body
 typealias OtelJavaInstrumentationLibraryInfo = InstrumentationLibraryInfo
 typealias OtelJavaAttributesBuilder = AttributesBuilder
@@ -153,3 +166,6 @@ typealias OtelJavaSampler = Sampler
 typealias OtelJavaSamplingResult = SamplingResult
 typealias OtelJavaSamplingDecision = SamplingDecision
 typealias OtelJavaAlwaysRecordSampler = AlwaysRecordSampler
+typealias OtelJavaComposableSampler = ComposableSampler
+typealias OtelJavaCompositeSampler = CompositeSampler
+typealias OtelJavaSamplingIntent = SamplingIntent

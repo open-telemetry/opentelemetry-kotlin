@@ -5,8 +5,8 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.toByteArray
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.ByteReadChannel
-import io.opentelemetry.kotlin.logging.export.toReadableLogRecordList
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.LogRecordData
+import io.opentelemetry.kotlin.logging.export.toLogRecordDataList
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.export.toSpanDataList
 import kotlinx.coroutines.delay
@@ -21,7 +21,7 @@ import kotlin.time.TimeSource
 class FakeOtlpServer {
 
     private val spans = mutableListOf<SpanData>()
-    private val logs = mutableListOf<ReadableLogRecord>()
+    private val logs = mutableListOf<LogRecordData>()
     private val timeSource = TimeSource.Monotonic
 
     /**
@@ -33,7 +33,7 @@ class FakeOtlpServer {
 
         when {
             path.contains("/v1/traces") -> spans.addAll(body.toSpanDataList())
-            path.contains("/v1/logs") -> logs.addAll(body.toReadableLogRecordList())
+            path.contains("/v1/logs") -> logs.addAll(body.toLogRecordDataList())
             else -> error("Unsupported path: $path")
         }
 
@@ -90,8 +90,8 @@ class FakeOtlpServer {
      */
     suspend fun awaitLog(
         timeout: Duration = 5.seconds,
-        predicate: (ReadableLogRecord) -> Boolean
-    ): ReadableLogRecord = awaitTelemetry(
+        predicate: (LogRecordData) -> Boolean
+    ): LogRecordData = awaitTelemetry(
         collection = logs,
         timeout = timeout,
         predicate = predicate,
@@ -105,5 +105,5 @@ class FakeOtlpServer {
     /**
      * Returns all collected log records.
      */
-    fun getLogs(): List<ReadableLogRecord> = logs.toList()
+    fun getLogs(): List<LogRecordData> = logs.toList()
 }

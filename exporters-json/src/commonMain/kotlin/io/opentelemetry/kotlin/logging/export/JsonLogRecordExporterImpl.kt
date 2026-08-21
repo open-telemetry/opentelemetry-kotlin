@@ -1,0 +1,27 @@
+package io.opentelemetry.kotlin.logging.export
+
+import io.opentelemetry.kotlin.encode.JsonLogRecordEncoder
+import io.opentelemetry.kotlin.encode.OtlpJsonEncoder
+import io.opentelemetry.kotlin.export.MutableShutdownState
+import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.framework.serialization.SerializableLogRecordData
+import io.opentelemetry.kotlin.logging.data.LogRecordData
+
+internal class JsonLogRecordExporterImpl(
+    val encoder: OtlpJsonEncoder<LogRecordData, SerializableLogRecordData> = JsonLogRecordEncoder()
+) : JsonLogRecordExporter() {
+    private val shutdownState = MutableShutdownState()
+
+    override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode =
+        shutdownState.ifActive {
+            telemetry.forEach { encoder.encode(it, sink) }
+            OperationResultCode.Success
+        }
+
+    override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
+
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownState.shutdown {
+            OperationResultCode.Success
+        }
+}

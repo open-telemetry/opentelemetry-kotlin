@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.export.assertAttributesMatch
 import io.opentelemetry.kotlin.factory.toHexString
-import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -15,7 +15,7 @@ class LogRecordProtobufConversionTest {
 
     @Test
     fun testEmptyConversion() {
-        val obj = FakeReadableLogRecord(
+        val obj = FakeLogRecordData(
             timestamp = null,
             observedTimestamp = null,
             severityNumber = null,
@@ -46,7 +46,7 @@ class LogRecordProtobufConversionTest {
             "doubleList" to listOf(6.0, 12.0),
             "boolList" to listOf(true, false),
         )
-        val obj = FakeReadableLogRecord(attributes = attrs)
+        val obj = FakeLogRecordData(attributes = attrs)
         val protobuf = obj.toProtobuf()
         assertEquals(obj.timestamp, protobuf.time_unix_nano)
         assertEquals(obj.observedTimestamp, protobuf.observed_time_unix_nano)
@@ -60,48 +60,48 @@ class LogRecordProtobufConversionTest {
 
     @Test
     fun testDroppedAttributesCountConversion() {
-        val obj = FakeReadableLogRecord(droppedAttributesCount = 7)
+        val obj = FakeLogRecordData(droppedAttributesCount = 7)
         val protobuf = obj.toProtobuf()
         assertEquals(7, protobuf.dropped_attributes_count)
 
-        val restored = protobuf.toReadableLogRecord(obj.resource, obj.instrumentationScopeInfo)
+        val restored = protobuf.toLogRecordData(obj.resource, obj.instrumentationScopeInfo)
         assertEquals(7, restored.droppedAttributesCount)
     }
 
     @Test
     fun testAnyValueStringBodySerialisesAsString() {
-        val protobuf = FakeReadableLogRecord(body = AnyValue.StringValue("hi")).toProtobuf()
+        val protobuf = FakeLogRecordData(body = AnyValue.StringValue("hi")).toProtobuf()
         assertEquals("hi", protobuf.body?.string_value)
     }
 
     @Test
     fun testAnyValueBoolBodySerialisesAsBool() {
-        val protobuf = FakeReadableLogRecord(body = AnyValue.BoolValue(true)).toProtobuf()
+        val protobuf = FakeLogRecordData(body = AnyValue.BoolValue(true)).toProtobuf()
         assertEquals(true, protobuf.body?.bool_value)
     }
 
     @Test
     fun testAnyValueLongBodySerialisesAsInt() {
-        val protobuf = FakeReadableLogRecord(body = AnyValue.LongValue(42)).toProtobuf()
+        val protobuf = FakeLogRecordData(body = AnyValue.LongValue(42)).toProtobuf()
         assertEquals(42L, protobuf.body?.int_value)
     }
 
     @Test
     fun testAnyValueDoubleBodySerialisesAsDouble() {
-        val protobuf = FakeReadableLogRecord(body = AnyValue.DoubleValue(1.5)).toProtobuf()
+        val protobuf = FakeLogRecordData(body = AnyValue.DoubleValue(1.5)).toProtobuf()
         assertEquals(1.5, protobuf.body?.double_value)
     }
 
     @Test
     fun testAnyValueBytesBodySerialisesAsBytes() {
         val bytes = byteArrayOf(1, 2, 3)
-        val protobuf = FakeReadableLogRecord(body = AnyValue.BytesValue(bytes)).toProtobuf()
+        val protobuf = FakeLogRecordData(body = AnyValue.BytesValue(bytes)).toProtobuf()
         assertContentEquals(bytes, protobuf.body?.bytes_value?.toByteArray())
     }
 
     @Test
     fun testAnyValueNullBodySerialisesAsEmptyAnyValue() {
-        val protobuf = FakeReadableLogRecord(body = AnyValue.NullValue).toProtobuf()
+        val protobuf = FakeLogRecordData(body = AnyValue.NullValue).toProtobuf()
         val any = protobuf.body
         assertNotNull(any)
         assertNull(any.string_value)
@@ -121,7 +121,7 @@ class LogRecordProtobufConversionTest {
                 AnyValue.LongValue(1),
             )
         )
-        val protobuf = FakeReadableLogRecord(body = list).toProtobuf()
+        val protobuf = FakeLogRecordData(body = list).toProtobuf()
         val arr = protobuf.body?.array_value
         assertNotNull(arr)
         assertEquals(2, arr.values.size)
@@ -137,7 +137,7 @@ class LogRecordProtobufConversionTest {
                 "count" to AnyValue.LongValue(7),
             )
         )
-        val protobuf = FakeReadableLogRecord(body = map).toProtobuf()
+        val protobuf = FakeLogRecordData(body = map).toProtobuf()
         val kv = protobuf.body?.kvlist_value
         assertNotNull(kv)
         assertEquals(2, kv.values.size)
@@ -162,9 +162,9 @@ class LogRecordProtobufConversionTest {
                 )
             )
         )
-        val obj = FakeReadableLogRecord(body = original)
+        val obj = FakeLogRecordData(body = original)
         val protobuf = obj.toProtobuf()
-        val restored = protobuf.toReadableLogRecord(obj.resource, obj.instrumentationScopeInfo)
+        val restored = protobuf.toLogRecordData(obj.resource, obj.instrumentationScopeInfo)
         assertEquals(original, restored.body)
     }
 
@@ -173,14 +173,14 @@ class LogRecordProtobufConversionTest {
         val payload = object {
             override fun toString() = "custom-string"
         }
-        val protobuf = FakeReadableLogRecord(body = payload).toProtobuf()
+        val protobuf = FakeLogRecordData(body = payload).toProtobuf()
         assertEquals("custom-string", protobuf.body?.string_value)
     }
 
     @Test
     fun testPrimitiveBodyRoundTripsAsRawKotlinType() {
-        val obj = FakeReadableLogRecord(body = 99L)
-        val restored = obj.toProtobuf().toReadableLogRecord(obj.resource, obj.instrumentationScopeInfo)
+        val obj = FakeLogRecordData(body = 99L)
+        val restored = obj.toProtobuf().toLogRecordData(obj.resource, obj.instrumentationScopeInfo)
         assertTrue(restored.body is Long, "expected Long, got ${restored.body?.let { it::class }}")
         assertEquals(99L, restored.body)
     }

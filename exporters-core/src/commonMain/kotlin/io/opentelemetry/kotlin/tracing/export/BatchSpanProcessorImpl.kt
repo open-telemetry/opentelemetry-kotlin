@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryConfig
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.BatchTelemetryProcessor
@@ -17,6 +18,7 @@ internal class BatchSpanProcessorImpl(
     scheduleDelayMs: Long,
     exportTimeoutMs: Long,
     maxExportBatchSize: Int,
+    sdkErrorHandler: SdkErrorHandler,
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : SpanProcessor {
 
@@ -28,6 +30,7 @@ internal class BatchSpanProcessorImpl(
                 scheduleDelayMs = scheduleDelayMs,
                 exportTimeoutMs = exportTimeoutMs,
                 maxExportBatchSize = maxExportBatchSize,
+                sdkErrorHandler = sdkErrorHandler,
             ),
             dispatcher = dispatcher,
             exportAction = exporter::export

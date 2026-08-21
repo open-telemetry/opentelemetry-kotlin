@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -22,7 +23,8 @@ internal class TelemetryExporterTest {
             initialDelayMs = 100,
             maxAttemptIntervalMs = 1000,
             maxAttempts = 3,
-            exportAction = { OtlpResponse.Success }
+            sdkErrorHandler = NoopSdkErrorHandler,
+            exportAction = { OtlpResponse.Success },
         )
     }
 
@@ -56,6 +58,7 @@ internal class TelemetryExporterTest {
             initialDelayMs = 100,
             maxAttemptIntervalMs = 1000,
             maxAttempts = 3,
+            sdkErrorHandler = NoopSdkErrorHandler,
             coroutineContext = StandardTestDispatcher(testScheduler),
         ) {
             attempts++
@@ -73,6 +76,7 @@ internal class TelemetryExporterTest {
             initialDelayMs = 100,
             maxAttemptIntervalMs = 1000,
             maxAttempts = 3,
+            sdkErrorHandler = NoopSdkErrorHandler,
             coroutineContext = StandardTestDispatcher(testScheduler),
         ) {
             attempts++
@@ -93,6 +97,7 @@ internal class TelemetryExporterTest {
             initialDelayMs = initialDelayMs,
             maxAttemptIntervalMs = maxIntervalMs,
             maxAttempts = maxAttempts,
+            sdkErrorHandler = NoopSdkErrorHandler,
             coroutineContext = StandardTestDispatcher(testScheduler),
             random = Random(0),
         ) {
@@ -126,6 +131,7 @@ internal class TelemetryExporterTest {
             maxAttempts = 3,
             coroutineContext = StandardTestDispatcher(testScheduler),
             random = Random(0),
+            sdkErrorHandler = NoopSdkErrorHandler,
         ) {
             timestamps += testScheduler.currentTime
             if (attempts++ == 0) {
@@ -146,7 +152,8 @@ internal class TelemetryExporterTest {
             initialDelayMs = 1,
             maxAttemptIntervalMs = 1,
             maxAttempts = 1,
-            exportAction = { error("network unreachable") }
+            sdkErrorHandler = NoopSdkErrorHandler,
+            exportAction = { error("network unreachable") },
         )
         // The failure occurs on a background coroutine whose scope has a CoroutineExceptionHandler,
         // so it must not propagate to the caller nor crash the process.

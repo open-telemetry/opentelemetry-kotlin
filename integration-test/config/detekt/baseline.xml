@@ -2,7 +2,7 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>SpreadOperator:OtelKotlinTestRule.kt$OtelKotlinTestRule$( InMemoryLogRecordProcessor( logRecordExporter, scope, ), *config.logRecordProcessors.toTypedArray() )</ID>
+    <ID>SpreadOperator:OtelKotlinTestRule.kt$OtelKotlinTestRule$( *config.logRecordProcessors.toTypedArray(), InMemoryLogRecordProcessor( logRecordExporter, scope, ), )</ID>
     <ID>SpreadOperator:OtelKotlinTestRule.kt$OtelKotlinTestRule$( InMemorySpanProcessor( spanExporter, scope, ), *config.spanProcessors.toTypedArray() )</ID>
   </CurrentIssues>
 </SmellBaseline>

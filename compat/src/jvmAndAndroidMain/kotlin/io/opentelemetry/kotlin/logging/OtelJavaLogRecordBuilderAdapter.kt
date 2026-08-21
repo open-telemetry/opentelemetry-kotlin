@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordBuilder
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
+import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
@@ -18,7 +19,7 @@ internal class OtelJavaLogRecordBuilderAdapter(private val impl: Logger) :
     private var severity: OtelJavaSeverity? = null
     private var severityText: String? = null
     private var body: Any? = null
-    private val attrs = ConcurrentHashMap<String, String>()
+    private val attrs = ConcurrentHashMap<String, Any>()
 
     override fun setTimestamp(timestamp: Long, unit: TimeUnit): OtelJavaLogRecordBuilder {
         this.timestamp = unit.toNanos(timestamp)
@@ -68,7 +69,7 @@ internal class OtelJavaLogRecordBuilderAdapter(private val impl: Logger) :
         key: OtelJavaAttributeKey<T>,
         value: T?
     ): OtelJavaLogRecordBuilder {
-        attrs[key.key] = value.toString()
+        value?.let { attrs[key.key] = it }
         return this
     }
 
@@ -80,7 +81,7 @@ internal class OtelJavaLogRecordBuilderAdapter(private val impl: Logger) :
             context = context?.toOtelKotlinContext(),
             severityNumber = severity?.toOtelKotlinSeverityNumber(),
             severityText = severityText,
-            attributes = { attrs.forEach { setStringAttribute(it.key, it.value) } }
+            attributes = { setTypedAttributes(attrs) }
         )
     }
 

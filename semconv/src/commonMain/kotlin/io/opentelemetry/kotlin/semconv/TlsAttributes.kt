@@ -192,12 +192,12 @@ object TlsAttributes {
     enum class TlsProtocolNameValues(val value: String) {
 
         /**
-        * <p>ssl.</p>
+        * <p>SSL</p>
         */
         SSL("ssl"),
 
         /**
-        * <p>tls.</p>
+        * <p>TLS</p>
         */
         TLS("tls"),
     }

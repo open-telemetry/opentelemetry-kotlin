@@ -20,7 +20,7 @@ object UrlAttributes {
     /**
     * <p>The file extension extracted from the <c>url.full</c>, excluding the leading dot.</p>
     * <p>Notes:</p>
-    * <p>The file extension is only set if it exists, as not every url has a file extension. When the file name has multiple extensions <c>example.tar.gz</c>, only the last one should be captured <c>gz</c>, not <c>tar.gz</c>.</p>
+    * <p>The file extension is only set if it exists, as not every URL has a file extension. When the filename has multiple extensions <c>example.tar.gz</c>, only the last one should be captured <c>gz</c>, not <c>tar.gz</c>.</p>
     */
     @IncubatingApi
     const val URL_EXTENSION: String = "url.extension"
@@ -112,7 +112,7 @@ object UrlAttributes {
     const val URL_QUERY: String = "url.query"
 
     /**
-    * <p>The highest registered url domain, stripped of the subdomain.</p>
+    * <p>The highest registered URL domain, stripped of the subdomain.</p>
     * <p>Notes:</p>
     * <p>This value can be determined precisely with the <a href="https://publicsuffix.org/">public suffix list</a>. For example, the registered domain for <c>foo.example.com</c> is <c>example.com</c>. Trying to approximate this by simply taking the last two labels will not work well for TLDs such as <c>co.uk</c>.</p>
     */
@@ -125,7 +125,7 @@ object UrlAttributes {
     const val URL_SCHEME: String = "url.scheme"
 
     /**
-    * <p>The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain. In a partially qualified domain, or if the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain.</p>
+    * <p>The subdomain portion of a fully qualified domain name includes all of the names except the hostname under the registered_domain. In a partially qualified domain, or if the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain.</p>
     * <p>Notes:</p>
     * <p>The subdomain portion of <c>www.east.mydomain.co.uk</c> is <c>east</c>. If the domain has multiple levels of subdomain, such as <c>sub2.sub1.example.com</c>, the subdomain field should contain <c>sub2.sub1</c>, with no trailing period.</p>
     */

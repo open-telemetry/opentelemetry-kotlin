@@ -6,12 +6,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalOtlpFileExporter(
+public data class ExperimentalOtlpFileExporter(
   /**
    * Configure output stream. 
    * Values include stdout, or scheme+destination. For example: file:///path/to/file.jsonl.
    * If omitted or null, stdout is used.
    */
   @SerialName("output_stream")
-  internal val outputStream: String? = null,
+  public val outputStream: String? = null,
 )

@@ -6,43 +6,36 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanLimits
 @ExperimentalApi
 internal class CompatSpanLimitsConfig : SpanLimitsConfigDsl {
 
-    private val builder = OtelJavaSpanLimits.builder()
+    override var attributeCountLimit: Int? = null
+    override var attributeValueLengthLimit: Int? = null
+    override var linkCountLimit: Int? = null
+    override var eventCountLimit: Int? = null
+    override var attributeCountPerEventLimit: Int? = null
+    override var attributeCountPerLinkLimit: Int? = null
 
-    override var attributeCountLimit: Int = DEFAULT_ATTR_LIMIT
-        set(value) {
-            field = value
-            builder.setMaxNumberOfAttributes(value)
-        }
+    /**
+     * The Java SDK cannot report dropped links, events, or attributes back to us, so the adapters
+     * enforce those three limits themselves and need the default filled in here.
+     */
+    val effectiveAttributeCountLimit: Int
+        get() = attributeCountLimit ?: DEFAULT_ATTR_LIMIT
 
-    override var attributeValueLengthLimit: Int = DEFAULT_ATTR_VALUE_LENGTH_LIMIT
-        set(value) {
-            field = value
-            builder.setMaxAttributeValueLength(value)
-        }
+    val effectiveLinkCountLimit: Int
+        get() = linkCountLimit ?: DEFAULT_LINK_LIMIT
 
-    override var linkCountLimit: Int = DEFAULT_LINK_LIMIT
-        set(value) {
-            field = value
-            builder.setMaxNumberOfLinks(value)
-        }
+    val effectiveEventCountLimit: Int
+        get() = eventCountLimit ?: DEFAULT_EVENT_LIMIT
 
-    override var eventCountLimit: Int = DEFAULT_EVENT_LIMIT
-        set(value) {
-            field = value
-            builder.setMaxNumberOfEvents(value)
-        }
-
-    override var attributeCountPerEventLimit: Int = DEFAULT_ATTR_LIMIT
-        set(value) {
-            field = value
-            builder.setMaxNumberOfAttributesPerEvent(value)
-        }
-
-    override var attributeCountPerLinkLimit: Int = DEFAULT_ATTR_LIMIT
-        set(value) {
-            field = value
-            builder.setMaxNumberOfAttributesPerLink(value)
-        }
-
-    fun build(): OtelJavaSpanLimits = builder.build()
+    /**
+     * Only the limits that were configured are set, so anything left unset falls back to the Java
+     * SDK's own default.
+     */
+    fun build(): OtelJavaSpanLimits = OtelJavaSpanLimits.builder().apply {
+        attributeCountLimit?.let(::setMaxNumberOfAttributes)
+        attributeValueLengthLimit?.let(::setMaxAttributeValueLength)
+        linkCountLimit?.let(::setMaxNumberOfLinks)
+        eventCountLimit?.let(::setMaxNumberOfEvents)
+        attributeCountPerEventLimit?.let(::setMaxNumberOfAttributesPerEvent)
+        attributeCountPerLinkLimit?.let(::setMaxNumberOfAttributesPerLink)
+    }.build()
 }

@@ -5,11 +5,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class PullMetricExporter(
+public data class PullMetricExporter(
   /**
    * Configure exporter to be prometheus.
    * If omitted, ignore.
    */
   @SerialName("prometheus/development")
-  internal val prometheusDevelopment: ExperimentalPrometheusMetricExporter? = null,
+  public val prometheusDevelopment: ExperimentalPrometheusMetricExporter? = null,
 )

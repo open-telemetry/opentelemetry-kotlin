@@ -2,11 +2,11 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.LogExportConfigDsl
-import io.opentelemetry.kotlin.platformLog
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,10 +18,16 @@ import kotlinx.coroutines.SupervisorJob
 @ExperimentalApi
 public fun LogExportConfigDsl.compositeLogRecordProcessor(vararg processors: LogRecordProcessor): LogRecordProcessor {
     if (processors.isEmpty()) {
-        platformLog("At least one processor must be provided")
+        sdkErrorHandler.onError(
+            SdkError.ApiMisuse(
+                api = "LogExportConfigDsl.compositeLogRecordProcessor",
+                message = "At least one processor must be provided",
+                severity = SdkErrorSeverity.WARNING,
+            )
+        )
         return NoopLogRecordProcessor
     }
-    return CompositeLogRecordProcessor(processors.toList(), NoopSdkErrorHandler)
+    return CompositeLogRecordProcessor(processors.toList(), sdkErrorHandler)
 }
 
 /**
@@ -31,7 +37,7 @@ public fun LogExportConfigDsl.compositeLogRecordProcessor(vararg processors: Log
 public fun LogExportConfigDsl.simpleLogRecordProcessor(exporter: LogRecordExporter): LogRecordProcessor {
     val dispatcher: CoroutineDispatcher = Dispatchers.Default
     val scope = CoroutineScope(
-        SupervisorJob() + dispatcher + telemetryExceptionHandler("Simple log record processor")
+        SupervisorJob() + dispatcher + telemetryExceptionHandler("Simple log record processor", sdkErrorHandler)
     )
     return SimpleLogRecordProcessor(exporter, scope)
 }
@@ -42,10 +48,16 @@ public fun LogExportConfigDsl.simpleLogRecordProcessor(exporter: LogRecordExport
 @ExperimentalApi
 public fun LogExportConfigDsl.compositeLogRecordExporter(vararg exporters: LogRecordExporter): LogRecordExporter {
     if (exporters.isEmpty()) {
-        platformLog("At least one exporter must be provided")
+        sdkErrorHandler.onError(
+            SdkError.ApiMisuse(
+                api = "LogExportConfigDsl.compositeLogRecordExporter",
+                message = "At least one exporter must be provided",
+                severity = SdkErrorSeverity.WARNING,
+            )
+        )
         return NoopLogRecordExporter
     }
-    return CompositeLogRecordExporter(exporters.toList(), NoopSdkErrorHandler)
+    return CompositeLogRecordExporter(exporters.toList(), sdkErrorHandler)
 }
 
 /**
@@ -66,6 +78,7 @@ public fun LogExportConfigDsl.batchLogRecordProcessor(
     scheduleDelayMs,
     exportTimeoutMs,
     maxExportBatchSize,
+    sdkErrorHandler,
     dispatcher,
 )
 

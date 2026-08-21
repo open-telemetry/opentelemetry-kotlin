@@ -16,7 +16,7 @@ public interface ContextConfigDsl {
      * Selects among the built-in [ImplicitContextStorage] implementations. Ignored when a custom
      * implementation is supplied via [storage].
      */
-    public var storageMode: ImplicitContextStorageMode
+    public var storageMode: ImplicitContextStorageMode?
 
     /**
      * Plugs in a custom [ImplicitContextStorage] implementation. When set, this takes precedence

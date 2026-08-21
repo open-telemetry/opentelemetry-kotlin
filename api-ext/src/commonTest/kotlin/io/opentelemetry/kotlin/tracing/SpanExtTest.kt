@@ -3,8 +3,10 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.exceptionType
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 internal class SpanExtTest {
@@ -68,9 +70,12 @@ internal class SpanExtTest {
         val errMessage = "Whoops"
         val exc = IllegalStateException(errMessage)
 
-        span.wrapOperation {
-            throw exc
+        val thrown = assertFailsWith<IllegalStateException> {
+            span.wrapOperation {
+                throw exc
+            }
         }
+        assertSame(exc, thrown)
 
         assertFalse(span.isRecording())
         assertTrue(span.status is StatusData.Error)

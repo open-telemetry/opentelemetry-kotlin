@@ -1,25 +1,11 @@
 package io.opentelemetry.kotlin.error
 
+/**
+ * An [SdkErrorHandler] that silently discards everything reported to it. This is the default
+ * behavior when no handler is configured.
+ */
 public object NoopSdkErrorHandler : SdkErrorHandler {
 
-    override fun onApiMisuse(
-        api: String,
-        details: String,
-        severity: SdkErrorSeverity
-    ) {
-    }
-
-    override fun onUserCodeError(
-        exc: Throwable,
-        details: String,
-        severity: SdkErrorSeverity
-    ) {
-    }
-
-    override fun onSdkCodeError(
-        exc: Throwable,
-        details: String,
-        severity: SdkErrorSeverity
-    ) {
+    override fun onError(error: SdkError) {
     }
 }

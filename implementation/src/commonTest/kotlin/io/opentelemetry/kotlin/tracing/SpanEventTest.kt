@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
@@ -47,6 +48,7 @@ internal class SpanEventTest {
             spanLimitConfig = spanLimitConfig,
             idGenerator = FakeIdGenerator(),
             shutdownState = MutableShutdownState(),
+            sdkErrorHandler = NoopSdkErrorHandler,
         )
     }
 

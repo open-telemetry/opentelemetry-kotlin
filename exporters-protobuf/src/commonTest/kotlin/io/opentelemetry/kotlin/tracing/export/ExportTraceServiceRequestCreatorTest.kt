@@ -191,8 +191,8 @@ class ExportTraceServiceRequestCreatorTest {
         expectedLink: SpanLinkData,
         observedLink: SpanLinkData
     ) {
-        assertEquals(expectedLink.spanContext.traceId, observedLink.spanContext.traceId)
-        assertEquals(expectedLink.spanContext.spanId, observedLink.spanContext.spanId)
+        assertSpanContextMatches(expectedLink.spanContext, observedLink.spanContext)
+        assertEquals(expectedLink.spanContext.isRemote, observedLink.spanContext.isRemote)
         assertEquals(expectedLink.attributes, observedLink.attributes)
     }
 

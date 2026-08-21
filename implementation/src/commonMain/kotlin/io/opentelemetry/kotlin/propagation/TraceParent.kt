@@ -1,8 +1,10 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
-import io.opentelemetry.kotlin.platformLog
 import io.opentelemetry.kotlin.tracing.TraceFlags
 
 /**
@@ -52,6 +54,7 @@ internal class TraceParent private constructor(
             traceId: String,
             spanId: String,
             traceFlags: TraceFlags,
+            sdkErrorHandler: SdkErrorHandler,
         ): TraceParent? {
             val errorMessage =
                 if (version.length != VERSION_LEN || !version.isLowerHex() || version == FORBIDDEN_VERSION) {
@@ -67,12 +70,22 @@ internal class TraceParent private constructor(
             return if (errorMessage == null) {
                 TraceParent(version, traceId, spanId, traceFlags)
             } else {
-                platformLog(errorMessage)
+                sdkErrorHandler.onError(
+                    SdkError.ApiMisuse(
+                        api = "TraceParent.create",
+                        message = errorMessage,
+                        severity = SdkErrorSeverity.WARNING,
+                    )
+                )
                 null
             }
         }
 
-        fun decode(header: String, traceFlagsFactory: TraceFlagsFactory): TraceParent? {
+        fun decode(
+            header: String,
+            traceFlagsFactory: TraceFlagsFactory,
+            sdkErrorHandler: SdkErrorHandler,
+        ): TraceParent? {
             if (header.length < LEN_V00) {
                 return null
             }
@@ -101,6 +114,7 @@ internal class TraceParent private constructor(
                 traceId = parts[1],
                 spanId = parts[2],
                 traceFlags = traceFlagsFactory.fromHex(flagsStr),
+                sdkErrorHandler = sdkErrorHandler,
             )
         }
 

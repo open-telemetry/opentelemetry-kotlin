@@ -27,6 +27,11 @@ internal class TracingIdFactoryImplTest {
     }
 
     @Test
+    fun testGeneratesRandomTraceIds() {
+        assertTrue(factory.generatesRandomTraceIds)
+    }
+
+    @Test
     fun testValidSpanId() {
         val spanId = factory.generateSpanIdBytes()
         assertEquals(16, spanId.toHexString().length)

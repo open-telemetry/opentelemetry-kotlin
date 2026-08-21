@@ -3,8 +3,8 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.export.FakeTelemetryRepository
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
-import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,11 +13,11 @@ import kotlin.test.assertTrue
 
 internal class PersistingLogRecordExporterTest {
 
-    private val telemetry = listOf(FakeReadableLogRecord(body = "test"))
+    private val telemetry = listOf(FakeLogRecordData(body = "test"))
 
     @Test
     fun testStoreCalledOnExport() = runTest {
-        val repository = FakeTelemetryRepository<ReadableLogRecord>()
+        val repository = FakeTelemetryRepository<LogRecordData>()
         val exporter = PersistingLogRecordExporter(FakeLogRecordExporter(), repository)
         exporter.export(telemetry)
 
@@ -27,7 +27,7 @@ internal class PersistingLogRecordExporterTest {
 
     @Test
     fun testExportReturnsSuccessWhenStoreSucceeds() = runTest {
-        val repository = FakeTelemetryRepository<ReadableLogRecord>()
+        val repository = FakeTelemetryRepository<LogRecordData>()
         val exporter = PersistingLogRecordExporter(FakeLogRecordExporter(), repository)
 
         val result = exporter.export(telemetry)
@@ -36,7 +36,7 @@ internal class PersistingLogRecordExporterTest {
 
     @Test
     fun testDelegateNotCalledWhenStoreSucceeds() = runTest {
-        val repository = FakeTelemetryRepository<ReadableLogRecord>()
+        val repository = FakeTelemetryRepository<LogRecordData>()
         val delegate = FakeLogRecordExporter()
         val exporter = PersistingLogRecordExporter(delegate, repository)
 
@@ -46,7 +46,7 @@ internal class PersistingLogRecordExporterTest {
 
     @Test
     fun testExportStillWorksIfStoreFails() = runTest {
-        val repository = FakeTelemetryRepository<ReadableLogRecord>(storeFails = true)
+        val repository = FakeTelemetryRepository<LogRecordData>(storeFails = true)
         val delegate = FakeLogRecordExporter()
         val exporter = PersistingLogRecordExporter(delegate, repository)
 
@@ -58,7 +58,7 @@ internal class PersistingLogRecordExporterTest {
 
     @Test
     fun testFallbackExportResultPropagatedWhenStoreFails() = runTest {
-        val repository = FakeTelemetryRepository<ReadableLogRecord>(storeFails = true)
+        val repository = FakeTelemetryRepository<LogRecordData>(storeFails = true)
         val exporter = PersistingLogRecordExporter(
             FakeLogRecordExporter(action = { Failure }),
             repository,
@@ -70,14 +70,14 @@ internal class PersistingLogRecordExporterTest {
 
     @Test
     fun testForceFlushReturnsSuccess() = runTest {
-        val repository = FakeTelemetryRepository<ReadableLogRecord>()
+        val repository = FakeTelemetryRepository<LogRecordData>()
         val exporter = PersistingLogRecordExporter(FakeLogRecordExporter(), repository)
         assertEquals(Success, exporter.forceFlush())
     }
 
     @Test
     fun testShutdown() = runTest {
-        val repository = FakeTelemetryRepository<ReadableLogRecord>()
+        val repository = FakeTelemetryRepository<LogRecordData>()
         val exporter = PersistingLogRecordExporter(FakeLogRecordExporter(), repository)
 
         assertEquals(Success, exporter.export(telemetry))
@@ -94,7 +94,7 @@ internal class PersistingLogRecordExporterTest {
 
     @Test
     fun testForceFlushWorksAfterShutdown() = runTest {
-        val repository = FakeTelemetryRepository<ReadableLogRecord>()
+        val repository = FakeTelemetryRepository<LogRecordData>()
         val exporter = PersistingLogRecordExporter(FakeLogRecordExporter(), repository)
         exporter.shutdown()
         assertEquals(Success, exporter.forceFlush())

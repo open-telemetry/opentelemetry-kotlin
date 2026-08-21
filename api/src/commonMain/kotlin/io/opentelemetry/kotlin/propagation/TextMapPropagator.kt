@@ -23,11 +23,11 @@ public interface TextMapPropagator {
     /**
      * Injects propagated fields from [context] into [carrier] using [setter].
      */
-    public fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>)
+    public fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>)
 
     /**
      * Extracts propagated fields from [carrier] using [getter] and returns a new
      * [Context] with those values merged in.
      */
-    public fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context
+    public fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context
 }

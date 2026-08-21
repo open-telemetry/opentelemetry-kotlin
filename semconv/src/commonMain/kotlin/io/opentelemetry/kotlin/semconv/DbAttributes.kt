@@ -276,7 +276,11 @@ object DbAttributes {
     * <p><c>db.query.parameter.<key></c> SHOULD match
     * up with the parameterized placeholders present in <c>db.query.text</c>.</p>
     * <p>It is RECOMMENDED to capture the value as provided by the application
-    * without attempting to do any case normalization.</p>
+    * without attempting to do any case normalization or sanitization.</p>
+    * <p>Instrumentations SHOULD NOT capture <c>db.query.parameter.<key></c> by default
+    * since values may contain PII or sensitive details.
+    * Application operators are expected to enable specific keys depending
+    * on their privacy and security considerations.</p>
     * <p><c>db.query.parameter.<key></c> SHOULD NOT be captured on batch operations.</p>
     * <p>Examples:</p>
     * <ul>
@@ -319,7 +323,7 @@ object DbAttributes {
     /**
     * <p>Deprecated, use <c>db.namespace</c> instead.</p>
     */
-    @Deprecated("Uncategorized.")
+    @Deprecated("Replaced by `db.namespace` (string).")
     const val DB_REDIS_DATABASE_INDEX: String = "db.redis.database_index"
 
     /**

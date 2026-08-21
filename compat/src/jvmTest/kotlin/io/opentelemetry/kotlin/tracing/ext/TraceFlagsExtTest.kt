@@ -9,8 +9,16 @@ internal class TraceFlagsExtTest {
 
     @Test
     fun toOtelJavaTraceFlags() {
-        val expected = FakeTraceFlags()
-        val observed = expected.toOtelJavaTraceFlags()
-        assertEquals(expected.hex, observed.asHex())
+        val combinations = listOf(
+            FakeTraceFlags(isSampled = false, isRandom = false),
+            FakeTraceFlags(isSampled = true, isRandom = false),
+            FakeTraceFlags(isSampled = false, isRandom = true),
+            FakeTraceFlags(isSampled = true, isRandom = true),
+        )
+        combinations.forEach { expected ->
+            val observed = expected.toOtelJavaTraceFlags()
+            assertEquals(expected.hex, observed.asHex())
+            assertEquals(expected.isSampled, observed.isSampled)
+        }
     }
 }

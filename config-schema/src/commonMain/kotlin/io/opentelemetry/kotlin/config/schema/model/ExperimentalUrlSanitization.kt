@@ -7,7 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalUrlSanitization(
+public data class ExperimentalUrlSanitization(
   /**
    * List of query parameter names whose values should be redacted from URLs.
    * Query parameter names are case-sensitive.
@@ -16,5 +16,5 @@ internal data class ExperimentalUrlSanitization(
    * If omitted, the default sensitive query parameter list as defined by the url semantic conventions (https://github.com/open-telemetry/semantic-conventions/blob/main/docs/registry/attributes/url.md) is used.
    */
   @SerialName("sensitive_query_parameters")
-  internal val sensitiveQueryParameters: List<String>? = null,
+  public val sensitiveQueryParameters: List<String>? = null,
 )

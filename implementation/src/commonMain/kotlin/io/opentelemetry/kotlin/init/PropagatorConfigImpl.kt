@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
@@ -58,15 +59,31 @@ internal class PropagatorConfigImpl : PropagatorConfigDsl {
         traceStateFactory: TraceStateFactory,
         spanContextFactory: SpanContextFactory,
         spanFactory: SpanFactory,
+        sdkErrorHandler: SdkErrorHandler,
     ) {
         w3cTraceContextImpl = W3CTraceContextPropagator(
             traceFlagsFactory = traceFlagsFactory,
             traceStateFactory = traceStateFactory,
             spanContextFactory = spanContextFactory,
             spanFactory = spanFactory,
+            sdkErrorHandler = sdkErrorHandler,
         )
-        b3SingleImpl = B3Propagator(B3Format.SINGLE, traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory)
-        b3MultiImpl = B3Propagator(B3Format.MULTI, traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory)
+        b3SingleImpl = B3Propagator(
+            B3Format.SINGLE,
+            traceFlagsFactory,
+            traceStateFactory,
+            spanContextFactory,
+            spanFactory,
+            sdkErrorHandler,
+        )
+        b3MultiImpl = B3Propagator(
+            B3Format.MULTI,
+            traceFlagsFactory,
+            traceStateFactory,
+            spanContextFactory,
+            spanFactory,
+            sdkErrorHandler,
+        )
     }
 
     internal fun buildPropagator(): TextMapPropagator = configured
@@ -78,9 +95,9 @@ private class ForwardingPropagator(
 ) : TextMapPropagator {
     override fun fields(): Collection<String> = delegate().fields()
 
-    override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) =
+    override fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>) =
         delegate().inject(context, carrier, setter)
 
-    override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context =
+    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context =
         delegate().extract(context, carrier, getter)
 }

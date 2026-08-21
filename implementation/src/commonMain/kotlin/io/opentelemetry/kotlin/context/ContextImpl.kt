@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.baggage.Baggage
 import io.opentelemetry.kotlin.baggage.BaggageImpl
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.tracing.Span
 
@@ -11,6 +12,7 @@ private val SPAN_KEY: ContextKey<Span> = ContextKeyImpl("otel-kotlin-span")
 internal class ContextImpl(
     private val storage: ImplicitContextStorage,
     private val spanFactory: SpanFactory,
+    private val sdkErrorHandler: SdkErrorHandler,
     private val impl: Map<ContextKey<*>, Any?> = emptyMap()
 ) : Context {
 
@@ -19,7 +21,7 @@ internal class ContextImpl(
         value: T?
     ): Context {
         val newValues = impl.plus(Pair(key, value))
-        return ContextImpl(storage, spanFactory, newValues)
+        return ContextImpl(storage, spanFactory, sdkErrorHandler, newValues)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -33,7 +35,7 @@ internal class ContextImpl(
         }
         val current = storage.implicitContext()
         storage.setImplicitContext(this)
-        return ScopeImpl.create(current, this, storage)
+        return ScopeImpl.create(current, this, storage, sdkErrorHandler)
     }
 
     override fun storeSpan(span: Span): Context = set(SPAN_KEY, span)

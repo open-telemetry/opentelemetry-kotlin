@@ -6,7 +6,11 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
+import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 
+/**
+ * An immutable snapshot of a span's state.
+ */
 class SpanDataImpl(
     override val name: String,
     override val status: StatusData,
@@ -24,4 +28,6 @@ class SpanDataImpl(
     override val instrumentationScopeInfo: InstrumentationScopeInfo,
     override val hasEnded: Boolean,
     override val droppedAttributesCount: Int = 0,
-) : SpanData
+) : ReadableSpan {
+    override fun toSpanData(): SpanData = this
+}

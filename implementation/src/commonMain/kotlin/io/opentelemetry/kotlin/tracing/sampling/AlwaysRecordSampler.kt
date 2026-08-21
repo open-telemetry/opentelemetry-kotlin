@@ -15,13 +15,13 @@ internal class AlwaysRecordSampler(
 
     override fun shouldSample(
         context: Context,
-        traceId: String,
+        traceIdBytes: ByteArray,
         name: String,
         spanKind: SpanKind,
         attributes: AttributeContainer,
         links: List<SpanLink>,
     ): SamplingResult {
-        val delegate = root.shouldSample(context, traceId, name, spanKind, attributes, links)
+        val delegate = root.shouldSample(context, traceIdBytes, name, spanKind, attributes, links)
         if (delegate.decision == DROP) {
             return SamplingResultImpl(
                 decision = RECORD_ONLY,

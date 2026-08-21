@@ -40,8 +40,8 @@ object MessagingAttributes {
     /**
     * <p>The message destination name</p>
     * <p>Notes:</p>
-    * <p>Destination name SHOULD uniquely identify a specific queue, topic or other entity within the broker. If
-    * the broker doesn't have such notion, the destination name SHOULD uniquely identify the broker.</p>
+    * <p>SHOULD uniquely identify a specific queue, topic or other entity within the broker. If
+    * the broker doesn't have such notion, it SHOULD uniquely identify the broker.</p>
     */
     @IncubatingApi
     const val MESSAGING_DESTINATION_NAME: String = "messaging.destination.name"
@@ -63,7 +63,7 @@ object MessagingAttributes {
     /**
     * <p>Low cardinality representation of the messaging destination name</p>
     * <p>Notes:</p>
-    * <p>Destination names could be constructed from templates. An example would be a destination name involving a user name or product id. Although the destination name in this case is of high cardinality, the underlying template is of low cardinality and can be effectively used for grouping and aggregation.</p>
+    * <p>Destination names could be constructed from templates. An example would be a destination name involving a username or product ID. Although the destination name in this case is of high cardinality, the underlying template is of low cardinality and can be effectively used for grouping and aggregation.</p>
     */
     @IncubatingApi
     const val MESSAGING_DESTINATION_TEMPLATE: String = "messaging.destination.template"
@@ -105,7 +105,7 @@ object MessagingAttributes {
     const val MESSAGING_GCP_PUBSUB_MESSAGE_ACK_DEADLINE: String = "messaging.gcp_pubsub.message.ack_deadline"
 
     /**
-    * <p>The ack id for a given message.</p>
+    * <p>The ack ID for a given message.</p>
     */
     @IncubatingApi
     const val MESSAGING_GCP_PUBSUB_MESSAGE_ACK_ID: String = "messaging.gcp_pubsub.message.ack_id"
@@ -123,6 +123,14 @@ object MessagingAttributes {
     const val MESSAGING_GCP_PUBSUB_MESSAGE_ORDERING_KEY: String = "messaging.gcp_pubsub.message.ordering_key"
 
     /**
+    * <p>The Kafka cluster ID, obtained from the broker metadata exposed through the Kafka client (or AdminClient) API.</p>
+    * <p>Notes:</p>
+    * <p>The cluster ID is a unique identifier reported by the Kafka broker. It identifies the cluster independently of the individual brokers the client is configured to connect to, and remains stable even if broker hostnames, IP addresses, or ports change.</p>
+    */
+    @IncubatingApi
+    const val MESSAGING_KAFKA_CLUSTER_ID: String = "messaging.kafka.cluster.id"
+
+    /**
     * <p>Deprecated, use <c>messaging.consumer.group.name</c> instead.</p>
     */
     @Deprecated("Replaced by `messaging.consumer.group.name`.")
@@ -131,7 +139,7 @@ object MessagingAttributes {
     /**
     * <p>Deprecated, use <c>messaging.destination.partition.id</c> instead.</p>
     */
-    @Deprecated("Record string representation of the partition id in `messaging.destination.partition.id` attribute.")
+    @Deprecated("Record string representation of the partition ID in `messaging.destination.partition.id` attribute.")
     const val MESSAGING_KAFKA_DESTINATION_PARTITION: String = "messaging.kafka.destination.partition"
 
     /**
@@ -253,7 +261,7 @@ object MessagingAttributes {
     const val MESSAGING_ROCKETMQ_MESSAGE_GROUP: String = "messaging.rocketmq.message.group"
 
     /**
-    * <p>Key(s) of message, another way to mark message besides message id.</p>
+    * <p>Key(s) of message, another way to mark message besides message ID.</p>
     */
     @IncubatingApi
     const val MESSAGING_ROCKETMQ_MESSAGE_KEYS: String = "messaging.rocketmq.message.keys"

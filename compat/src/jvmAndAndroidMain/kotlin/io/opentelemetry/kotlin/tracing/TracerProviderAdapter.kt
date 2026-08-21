@@ -2,9 +2,11 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.aliases.OtelJavaTracerProvider
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
+import io.opentelemetry.kotlin.scope.scopeCacheKey
 import java.util.concurrent.ConcurrentHashMap
 
 @ExperimentalApi
@@ -14,7 +16,7 @@ internal class TracerProviderAdapter(
     private val spanLimitsConfig: CompatSpanLimitsConfig,
 ) : TracerProvider {
 
-    private val map = ConcurrentHashMap<String, TracerAdapter>()
+    private val map = ConcurrentHashMap<InstrumentationScopeInfo, TracerAdapter>()
 
     override fun getTracer(
         name: String,
@@ -22,9 +24,7 @@ internal class TracerProviderAdapter(
         schemaUrl: String?,
         attributes: (AttributesMutator.() -> Unit)?
     ): Tracer {
-        val key = name.plus(version).plus(schemaUrl)
-
-        return map.getOrPut(key) {
+        return map.getOrPut(scopeCacheKey(name, version, schemaUrl)) {
             val tracerBuilder = tracerProvider.tracerBuilder(name)
 
             schemaUrl?.let(tracerBuilder::setSchemaUrl)

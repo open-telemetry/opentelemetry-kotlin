@@ -24,7 +24,7 @@ internal class ParentBasedSampler(
 
     override fun shouldSample(
         context: Context,
-        traceId: String,
+        traceIdBytes: ByteArray,
         name: String,
         spanKind: SpanKind,
         attributes: AttributeContainer,
@@ -38,6 +38,6 @@ internal class ParentBasedSampler(
             parent.traceFlags.isSampled -> localParentSampled
             else -> localParentNotSampled
         }
-        return delegate.shouldSample(context, traceId, name, spanKind, attributes, links)
+        return delegate.shouldSample(context, traceIdBytes, name, spanKind, attributes, links)
     }
 }

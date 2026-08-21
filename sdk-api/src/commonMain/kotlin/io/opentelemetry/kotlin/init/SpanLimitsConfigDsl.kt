@@ -12,20 +12,20 @@ public interface SpanLimitsConfigDsl : AttributeLimitsConfigDsl {
     /**
      * The maximum number of links
      */
-    public var linkCountLimit: Int
+    public var linkCountLimit: Int?
 
     /**
      * The maximum number of events
      */
-    public var eventCountLimit: Int
+    public var eventCountLimit: Int?
 
     /**
      * The maximum number of attributes per event
      */
-    public var attributeCountPerEventLimit: Int
+    public var attributeCountPerEventLimit: Int?
 
     /**
      * The maximum number of attributes per link
      */
-    public var attributeCountPerLinkLimit: Int
+    public var attributeCountPerLinkLimit: Int?
 }

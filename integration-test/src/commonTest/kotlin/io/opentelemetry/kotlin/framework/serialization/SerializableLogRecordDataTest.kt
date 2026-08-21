@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.framework.serialization
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.framework.serialization.conversion.toSerializable
-import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.model.hex
@@ -13,7 +13,7 @@ internal class SerializableLogRecordDataTest {
 
     @Test
     fun testConversion() {
-        val fake = FakeReadableLogRecord(eventName = "event")
+        val fake = FakeLogRecordData(eventName = "event")
         val observed = fake.toSerializable()
 
         compareResource(checkNotNull(fake.resource), checkNotNull(observed.resource))

@@ -1,13 +1,12 @@
 package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.config.validateOrUseDefault
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 
 internal class PersistedTelemetryConfig(
     maxBatchedItemsPerSignal: Int = DEFAULT_MAX_BATCHED_ITEMS_PER_SIGNAL,
     maxTelemetryAgeInDays: Long = DEFAULT_MAX_TELEMETRY_AGE_IN_DAYS,
-    sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
+    sdkErrorHandler: SdkErrorHandler,
 ) {
     /**
      * Maximum number of batches that should be stored for each telemetry signal. 100 by default.

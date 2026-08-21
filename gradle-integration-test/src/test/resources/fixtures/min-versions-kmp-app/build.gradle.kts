@@ -4,6 +4,11 @@ plugins {
 
 val otelKotlinVersion: String = providers.gradleProperty("otelKotlinVersion").get()
 
+val otelModules: List<String> = providers.gradleProperty("klibModules").get()
+    .split(",")
+    .map(String::trim)
+    .filter(String::isNotEmpty)
+
 kotlin {
     js {
         nodejs()
@@ -15,11 +20,9 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("io.opentelemetry.kotlin:api:$otelKotlinVersion")
-                implementation("io.opentelemetry.kotlin:sdk-api:$otelKotlinVersion")
-                implementation("io.opentelemetry.kotlin:core:$otelKotlinVersion")
-                implementation("io.opentelemetry.kotlin:implementation:$otelKotlinVersion")
-                implementation("io.opentelemetry.kotlin:exporters-core:$otelKotlinVersion")
+                otelModules.forEach { module ->
+                    implementation("io.opentelemetry.kotlin:$module:$otelKotlinVersion")
+                }
             }
         }
     }

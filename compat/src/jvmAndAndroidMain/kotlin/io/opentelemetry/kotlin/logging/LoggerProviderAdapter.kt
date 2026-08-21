@@ -1,14 +1,16 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.aliases.OtelJavaLoggerProvider
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.scope.scopeCacheKey
 import java.util.concurrent.ConcurrentHashMap
 
 @ExperimentalApi
 internal class LoggerProviderAdapter(private val impl: OtelJavaLoggerProvider) : LoggerProvider {
 
-    private val map = ConcurrentHashMap<String, LoggerAdapter>()
+    private val map = ConcurrentHashMap<InstrumentationScopeInfo, LoggerAdapter>()
 
     override fun getLogger(
         name: String,
@@ -16,8 +18,7 @@ internal class LoggerProviderAdapter(private val impl: OtelJavaLoggerProvider) :
         schemaUrl: String?,
         attributes: (AttributesMutator.() -> Unit)?
     ): Logger {
-        val key = name.plus(version).plus(schemaUrl)
-        return map.getOrPut(key) {
+        return map.getOrPut(scopeCacheKey(name, version, schemaUrl)) {
             val builder = impl.loggerBuilder(name)
 
             if (schemaUrl != null) {

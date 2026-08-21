@@ -5,22 +5,22 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class LogRecordProcessor(
+public data class LogRecordProcessor(
   /**
    * Configure a batch log record processor.
    * If omitted, ignore.
    */
-  internal val batch: BatchLogRecordProcessor? = null,
+  public val batch: BatchLogRecordProcessor? = null,
   /**
    * Configure a simple log record processor.
    * If omitted, ignore.
    */
-  internal val simple: SimpleLogRecordProcessor? = null,
+  public val simple: SimpleLogRecordProcessor? = null,
   /**
    * Configure an event to span event bridge log record processor.
    * If omitted, ignore.
    */
   @SerialName("event_to_span_event_bridge/development")
-  internal val eventToSpanEventBridgeDevelopment:
+  public val eventToSpanEventBridgeDevelopment:
       ExperimentalEventToSpanEventBridgeLogRecordProcessor? = null,
 )

@@ -95,7 +95,7 @@ internal class TextMapPropagatorAdapterTest {
 
             override fun keys(carrier: Map<String, String>): Collection<String> = error(errMsg)
             override fun get(carrier: Map<String, String>?, key: String): String = error(errMsg)
-            override fun getAll(carrier: Map<String, String>, key: String): List<String> = error(errMsg)
+            override fun getAll(carrier: Map<String, String>?, key: String): List<String> = error(errMsg)
         }
 
         val extracted = TextMapPropagatorAdapter(impl).extract(
@@ -150,7 +150,7 @@ internal class TextMapPropagatorAdapterTest {
                 error(errMsg)
             }
 
-            override fun getAll(carrier: Map<String, String>, key: String): List<String> {
+            override fun getAll(carrier: Map<String, String>?, key: String): List<String> {
                 error(errMsg)
             }
         }
@@ -168,8 +168,8 @@ internal class TextMapPropagatorAdapterTest {
     private object MapGetter : TextMapGetter<Map<String, String>> {
         override fun keys(carrier: Map<String, String>): Collection<String> = carrier.keys
         override fun get(carrier: Map<String, String>?, key: String): String? = carrier?.get(key)
-        override fun getAll(carrier: Map<String, String>, key: String): List<String> =
-            carrier[key]?.let { listOf(it) } ?: emptyList()
+        override fun getAll(carrier: Map<String, String>?, key: String): List<String> =
+            carrier?.get(key)?.let { listOf(it) } ?: emptyList()
     }
 
     private object JavaMapGetter : OtelJavaTextMapGetter<Map<String, String>> {

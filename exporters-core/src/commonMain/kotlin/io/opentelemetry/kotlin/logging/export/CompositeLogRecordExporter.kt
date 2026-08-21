@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.batchExportOperationSuspend
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 
 internal class CompositeLogRecordExporter(
     private val exporters: List<LogRecordExporter>,
@@ -16,7 +16,7 @@ internal class CompositeLogRecordExporter(
     )
 ) : LogRecordExporter, TelemetryCloseable by telemetryCloseable {
 
-    override suspend fun export(telemetry: List<ReadableLogRecord>): OperationResultCode {
+    override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode {
         return batchExportOperationSuspend(
             exporters,
             sdkErrorHandler

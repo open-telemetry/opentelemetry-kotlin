@@ -1,0 +1,23 @@
+file_format: "1.0"
+disabled: false
+log_level: info
+resource:
+  schema_url: "https://opentelemetry.io/schemas/1.37.0"
+  attributes_list: "service.namespace=demo,service.version=1.0.0"
+  attributes:
+    - name: service.name
+      value: unknown_service
+      type: string
+attribute_limits:
+  attribute_count_limit: 128
+  attribute_value_length_limit: 4096
+logger_provider:
+  processors: []
+  limits:
+    attribute_count_limit: 64
+    attribute_value_length_limit: 256
+tracer_provider:
+  processors: []
+  limits:
+    attribute_count_limit: 128
+    event_count_limit: 64

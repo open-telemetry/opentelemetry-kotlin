@@ -5,10 +5,10 @@ import kotlin.Double
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalProbabilitySampler(
+public data class ExperimentalProbabilitySampler(
   /**
    * Configure ratio.
    * If omitted or null, 1.0 is used.
    */
-  internal val ratio: Double? = null,
+  public val ratio: Double? = null,
 )

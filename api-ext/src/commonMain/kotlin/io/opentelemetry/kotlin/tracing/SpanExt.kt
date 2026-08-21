@@ -20,7 +20,8 @@ public fun Span.addLink(span: Span, attributes: AttributesMutator.() -> Unit = {
  * status - generally this will be [StatusData.Ok] unless the operation fails.
  *
  * If an exception is thrown it will be added to the span as an event and the status will be
- * set to [StatusData.Error] with a description of the throwable's message, if any.
+ * set to [StatusData.Error] with a description of the throwable's message, if any. The span is
+ * ended and the exception is then rethrown so the caller can react to it.
  */
 @ExperimentalApi
 public fun Span.wrapOperation(action: () -> StatusData) {
@@ -33,6 +34,7 @@ public fun Span.wrapOperation(action: () -> StatusData) {
             exc.exceptionType()?.let { setStringAttribute("exception.type", it) }
         }
         setStatus(StatusData.Error(exc.message))
+        throw exc
     } finally {
         end()
     }

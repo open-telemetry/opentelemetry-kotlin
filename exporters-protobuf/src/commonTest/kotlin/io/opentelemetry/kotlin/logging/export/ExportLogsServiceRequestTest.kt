@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.factory.hexToByteArray
-import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.FakeTraceFlags
@@ -14,7 +14,7 @@ import kotlin.test.assertNull
 
 class ExportLogsServiceRequestTest {
 
-    private val telemetry = FakeReadableLogRecord(
+    private val telemetry = FakeLogRecordData(
         eventName = "foo",
         spanContext = FakeSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
@@ -28,7 +28,7 @@ class ExportLogsServiceRequestTest {
     fun testProtobufToByteArray() {
         val original = listOf(telemetry)
         val byteArray = original.toProtobufByteArray()
-        val result = byteArray.toReadableLogRecordList()
+        val result = byteArray.toLogRecordDataList()
 
         assertEquals(1, result.size)
         val expected = original[0]
@@ -77,23 +77,23 @@ class ExportLogsServiceRequestTest {
         )
 
         severityLevels.forEach { severity ->
-            val record = FakeReadableLogRecord(severityNumber = severity)
+            val record = FakeLogRecordData(severityNumber = severity)
             val byteArray = listOf(record).toProtobufByteArray()
-            val result = byteArray.toReadableLogRecordList()
+            val result = byteArray.toLogRecordDataList()
             assertEquals(severity, result[0].severityNumber, "Failed for severity: $severity")
         }
     }
 
     @Test
     fun testNullRoundTrip() {
-        val record = FakeReadableLogRecord(
+        val record = FakeLogRecordData(
             severityNumber = null,
             severityText = null,
             body = null,
             eventName = null,
         )
         val byteArray = listOf(record).toProtobufByteArray()
-        val result = byteArray.toReadableLogRecordList()
+        val result = byteArray.toLogRecordDataList()
         assertNull(result[0].severityNumber)
         assertNull(result[0].severityText)
         assertNull(result[0].body)
@@ -102,14 +102,14 @@ class ExportLogsServiceRequestTest {
 
     @Test
     fun testEventNameRoundTrip() {
-        val record = FakeReadableLogRecord(eventName = "test-event")
+        val record = FakeLogRecordData(eventName = "test-event")
         val byteArray = listOf(record).toProtobufByteArray()
-        val result = byteArray.toReadableLogRecordList()
+        val result = byteArray.toLogRecordDataList()
         assertEquals("test-event", result[0].eventName)
     }
 
     private fun assertSpanContextMatches(
-        expectedContext: FakeSpanContext,
+        expectedContext: SpanContext,
         actualContext: SpanContext
     ) {
         assertEquals(expectedContext.traceId, actualContext.traceId)

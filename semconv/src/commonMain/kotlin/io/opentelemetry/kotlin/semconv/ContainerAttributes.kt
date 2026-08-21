@@ -59,7 +59,7 @@ object ContainerAttributes {
     /**
     * <p>Runtime specific image identifier. Usually a hash algorithm followed by a UUID.</p>
     * <p>Notes:</p>
-    * <p>Docker defines a sha256 of the image id; <c>container.image.id</c> corresponds to the <c>Image</c> field from the Docker container inspect <a href="https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Container/operation/ContainerInspect">API</a> endpoint.
+    * <p>Docker defines a sha256 of the image ID; <c>container.image.id</c> corresponds to the <c>Image</c> field from the Docker container inspect <a href="https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Container/operation/ContainerInspect">API</a> endpoint.
     * K8s defines a link to the container registry repository with digest <c>"imageID": "registry.azurecr.io /namespace/service/dockerfile@sha256:bdeabd40c3a8a492eaf9e8e44d0ebbb84bac7ee25ac0cf8a7159d25f62555625"</c>.
     * The ID is assigned by the container runtime and can vary in different environments. Consider using <c>oci.manifest.digest</c> if it is important to identify the same image in different environments/runtimes.</p>
     */
@@ -72,7 +72,7 @@ object ContainerAttributes {
     const val CONTAINER_IMAGE_NAME: String = "container.image.name"
 
     /**
-    * <p>Repo digests of the container image as provided by the container runtime.</p>
+    * <p>Repository digests of the container image as provided by the container runtime.</p>
     * <p>Notes:</p>
     * <p><a href="https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Image/operation/ImageInspect">Docker</a> and <a href="https://github.com/kubernetes/cri-api/blob/c75ef5b473bbe2d0a4fc92f82235efd665ea8e9f/pkg/apis/runtime/v1/api.proto#L1237-L1238">CRI</a> report those under the <c>RepoDigests</c> field.</p>
     */
@@ -86,7 +86,7 @@ object ContainerAttributes {
     /**
     * <p>Container labels, <c><key></c> being the label name, the value being the label value.</p>
     * <p>Notes:</p>
-    * <p>For example, a docker container label <c>app</c> with value <c>nginx</c> SHOULD be recorded as the <c>container.label.app</c> attribute with value <c>"nginx"</c>.</p>
+    * <p>For example, a Docker container label <c>app</c> with value <c>nginx</c> SHOULD be recorded as the <c>container.label.app</c> attribute with value <c>"nginx"</c>.</p>
     */
     @IncubatingApi
     const val CONTAINER_LABEL: String = "container.label"

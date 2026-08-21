@@ -50,8 +50,8 @@ object LogAttributes {
     /**
     * <p>A unique identifier for the Log Record.</p>
     * <p>Notes:</p>
-    * <p>If an id is provided, other log records with the same id will be considered duplicates and can be removed safely. This means, that two distinguishable log records MUST have different values.
-    * The id MAY be an <a href="https://github.com/ulid/spec">Universally Unique Lexicographically Sortable Identifier (ULID)</a>, but other identifiers (e.g. UUID) may be used as needed.</p>
+    * <p>If an ID is provided, other log records with the same ID will be considered duplicates and can be removed safely. This means, that two distinguishable log records MUST have different values.
+    * The ID MAY be an <a href="https://github.com/ulid/spec">Universally Unique Lexicographically Sortable Identifier (ULID)</a>, but other identifiers (e.g. UUID) may be used as needed.</p>
     */
     @IncubatingApi
     const val LOG_RECORD_UID: String = "log.record.uid"

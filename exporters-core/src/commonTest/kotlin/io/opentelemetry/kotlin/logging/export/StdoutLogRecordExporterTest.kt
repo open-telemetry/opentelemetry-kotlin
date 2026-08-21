@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.export.FakeLogExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.loadTestFixture
 import io.opentelemetry.kotlin.logging.SeverityNumber
-import io.opentelemetry.kotlin.logging.model.FakeReadableLogRecord
+import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import kotlinx.coroutines.test.runTest
@@ -21,7 +21,7 @@ internal class StdoutLogRecordExporterTest {
             output.add(it)
         }
 
-        val logRecord = FakeReadableLogRecord(
+        val logRecord = FakeLogRecordData(
             body = null,
             timestamp = null,
             observedTimestamp = null,
@@ -47,7 +47,7 @@ internal class StdoutLogRecordExporterTest {
             output.add(it)
         }
 
-        val logRecord = FakeReadableLogRecord(
+        val logRecord = FakeLogRecordData(
             timestamp = 1000000000L,
             observedTimestamp = 1000000100L,
             severityNumber = SeverityNumber.INFO,
@@ -89,7 +89,7 @@ internal class StdoutLogRecordExporterTest {
         val exporter = StdoutLogRecordExporter(output::add)
         exporter.shutdown()
 
-        val logRecord = FakeReadableLogRecord()
+        val logRecord = FakeLogRecordData()
         val result = exporter.export(listOf(logRecord))
         assertEquals(OperationResultCode.Failure, result)
         assertEquals(0, output.size)

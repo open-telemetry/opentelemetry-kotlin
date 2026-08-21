@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
@@ -13,6 +14,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 internal class SpanEndTest {
@@ -37,6 +40,7 @@ internal class SpanEndTest {
             spanLimitConfig = fakeSpanLimitsConfig,
             idGenerator = FakeIdGenerator(),
             shutdownState = MutableShutdownState(),
+            sdkErrorHandler = NoopSdkErrorHandler,
         )
     }
 
@@ -106,6 +110,49 @@ internal class SpanEndTest {
         assertEquals(1, startCallCount)
         assertEquals(1, endCallCount)
         assertSpanTimestamp(clock.now())
+    }
+
+    @Test
+    fun testOnEndReceivesImmutableSnapshot() {
+        tracer.startSpan("test") {
+            setStringAttribute("key", "value")
+        }.end()
+
+        // SpanDataImpl holds plain data rather than a reference to the span model. The
+        // model, its lock, and its attributes are not retained once a span ends
+        val endedSpan = processor.endCalls.single()
+        assertIs<SpanDataImpl>(endedSpan)
+
+        // already a snapshot
+        assertSame(endedSpan, endedSpan.toSpanData())
+
+        // ending callback receives the live span
+        val endingSpan: Any = processor.endingCalls.single()
+        assertFalse(endedSpan === endingSpan)
+    }
+
+    @Test
+    fun testOnEndSnapshotCapturesOnEndingChanges() {
+        processor.endingAction = { rwSpan ->
+            rwSpan.setName("renamed")
+            rwSpan.setStringAttribute("key", "value")
+        }
+
+        tracer.startSpan("test").end()
+
+        with(processor.endCalls.single()) {
+            assertEquals("renamed", name)
+            assertEquals(mapOf("key" to "value"), attributes)
+        }
+    }
+
+    @Test
+    fun testOnEndNotInvokedWhenNotRequired() {
+        processor.endRequired = false
+
+        tracer.startSpan("test").end()
+
+        assertTrue(processor.endCalls.isEmpty())
     }
 
     private fun assertSpanTimestamp(timestamp: Long) {

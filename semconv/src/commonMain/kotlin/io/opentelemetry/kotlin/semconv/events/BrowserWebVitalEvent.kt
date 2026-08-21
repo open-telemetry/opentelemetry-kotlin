@@ -17,6 +17,30 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 @ExperimentalApi
 @IncubatingApi
 class BrowserWebVitalEvent(
+    /**
+    * <p>The delta between the current value and the last-reported value. See <a href="https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#report-only-the-delta-of-changes">delta</a>.</p>
+    */
+    val browserWebVitalDelta: Double,
+    /**
+    * <p>A unique ID representing this particular metric instance.</p>
+    */
+    val browserWebVitalId: String,
+    /**
+    * <p>Name of the web vital.</p>
+    */
+    val browserWebVitalName: String,
+    /**
+    * <p>The type of navigation, as reported by the <a href="https://developer.mozilla.org/docs/Web/API/PerformanceNavigationTiming/type">Navigation Timing API</a>, with additional values reported by the web-vitals library.</p>
+    */
+    val browserWebVitalNavigationType: String? = null,
+    /**
+    * <p>The rating of the web vital value against the "good", "needs improvement", and "poor" thresholds defined for the metric.</p>
+    */
+    val browserWebVitalRating: String? = null,
+    /**
+    * <p>Value of the web vital.</p>
+    */
+    val browserWebVitalValue: Double,
 ) : OpenTelemetryEvent {
 
     override fun emit(
@@ -26,6 +50,12 @@ class BrowserWebVitalEvent(
         logger.emit(
             eventName = "browser.web_vital",
         ) {
+            setDoubleAttribute("browser.web_vital.delta", browserWebVitalDelta)
+            setStringAttribute("browser.web_vital.id", browserWebVitalId)
+            setStringAttribute("browser.web_vital.name", browserWebVitalName)
+            browserWebVitalNavigationType?.let { setStringAttribute("browser.web_vital.navigation_type", it) }
+            browserWebVitalRating?.let { setStringAttribute("browser.web_vital.rating", it) }
+            setDoubleAttribute("browser.web_vital.value", browserWebVitalValue)
             attributes?.invoke(this)
         }
     }

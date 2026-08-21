@@ -82,7 +82,7 @@ internal class LogProcessorOnEmitTest {
             assertEquals("bar", resource.attributes["resource.foo"])
             assertEquals("2cc2b48c50aefe53b3974ed91e6b4ea9", spanContext.traceId)
             assertEquals("e77bcc2f537f0b02", spanContext.spanId)
-            assertEquals("01", spanContext.traceFlags.hex)
+            assertEquals("03", spanContext.traceFlags.hex)
             assertEquals(emptyMap(), spanContext.traceState.asMap())
             assertTrue(spanContext.isValid)
         }

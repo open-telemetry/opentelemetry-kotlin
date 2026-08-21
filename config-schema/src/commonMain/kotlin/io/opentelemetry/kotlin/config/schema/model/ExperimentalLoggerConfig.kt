@@ -6,12 +6,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalLoggerConfig(
+public data class ExperimentalLoggerConfig(
   /**
    * Configure if the logger is enabled or not.
    * If omitted or null, true is used.
    */
-  internal val enabled: Boolean? = null,
+  public val enabled: Boolean? = null,
   /**
    * Configure severity filtering.
    * Log records with an non-zero (i.e. unspecified) severity number which is less than minimum_severity are not processed.
@@ -43,12 +43,12 @@ internal data class ExperimentalLoggerConfig(
    * If omitted, severity filtering is not applied.
    */
   @SerialName("minimum_severity")
-  internal val minimumSeverity: SeverityNumber? = null,
+  public val minimumSeverity: SeverityNumber? = null,
   /**
    * Configure trace based filtering.
    * If true, log records associated with unsampled trace contexts traces are not processed. If false, or if a log record is not associated with a trace context, trace based filtering is not applied.
    * If omitted or null, trace based filtering is not applied.
    */
   @SerialName("trace_based")
-  internal val traceBased: Boolean? = null,
+  public val traceBased: Boolean? = null,
 )

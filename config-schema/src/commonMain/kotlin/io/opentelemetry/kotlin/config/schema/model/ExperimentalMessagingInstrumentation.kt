@@ -4,7 +4,7 @@ package io.opentelemetry.kotlin.config.schema.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalMessagingInstrumentation(
+public data class ExperimentalMessagingInstrumentation(
   /**
    * Configure messaging semantic convention version and migration behavior.
    *
@@ -13,5 +13,5 @@ internal data class ExperimentalMessagingInstrumentation(
    * See messaging semantic conventions: https://opentelemetry.io/docs/specs/semconv/messaging/
    * If omitted, uses the general stability_opt_in_list setting, or instrumentations continue emitting their default semantic convention version if not set.
    */
-  internal val semconv: ExperimentalSemconvConfig? = null,
+  public val semconv: ExperimentalSemconvConfig? = null,
 )

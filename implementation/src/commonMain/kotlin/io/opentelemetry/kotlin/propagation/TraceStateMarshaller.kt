@@ -16,52 +16,18 @@ internal class TraceStateMarshaller(internal val traceState: TraceState) {
         traceState.asMap()
     }
 
-    fun encode(): String = buildString {
-        state.forEach {
-            if (isNotEmpty()) {
-                append(LIST_MEMBER_SEPARATOR)
-            }
-            append(it.key)
-            append(KEY_VALUE_SEPARATOR)
-            append(it.value)
-        }
-    }
+    fun encode(): String = W3CTraceStateCodec.encode(state)
 
     companion object {
-        private const val LIST_MEMBER_SEPARATOR = ','
-        private const val KEY_VALUE_SEPARATOR = '='
-        private const val OWS_SPACE = ' '
-        private const val OWS_HTAB = '\t'
-
         fun decode(header: String, traceStateFactory: TraceStateFactory): TraceStateMarshaller {
             var state = traceStateFactory.default
-            val seen = mutableSetOf<String>()
-            val split = header.split(LIST_MEMBER_SEPARATOR)
-            split.forEach { raw ->
-                val parsed = parseMember(raw, seen) ?: return@forEach
-                val (key, value) = parsed
+            W3CTraceStateCodec.decode(header).forEach { (key, value) ->
                 val next = state.put(key, value)
                 if (next.get(key) == value) {
                     state = next
                 }
             }
             return TraceStateMarshaller(state)
-        }
-
-        private fun parseMember(raw: String, seen: MutableSet<String>): Pair<String, String>? {
-            val member = raw.trim(OWS_SPACE, OWS_HTAB)
-            if (member.isEmpty()) {
-                return null
-            }
-            val eq = member.indexOf(KEY_VALUE_SEPARATOR)
-            if (eq <= 0 || eq == member.length - 1) {
-                return null
-            }
-            val key = member.substring(0, eq)
-            if (!seen.add(key)) {
-                return null
-            }
-            return key to member.substring(eq + 1)
         }
     }
 }

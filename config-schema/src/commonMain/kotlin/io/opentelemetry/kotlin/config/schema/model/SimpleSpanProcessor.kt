@@ -4,10 +4,10 @@ package io.opentelemetry.kotlin.config.schema.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class SimpleSpanProcessor(
+public data class SimpleSpanProcessor(
   /**
    * Configure exporter.
    * Property is required and must be non-null.
    */
-  internal val exporter: SpanExporter,
+  public val exporter: SpanExporter,
 )

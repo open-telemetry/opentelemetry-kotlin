@@ -81,7 +81,7 @@ object OsAttributes {
         DRAGONFLYBSD("dragonflybsd"),
 
         /**
-        * <p>HP-UX (Hewlett Packard Unix)</p>
+        * <p>HP-UX (Hewlett Packard UNIX)</p>
         */
         HPUX("hpux"),
 

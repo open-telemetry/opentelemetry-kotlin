@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
@@ -28,6 +29,7 @@ internal class BatchSpanProcessorImplTest {
             scheduleDelayMs = 1,
             exportTimeoutMs = 1000,
             maxExportBatchSize = 10,
+            sdkErrorHandler = NoopSdkErrorHandler,
         )
     }
 

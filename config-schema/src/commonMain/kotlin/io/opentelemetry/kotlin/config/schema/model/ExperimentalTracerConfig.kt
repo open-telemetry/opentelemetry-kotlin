@@ -5,10 +5,10 @@ import kotlin.Boolean
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalTracerConfig(
+public data class ExperimentalTracerConfig(
   /**
    * Configure if the tracer is enabled or not.
    * If omitted, true is used.
    */
-  internal val enabled: Boolean? = null,
+  public val enabled: Boolean? = null,
 )

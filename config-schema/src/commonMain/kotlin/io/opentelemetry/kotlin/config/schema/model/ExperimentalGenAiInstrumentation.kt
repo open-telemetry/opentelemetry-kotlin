@@ -4,7 +4,7 @@ package io.opentelemetry.kotlin.config.schema.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalGenAiInstrumentation(
+public data class ExperimentalGenAiInstrumentation(
   /**
    * Configure GenAI semantic convention version and migration behavior.
    *
@@ -13,5 +13,5 @@ internal data class ExperimentalGenAiInstrumentation(
    * See GenAI semantic conventions: https://opentelemetry.io/docs/specs/semconv/gen-ai/
    * If omitted, uses the general stability_opt_in_list setting, or instrumentations continue emitting their default semantic convention version if not set.
    */
-  internal val semconv: ExperimentalSemconvConfig? = null,
+  public val semconv: ExperimentalSemconvConfig? = null,
 )

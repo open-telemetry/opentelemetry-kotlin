@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.resource
 
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
+import io.opentelemetry.kotlin.attributes.AnyValue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -68,5 +69,40 @@ internal class ResourceAdapterTest {
         assertEquals(listOf(1L, 2L), attrs["longList"])
         assertEquals(listOf(1.0, 2.0), attrs["doubleList"])
         assertEquals(listOf(true, false), attrs["boolList"])
+    }
+
+    @Test
+    fun testAsNewResourceWithAnyValue() {
+        val base = ResourceAdapter(OtelJavaResource.builder().put("str", "hello").build())
+
+        val result = base.asNewResource {
+            attributes["any"] = AnyValue.LongValue(3)
+            attributes["unrepresentable"] = AnyValue.MapValue(mapOf("k" to AnyValue.LongValue(1)))
+            attributes["bytes"] = byteArrayOf(1, 2)
+        }
+
+        val attrs = result.attributes
+        assertEquals("hello", attrs["str"])
+        // Flattened to a long rather than serialized via AnyValue.toString().
+        assertEquals(3L, attrs["any"])
+        // Variants Java OTel cannot represent are dropped, as is a ByteArray.
+        assertNull(attrs["unrepresentable"])
+        assertNull(attrs["bytes"])
+    }
+
+    @Test
+    fun testMergePreservesTypes() {
+        val base = ResourceAdapter(OtelJavaResource.builder().put("long", 42L).build())
+        val other = ResourceAdapter(
+            OtelJavaResource.builder()
+                .put("double", 42.0)
+                .put(AttributeKey.doubleArrayKey("doubleList"), listOf(1.0, 2.0))
+                .build()
+        )
+
+        val merged = base.merge(other)
+        assertEquals(42L, merged.attributes["long"])
+        assertEquals(42.0, merged.attributes["double"])
+        assertEquals(listOf(1.0, 2.0), merged.attributes["doubleList"])
     }
 }

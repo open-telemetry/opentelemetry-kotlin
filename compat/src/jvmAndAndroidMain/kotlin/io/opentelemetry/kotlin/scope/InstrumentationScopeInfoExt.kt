@@ -21,3 +21,15 @@ internal fun OtelJavaInstrumentationScopeInfo.toOtelKotlinInstrumentationScopeIn
         schemaUrl = schemaUrl,
         attributes = attributes.convertToMap()
     )
+
+/**
+ * Builds the cache key used by the provider adapters to dedupe tracers/loggers/meters.
+ *
+ * Scope attributes are deliberately excluded because opentelemetry-java doesn't currently support
+ * them.
+ */
+internal fun scopeCacheKey(
+    name: String,
+    version: String?,
+    schemaUrl: String?
+): InstrumentationScopeInfo = InstrumentationScopeInfoImpl(name, version, schemaUrl, emptyMap())

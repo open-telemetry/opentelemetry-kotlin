@@ -22,7 +22,7 @@ object McpAttributes {
     const val MCP_PROTOCOL_VERSION: String = "mcp.protocol.version"
 
     /**
-    * <p>The value of the resource uri.</p>
+    * <p>The value of the resource URI.</p>
     * <p>Notes:</p>
     * <p>This is a URI of the resource provided in the following requests or notifications: <c>resources/read</c>, <c>resources/subscribe</c>, <c>resources/unsubscribe</c>, or <c>notifications/resources/updated</c>.</p>
     */

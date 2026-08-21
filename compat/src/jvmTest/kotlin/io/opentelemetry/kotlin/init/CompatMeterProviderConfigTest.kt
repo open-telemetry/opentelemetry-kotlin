@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.clock.FakeClock
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 
 internal class CompatMeterProviderConfigTest {
@@ -11,9 +12,9 @@ internal class CompatMeterProviderConfigTest {
     private val clock = FakeClock()
 
     @Test
-    fun `default service name is unknown_service`() {
+    fun `service name is unset by default`() {
         val cfg = CompatMeterProviderConfig(clock)
-        assertEquals("unknown_service", cfg.serviceName)
+        assertNull(cfg.serviceName)
     }
 
     @Test

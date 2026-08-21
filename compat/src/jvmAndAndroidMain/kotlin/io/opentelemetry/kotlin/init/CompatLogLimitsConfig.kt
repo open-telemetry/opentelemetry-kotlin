@@ -6,19 +6,15 @@ import io.opentelemetry.kotlin.aliases.OtelJavaLogLimits
 @ExperimentalApi
 internal class CompatLogLimitsConfig : LogLimitsConfigDsl {
 
-    private val builder = OtelJavaLogLimits.builder()
+    override var attributeCountLimit: Int? = null
+    override var attributeValueLengthLimit: Int? = null
 
-    override var attributeCountLimit: Int = DEFAULT_ATTR_LIMIT
-        set(value) {
-            field = value
-            builder.setMaxNumberOfAttributes(value)
-        }
-
-    override var attributeValueLengthLimit: Int = DEFAULT_ATTR_VALUE_LENGTH_LIMIT
-        set(value) {
-            field = value
-            builder.setMaxAttributeValueLength(value)
-        }
-
-    fun build(): OtelJavaLogLimits = builder.build()
+    /**
+     * Only the limits that were configured are set, so anything left unset falls back to the Java
+     * SDK's own default.
+     */
+    fun build(): OtelJavaLogLimits = OtelJavaLogLimits.builder().apply {
+        attributeCountLimit?.let(::setMaxNumberOfAttributes)
+        attributeValueLengthLimit?.let(::setMaxAttributeValueLength)
+    }.build()
 }

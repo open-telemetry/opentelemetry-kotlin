@@ -309,7 +309,7 @@ internal class W3CBaggagePropagatorTest {
         override fun keys(carrier: Map<String, List<String>>): Collection<String> = carrier.keys
         override fun get(carrier: Map<String, List<String>>?, key: String): String? =
             carrier?.get(key)?.firstOrNull()
-        override fun getAll(carrier: Map<String, List<String>>, key: String): List<String> =
-            carrier[key].orEmpty()
+        override fun getAll(carrier: Map<String, List<String>>?, key: String): List<String> =
+            carrier?.get(key).orEmpty()
     }
 }

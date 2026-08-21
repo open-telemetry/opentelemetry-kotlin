@@ -64,7 +64,7 @@ internal class SpanContextFactoryImpl(
 
     private fun isValidTraceId(traceId: String): Boolean {
         // Must be 32 hex characters (16 bytes)
-        if (traceId.length != 32) {
+        if (traceId.length != TRACE_ID_HEX_LENGTH) {
             return false
         }
 
@@ -74,12 +74,12 @@ internal class SpanContextFactoryImpl(
         }
 
         // Must have at least one non-zero byte (not all zeros)
-        return traceId != "00000000000000000000000000000000"
+        return !traceId.isAllZerosHex()
     }
 
     private fun isValidSpanId(spanId: String): Boolean {
         // Must be 16 hex characters (8 bytes)
-        if (spanId.length != 16) {
+        if (spanId.length != SPAN_ID_HEX_LENGTH) {
             return false
         }
 
@@ -89,6 +89,6 @@ internal class SpanContextFactoryImpl(
         }
 
         // Must have at least one non-zero byte (not all zeros)
-        return spanId != "0000000000000000"
+        return !spanId.isAllZerosHex()
     }
 }

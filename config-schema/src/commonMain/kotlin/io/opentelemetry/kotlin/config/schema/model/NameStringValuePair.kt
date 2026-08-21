@@ -5,15 +5,15 @@ import kotlin.String
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class NameStringValuePair(
+public data class NameStringValuePair(
   /**
    * The name of the pair.
    * Property is required and must be non-null.
    */
-  internal val name: String,
+  public val name: String,
   /**
    * The value of the pair.
    * Property must be present, but if null the behavior is dependent on usage context.
    */
-  internal val `value`: String? = null,
+  public val `value`: String? = null,
 )

@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
@@ -47,7 +48,7 @@ internal class PropagatorConfigImplTest {
     @Test
     fun `w3cTraceContext routes through delegate once factories are installed`() {
         val config = PropagatorConfigImpl().apply { w3cTraceContext() }
-        config.installFactories(traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory)
+        config.installFactories(traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory, NoopSdkErrorHandler)
         val propagator = config.buildPropagator()
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
 

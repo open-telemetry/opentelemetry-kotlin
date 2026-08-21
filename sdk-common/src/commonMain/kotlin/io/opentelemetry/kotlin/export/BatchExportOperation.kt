@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.export
 
+import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 
@@ -20,10 +21,12 @@ public fun <T> batchExportOperation(
             success = success && exportResult == OperationResultCode.Success
         } catch (exc: Throwable) {
             success = false
-            sdkErrorHandler.onUserCodeError(
-                exc,
-                "Export operation failed",
-                SdkErrorSeverity.WARNING
+            sdkErrorHandler.onError(
+                SdkError.UserCodeError(
+                    exc,
+                    "Export operation failed",
+                    SdkErrorSeverity.WARNING
+                )
             )
         }
     }
@@ -50,10 +53,12 @@ public suspend fun <T> batchExportOperationSuspend(
             success = success && exportResult == OperationResultCode.Success
         } catch (exc: Throwable) {
             success = false
-            sdkErrorHandler.onUserCodeError(
-                exc,
-                "Export operation failed",
-                SdkErrorSeverity.WARNING
+            sdkErrorHandler.onError(
+                SdkError.UserCodeError(
+                    exc,
+                    "Export operation failed",
+                    SdkErrorSeverity.WARNING
+                )
             )
         }
     }

@@ -30,7 +30,7 @@ object DeploymentAttributes {
     const val DEPLOYMENT_ENVIRONMENT_NAME: String = "deployment.environment.name"
 
     /**
-    * <p>The id of the deployment.</p>
+    * <p>The ID of the deployment.</p>
     */
     @IncubatingApi
     const val DEPLOYMENT_ID: String = "deployment.id"

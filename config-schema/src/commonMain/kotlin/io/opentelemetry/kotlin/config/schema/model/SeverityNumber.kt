@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal enum class SeverityNumber {
+public enum class SeverityNumber {
   @SerialName("trace")
   TRACE,
   @SerialName("trace2")

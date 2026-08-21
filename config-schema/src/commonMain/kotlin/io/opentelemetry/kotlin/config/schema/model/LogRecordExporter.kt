@@ -5,28 +5,28 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class LogRecordExporter(
+public data class LogRecordExporter(
   /**
    * Configure exporter to be OTLP with HTTP transport.
    * If omitted, ignore.
    */
   @SerialName("otlp_http")
-  internal val otlpHttp: OtlpHttpExporter? = null,
+  public val otlpHttp: OtlpHttpExporter? = null,
   /**
    * Configure exporter to be OTLP with gRPC transport.
    * If omitted, ignore.
    */
   @SerialName("otlp_grpc")
-  internal val otlpGrpc: OtlpGrpcExporter? = null,
+  public val otlpGrpc: OtlpGrpcExporter? = null,
   /**
    * Configure exporter to be OTLP with file transport.
    * If omitted, ignore.
    */
   @SerialName("otlp_file/development")
-  internal val otlpFileDevelopment: ExperimentalOtlpFileExporter? = null,
+  public val otlpFileDevelopment: ExperimentalOtlpFileExporter? = null,
   /**
    * Configure exporter to be console.
    * If omitted, ignore.
    */
-  internal val console: ConsoleExporter? = null,
+  public val console: ConsoleExporter? = null,
 )

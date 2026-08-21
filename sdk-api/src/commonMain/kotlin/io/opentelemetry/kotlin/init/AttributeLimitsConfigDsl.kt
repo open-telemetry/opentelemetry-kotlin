@@ -14,10 +14,10 @@ public interface AttributeLimitsConfigDsl {
     /**
      * The maximum number of attributes
      */
-    public var attributeCountLimit: Int
+    public var attributeCountLimit: Int?
 
     /**
      * The maximum length of an attribute value
      */
-    public var attributeValueLengthLimit: Int
+    public var attributeValueLengthLimit: Int?
 }

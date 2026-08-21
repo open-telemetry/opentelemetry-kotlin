@@ -6,49 +6,49 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ExperimentalGeneralInstrumentation(
+public data class ExperimentalGeneralInstrumentation(
   /**
    * Configure instrumentations following the http semantic conventions.
    * See http semantic conventions: https://opentelemetry.io/docs/specs/semconv/http/
    * If omitted, defaults as described in ExperimentalHttpInstrumentation are used.
    */
-  internal val http: ExperimentalHttpInstrumentation? = null,
+  public val http: ExperimentalHttpInstrumentation? = null,
   /**
    * Configure instrumentations following the code semantic conventions.
    * See code semantic conventions: https://opentelemetry.io/docs/specs/semconv/registry/attributes/code/
    * If omitted, defaults as described in ExperimentalCodeInstrumentation are used.
    */
-  internal val code: ExperimentalCodeInstrumentation? = null,
+  public val code: ExperimentalCodeInstrumentation? = null,
   /**
    * Configure instrumentations following the database semantic conventions.
    * See database semantic conventions: https://opentelemetry.io/docs/specs/semconv/database/
    * If omitted, defaults as described in ExperimentalDbInstrumentation are used.
    */
-  internal val db: ExperimentalDbInstrumentation? = null,
+  public val db: ExperimentalDbInstrumentation? = null,
   /**
    * Configure instrumentations following the GenAI semantic conventions.
    * See GenAI semantic conventions: https://opentelemetry.io/docs/specs/semconv/gen-ai/
    * If omitted, defaults as described in ExperimentalGenAiInstrumentation are used.
    */
   @SerialName("gen_ai")
-  internal val genAi: ExperimentalGenAiInstrumentation? = null,
+  public val genAi: ExperimentalGenAiInstrumentation? = null,
   /**
    * Configure instrumentations following the messaging semantic conventions.
    * See messaging semantic conventions: https://opentelemetry.io/docs/specs/semconv/messaging/
    * If omitted, defaults as described in ExperimentalMessagingInstrumentation are used.
    */
-  internal val messaging: ExperimentalMessagingInstrumentation? = null,
+  public val messaging: ExperimentalMessagingInstrumentation? = null,
   /**
    * Configure instrumentations following the RPC semantic conventions.
    * See RPC semantic conventions: https://opentelemetry.io/docs/specs/semconv/rpc/
    * If omitted, defaults as described in ExperimentalRpcInstrumentation are used.
    */
-  internal val rpc: ExperimentalRpcInstrumentation? = null,
+  public val rpc: ExperimentalRpcInstrumentation? = null,
   /**
    * Configure general sanitization options.
    * If omitted, defaults as described in ExperimentalSanitization are used.
    */
-  internal val sanitization: ExperimentalSanitization? = null,
+  public val sanitization: ExperimentalSanitization? = null,
   /**
    * Configure semantic convention stability opt-in as a comma-separated list.
    * This property follows the format and semantics of the OTEL_SEMCONV_STABILITY_OPT_IN environment variable.
@@ -80,5 +80,5 @@ internal data class ExperimentalGeneralInstrumentation(
    * If omitted or null, no opt-in is configured and instrumentations continue emitting their default semantic convention version.
    */
   @SerialName("stability_opt_in_list")
-  internal val stabilityOptInList: String? = null,
+  public val stabilityOptInList: String? = null,
 )

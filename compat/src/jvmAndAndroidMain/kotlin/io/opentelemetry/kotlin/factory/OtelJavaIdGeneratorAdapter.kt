@@ -11,4 +11,5 @@ internal class OtelJavaIdGeneratorAdapter(
 ) : OtelJavaIdGenerator {
     override fun generateSpanId(): String = impl.generateSpanIdBytes().toHexString()
     override fun generateTraceId(): String = impl.generateTraceIdBytes().toHexString()
+    override fun generatesRandomTraceIds(): Boolean = impl.generatesRandomTraceIds
 }

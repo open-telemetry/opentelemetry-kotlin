@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.logging
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 
@@ -9,7 +8,6 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
  *
  * https://opentelemetry.io/docs/specs/otel/logs/api/#loggerprovider
  */
-@ExperimentalApi
 @ThreadSafe
 public interface LoggerProvider {
 

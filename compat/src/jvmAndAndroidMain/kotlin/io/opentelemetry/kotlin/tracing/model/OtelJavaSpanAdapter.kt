@@ -10,6 +10,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaStatusCode
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
+import io.opentelemetry.kotlin.attributes.setTypedAttribute
+import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
@@ -18,15 +20,13 @@ import java.util.concurrent.TimeUnit
 internal class OtelJavaSpanAdapter(private val span: Span) : OtelJavaSpan, OtelJavaImplicitContextKeyed {
 
     override fun <T : Any?> setAttribute(key: OtelJavaAttributeKey<T?>, value: T?): OtelJavaSpan {
-        span.setStringAttribute(key.key, value.toString())
+        value?.let { span.setTypedAttribute(key.key, it) }
         return this
     }
 
     override fun addEvent(name: String, attributes: OtelJavaAttributes): OtelJavaSpan {
         span.addEvent(name) {
-            attributes.convertToMap().forEach {
-                setStringAttribute(it.key, it.value.toString())
-            }
+            setTypedAttributes(attributes.convertToMap())
         }
         return this
     }
@@ -39,9 +39,7 @@ internal class OtelJavaSpanAdapter(private val span: Span) : OtelJavaSpan, OtelJ
     ): OtelJavaSpan {
         val time = unit.toNanos(timestamp)
         span.addEvent(name, time) {
-            attributes.convertToMap().forEach {
-                setStringAttribute(it.key, it.value.toString())
-            }
+            setTypedAttributes(attributes.convertToMap())
         }
         return this
     }
@@ -51,9 +49,7 @@ internal class OtelJavaSpanAdapter(private val span: Span) : OtelJavaSpan, OtelJ
         attributes: OtelJavaAttributes
     ): OtelJavaSpan {
         span.addLink(SpanContextAdapter(spanContext)) {
-            attributes.convertToMap().forEach {
-                setStringAttribute(it.key, it.value.toString())
-            }
+            setTypedAttributes(attributes.convertToMap())
         }
         return this
     }
@@ -69,9 +65,7 @@ internal class OtelJavaSpanAdapter(private val span: Span) : OtelJavaSpan, OtelJ
     ): OtelJavaSpan {
         span.addEvent("exception") {
             setExceptionAttributes(exception)
-            additionalAttributes.convertToMap().forEach {
-                setStringAttribute(it.key, it.value.toString())
-            }
+            setTypedAttributes(additionalAttributes.convertToMap())
         }
         return this
     }
