@@ -78,13 +78,18 @@ internal class DeserializedSpanContext(
     override val traceId: String by lazy { traceIdBytes.toHexString() }
     override val spanId: String by lazy { spanIdBytes.toHexString() }
     override val traceFlags: TraceFlags = DeserializedTraceFlags(flags and 0xFF)
-    override val isValid: Boolean by lazy { traceId != "0".repeat(32) && spanId != "0".repeat(16) }
+    override val isValid: Boolean by lazy { traceId != INVALID_TRACE_ID && spanId != INVALID_SPAN_ID }
     override val traceState: TraceState by lazy {
         DeserializedTraceState(W3CTraceStateCodec.decode(traceStateString))
     }
+
+    private companion object {
+        private const val INVALID_TRACE_ID = "00000000000000000000000000000000"
+        private const val INVALID_SPAN_ID = "0000000000000000"
+    }
 }
 
-private class DeserializedTraceFlags(private val value: Int) : TraceFlags {
+private class DeserializedTraceFlags(value: Int) : TraceFlags {
     override val isSampled: Boolean = (value and 0x01) != 0
     override val isRandom: Boolean = (value and 0x02) != 0
 }
