@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.collections.ReadOnlyListView
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.guardOrDefault
@@ -147,11 +148,13 @@ internal class SpanModel(
 
     private val eventsList = mutableListOf<SpanEventData>()
 
+    private val eventsView: List<SpanEventData> = ReadOnlyListView(eventsList)
+
     private var droppedEventsCountImpl = 0
 
     override val events: List<SpanEventData>
         get() = lock.read {
-            eventsList.toList()
+            eventsView
         }
 
     override val droppedEventsCount: Int
@@ -161,11 +164,13 @@ internal class SpanModel(
 
     private val linksList = initialLinks.toMutableList<SpanLinkData>()
 
+    private val linksView: List<SpanLinkData> = ReadOnlyListView(linksList)
+
     private var droppedLinksCountImpl = initialDroppedLinksCount
 
     override val links: List<SpanLinkData>
         get() = lock.read {
-            linksList.toList()
+            linksView
         }
 
     override val droppedLinksCount: Int
@@ -252,7 +257,7 @@ internal class SpanModel(
 
     override val attributes: Map<String, Any>
         get() = lock.read {
-            attrs.attributes
+            attrs.readOnlyAttributes
         }
 
     override val droppedAttributesCount: Int

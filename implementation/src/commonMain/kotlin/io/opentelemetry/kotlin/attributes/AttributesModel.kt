@@ -1,10 +1,14 @@
 package io.opentelemetry.kotlin.attributes
 
+import io.opentelemetry.kotlin.collections.ReadOnlyMapView
+
 internal class AttributesModel(
     private val attributeLimit: Int = DEFAULT_ATTRIBUTE_LIMIT,
     private val attributeValueLengthLimit: Int = DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
     private val attrs: MutableMap<String, Any> = mutableMapOf()
 ) : AttributesMutator, AttributeContainer {
+
+    internal val readOnlyAttributes: Map<String, Any> = ReadOnlyMapView(attrs)
 
     /**
      * True when [attributeValueLengthLimit] doesn't truncate anything, which is the default.

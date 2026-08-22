@@ -126,7 +126,7 @@ internal class LogRecordModel(
 
     override val attributes: Map<String, Any>
         get() = lock.read {
-            attrs.attributes.toMap()
+            attrs.readOnlyAttributes
         }
 
     override val droppedAttributesCount: Int
@@ -214,7 +214,7 @@ internal class LogRecordModel(
         body,
         eventName,
         spanContext,
-        attributes,
+        attributes.toMap(),
         resource,
         instrumentationScopeInfo,
         droppedAttributesCount
