@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
+import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
@@ -13,6 +14,7 @@ import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryRepositoryImpl
 import io.opentelemetry.kotlin.export.TimeoutTelemetryCloseable
+import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -27,7 +29,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeout
 
 /**
  * Creates a processor that persists telemetry before exporting it. This effectively glues
@@ -143,10 +144,11 @@ internal class PersistingSpanProcessor(
                     repository.delete(record)
                     return@forEach
                 }
-                val result = try {
-                    withTimeout(exportTimeoutMs) { exporter.export(telemetry) }
-                } catch (e: Throwable) {
-                    Failure
+                val result = sdkErrorHandler.guardOrDefaultSuspend(
+                    Failure,
+                    "Persisted export failed",
+                ) {
+                    runWithTimeout(exportTimeoutMs) { exporter.export(telemetry) }
                 }
                 if (result == Success) {
                     repository.delete(record)
