@@ -386,6 +386,21 @@ public abstract interface class io/opentelemetry/kotlin/metrics/data/SumData$Dou
 public abstract interface class io/opentelemetry/kotlin/metrics/data/SumData$LongSumData : io/opentelemetry/kotlin/metrics/data/SumData {
 }
 
+public final class io/opentelemetry/kotlin/metrics/instrument/InstrumentKind : java/lang/Enum {
+	public static final field HISTOGRAM Lio/opentelemetry/kotlin/metrics/instrument/InstrumentKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/instrument/InstrumentKind;
+	public static fun values ()[Lio/opentelemetry/kotlin/metrics/instrument/InstrumentKind;
+}
+
+public final class io/opentelemetry/kotlin/metrics/instrument/InstrumentValueType : java/lang/Enum {
+	public static final field DOUBLE Lio/opentelemetry/kotlin/metrics/instrument/InstrumentValueType;
+	public static final field LONG Lio/opentelemetry/kotlin/metrics/instrument/InstrumentValueType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/instrument/InstrumentValueType;
+	public static fun values ()[Lio/opentelemetry/kotlin/metrics/instrument/InstrumentValueType;
+}
+
 public abstract interface class io/opentelemetry/kotlin/resource/MutableResource {
 	public abstract fun getAttributes ()Ljava/util/Map;
 	public abstract fun getSchemaUrl ()Ljava/lang/String;
