@@ -94,7 +94,8 @@ internal class SpanModel(
 
     override fun setStatus(status: StatusData) {
         mutate("Span.setStatus failed") {
-            if (statusImpl !is StatusData.Ok) {
+            // per the OTel spec, Unset MUST be ignored, and Ok is final once set.
+            if (status !is StatusData.Unset && statusImpl !is StatusData.Ok) {
                 statusImpl = status
             }
         }
