@@ -100,7 +100,7 @@ internal class B3Propagator(
             sdkErrorHandler.reportError(
                 SdkError.ApiMisuse(
                     api = "B3Propagator.extractSingle",
-                    message = "B3 single header has wrong number of parts: $header",
+                    message = "B3 single header has wrong number of parts",
                     severity = SdkErrorSeverity.WARNING,
                 )
             )
@@ -110,7 +110,7 @@ internal class B3Propagator(
             sdkErrorHandler.reportError(
                 SdkError.ApiMisuse(
                     api = "B3Propagator.extractSingle",
-                    message = "B3 invalid traceId in single header: ${parts[0]}",
+                    message = "B3 invalid traceId in single header",
                     severity = SdkErrorSeverity.WARNING,
                 )
             )
@@ -124,7 +124,7 @@ internal class B3Propagator(
             sdkErrorHandler.reportError(
                 SdkError.ApiMisuse(
                     api = "B3Propagator.extractSingle",
-                    message = "B3 invalid spanId in single header: $rawSpanId",
+                    message = "B3 invalid spanId in single header",
                     severity = SdkErrorSeverity.WARNING,
                 )
             )
@@ -143,7 +143,7 @@ internal class B3Propagator(
                 sdkErrorHandler.reportError(
                     SdkError.ApiMisuse(
                         api = "B3Propagator.extractMulti",
-                        message = "B3 invalid traceId in multi header: $rawTraceId",
+                        message = "B3 invalid traceId in multi header",
                         severity = SdkErrorSeverity.WARNING,
                     )
                 )
@@ -157,7 +157,7 @@ internal class B3Propagator(
             sdkErrorHandler.reportError(
                 SdkError.ApiMisuse(
                     api = "B3Propagator.extractMulti",
-                    message = "B3 invalid spanId in multi header: $rawSpanId",
+                    message = "B3 invalid spanId in multi header",
                     severity = SdkErrorSeverity.WARNING,
                 )
             )
