@@ -85,44 +85,58 @@ internal object W3CBaggagePropagator : TextMapPropagator {
 
     private fun decode(header: String): Baggage? {
         var baggage: Baggage = BaggageImpl.EMPTY
-        var currentLength = 0
-        var start = 0
-        var headerFull = false
-        while (start <= header.length && !headerFull) {
-            val comma = header.indexOf(ENTRY_DELIMITER, start)
-            val end = if (comma < 0) {
-                header.length
-            } else {
-                comma
-            }
-            val element = header.substring(start, end).trim(SPACE, HTAB)
-            start = if (comma < 0) {
-                header.length + 1
-            } else {
-                comma + 1
-            }
-            if (element.isNotEmpty() && element.length <= MAX_ENTRY_BYTES) {
-                val separator = if (currentLength == 0) {
-                    0
-                } else {
-                    1
-                }
-                if (currentLength + separator + element.length > MAX_HEADER_BYTES) {
-                    headerFull = true
-                } else {
-                    val parsed = decodeEntry(element)
-                    if (parsed != null) {
-                        currentLength += separator + element.length
-                        baggage = baggage.set(
-                            parsed.key,
-                            parsed.value,
-                            BaggageEntryMetadataImpl(parsed.metadata),
-                        )
-                    }
-                }
-            }
+        val budget = HeaderBudget(MAX_HEADER_BYTES)
+        for (rawElement in header.split(ENTRY_DELIMITER)) {
+            val parsed = parseElementIfFits(rawElement, budget) ?: continue
+            baggage = baggage.set(parsed.key, parsed.value, BaggageEntryMetadataImpl(parsed.metadata))
         }
         return baggage.takeIf { it !== BaggageImpl.EMPTY }
+    }
+
+    /**
+     * Trims and decodes [rawElement], honoring the per-entry size limit and [budget] for the
+     * whole header. Returns `null` for elements that are empty, malformed, or too large.
+     * Malformed entries do not consume any of the header's budget, but an oversized element
+     * permanently exhausts [budget] so later, smaller elements are skipped too -- matching how a
+     * real client would stop appending once the header is full.
+     */
+    private fun parseElementIfFits(rawElement: String, budget: HeaderBudget): ParsedEntry? {
+        val element = rawElement.trim(SPACE, HTAB)
+        if (element.isEmpty() || element.length > MAX_ENTRY_BYTES) {
+            return null
+        }
+        if (!budget.hasRoomFor(element.length)) {
+            budget.exhaust()
+            return null
+        }
+        val parsed = decodeEntry(element) ?: return null
+        budget.reserve(element.length)
+        return parsed
+    }
+
+    /** Tracks how many bytes of [MAX_HEADER_BYTES] remain as baggage entries are accumulated. */
+    private class HeaderBudget(private var remainingBytes: Int) {
+        private var hasEntries = false
+
+        private val separatorBytes: Int
+            get() = when {
+                hasEntries -> 1
+                else -> 0
+            }
+
+        /** Whether an entry of [entryLength] bytes, plus its delimiter, still fits. */
+        fun hasRoomFor(entryLength: Int): Boolean = separatorBytes + entryLength <= remainingBytes
+
+        /** Commits the space for an entry already confirmed to fit via [hasRoomFor]. */
+        fun reserve(entryLength: Int) {
+            remainingBytes -= separatorBytes + entryLength
+            hasEntries = true
+        }
+
+        /** Permanently blocks any further entries from fitting. */
+        fun exhaust() {
+            remainingBytes = 0
+        }
     }
 
     private fun decodeEntry(element: String): ParsedEntry? {
