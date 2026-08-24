@@ -18,7 +18,11 @@ internal class MeterImpl(
         unit: String?,
         description: String?,
     ): DoubleUpDownCounter {
-        val noopMeter = obtainNoopMeterIfInvalid(name) ?: return DoubleUpDownCounterImpl(name, unit, description)
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: return DoubleUpDownCounterImpl(
+            name,
+            sdkErrorHandler.sanitizeInstrumentUnit(unit),
+            description,
+        )
         return noopMeter.createDoubleUpDownCounter(name, unit, description)
     }
 
