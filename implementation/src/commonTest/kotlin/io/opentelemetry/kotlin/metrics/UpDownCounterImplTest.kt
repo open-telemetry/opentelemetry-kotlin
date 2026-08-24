@@ -188,4 +188,21 @@ internal class UpDownCounterImplTest {
         assertEquals(1, handler.apiMisuses.size)
         assertEquals("Instrument.unit", handler.apiMisuses.single().api)
     }
+
+    @Test
+    fun createTruncatesOverLongDescriptionAndReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        val overLongMeter = MeterProviderImpl(
+            MetricsConfig(
+                resource = ResourceImpl(AttributesModel(), null),
+                sdkErrorHandler = handler,
+            )
+        ).getMeter("test")
+
+        val description = "a".repeat(MAX_INSTRUMENT_DESCRIPTION_CHARS + 1)
+        val counter = overLongMeter.createDoubleUpDownCounter("grocery.customers", description = description)
+
+        assertEquals("a".repeat(MAX_INSTRUMENT_DESCRIPTION_CHARS), counter.description)
+        assertEquals(1, handler.apiMisuses.size)
+    }
 }

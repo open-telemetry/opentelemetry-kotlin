@@ -21,7 +21,7 @@ internal class MeterImpl(
         val noopMeter = obtainNoopMeterIfInvalid(name) ?: return DoubleUpDownCounterImpl(
             name,
             sanitizeInstrumentUnit(unit),
-            description,
+            sdkErrorHandler.sanitizeInstrumentDescription(description),
         )
         return noopMeter.createDoubleUpDownCounter(name, unit, description)
     }
