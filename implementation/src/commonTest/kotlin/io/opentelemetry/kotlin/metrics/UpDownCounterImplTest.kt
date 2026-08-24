@@ -2,12 +2,14 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.init.config.MetricsConfig
 import io.opentelemetry.kotlin.resource.ResourceImpl
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
@@ -53,5 +55,23 @@ internal class UpDownCounterImplTest {
         assertEquals("grocery.customers", counter.name)
         assertEquals(null, counter.unit)
         assertEquals(null, counter.description)
+    }
+
+    @Test
+    fun createWithInvalidNameReturnsNoopAndReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        val invalidMeter = MeterProviderImpl(
+            MetricsConfig(
+                resource = ResourceImpl(AttributesModel(), null),
+                sdkErrorHandler = handler,
+            )
+        ).getMeter("test")
+
+        val counter = invalidMeter.createDoubleUpDownCounter("1 invalid name")
+
+        assertEquals("1 invalid name", counter.name)
+        assertFalse(counter.enabled())
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals("Instrument.name", handler.apiMisuses.single().api)
     }
 }
