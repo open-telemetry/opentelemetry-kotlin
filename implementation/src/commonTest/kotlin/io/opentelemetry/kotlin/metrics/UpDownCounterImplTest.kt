@@ -17,6 +17,9 @@ internal class UpDownCounterImplTest {
 
     private lateinit var meter: Meter
 
+    /** Mirrors the private MeterImpl.MAX_INSTRUMENT_NAME_CHARS constant. */
+    private val maxNameChars = 255
+
     @BeforeTest
     fun setup() {
         meter = MeterProviderImpl(
@@ -73,5 +76,58 @@ internal class UpDownCounterImplTest {
         assertFalse(counter.enabled())
         assertEquals(1, handler.apiMisuses.size)
         assertEquals("Instrument.name", handler.apiMisuses.single().api)
+    }
+
+    @Test
+    fun createAcceptsValidNamesWithoutError() {
+        val handler = FakeSdkErrorHandler()
+        val validMeter = MeterProviderImpl(
+            MetricsConfig(
+                resource = ResourceImpl(AttributesModel(), null),
+                sdkErrorHandler = handler,
+            )
+        ).getMeter("test")
+
+        val validNames = listOf(
+            "a",
+            "queue.depth",
+            "http/server/duration",
+            "A-b_c.d/e1",
+            "a".repeat(maxNameChars),
+        )
+        for (name in validNames) {
+            val counter = validMeter.createDoubleUpDownCounter(name)
+            assertTrue(counter.enabled(), "expected \"$name\" to be valid")
+        }
+        assertTrue(handler.errors.isEmpty())
+    }
+
+    @Test
+    fun createRejectsInvalidNamesAndReportsApiMisuse() {
+        val invalidNames = listOf(
+            "",
+            "1abc",
+            "_foo",
+            "/foo",
+            "foo bar",
+            "foo\$",
+            "a".repeat(maxNameChars + 1),
+            "café",
+        )
+        for (name in invalidNames) {
+            val handler = FakeSdkErrorHandler()
+            val invalidMeter = MeterProviderImpl(
+                MetricsConfig(
+                    resource = ResourceImpl(AttributesModel(), null),
+                    sdkErrorHandler = handler,
+                )
+            ).getMeter("test")
+
+            val counter = invalidMeter.createDoubleUpDownCounter(name)
+
+            assertFalse(counter.enabled(), "expected \"$name\" to be invalid")
+            assertEquals(1, handler.apiMisuses.size)
+            assertEquals("Instrument.name", handler.apiMisuses.single().api)
+        }
     }
 }
