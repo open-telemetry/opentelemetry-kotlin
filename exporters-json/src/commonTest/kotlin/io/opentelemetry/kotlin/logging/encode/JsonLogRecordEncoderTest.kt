@@ -1,10 +1,9 @@
-package io.opentelemetry.kotlin.encode
+package io.opentelemetry.kotlin.logging.encode
 
 import io.opentelemetry.kotlin.framework.serialization.SerializableLogRecordData
 import io.opentelemetry.kotlin.framework.serialization.conversion.toSerializable
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import kotlinx.serialization.json.Json
-import okio.Buffer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -15,15 +14,14 @@ internal class JsonLogRecordEncoderTest {
     fun `should successfully encode a log record data in JSON format`() {
         // given
         val encoder = JsonLogRecordEncoder()
-        val buffer = Buffer()
         val value = FakeLogRecordData()
 
         // when
-        encoder.encode(value, buffer)
+        val result = encoder.encode(value)
 
         // then
         assertTrue {
-            buffer.readUtf8() == Json.encodeToString(value.toSerializable())
+            result == Json.encodeToString(value.toSerializable())
         }
     }
 
@@ -32,15 +30,14 @@ internal class JsonLogRecordEncoderTest {
         // given
         val encoder = JsonLogRecordEncoder()
         val value = FakeLogRecordData()
-        val buffer = Buffer()
 
         // when
-        encoder.encode(value, buffer)
+        val result = encoder.encode(value)
 
         // then
         assertEquals(
             expected = value.toSerializable(),
-            actual = Json.decodeFromString<SerializableLogRecordData>(buffer.readUtf8())
+            actual = Json.decodeFromString<SerializableLogRecordData>(result)
         )
     }
 }

@@ -1,5 +1,6 @@
-package io.opentelemetry.kotlin.encode
+package io.opentelemetry.kotlin.tracing.encode
 
+import io.opentelemetry.kotlin.encode.OtlpJsonEncoder
 import io.opentelemetry.kotlin.framework.serialization.SerializableSpanData
 import io.opentelemetry.kotlin.framework.serialization.conversion.toSerializable
 import io.opentelemetry.kotlin.tracing.data.SpanData

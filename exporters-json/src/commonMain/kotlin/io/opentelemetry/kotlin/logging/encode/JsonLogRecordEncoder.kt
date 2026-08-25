@@ -1,5 +1,6 @@
-package io.opentelemetry.kotlin.encode
+package io.opentelemetry.kotlin.logging.encode
 
+import io.opentelemetry.kotlin.encode.OtlpJsonEncoder
 import io.opentelemetry.kotlin.framework.serialization.SerializableLogRecordData
 import io.opentelemetry.kotlin.framework.serialization.conversion.toSerializable
 import io.opentelemetry.kotlin.logging.data.LogRecordData

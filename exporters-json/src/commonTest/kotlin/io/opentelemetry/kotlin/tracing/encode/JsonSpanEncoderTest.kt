@@ -1,10 +1,9 @@
-package io.opentelemetry.kotlin.encode
+package io.opentelemetry.kotlin.tracing.encode
 
 import io.opentelemetry.kotlin.framework.serialization.SerializableSpanData
 import io.opentelemetry.kotlin.framework.serialization.conversion.toSerializable
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import kotlinx.serialization.json.Json
-import okio.Buffer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -15,15 +14,14 @@ internal class JsonSpanEncoderTest {
     fun `should successfully encode span data in JSON format`() {
         // given
         val encoder = JsonSpanEncoder()
-        val buffer = Buffer()
         val value = FakeSpanData()
 
         // when
-        encoder.encode(value, buffer)
+        val result = encoder.encode(value)
 
         // then
         assertTrue {
-            buffer.readUtf8() == Json.encodeToString(value.toSerializable())
+            result == Json.encodeToString(value.toSerializable())
         }
     }
 
@@ -32,15 +30,14 @@ internal class JsonSpanEncoderTest {
         // given
         val encoder = JsonSpanEncoder()
         val value = FakeSpanData()
-        val buffer = Buffer()
 
         // when
-        encoder.encode(value, buffer)
+        val result = encoder.encode(value)
 
         // then
         assertEquals(
             expected = value.toSerializable(),
-            actual = Json.decodeFromString<SerializableSpanData>(buffer.readUtf8())
+            actual = Json.decodeFromString<SerializableSpanData>(result)
         )
     }
 }
