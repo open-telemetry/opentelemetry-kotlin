@@ -18,7 +18,6 @@ kotlin {
                 implementation(project(":exporters-core"))
                 implementation(project(":integration-test"))
                 implementation(libs.ktor.serialization.kotlinx.json)
-//                implementation(libs.okio)
             }
         }
         val commonTest by getting {
