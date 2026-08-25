@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Asserts behaviour against the W3C `tracestate` spec:
@@ -156,5 +157,63 @@ internal class TraceStateMarshallerTest {
         val expected = (1..32).joinToString(",") { "k$it=v$it" }
         val ts = TraceStateMarshaller.decode(header, factory)
         assertEquals(expected, ts.encode())
+    }
+
+    @Test
+    fun `decode keeps a combined header of exactly 512 characters`() {
+        val header = exactly512Header()
+        assertEquals(MAX_TRACESTATE_CHARS, header.length)
+        val ts = TraceStateMarshaller.decode(header, factory)
+        assertEquals(header, ts.encode())
+    }
+
+    @Test
+    fun `encode keeps a combined header of exactly 512 characters`() {
+        val header = exactly512Header()
+        val ts = TraceStateMarshaller.decode(header, factory)
+        assertEquals(MAX_TRACESTATE_CHARS, ts.encode().length)
+        assertEquals(header, ts.encode())
+    }
+
+    @Test
+    fun `decode drops members longer than 128 before dropping from the end`() {
+        val ts = TraceStateMarshaller.decode(oversizedHeaderWithTrailingLargeMember(), factory)
+        assertEquals(truncatedOversizedHeader(), ts.encode())
+        assertTrue(ts.encode().length <= MAX_TRACESTATE_CHARS)
+    }
+
+    @Test
+    fun `encode drops members longer than 128 before dropping from the end`() {
+        val ts = TraceStateMarshaller.decode(oversizedHeaderWithTrailingLargeMember(), factory)
+        assertEquals(truncatedOversizedHeader(), ts.encode())
+    }
+
+    @Test
+    fun `decode drops members from the end when all members are at most 128 characters`() {
+        val members = (0 until 11).map { "a$it=" + "x".repeat(47) }
+        val header = members.joinToString(",")
+        assertTrue(header.length > MAX_TRACESTATE_CHARS)
+        val ts = TraceStateMarshaller.decode(header, factory)
+        val encoded = ts.encode()
+        assertTrue(encoded.length <= MAX_TRACESTATE_CHARS)
+        assertEquals(members.dropLast(1).joinToString(","), encoded)
+    }
+
+    private fun exactly512Header(): String {
+        val first = "a=" + "x".repeat(254)
+        val second = "b=" + "x".repeat(253)
+        return "$first,$second"
+    }
+
+    private fun oversizedHeaderWithTrailingLargeMember(): String {
+        val small = "keep=ok"
+        val large = (0 until 4).joinToString(",") { "k$it=" + "x".repeat(126) }
+        return "$small,$large"
+    }
+
+    private fun truncatedOversizedHeader(): String {
+        val small = "keep=ok"
+        val large = (0 until 3).joinToString(",") { "k$it=" + "x".repeat(126) }
+        return "$small,$large"
     }
 }

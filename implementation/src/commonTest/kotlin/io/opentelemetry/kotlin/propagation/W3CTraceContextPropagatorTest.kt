@@ -246,6 +246,24 @@ internal class W3CTraceContextPropagatorTest {
     }
 
     @Test
+    fun `extract still succeeds when tracestate exceeds the combined header limit`() {
+        val large = (0 until 4).joinToString(",") { "k$it=" + "x".repeat(126) }
+        val carrier = mapOf(
+            "traceparent" to "00-$traceId-$spanId-01",
+            "tracestate" to "keep=ok,$large",
+        )
+        val result = propagator.extract(contextFactory.root(), carrier, MapTextMapGetter)
+        val sc = result.extractSpan().spanContext
+
+        assertTrue(sc.isValid)
+        assertTrue(sc.isRemote)
+        assertEquals(traceId, sc.traceId)
+        assertEquals("ok", sc.traceState.get("keep"))
+        assertEquals(null, sc.traceState.get("k3"))
+        assertTrue(W3CTraceStateCodec.encode(sc.traceState.asMap()).length <= MAX_TRACESTATE_CHARS)
+    }
+
+    @Test
     fun `inject and extract round-trip preserves traceId spanId flags and tracestate`() {
         val state = traceStateFactory.default.put("vendor", "value")
         val original = spanContext(
