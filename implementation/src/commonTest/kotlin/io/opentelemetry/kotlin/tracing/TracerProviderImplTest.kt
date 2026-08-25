@@ -2,7 +2,10 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
@@ -13,6 +16,7 @@ import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.ResourceImpl
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -49,6 +53,29 @@ internal class TracerProviderImplTest {
     @Test
     fun testMinimalTracerProvider() {
         assertNotNull(impl.getTracer(name = ""))
+    }
+
+    @Test
+    fun testEmptyTracerNameReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        val config = TracingConfig(
+            null,
+            fakeSpanLimitsConfig,
+            ResourceImpl(AttributesModel(), null),
+            handler,
+        )
+        val provider = TracerProviderImpl(
+            clock = FakeClock(),
+            tracingConfig = config,
+            contextFactory = FakeContextFactory(),
+            spanContextFactory = FakeSpanContextFactory(),
+            traceFlagsFactory = FakeTraceFlagsFactory(),
+            spanFactory = FakeSpanFactory(),
+            idGenerator = FakeIdGenerator(),
+        )
+        provider.getTracer(name = "")
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals("TracerProvider.getTracer", handler.apiMisuses.single().api)
     }
 
     @Test
@@ -195,4 +222,58 @@ internal class TracerProviderImplTest {
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.isValid)
     }
+
+    @Test
+    fun testThrowingAttributesReturnsNoopTracer() {
+        val errorHandler = FakeSdkErrorHandler()
+        val provider = createProvider(errorHandler = errorHandler)
+
+        val tracer = provider.getTracer(name = "name") { error("boom") }
+
+        assertFalse(tracer.startSpan("test-span").isRecording())
+        val recorded = errorHandler.userCodeErrors.single()
+        assertEquals("TracerProvider.getTracer failed", recorded.message)
+        assertEquals("boom", recorded.cause.message)
+    }
+
+    @Test
+    fun testThrowingErrorHandlerDoesNotEscapeForceFlush() = runTest {
+        val provider = createProvider(
+            processor = FakeSpanProcessor(flushCode = { error("boom") }),
+            errorHandler = ThrowingSdkErrorHandler(),
+        )
+        provider.getTracer(name = "test")
+
+        assertEquals(OperationResultCode.Failure, provider.forceFlush())
+    }
+
+    @Test
+    fun testThrowingErrorHandlerDoesNotEscapeShutdown() = runTest {
+        val provider = createProvider(
+            processor = FakeSpanProcessor(shutdownCode = { error("boom") }),
+            errorHandler = ThrowingSdkErrorHandler(),
+        )
+        provider.getTracer(name = "test")
+
+        assertEquals(OperationResultCode.Failure, provider.shutdown())
+    }
+
+    private fun createProvider(
+        processor: SpanProcessor? = null,
+        errorHandler: SdkErrorHandler,
+    ) = TracerProviderImpl(
+        clock = FakeClock(),
+        tracingConfig = TracingConfig(processor, fakeSpanLimitsConfig, FakeResource(), errorHandler),
+        contextFactory = FakeContextFactory(),
+        spanContextFactory = FakeSpanContextFactory(),
+        traceFlagsFactory = FakeTraceFlagsFactory(),
+        spanFactory = FakeSpanFactory(),
+        idGenerator = FakeIdGenerator(),
+    )
+
+    private class ThrowingSdkErrorHandler : SdkErrorHandler {
+        override fun onError(error: SdkError): Unit = handlerBoom()
+    }
 }
+
+private fun handlerBoom(): Nothing = error("handler boom")

@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
@@ -13,7 +14,9 @@ import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
+import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.sdkDefaultAttributes
+import io.opentelemetry.kotlin.sdkDefaultSchemaUrl
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
@@ -107,7 +110,7 @@ internal class TracerProviderConfigImplTest {
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).generateTracingConfig(base)
         assertNull(cfg.processor)
         assertEquals(sdkDefaultAttributes, cfg.resource.attributes)
-        assertNull(cfg.resource.schemaUrl)
+        assertEquals(sdkDefaultSchemaUrl, cfg.resource.schemaUrl)
 
         with(cfg.spanLimits) {
             assertEquals(128, linkCountLimit)
@@ -186,6 +189,18 @@ internal class TracerProviderConfigImplTest {
         }.generateTracingConfig(base)
         assertSame(first, cfg.processor)
         assertNotSame(second, cfg.processor)
+    }
+
+    @Test
+    fun testDoubleExportReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        TracerProviderConfigImpl(clock, handler).apply {
+            export { compositeSpanProcessor(FakeSpanProcessor()) }
+            export { compositeSpanProcessor(FakeSpanProcessor()) }
+        }.generateTracingConfig(base)
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals("TracerProviderConfigDsl.export", handler.apiMisuses.single().api)
+        assertEquals("export() should only be called once.", handler.apiMisuses.single().message)
     }
 
     @Test
@@ -272,7 +287,7 @@ internal class TracerProviderConfigImplTest {
 
     private fun Sampler.decisionFor(context: Context): Decision = shouldSample(
         context = context,
-        traceId = "12345678901234567890123456789012",
+        traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
         name = "span",
         spanKind = SpanKind.INTERNAL,
         attributes = AttributesModel(),

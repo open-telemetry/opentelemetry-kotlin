@@ -22,6 +22,9 @@ class FakeSpan(
     val events: MutableList<SpanEventData> = mutableListOf()
     val links: MutableList<SpanLinkData> = mutableListOf()
 
+    private val attrs = FakeAttributesMutator()
+    val attributes: Map<String, Any> get() = attrs.attributes
+
     private var recording: Boolean = true
 
     override fun setName(name: String) {
@@ -33,7 +36,7 @@ class FakeSpan(
     }
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
-        TODO("Not yet implemented")
+        attrs.setBooleanAttribute(key, value)
     }
 
     override fun end() {
@@ -71,38 +74,38 @@ class FakeSpan(
     }
 
     override fun setStringAttribute(key: String, value: String) {
-        TODO("Not yet implemented")
+        attrs.setStringAttribute(key, value)
     }
 
     override fun setLongAttribute(key: String, value: Long) {
-        TODO("Not yet implemented")
+        attrs.setLongAttribute(key, value)
     }
 
     override fun setDoubleAttribute(key: String, value: Double) {
-        TODO("Not yet implemented")
+        attrs.setDoubleAttribute(key, value)
     }
 
     override fun setBooleanListAttribute(key: String, value: List<Boolean>) {
-        TODO("Not yet implemented")
+        attrs.setBooleanListAttribute(key, value)
     }
 
     override fun setStringListAttribute(key: String, value: List<String>) {
-        TODO("Not yet implemented")
+        attrs.setStringListAttribute(key, value)
     }
 
     override fun setLongListAttribute(key: String, value: List<Long>) {
-        TODO("Not yet implemented")
+        attrs.setLongListAttribute(key, value)
     }
 
     override fun setDoubleListAttribute(key: String, value: List<Double>) {
-        TODO("Not yet implemented")
+        attrs.setDoubleListAttribute(key, value)
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
-        TODO("Not yet implemented")
+        attrs.setByteArrayAttribute(key, value)
     }
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
-        TODO("Not yet implemented")
+        attrs.setAnyValueAttribute(key, value)
     }
 }

@@ -10,10 +10,10 @@ plugins {
 
 plugins.withType<YarnPlugin> {
     extensions.configure<YarnRootExtension> {
-        resolution("brace-expansion", ">=5.0.7")
+        resolution("brace-expansion", ">=5.0.8")
         resolution("diff", ">=8.0.3")
         resolution("glob", ">=10.5.0")
-        resolution("js-yaml", ">=4.2.0")
+        resolution("js-yaml", ">=5.2.2")
         resolution("minimatch", ">=9.0.7")
         resolution("serialize-javascript", ">=7.0.5")
         resolution("**/ws", "8.21.0")

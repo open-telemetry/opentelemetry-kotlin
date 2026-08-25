@@ -3,13 +3,15 @@ package io.opentelemetry.kotlin.export.conversion
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.resource.FakeResource
+import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.FakeTraceFlags
+import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.proto.common.v1.InstrumentationScope
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class CommonProtobufConversionTest {
@@ -108,14 +110,38 @@ class CommonProtobufConversionTest {
     }
 
     @Test
-    fun testResourceDeserialization_asNewResourceThrows() {
-        val proto = io.opentelemetry.proto.resource.v1.Resource(
-            attributes = emptyList()
-        )
-        val resource = proto.toResource()
-        assertFailsWith<UnsupportedOperationException> {
-            resource.asNewResource { }
+    fun testResourceDeserialization_asNewResource() {
+        val resource = deserializedResource()
+
+        val newResource = resource.asNewResource {
+            attributes["added"] = 5L
+            schemaUrl = "https://example.com/schema"
         }
+
+        assertEquals(mapOf<String, Any>("existing" to "value", "added" to 5L), newResource.attributes)
+        assertEquals("https://example.com/schema", newResource.schemaUrl)
+    }
+
+    @Test
+    fun testResourceDeserialization_asNewResourceLeavesOriginalUntouched() {
+        val resource = deserializedResource()
+
+        resource.asNewResource {
+            attributes.clear()
+            attributes["added"] = 5L
+            schemaUrl = "https://example.com/schema"
+        }
+
+        assertEquals(mapOf<String, Any>("existing" to "value"), resource.attributes)
+        assertNull(resource.schemaUrl)
+    }
+
+    @Test
+    fun testResourceDeserialization_asNewResourceWithoutMutations() {
+        val resource = deserializedResource()
+        val copy = resource.asNewResource { }
+        assertEquals(resource.attributes, copy.attributes)
+        assertNull(copy.schemaUrl)
     }
 
     @Test
@@ -148,6 +174,18 @@ class CommonProtobufConversionTest {
     }
 
     @Test
+    fun testDeserializedSpanContext_remote() {
+        val context = DeserializedSpanContext(
+            traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
+            spanIdBytes = "1234567890123456".hexToByteArray(),
+            flags = 1,
+            isRemote = true
+        )
+        assertTrue(context.isRemote)
+        assertTrue(context.traceFlags.isSampled)
+    }
+
+    @Test
     fun testDeserializedSpanContext_withTraceState() {
         val context = DeserializedSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
@@ -165,6 +203,36 @@ class CommonProtobufConversionTest {
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
             spanIdBytes = "1234567890123456".hexToByteArray(),
             traceStateString = ""
+        )
+        assertEquals(0, context.traceState.asMap().size)
+    }
+
+    @Test
+    fun testDeserializedSpanContext_malformedTraceState() {
+        val context = DeserializedSpanContext(
+            traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
+            spanIdBytes = "1234567890123456".hexToByteArray(),
+            traceStateString = "foo=bar,nokey,baz=qux"
+        )
+        assertEquals(mapOf("foo" to "bar", "baz" to "qux"), context.traceState.asMap())
+    }
+
+    @Test
+    fun testDeserializedSpanContext_traceStateWithTrailingSeparator() {
+        val context = DeserializedSpanContext(
+            traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
+            spanIdBytes = "1234567890123456".hexToByteArray(),
+            traceStateString = "foo=bar,"
+        )
+        assertEquals(mapOf("foo" to "bar"), context.traceState.asMap())
+    }
+
+    @Test
+    fun testDeserializedSpanContext_traceStateOfOnlySeparators() {
+        val context = DeserializedSpanContext(
+            traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
+            spanIdBytes = "1234567890123456".hexToByteArray(),
+            traceStateString = ",,,"
         )
         assertEquals(0, context.traceState.asMap().size)
     }
@@ -203,25 +271,75 @@ class CommonProtobufConversionTest {
     }
 
     @Test
-    fun testDeserializedTraceState_put_throws() {
-        val context = DeserializedSpanContext(
-            traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
-            spanIdBytes = "1234567890123456".hexToByteArray()
-        )
-        assertFailsWith<UnsupportedOperationException> {
-            context.traceState.put("key", "value")
-        }
+    fun testDeserializedTraceState_put() {
+        val state = deserializedTraceState("foo=bar")
+        val next = state.put("baz", "qux")
+        assertEquals(mapOf("foo" to "bar", "baz" to "qux"), next.asMap())
+        assertEquals(mapOf("foo" to "bar"), state.asMap())
     }
 
     @Test
-    fun testDeserializedTraceState_remove_throws() {
-        val context = DeserializedSpanContext(
-            traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
-            spanIdBytes = "1234567890123456".hexToByteArray()
-        )
-        assertFailsWith<UnsupportedOperationException> {
-            context.traceState.remove("key")
-        }
+    fun testDeserializedTraceState_putOverwritesExistingKey() {
+        val state = deserializedTraceState("foo=bar")
+        assertEquals(mapOf("foo" to "baz"), state.put("foo", "baz").asMap())
+    }
+
+    @Test
+    fun testDeserializedTraceState_putInvalidKeyReturnsSameInstance() {
+        val state = deserializedTraceState("foo=bar")
+        assertSame(state, state.put("UPPERCASE", "value"))
+        assertSame(state, state.put("", "value"))
+        assertSame(state, state.put("too@many@parts", "value"))
+    }
+
+    @Test
+    fun testDeserializedTraceState_putInvalidValueReturnsSameInstance() {
+        val state = deserializedTraceState("foo=bar")
+        assertSame(state, state.put("key", ""))
+        assertSame(state, state.put("key", "has,comma"))
+        assertSame(state, state.put("key", "trailing "))
+    }
+
+    @Test
+    fun testDeserializedTraceState_putNewKeyAtMaxEntriesReturnsSameInstance() {
+        val header = (0 until MAX_TRACE_STATE_ENTRIES).joinToString(",") { "key$it=value$it" }
+        val state = deserializedTraceState(header)
+        assertEquals(MAX_TRACE_STATE_ENTRIES, state.asMap().size)
+
+        assertSame(state, state.put("extra", "value"))
+    }
+
+    @Test
+    fun testDeserializedTraceState_putExistingKeyAtMaxEntriesIsAllowed() {
+        val header = (0 until MAX_TRACE_STATE_ENTRIES).joinToString(",") { "key$it=value$it" }
+        val state = deserializedTraceState(header)
+
+        val next = state.put("key0", "updated")
+        assertEquals(MAX_TRACE_STATE_ENTRIES, next.asMap().size)
+        assertEquals("updated", next.get("key0"))
+    }
+
+    @Test
+    fun testDeserializedTraceState_remove() {
+        val state = deserializedTraceState("foo=bar,baz=qux")
+        val next = state.remove("foo")
+
+        assertEquals(mapOf("baz" to "qux"), next.asMap())
+
+        // the original instance is unchanged
+        assertEquals(mapOf("foo" to "bar", "baz" to "qux"), state.asMap())
+    }
+
+    @Test
+    fun testDeserializedTraceState_removeUnknownKeyReturnsSameInstance() {
+        val state = deserializedTraceState("foo=bar")
+        assertSame(state, state.remove("unknown"))
+    }
+
+    @Test
+    fun testDeserializedTraceState_putThenEncode() {
+        val state = deserializedTraceState("foo=bar").put("baz", "qux")
+        assertEquals("foo=bar,baz=qux", state.toW3CString())
     }
 
     @Test
@@ -234,5 +352,22 @@ class CommonProtobufConversionTest {
         val w3cString = context.traceState.toW3CString()
         assertTrue(w3cString.contains("foo=bar"))
         assertTrue(w3cString.contains("baz=qux"))
+    }
+
+    private fun deserializedResource(): Resource {
+        val proto = io.opentelemetry.proto.resource.v1.Resource(
+            attributes = mapOf<String, Any>("existing" to "value").createKeyValues()
+        )
+        return proto.toResource()
+    }
+
+    private fun deserializedTraceState(header: String): TraceState = DeserializedSpanContext(
+        traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
+        spanIdBytes = "1234567890123456".hexToByteArray(),
+        traceStateString = header,
+    ).traceState
+
+    private companion object {
+        private const val MAX_TRACE_STATE_ENTRIES = 32
     }
 }

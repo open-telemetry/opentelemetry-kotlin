@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
@@ -46,6 +47,7 @@ internal class LogAttributesTest {
                 attributeValueLengthLimit = fakeLogLimitsConfig.attributeValueLengthLimit
             ),
             shutdownState = MutableShutdownState(),
+            sdkErrorHandler = NoopSdkErrorHandler,
         )
     }
 
@@ -155,6 +157,7 @@ internal class LogAttributesTest {
             attributeValueLengthLimit = limit,
         ),
         shutdownState = MutableShutdownState(),
+        sdkErrorHandler = NoopSdkErrorHandler,
     )
 
     private fun AttributesMutator.addTestAttributes(keyToken: String = "") {

@@ -25,7 +25,7 @@ import com.squareup.kotlinpoet.TypeSpec
  * `opentelemetry-configuration` JSON schema.
  *
  * The schema is passed in as the nested [Map]/[List] structure produced by Groovy's `JsonSlurper`.
- * Every generated type is `internal` and annotated with kotlinx.serialization annotations.
+ * Every generated type is public and annotated with kotlinx.serialization annotations.
  */
 internal class ConfigModelGenerator(private val packageName: String) {
 
@@ -62,7 +62,7 @@ internal class ConfigModelGenerator(private val packageName: String) {
 
         val constructor = FunSpec.constructorBuilder()
         val typeBuilder = TypeSpec.classBuilder(name)
-            .addModifiers(KModifier.DATA, KModifier.INTERNAL)
+            .addModifiers(KModifier.DATA)
             .addAnnotation(serializable)
             .deriveKDoc(def)
 
@@ -85,7 +85,7 @@ internal class ConfigModelGenerator(private val packageName: String) {
 
             constructor.addParameter(param)
             typeBuilder.addProperty(
-                PropertySpec.builder(kotlinName, type, KModifier.INTERNAL)
+                PropertySpec.builder(kotlinName, type)
                     .initializer(kotlinName)
                     .deriveKDoc(propSchema)
                     .build()
@@ -97,7 +97,6 @@ internal class ConfigModelGenerator(private val packageName: String) {
 
     private fun buildEnum(name: String, def: Map<String, Any?>): FileSpec {
         val builder = TypeSpec.enumBuilder(name)
-            .addModifiers(KModifier.INTERNAL)
             .addAnnotation(serializable)
             .deriveKDoc(def)
 
@@ -116,7 +115,6 @@ internal class ConfigModelGenerator(private val packageName: String) {
 
     private fun buildMapTypeAlias(name: String, def: Map<String, Any?>): FileSpec {
         val alias = TypeAliasSpec.builder(name, MAP.parameterizedBy(STRING, contextualAnyNullable))
-            .addModifiers(KModifier.INTERNAL)
             .deriveKDoc(def)
             .build()
         return FileSpec.builder(packageName, name).addFileComment(HEADER).addTypeAlias(alias)
@@ -125,7 +123,6 @@ internal class ConfigModelGenerator(private val packageName: String) {
 
     private fun buildMarkerClass(name: String, def: Map<String, Any?>): FileSpec {
         val marker = TypeSpec.classBuilder(name)
-            .addModifiers(KModifier.INTERNAL)
             .addAnnotation(serializable)
             .deriveKDoc(def)
             .build()

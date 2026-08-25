@@ -2,6 +2,8 @@ package io.opentelemetry.kotlin.export.conversion
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.factory.toHexString
+import io.opentelemetry.kotlin.propagation.W3CTraceStateCodec
+import io.opentelemetry.kotlin.propagation.W3CTraceStateValidator
 import io.opentelemetry.kotlin.resource.MutableResource
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
@@ -33,8 +35,7 @@ internal fun io.opentelemetry.proto.resource.v1.Resource.toResource(): Resource 
 
 internal fun TraceFlags.toFlagsInt(): Int = hex.toInt(16)
 
-internal fun TraceState.toW3CString(): String =
-    asMap().entries.joinToString(",") { "${it.key}=${it.value}" }
+internal fun TraceState.toW3CString(): String = W3CTraceStateCodec.encode(asMap())
 
 private class DeserializedInstrumentationScopeInfo(
     override val name: String,
@@ -48,7 +49,12 @@ private class DeserializedResource(
     override val schemaUrl: String? = null
 ) : Resource {
     override fun asNewResource(action: MutableResource.() -> Unit): Resource {
-        throw UnsupportedOperationException()
+        val mutable = DeserializedMutableResource(attributes.toMutableMap(), schemaUrl)
+        mutable.apply(action)
+        return DeserializedResource(
+            attributes = mutable.attributes.toMap(),
+            schemaUrl = mutable.schemaUrl,
+        )
     }
 
     override fun merge(other: Resource): Resource = DeserializedResource(
@@ -57,18 +63,25 @@ private class DeserializedResource(
     )
 }
 
+private class DeserializedMutableResource(
+    override val attributes: MutableMap<String, Any>,
+    override var schemaUrl: String?,
+) : MutableResource
+
 internal class DeserializedSpanContext(
     override val traceIdBytes: ByteArray,
     override val spanIdBytes: ByteArray,
     flags: Int = 0,
     traceStateString: String = "",
+    override val isRemote: Boolean = false,
 ) : SpanContext {
     override val traceId: String by lazy { traceIdBytes.toHexString() }
     override val spanId: String by lazy { spanIdBytes.toHexString() }
     override val traceFlags: TraceFlags = DeserializedTraceFlags(flags and 0xFF)
     override val isValid: Boolean by lazy { traceId != "0".repeat(32) && spanId != "0".repeat(16) }
-    override val isRemote: Boolean = false
-    override val traceState: TraceState = parseTraceState(traceStateString)
+    override val traceState: TraceState by lazy {
+        DeserializedTraceState(W3CTraceStateCodec.decode(traceStateString))
+    }
 }
 
 private class DeserializedTraceFlags(private val value: Int) : TraceFlags {
@@ -76,18 +89,17 @@ private class DeserializedTraceFlags(private val value: Int) : TraceFlags {
     override val isRandom: Boolean = (value and 0x02) != 0
 }
 
-private fun parseTraceState(traceStateString: String): TraceState {
-    if (traceStateString.isEmpty()) return DeserializedTraceState(emptyMap())
-    val map = traceStateString.split(",").associate { entry ->
-        val parts = entry.split("=", limit = 2)
-        parts[0] to parts[1]
-    }
-    return DeserializedTraceState(map)
-}
-
 private class DeserializedTraceState(private val entries: Map<String, String>) : TraceState {
     override fun get(key: String): String? = entries[key]
     override fun asMap(): Map<String, String> = entries
-    override fun put(key: String, value: String): TraceState = throw UnsupportedOperationException()
-    override fun remove(key: String): TraceState = throw UnsupportedOperationException()
+    override fun put(key: String, value: String): TraceState = when {
+        W3CTraceStateValidator.canPut(entries, key, value) ->
+            DeserializedTraceState(entries + (key to value))
+        else -> this
+    }
+
+    override fun remove(key: String): TraceState = when {
+        entries.containsKey(key) -> DeserializedTraceState(entries - key)
+        else -> this
+    }
 }

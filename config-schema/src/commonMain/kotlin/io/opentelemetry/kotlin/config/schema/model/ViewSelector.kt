@@ -6,13 +6,13 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class ViewSelector(
+public data class ViewSelector(
   /**
    * Configure instrument name selection criteria.
    * If omitted or null, all instrument names match.
    */
   @SerialName("instrument_name")
-  internal val instrumentName: String? = null,
+  public val instrumentName: String? = null,
   /**
    * Configure instrument type selection criteria.
    * Values include:
@@ -26,28 +26,28 @@ internal data class ViewSelector(
    * If omitted, all instrument types match.
    */
   @SerialName("instrument_type")
-  internal val instrumentType: InstrumentType? = null,
+  public val instrumentType: InstrumentType? = null,
   /**
    * Configure the instrument unit selection criteria.
    * If omitted or null, all instrument units match.
    */
-  internal val unit: String? = null,
+  public val unit: String? = null,
   /**
    * Configure meter name selection criteria.
    * If omitted or null, all meter names match.
    */
   @SerialName("meter_name")
-  internal val meterName: String? = null,
+  public val meterName: String? = null,
   /**
    * Configure meter version selection criteria.
    * If omitted or null, all meter versions match.
    */
   @SerialName("meter_version")
-  internal val meterVersion: String? = null,
+  public val meterVersion: String? = null,
   /**
    * Configure meter schema url selection criteria.
    * If omitted or null, all meter schema URLs match.
    */
   @SerialName("meter_schema_url")
-  internal val meterSchemaUrl: String? = null,
+  public val meterSchemaUrl: String? = null,
 )

@@ -85,7 +85,7 @@ internal class SpanAdapter(
         if (attributes != null) {
             attributes(container)
         }
-        if (linksImpl.size < spanLimitsConfig.linkCountLimit) {
+        if (linksImpl.size < spanLimitsConfig.effectiveLinkCountLimit) {
             linksImpl.add(SpanLinkCompatImpl(spanContext, container))
         }
         impl.addLink(spanContext.toOtelJavaSpanContext(), container.otelJavaAttributes())
@@ -101,7 +101,7 @@ internal class SpanAdapter(
             attributes(container)
         }
         val time = timestamp ?: clock.now()
-        if (eventsImpl.size < spanLimitsConfig.eventCountLimit) {
+        if (eventsImpl.size < spanLimitsConfig.effectiveEventCountLimit) {
             eventsImpl.add(SpanEventCompatImpl(name, time, container))
         }
         impl.addEvent(name, container.otelJavaAttributes(), time, TimeUnit.NANOSECONDS)
@@ -109,56 +109,56 @@ internal class SpanAdapter(
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
         impl.setAttribute(key, value)
-        if (attrs.size < spanLimitsConfig.attributeCountLimit) {
+        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
             attrs[key] = value
         }
     }
 
     override fun setStringAttribute(key: String, value: String) {
         impl.setAttribute(key, value)
-        if (attrs.size < spanLimitsConfig.attributeCountLimit) {
+        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
             attrs[key] = value
         }
     }
 
     override fun setLongAttribute(key: String, value: Long) {
         impl.setAttribute(key, value)
-        if (attrs.size < spanLimitsConfig.attributeCountLimit) {
+        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
             attrs[key] = value
         }
     }
 
     override fun setDoubleAttribute(key: String, value: Double) {
         impl.setAttribute(key, value)
-        if (attrs.size < spanLimitsConfig.attributeCountLimit) {
+        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
             attrs[key] = value
         }
     }
 
     override fun setBooleanListAttribute(key: String, value: List<Boolean>) {
         impl.setAttribute(OtelJavaAttributeKey.booleanArrayKey(key), value)
-        if (attrs.size < spanLimitsConfig.attributeCountLimit) {
+        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
             attrs[key] = value
         }
     }
 
     override fun setStringListAttribute(key: String, value: List<String>) {
         impl.setAttribute(OtelJavaAttributeKey.stringArrayKey(key), value)
-        if (attrs.size < spanLimitsConfig.attributeCountLimit) {
+        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
             attrs[key] = value
         }
     }
 
     override fun setLongListAttribute(key: String, value: List<Long>) {
         impl.setAttribute(OtelJavaAttributeKey.longArrayKey(key), value)
-        if (attrs.size < spanLimitsConfig.attributeCountLimit) {
+        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
             attrs[key] = value
         }
     }
 
     override fun setDoubleListAttribute(key: String, value: List<Double>) {
         impl.setAttribute(OtelJavaAttributeKey.doubleArrayKey(key), value)
-        if (attrs.size < spanLimitsConfig.attributeCountLimit) {
+        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
             attrs[key] = value
         }
     }

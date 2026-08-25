@@ -30,9 +30,10 @@ internal class SimpleLogRecordProcessor(
         context: Context
     ) {
         shutdownState.execute {
+            val data = log.toLogRecordData()
             scope.launch {
                 lock.write {
-                    exporter.export(listOf(log))
+                    exporter.export(listOf(data))
                 }
             }
         }

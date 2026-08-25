@@ -10,18 +10,24 @@ internal class FakeOtelJavaLogRecordExporter : OtelJavaLogRecordExporter {
     var shutdownCount = 0
     val exports: MutableList<OtelJavaLogRecordData> = mutableListOf()
 
+    /**
+     * Supplies the result of every operation, so tests can return results that complete
+     * asynchronously (or not at all).
+     */
+    var nextResult: () -> OtelJavaCompletableResultCode = { OtelJavaCompletableResultCode.ofSuccess() }
+
     override fun export(logs: MutableCollection<OtelJavaLogRecordData>): OtelJavaCompletableResultCode {
         exports += logs
-        return OtelJavaCompletableResultCode.ofSuccess()
+        return nextResult()
     }
 
     override fun flush(): OtelJavaCompletableResultCode {
         flushCount += 1
-        return OtelJavaCompletableResultCode.ofSuccess()
+        return nextResult()
     }
 
     override fun shutdown(): OtelJavaCompletableResultCode {
         shutdownCount += 1
-        return OtelJavaCompletableResultCode.ofSuccess()
+        return nextResult()
     }
 }

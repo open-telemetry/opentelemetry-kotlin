@@ -99,6 +99,27 @@ internal class OtelJavaSpanExportTest {
     }
 
     @Test
+    fun `test span attributes retain their types`() = runTest {
+        // Golden files stringify every attribute value, so they cannot detect a type being lost.
+        // Assert against the exported span directly instead.
+        val span = tracer.spanBuilder("typed_attrs").startSpan()
+        span.setAllAttributes(attrs)
+        span.end()
+
+        harness.assertSpans(1, null) { spans ->
+            val exported = spans[0].attributes
+            assertEquals("second_value", exported["string_key"])
+            assertEquals(true, exported["bool_key"])
+            assertEquals(42L, exported["long_key"])
+            assertEquals(3.14, exported["double_key"])
+            assertEquals(listOf("a"), exported["string_list_key"])
+            assertEquals(listOf(true), exported["bool_list_key"])
+            assertEquals(listOf(42L), exported["long_list_key"])
+            assertEquals(listOf(3.14), exported["double_list_key"])
+        }
+    }
+
+    @Test
     fun `test span events export`() = runTest {
         val spanName = "span_events"
         val span = tracer.spanBuilder(spanName).startSpan().apply {

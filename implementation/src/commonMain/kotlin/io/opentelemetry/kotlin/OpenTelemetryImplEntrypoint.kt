@@ -1,7 +1,5 @@
 package io.opentelemetry.kotlin
 
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
-import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.BaggageFactoryImpl
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
@@ -31,22 +29,22 @@ public fun createOpenTelemetry(
      */
     config: OpenTelemetryConfigDsl.() -> Unit = {}
 ): OpenTelemetry {
-    val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler
-    val cfg = OpenTelemetryConfigImpl(clock, sdkErrorHandler).apply(config)
+    val resourceFactory = ResourceFactoryImpl()
+    val cfg = OpenTelemetryConfigImpl(clock, resourceFactory).apply(config)
     val idGenerator = cfg.resolveIdGenerator()
 
-    val resourceFactory = ResourceFactoryImpl()
     val traceFlags = TraceFlagsFactoryImpl()
     val traceState = TraceStateFactoryImpl()
     val spanContext = SpanContextFactoryImpl(idGenerator, traceFlags, traceState)
 
     val span = SpanFactoryImpl(spanContext)
-    val contextFactory = ContextFactoryImpl(span, cfg.contextConfig::generateStorage)
+    val contextFactory = ContextFactoryImpl(span, cfg.sdkErrorHandler, cfg.contextConfig::generateStorage)
     cfg.propagatorCfg.installFactories(
         traceFlagsFactory = traceFlags,
         traceStateFactory = traceState,
         spanContextFactory = spanContext,
         spanFactory = span,
+        sdkErrorHandler = cfg.sdkErrorHandler,
     )
 
     val tracingConfig = cfg.generateTracingConfig()

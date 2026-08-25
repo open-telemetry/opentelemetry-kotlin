@@ -99,22 +99,22 @@ object OtelAttributes {
     enum class OtelComponentTypeValues(val value: String) {
 
         /**
-        * <p>The builtin SDK batching span processor</p>
+        * <p>The built-in SDK batching span processor</p>
         */
         BATCHING_SPAN_PROCESSOR("batching_span_processor"),
 
         /**
-        * <p>The builtin SDK simple span processor</p>
+        * <p>The built-in SDK simple span processor</p>
         */
         SIMPLE_SPAN_PROCESSOR("simple_span_processor"),
 
         /**
-        * <p>The builtin SDK batching log record processor</p>
+        * <p>The built-in SDK batching log record processor</p>
         */
         BATCHING_LOG_PROCESSOR("batching_log_processor"),
 
         /**
-        * <p>The builtin SDK simple log record processor</p>
+        * <p>The built-in SDK simple log record processor</p>
         */
         SIMPLE_LOG_PROCESSOR("simple_log_processor"),
 
@@ -154,7 +154,7 @@ object OtelAttributes {
         OTLP_HTTP_JSON_LOG_EXPORTER("otlp_http_json_log_exporter"),
 
         /**
-        * <p>The builtin SDK periodically exporting metric reader</p>
+        * <p>The built-in SDK periodically exporting metric reader</p>
         */
         PERIODIC_METRIC_READER("periodic_metric_reader"),
 

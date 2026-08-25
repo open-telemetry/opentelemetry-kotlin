@@ -4,14 +4,19 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
+import io.opentelemetry.kotlin.logging.LogRecordDataImpl
 import io.opentelemetry.kotlin.logging.SeverityNumber
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
 
 /**
  * The single source of truth for log record state. This is not exposed to consumers of the API - they
- * are presented with views such as [ReadableLogRecordImpl], depending on which API call they make.
+ * are presented with views such as [ReadWriteLogRecordImpl], or an immutable snapshot taken via
+ * [toLogRecordData], depending on which API call they make.
  */
 internal class LogRecordModel(
     override val resource: Resource,
@@ -24,10 +29,21 @@ internal class LogRecordModel(
     severityNumber: SeverityNumber?,
     spanContext: SpanContext,
     logLimitConfig: LogLimitConfig,
+    private val sdkErrorHandler: SdkErrorHandler,
 ) : ReadWriteLogRecord {
 
-    private val lock by lazy {
-        ReentrantReadWriteLock()
+    private val lock = ReentrantReadWriteLock()
+
+    /**
+     * Runs [action] behind the write lock. Input supplied by the host application must never escape
+     * a public API method, so a failure is reported and swallowed.
+     */
+    private inline fun mutate(details: String, action: () -> Unit) {
+        sdkErrorHandler.guard(details) {
+            lock.write {
+                action()
+            }
+        }
     }
 
     override var timestamp: Long? = timestamp
@@ -35,7 +51,7 @@ internal class LogRecordModel(
             field
         }
         set(value) {
-            lock.write {
+            mutate("LogRecord.timestamp failed") {
                 field = value
             }
         }
@@ -45,7 +61,7 @@ internal class LogRecordModel(
             field
         }
         set(value) {
-            lock.write {
+            mutate("LogRecord.observedTimestamp failed") {
                 field = value
             }
         }
@@ -55,7 +71,7 @@ internal class LogRecordModel(
             field
         }
         set(value) {
-            lock.write {
+            mutate("LogRecord.severityNumber failed") {
                 field = value
             }
         }
@@ -65,7 +81,7 @@ internal class LogRecordModel(
             field
         }
         set(value) {
-            lock.write {
+            mutate("LogRecord.severityText failed") {
                 field = value
             }
         }
@@ -75,7 +91,7 @@ internal class LogRecordModel(
             field
         }
         set(value) {
-            lock.write {
+            mutate("LogRecord.body failed") {
                 field = value
             }
         }
@@ -85,7 +101,7 @@ internal class LogRecordModel(
             field
         }
         set(value) {
-            lock.write {
+            mutate("LogRecord.spanContext failed") {
                 field = value
             }
         }
@@ -95,7 +111,7 @@ internal class LogRecordModel(
             field
         }
         set(value) {
-            lock.write {
+            mutate("LogRecord.eventName failed") {
                 field = value
             }
         }
@@ -119,25 +135,25 @@ internal class LogRecordModel(
         }
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
-        lock.write {
+        mutate("LogRecord.setBooleanAttribute failed") {
             attrs.setBooleanAttribute(key, value)
         }
     }
 
     override fun setStringAttribute(key: String, value: String) {
-        lock.write {
+        mutate("LogRecord.setStringAttribute failed") {
             attrs.setStringAttribute(key, value)
         }
     }
 
     override fun setLongAttribute(key: String, value: Long) {
-        lock.write {
+        mutate("LogRecord.setLongAttribute failed") {
             attrs.setLongAttribute(key, value)
         }
     }
 
     override fun setDoubleAttribute(key: String, value: Double) {
-        lock.write {
+        mutate("LogRecord.setDoubleAttribute failed") {
             attrs.setDoubleAttribute(key, value)
         }
     }
@@ -146,7 +162,7 @@ internal class LogRecordModel(
         key: String,
         value: List<Boolean>
     ) {
-        lock.write {
+        mutate("LogRecord.setBooleanListAttribute failed") {
             attrs.setBooleanListAttribute(key, value)
         }
     }
@@ -155,7 +171,7 @@ internal class LogRecordModel(
         key: String,
         value: List<String>
     ) {
-        lock.write {
+        mutate("LogRecord.setStringListAttribute failed") {
             attrs.setStringListAttribute(key, value)
         }
     }
@@ -164,7 +180,7 @@ internal class LogRecordModel(
         key: String,
         value: List<Long>
     ) {
-        lock.write {
+        mutate("LogRecord.setLongListAttribute failed") {
             attrs.setLongListAttribute(key, value)
         }
     }
@@ -173,20 +189,34 @@ internal class LogRecordModel(
         key: String,
         value: List<Double>
     ) {
-        lock.write {
+        mutate("LogRecord.setDoubleListAttribute failed") {
             attrs.setDoubleListAttribute(key, value)
         }
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
-        lock.write {
+        mutate("LogRecord.setByteArrayAttribute failed") {
             attrs.setByteArrayAttribute(key, value)
         }
     }
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
-        lock.write {
+        mutate("LogRecord.setAnyValueAttribute failed") {
             attrs.setAnyValueAttribute(key, value)
         }
     }
+
+    override fun toLogRecordData(): LogRecordData = LogRecordDataImpl(
+        timestamp,
+        observedTimestamp,
+        severityNumber,
+        severityText,
+        body,
+        eventName,
+        spanContext,
+        attributes,
+        resource,
+        instrumentationScopeInfo,
+        droppedAttributesCount
+    )
 }

@@ -2,18 +2,18 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaLogger
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
+import io.opentelemetry.kotlin.attributes.toFlattenedBodyString
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.OtelJavaContextAdapter
-import io.opentelemetry.kotlin.context.OtelJavaContextKeyRepository
+import io.opentelemetry.kotlin.context.toOtelJavaContext
 import java.util.concurrent.TimeUnit
 
 @ExperimentalApi
 internal class LoggerAdapter(
     private val impl: OtelJavaLogger,
-    private val contextKeyRepository: OtelJavaContextKeyRepository = OtelJavaContextKeyRepository.INSTANCE,
 ) : Logger {
 
     override fun enabled(
@@ -21,8 +21,12 @@ internal class LoggerAdapter(
         severityNumber: SeverityNumber?,
         eventName: String?,
     ): Boolean {
-        // no implementation in opentelemetry-java. Return true to allow all logs
-        return true
+        // eventName has no equivalent in opentelemetry-java, so it is not taken into account
+        val severity = (severityNumber ?: SeverityNumber.UNKNOWN).toOtelJavaSeverityNumber()
+        return when (context) {
+            null -> impl.isEnabled(severity)
+            else -> impl.isEnabled(severity, context.toOtelJavaContext())
+        }
     }
 
     override fun emit(
@@ -62,8 +66,8 @@ internal class LoggerAdapter(
     ) {
         val builder = impl.logRecordBuilder()
 
-        if (body != null) {
-            builder.setBody(body.toString())
+        if (body != null && body != AnyValue.NullValue) {
+            builder.setBody(body.toFlattenedBodyString())
         }
         if (eventName != null) {
             builder.setEventName(eventName)
@@ -75,7 +79,7 @@ internal class LoggerAdapter(
             builder.setObservedTimestamp(observedTimestamp, TimeUnit.NANOSECONDS)
         }
         if (context != null) {
-            builder.setContext(OtelJavaContextAdapter(context, contextKeyRepository))
+            builder.setContext(context.toOtelJavaContext())
         }
         if (severityNumber != null) {
             builder.setSeverity(severityNumber.toOtelJavaSeverityNumber())

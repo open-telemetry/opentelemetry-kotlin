@@ -1,5 +1,14 @@
 package io.opentelemetry.kotlin.encode
 
-internal sealed interface OtlpJsonEncoder<in T> {
-    fun encode(value: T): Sequence<String>
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
+
+internal interface OtlpJsonEncoder<in T, S> {
+    fun getSerializable(value: T): S
+    fun getSerializer(): KSerializer<S>
+    fun encode(value: T): String =
+        Json.encodeToString(
+            serializer = getSerializer(),
+            value = getSerializable(value)
+        )
 }
