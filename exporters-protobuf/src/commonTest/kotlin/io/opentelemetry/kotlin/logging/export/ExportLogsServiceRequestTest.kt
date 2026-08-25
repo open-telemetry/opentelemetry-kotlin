@@ -199,4 +199,32 @@ class ExportLogsServiceRequestTest {
 
         assertEquals("", request.resource_logs[0].scope_logs[0].schema_url)
     }
+
+    @Test
+    fun testUsesResourceSchemaUrlOnResourceLogs() {
+        val request = listOf(
+            FakeLogRecordData(resource = FakeResource(schemaUrl = "https://example.com/resource")),
+        ).toExportLogsServiceRequest()
+
+        assertEquals("https://example.com/resource", request.resource_logs[0].schema_url)
+    }
+
+    @Test
+    fun testUsesEmptySchemaUrlWhenResourceHasNone() {
+        val request = listOf(
+            FakeLogRecordData(resource = FakeResource(schemaUrl = null)),
+        ).toExportLogsServiceRequest()
+
+        assertEquals("", request.resource_logs[0].schema_url)
+    }
+
+    @Test
+    fun testRoundTripPreservesResourceSchemaUrl() {
+        val original = listOf(
+            FakeLogRecordData(resource = FakeResource(schemaUrl = "https://example.com/resource")),
+        )
+        val result = original.toProtobufByteArray().toLogRecordDataList()
+
+        assertEquals("https://example.com/resource", result.single().resource.schemaUrl)
+    }
 }
