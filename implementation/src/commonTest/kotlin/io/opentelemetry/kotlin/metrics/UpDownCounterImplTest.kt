@@ -21,6 +21,9 @@ internal class UpDownCounterImplTest {
     /** Mirrors the private MeterImpl.MAX_INSTRUMENT_NAME_CHARS constant. */
     private val maxNameChars = 255
 
+    /** Mirrors the private MeterImpl.MAX_INSTRUMENT_UNIT_CHARS constant. */
+    private val maxUnitChars = 63
+
     @BeforeTest
     fun setup() {
         meter = MeterProviderImpl(
@@ -142,8 +145,43 @@ internal class UpDownCounterImplTest {
             )
         ).getMeter("test")
 
-        val unit = "a".repeat(MAX_INSTRUMENT_UNIT_CHARS + 1)
+        val unit = "a".repeat(maxUnitChars + 1)
         val counter = invalidUnitMeter.createDoubleUpDownCounter("grocery.customers", unit = unit)
+
+        assertNull(counter.unit)
+        assertTrue(counter.enabled())
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals("Instrument.unit", handler.apiMisuses.single().api)
+    }
+
+    @Test
+    fun createKeepsUnitAtLimitUnchanged() {
+        val handler = FakeSdkErrorHandler()
+        val limitMeter = MeterProviderImpl(
+            MetricsConfig(
+                resource = ResourceImpl(AttributesModel(), null),
+                sdkErrorHandler = handler,
+            )
+        ).getMeter("test")
+
+        val unit = "a".repeat(maxUnitChars)
+        val counter = limitMeter.createDoubleUpDownCounter("grocery.customers", unit = unit)
+
+        assertEquals(unit, counter.unit)
+        assertTrue(handler.errors.isEmpty())
+    }
+
+    @Test
+    fun createWithNonAsciiUnitDropsUnitAndReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        val nonAsciiUnitMeter = MeterProviderImpl(
+            MetricsConfig(
+                resource = ResourceImpl(AttributesModel(), null),
+                sdkErrorHandler = handler,
+            )
+        ).getMeter("test")
+
+        val counter = nonAsciiUnitMeter.createDoubleUpDownCounter("grocery.customers", unit = "café")
 
         assertNull(counter.unit)
         assertTrue(counter.enabled())

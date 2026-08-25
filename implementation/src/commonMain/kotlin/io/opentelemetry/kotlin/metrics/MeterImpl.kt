@@ -20,7 +20,7 @@ internal class MeterImpl(
     ): DoubleUpDownCounter {
         val noopMeter = obtainNoopMeterIfInvalid(name) ?: return DoubleUpDownCounterImpl(
             name,
-            sdkErrorHandler.sanitizeInstrumentUnit(unit),
+            sanitizeInstrumentUnit(unit),
             description,
         )
         return noopMeter.createDoubleUpDownCounter(name, unit, description)
@@ -60,6 +60,33 @@ internal class MeterImpl(
         return false
     }
 
+    /**
+     * Sanitizes [unit] to satisfy the
+     * [instrument unit](https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-unit)
+     * requirements: a case-sensitive ASCII string of at most [MAX_INSTRUMENT_UNIT_CHARS]
+     * characters.
+     *
+     * Invalid units are reported as [SdkError.ApiMisuse] and dropped to `null` rather than
+     * destabilizing the host or being rewritten to a misleading value. `null` stays `null`.
+     */
+    private fun sanitizeInstrumentUnit(unit: String?): String? {
+        if (unit == null) {
+            return null
+        }
+        if (unit.length <= MAX_INSTRUMENT_UNIT_CHARS && unit.all { it.code in 0..127 }) {
+            return unit
+        }
+        sdkErrorHandler.reportError(
+            SdkError.ApiMisuse(
+                api = "Instrument.unit",
+                message = "Instrument unit is invalid (must be ASCII, at most " +
+                    "$MAX_INSTRUMENT_UNIT_CHARS characters); it was dropped.",
+                severity = SdkErrorSeverity.WARNING,
+            )
+        )
+        return null
+    }
+
     private companion object {
         /**
          * The maximum length instrument names must support, per
@@ -68,5 +95,11 @@ internal class MeterImpl(
         const val MAX_INSTRUMENT_NAME_CHARS = 255
 
         val INSTRUMENT_NAME = Regex("^[A-Za-z][A-Za-z0-9_./-]{0,254}$")
+
+        /**
+         * The maximum length instrument units must support, per
+         * https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-unit.
+         */
+        const val MAX_INSTRUMENT_UNIT_CHARS = 63
     }
 }
