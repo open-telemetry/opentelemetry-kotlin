@@ -10,6 +10,9 @@ import io.opentelemetry.kotlin.metrics.aggregation.Aggregation
  * An explicitly configured stream setting overrides advice for the same aspect. A null
  * [aggregation] delegates aggregation selection to the MetricReader default.
  *
+ * [cardinalityLimit] should be positive. Non-positive values fall back to
+ * [MetricStorage.DEFAULT_MAX_CARDINALITY] when the metric stream is resolved.
+ *
  * https://opentelemetry.io/docs/specs/otel/metrics/sdk/#view
  */
 internal data class View(
@@ -19,8 +22,4 @@ internal data class View(
     val aggregation: Aggregation? = null,
     val attributesProcessor: AttributesProcessor = AttributesProcessor.Noop,
     val cardinalityLimit: Int = MetricStorage.DEFAULT_MAX_CARDINALITY,
-) {
-    init {
-        require(cardinalityLimit > 0) { "cardinalityLimit must be positive" }
-    }
-}
+)

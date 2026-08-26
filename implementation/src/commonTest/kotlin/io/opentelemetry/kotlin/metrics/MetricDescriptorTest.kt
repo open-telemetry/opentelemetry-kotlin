@@ -62,14 +62,28 @@ internal class MetricDescriptorTest {
         assertEquals(first.hashCode(), second.hashCode())
     }
 
+    @Test
+    fun `invalid cardinality limit falls back to the SDK default`() {
+        listOf(0, -1).forEach { invalidLimit ->
+            val descriptor = MetricDescriptor.create(
+                sourceInstrument = instrument,
+                view = view(cardinalityLimit = invalidLimit),
+            )
+
+            assertEquals(MetricStorage.DEFAULT_MAX_CARDINALITY, descriptor.cardinalityLimit)
+        }
+    }
+
     private fun view(
         selector: InstrumentSelector = InstrumentSelector { _, _ -> true },
         name: String? = null,
         description: String? = null,
+        cardinalityLimit: Int = MetricStorage.DEFAULT_MAX_CARDINALITY,
     ): View = View(
         selector = selector,
         name = name,
         description = description,
+        cardinalityLimit = cardinalityLimit,
     )
 
     private companion object {

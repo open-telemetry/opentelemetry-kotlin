@@ -65,7 +65,8 @@ internal class MetricDescriptor private constructor(
             sourceInstrument = sourceInstrument,
             view = view,
             attributesProcessor = attributesProcessor,
-            cardinalityLimit = cardinalityLimit,
+            cardinalityLimit = cardinalityLimit.takeIf { it > 0 }
+                ?: MetricStorage.DEFAULT_MAX_CARDINALITY,
         )
     }
 }
