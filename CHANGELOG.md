@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 0.7.0 (2026-08-26)
+
 ### Migration notes
 
 - `SdkErrorHandler` now has a single `onError(SdkError)` method in place of `onApiMisuse`,
