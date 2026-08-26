@@ -13,6 +13,7 @@ import io.ktor.utils.io.ByteReadChannel
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.export.EXPORT_REQUEST_TIMEOUT_MS
 import io.opentelemetry.kotlin.export.HttpClientRegistry
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpClient
@@ -147,6 +148,15 @@ internal class OtlpHttpSpanExporterTest {
             engine = engine,
             requestTimeoutMs = 30_000,
         )
+
+        assertSame(client1, client2)
+        HttpClientRegistry.clear()
+    }
+
+    @Test
+    fun testDefaultPathReusesClientAcrossCalls() {
+        val client1 = HttpClientRegistry.getOrCreate(EXPORT_REQUEST_TIMEOUT_MS)
+        val client2 = HttpClientRegistry.getOrCreate(EXPORT_REQUEST_TIMEOUT_MS)
 
         assertSame(client1, client2)
         HttpClientRegistry.clear()
