@@ -21,12 +21,6 @@ import io.opentelemetry.kotlin.export.createHttpEngine
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
-import kotlin.test.assertSame
-import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -34,6 +28,12 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 internal class OtlpHttpSpanExporterTest {
 
