@@ -212,6 +212,24 @@ internal class OtlpClientTest {
     }
 
     @Test
+    fun testExportTracesSetsCustomHeaders() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        val httpClient = createDefaultHttpClient(INFINITE_TIMEOUT_MS, server)
+        client = OtlpClient(
+            baseUrl,
+            httpClient = httpClient,
+            sdkErrorHandler = errorHandler,
+            requestHeaders = mapOf("Authorization" to "Bearer test-token"),
+        )
+        client.exportTraces(spans)
+
+        val request = server.requestHistory.single()
+        val headers = request.headers.toMap().mapValues { it.value.joinToString() }
+        assertEquals("Bearer test-token", headers["Authorization"])
+        assertEquals(expectedUserAgent, headers["User-Agent"])
+    }
+
+    @Test
     fun testExportLogRetryableError() = runTest {
         mockResponseStatus = HttpStatusCode.TooManyRequests
         val response = client.exportLogs(logRecords)

@@ -136,6 +136,40 @@ internal class OtlpHttpSpanExporterTest {
     }
 
     @Test
+    fun testEngineOverloadIsUsed() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        val fakeConfig = object : TraceExportConfigDsl {
+            override val clock: Clock = FakeClock()
+            override val sdkErrorHandler = NoopSdkErrorHandler
+        }
+        val engineExporter = fakeConfig.otlpHttpSpanExporter(baseUrl, server)
+        val code = engineExporter.export(spans)
+        assertEquals(OperationResultCode.Success, code)
+        waitForExportedTelemetry()
+        HttpClientRegistry.clear()
+    }
+
+    @Test
+    fun testDslHeadersAreSent() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        val fakeConfig = object : TraceExportConfigDsl {
+            override val clock: Clock = FakeClock()
+            override val sdkErrorHandler = NoopSdkErrorHandler
+        }
+        val dslExporter = fakeConfig.otlpHttpSpanExporter {
+            endpoint = baseUrl
+            header("Authorization", "Bearer test-token")
+            httpClientEngine = server
+        }
+        val code = dslExporter.export(spans)
+        assertEquals(OperationResultCode.Success, code)
+        val headers = waitForExportedTelemetry().single().headers.toMap().mapValues { it.value.joinToString() }
+        assertEquals("Bearer test-token", headers["Authorization"])
+        assertTrue(headers["User-Agent"]!!.startsWith("OTel-OTLP-Exporter-Kotlin/"))
+        HttpClientRegistry.clear()
+    }
+
+    @Test
     fun testHttpClientRegistryIsReused() {
         val engine = createHttpEngine()
         val client1 = HttpClientRegistry.getOrCreate(

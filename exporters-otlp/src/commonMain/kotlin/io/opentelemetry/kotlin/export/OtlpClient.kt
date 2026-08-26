@@ -32,6 +32,7 @@ internal class OtlpClient(
     private val baseUrl: String,
     private val httpClient: HttpClient,
     private val sdkErrorHandler: SdkErrorHandler,
+    private val requestHeaders: Map<String, String> = emptyMap(),
 ) {
 
     private val contentType = ContentType.parse("application/x-protobuf")
@@ -58,6 +59,9 @@ internal class OtlpClient(
         val response = httpClient.post(url) {
             compress("gzip")
             contentType(contentType)
+            requestHeaders.forEach { (name, value) ->
+                header(name, value)
+            }
             header(HttpHeaders.UserAgent, userAgent)
             setBody(requestSerializer())
         }

@@ -13,6 +13,7 @@ import io.ktor.utils.io.ByteReadChannel
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.export.HttpClientRegistry
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpClient
 import io.opentelemetry.kotlin.export.createDefaultHttpClient
@@ -126,6 +127,40 @@ internal class OtlpHttpLogRecordExporterTest {
         }
         val headers = customServer.requestHistory.single().headers.toMap().mapValues { it.value.joinToString() }
         assertEquals("Bearer test-token", headers["Authorization"])
+    }
+
+    @Test
+    fun testEngineOverloadIsUsed() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        val fakeConfig = object : LogExportConfigDsl {
+            override val clock: Clock = FakeClock()
+            override val sdkErrorHandler = NoopSdkErrorHandler
+        }
+        val engineExporter = fakeConfig.otlpHttpLogRecordExporter(baseUrl, server)
+        val code = engineExporter.export(logRecords)
+        assertEquals(OperationResultCode.Success, code)
+        waitForExportedTelemetry()
+        HttpClientRegistry.clear()
+    }
+
+    @Test
+    fun testDslHeadersAreSent() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        val fakeConfig = object : LogExportConfigDsl {
+            override val clock: Clock = FakeClock()
+            override val sdkErrorHandler = NoopSdkErrorHandler
+        }
+        val dslExporter = fakeConfig.otlpHttpLogRecordExporter {
+            endpoint = baseUrl
+            header("Authorization", "Bearer test-token")
+            httpClientEngine = server
+        }
+        val code = dslExporter.export(logRecords)
+        assertEquals(OperationResultCode.Success, code)
+        val headers = waitForExportedTelemetry().single().headers.toMap().mapValues { it.value.joinToString() }
+        assertEquals("Bearer test-token", headers["Authorization"])
+        assertTrue(headers["User-Agent"]!!.startsWith("OTel-OTLP-Exporter-Kotlin/"))
+        HttpClientRegistry.clear()
     }
 
     private suspend fun waitForExportedTelemetry(

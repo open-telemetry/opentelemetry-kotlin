@@ -1,12 +1,24 @@
+public final class io/opentelemetry/kotlin/export/OtlpHttpExporterConfigDsl {
+	public final fun getEndpoint ()Ljava/lang/String;
+	public final fun getTimeoutMs ()J
+	public final fun header (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun setEndpoint (Ljava/lang/String;)V
+	public final fun setTimeoutMs (J)V
+}
+
 public final class io/opentelemetry/kotlin/logging/export/OtlpLogRecordExporterApiKt {
 	public static final fun otlpHttpLogRecordExporter (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;Ljava/lang/String;Lio/ktor/client/HttpClient;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
 	public static final fun otlpHttpLogRecordExporter (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;Ljava/lang/String;Lio/ktor/client/engine/HttpClientEngine;J)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
+	public static final fun otlpHttpLogRecordExporter (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
 	public static synthetic fun otlpHttpLogRecordExporter$default (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;Ljava/lang/String;Lio/ktor/client/engine/HttpClientEngine;JILjava/lang/Object;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
+	public static synthetic fun otlpHttpLogRecordExporter$default (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
 }
 
 public final class io/opentelemetry/kotlin/tracing/export/OtlpSpanExporterApiKt {
 	public static final fun otlpHttpSpanExporter (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Ljava/lang/String;Lio/ktor/client/HttpClient;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
 	public static final fun otlpHttpSpanExporter (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Ljava/lang/String;Lio/ktor/client/engine/HttpClientEngine;J)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
+	public static final fun otlpHttpSpanExporter (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
 	public static synthetic fun otlpHttpSpanExporter$default (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Ljava/lang/String;Lio/ktor/client/engine/HttpClientEngine;JILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
+	public static synthetic fun otlpHttpSpanExporter$default (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
 }
 
