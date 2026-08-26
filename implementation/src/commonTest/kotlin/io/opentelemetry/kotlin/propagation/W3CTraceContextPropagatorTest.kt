@@ -260,7 +260,7 @@ internal class W3CTraceContextPropagatorTest {
         assertEquals(traceId, sc.traceId)
         assertEquals("ok", sc.traceState.get("keep"))
         assertEquals(null, sc.traceState.get("k3"))
-        assertTrue(W3CTraceStateCodec.encode(sc.traceState.asMap()).length <= MAX_TRACESTATE_CHARS)
+        assertTrue(W3CTraceStateCodec.encode(sc.traceState.asMap()).length <= 512)
     }
 
     @Test

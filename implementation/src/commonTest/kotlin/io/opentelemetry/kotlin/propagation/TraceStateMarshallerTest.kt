@@ -162,7 +162,7 @@ internal class TraceStateMarshallerTest {
     @Test
     fun `decode keeps a combined header of exactly 512 characters`() {
         val header = exactly512Header()
-        assertEquals(MAX_TRACESTATE_CHARS, header.length)
+        assertEquals(512, header.length)
         val ts = TraceStateMarshaller.decode(header, factory)
         assertEquals(header, ts.encode())
     }
@@ -171,7 +171,7 @@ internal class TraceStateMarshallerTest {
     fun `encode keeps a combined header of exactly 512 characters`() {
         val header = exactly512Header()
         val ts = TraceStateMarshaller.decode(header, factory)
-        assertEquals(MAX_TRACESTATE_CHARS, ts.encode().length)
+        assertEquals(512, ts.encode().length)
         assertEquals(header, ts.encode())
     }
 
@@ -179,7 +179,7 @@ internal class TraceStateMarshallerTest {
     fun `decode drops members longer than 128 before dropping from the end`() {
         val ts = TraceStateMarshaller.decode(oversizedHeaderWithTrailingLargeMember(), factory)
         assertEquals(truncatedOversizedHeader(), ts.encode())
-        assertTrue(ts.encode().length <= MAX_TRACESTATE_CHARS)
+        assertTrue(ts.encode().length <= 512)
     }
 
     @Test
@@ -192,10 +192,10 @@ internal class TraceStateMarshallerTest {
     fun `decode drops members from the end when all members are at most 128 characters`() {
         val members = (0 until 11).map { "a$it=" + "x".repeat(47) }
         val header = members.joinToString(",")
-        assertTrue(header.length > MAX_TRACESTATE_CHARS)
+        assertTrue(header.length > 512)
         val ts = TraceStateMarshaller.decode(header, factory)
         val encoded = ts.encode()
-        assertTrue(encoded.length <= MAX_TRACESTATE_CHARS)
+        assertTrue(encoded.length <= 512)
         assertEquals(members.dropLast(1).joinToString(","), encoded)
     }
 
