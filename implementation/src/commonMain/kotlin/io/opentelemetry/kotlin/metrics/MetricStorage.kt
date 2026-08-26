@@ -14,6 +14,7 @@ import io.opentelemetry.kotlin.resource.Resource
  */
 internal interface MetricStorage {
     val descriptor: MetricDescriptor
+    var isEnabled: Boolean
 
     /**
      * Collects the metric data currently retained by this storage.
@@ -26,8 +27,6 @@ internal interface MetricStorage {
         instrumentationScopeInfo: InstrumentationScopeInfo,
         timestampEpochNanos: Long,
     ): MetricData
-
-    fun setEnabled(enabled: Boolean)
 
     companion object {
         const val DEFAULT_MAX_CARDINALITY: Int = 2_000
