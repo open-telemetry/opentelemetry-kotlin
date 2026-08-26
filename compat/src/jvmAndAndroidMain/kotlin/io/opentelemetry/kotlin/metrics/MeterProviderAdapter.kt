@@ -22,7 +22,7 @@ internal class MeterProviderAdapter(
         schemaUrl: String?,
         attributes: (AttributesMutator.() -> Unit)?,
     ): Meter {
-        return map.getOrPut(scopeCacheKey(name, version, schemaUrl)) {
+        return map.getOrPut(scopeCacheKey(name, version, schemaUrl, attributes)) {
             val builder = impl.meterBuilder(name)
             schemaUrl?.let(builder::setSchemaUrl)
             version?.let(builder::setInstrumentationVersion)
