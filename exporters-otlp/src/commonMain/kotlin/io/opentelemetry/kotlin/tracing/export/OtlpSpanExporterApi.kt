@@ -23,7 +23,7 @@ public fun TraceExportConfigDsl.otlpHttpSpanExporter(
     OtlpClient(
         baseUrl,
         HttpClientRegistry.getOrCreate(requestTimeoutMs = timeoutMs, engine = httpClientEngine),
-        sdkErrorHandler
+        sdkErrorHandler,
     ),
     EXPORT_INITIAL_DELAY_MS,
     EXPORT_MAX_ATTEMPT_INTERVAL_MS,
