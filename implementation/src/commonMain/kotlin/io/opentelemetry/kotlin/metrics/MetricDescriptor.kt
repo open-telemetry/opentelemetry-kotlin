@@ -5,9 +5,15 @@ import io.opentelemetry.kotlin.metrics.view.AttributesProcessor
 import io.opentelemetry.kotlin.metrics.view.View
 
 /**
- * SDK configuration for a metric stream after applying an instrument-matching View.
+ * Resolved SDK configuration for a metric stream after applying an instrument-matching View.
  *
  * One instrument may produce multiple independently configured streams when multiple Views match.
+ *
+ * This is a plain class rather than a data class because equality represents the resolved stream
+ * configuration rather than the complete [View]. Names are compared case-insensitively to preserve
+ * instrument identity, as specified by the specification:
+ *
+ * https://opentelemetry.io/docs/specs/semconv/general/naming
  *
  * https://opentelemetry.io/docs/specs/otel/metrics/sdk/#measurement-processing
  */
@@ -21,6 +27,7 @@ internal class MetricDescriptor private constructor(
 ) {
     val unit: String? = sourceInstrument.unit
 
+    /** Uses case-insensitive version of [name]. */
     override fun equals(other: Any?): Boolean =
         this === other ||
             other is MetricDescriptor &&
@@ -31,6 +38,7 @@ internal class MetricDescriptor private constructor(
             attributesProcessor == other.attributesProcessor &&
             cardinalityLimit == other.cardinalityLimit
 
+    /** Uses case-insensitive version of [name]. */
     override fun hashCode(): Int {
         var result = name.lowercase().hashCode()
         result = 31 * result + description.hashCode()

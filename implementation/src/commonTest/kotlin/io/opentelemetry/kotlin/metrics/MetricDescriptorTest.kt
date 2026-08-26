@@ -47,6 +47,21 @@ internal class MetricDescriptorTest {
         assertEquals(first.hashCode(), second.hashCode())
     }
 
+    @Test
+    fun `metric name comparison is case insensitive`() {
+        val first = MetricDescriptor.create(
+            sourceInstrument = instrument,
+            view = view(name = "http.server.request.duration"),
+        )
+        val second = MetricDescriptor.create(
+            sourceInstrument = instrument,
+            view = view(name = "HTTP.SERVER.REQUEST.DURATION"),
+        )
+
+        assertEquals(first, second)
+        assertEquals(first.hashCode(), second.hashCode())
+    }
+
     private fun view(
         selector: InstrumentSelector = InstrumentSelector { _, _ -> true },
         name: String? = null,
