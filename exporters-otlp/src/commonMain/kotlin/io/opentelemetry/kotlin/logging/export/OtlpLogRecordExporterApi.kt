@@ -23,14 +23,7 @@ public fun LogExportConfigDsl.otlpHttpLogRecordExporter(
     OtlpHttpLogRecordExporter(
         OtlpClient(
             baseUrl,
-            if (httpClientEngine != null) {
-                HttpClientRegistry.getOrCreate(
-                    requestTimeoutMs = timeoutMs,
-                    engine = httpClientEngine
-                )
-            } else {
-                HttpClientRegistry.getOrCreate(requestTimeoutMs = timeoutMs)
-            },
+            HttpClientRegistry.getOrCreate(requestTimeoutMs = timeoutMs, engine = httpClientEngine),
             sdkErrorHandler,
         ),
         EXPORT_INITIAL_DELAY_MS,

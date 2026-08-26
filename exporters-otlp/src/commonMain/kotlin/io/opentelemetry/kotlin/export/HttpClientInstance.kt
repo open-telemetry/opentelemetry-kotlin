@@ -20,12 +20,11 @@ internal object HttpClientRegistry {
         clients.clear()
     }
 
-    fun getOrCreate(requestTimeoutMs: Long): HttpClient = getOrCreate(defaultEngine, requestTimeoutMs)
-
-    fun getOrCreate(engine: HttpClientEngine, requestTimeoutMs: Long): HttpClient {
-        val key = HttpClientKey(engine, requestTimeoutMs)
+    fun getOrCreate(engine: HttpClientEngine? = null, requestTimeoutMs: Long): HttpClient {
+        val resolvedEngine = engine ?: defaultEngine
+        val key = HttpClientKey(resolvedEngine, requestTimeoutMs)
         return clients.computeIfAbsent(key) {
-            createDefaultHttpClient(requestTimeoutMs, engine)
+            createDefaultHttpClient(requestTimeoutMs, resolvedEngine)
         }
     }
 }
