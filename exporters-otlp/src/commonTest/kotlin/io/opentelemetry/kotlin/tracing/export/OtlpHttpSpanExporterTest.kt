@@ -137,9 +137,11 @@ internal class OtlpHttpSpanExporterTest {
         HttpClientRegistry.clear()
         val config = fakeConfig()
 
+        // 1. First exporter creation populates the registry with the default engine/client
         config.otlpHttpSpanExporter(baseUrl)
         val client1 = HttpClientRegistry.getOrCreate(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
 
+        // 2. Second exporter creation should hit the existing cache without replacing it
         config.otlpHttpSpanExporter(baseUrl)
         val client2 = HttpClientRegistry.getOrCreate(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
 
