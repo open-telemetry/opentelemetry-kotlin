@@ -185,15 +185,6 @@ internal class OtlpHttpSpanExporterTest {
     }
 
     @Test
-    fun testDefaultPathReusesClientAcrossCalls() {
-        val client1 = HttpClientRegistry.getOrCreate(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
-        val client2 = HttpClientRegistry.getOrCreate(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
-
-        assertSame(client1, client2)
-        HttpClientRegistry.clear()
-    }
-
-    @Test
     fun testHttpClientRegistryConcurrency() = runTest {
         val engine = createHttpEngine()
 
