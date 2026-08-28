@@ -96,6 +96,10 @@ internal class OtlpClient(
         return header.toLongOrNull()?.takeIf { it >= 0 }?.let { it * 1000L }
     }
 
+    internal fun close() {
+        httpClient.close()
+    }
+
     private companion object {
         const val MAX_ERROR_BODY_BYTES: Long = 4 * 1024 * 1024
     }
