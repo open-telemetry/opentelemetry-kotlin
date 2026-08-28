@@ -74,10 +74,7 @@ internal class OtelJavaUpDownCounterAdapterTest {
     @Test
     fun ofDoublesUsesInjectedMeterProvider() {
         val javaMeterProvider = RecordingJavaMeterProvider()
-        OtelJavaLongUpDownCounterBuilderAdapter(FakeMeter("test"), "n", javaMeterProvider)
-            .ofDoubles()
-            .build()
-            .add(1.0)
+        OtelJavaLongUpDownCounterBuilderAdapter(FakeMeter("test"), "n", javaMeterProvider).ofDoubles()
         assertEquals(1, javaMeterProvider.getCount)
     }
 
@@ -86,7 +83,6 @@ internal class OtelJavaUpDownCounterAdapterTest {
         val javaMeterProvider = RecordingJavaMeterProvider()
         OtelJavaLongUpDownCounterBuilderAdapter(FakeMeter("test"), "n", javaMeterProvider)
             .buildWithCallback { }
-            .close()
         assertEquals(1, javaMeterProvider.getCount)
     }
 

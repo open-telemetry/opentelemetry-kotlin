@@ -42,7 +42,7 @@ internal class MeterAdapterUpDownCounterTest {
                 0L to emptyMap(),
                 2L to mapOf("account.type" to "commercial"),
             ),
-            javaMeter.counter.adds,
+            javaMeter.longCounter.adds,
         )
     }
 
@@ -56,7 +56,7 @@ internal class MeterAdapterUpDownCounterTest {
         assertEquals(null, javaMeter.unit)
         assertEquals(null, javaMeter.description)
         counter.add(1)
-        assertEquals(listOf(1L to emptyMap()), javaMeter.counter.adds)
+        assertEquals(listOf(1L to emptyMap()), javaMeter.longCounter.adds)
     }
 
     @Test
@@ -136,7 +136,7 @@ internal class MeterAdapterUpDownCounterTest {
     }
 
     private class RecordingJavaMeter : OtelJavaMeter by OtelJavaMeterProvider.noop().get("") {
-        val counter = RecordingJavaLongUpDownCounter()
+        val longCounter = RecordingJavaLongUpDownCounter()
         val doubleCounter = RecordingJavaDoubleUpDownCounter()
         var unit: String? = null
         var description: String? = null
@@ -169,7 +169,7 @@ internal class MeterAdapterUpDownCounterTest {
                             .ofDoubles().buildWithCallback(callback)
                     }
 
-                override fun build() = counter
+                override fun build() = longCounter
 
                 override fun buildWithCallback(
                     callback: Consumer<OtelJavaObservableLongMeasurement>,
