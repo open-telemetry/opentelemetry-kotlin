@@ -24,7 +24,7 @@ internal class TracerProviderAdapter(
         schemaUrl: String?,
         attributes: (AttributesMutator.() -> Unit)?
     ): Tracer {
-        return map.getOrPut(scopeCacheKey(name, version, schemaUrl)) {
+        return map.getOrPut(scopeCacheKey(name, version, schemaUrl, attributes)) {
             val tracerBuilder = tracerProvider.tracerBuilder(name)
 
             schemaUrl?.let(tracerBuilder::setSchemaUrl)

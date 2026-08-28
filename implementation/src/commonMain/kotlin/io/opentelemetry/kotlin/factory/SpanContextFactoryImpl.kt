@@ -27,24 +27,13 @@ internal class SpanContextFactoryImpl(
         traceFlags: TraceFlags,
         traceState: TraceState,
         isRemote: Boolean,
-    ): SpanContext {
-        val isValidTraceId = isValidTraceId(traceId)
-        val isValidSpanId = isValidSpanId(spanId)
-
-        return SpanContextImpl(
-            traceIdBytes = when {
-                isValidTraceId -> traceId.hexToByteArray()
-                else -> idGenerator.invalidTraceId
-            },
-            spanIdBytes = when {
-                isValidSpanId -> spanId.hexToByteArray()
-                else -> idGenerator.invalidSpanId
-            },
-            traceFlags = traceFlags,
-            isRemote = isRemote,
-            traceState = traceState
-        )
-    }
+    ): SpanContext = create(
+        traceId.hexToByteArray(),
+        spanId.hexToByteArray(),
+        traceFlags,
+        traceState,
+        isRemote,
+    )
 
     override fun create(
         traceIdBytes: ByteArray,
@@ -52,41 +41,19 @@ internal class SpanContextFactoryImpl(
         traceFlags: TraceFlags,
         traceState: TraceState,
         isRemote: Boolean,
-    ): SpanContext = create(
-        traceIdBytes.toHexString(),
-        spanIdBytes.toHexString(),
-        traceFlags,
-        traceState,
-        isRemote,
+    ): SpanContext = SpanContextImpl(
+        traceIdBytes = if (traceIdBytes.isValidTraceIdBytes()) {
+            traceIdBytes
+        } else {
+            idGenerator.invalidTraceId
+        },
+        spanIdBytes = if (spanIdBytes.isValidSpanIdBytes()) {
+            spanIdBytes
+        } else {
+            idGenerator.invalidSpanId
+        },
+        traceFlags = traceFlags,
+        isRemote = isRemote,
+        traceState = traceState,
     )
-
-    private fun isValidTraceId(traceId: String): Boolean {
-        // Must be 32 hex characters (16 bytes)
-        if (traceId.length != TRACE_ID_HEX_LENGTH) {
-            return false
-        }
-
-        // Must be valid hex
-        if (!traceId.isValidHex()) {
-            return false
-        }
-
-        // Must have at least one non-zero byte (not all zeros)
-        return !traceId.isAllZerosHex()
-    }
-
-    private fun isValidSpanId(spanId: String): Boolean {
-        // Must be 16 hex characters (8 bytes)
-        if (spanId.length != SPAN_ID_HEX_LENGTH) {
-            return false
-        }
-
-        // Must be valid hex
-        if (!spanId.isValidHex()) {
-            return false
-        }
-
-        // Must have at least one non-zero byte (not all zeros)
-        return !spanId.isAllZerosHex()
-    }
 }

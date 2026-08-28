@@ -18,7 +18,7 @@ internal class LoggerProviderAdapter(private val impl: OtelJavaLoggerProvider) :
         schemaUrl: String?,
         attributes: (AttributesMutator.() -> Unit)?
     ): Logger {
-        return map.getOrPut(scopeCacheKey(name, version, schemaUrl)) {
+        return map.getOrPut(scopeCacheKey(name, version, schemaUrl, attributes)) {
             val builder = impl.loggerBuilder(name)
 
             if (schemaUrl != null) {

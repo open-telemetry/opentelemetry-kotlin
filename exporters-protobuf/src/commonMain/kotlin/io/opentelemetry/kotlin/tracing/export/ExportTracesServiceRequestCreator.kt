@@ -14,7 +14,7 @@ fun List<SpanData>.toProtobufByteArray() =
 fun ByteArray.toSpanDataList(): List<SpanData> {
     val request = ExportTraceServiceRequest.ADAPTER.decode(this)
     return request.resource_spans.flatMap { resourceSpans ->
-        val resource = resourceSpans.resource?.toResource()
+        val resource = resourceSpans.resource?.toResource(resourceSpans.schema_url)
             ?: return@flatMap emptyList()
         resourceSpans.scope_spans.flatMap { scopeSpans ->
             val scopeInfo = scopeSpans.scope?.toInstrumentationScopeInfo(scopeSpans.schema_url)
@@ -40,5 +40,6 @@ private fun List<SpanData>.toResourceSpan(): List<ResourceSpans> =
                     schema_url = scope.schemaUrl ?: "",
                 )
             },
+            schema_url = resource.schemaUrl ?: "",
         )
     }

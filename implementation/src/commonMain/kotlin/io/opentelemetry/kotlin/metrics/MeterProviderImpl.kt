@@ -30,6 +30,7 @@ internal class MeterProviderImpl(
             MeterImpl(
                 instrumentationScopeInfo = key,
                 resource = metricsConfig.resource,
+                sdkErrorHandler = sdkErrorHandler,
             )
         }
     }

@@ -119,15 +119,21 @@ internal class SpanModel(
     @Suppress("NOTHING_TO_INLINE")
     private inline fun endInternal(timestamp: Long) {
         sdkErrorHandler.guard("Span.end failed") {
-            val toExport = lock.write {
+            val shouldEnd = lock.write {
                 if (state != State.STARTED) {
-                    return@write null
+                    return@write false
                 }
                 state = State.ENDING
                 endTimestampImpl = timestamp
-                sdkErrorHandler.guard {
-                    processor?.onEnding(ReadWriteSpanImpl(this))
-                }
+                true
+            }
+            if (!shouldEnd) {
+                return
+            }
+            sdkErrorHandler.guard {
+                processor?.onEnding(ReadWriteSpanImpl(this))
+            }
+            val toExport = lock.write {
                 state = State.ENDED
                 // take a snapshot so that processors retain plain data rather than this
                 // model, releasing its properties once the span

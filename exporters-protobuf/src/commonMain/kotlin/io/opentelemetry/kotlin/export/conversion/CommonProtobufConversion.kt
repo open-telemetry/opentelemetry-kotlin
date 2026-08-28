@@ -30,8 +30,13 @@ internal fun InstrumentationScope.toInstrumentationScopeInfo(
     attributes = attributes.toAttributeMap()
 )
 
-internal fun io.opentelemetry.proto.resource.v1.Resource.toResource(): Resource =
-    DeserializedResource(attributes = attributes.toAttributeMap())
+internal fun io.opentelemetry.proto.resource.v1.Resource.toResource(
+    schemaUrl: String? = null,
+): Resource =
+    DeserializedResource(
+        attributes = attributes.toAttributeMap(),
+        schemaUrl = schemaUrl?.ifEmpty { null },
+    )
 
 internal fun TraceFlags.toFlagsInt(): Int = hex.toInt(16)
 

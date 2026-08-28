@@ -14,7 +14,7 @@ fun List<LogRecordData>.toProtobufByteArray(): ByteArray =
 fun ByteArray.toLogRecordDataList(): List<LogRecordData> {
     val request = ExportLogsServiceRequest.ADAPTER.decode(this)
     return request.resource_logs.flatMap { resourceLogs ->
-        val resource = resourceLogs.resource?.toResource()
+        val resource = resourceLogs.resource?.toResource(resourceLogs.schema_url)
             ?: return@flatMap emptyList()
         resourceLogs.scope_logs.flatMap { scopeLogs ->
             val scopeInfo = scopeLogs.scope?.toInstrumentationScopeInfo(scopeLogs.schema_url)
@@ -42,5 +42,6 @@ private fun List<LogRecordData>.toResourceLogs(): List<ResourceLogs> =
                     schema_url = scope.schemaUrl ?: "",
                 )
             },
+            schema_url = resource.schemaUrl ?: "",
         )
     }

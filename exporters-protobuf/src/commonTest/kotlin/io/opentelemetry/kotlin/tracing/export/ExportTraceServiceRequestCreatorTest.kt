@@ -274,4 +274,32 @@ class ExportTraceServiceRequestCreatorTest {
 
         assertEquals("", request.resource_spans[0].scope_spans[0].schema_url)
     }
+
+    @Test
+    fun testUsesResourceSchemaUrlOnResourceSpans() {
+        val request = listOf(
+            FakeSpanData(resource = FakeResource(schemaUrl = "https://example.com/resource")),
+        ).toExportTraceServiceRequest()
+
+        assertEquals("https://example.com/resource", request.resource_spans[0].schema_url)
+    }
+
+    @Test
+    fun testUsesEmptySchemaUrlWhenResourceHasNone() {
+        val request = listOf(
+            FakeSpanData(resource = FakeResource(schemaUrl = null)),
+        ).toExportTraceServiceRequest()
+
+        assertEquals("", request.resource_spans[0].schema_url)
+    }
+
+    @Test
+    fun testRoundTripPreservesResourceSchemaUrl() {
+        val original = listOf(
+            FakeSpanData(resource = FakeResource(schemaUrl = "https://example.com/resource")),
+        )
+        val result = original.toProtobufByteArray().toSpanDataList()
+
+        assertEquals("https://example.com/resource", result.single().resource.schemaUrl)
+    }
 }
