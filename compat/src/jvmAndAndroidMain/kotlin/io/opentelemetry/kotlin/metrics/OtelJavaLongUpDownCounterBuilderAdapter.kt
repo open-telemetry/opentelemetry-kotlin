@@ -11,6 +11,7 @@ import java.util.function.Consumer
 internal class OtelJavaLongUpDownCounterBuilderAdapter(
     private val meter: Meter,
     private val name: String,
+    private val javaMeterProvider: OtelJavaMeterProvider = OtelJavaMeterProvider.noop(),
     private var unit: String? = null,
     private var description: String? = null,
 ) : OtelJavaLongUpDownCounterBuilder {
@@ -26,7 +27,7 @@ internal class OtelJavaLongUpDownCounterBuilderAdapter(
     }
 
     override fun ofDoubles(): OtelJavaDoubleUpDownCounterBuilder =
-        OtelJavaMeterProvider.noop().get("").upDownCounterBuilder(name).ofDoubles()
+        javaMeterProvider.get("").upDownCounterBuilder(name).ofDoubles()
 
     override fun build(): OtelJavaLongUpDownCounter =
         OtelJavaLongUpDownCounterAdapter(meter.createLongUpDownCounter(name, unit, description))
@@ -34,5 +35,5 @@ internal class OtelJavaLongUpDownCounterBuilderAdapter(
     override fun buildWithCallback(
         callback: Consumer<OtelJavaObservableLongMeasurement>,
     ): OtelJavaObservableLongUpDownCounter =
-        OtelJavaMeterProvider.noop().get("").upDownCounterBuilder(name).buildWithCallback(callback)
+        javaMeterProvider.get("").upDownCounterBuilder(name).buildWithCallback(callback)
 }

@@ -8,13 +8,16 @@ private const val DEFAULT_DETAILS = "Operation failed"
  * Runs [action], which may be user-supplied code.
  *
  * If [action] completes normally nothing happens. If it throws, the failure is reported to this
- * handler as a [SdkError.UserCodeError] and swallowed.
+ * handler as a [SdkError.UserCodeError] and swallowed. [CancellationException] is rethrown so
+ * coroutine cancellation keeps propagating.
  *
  * @param details optional description of what was being attempted, used as the error message.
  */
 public inline fun SdkErrorHandler.guard(details: String? = null, action: () -> Unit) {
     try {
         action()
+    } catch (exc: CancellationException) {
+        throw exc
     } catch (exc: Throwable) {
         reportUserCodeError(exc, details)
     }
@@ -22,7 +25,7 @@ public inline fun SdkErrorHandler.guard(details: String? = null, action: () -> U
 
 /**
  * As [guard], but for user-supplied code that returns a value. Returns [default] if [action]
- * throws.
+ * throws. [CancellationException] is rethrown rather than reported.
  */
 public inline fun <T> SdkErrorHandler.guardOrDefault(
     default: T,
@@ -30,6 +33,8 @@ public inline fun <T> SdkErrorHandler.guardOrDefault(
     action: () -> T,
 ): T = try {
     action()
+} catch (exc: CancellationException) {
+    throw exc
 } catch (exc: Throwable) {
     reportUserCodeError(exc, details)
     default

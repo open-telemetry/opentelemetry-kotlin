@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.metrics
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
+import io.opentelemetry.kotlin.aliases.OtelJavaMeter
+import io.opentelemetry.kotlin.aliases.OtelJavaMeterProvider
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -70,17 +72,32 @@ internal class OtelJavaUpDownCounterAdapterTest {
     }
 
     @Test
-    fun ofDoublesDelegatesToJavaNoop() {
-        OtelJavaLongUpDownCounterBuilderAdapter(FakeMeter("test"), "n")
+    fun ofDoublesUsesInjectedMeterProvider() {
+        val javaMeterProvider = RecordingJavaMeterProvider()
+        OtelJavaLongUpDownCounterBuilderAdapter(FakeMeter("test"), "n", javaMeterProvider)
             .ofDoubles()
             .build()
             .add(1.0)
+        assertEquals(1, javaMeterProvider.getCount)
     }
 
     @Test
-    fun buildWithCallbackDelegatesToJavaNoop() {
-        OtelJavaLongUpDownCounterBuilderAdapter(FakeMeter("test"), "n")
+    fun buildWithCallbackUsesInjectedMeterProvider() {
+        val javaMeterProvider = RecordingJavaMeterProvider()
+        OtelJavaLongUpDownCounterBuilderAdapter(FakeMeter("test"), "n", javaMeterProvider)
             .buildWithCallback { }
             .close()
+        assertEquals(1, javaMeterProvider.getCount)
+    }
+
+    private class RecordingJavaMeterProvider(
+        private val delegate: OtelJavaMeterProvider = OtelJavaMeterProvider.noop(),
+    ) : OtelJavaMeterProvider by delegate {
+        var getCount = 0
+
+        override fun get(instrumentationScopeName: String): OtelJavaMeter {
+            getCount++
+            return delegate.get(instrumentationScopeName)
+        }
     }
 }

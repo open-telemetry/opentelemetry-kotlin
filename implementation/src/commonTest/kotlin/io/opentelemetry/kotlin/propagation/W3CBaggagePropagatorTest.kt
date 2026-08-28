@@ -117,6 +117,41 @@ internal class W3CBaggagePropagatorTest {
     }
 
     @Test
+    fun `extract skips entry whose serialized form exceeds per-entry limit`() {
+        val header = "ok=v,big=" + "x".repeat(5000) + ",keep=g"
+        val baggage = extract(header)
+        assertEquals("v", baggage.getValue("ok"))
+        assertEquals("g", baggage.getValue("keep"))
+        assertNull(baggage.getValue("big"))
+        assertEquals(2, baggage.asMap().size)
+    }
+
+    @Test
+    fun `extract stops when total header would exceed 8192 bytes`() {
+        val header = (0 until 20).joinToString(",") { idx ->
+            "k$idx=" + "v".repeat(500)
+        }
+        assertTrue(header.length > 8192)
+        val baggage = extract(header)
+        assertNotNull(baggage.getValue("k0"))
+        assertNull(baggage.getValue("k19"))
+        assertTrue(baggage.asMap().size < 20)
+        assertTrue(extractedHeaderSize(baggage) <= 8192)
+    }
+
+    @Test
+    fun `extract accepts a header of exactly 8192 bytes`() {
+        val first = "a=" + "x".repeat(4094)
+        val second = "b=" + "y".repeat(4093)
+        val header = "$first,$second"
+        assertEquals(8192, header.length)
+        val baggage = extract(header)
+        assertEquals("x".repeat(4094), baggage.getValue("a"))
+        assertEquals("y".repeat(4093), baggage.getValue("b"))
+        assertEquals(2, baggage.asMap().size)
+    }
+
+    @Test
     fun `inject caps at 180 entries even when bytes remain`() {
         val baggage = (0 until 181).fold(BaggageImpl.EMPTY) { acc, idx ->
             acc.set("k$idx", "v")
@@ -304,6 +339,9 @@ internal class W3CBaggagePropagatorTest {
         )
         return ctx.extractBaggage()
     }
+
+    private fun extractedHeaderSize(baggage: Baggage): Int =
+        injectInto(baggage)["baggage"]?.length ?: 0
 
     private object MultiValueMapTextMapGetter : TextMapGetter<Map<String, List<String>>> {
         override fun keys(carrier: Map<String, List<String>>): Collection<String> = carrier.keys

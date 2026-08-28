@@ -39,6 +39,19 @@ internal class UpDownCounterImplTest {
     }
 
     @Test
+    fun createDoubleUpDownCounterExposesIdentity() {
+        val counter = meter.createDoubleUpDownCounter(
+            name = "queue.depth",
+            unit = "{item}",
+            description = "queue size",
+        )
+        assertEquals("queue.depth", counter.name)
+        assertEquals("{item}", counter.unit)
+        assertEquals("queue size", counter.description)
+        assertTrue(counter.enabled())
+    }
+
+    @Test
     fun longAddAcceptsPositiveNegativeAndZero() {
         val counter = meter.createLongUpDownCounter("grocery.customers")
         counter.add(1)
@@ -48,10 +61,24 @@ internal class UpDownCounterImplTest {
     }
 
     @Test
+    fun doubleAddAcceptsPositiveNegativeAndZero() {
+        val counter = meter.createDoubleUpDownCounter("grocery.customers")
+        counter.add(1.5)
+        counter.add(-1.5)
+        counter.add(0.0)
+        counter.add(2.0) { setStringAttribute("account.type", "residential") }
+    }
+
+    @Test
     fun createUsesNullUnitAndDescriptionByDefault() {
-        val counter = meter.createLongUpDownCounter("grocery.customers")
-        assertEquals("grocery.customers", counter.name)
-        assertEquals(null, counter.unit)
-        assertEquals(null, counter.description)
+        val longCounter = meter.createLongUpDownCounter("grocery.customers")
+        assertEquals("grocery.customers", longCounter.name)
+        assertEquals(null, longCounter.unit)
+        assertEquals(null, longCounter.description)
+
+        val doubleCounter = meter.createDoubleUpDownCounter("grocery.customers")
+        assertEquals("grocery.customers", doubleCounter.name)
+        assertEquals(null, doubleCounter.unit)
+        assertEquals(null, doubleCounter.description)
     }
 }

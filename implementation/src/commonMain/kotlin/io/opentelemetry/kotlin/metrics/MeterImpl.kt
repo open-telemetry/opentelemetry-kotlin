@@ -7,6 +7,12 @@ internal class MeterImpl(
     val instrumentationScopeInfo: InstrumentationScopeInfo,
     val resource: Resource,
 ) : Meter {
+    override fun createDoubleUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+    ): DoubleUpDownCounter = DoubleUpDownCounterImpl(name, unit, description)
+
     override fun createLongUpDownCounter(
         name: String,
         unit: String?,

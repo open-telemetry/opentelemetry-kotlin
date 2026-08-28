@@ -8,11 +8,12 @@ import io.opentelemetry.kotlin.aliases.OtelJavaMeterProvider
  * Adapts a Kotlin [Meter] to a Java [OtelJavaMeter].
  *
  * Long UpDownCounter builders are wired to the Kotlin API. Other instrument-builder calls still
- * delegate to Java OTel's no-op meter until those instruments are implemented.
+ * delegate to [javaMeterProvider] until those instruments are implemented.
  */
 internal class OtelJavaMeterAdapter(
     private val impl: Meter,
-) : OtelJavaMeter by OtelJavaMeterProvider.noop().get("") {
+    private val javaMeterProvider: OtelJavaMeterProvider = OtelJavaMeterProvider.noop(),
+) : OtelJavaMeter by javaMeterProvider.get("") {
     override fun upDownCounterBuilder(name: String): OtelJavaLongUpDownCounterBuilder =
-        OtelJavaLongUpDownCounterBuilderAdapter(impl, name)
+        OtelJavaLongUpDownCounterBuilderAdapter(impl, name, javaMeterProvider)
 }

@@ -93,6 +93,9 @@ internal class SpanModel(
     }
 
     override fun setStatus(status: StatusData) {
+        if (status is StatusData.Unset) {
+            return
+        }
         mutate("Span.setStatus failed") {
             if (statusImpl !is StatusData.Ok) {
                 statusImpl = status
@@ -116,20 +119,27 @@ internal class SpanModel(
     @Suppress("NOTHING_TO_INLINE")
     private inline fun endInternal(timestamp: Long) {
         sdkErrorHandler.guard("Span.end failed") {
-            lock.write {
-                if (state == State.STARTED) {
-                    state = State.ENDING
-                    endTimestampImpl = timestamp
-                    sdkErrorHandler.guard {
-                        processor?.onEnding(ReadWriteSpanImpl(this))
-                    }
-                    state = State.ENDED
-                    sdkErrorHandler.guard {
-                        // take a snapshot so that processors retain plain data rather than this
-                        // model, releasing its properties once the span
-                        // has ended. Only built if a processor needs it.
-                        processor?.takeIf(SpanProcessor::isEndRequired)?.onEnd(toSpanData())
-                    }
+            val toExport = lock.write {
+                if (state != State.STARTED) {
+                    return@write null
+                }
+                state = State.ENDING
+                endTimestampImpl = timestamp
+                sdkErrorHandler.guard {
+                    processor?.onEnding(ReadWriteSpanImpl(this))
+                }
+                state = State.ENDED
+                // take a snapshot so that processors retain plain data rather than this
+                // model, releasing its properties once the span
+                // has ended. Only built if a processor needs it.
+                processor?.takeIf(SpanProcessor::isEndRequired)?.let { endProcessor ->
+                    endProcessor to toSpanData()
+                }
+            }
+            if (toExport != null) {
+                val (endProcessor, snapshot) = toExport
+                sdkErrorHandler.guard {
+                    endProcessor.onEnd(snapshot)
                 }
             }
         }

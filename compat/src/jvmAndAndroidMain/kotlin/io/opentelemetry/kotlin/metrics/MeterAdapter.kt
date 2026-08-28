@@ -7,6 +7,17 @@ import io.opentelemetry.kotlin.aliases.OtelJavaMeter
 internal class MeterAdapter(
     private val impl: OtelJavaMeter,
 ) : Meter {
+    override fun createDoubleUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+    ): DoubleUpDownCounter {
+        val builder = impl.upDownCounterBuilder(name).ofDoubles()
+        unit?.let(builder::setUnit)
+        description?.let(builder::setDescription)
+        return DoubleUpDownCounterAdapter(builder.build(), name, unit, description)
+    }
+
     override fun createLongUpDownCounter(
         name: String,
         unit: String?,

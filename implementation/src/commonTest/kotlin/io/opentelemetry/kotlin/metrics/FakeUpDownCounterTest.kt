@@ -30,10 +30,35 @@ internal class FakeUpDownCounterTest {
     }
 
     @Test
-    fun enabledResultCanChange() {
-        val counter = FakeLongUpDownCounter("n")
+    fun doubleAddRecordsValueAndAttributes() {
+        val meter = FakeMeter("test")
+        val counter = meter.createDoubleUpDownCounter(
+            name = "queue.depth",
+            unit = "{item}",
+            description = "queue size",
+        ) as FakeDoubleUpDownCounter
+
+        counter.add(1.5)
+        counter.add(-0.5) { setStringAttribute("material", "steel") }
+
+        assertEquals("queue.depth", counter.name)
+        assertEquals("{item}", counter.unit)
+        assertEquals("queue size", counter.description)
         assertTrue(counter.enabled())
-        counter.enabledResult = { false }
-        assertFalse(counter.enabled())
+        assertEquals(listOf(1.5 to emptyMap(), -0.5 to mapOf("material" to "steel")), counter.adds)
+        assertEquals(1, meter.doubleUpDownCounters.size)
+    }
+
+    @Test
+    fun enabledResultCanChange() {
+        val longCounter = FakeLongUpDownCounter("n")
+        assertTrue(longCounter.enabled())
+        longCounter.enabledResult = { false }
+        assertFalse(longCounter.enabled())
+
+        val doubleCounter = FakeDoubleUpDownCounter("n")
+        assertTrue(doubleCounter.enabled())
+        doubleCounter.enabledResult = { false }
+        assertFalse(doubleCounter.enabled())
     }
 }
