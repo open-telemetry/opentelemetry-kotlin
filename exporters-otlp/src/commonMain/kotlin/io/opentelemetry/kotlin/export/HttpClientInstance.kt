@@ -14,15 +14,17 @@ internal data class HttpClientKey(
 
 internal object HttpClientRegistry {
     private val clients = ConcurrentMap<HttpClientKey, HttpClient>()
+    private val defaultEngine: HttpClientEngine by lazy { createHttpEngine() }
 
     internal fun clear() {
         clients.clear()
     }
 
-    fun getOrCreate(engine: HttpClientEngine, requestTimeoutMs: Long): HttpClient {
-        val key = HttpClientKey(engine, requestTimeoutMs)
+    fun getOrCreate(engine: HttpClientEngine? = null, requestTimeoutMs: Long): HttpClient {
+        val resolvedEngine = engine ?: defaultEngine
+        val key = HttpClientKey(resolvedEngine, requestTimeoutMs)
         return clients.computeIfAbsent(key) {
-            createDefaultHttpClient(requestTimeoutMs, engine)
+            createDefaultHttpClient(requestTimeoutMs, resolvedEngine)
         }
     }
 }

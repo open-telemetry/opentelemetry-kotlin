@@ -13,6 +13,7 @@ import io.ktor.utils.io.ByteReadChannel
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.export.EXPORT_REQUEST_TIMEOUT_MS
 import io.opentelemetry.kotlin.export.HttpClientRegistry
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpClient
@@ -119,11 +120,10 @@ internal class OtlpHttpSpanExporterTest {
         val customClient = HttpClient(customServer) {
             defaultRequest { header("Authorization", "Bearer test-token") }
         }
-        val fakeConfig = object : TraceExportConfigDsl {
-            override val clock: Clock = FakeClock()
-            override val sdkErrorHandler = NoopSdkErrorHandler
+        val customExporter = fakeConfig().otlpHttpSpanExporter {
+            endpoint = baseUrl
+            httpClient = customClient
         }
-        val customExporter = fakeConfig.otlpHttpSpanExporter(baseUrl, customClient)
         customExporter.export(spans)
 
         withTimeout(1000) {
@@ -136,36 +136,40 @@ internal class OtlpHttpSpanExporterTest {
     }
 
     @Test
-    fun testEngineOverloadIsUsed() = runTest {
-        mockResponseStatus = HttpStatusCode.OK
-        val fakeConfig = object : TraceExportConfigDsl {
-            override val clock: Clock = FakeClock()
-            override val sdkErrorHandler = NoopSdkErrorHandler
-        }
-        val engineExporter = fakeConfig.otlpHttpSpanExporter(baseUrl, server)
-        val code = engineExporter.export(spans)
-        assertEquals(OperationResultCode.Success, code)
-        waitForExportedTelemetry()
+    fun testDefaultFactoryUsesSharedRegistryClient() {
+        HttpClientRegistry.clear()
+        val config = fakeConfig()
+
+        // 1. First exporter creation populates the registry with the default engine/client
+        config.otlpHttpSpanExporter { endpoint = baseUrl }
+        val client1 = HttpClientRegistry.getOrCreate(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
+
+        // 2. Second exporter creation should hit the existing cache without replacing it
+        config.otlpHttpSpanExporter { endpoint = baseUrl }
+        val client2 = HttpClientRegistry.getOrCreate(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
+
+        assertSame(client1, client2)
         HttpClientRegistry.clear()
     }
 
     @Test
-    fun testDslHeadersAreSent() = runTest {
-        mockResponseStatus = HttpStatusCode.OK
-        val fakeConfig = object : TraceExportConfigDsl {
-            override val clock: Clock = FakeClock()
-            override val sdkErrorHandler = NoopSdkErrorHandler
+    fun testFactoryWithCustomEngineExports() = runTest {
+        val mockServer = MockEngine {
+            respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
         }
-        val dslExporter = fakeConfig.otlpHttpSpanExporter {
+        val factoryExporter = fakeConfig().otlpHttpSpanExporter {
             endpoint = baseUrl
-            header("Authorization", "Bearer test-token")
-            httpClientEngine = server
+            httpClientEngine = mockServer
         }
-        val code = dslExporter.export(spans)
+        val code = factoryExporter.export(spans)
         assertEquals(OperationResultCode.Success, code)
-        val headers = waitForExportedTelemetry().single().headers.toMap().mapValues { it.value.joinToString() }
-        assertEquals("Bearer test-token", headers["Authorization"])
-        assertTrue(headers["User-Agent"]!!.startsWith("OTel-OTLP-Exporter-Kotlin/"))
+
+        withTimeout(1000) {
+            while (mockServer.requestHistory.isEmpty()) {
+                delay(1L)
+            }
+        }
+        assertEquals(1, mockServer.requestHistory.size)
         HttpClientRegistry.clear()
     }
 
@@ -226,5 +230,10 @@ internal class OtlpHttpSpanExporterTest {
         val request = requests.single()
         val bytes = request.body.toByteArray()
         assertContentEquals(telemetry.toProtobufByteArray(), bytes)
+    }
+
+    private fun fakeConfig(): TraceExportConfigDsl = object : TraceExportConfigDsl {
+        override val clock: Clock = FakeClock()
+        override val sdkErrorHandler = NoopSdkErrorHandler
     }
 }

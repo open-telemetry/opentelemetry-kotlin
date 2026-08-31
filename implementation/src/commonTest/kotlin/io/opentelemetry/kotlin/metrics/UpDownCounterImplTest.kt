@@ -24,6 +24,9 @@ internal class UpDownCounterImplTest {
     /** Mirrors the private MeterImpl.MAX_INSTRUMENT_UNIT_CHARS constant. */
     private val maxUnitChars = 63
 
+    /** Mirrors the private MeterImpl.MAX_INSTRUMENT_DESCRIPTION_CHARS constant. */
+    private val maxDescriptionChars = 1023
+
     @BeforeTest
     fun setup() {
         meter = MeterProviderImpl(
@@ -187,5 +190,77 @@ internal class UpDownCounterImplTest {
         assertTrue(counter.enabled())
         assertEquals(1, handler.apiMisuses.size)
         assertEquals("Instrument.unit", handler.apiMisuses.single().api)
+    }
+
+    @Test
+    fun createTruncatesOverLongDescriptionAndReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        val overLongMeter = MeterProviderImpl(
+            MetricsConfig(
+                resource = ResourceImpl(AttributesModel(), null),
+                sdkErrorHandler = handler,
+            )
+        ).getMeter("test")
+
+        val description = "a".repeat(maxDescriptionChars + 1)
+        val counter = overLongMeter.createDoubleUpDownCounter("grocery.customers", description = description)
+
+        assertEquals("a".repeat(maxDescriptionChars), counter.description)
+        assertEquals(1, handler.apiMisuses.size)
+    }
+
+    @Test
+    fun createKeepsDescriptionAtLimitUnchanged() {
+        val handler = FakeSdkErrorHandler()
+        val limitMeter = MeterProviderImpl(
+            MetricsConfig(
+                resource = ResourceImpl(AttributesModel(), null),
+                sdkErrorHandler = handler,
+            )
+        ).getMeter("test")
+
+        val description = "a".repeat(maxDescriptionChars)
+        val counter = limitMeter.createDoubleUpDownCounter("grocery.customers", description = description)
+
+        assertEquals(description, counter.description)
+        assertTrue(handler.errors.isEmpty())
+    }
+
+    @Test
+    fun createKeepsSupplementaryPlaneCharacterWithinLimit() {
+        val handler = FakeSdkErrorHandler()
+        val supplementaryMeter = MeterProviderImpl(
+            MetricsConfig(
+                resource = ResourceImpl(AttributesModel(), null),
+                sdkErrorHandler = handler,
+            )
+        ).getMeter("test")
+
+        // U+1F600 GRINNING FACE is a surrogate pair, one code point but two UTF-16 chars.
+        val emoji = "\uD83D\uDE00"
+        val description = emoji + "a".repeat(maxDescriptionChars - 1)
+        val counter = supplementaryMeter.createDoubleUpDownCounter("grocery.customers", description = description)
+
+        assertEquals(description, counter.description)
+        assertTrue(handler.errors.isEmpty())
+    }
+
+    @Test
+    fun createTruncationDoesNotSplitSupplementaryPlaneCharacter() {
+        val handler = FakeSdkErrorHandler()
+        val supplementaryMeter = MeterProviderImpl(
+            MetricsConfig(
+                resource = ResourceImpl(AttributesModel(), null),
+                sdkErrorHandler = handler,
+            )
+        ).getMeter("test")
+
+        val emoji = "\uD83D\uDE00"
+        // Surrogate pair sits right at the boundary; truncation must drop it whole, not split it.
+        val description = "a".repeat(maxDescriptionChars) + emoji
+        val counter = supplementaryMeter.createDoubleUpDownCounter("grocery.customers", description = description)
+
+        assertEquals("a".repeat(maxDescriptionChars), counter.description)
+        assertEquals(1, handler.apiMisuses.size)
     }
 }
