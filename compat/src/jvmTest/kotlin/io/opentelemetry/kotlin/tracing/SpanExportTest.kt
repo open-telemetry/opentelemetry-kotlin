@@ -483,6 +483,7 @@ internal class SpanExportTest {
         override fun onEnd(span: ReadableSpan) {}
         override fun isStartRequired(): Boolean = true
         override fun isEndRequired(): Boolean = false
+        override fun isOnEndingRequired(): Boolean = false
         override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
         override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
     }
@@ -531,5 +532,6 @@ internal class SpanExportTest {
         override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
         override fun isStartRequired(): Boolean = true
         override fun isEndRequired(): Boolean = true
+        override fun isOnEndingRequired(): Boolean = false
     }
 }

@@ -1,13 +1,12 @@
 package io.opentelemetry.kotlin.config.envar
 
-import io.opentelemetry.kotlin.config.envar.model.EnvVarName.Companion.envVarName
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 internal class EnvVarReaderTest {
 
-    private val name = envVarName("OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT")
+    private val name = "OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT"
 
     @Test
     fun `should read an int`() {
@@ -25,7 +24,7 @@ internal class EnvVarReaderTest {
             null
         }.readInt(name)
 
-        assertEquals(name.value, requested)
+        assertEquals(name, requested)
     }
 
     @Test

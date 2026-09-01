@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.AtomicBoolean
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 
 private const val ALREADY_DETACHED_MSG = "Scope.detach() called on an already-detached scope"
 private const val OUT_OF_ORDER_MSG = "Scope.detach() called out of order — context has already changed"
@@ -35,7 +36,7 @@ internal class ScopeImpl private constructor(
     }
 
     private fun reportMisuse(message: String) {
-        sdkErrorHandler.onError(
+        sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
                 api = "Scope.detach",
                 message = message,
@@ -52,7 +53,7 @@ internal class ScopeImpl private constructor(
             sdkErrorHandler: SdkErrorHandler,
         ): Scope =
             if (previousContext == currentContext) {
-                sdkErrorHandler.onError(
+                sdkErrorHandler.reportError(
                     SdkError.ApiMisuse(
                         api = "Context.attach",
                         message = "Cannot create scope with two matching contexts",

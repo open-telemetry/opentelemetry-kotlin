@@ -3,9 +3,11 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.platformLog
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +19,7 @@ import kotlinx.coroutines.SupervisorJob
 @ExperimentalApi
 public fun TraceExportConfigDsl.compositeSpanProcessor(vararg processors: SpanProcessor): SpanProcessor {
     if (processors.isEmpty()) {
-        sdkErrorHandler.onError(
+        sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
                 api = "TraceExportConfigDsl.compositeSpanProcessor",
                 message = "At least one processor must be provided",
@@ -47,7 +49,7 @@ public fun TraceExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): Spa
 @ExperimentalApi
 public fun TraceExportConfigDsl.compositeSpanExporter(vararg exporters: SpanExporter): SpanExporter {
     if (exporters.isEmpty()) {
-        sdkErrorHandler.onError(
+        sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
                 api = "TraceExportConfigDsl.compositeSpanExporter",
                 message = "At least one exporter must be provided",
@@ -83,12 +85,12 @@ public fun TraceExportConfigDsl.batchSpanProcessor(
 
 /**
  * Creates a span exporter that outputs span data to stdout. The destination is configurable
- * via a parameter that defaults to [println].
+ * via a parameter that defaults to [platformLog].
  *
  * This exporter is intended for debugging and learning purposes. It is not recommended for
  * production use. The output format is not standardized and can change at any time.
  */
 @ExperimentalApi
 public fun TraceExportConfigDsl.stdoutSpanExporter(
-    logger: (String) -> Unit = ::println
+    logger: (String) -> Unit = ::platformLog
 ): SpanExporter = StdoutSpanExporter(logger)

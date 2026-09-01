@@ -37,13 +37,60 @@ internal class CompositeSpanProcessorTest {
             Success,
         )
         assertFalse(errorHandler.hasErrors())
+        assertFalse(processor.isStartRequired())
+        assertFalse(processor.isEndRequired())
+        assertFalse(processor.isOnEndingRequired())
+    }
+
+    @Test
+    fun testGatingFunctionsDelegate() = runTest {
+        val impl = FakeSpanProcessor(
+            startRequired = false,
+            endRequired = false,
+            onEndingRequired = false
+        )
+        val other = FakeSpanProcessor(
+            startRequired = false,
+            endRequired = false,
+            onEndingRequired = false
+        )
+        val processor = CompositeSpanProcessor(listOf(impl, other), errorHandler)
+        assertFalse(processor.isStartRequired())
+        assertFalse(processor.isEndRequired())
+        assertFalse(processor.isOnEndingRequired())
+
+        other.startRequired = true
+        assertTrue(processor.isStartRequired())
+        assertFalse(processor.isEndRequired())
+        assertFalse(processor.isOnEndingRequired())
+
+        other.endRequired = true
+        other.onEndingRequired = true
+        assertTrue(processor.isEndRequired())
+        assertTrue(processor.isOnEndingRequired())
+    }
+
+    @Test
+    fun testGatingFunctionThrows() = runTest {
+        val impl = object : SpanProcessor by FakeSpanProcessor() {
+            override fun isStartRequired(): Boolean = error("boom")
+            override fun isEndRequired(): Boolean = error("boom")
+            override fun isOnEndingRequired(): Boolean = error("boom")
+        }
+        val processor = CompositeSpanProcessor(listOf(impl), errorHandler)
         assertTrue(processor.isStartRequired())
         assertTrue(processor.isEndRequired())
+        assertTrue(processor.isOnEndingRequired())
+        assertEquals(3, errorHandler.userCodeErrors.size)
     }
 
     @Test
     fun testProcessorNotInvoked() = runTest {
-        val impl = FakeSpanProcessor(startRequired = false, endRequired = false)
+        val impl = FakeSpanProcessor(
+            startRequired = false,
+            endRequired = false,
+            onEndingRequired = false
+        )
         val other = FakeSpanProcessor()
         val processor =
             CompositeSpanProcessor(

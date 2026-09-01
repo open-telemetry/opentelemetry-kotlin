@@ -11,6 +11,7 @@ internal object NoopSpanProcessor : SpanProcessor {
     override fun onEnd(span: ReadableSpan) = Unit
     override fun isStartRequired(): Boolean = false
     override fun isEndRequired(): Boolean = false
+    override fun isOnEndingRequired(): Boolean = false
     override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
     override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
 }

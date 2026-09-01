@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.resource
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.factory.ResourceFactory
 
 /**
@@ -23,7 +24,7 @@ public fun List<ResourceDetector>.detectResource(
         try {
             detected.merge(with(detector) { factory.detect() })
         } catch (exc: Throwable) {
-            errorHandler.onError(
+            errorHandler.reportError(
                 SdkError.UserCodeError(
                     exc,
                     "Resource detector '${detector.name}' failed",
@@ -45,7 +46,7 @@ private fun List<ResourceDetector>.reportDuplicateNames(errorHandler: SdkErrorHa
         .filterValues { it.size > 1 }
         .keys
         .forEach { name ->
-            errorHandler.onError(
+            errorHandler.reportError(
                 SdkError.ApiMisuse(
                     "ResourceDetector",
                     "Multiple resource detectors are named '$name'",

@@ -55,6 +55,6 @@ internal class SpanEventBridgeLogRecordProcessor : LogRecordProcessor {
     }
 
     private fun SpanContext.identifies(span: Span): Boolean = isValid &&
-        traceId == span.spanContext.traceId &&
-        spanId == span.spanContext.spanId
+        traceIdBytes.contentEquals(span.spanContext.traceIdBytes) &&
+        spanIdBytes.contentEquals(span.spanContext.spanIdBytes)
 }

@@ -24,7 +24,15 @@ plugins.withType<YarnPlugin> {
 group = "io.opentelemetry.kotlin"
 version = project.version
 
-if (project.hasProperty("snapshotPublish")) {
+val publishingToMavenLocal = gradle.startParameter.taskNames.any {
+    it.substringAfterLast(':') == "publishToMavenLocal"
+}
+val snapshotPublish = project.findProperty("snapshotPublish")
+    ?.toString()
+    ?.toBoolean()
+    ?: publishingToMavenLocal
+
+if (snapshotPublish) {
     allprojects {
         version = "${version}-SNAPSHOT"
     }
@@ -40,7 +48,12 @@ kover {
         filters {
             excludes {
                 androidGeneratedClasses()
-                classes("*.BuildConfig", "io.opentelemetry.proto.*")
+                // generated code: protobuf messages and the opentelemetry-configuration schema model
+                classes(
+                    "*.BuildConfig",
+                    "io.opentelemetry.proto.*",
+                    "io.opentelemetry.kotlin.config.schema.model.*",
+                )
             }
         }
     }

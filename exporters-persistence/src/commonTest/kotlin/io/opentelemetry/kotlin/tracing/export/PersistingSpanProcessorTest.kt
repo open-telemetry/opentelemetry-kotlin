@@ -620,6 +620,7 @@ internal class PersistingSpanProcessorTest {
         override fun onEnd(span: ReadableSpan) {}
         override fun isStartRequired(): Boolean = false
         override fun isEndRequired(): Boolean = true
+        override fun isOnEndingRequired(): Boolean = false
 
         override suspend fun forceFlush(): OperationResultCode {
             if (flushDelayMs > 0) {

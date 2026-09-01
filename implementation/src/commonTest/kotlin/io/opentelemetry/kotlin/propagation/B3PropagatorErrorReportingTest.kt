@@ -60,7 +60,7 @@ internal class B3PropagatorErrorReportingTest {
         assertEquals(1, handler.apiMisuses.size)
         val error = handler.apiMisuses.single()
         assertEquals("B3Propagator.extractSingle", error.api)
-        assertEquals("B3 single header has wrong number of parts: $traceId", error.message)
+        assertEquals("B3 single header has wrong number of parts", error.message)
         assertEquals(SdkErrorSeverity.WARNING, error.severity)
     }
 
@@ -75,7 +75,7 @@ internal class B3PropagatorErrorReportingTest {
         assertEquals(1, handler.apiMisuses.size)
         val error = handler.apiMisuses.single()
         assertEquals("B3Propagator.extractSingle", error.api)
-        assertEquals("B3 invalid traceId in single header: ${"0".repeat(32)}", error.message)
+        assertEquals("B3 invalid traceId in single header", error.message)
     }
 
     @Test
@@ -89,7 +89,7 @@ internal class B3PropagatorErrorReportingTest {
         assertEquals(1, handler.apiMisuses.size)
         val error = handler.apiMisuses.single()
         assertEquals("B3Propagator.extractSingle", error.api)
-        assertEquals("B3 invalid spanId in single header: ${"0".repeat(16)}", error.message)
+        assertEquals("B3 invalid spanId in single header", error.message)
     }
 
     @Test
@@ -107,7 +107,7 @@ internal class B3PropagatorErrorReportingTest {
         assertEquals(1, handler.apiMisuses.size)
         val error = handler.apiMisuses.single()
         assertEquals("B3Propagator.extractMulti", error.api)
-        assertEquals("B3 invalid traceId in multi header: not-a-valid-trace-id", error.message)
+        assertEquals("B3 invalid traceId in multi header", error.message)
     }
 
     @Test
@@ -125,6 +125,6 @@ internal class B3PropagatorErrorReportingTest {
         assertEquals(1, handler.apiMisuses.size)
         val error = handler.apiMisuses.single()
         assertEquals("B3Propagator.extractMulti", error.api)
-        assertEquals("B3 invalid spanId in multi header: short", error.message)
+        assertEquals("B3 invalid spanId in multi header", error.message)
     }
 }

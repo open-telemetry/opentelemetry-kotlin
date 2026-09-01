@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.propagation
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Asserts the structure of the W3C `tracestate` list format:
@@ -114,5 +115,79 @@ internal class W3CTraceStateCodecTest {
     fun testDecodeThenEncodeRoundTrips() {
         val header = "foo=1,bar=2,baz=3"
         assertEquals(header, W3CTraceStateCodec.encode(W3CTraceStateCodec.decode(header)))
+    }
+
+    @Test
+    fun testDecodeKeepsAtMost32Members() {
+        val header = (1..33).joinToString(",") { "k$it=v$it" }
+        val decoded = W3CTraceStateCodec.decode(header)
+        assertEquals((1..32).map { "k$it" }, decoded.keys.toList())
+    }
+
+    @Test
+    fun testEncodeKeepsAtMost32Members() {
+        val entries = (1..33).associate { "k$it" to "v$it" }
+        val expected = (1..32).joinToString(",") { "k$it=v$it" }
+        assertEquals(expected, W3CTraceStateCodec.encode(entries))
+    }
+
+    @Test
+    fun testDecodeKeepsAHeaderOfExactly512Characters() {
+        val header = exactly512Header()
+        assertEquals(512, header.length)
+        assertEquals(header, W3CTraceStateCodec.encode(W3CTraceStateCodec.decode(header)))
+    }
+
+    @Test
+    fun testEncodeKeepsAHeaderOfExactly512Characters() {
+        val header = exactly512Header()
+        val entries = linkedMapOf(
+            "a" to "x".repeat(254),
+            "b" to "x".repeat(253),
+        )
+        assertEquals(header, W3CTraceStateCodec.encode(entries))
+    }
+
+    @Test
+    fun testDecodeDropsMembersLongerThan128BeforeDroppingFromTheEnd() {
+        assertEquals(
+            truncatedOversizedHeader(),
+            W3CTraceStateCodec.encode(W3CTraceStateCodec.decode(oversizedHeaderWithTrailingLargeMember())),
+        )
+    }
+
+    @Test
+    fun testEncodeDropsMembersLongerThan128BeforeDroppingFromTheEnd() {
+        val entries = linkedMapOf("keep" to "ok")
+        (0 until 4).forEach { entries["k$it"] = "x".repeat(126) }
+        assertEquals(truncatedOversizedHeader(), W3CTraceStateCodec.encode(entries))
+    }
+
+    @Test
+    fun testDecodeDropsMembersFromTheEndWhenAllMembersAreAtMost128Characters() {
+        val members = (0 until 11).map { "a$it=" + "x".repeat(47) }
+        val header = members.joinToString(",")
+        assertTrue(header.length > 512)
+        val encoded = W3CTraceStateCodec.encode(W3CTraceStateCodec.decode(header))
+        assertTrue(encoded.length <= 512)
+        assertEquals(members.dropLast(1).joinToString(","), encoded)
+    }
+
+    private fun exactly512Header(): String {
+        val first = "a=" + "x".repeat(254)
+        val second = "b=" + "x".repeat(253)
+        return "$first,$second"
+    }
+
+    private fun oversizedHeaderWithTrailingLargeMember(): String {
+        val small = "keep=ok"
+        val large = (0 until 4).joinToString(",") { "k$it=" + "x".repeat(126) }
+        return "$small,$large"
+    }
+
+    private fun truncatedOversizedHeader(): String {
+        val small = "keep=ok"
+        val large = (0 until 3).joinToString(",") { "k$it=" + "x".repeat(126) }
+        return "$small,$large"
     }
 }

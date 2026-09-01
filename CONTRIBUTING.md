@@ -11,8 +11,8 @@ would be accepted.
    1. JDK >=11 (OpenJDK 21 via https://sdkman.io/ is recommended)
    2. **Android SDK** — Android Studio bundles the SDK and is the easiest route: https://developer.android.com/studio.
       If installing the SDK manually, ensure the following packages are present:
-      - `platforms;android-34`
-      - `build-tools;30.0.3`
+      - `platforms;android-36`
+      - `build-tools;36.0.0`
       - `platform-tools`
    3. **Xcode** (macOS only) — the full Xcode app is required, not just the command-line tools.
       Install from the Mac App Store, then run:
@@ -26,7 +26,8 @@ would be accepted.
       install a supported iOS platform runtime via **Xcode → Settings → Platforms**, or exclude the
       tests temporarily with `-x iosSimulatorArm64Test -x iosArm64Test`.
    4. Android Studio or IntelliJ IDEA are recommended
-3. Run `./gradlew build` to confirm the project builds
+3. Follow [Running the full build including the integration test](#running-the-full-build-including-the-integration-test)
+   to confirm the project builds
 4. Open an issue or update these docs if there was a step missing from these instructions!
 
 ### Running the full build including the integration test
@@ -37,8 +38,8 @@ Maven Local first. This is a separate step because running both in the same Grad
 a race condition with Kotlin/Native:
 
 ```bash
-./gradlew publishToMavenLocal   # publishes snapshot artifacts to ~/.m2
-./gradlew build                  # runs all tests including the integration test
+./gradlew publishToMavenLocal -PsnapshotPublish=true   # publishes artifacts, including snapshot versions, to ~/.m2
+./gradlew build                                         # runs all tests including the integration test
 ```
 
 No GPG signing key is required for local development — pass `-Psigning.skip=true` to skip signing,

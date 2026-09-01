@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 internal class SimpleSpanProcessorTest {
@@ -19,8 +20,9 @@ internal class SimpleSpanProcessorTest {
     @Test
     fun testSpanProcessorDefaults() = runTest {
         val processor = FakeTraceExportConfig().simpleSpanProcessor(FakeSpanExporter())
-        assertTrue(processor.isStartRequired())
+        assertFalse(processor.isStartRequired())
         assertTrue(processor.isEndRequired())
+        assertFalse(processor.isOnEndingRequired())
         assertEquals(OperationResultCode.Success, processor.shutdown())
         assertEquals(OperationResultCode.Success, processor.forceFlush())
     }

@@ -134,7 +134,8 @@ internal class TracerImpl(
                 spanModel.setAttributes(result.attributes.attributes)
                 spanModel.setAttributes(collector.attributes.attributes)
                 sdkErrorHandler.guard {
-                    processor?.onStart(ReadWriteSpanImpl(spanModel), ctx)
+                    processor?.takeIf(SpanProcessor::isStartRequired)
+                        ?.onStart(ReadWriteSpanImpl(spanModel), ctx)
                 }
                 CreatedSpan(spanModel)
             }
@@ -166,7 +167,6 @@ internal class TracerImpl(
                 randomTraceId -> unsampledRandomFlags
                 else -> unsampledFlags
             },
-            isValid = validTraceId && validSpanId,
             isRemote = false,
             traceState = traceState,
         )
