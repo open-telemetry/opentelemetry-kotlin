@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.export
 
-import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
+import io.opentelemetry.kotlin.ioDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
