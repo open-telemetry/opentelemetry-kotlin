@@ -47,7 +47,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: open-telemetry/opentelemetry-kotlin
           fail_ci_if_error: false
-          files: build/reports/kover/reportRelease.xml
+          files: build/reports/kover/report.xml
 
   # Runs on macOS because the klib fixture consumes the library's iOS klibs, which KGP only
   # publishes from a macOS host. The rest of the suite is host-independent, so it all runs here.

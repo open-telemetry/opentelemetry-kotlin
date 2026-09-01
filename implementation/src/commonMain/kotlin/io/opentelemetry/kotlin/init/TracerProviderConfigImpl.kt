@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.config.DEFAULT_EVENT_LIMIT
 import io.opentelemetry.kotlin.init.config.DEFAULT_LINK_LIMIT
@@ -39,7 +40,7 @@ internal class TracerProviderConfigImpl(
 
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
         if (processor != null) {
-            sdkErrorHandler.onError(
+            sdkErrorHandler.reportError(
                 SdkError.ApiMisuse(
                     api = "TracerProviderConfigDsl.export",
                     message = "export() should only be called once.",

@@ -21,7 +21,7 @@ import io.opentelemetry.kotlin.tracing.SpanContext
 internal class LoggerImpl(
     private val clock: Clock,
     private val processor: LogRecordProcessor?,
-    contextFactory: ContextFactory,
+    private val contextFactory: ContextFactory,
     spanContextFactory: SpanContextFactory,
     private val key: InstrumentationScopeInfo,
     private val resource: Resource,
@@ -31,7 +31,6 @@ internal class LoggerImpl(
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Logger {
 
-    private val contextFactory = contextFactory
     private val root = contextFactory.root()
     private val invalidSpanContext = spanContextFactory.invalid
 

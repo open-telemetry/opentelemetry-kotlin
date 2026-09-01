@@ -26,7 +26,7 @@ internal class CompatOpenTelemetryConfig(
 ) : OpenTelemetryConfigDsl {
 
     @Volatile private var configuredErrorHandler: SdkErrorHandler = NoopSdkErrorHandler
-    private val sdkErrorHandler = GuardedSdkErrorHandler { configuredErrorHandler.onError(it) }
+    internal val sdkErrorHandler = GuardedSdkErrorHandler { configuredErrorHandler.onError(it) }
 
     internal val tracerProviderConfig = CompatTracerProviderConfig(clock, sdkErrorHandler)
     internal val loggerProviderConfig = CompatLoggerProviderConfig(clock, sdkErrorHandler)

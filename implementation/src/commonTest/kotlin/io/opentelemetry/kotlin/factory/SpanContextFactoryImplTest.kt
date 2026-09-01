@@ -183,6 +183,59 @@ internal class SpanContextFactoryImplTest {
     }
 
     @Test
+    internal fun testCreateBytesWithValidIds() {
+        val traceId = "12345678901234567890123456789012"
+        val spanId = "1234567890123456"
+        val traceIdBytes = traceId.hexToByteArray()
+        val spanIdBytes = spanId.hexToByteArray()
+
+        val spanContext = factory.create(
+            traceIdBytes,
+            spanIdBytes,
+            traceFlagsFactory.default,
+            traceStateFactory.default,
+            false,
+        )
+
+        assertEquals(traceId, spanContext.traceId)
+        assertEquals(spanId, spanContext.spanId)
+        assertTrue(spanContext.isValid)
+        assertFalse(spanContext.isRemote)
+    }
+
+    @Test
+    internal fun testCreateBytesWithAllZeroIdsIsInvalid() {
+        val spanContext = factory.create(
+            ByteArray(16),
+            ByteArray(8),
+            traceFlagsFactory.default,
+            traceStateFactory.default,
+            false,
+        )
+
+        assertEquals("00000000000000000000000000000000", spanContext.traceId)
+        assertEquals("0000000000000000", spanContext.spanId)
+        assertFalse(spanContext.isValid)
+    }
+
+    @Test
+    internal fun testCreateBytesWithWrongLengthIdsAreZeroed() {
+        val spanContext = factory.create(
+            ByteArray(4) { 1 },
+            ByteArray(0),
+            traceFlagsFactory.default,
+            traceStateFactory.default,
+            false,
+        )
+
+        assertEquals("00000000000000000000000000000000", spanContext.traceId)
+        assertEquals("0000000000000000", spanContext.spanId)
+        assertEquals(16, spanContext.traceIdBytes.size)
+        assertEquals(8, spanContext.spanIdBytes.size)
+        assertFalse(spanContext.isValid)
+    }
+
+    @Test
     internal fun testStatePreservedWithInvalidIds() {
         val invalidTraceId = "invalid"
         val invalidSpanId = "bad"
@@ -197,5 +250,19 @@ internal class SpanContextFactoryImplTest {
         assertEquals(customTraceState, spanContext.traceState)
         assertFalse(spanContext.isValid)
         assertFalse(spanContext.isRemote)
+    }
+
+    @Test
+    internal fun testZeroIdsAreInvalidEvenWhenSampled() {
+        val spanContext = factory.create(
+            "00000000000000000000000000000000",
+            "0000000000000000",
+            traceFlagsFactory.fromHex("01"),
+            traceStateFactory.default,
+            false,
+        )
+
+        assertTrue(spanContext.traceFlags.isSampled)
+        assertFalse(spanContext.isValid)
     }
 }

@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
+import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -80,6 +81,56 @@ internal class SpanDataTest {
         assertFalse(tracer.startSpan("test").isRecording())
     }
 
+    @Test
+    fun testToSpanDataCopiesByteArrayAttributes() {
+        val bytes = byteArrayOf(1, 2, 3)
+        val span = tracer.startSpan("test")
+        span.setByteArrayAttribute("bytes", bytes)
+        val data = span.toReadableSpan().toSpanData()
+        bytes[0] = 9
+        assertEquals(1.toByte(), (data.attributes["bytes"] as ByteArray)[0])
+    }
+
+    @Test
+    fun testToSpanDataCopiesListAttributes() {
+        val flags = mutableListOf(true)
+        val span = tracer.startSpan("test")
+        span.setBooleanListAttribute("flags", flags)
+        val data = span.toReadableSpan().toSpanData()
+        flags.add(false)
+        assertEquals(listOf(true), data.attributes["flags"])
+    }
+
+    @Test
+    fun testToSpanDataCopiesEventAndLinkAttributeValues() {
+        val eventList = mutableListOf(true)
+        val linkBytes = byteArrayOf(1)
+        val span = tracer.startSpan("test")
+        span.addEvent("event") {
+            setBooleanListAttribute("flags", eventList)
+        }
+        span.addLink(fakeSpanContext) {
+            setByteArrayAttribute("bytes", linkBytes)
+        }
+        val data = span.toReadableSpan().toSpanData()
+        eventList.add(false)
+        linkBytes[0] = 9
+        assertEquals(listOf(true), data.events.single().attributes["flags"])
+        assertEquals(1.toByte(), (data.links.single().attributes["bytes"] as ByteArray)[0])
+    }
+
+    @Test
+    fun testToSpanDataEventsAndLinksAreNotMutators() {
+        val span = tracer.startSpan("test").apply {
+            addEvent("event") { setStringAttribute("k", "v") }
+            addLink(fakeSpanContext) { setStringAttribute("k", "v") }
+            end()
+        }
+        val data = processor.endCalls.single()
+        assertFalse(data.events.single() is AttributesMutator)
+        assertFalse(data.links.single() is AttributesMutator)
+    }
+
     private fun simulateSpan(): ReadableSpan {
         return tracer.startSpan(
             name = "test",
@@ -107,9 +158,18 @@ internal class SpanDataTest {
         assertEquals(span.startTimestamp, data.startTimestamp)
         assertEquals(span.status, data.status)
         assertEquals(span.attributes, data.attributes)
-        assertEquals(span.events, data.events)
+        assertEquals(span.events.size, data.events.size)
+        span.events.zip(data.events).forEach { (expected, actual) ->
+            assertEquals(expected.name, actual.name)
+            assertEquals(expected.timestamp, actual.timestamp)
+            assertEquals(expected.attributes, actual.attributes)
+        }
         assertEquals(span.droppedEventsCount, data.droppedEventsCount)
-        assertEquals(span.links, data.links)
+        assertEquals(span.links.size, data.links.size)
+        span.links.zip(data.links).forEach { (expected, actual) ->
+            assertEquals(expected.spanContext, actual.spanContext)
+            assertEquals(expected.attributes, actual.attributes)
+        }
         assertEquals(span.droppedLinksCount, data.droppedLinksCount)
         assertSame(fakeResource, data.resource)
         assertSame(key, data.instrumentationScopeInfo)

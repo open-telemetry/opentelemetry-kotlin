@@ -4,7 +4,9 @@ import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.toByteArray
 import io.ktor.http.HttpStatusCode
+import io.ktor.util.GZipEncoder
 import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.toByteArray
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.export.toLogRecordDataList
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -28,7 +30,9 @@ class FakeOtlpServer {
      * Mock HTTP engine that intercepts OTLP requests and collects telemetry data.
      */
     val mockEngine = MockEngine { request ->
-        val body = request.body.toByteArray()
+        val compressedBody = request.body.toByteArray()
+        val body = GZipEncoder.decode(ByteReadChannel(compressedBody))
+            .toByteArray()
         val path = request.url.encodedPath
 
         when {

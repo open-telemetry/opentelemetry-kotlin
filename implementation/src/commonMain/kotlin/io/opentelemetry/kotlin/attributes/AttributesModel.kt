@@ -40,7 +40,7 @@ internal class AttributesModel(
         value: List<Boolean>
     ) {
         ifPreconditionsOk(key) {
-            attrs[key] = value
+            attrs[key] = value.toList()
         }
     }
 
@@ -62,7 +62,7 @@ internal class AttributesModel(
         value: List<Long>
     ) {
         ifPreconditionsOk(key) {
-            attrs[key] = value
+            attrs[key] = value.toList()
         }
     }
 
@@ -71,7 +71,7 @@ internal class AttributesModel(
         value: List<Double>
     ) {
         ifPreconditionsOk(key) {
-            attrs[key] = value
+            attrs[key] = value.toList()
         }
     }
 
@@ -83,7 +83,7 @@ internal class AttributesModel(
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
         ifPreconditionsOk(key) {
-            attrs[key] = truncateAnyValue(value)
+            attrs[key] = copyAnyValue(truncateAnyValue(value))
         }
     }
 
@@ -159,6 +159,17 @@ internal class AttributesModel(
                 value
             }
         }
+    }
+
+    private fun copyAnyValue(value: AnyValue): AnyValue = when (value) {
+        is AnyValue.BytesValue -> AnyValue.BytesValue(value.value.copyOf())
+        is AnyValue.ListValue -> AnyValue.ListValue(value.values.map(::copyAnyValue))
+        is AnyValue.MapValue -> AnyValue.MapValue(value.values.mapValues { (_, nested) -> copyAnyValue(nested) })
+        AnyValue.NullValue,
+        is AnyValue.StringValue,
+        is AnyValue.BoolValue,
+        is AnyValue.LongValue,
+        is AnyValue.DoubleValue -> value
     }
 
     private var droppedAttributesCountImpl = 0
