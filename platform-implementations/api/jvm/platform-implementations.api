@@ -1,3 +1,12 @@
+public final class io/opentelemetry/kotlin/AtomicBoolean {
+	public fun <init> ()V
+	public fun <init> (Z)V
+	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun compareAndSet (ZZ)Z
+	public final fun get ()Z
+	public final fun set (Z)V
+}
+
 public final class io/opentelemetry/kotlin/AtomicLong {
 	public fun <init> ()V
 	public fun <init> (J)V
@@ -21,6 +30,10 @@ public final class io/opentelemetry/kotlin/EnvVar_jvmKt {
 
 public final class io/opentelemetry/kotlin/ExceptionType_jvmKt {
 	public static final fun exceptionType (Ljava/lang/Throwable;)Ljava/lang/String;
+}
+
+public final class io/opentelemetry/kotlin/IoDispatcher_jvmKt {
+	public static final fun getIoDispatcher ()Lkotlinx/coroutines/CoroutineDispatcher;
 }
 
 public final class io/opentelemetry/kotlin/FileSystem_jvmKt {

@@ -7,10 +7,10 @@ import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.platformLog
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 
 /**
@@ -36,9 +36,8 @@ public fun TraceExportConfigDsl.compositeSpanProcessor(vararg processors: SpanPr
  */
 @ExperimentalApi
 public fun TraceExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): SpanProcessor {
-    val dispatcher: CoroutineDispatcher = Dispatchers.Default
     val scope = CoroutineScope(
-        SupervisorJob() + dispatcher + telemetryExceptionHandler("Simple span processor", sdkErrorHandler)
+        SupervisorJob() + ioDispatcher + telemetryExceptionHandler("Simple span processor", sdkErrorHandler)
     )
     return SimpleSpanProcessor(exporter, scope)
 }
@@ -72,7 +71,7 @@ public fun TraceExportConfigDsl.batchSpanProcessor(
     scheduleDelayMs: Long = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher = ioDispatcher,
 ): SpanProcessor = BatchSpanProcessorImpl(
     exporter,
     maxQueueSize,

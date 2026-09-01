@@ -1,8 +1,8 @@
 package io.opentelemetry.kotlin.export
 
+import io.opentelemetry.kotlin.AtomicBoolean
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
-import kotlin.concurrent.Volatile
 
 /**
  * Non-locking but thread-safe implementation of [ShutdownState]. Objects that can read but not modify
@@ -11,31 +11,34 @@ import kotlin.concurrent.Volatile
 @ThreadSafe
 @ExperimentalApi
 public class MutableShutdownState : ShutdownState() {
-    @Volatile
-    override var isShutdown: Boolean = false
-        private set
+
+    private val shutdown = AtomicBoolean(false)
+
+    override val isShutdown: Boolean
+        get() = shutdown.get()
 
     /**
      * Perform shutdown upon invocation
      */
     public fun shutdownNow() {
-        isShutdown = true
+        shutdown.set(true)
     }
 
     /**
      * If not already shut down, call [shutdownNow] and run [action] within [timeoutMs] milliseconds.
      * Returns [OperationResultCode.Failure] if the timeout elapses before [action] completes.
      * If already shut down, returns [OperationResultCode.Success].
+     *
+     * The shutdown transition is atomic, so if several callers race only one of them runs [action].
      */
     public suspend fun shutdown(
         timeoutMs: Long = DEFAULT_TIMEOUT_MS,
         action: suspend () -> OperationResultCode,
     ): OperationResultCode =
-        if (isShutdown) {
-            OperationResultCode.Success
-        } else {
-            shutdownNow()
+        if (shutdown.compareAndSet(false, true)) {
             runWithTimeout(timeoutMs, action)
+        } else {
+            OperationResultCode.Success
         }
 
     public companion object {

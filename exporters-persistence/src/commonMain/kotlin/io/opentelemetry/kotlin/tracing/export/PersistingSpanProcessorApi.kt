@@ -9,8 +9,8 @@ import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryFileSystemImpl
 import io.opentelemetry.kotlin.getFileSystem
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.ioDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import okio.Path
 
 /**
@@ -57,7 +57,7 @@ internal fun TraceExportConfigDsl.persistingSpanProcessorImpl(
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
     sdkErrorHandler: SdkErrorHandler = this.sdkErrorHandler,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher = ioDispatcher,
 ): SpanProcessor {
     return PersistingSpanProcessor(
         processor = processor,

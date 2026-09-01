@@ -73,6 +73,23 @@ internal class ScopeImplTest {
         assertEquals(SdkErrorSeverity.WARNING, error.severity)
     }
 
+    @Test
+    fun testDetachSucceedsOnceContextIsRestored() {
+        val ctx1 = newContext()
+        val scope1 = ctx1.attach()
+        val ctx2 = newContext()
+        val scope2 = ctx2.attach()
+
+        // scope1 can't detach while ctx2 is current
+        assertFalse(scope1.detach())
+        assertEquals(1, handler.apiMisuses.size)
+
+        // once scope2 restores ctx1, scope1 is detachable again.
+        assertTrue(scope2.detach())
+        assertTrue(scope1.detach())
+        assertEquals(1, handler.apiMisuses.size)
+    }
+
     private fun newContext(): Context =
         factory.root().set(factory.createKey<String>("key"), "value")
 }

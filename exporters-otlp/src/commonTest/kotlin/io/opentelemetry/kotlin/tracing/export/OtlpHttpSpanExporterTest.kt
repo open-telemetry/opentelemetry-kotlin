@@ -21,9 +21,9 @@ import io.opentelemetry.kotlin.export.OtlpClient
 import io.opentelemetry.kotlin.export.createDefaultHttpClient
 import io.opentelemetry.kotlin.export.createHttpEngine
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -129,8 +129,8 @@ internal class OtlpHttpSpanExporterTest {
         val customExporter = fakeConfig().otlpHttpSpanExporter(baseUrl, customClient)
         customExporter.export(spans)
 
-        // use real time because the exporter runs on Dispatchers.Default.
-        withContext(Dispatchers.Default.limitedParallelism(1)) {
+        // use real time because the exporter runs on the IO dispatcher.
+        withContext(ioDispatcher.limitedParallelism(1)) {
             withTimeout(1000) {
                 while (customServer.requestHistory.isEmpty()) {
                     delay(1L)
@@ -199,7 +199,7 @@ internal class OtlpHttpSpanExporterTest {
 
         val clients = coroutineScope {
             (1..50).map {
-                async(Dispatchers.Default) {
+                async(ioDispatcher) {
                     HttpClientRegistry.getOrCreate(
                         engine = engine,
                         requestTimeoutMs = 30_000
@@ -216,8 +216,8 @@ internal class OtlpHttpSpanExporterTest {
         telemetry: List<SpanData>,
         timeoutMs: Long = 1000
     ) {
-        // use real time because the exporter runs on Dispatchers.Default.
-        withContext(Dispatchers.Default.limitedParallelism(1)) {
+        // use real time because the exporter runs on the IO dispatcher.
+        withContext(ioDispatcher.limitedParallelism(1)) {
             withTimeout(timeoutMs) {
                 while (server.requestHistory.isEmpty()) {
                     delay(1L)
