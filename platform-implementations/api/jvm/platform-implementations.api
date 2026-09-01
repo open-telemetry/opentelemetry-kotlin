@@ -32,12 +32,12 @@ public final class io/opentelemetry/kotlin/ExceptionType_jvmKt {
 	public static final fun exceptionType (Ljava/lang/Throwable;)Ljava/lang/String;
 }
 
-public final class io/opentelemetry/kotlin/IoDispatcher_jvmKt {
-	public static final fun getIoDispatcher ()Lkotlinx/coroutines/CoroutineDispatcher;
-}
-
 public final class io/opentelemetry/kotlin/FileSystem_jvmKt {
 	public static final fun getFileSystem ()Lokio/FileSystem;
+}
+
+public final class io/opentelemetry/kotlin/IoDispatcher_jvmKt {
+	public static final fun getIoDispatcher ()Lkotlinx/coroutines/CoroutineDispatcher;
 }
 
 public final class io/opentelemetry/kotlin/PlatformLogger_jvmKt {
