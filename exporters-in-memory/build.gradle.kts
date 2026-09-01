@@ -13,6 +13,7 @@ kotlin {
             dependencies {
                 implementation(project(":sdk-api"))
                 implementation(project(":sdk-common"))
+                implementation(project(":platform-implementations"))
             }
         }
         val commonTest by getting {

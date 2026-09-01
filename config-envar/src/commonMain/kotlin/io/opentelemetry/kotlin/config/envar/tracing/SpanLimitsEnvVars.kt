@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.limitOrUnset
 import io.opentelemetry.kotlin.config.envar.EnvVarReader
-import io.opentelemetry.kotlin.config.envar.model.EnvVarName.Companion.envVarName
 
 /**
  * Maps the span limit environment variables onto the behavior they supply. A variable that is unset,
@@ -25,11 +24,11 @@ class SpanLimitsEnvVars(private val reader: EnvVarReader) {
     )
 
     private companion object {
-        val ATTRIBUTE_COUNT_LIMIT = envVarName("OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT")
-        val ATTRIBUTE_VALUE_LENGTH_LIMIT = envVarName("OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT")
-        val LINK_COUNT_LIMIT = envVarName("OTEL_SPAN_LINK_COUNT_LIMIT")
-        val EVENT_COUNT_LIMIT = envVarName("OTEL_SPAN_EVENT_COUNT_LIMIT")
-        val EVENT_ATTRIBUTE_COUNT_LIMIT = envVarName("OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT")
-        val LINK_ATTRIBUTE_COUNT_LIMIT = envVarName("OTEL_LINK_ATTRIBUTE_COUNT_LIMIT")
+        const val ATTRIBUTE_COUNT_LIMIT = "OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT"
+        const val ATTRIBUTE_VALUE_LENGTH_LIMIT = "OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT"
+        const val LINK_COUNT_LIMIT = "OTEL_SPAN_LINK_COUNT_LIMIT"
+        const val EVENT_COUNT_LIMIT = "OTEL_SPAN_EVENT_COUNT_LIMIT"
+        const val EVENT_ATTRIBUTE_COUNT_LIMIT = "OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT"
+        const val LINK_ATTRIBUTE_COUNT_LIMIT = "OTEL_LINK_ATTRIBUTE_COUNT_LIMIT"
     }
 }

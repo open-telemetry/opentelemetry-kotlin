@@ -1,8 +1,8 @@
 package io.opentelemetry.kotlin.export
 
-import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.guardOrDefault
+import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 
 /**
  * Performs an export operation on each element in a List and returns a success code if each
@@ -16,19 +16,13 @@ public fun <T> batchExportOperation(
     var success = true
 
     elements.forEach {
-        try {
-            val exportResult = action(it)
-            success = success && exportResult == OperationResultCode.Success
-        } catch (exc: Throwable) {
-            success = false
-            sdkErrorHandler.onError(
-                SdkError.UserCodeError(
-                    exc,
-                    "Export operation failed",
-                    SdkErrorSeverity.WARNING
-                )
-            )
+        val exportResult = sdkErrorHandler.guardOrDefault(
+            OperationResultCode.Failure,
+            "Export operation failed",
+        ) {
+            action(it)
         }
+        success = success && exportResult == OperationResultCode.Success
     }
     return when {
         success -> OperationResultCode.Success
@@ -48,19 +42,13 @@ public suspend fun <T> batchExportOperationSuspend(
     var success = true
 
     elements.forEach {
-        try {
-            val exportResult = action(it)
-            success = success && exportResult == OperationResultCode.Success
-        } catch (exc: Throwable) {
-            success = false
-            sdkErrorHandler.onError(
-                SdkError.UserCodeError(
-                    exc,
-                    "Export operation failed",
-                    SdkErrorSeverity.WARNING
-                )
-            )
+        val exportResult = sdkErrorHandler.guardOrDefaultSuspend(
+            OperationResultCode.Failure,
+            "Export operation failed",
+        ) {
+            action(it)
         }
+        success = success && exportResult == OperationResultCode.Success
     }
     return when {
         success -> OperationResultCode.Success

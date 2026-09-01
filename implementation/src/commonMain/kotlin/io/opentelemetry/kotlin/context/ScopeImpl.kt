@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.context
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 import kotlin.concurrent.Volatile
 
 internal class ScopeImpl private constructor(
@@ -17,7 +18,7 @@ internal class ScopeImpl private constructor(
 
     override fun detach(): Boolean {
         return if (detached) {
-            sdkErrorHandler.onError(
+            sdkErrorHandler.reportError(
                 SdkError.ApiMisuse(
                     api = "Scope.detach",
                     message = "Scope.detach() called on an already-detached scope",
@@ -26,7 +27,7 @@ internal class ScopeImpl private constructor(
             )
             false
         } else if (storage.implicitContext() != currentContext) {
-            sdkErrorHandler.onError(
+            sdkErrorHandler.reportError(
                 SdkError.ApiMisuse(
                     api = "Scope.detach",
                     message = "Scope.detach() called out of order — context has already changed",
@@ -49,7 +50,7 @@ internal class ScopeImpl private constructor(
             sdkErrorHandler: SdkErrorHandler,
         ): Scope =
             if (previousContext == currentContext) {
-                sdkErrorHandler.onError(
+                sdkErrorHandler.reportError(
                     SdkError.ApiMisuse(
                         api = "Context.attach",
                         message = "Cannot create scope with two matching contexts",

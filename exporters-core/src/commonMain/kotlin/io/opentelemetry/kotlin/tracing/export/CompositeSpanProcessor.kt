@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefault
@@ -20,50 +19,42 @@ internal class CompositeSpanProcessor(
     ),
 ) : SpanProcessor, TelemetryCloseable by telemetryCloseable {
 
-    private val lock = ReentrantReadWriteLock()
-
     override fun onStart(
         span: ReadWriteSpan,
         parentContext: Context
     ) {
-        lock.write {
-            batchExportOperation(
-                processors,
-                sdkErrorHandler
-            ) {
-                if (it.requires(START_DETAILS, SpanProcessor::isStartRequired)) {
-                    it.onStart(span, parentContext)
-                }
-                OperationResultCode.Success
+        batchExportOperation(
+            processors,
+            sdkErrorHandler
+        ) {
+            if (it.requires(START_DETAILS, SpanProcessor::isStartRequired)) {
+                it.onStart(span, parentContext)
             }
+            OperationResultCode.Success
         }
     }
 
     override fun onEnding(span: ReadWriteSpan) {
-        lock.write {
-            batchExportOperation(
-                processors,
-                sdkErrorHandler
-            ) {
-                if (it.requires(ON_ENDING_DETAILS, SpanProcessor::isOnEndingRequired)) {
-                    it.onEnding(span)
-                }
-                OperationResultCode.Success
+        batchExportOperation(
+            processors,
+            sdkErrorHandler
+        ) {
+            if (it.requires(ON_ENDING_DETAILS, SpanProcessor::isOnEndingRequired)) {
+                it.onEnding(span)
             }
+            OperationResultCode.Success
         }
     }
 
     override fun onEnd(span: ReadableSpan) {
-        lock.write {
-            batchExportOperation(
-                processors,
-                sdkErrorHandler
-            ) {
-                if (it.requires(END_DETAILS, SpanProcessor::isEndRequired)) {
-                    it.onEnd(span)
-                }
-                OperationResultCode.Success
+        batchExportOperation(
+            processors,
+            sdkErrorHandler
+        ) {
+            if (it.requires(END_DETAILS, SpanProcessor::isEndRequired)) {
+                it.onEnd(span)
             }
+            OperationResultCode.Success
         }
     }
 

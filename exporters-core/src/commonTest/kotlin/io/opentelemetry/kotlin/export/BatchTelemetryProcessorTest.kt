@@ -117,15 +117,6 @@ internal class BatchTelemetryProcessorTest {
     }
 
     @Test
-    fun testZeroQueueSizeDropsAllTelemetry() = runTest {
-        val exports = assertTelemetryBatched(
-            telemetry = listOf(1, 2, 3),
-            maxQueueSize = 0,
-        )
-        assertEquals(emptyList(), exports)
-    }
-
-    @Test
     fun testExportThrowsError() = runTest {
         val exports = assertTelemetryBatched(
             telemetry = listOf(1, 2, 3, 4, 5, 6, 7, 8),

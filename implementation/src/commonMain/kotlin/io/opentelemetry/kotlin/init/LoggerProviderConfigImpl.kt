@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.LoggerConfigImpl
@@ -28,7 +29,7 @@ internal class LoggerProviderConfigImpl(
 
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
         if (processor != null) {
-            sdkErrorHandler.onError(
+            sdkErrorHandler.reportError(
                 SdkError.ApiMisuse(
                     api = "LoggerProviderConfigDsl.export",
                     message = "export() should only be called once.",
