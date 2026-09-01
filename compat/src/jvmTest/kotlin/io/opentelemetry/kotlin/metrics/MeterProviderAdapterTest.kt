@@ -1,7 +1,11 @@
 package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkMeterProvider
+import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaMetricReader
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNotSame
@@ -70,5 +74,19 @@ internal class MeterProviderAdapterTest {
         val first = adapter.getMeter(name = "name")
         val second = adapter.getMeter(name = "name", version = "null")
         assertNotSame(first, second)
+    }
+
+    @Test
+    fun testForceFlushAndShutdownDelegateToJavaSdkProvider() = runTest {
+        val reader = FakeOtelJavaMetricReader()
+        val provider = OtelJavaSdkMeterProvider.builder()
+            .registerMetricReader(reader)
+            .build()
+        val adapter = MeterProviderAdapter(provider)
+
+        assertEquals(OperationResultCode.Success, adapter.forceFlush())
+        assertEquals(1, reader.flushCount)
+        assertEquals(OperationResultCode.Success, adapter.shutdown())
+        assertEquals(1, reader.shutdownCount)
     }
 }

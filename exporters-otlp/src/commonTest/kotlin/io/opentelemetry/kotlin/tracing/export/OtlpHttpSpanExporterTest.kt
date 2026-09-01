@@ -126,7 +126,10 @@ internal class OtlpHttpSpanExporterTest {
         val customClient = HttpClient(customServer) {
             defaultRequest { header("Authorization", "Bearer test-token") }
         }
-        val customExporter = fakeConfig().otlpHttpSpanExporter(baseUrl, customClient)
+        val customExporter = fakeConfig().otlpHttpSpanExporter {
+            endpoint = baseUrl
+            httpClient = customClient
+        }
         customExporter.export(spans)
 
         // use real time because the exporter runs on the IO dispatcher.
@@ -147,11 +150,11 @@ internal class OtlpHttpSpanExporterTest {
         val config = fakeConfig()
 
         // 1. First exporter creation populates the registry with the default engine/client
-        config.otlpHttpSpanExporter(baseUrl)
+        config.otlpHttpSpanExporter { endpoint = baseUrl }
         val client1 = HttpClientRegistry.getOrCreate(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
 
         // 2. Second exporter creation should hit the existing cache without replacing it
-        config.otlpHttpSpanExporter(baseUrl)
+        config.otlpHttpSpanExporter { endpoint = baseUrl }
         val client2 = HttpClientRegistry.getOrCreate(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
 
         assertSame(client1, client2)
@@ -163,7 +166,10 @@ internal class OtlpHttpSpanExporterTest {
         val mockServer = MockEngine {
             respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
         }
-        val factoryExporter = fakeConfig().otlpHttpSpanExporter(baseUrl, mockServer)
+        val factoryExporter = fakeConfig().otlpHttpSpanExporter {
+            endpoint = baseUrl
+            httpClientEngine = mockServer
+        }
         val code = factoryExporter.export(spans)
         assertEquals(OperationResultCode.Success, code)
 

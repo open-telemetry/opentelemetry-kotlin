@@ -122,7 +122,10 @@ internal class OtlpHttpLogRecordExporterTest {
         val customClient = HttpClient(customServer) {
             defaultRequest { header("Authorization", "Bearer test-token") }
         }
-        val customExporter = fakeConfig().otlpHttpLogRecordExporter(baseUrl, customClient)
+        val customExporter = fakeConfig().otlpHttpLogRecordExporter {
+            endpoint = baseUrl
+            httpClient = customClient
+        }
         customExporter.export(logRecords)
 
         // use real time because the exporter runs on Dispatchers.Default.
@@ -143,11 +146,11 @@ internal class OtlpHttpLogRecordExporterTest {
         val config = fakeConfig()
 
         // 1. First exporter creation populates the registry with the default engine/client
-        config.otlpHttpLogRecordExporter(baseUrl)
+        config.otlpHttpLogRecordExporter { endpoint = baseUrl }
         val client1 = HttpClientRegistry.getOrCreate(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
 
         // 2. Second exporter creation should hit the existing cache without replacing it
-        config.otlpHttpLogRecordExporter(baseUrl)
+        config.otlpHttpLogRecordExporter { endpoint = baseUrl }
         val client2 = HttpClientRegistry.getOrCreate(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
 
         assertSame(client1, client2)
@@ -159,7 +162,10 @@ internal class OtlpHttpLogRecordExporterTest {
         val mockServer = MockEngine {
             respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
         }
-        val factoryExporter = fakeConfig().otlpHttpLogRecordExporter(baseUrl, mockServer)
+        val factoryExporter = fakeConfig().otlpHttpLogRecordExporter {
+            endpoint = baseUrl
+            httpClientEngine = mockServer
+        }
         val code = factoryExporter.export(logRecords)
         assertEquals(OperationResultCode.Success, code)
 

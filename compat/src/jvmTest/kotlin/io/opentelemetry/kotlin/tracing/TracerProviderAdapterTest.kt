@@ -2,8 +2,12 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanProcessor
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotSame
 import kotlin.test.assertSame
@@ -43,5 +47,23 @@ internal class TracerProviderAdapterTest {
         val first = adapter.getTracer(name = "name")
         val second = adapter.getTracer(name = "name", version = "null")
         assertNotSame(first, second)
+    }
+
+    @Test
+    fun testForceFlushAndShutdownDelegateToJavaSdkProvider() = runTest {
+        val processor = FakeOtelJavaSpanProcessor()
+        val provider = OtelJavaSdkTracerProvider.builder()
+            .addSpanProcessor(processor)
+            .build()
+        val adapter = TracerProviderAdapter(
+            provider,
+            FakeClock(),
+            CompatSpanLimitsConfig(),
+        )
+
+        assertEquals(OperationResultCode.Success, adapter.forceFlush())
+        assertEquals(1, processor.flushCount)
+        assertEquals(OperationResultCode.Success, adapter.shutdown())
+        assertEquals(1, processor.shutdownCount)
     }
 }
