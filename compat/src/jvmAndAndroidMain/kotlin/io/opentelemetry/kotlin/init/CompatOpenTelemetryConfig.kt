@@ -6,6 +6,11 @@ import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.BehaviorResolver
+import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
+import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -31,7 +36,8 @@ internal class CompatOpenTelemetryConfig(
     internal val tracerProviderConfig = CompatTracerProviderConfig(clock, sdkErrorHandler)
     internal val loggerProviderConfig = CompatLoggerProviderConfig(clock, sdkErrorHandler)
     internal val meterProviderConfig = CompatMeterProviderConfig(clock)
-    internal val globalAttributeLimits = CompatAttributeLimitsConfig()
+    private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
+    private val behaviorResolver: BehaviorResolver = BehaviorResolverImpl()
     internal val propagatorCfg = CompatPropagatorConfigImpl()
 
     private var customIdGenerator: (() -> IdGenerator)? = null
@@ -102,4 +108,17 @@ internal class CompatOpenTelemetryConfig(
     }
 
     internal fun resolveIdGenerator(): IdGenerator = customIdGenerator?.invoke() ?: CompatIdGenerator()
+
+    /**
+     * Resolves the behavior the SDK is initialized with, applying the precedence rules the resolver
+     * defines. Environment variables and declarative configuration are not wired up yet.
+     */
+    private fun resolveBehavior(): OpenTelemetryBehavior = behaviorResolver.resolve(
+        envars = null,
+        declarativeFile = null,
+        dsl = OpenTelemetryBehavior(attributeLimits = globalAttributeLimits.toBehavior()),
+    )
+
+    internal fun resolveAttributeLimits(): AttributeLimitsBehavior =
+        resolveBehavior().attributeLimits ?: AttributeLimitsBehavior()
 }

@@ -1,6 +1,11 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.BehaviorResolver
+import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
+import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -31,7 +36,8 @@ internal class OpenTelemetryConfigImpl(
     internal val metricsConfig: MeterProviderConfigImpl = MeterProviderConfigImpl(sdkErrorHandler)
     internal val contextConfig: ContextConfigImpl = ContextConfigImpl()
     internal val propagatorCfg: PropagatorConfigImpl = PropagatorConfigImpl()
-    private val globalAttributeLimits = AttributeLimitsConfigImpl()
+    private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
+    private val behaviorResolver: BehaviorResolver = BehaviorResolverImpl()
     private val resourceDetectionConfig = ResourceDetectionConfigImpl()
 
     private var customIdGenerator: (() -> IdGenerator)? = null
@@ -84,11 +90,24 @@ internal class OpenTelemetryConfigImpl(
             .merge(globalResourceConfig.generateResource())
     }
 
+    /**
+     * Resolves the behavior the SDK is initialized with, applying the precedence rules the resolver
+     * defines. Environment variables and declarative configuration are not wired up yet.
+     */
+    private fun resolveBehavior(): OpenTelemetryBehavior = behaviorResolver.resolve(
+        envars = null,
+        declarativeFile = null,
+        dsl = OpenTelemetryBehavior(attributeLimits = globalAttributeLimits.toBehavior()),
+    )
+
+    private fun resolveAttributeLimits(): AttributeLimitsBehavior =
+        resolveBehavior().attributeLimits ?: AttributeLimitsBehavior()
+
     internal fun generateTracingConfig() =
-        tracingConfig.generateTracingConfig(baseResource, globalAttributeLimits)
+        tracingConfig.generateTracingConfig(baseResource, resolveAttributeLimits())
 
     internal fun generateLoggingConfig() =
-        loggingConfig.generateLoggingConfig(baseResource, globalAttributeLimits)
+        loggingConfig.generateLoggingConfig(baseResource, resolveAttributeLimits())
 
     internal fun generateMetricsConfig() =
         metricsConfig.generateMetricsConfig(baseResource)

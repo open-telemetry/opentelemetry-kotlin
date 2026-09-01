@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
@@ -11,7 +12,6 @@ import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactory
-import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.LogRecordModel
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecordImpl
@@ -25,7 +25,7 @@ internal class LoggerImpl(
     spanContextFactory: SpanContextFactory,
     private val key: InstrumentationScopeInfo,
     private val resource: Resource,
-    private val logLimitConfig: LogLimitConfig,
+    private val logLimits: AttributeLimitsBehavior,
     private val shutdownState: ShutdownState,
     private val loggerConfig: LoggerConfig = LoggerConfigImpl(),
     private val sdkErrorHandler: SdkErrorHandler,
@@ -107,7 +107,7 @@ internal class LoggerImpl(
                     severityText = severityText,
                     severityNumber = severityNumber ?: SeverityNumber.UNKNOWN,
                     spanContext = spanContext,
-                    logLimitConfig = logLimitConfig,
+                    logLimits = logLimits,
                     eventName = eventName,
                     sdkErrorHandler = sdkErrorHandler,
                 )

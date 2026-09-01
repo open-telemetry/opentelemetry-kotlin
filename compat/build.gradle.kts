@@ -14,6 +14,7 @@ kotlin {
                 api(project(":core"))
                 implementation(project(":sdk-api"))
                 implementation(project(":sdk-common"))
+                implementation(project(":config-dsl"))
                 implementation(project(":model"))
                 implementation(project(":java-typealiases"))
                 implementation(libs.kotlinx.coroutines)

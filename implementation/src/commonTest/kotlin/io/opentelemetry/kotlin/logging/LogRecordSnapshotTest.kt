@@ -1,12 +1,12 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
-import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
@@ -32,7 +32,7 @@ internal class LogRecordSnapshotTest {
             spanContextFactory = FakeSpanContextFactory(),
             key = key,
             resource = FakeResource(),
-            logLimitConfig = LogLimitConfig(
+            logLimits = AttributeLimitsBehavior(
                 attributeCountLimit = 2,
                 attributeValueLengthLimit = fakeLogLimitsConfig.attributeValueLengthLimit
             ),

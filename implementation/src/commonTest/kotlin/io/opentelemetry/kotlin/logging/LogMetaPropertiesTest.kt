@@ -32,7 +32,7 @@ internal class LogMetaPropertiesTest {
             spanContextFactory = FakeSpanContextFactory(),
             key = key,
             resource = fakeResource,
-            logLimitConfig = fakeLogLimitsConfig,
+            logLimits = fakeLogLimitsConfig,
             shutdownState = MutableShutdownState(),
             sdkErrorHandler = NoopSdkErrorHandler,
         )

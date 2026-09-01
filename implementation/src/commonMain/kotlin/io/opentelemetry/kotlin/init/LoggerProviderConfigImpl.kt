@@ -1,13 +1,12 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
-import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.config.dsl.LogLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.reportError
-import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.LoggerConfigImpl
 import io.opentelemetry.kotlin.logging.LoggerConfigurator
@@ -51,7 +50,7 @@ internal class LoggerProviderConfigImpl(
 
     fun generateLoggingConfig(
         base: Resource,
-        globalLimits: AttributeLimitsConfigDsl? = null
+        globalLimits: AttributeLimitsBehavior,
     ): LoggingConfig = LoggingConfig(
         processor = processor,
         logLimits = generateLogLimitsConfig(globalLimits),
@@ -64,16 +63,9 @@ internal class LoggerProviderConfigImpl(
      * A limit left unset by the log limits falls back to the global attribute limits, then to the
      * default this SDK applies.
      */
-    private fun generateLogLimitsConfig(globalLimits: AttributeLimitsConfigDsl?): LogLimitConfig {
-        val impl = LogLimitsConfigImpl()
+    private fun generateLogLimitsConfig(globalLimits: AttributeLimitsBehavior): AttributeLimitsBehavior {
+        val impl = LogLimitsConfigDslImpl()
         logLimitsAction(impl)
-        return LogLimitConfig(
-            attributeCountLimit = impl.attributeCountLimit
-                ?: globalLimits?.attributeCountLimit
-                ?: DEFAULT_ATTRIBUTE_LIMIT,
-            attributeValueLengthLimit = impl.attributeValueLengthLimit
-                ?: globalLimits?.attributeValueLengthLimit
-                ?: DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
-        )
+        return globalLimits.mergeWith(impl.toBehavior())
     }
 }

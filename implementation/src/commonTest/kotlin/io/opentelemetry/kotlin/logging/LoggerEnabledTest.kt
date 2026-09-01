@@ -119,7 +119,7 @@ internal class LoggerEnabledTest {
             spanContextFactory = FakeSpanContextFactory(),
             key = key,
             resource = FakeResource(),
-            logLimitConfig = fakeLogLimitsConfig,
+            logLimits = fakeLogLimitsConfig,
             shutdownState = MutableShutdownState(),
             loggerConfig = config,
             sdkErrorHandler = NoopSdkErrorHandler,

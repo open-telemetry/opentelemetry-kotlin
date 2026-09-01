@@ -156,6 +156,24 @@ internal class OpenTelemetryConfigImplTest {
     }
 
     @Test
+    fun testNegativeGlobalAttrLimitFallsBackToDefault() {
+        val cfg = OpenTelemetryConfigImpl(clock).apply {
+            attributeLimits {
+                attributeCountLimit = -1
+                attributeValueLengthLimit = -1
+            }
+        }
+        with(cfg.generateTracingConfig().spanLimits) {
+            assertEquals(DEFAULT_ATTRIBUTE_LIMIT, attributeCountLimit)
+            assertEquals(DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT, attributeValueLengthLimit)
+        }
+        with(cfg.generateLoggingConfig().logLimits) {
+            assertNull(attributeCountLimit)
+            assertNull(attributeValueLengthLimit)
+        }
+    }
+
+    @Test
     fun testDefaultStorage() {
         val cfg = OpenTelemetryConfigImpl(clock)
         val rootContext = FakeContext()
@@ -286,8 +304,8 @@ internal class OpenTelemetryConfigImplTest {
             assertEquals(DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT, attributeValueLengthLimit)
         }
         with(cfg.generateLoggingConfig().logLimits) {
-            assertEquals(DEFAULT_ATTRIBUTE_LIMIT, attributeCountLimit)
-            assertEquals(DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT, attributeValueLengthLimit)
+            assertNull(attributeCountLimit)
+            assertNull(attributeValueLengthLimit)
         }
     }
 

@@ -4,9 +4,11 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
+import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
-import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.logging.LogRecordDataImpl
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.LogRecordData
@@ -28,7 +30,7 @@ internal class LogRecordModel(
     severityText: String?,
     severityNumber: SeverityNumber?,
     spanContext: SpanContext,
-    logLimitConfig: LogLimitConfig,
+    logLimits: AttributeLimitsBehavior,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : ReadWriteLogRecord {
 
@@ -98,8 +100,9 @@ internal class LogRecordModel(
 
     private val attrs by lazy {
         AttributesModel(
-            attributeLimit = logLimitConfig.attributeCountLimit,
-            attributeValueLengthLimit = logLimitConfig.attributeValueLengthLimit,
+            attributeLimit = logLimits.attributeCountLimit ?: DEFAULT_ATTRIBUTE_LIMIT,
+            attributeValueLengthLimit = logLimits.attributeValueLengthLimit
+                ?: DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
             attrs = mutableMapOf()
         )
     }

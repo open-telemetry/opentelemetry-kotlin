@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
@@ -99,7 +100,7 @@ internal class CompatTracerProviderConfig(
         clock: Clock,
         idGenerator: IdGenerator,
         baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build()),
-        globalLimits: AttributeLimitsConfigDsl? = null,
+        globalLimits: AttributeLimitsBehavior,
     ): TracerProvider {
         builder.setIdGenerator(
             when (idGenerator) {
@@ -109,9 +110,9 @@ internal class CompatTracerProviderConfig(
         )
         spanLimitsAction?.invoke(spanLimitsConfig)
         spanLimitsConfig.attributeCountLimit =
-            spanLimitsConfig.attributeCountLimit ?: globalLimits?.attributeCountLimit
+            spanLimitsConfig.attributeCountLimit ?: globalLimits.attributeCountLimit
         spanLimitsConfig.attributeValueLengthLimit =
-            spanLimitsConfig.attributeValueLengthLimit ?: globalLimits?.attributeValueLengthLimit
+            spanLimitsConfig.attributeValueLengthLimit ?: globalLimits.attributeValueLengthLimit
         builder.setSpanLimits(spanLimitsConfig.build())
         tracerConfigurator?.let(::applyTracerConfigurator)
         val resource = ResourceAdapter(
