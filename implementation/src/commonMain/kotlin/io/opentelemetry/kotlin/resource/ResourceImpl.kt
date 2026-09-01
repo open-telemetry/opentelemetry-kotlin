@@ -28,4 +28,20 @@ internal class ResourceImpl(
         }
         return ResourceImpl(AttributesModel(attributeLimit = NO_ATTRIBUTE_LIMIT, attrs = mergedAttrs), mergedSchema)
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other !is ResourceImpl) {
+            return false
+        }
+        return attributes == other.attributes && schemaUrl == other.schemaUrl
+    }
+
+    override fun hashCode(): Int {
+        var result = attributes.hashCode()
+        result = 31 * result + (schemaUrl?.hashCode() ?: 0)
+        return result
+    }
 }

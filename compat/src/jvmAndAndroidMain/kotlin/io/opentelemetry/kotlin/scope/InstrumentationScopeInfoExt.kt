@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.scope
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.aliases.OtelJavaInstrumentationScopeInfo
+import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.convertToMap
 
@@ -24,12 +26,16 @@ internal fun OtelJavaInstrumentationScopeInfo.toOtelKotlinInstrumentationScopeIn
 
 /**
  * Builds the cache key used by the provider adapters to dedupe tracers/loggers/meters.
- *
- * Scope attributes are deliberately excluded because opentelemetry-java doesn't currently support
- * them.
  */
 internal fun scopeCacheKey(
     name: String,
     version: String?,
-    schemaUrl: String?
-): InstrumentationScopeInfo = InstrumentationScopeInfoImpl(name, version, schemaUrl, emptyMap())
+    schemaUrl: String?,
+    attributes: (AttributesMutator.() -> Unit)? = null,
+): InstrumentationScopeInfo {
+    val container = CompatAttributesModel()
+    if (attributes != null) {
+        attributes(container)
+    }
+    return InstrumentationScopeInfoImpl(name, version, schemaUrl, container.attributes)
+}

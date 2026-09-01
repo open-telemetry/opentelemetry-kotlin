@@ -20,6 +20,8 @@ import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
+import io.opentelemetry.kotlin.tracing.frozenCopy
+import io.opentelemetry.kotlin.tracing.toSnapshot
 
 /**
  * The single source of truth for span state. This is not exposed to consumers of the API - they
@@ -91,6 +93,9 @@ internal class SpanModel(
     }
 
     override fun setStatus(status: StatusData) {
+        if (status is StatusData.Unset) {
+            return
+        }
         mutate("Span.setStatus failed") {
             if (statusImpl !is StatusData.Ok) {
                 statusImpl = status
@@ -114,20 +119,33 @@ internal class SpanModel(
     @Suppress("NOTHING_TO_INLINE")
     private inline fun endInternal(timestamp: Long) {
         sdkErrorHandler.guard("Span.end failed") {
-            lock.write {
-                if (state == State.STARTED) {
-                    state = State.ENDING
-                    endTimestampImpl = timestamp
-                    sdkErrorHandler.guard {
-                        processor?.onEnding(ReadWriteSpanImpl(this))
-                    }
-                    state = State.ENDED
-                    sdkErrorHandler.guard {
-                        // take a snapshot so that processors retain plain data rather than this
-                        // model, releasing its properties once the span
-                        // has ended. Only built if a processor needs it.
-                        processor?.takeIf(SpanProcessor::isEndRequired)?.onEnd(toSpanData())
-                    }
+            val shouldEnd = lock.write {
+                if (state != State.STARTED) {
+                    return@write false
+                }
+                state = State.ENDING
+                endTimestampImpl = timestamp
+                true
+            }
+            if (!shouldEnd) {
+                return
+            }
+            sdkErrorHandler.guard {
+                processor?.onEnding(ReadWriteSpanImpl(this))
+            }
+            val toExport = lock.write {
+                state = State.ENDED
+                // take a snapshot so that processors retain plain data rather than this
+                // model, releasing its properties once the span
+                // has ended. Only built if a processor needs it.
+                processor?.takeIf(SpanProcessor::isEndRequired)?.let { endProcessor ->
+                    endProcessor to toSpanData()
+                }
+            }
+            if (toExport != null) {
+                val (endProcessor, snapshot) = toExport
+                sdkErrorHandler.guard {
+                    endProcessor.onEnd(snapshot)
                 }
             }
         }
@@ -220,10 +238,10 @@ internal class SpanModel(
             spanKind,
             startTimestamp,
             endTimestampImpl,
-            attrs.attributes,
-            eventsList.toList(),
+            attrs.attributes.frozenCopy(),
+            eventsList.map { it.toSnapshot() },
             droppedEventsCountImpl,
-            linksList.toList(),
+            linksList.map { it.toSnapshot() },
             droppedLinksCountImpl,
             resource,
             instrumentationScopeInfo,

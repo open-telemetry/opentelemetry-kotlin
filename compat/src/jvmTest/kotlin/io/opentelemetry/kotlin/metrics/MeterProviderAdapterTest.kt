@@ -44,6 +44,21 @@ internal class MeterProviderAdapterTest {
     }
 
     @Test
+    fun testDupeMeterProviderAttributes() {
+        val first = adapter.getMeter(name = "name") {
+            setStringAttribute("key", "value")
+        }
+        val second = adapter.getMeter(name = "name") {
+            setStringAttribute("key", "value")
+        }
+        val third = adapter.getMeter(name = "name") {
+            setStringAttribute("foo", "bar")
+        }
+        assertSame(first, second)
+        assertNotEquals(first, third)
+    }
+
+    @Test
     fun testScopePropertyBoundaryCollision() {
         val first = adapter.getMeter(name = "ab", version = "c")
         val second = adapter.getMeter(name = "a", version = "bc")

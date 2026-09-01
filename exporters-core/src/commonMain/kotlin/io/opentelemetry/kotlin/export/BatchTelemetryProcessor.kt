@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.ioDispatcher
+import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -9,7 +10,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeout
 
 internal class BatchTelemetryProcessor<T>(
     private val config: BatchTelemetryConfig,
@@ -69,12 +69,11 @@ internal class BatchTelemetryProcessor<T>(
                 return
             }
 
-            try {
-                withTimeout(config.exportTimeoutMs) {
-                    exportAction(batch)
-                }
-            } catch (ignored: Throwable) {
-                // drop, continue as normal.
+            config.sdkErrorHandler.guardOrDefaultSuspend(
+                OperationResultCode.Failure,
+                "Batch export failed",
+            ) {
+                runWithTimeout(config.exportTimeoutMs) { exportAction(batch) }
             }
         }
     }

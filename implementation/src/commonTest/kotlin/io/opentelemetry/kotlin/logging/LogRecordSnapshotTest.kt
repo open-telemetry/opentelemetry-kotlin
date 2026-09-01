@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
+import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -96,5 +97,31 @@ internal class LogRecordSnapshotTest {
         val data = processor.logs.single().toLogRecordData()
         assertEquals(2, data.attributes.size)
         assertEquals(1, data.droppedAttributesCount)
+    }
+
+    @Test
+    fun testSnapshotReflectsMutatedFields() {
+        logger.emit("my_log")
+
+        val log = processor.logs.single()
+        val spanContext = FakeSpanContext.VALID
+        log.timestamp = 5L
+        log.observedTimestamp = 6L
+        log.severityNumber = SeverityNumber.ERROR
+        log.severityText = "error"
+        log.body = "changed_body"
+        log.eventName = "changed_event"
+        log.spanContext = spanContext
+        log.setStringAttribute("key", "value")
+
+        val data = log.toLogRecordData()
+        assertEquals(5L, data.timestamp)
+        assertEquals(6L, data.observedTimestamp)
+        assertEquals(SeverityNumber.ERROR, data.severityNumber)
+        assertEquals("error", data.severityText)
+        assertEquals("changed_body", data.body)
+        assertEquals("changed_event", data.eventName)
+        assertEquals(spanContext, data.spanContext)
+        assertEquals(mapOf("key" to "value"), data.attributes)
     }
 }

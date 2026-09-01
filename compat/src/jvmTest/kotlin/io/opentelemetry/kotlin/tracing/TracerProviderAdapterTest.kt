@@ -4,7 +4,9 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import kotlin.test.Test
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotSame
+import kotlin.test.assertSame
 
 internal class TracerProviderAdapterTest {
 
@@ -13,6 +15,21 @@ internal class TracerProviderAdapterTest {
         FakeClock(),
         CompatSpanLimitsConfig()
     )
+
+    @Test
+    fun testDupeTracerProviderAttributes() {
+        val first = adapter.getTracer(name = "name") {
+            setStringAttribute("key", "value")
+        }
+        val second = adapter.getTracer(name = "name") {
+            setStringAttribute("key", "value")
+        }
+        val third = adapter.getTracer(name = "name") {
+            setStringAttribute("foo", "bar")
+        }
+        assertSame(first, second)
+        assertNotEquals(first, third)
+    }
 
     @Test
     fun testScopePropertyBoundaryCollision() {

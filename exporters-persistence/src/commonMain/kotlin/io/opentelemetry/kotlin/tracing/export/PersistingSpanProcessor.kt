@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.guard
+import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
@@ -14,6 +14,7 @@ import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryRepositoryImpl
 import io.opentelemetry.kotlin.export.TimeoutTelemetryCloseable
+import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 import io.opentelemetry.kotlin.ioDispatcher
@@ -28,7 +29,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeout
 
 /**
  * Creates a processor that persists telemetry before exporting it. This effectively glues
@@ -96,44 +96,20 @@ internal class PersistingSpanProcessor(
     }
 
     override fun onStart(span: ReadWriteSpan, parentContext: Context) = shutdownState.execute {
-        try {
+        sdkErrorHandler.guard("SpanProcessor.onStart failed") {
             composite.onStart(span, parentContext)
-        } catch (e: Throwable) {
-            sdkErrorHandler.onError(
-                SdkError.UserCodeError(
-                    e,
-                    "SpanProcessor.onStart failed",
-                    SdkErrorSeverity.WARNING
-                )
-            )
         }
     }
 
     override fun onEnding(span: ReadWriteSpan) = shutdownState.execute {
-        try {
+        sdkErrorHandler.guard("SpanProcessor.onEnding failed") {
             composite.onEnding(span)
-        } catch (e: Throwable) {
-            sdkErrorHandler.onError(
-                SdkError.UserCodeError(
-                    e,
-                    "SpanProcessor.onEnding failed",
-                    SdkErrorSeverity.WARNING
-                )
-            )
         }
     }
 
     override fun onEnd(span: ReadableSpan) = shutdownState.execute {
-        try {
+        sdkErrorHandler.guard("SpanProcessor.onEnd failed") {
             composite.onEnd(span)
-        } catch (e: Throwable) {
-            sdkErrorHandler.onError(
-                SdkError.UserCodeError(
-                    e,
-                    "SpanProcessor.onEnd failed",
-                    SdkErrorSeverity.WARNING
-                )
-            )
         }
     }
 
@@ -168,10 +144,11 @@ internal class PersistingSpanProcessor(
                     repository.delete(record)
                     return@forEach
                 }
-                val result = try {
-                    withTimeout(exportTimeoutMs) { exporter.export(telemetry) }
-                } catch (e: Throwable) {
-                    Failure
+                val result = sdkErrorHandler.guardOrDefaultSuspend(
+                    Failure,
+                    "Persisted export failed",
+                ) {
+                    runWithTimeout(exportTimeoutMs) { exporter.export(telemetry) }
                 }
                 if (result == Success) {
                     repository.delete(record)
