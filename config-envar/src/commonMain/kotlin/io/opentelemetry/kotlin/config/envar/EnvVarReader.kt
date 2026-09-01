@@ -15,9 +15,12 @@ class EnvVarReader(private val getEnvVar: (String) -> String?) {
     /**
      * Returns the value of [name] as an [Int], or `null` if it is unset or is not an [Int].
      */
-    fun readInt(name: String): Int? = read(name)?.toIntOrNull()
+    fun readInt(name: String): Int? = readString(name)?.toIntOrNull()
 
-    private fun read(name: String): String? = try {
+    /**
+     * Returns the value of [name], or `null` if it is unset or could not be read.
+     */
+    fun readString(name: String): String? = try {
         getEnvVar(name)
     } catch (_: Throwable) {
         null

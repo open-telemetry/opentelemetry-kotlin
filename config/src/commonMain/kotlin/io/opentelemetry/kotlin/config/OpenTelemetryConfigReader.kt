@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.config.envar.EnvVarReader
 import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
-import io.opentelemetry.kotlin.config.envar.model.EnvVarName.Companion.envVarName
 import io.opentelemetry.kotlin.config.yaml.ConfigFileReader
 import io.opentelemetry.kotlin.config.yaml.ConfigFileReaderImpl
 import io.opentelemetry.kotlin.config.yaml.toBehavior
@@ -42,6 +41,6 @@ class OpenTelemetryConfigReader(
     }
 
     private companion object {
-        val CONFIG_FILE = envVarName("OTEL_CONFIG_FILE")
+        const val CONFIG_FILE = "OTEL_CONFIG_FILE"
     }
 }
