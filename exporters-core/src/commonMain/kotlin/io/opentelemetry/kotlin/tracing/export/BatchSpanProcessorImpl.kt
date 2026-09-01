@@ -43,8 +43,9 @@ internal class BatchSpanProcessorImpl(
         shutdownState.execute { processor.processTelemetry(span) }
     }
 
-    override fun isStartRequired(): Boolean = true
+    override fun isStartRequired(): Boolean = false
     override fun isEndRequired(): Boolean = true
+    override fun isOnEndingRequired(): Boolean = false
 
     override fun onStart(
         span: ReadWriteSpan,

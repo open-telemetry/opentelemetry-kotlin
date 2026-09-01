@@ -43,5 +43,5 @@ public interface SpanProcessor : TelemetryCloseable {
     /**
      * Determines whether this span processor is required when a span is ending.
      */
-    public fun isOnEndingRequired(): Boolean = true
+    public fun isOnEndingRequired(): Boolean
 }

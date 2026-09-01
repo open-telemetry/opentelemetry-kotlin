@@ -468,10 +468,6 @@ public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanProce
 	public abstract fun onStart (Lio/opentelemetry/kotlin/tracing/model/ReadWriteSpan;Lio/opentelemetry/kotlin/context/Context;)V
 }
 
-public final class io/opentelemetry/kotlin/tracing/export/SpanProcessor$DefaultImpls {
-	public static fun isOnEndingRequired (Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;)Z
-}
-
 public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadWriteSpan : io/opentelemetry/kotlin/tracing/Span, io/opentelemetry/kotlin/tracing/model/ReadableSpan {
 	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/tracing/SpanContext;
 	public abstract fun setSpanContext (Lio/opentelemetry/kotlin/tracing/SpanContext;)V

@@ -115,6 +115,7 @@ internal class PersistingSpanProcessor(
 
     override fun isStartRequired(): Boolean = composite.isStartRequired()
     override fun isEndRequired(): Boolean = composite.isEndRequired()
+    override fun isOnEndingRequired(): Boolean = composite.isOnEndingRequired()
 
     override suspend fun forceFlush(): OperationResultCode {
         if (shutdownState.isShutdown) {

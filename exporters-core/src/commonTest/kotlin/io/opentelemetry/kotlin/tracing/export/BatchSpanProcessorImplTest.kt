@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
@@ -31,6 +32,15 @@ internal class BatchSpanProcessorImplTest {
             maxExportBatchSize = 10,
             sdkErrorHandler = NoopSdkErrorHandler,
         )
+    }
+
+    @Test
+    fun testOnlyOnEndIsRequired() = runTest {
+        assertFalse(processor.isStartRequired())
+        assertTrue(processor.isEndRequired())
+        assertFalse(processor.isOnEndingRequired())
+        processor.shutdown()
+        advanceUntilIdle()
     }
 
     @Test

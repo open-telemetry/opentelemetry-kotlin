@@ -131,7 +131,8 @@ internal class SpanModel(
                 return
             }
             sdkErrorHandler.guard {
-                processor?.onEnding(ReadWriteSpanImpl(this))
+                processor?.takeIf(SpanProcessor::isOnEndingRequired)
+                    ?.onEnding(ReadWriteSpanImpl(this))
             }
             val toExport = lock.write {
                 state = State.ENDED

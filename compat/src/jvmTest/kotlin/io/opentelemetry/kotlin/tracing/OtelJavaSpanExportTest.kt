@@ -373,6 +373,7 @@ internal class OtelJavaSpanExportTest {
         override fun onEnd(span: ReadableSpan) = Unit
         override fun isStartRequired(): Boolean = true
         override fun isEndRequired(): Boolean = false
+        override fun isOnEndingRequired(): Boolean = false
         override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
         override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
     }

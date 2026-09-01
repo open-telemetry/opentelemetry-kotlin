@@ -46,8 +46,9 @@ internal class SimpleSpanProcessor(
         }
     }
 
-    override fun isStartRequired(): Boolean = true
+    override fun isStartRequired(): Boolean = false
     override fun isEndRequired(): Boolean = true
+    override fun isOnEndingRequired(): Boolean = false
 
     override suspend fun forceFlush(): OperationResultCode =
         runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS) { exporter.forceFlush() }
