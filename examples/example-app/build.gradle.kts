@@ -13,7 +13,7 @@ kotlin {
 
     androidLibrary {
         namespace = "io.opentelemetry.kotlin.example.app"
-        compileSdk = 36
+        compileSdk = 37
         minSdk = 21
     }
 
