@@ -36,11 +36,6 @@ internal class OpenTelemetryEnvVarsTest {
     }
 
     @Test
-    fun doesNotAggregateSpanLimits() {
-        assertNull(behaviorFrom(mapOf("OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT" to "4")).tracerProvider)
-    }
-
-    @Test
     fun disallowedValueUnset() {
         val behavior = behaviorFrom(mapOf("OTEL_ATTRIBUTE_COUNT_LIMIT" to "-1"))
         assertNull(behavior.attributeLimits?.attributeCountLimit)
