@@ -289,18 +289,30 @@ internal class NoopTests {
     @OptIn(ExperimentalApi::class)
     @Test
     fun testNoopMetrics() {
-        val counter = NoopOpenTelemetry.meterProvider.getMeter("test-meter")
-            .createDoubleUpDownCounter(
-                name = "queue.depth",
-                unit = "{item}",
-                description = "queue size",
-            )
-        assertEquals("queue.depth", counter.name)
-        assertEquals("{item}", counter.unit)
-        assertEquals("queue size", counter.description)
-        assertFalse(counter.enabled())
-        counter.add(1.0)
-        counter.add(-1.0) { setStringAttribute("account.type", "commercial") }
+        val meter = NoopOpenTelemetry.meterProvider.getMeter("test-meter")
+        val longCounter = meter.createLongUpDownCounter(
+            name = "store.inventory",
+            unit = "{item}",
+            description = "items in stock",
+        )
+        assertEquals("store.inventory", longCounter.name)
+        assertEquals("{item}", longCounter.unit)
+        assertEquals("items in stock", longCounter.description)
+        assertFalse(longCounter.enabled())
+        longCounter.add(1)
+        longCounter.add(-1) { setStringAttribute("account.type", "commercial") }
+
+        val doubleCounter = meter.createDoubleUpDownCounter(
+            name = "queue.depth",
+            unit = "{item}",
+            description = "queue size",
+        )
+        assertEquals("queue.depth", doubleCounter.name)
+        assertEquals("{item}", doubleCounter.unit)
+        assertEquals("queue size", doubleCounter.description)
+        assertFalse(doubleCounter.enabled())
+        doubleCounter.add(1.0)
+        doubleCounter.add(-1.0) { setStringAttribute("account.type", "commercial") }
     }
 
     private fun verifySpanOperationsAreNoop(span: NoopSpan) {

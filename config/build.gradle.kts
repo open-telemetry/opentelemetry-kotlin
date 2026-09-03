@@ -15,6 +15,7 @@ kotlin {
                 api(project(":config-dsl"))
                 api(project(":config-envar"))
                 api(project(":config-yaml"))
+                implementation(project(":platform-implementations"))
             }
         }
         val commonTest by getting {

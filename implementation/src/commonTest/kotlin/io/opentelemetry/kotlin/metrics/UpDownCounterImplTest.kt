@@ -38,6 +38,19 @@ internal class UpDownCounterImplTest {
     }
 
     @Test
+    fun createLongUpDownCounterExposesIdentity() {
+        val counter = meter.createLongUpDownCounter(
+            name = "store.inventory",
+            unit = "{item}",
+            description = "items in stock",
+        )
+        assertEquals("store.inventory", counter.name)
+        assertEquals("{item}", counter.unit)
+        assertEquals("items in stock", counter.description)
+        assertTrue(counter.enabled())
+    }
+
+    @Test
     fun createDoubleUpDownCounterExposesIdentity() {
         val counter = meter.createDoubleUpDownCounter(
             name = "queue.depth",
@@ -51,6 +64,15 @@ internal class UpDownCounterImplTest {
     }
 
     @Test
+    fun longAddAcceptsPositiveNegativeAndZero() {
+        val counter = meter.createLongUpDownCounter("grocery.customers")
+        counter.add(1)
+        counter.add(-1)
+        counter.add(0)
+        counter.add(2) { setStringAttribute("account.type", "commercial") }
+    }
+
+    @Test
     fun doubleAddAcceptsPositiveNegativeAndZero() {
         val counter = meter.createDoubleUpDownCounter("grocery.customers")
         counter.add(1.5)
@@ -61,10 +83,15 @@ internal class UpDownCounterImplTest {
 
     @Test
     fun createUsesNullUnitAndDescriptionByDefault() {
-        val counter = meter.createDoubleUpDownCounter("grocery.customers")
-        assertEquals("grocery.customers", counter.name)
-        assertEquals(null, counter.unit)
-        assertEquals(null, counter.description)
+        val longCounter = meter.createLongUpDownCounter("grocery.customers")
+        assertEquals("grocery.customers", longCounter.name)
+        assertEquals(null, longCounter.unit)
+        assertEquals(null, longCounter.description)
+
+        val doubleCounter = meter.createDoubleUpDownCounter("grocery.customers")
+        assertEquals("grocery.customers", doubleCounter.name)
+        assertEquals(null, doubleCounter.unit)
+        assertEquals(null, doubleCounter.description)
     }
 
     @Test

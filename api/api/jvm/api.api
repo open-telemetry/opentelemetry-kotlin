@@ -270,12 +270,22 @@ public final class io/opentelemetry/kotlin/metrics/LongHistogram$DefaultImpls {
 	public static synthetic fun record$default (Lio/opentelemetry/kotlin/metrics/LongHistogram;JLio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
+public abstract interface class io/opentelemetry/kotlin/metrics/LongUpDownCounter : io/opentelemetry/kotlin/metrics/SynchronousInstrument {
+	public abstract fun add (JLkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/opentelemetry/kotlin/metrics/LongUpDownCounter$DefaultImpls {
+	public static synthetic fun add$default (Lio/opentelemetry/kotlin/metrics/LongUpDownCounter;JLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
 public abstract interface class io/opentelemetry/kotlin/metrics/Meter {
 	public abstract fun createDoubleUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/DoubleUpDownCounter;
+	public abstract fun createLongUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/LongUpDownCounter;
 }
 
 public final class io/opentelemetry/kotlin/metrics/Meter$DefaultImpls {
 	public static synthetic fun createDoubleUpDownCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/DoubleUpDownCounter;
+	public static synthetic fun createLongUpDownCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/LongUpDownCounter;
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/MeterProvider {

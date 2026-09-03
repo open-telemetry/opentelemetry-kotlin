@@ -12,8 +12,18 @@ internal class TracerProviderBehaviorTest {
     }
 
     @Test
+    fun processorStartsUnset() {
+        assertNull(TracerProviderBehavior().processor)
+    }
+
+    @Test
     fun staysUnsetWhenNeitherLayerConfiguredSpanLimits() {
         assertNull(TracerProviderBehavior().mergeWith(TracerProviderBehavior()).spanLimits)
+    }
+
+    @Test
+    fun staysUnsetWhenNeitherLayerConfiguredProcessor() {
+        assertNull(TracerProviderBehavior().mergeWith(TracerProviderBehavior()).processor)
     }
 
     @Test
@@ -28,6 +38,14 @@ internal class TracerProviderBehaviorTest {
             limits,
             TracerProviderBehavior(spanLimits = limits).mergeWith(TracerProviderBehavior()).spanLimits,
         )
+    }
+
+    @Test
+    fun adoptsProcessorFromWhicheverLayerSuppliedIt() {
+        val processor = SpanProcessorBehavior()
+
+        assertEquals(processor, TracerProviderBehavior().mergeWith(TracerProviderBehavior(processor = processor)).processor)
+        assertEquals(processor, TracerProviderBehavior(processor = processor).mergeWith(TracerProviderBehavior()).processor)
     }
 
     @Test

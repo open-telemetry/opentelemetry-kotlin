@@ -17,4 +17,15 @@ internal class MeterAdapter(
         description?.let(builder::setDescription)
         return DoubleUpDownCounterAdapter(builder.build(), name, unit, description)
     }
+
+    override fun createLongUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+    ): LongUpDownCounter {
+        val builder = impl.upDownCounterBuilder(name)
+        unit?.let(builder::setUnit)
+        description?.let(builder::setDescription)
+        return LongUpDownCounterAdapter(builder.build(), name, unit, description)
+    }
 }

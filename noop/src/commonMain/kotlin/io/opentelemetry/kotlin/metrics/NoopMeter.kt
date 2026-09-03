@@ -14,4 +14,10 @@ internal object NoopMeter : Meter {
         unit: String?,
         description: String?,
     ): DoubleUpDownCounter = NoopDoubleUpDownCounter(name, unit, description)
+
+    override fun createLongUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+    ): LongUpDownCounter = NoopLongUpDownCounter(name, unit, description)
 }

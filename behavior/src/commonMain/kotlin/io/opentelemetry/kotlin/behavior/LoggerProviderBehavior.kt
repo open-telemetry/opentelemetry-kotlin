@@ -14,9 +14,16 @@ data class LoggerProviderBehavior(
      * Limits on log record data capture.
      */
     val logLimits: LogLimitsBehavior? = null,
+
+    /**
+     * Processor used by the logger provider.
+     */
+    val processor: LogRecordProcessorBehavior? = null,
+
 ) : Behavior<LoggerProviderBehavior> {
 
     override fun mergeWith(higher: LoggerProviderBehavior): LoggerProviderBehavior = copy(
         logLimits = mergeNode(logLimits, higher.logLimits),
+        processor = mergeNode(processor, higher.processor),
     )
 }

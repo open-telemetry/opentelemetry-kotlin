@@ -26,6 +26,19 @@ internal class MeterImpl(
         return noopMeter.createDoubleUpDownCounter(name, unit, description)
     }
 
+    override fun createLongUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+    ): LongUpDownCounter {
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: return LongUpDownCounterImpl(
+            name,
+            sanitizeInstrumentUnit(unit),
+            sanitizeInstrumentDescription(description),
+        )
+        return noopMeter.createLongUpDownCounter(name, unit, description)
+    }
+
     /**
      * Returns a noop meter if [name] is not a valid
      * [instrument name](https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-name-syntax),

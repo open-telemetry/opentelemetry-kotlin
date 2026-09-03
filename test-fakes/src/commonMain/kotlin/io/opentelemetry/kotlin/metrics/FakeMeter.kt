@@ -5,6 +5,7 @@ class FakeMeter(
 ) : Meter {
 
     val doubleUpDownCounters: MutableList<FakeDoubleUpDownCounter> = mutableListOf()
+    val longUpDownCounters: MutableList<FakeLongUpDownCounter> = mutableListOf()
 
     override fun createDoubleUpDownCounter(
         name: String,
@@ -12,5 +13,13 @@ class FakeMeter(
         description: String?,
     ): DoubleUpDownCounter = FakeDoubleUpDownCounter(name, unit, description).also {
         doubleUpDownCounters.add(it)
+    }
+
+    override fun createLongUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+    ): LongUpDownCounter = FakeLongUpDownCounter(name, unit, description).also {
+        longUpDownCounters.add(it)
     }
 }
