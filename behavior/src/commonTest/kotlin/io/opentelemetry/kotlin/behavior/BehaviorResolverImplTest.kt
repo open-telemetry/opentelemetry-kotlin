@@ -135,6 +135,26 @@ internal class BehaviorResolverImplTest {
         assertEquals(6, limits?.attributeValueLengthLimit)
     }
 
+    @Test
+    fun declarativeFileReplacesEnvarSampler() {
+        val resolved = resolver.resolve(
+            envars = OpenTelemetryBehavior(
+                tracerProvider = TracerProviderBehavior(sampler = SamplerBehavior.AlwaysOn),
+            ),
+            declarativeFile = OpenTelemetryBehavior(
+                tracerProvider = TracerProviderBehavior(
+                    sampler = SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOff),
+                ),
+            ),
+            dsl = null
+        )
+
+        assertEquals(
+            SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOff),
+            resolved.tracerProvider?.sampler
+        )
+    }
+
     private fun resolveSpanLimits(
         envars: OpenTelemetryBehavior? = null,
         declarativeFile: OpenTelemetryBehavior? = null,
