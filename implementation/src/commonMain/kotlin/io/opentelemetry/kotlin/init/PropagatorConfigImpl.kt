@@ -20,7 +20,7 @@ import kotlin.concurrent.Volatile
 @OptIn(ExperimentalApi::class)
 internal class PropagatorConfigImpl : PropagatorConfigDsl {
 
-    private var configured: TextMapPropagator = NoopOpenTelemetry.propagator
+    private var configured: TextMapPropagator? = null
 
     @Volatile private var w3cTraceContextImpl: TextMapPropagator = NoopOpenTelemetry.propagator
 
@@ -29,13 +29,14 @@ internal class PropagatorConfigImpl : PropagatorConfigDsl {
     @Volatile private var b3MultiImpl: TextMapPropagator = NoopOpenTelemetry.propagator
 
     override fun composite(vararg propagators: TextMapPropagator): TextMapPropagator {
-        configured = CompositeTextMapPropagator(propagators.toList())
-        return configured
+        val composite = CompositeTextMapPropagator(propagators.toList())
+        configured = composite
+        return composite
     }
 
     override fun w3cBaggage(): TextMapPropagator {
         configured = W3CBaggagePropagator
-        return configured
+        return W3CBaggagePropagator
     }
 
     override fun w3cTraceContext(): TextMapPropagator {
@@ -51,6 +52,12 @@ internal class PropagatorConfigImpl : PropagatorConfigDsl {
         }
         configured = forwarder
         return forwarder
+    }
+
+    override fun none(): TextMapPropagator {
+        val noop = NoopOpenTelemetry.propagator
+        configured = noop
+        return noop
     }
 
     // Factories are constructed after user config is applied, so we install them once available.
@@ -86,7 +93,16 @@ internal class PropagatorConfigImpl : PropagatorConfigDsl {
         )
     }
 
-    internal fun buildPropagator(): TextMapPropagator = configured
+    internal fun buildPropagator(): TextMapPropagator = configured ?: defaultPropagator()
+
+    /**
+     * The `tracecontext,baggage` default mandated by the OTel spec.
+     *
+     * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#general-sdk-configuration
+     */
+    private fun defaultPropagator(): TextMapPropagator = CompositeTextMapPropagator(
+        listOf(ForwardingPropagator { w3cTraceContextImpl }, W3CBaggagePropagator)
+    )
 }
 
 @OptIn(ExperimentalApi::class)

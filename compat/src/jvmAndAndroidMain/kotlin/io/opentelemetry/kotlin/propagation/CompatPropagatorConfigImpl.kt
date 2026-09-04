@@ -12,34 +12,40 @@ import io.opentelemetry.extension.trace.propagation.B3Propagator as JavaB3Propag
 @OptIn(ExperimentalApi::class)
 internal class CompatPropagatorConfigImpl : PropagatorConfigDsl {
 
-    private var configured: TextMapPropagator = TextMapPropagatorAdapter(OtelJavaTextMapPropagator.noop())
+    private var configured: TextMapPropagator? = null
 
     override fun composite(vararg propagators: TextMapPropagator): TextMapPropagator {
         val javaPropagators = propagators.map { it.toOtelJavaTextMapPropagator() }
-        configured = TextMapPropagatorAdapter(composite(javaPropagators))
-        return configured
+        return TextMapPropagatorAdapter(composite(javaPropagators)).also { configured = it }
     }
 
-    override fun w3cBaggage(): TextMapPropagator {
-        configured = TextMapPropagatorAdapter(W3CBaggagePropagator.getInstance())
-        return configured
-    }
+    override fun w3cBaggage(): TextMapPropagator =
+        TextMapPropagatorAdapter(W3CBaggagePropagator.getInstance()).also { configured = it }
 
-    override fun w3cTraceContext(): TextMapPropagator {
-        configured = TextMapPropagatorAdapter(W3CTraceContextPropagator.getInstance())
-        return configured
-    }
+    override fun w3cTraceContext(): TextMapPropagator =
+        TextMapPropagatorAdapter(W3CTraceContextPropagator.getInstance()).also { configured = it }
 
     override fun b3(format: B3Format): TextMapPropagator {
         val javaPropagator = when (format) {
             B3Format.SINGLE -> JavaB3Propagator.injectingSingleHeader()
             B3Format.MULTI -> JavaB3Propagator.injectingMultiHeaders()
         }
-        configured = TextMapPropagatorAdapter(javaPropagator)
-        return configured
+        return TextMapPropagatorAdapter(javaPropagator).also { configured = it }
     }
 
-    internal fun buildPropagator(): TextMapPropagator = configured
+    override fun none(): TextMapPropagator =
+        TextMapPropagatorAdapter(OtelJavaTextMapPropagator.noop()).also { configured = it }
+
+    internal fun buildPropagator(): TextMapPropagator = configured ?: defaultPropagator()
+
+    /**
+     * The `tracecontext,baggage` default mandated by the OTel spec.
+     *
+     * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#general-sdk-configuration
+     */
+    private fun defaultPropagator(): TextMapPropagator = TextMapPropagatorAdapter(
+        composite(listOf(W3CTraceContextPropagator.getInstance(), W3CBaggagePropagator.getInstance()))
+    )
 
     private fun TextMapPropagator.toOtelJavaTextMapPropagator(): OtelJavaTextMapPropagator =
         (this as? TextMapPropagatorAdapter)?.impl ?: OtelJavaTextMapPropagatorAdapter(this)

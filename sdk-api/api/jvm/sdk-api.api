@@ -180,6 +180,7 @@ public abstract interface class io/opentelemetry/kotlin/init/OpenTelemetryConfig
 public abstract interface class io/opentelemetry/kotlin/init/PropagatorConfigDsl {
 	public abstract fun b3 (Lio/opentelemetry/kotlin/init/B3Format;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public abstract fun composite ([Lio/opentelemetry/kotlin/propagation/TextMapPropagator;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
+	public abstract fun none ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public abstract fun w3cBaggage ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public abstract fun w3cTraceContext ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 }

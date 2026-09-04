@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -12,9 +13,11 @@ import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.init.B3Format
 import io.opentelemetry.kotlin.init.PropagatorConfigImpl
+import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotSame
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -124,6 +127,61 @@ internal class CorePropagatorApiTest {
     fun `b3 call captures result and buildPropagator returns it`() {
         val captured = dsl.b3(B3Format.SINGLE)
         assertSame(captured, dsl.buildPropagator())
+    }
+
+    @Test
+    fun `default propagator is w3c trace context and baggage`() {
+        installFactories()
+        val propagator = dsl.buildPropagator()
+        assertIs<CompositeTextMapPropagator>(propagator)
+        assertEquals(listOf("traceparent", "tracestate", "baggage"), propagator.fields().toList())
+    }
+
+    @Test
+    fun `default propagator injects traceparent for the current span`() {
+        installFactories()
+        val span = spanFactory.fromSpanContext(FakeSpanContext.VALID)
+        val carrier = mutableMapOf<String, String>()
+        dsl.buildPropagator().inject(contextFactory.root().storeSpan(span), carrier, MapTextMapSetter)
+        assertTrue(carrier.containsKey("traceparent"))
+    }
+
+    @Test
+    fun `default propagator extracts an incoming traceparent`() {
+        installFactories()
+        val result = dsl.buildPropagator().extract(
+            context = contextFactory.root(),
+            carrier = mapOf("traceparent" to "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"),
+            getter = MapTextMapGetter,
+        )
+        assertNotSame(contextFactory.root(), result)
+    }
+
+    @Test
+    fun `none returns the noop propagator and buildPropagator returns it`() {
+        val captured = dsl.none()
+        assertSame(NoopOpenTelemetry.propagator, captured)
+        assertSame(captured, dsl.buildPropagator())
+    }
+
+    @Test
+    fun `none disables injection and extraction`() {
+        dsl.none()
+        installFactories()
+        val propagator = dsl.buildPropagator()
+        assertTrue(propagator.fields().isEmpty())
+
+        val span = spanFactory.fromSpanContext(FakeSpanContext.VALID)
+        val carrier = mutableMapOf<String, String>()
+        propagator.inject(contextFactory.root().storeSpan(span), carrier, MapTextMapSetter)
+        assertTrue(carrier.isEmpty())
+
+        val result = propagator.extract(
+            context = contextFactory.root(),
+            carrier = mapOf("traceparent" to "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"),
+            getter = MapTextMapGetter,
+        )
+        assertSame(contextFactory.root(), result)
     }
 
     private fun installFactories() {

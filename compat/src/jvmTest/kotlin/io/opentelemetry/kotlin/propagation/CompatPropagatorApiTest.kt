@@ -132,6 +132,37 @@ internal class CompatPropagatorApiTest {
         val captured = dsl.w3cTraceContext()
         assertSame(captured, dsl.buildPropagator())
     }
+
+    @Test
+    fun `default propagator is w3c trace context and baggage`() {
+        val propagator = dsl.buildPropagator()
+        assertEquals(listOf("traceparent", "tracestate", "baggage"), propagator.fields().toList())
+    }
+
+    @Test
+    fun `default propagator round-trips a traceparent header through inject and extract`() {
+        val propagator = dsl.buildPropagator()
+        val incoming = mapOf("traceparent" to "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01")
+        val extracted = propagator.extract(contextFactory.root(), incoming, MapTextMapGetter)
+
+        val outgoing = mutableMapOf<String, String>()
+        propagator.inject(extracted, outgoing, MapTextMapSetter)
+        assertEquals(incoming["traceparent"], outgoing["traceparent"])
+    }
+
+    @Test
+    fun `none disables propagation`() {
+        val captured = dsl.none()
+        assertSame(captured, dsl.buildPropagator())
+        assertTrue(captured.fields().isEmpty())
+
+        val incoming = mapOf("traceparent" to "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01")
+        val extracted = captured.extract(contextFactory.root(), incoming, MapTextMapGetter)
+
+        val outgoing = mutableMapOf<String, String>()
+        captured.inject(extracted, outgoing, MapTextMapSetter)
+        assertTrue(outgoing.isEmpty())
+    }
 }
 
 @OptIn(ExperimentalApi::class)

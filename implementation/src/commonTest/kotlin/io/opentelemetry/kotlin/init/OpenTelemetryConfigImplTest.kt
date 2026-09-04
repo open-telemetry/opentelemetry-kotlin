@@ -36,6 +36,14 @@ internal class OpenTelemetryConfigImplTest {
         assertNull(cfg.generateTracingConfig().processor)
         assertNull(cfg.generateLoggingConfig().processor)
         assertNull(cfg.contextConfig.storageMode)
+        assertIs<CompositeTextMapPropagator>(cfg.propagatorCfg.buildPropagator())
+    }
+
+    @Test
+    fun testPropagatorNone() {
+        val cfg = OpenTelemetryConfigImpl(clock).apply {
+            propagator { none() }
+        }
         assertSame(NoopOpenTelemetry.propagator, cfg.propagatorCfg.buildPropagator())
     }
 

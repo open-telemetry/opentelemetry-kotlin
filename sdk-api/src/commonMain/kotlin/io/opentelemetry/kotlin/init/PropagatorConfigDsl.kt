@@ -43,4 +43,9 @@ public interface PropagatorConfigDsl {
      * https://github.com/openzipkin/b3-propagation
      */
     public fun b3(format: B3Format = B3Format.SINGLE): TextMapPropagator
+
+    /**
+     * Disables context propagation entirely by returning a no-op value.
+     */
+    public fun none(): TextMapPropagator
 }
