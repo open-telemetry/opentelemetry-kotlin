@@ -2,8 +2,6 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
-import io.opentelemetry.kotlin.behavior.BehaviorResolver
-import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
@@ -21,6 +19,7 @@ internal class OpenTelemetryConfigImpl(
     clock: Clock,
     private val resourceFactory: ResourceFactory = ResourceFactoryImpl(),
     private val globalResourceConfig: ResourceConfigImpl = ResourceConfigImpl(),
+    private val behaviorReader: BehaviorReader = defaultBehaviorReader(),
 ) : OpenTelemetryConfigDsl, ResourceConfigDsl by globalResourceConfig {
 
     @Volatile private var configuredErrorHandler: SdkErrorHandler = NoopSdkErrorHandler
@@ -37,13 +36,14 @@ internal class OpenTelemetryConfigImpl(
     internal val contextConfig: ContextConfigImpl = ContextConfigImpl()
     internal val propagatorCfg: PropagatorConfigImpl = PropagatorConfigImpl()
     private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
-    private val behaviorResolver: BehaviorResolver = BehaviorResolverImpl()
     private val resourceDetectionConfig = ResourceDetectionConfigImpl()
 
     private var customIdGenerator: (() -> IdGenerator)? = null
 
+    @Volatile private var configFilePath: String? = null
+
     override fun configFile(path: String) {
-        // no-op
+        configFilePath = path
     }
 
     override fun attributeLimits(action: AttributeLimitsConfigDsl.() -> Unit) {
@@ -91,17 +91,17 @@ internal class OpenTelemetryConfigImpl(
     }
 
     /**
-     * Resolves the behavior the SDK is initialized with, applying the precedence rules the resolver
-     * defines. Environment variables and declarative configuration are not wired up yet.
+     * The behavior the SDK is initialized with, applying the precedence rules the resolver defines.
      */
-    private fun resolveBehavior(): OpenTelemetryBehavior = behaviorResolver.resolve(
-        envars = null,
-        declarativeFile = null,
-        dsl = OpenTelemetryBehavior(attributeLimits = globalAttributeLimits.toBehavior()),
-    )
+    private val resolvedBehavior: OpenTelemetryBehavior by lazy {
+        behaviorReader.read(
+            configFilePath = configFilePath,
+            dsl = OpenTelemetryBehavior(attributeLimits = globalAttributeLimits.toBehavior()),
+        )
+    }
 
     private fun resolveAttributeLimits(): AttributeLimitsBehavior =
-        resolveBehavior().attributeLimits ?: AttributeLimitsBehavior()
+        resolvedBehavior.attributeLimits ?: AttributeLimitsBehavior()
 
     internal fun generateTracingConfig() =
         tracingConfig.generateTracingConfig(baseResource, resolveAttributeLimits())

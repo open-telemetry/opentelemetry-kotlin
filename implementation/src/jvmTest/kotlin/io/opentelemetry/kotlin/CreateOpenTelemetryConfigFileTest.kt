@@ -1,18 +1,18 @@
-package io.opentelemetry.kotlin.init
+package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.clock.FakeClock
-import io.opentelemetry.kotlin.createCompatOpenTelemetry
-import org.junit.Test
+import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
 import java.io.File
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-internal class CompatConfigFileTest {
+internal class CreateOpenTelemetryConfigFileTest {
 
     @Test
     fun `a config file that does not exist fails initialization`() {
         assertFailsWith<Exception> {
-            createCompatOpenTelemetry {
+            createOpenTelemetry {
                 configFile("does-not-exist.yaml")
             }
         }
@@ -22,7 +22,7 @@ internal class CompatConfigFileTest {
     fun `a config file that is not valid fails initialization`() {
         val path = writeConfigFile("file_format: [not, a, string")
         assertFailsWith<Exception> {
-            createCompatOpenTelemetry {
+            createOpenTelemetry {
                 configFile(path)
             }
         }
@@ -30,21 +30,23 @@ internal class CompatConfigFileTest {
 
     @Test
     fun `a config file supplies the global attribute limits`() {
-        val cfg = CompatOpenTelemetryConfig(FakeClock()).apply {
+        val cfg = OpenTelemetryConfigImpl(FakeClock()).apply {
             configFile(writeConfigFile(CONFIG_FILE))
         }
-        assertEquals(64, cfg.resolveAttributeLimits().attributeCountLimit)
+        assertEquals(64, cfg.generateTracingConfig().spanLimits.attributeCountLimit)
+        assertEquals(64, cfg.generateLoggingConfig().logLimits.attributeCountLimit)
     }
 
     @Test
     fun `the dsl takes precedence over the config file`() {
-        val cfg = CompatOpenTelemetryConfig(FakeClock()).apply {
+        val cfg = OpenTelemetryConfigImpl(FakeClock()).apply {
             configFile(writeConfigFile(CONFIG_FILE))
             attributeLimits {
                 attributeCountLimit = 32
             }
         }
-        assertEquals(32, cfg.resolveAttributeLimits().attributeCountLimit)
+        assertEquals(32, cfg.generateTracingConfig().spanLimits.attributeCountLimit)
+        assertEquals(32, cfg.generateLoggingConfig().logLimits.attributeCountLimit)
     }
 
     private fun writeConfigFile(contents: String): String {

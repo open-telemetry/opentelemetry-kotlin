@@ -14,8 +14,12 @@ kotlin {
                 api(project(":behavior"))
                 api(project(":config-dsl"))
                 api(project(":config-envar"))
-                api(project(":config-yaml"))
                 implementation(project(":platform-implementations"))
+            }
+        }
+        val jvmMain by getting {
+            dependencies {
+                implementation(project(":config-yaml"))
             }
         }
         val commonTest by getting {
