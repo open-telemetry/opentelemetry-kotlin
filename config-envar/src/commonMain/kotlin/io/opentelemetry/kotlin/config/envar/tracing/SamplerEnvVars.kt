@@ -22,10 +22,7 @@ class SamplerEnvVars(
             ALWAYS_OFF -> SamplerBehavior.AlwaysOff
             PARENT_BASED_ALWAYS_ON -> SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOn)
             PARENT_BASED_ALWAYS_OFF -> SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOff)
-            else -> {
-                onWarning("Unknown OTEL_TRACES_SAMPLER value '$name'; ignoring")
-                null
-            }
+            else -> null.also { onWarning("Unknown OTEL_TRACES_SAMPLER value '$name'; ignoring") }
         }
     }
 
