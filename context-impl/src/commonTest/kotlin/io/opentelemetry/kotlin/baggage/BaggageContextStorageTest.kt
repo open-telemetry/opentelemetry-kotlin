@@ -2,9 +2,7 @@ package io.opentelemetry.kotlin.baggage
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
+import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotSame
@@ -15,7 +13,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class BaggageContextStorageTest {
 
-    private val factory = ContextFactoryImpl(SpanFactoryImpl(SpanContextFactoryImpl(IdGeneratorImpl())))
+    private val factory = ContextFactoryImpl(FakeSpanFactory())
 
     @Test
     fun `extractBaggage on root returns empty baggage`() {

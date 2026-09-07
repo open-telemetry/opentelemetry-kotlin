@@ -6,7 +6,7 @@ import kotlin.concurrent.Volatile
  * A simple implementation of [ImplicitContextStorage] that only allows one context at any time,
  * and doesn't use thread locals/coroutine context to distinguish between what is current.
  */
-internal class DefaultImplicitContextStorage(
+public class DefaultImplicitContextStorage(
     rootSupplier: () -> Context
 ) : ImplicitContextStorage {
 
