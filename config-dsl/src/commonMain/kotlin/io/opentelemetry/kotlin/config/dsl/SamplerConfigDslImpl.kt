@@ -3,16 +3,19 @@ package io.opentelemetry.kotlin.config.dsl
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 
+/**
+ * Captures the sampler configured programmatically, and maps it onto a behavior.
+ */
 @ExperimentalApi
 class SamplerConfigDslImpl {
 
-    private var chosen: SamplerBehavior? = null
+    private var sampler: SamplerBehavior? = null
 
-    fun toBehavior(): SamplerBehavior? = chosen
+    fun toBehavior(): SamplerBehavior? = sampler
 
-    fun alwaysOn(): SamplerBehavior = record(SamplerBehavior.AlwaysOn)
+    fun alwaysOn(): SamplerBehavior = SamplerBehavior.AlwaysOn.also { sampler = it }
 
-    fun alwaysOff(): SamplerBehavior = record(SamplerBehavior.AlwaysOff)
+    fun alwaysOff(): SamplerBehavior = SamplerBehavior.AlwaysOff.also { sampler = it }
 
     fun parentBased(
         root: SamplerBehavior? = null,
@@ -20,18 +23,12 @@ class SamplerConfigDslImpl {
         remoteParentNotSampled: SamplerBehavior? = null,
         localParentSampled: SamplerBehavior? = null,
         localParentNotSampled: SamplerBehavior? = null,
-    ): SamplerBehavior = record(
+    ): SamplerBehavior =
         SamplerBehavior.ParentBased(
             root = root,
             remoteParentSampled = remoteParentSampled,
             remoteParentNotSampled = remoteParentNotSampled,
             localParentSampled = localParentSampled,
             localParentNotSampled = localParentNotSampled
-        )
-    )
-
-    private fun record(value: SamplerBehavior): SamplerBehavior {
-        chosen = value
-        return value
-    }
+        ).also { sampler = it }
 }
