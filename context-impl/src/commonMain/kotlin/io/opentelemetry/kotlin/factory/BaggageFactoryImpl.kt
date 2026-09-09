@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.baggage.BaggageEntryMetadataImpl
 import io.opentelemetry.kotlin.baggage.BaggageImpl
 
 @OptIn(ExperimentalApi::class)
-internal class BaggageFactoryImpl : BaggageFactory {
+public class BaggageFactoryImpl : BaggageFactory {
 
     override fun empty(): Baggage = BaggageImpl.EMPTY
 

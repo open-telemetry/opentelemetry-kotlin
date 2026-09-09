@@ -116,6 +116,25 @@ internal class OpenTelemetryConfigImplTest {
     }
 
     @Test
+    fun testLocalSpanLimits() {
+        val cfg = OpenTelemetryConfigImpl(clock).apply {
+            tracerProvider {
+                spanLimits {
+                    linkCountLimit = 8
+                    eventCountLimit = 16
+                    attributeCountPerEventLimit = 32
+                    attributeCountPerLinkLimit = 64
+                }
+            }
+        }
+        val spanLimits = cfg.generateTracingConfig().spanLimits
+        assertEquals(8, spanLimits.linkCountLimit)
+        assertEquals(16, spanLimits.eventCountLimit)
+        assertEquals(32, spanLimits.attributeCountPerEventLimit)
+        assertEquals(64, spanLimits.attributeCountPerLinkLimit)
+    }
+
+    @Test
     fun testLocalAttrLimits2() {
         val cfg = OpenTelemetryConfigImpl(clock).apply {
             attributeLimits {

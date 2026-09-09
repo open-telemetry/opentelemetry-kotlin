@@ -8,11 +8,16 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#spanprocessor
  */
 @ExperimentalApi
-class SpanProcessorBehavior : Behavior<SpanProcessorBehavior> {
+data class SpanProcessorBehavior(
 
-    override fun mergeWith(higher: SpanProcessorBehavior): SpanProcessorBehavior = higher
+    /**
+     * Console span exporter. Selecting it is the whole configuration.
+     */
+    val console: ConsoleExporterBehavior? = null,
 
-    override fun equals(other: Any?): Boolean = other is SpanProcessorBehavior
+) : Behavior<SpanProcessorBehavior> {
 
-    override fun hashCode(): Int = 0
+    override fun mergeWith(higher: SpanProcessorBehavior): SpanProcessorBehavior = copy(
+        console = mergeNode(console, higher.console),
+    )
 }

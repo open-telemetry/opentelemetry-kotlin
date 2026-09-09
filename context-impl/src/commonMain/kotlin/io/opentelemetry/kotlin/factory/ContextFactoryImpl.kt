@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.context.ImplicitContextStorage
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 
-internal class ContextFactoryImpl(
+public class ContextFactoryImpl(
     private val spanFactory: SpanFactory,
     private val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
     storageFactory: (supplier: () -> Context) -> ImplicitContextStorage = ::DefaultImplicitContextStorage,

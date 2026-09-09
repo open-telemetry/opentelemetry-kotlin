@@ -10,3 +10,12 @@ internal fun <T : Behavior<T>> mergeNode(lower: T?, higher: T?): T? = when {
     higher == null -> lower
     else -> lower.mergeWith(higher)
 }
+
+/**
+ * Merges two optional maps, where entries from [higher] win on key collisions.
+ */
+internal fun <K, V> mergeMap(lower: Map<K, V>?, higher: Map<K, V>?): Map<K, V>? = when {
+    lower == null -> higher
+    higher == null -> lower
+    else -> lower + higher
+}

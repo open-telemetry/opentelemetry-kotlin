@@ -13,6 +13,7 @@ internal class BehaviorResolverImplTest {
         val resolved = resolver.resolve(envars = null, declarativeFile = null, dsl = null)
 
         assertEquals(OpenTelemetryBehavior(), resolved)
+        assertNull(resolved.resource)
         assertNull(resolved.attributeLimits)
         assertNull(resolved.tracerProvider)
         assertNull(resolved.loggerProvider)
@@ -106,6 +107,17 @@ internal class BehaviorResolverImplTest {
     }
 
     @Test
+    fun declarativeFileReplacesEnvarResourceAttributes() {
+        val resolved = resolver.resolve(
+            envars = configWithResource(ResourceBehavior(attributes = mapOf("a" to 1L, "b" to 2L))),
+            declarativeFile = configWithResource(ResourceBehavior(attributes = mapOf("a" to 9L))),
+            dsl = configWithResource(ResourceBehavior(serviceName = "checkout")),
+        )
+        assertEquals(mapOf("a" to 9L), resolved.resource?.attributes)
+        assertEquals("checkout", resolved.resource?.serviceName)
+    }
+
+    @Test
     fun dslOverridesEnvarsForAttributeLimits() {
         val resolved = resolver.resolve(
             envars = configWithAttributeLimits(
@@ -135,6 +147,26 @@ internal class BehaviorResolverImplTest {
         assertEquals(6, limits?.attributeValueLengthLimit)
     }
 
+    @Test
+    fun declarativeFileReplacesEnvarSampler() {
+        val resolved = resolver.resolve(
+            envars = OpenTelemetryBehavior(
+                tracerProvider = TracerProviderBehavior(sampler = SamplerBehavior.AlwaysOn),
+            ),
+            declarativeFile = OpenTelemetryBehavior(
+                tracerProvider = TracerProviderBehavior(
+                    sampler = SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOff),
+                ),
+            ),
+            dsl = null
+        )
+
+        assertEquals(
+            SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOff),
+            resolved.tracerProvider?.sampler
+        )
+    }
+
     private fun resolveSpanLimits(
         envars: OpenTelemetryBehavior? = null,
         declarativeFile: OpenTelemetryBehavior? = null,
@@ -143,6 +175,9 @@ internal class BehaviorResolverImplTest {
 
     private fun configWithSpanLimits(spanLimits: SpanLimitsBehavior) =
         OpenTelemetryBehavior(tracerProvider = TracerProviderBehavior(spanLimits = spanLimits))
+
+    private fun configWithResource(resource: ResourceBehavior) =
+        OpenTelemetryBehavior(resource = resource)
 
     private fun configWithAttributeLimits(attributeLimits: AttributeLimitsBehavior) =
         OpenTelemetryBehavior(attributeLimits = attributeLimits)

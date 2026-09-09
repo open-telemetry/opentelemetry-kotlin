@@ -3,9 +3,7 @@ package io.opentelemetry.kotlin.context
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
+import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,7 +20,7 @@ internal class ScopeImplTest {
     fun setUp() {
         handler = FakeSdkErrorHandler()
         factory = ContextFactoryImpl(
-            SpanFactoryImpl(SpanContextFactoryImpl(IdGeneratorImpl())),
+            FakeSpanFactory(),
             sdkErrorHandler = handler,
         )
         storage = DefaultImplicitContextStorage(factory::root)

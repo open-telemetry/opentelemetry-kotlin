@@ -8,11 +8,16 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * https://opentelemetry.io/docs/specs/otel/logs/sdk/#logrecordprocessor
  */
 @ExperimentalApi
-class LogRecordProcessorBehavior : Behavior<LogRecordProcessorBehavior> {
+data class LogRecordProcessorBehavior(
 
-    override fun mergeWith(higher: LogRecordProcessorBehavior): LogRecordProcessorBehavior = higher
+    /**
+     * Console log exporter. Selecting it is the whole configuration.
+     */
+    val console: ConsoleExporterBehavior? = null,
 
-    override fun equals(other: Any?): Boolean = other is LogRecordProcessorBehavior
+) : Behavior<LogRecordProcessorBehavior> {
 
-    override fun hashCode(): Int = 0
+    override fun mergeWith(higher: LogRecordProcessorBehavior): LogRecordProcessorBehavior = copy(
+        console = mergeNode(console, higher.console),
+    )
 }

@@ -65,6 +65,12 @@ internal class OpenTelemetryConfigurationParserTest {
     }
 
     @Test
+    fun resourceFieldsMayBeOmitted() {
+        val yaml = "$MINIMAL_DOCUMENT\nresource: {}"
+        assertEquals(Resource(), parser.parse(yaml).resource)
+    }
+
+    @Test
     fun attributeLimitFieldsMayBeOmitted() {
         val yaml = "$MINIMAL_DOCUMENT\nattribute_limits: {}"
 

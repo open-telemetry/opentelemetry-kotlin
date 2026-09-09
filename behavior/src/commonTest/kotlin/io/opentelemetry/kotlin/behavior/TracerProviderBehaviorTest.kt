@@ -59,4 +59,38 @@ internal class TracerProviderBehaviorTest {
         assertEquals(1, merged.spanLimits?.attributeCountLimit)
         assertEquals(99, merged.spanLimits?.linkCountLimit)
     }
+
+    @Test
+    fun samplerStartsUnset() {
+        assertNull(TracerProviderBehavior().sampler)
+    }
+
+    @Test
+    fun staysUnsetWhenNeitherLayerConfiguredSampler() {
+        assertNull(TracerProviderBehavior().mergeWith(TracerProviderBehavior()).sampler)
+    }
+
+    @Test
+    fun adoptsSamplerFromWhicheverLayerSuppliedIt() {
+        val sampler = SamplerBehavior.AlwaysOff
+        assertEquals(
+            sampler,
+            TracerProviderBehavior().mergeWith(TracerProviderBehavior(sampler = sampler)).sampler,
+        )
+        assertEquals(
+            sampler,
+            TracerProviderBehavior(sampler = sampler).mergeWith(TracerProviderBehavior()).sampler,
+        )
+    }
+
+    @Test
+    fun samplerMergeDoesNotDropSpanLimits() {
+        val spanLimits = SpanLimitsBehavior(linkCountLimit = 3)
+        val merged = TracerProviderBehavior(spanLimits = spanLimits).mergeWith(
+            TracerProviderBehavior(sampler = SamplerBehavior.AlwaysOff)
+        )
+
+        assertEquals(spanLimits, merged.spanLimits)
+        assertEquals(SamplerBehavior.AlwaysOff, merged.sampler)
+    }
 }

@@ -13,7 +13,10 @@ import io.opentelemetry.kotlin.config.schema.model.OpenTelemetryConfiguration
 fun OpenTelemetryConfiguration.toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
     attributeLimits = attributeLimits?.toBehavior(),
     tracerProvider = tracerProvider?.let {
-        TracerProviderBehavior(spanLimits = it.limits?.toBehavior())
+        TracerProviderBehavior(
+            spanLimits = it.limits?.toBehavior(),
+            sampler = it.sampler?.toBehavior()
+        )
     },
     loggerProvider = loggerProvider?.let {
         LoggerProviderBehavior(logLimits = it.limits?.toBehavior())
