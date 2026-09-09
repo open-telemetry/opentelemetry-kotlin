@@ -19,7 +19,7 @@ val openTelemetryConfigurationRepoZip =
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 api(libs.kotlin.serialization)
             }
@@ -27,7 +27,7 @@ kotlin {
     }
 }
 
-val downloadOpenTelemetryConfiguration by tasks.registering(Download::class) {
+val downloadOpenTelemetryConfiguration = tasks.register<Download>("downloadOpenTelemetryConfiguration") {
     src(openTelemetryConfigurationRepoZip)
     dest(
         layout.buildDirectory.file(
@@ -37,7 +37,7 @@ val downloadOpenTelemetryConfiguration by tasks.registering(Download::class) {
     overwrite(false)
 }
 
-val refreshOpenTelemetryConfiguration by tasks.registering(Copy::class) {
+val refreshOpenTelemetryConfiguration = tasks.register<Copy>("refreshOpenTelemetryConfiguration") {
     dependsOn(downloadOpenTelemetryConfiguration)
 
     from(zipTree(downloadOpenTelemetryConfiguration.get().dest))

@@ -20,7 +20,7 @@ buildkonfig {
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(project(":sdk-api"))
                 implementation(project(":sdk-common"))
@@ -38,7 +38,7 @@ kotlin {
                 implementation(libs.kotlinx.coroutines)
             }
         }
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(project(":api-ext"))
                 implementation(project(":test-fakes"))
@@ -47,7 +47,7 @@ kotlin {
                 implementation(libs.kotest.property)
             }
         }
-        val jvmTest by getting {
+        jvmTest {
             dependencies {
                 implementation(project(":compat"))
                 implementation(project(":java-typealiases"))

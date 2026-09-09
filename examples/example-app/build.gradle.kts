@@ -36,7 +36,7 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(project(":core"))
                 implementation(project(":implementation"))
@@ -46,8 +46,8 @@ kotlin {
             }
         }
 
-        val composeMain by creating {
-            dependsOn(commonMain)
+        val composeMain = create("composeMain") {
+            dependsOn(commonMain.get())
             dependencies {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
@@ -56,7 +56,7 @@ kotlin {
             }
         }
 
-        val androidMain by getting {
+        androidMain {
             dependsOn(composeMain)
             dependencies {
                 implementation(libs.androidx.activity.compose)
@@ -64,7 +64,7 @@ kotlin {
             }
         }
 
-        val jvmMain by getting {
+        jvmMain {
             dependsOn(composeMain)
             dependencies {
                 implementation(compose.desktop.currentOs)
@@ -72,13 +72,13 @@ kotlin {
             }
         }
 
-        val iosArm64Main by getting
-        val iosSimulatorArm64Main by getting
-        val iosMain by getting {
+        getByName("iosArm64Main")
+        getByName("iosSimulatorArm64Main")
+        iosMain {
             dependsOn(composeMain)
         }
 
-        val jsMain by getting
+        getByName("jsMain")
     }
 
     compilerOptions {

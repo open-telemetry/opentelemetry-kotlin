@@ -82,13 +82,13 @@ abstract class GenerateSemanticConventionsTask @Inject constructor(
     }
 }
 
-val downloadSemanticConventions by tasks.registering(Download::class) {
+val downloadSemanticConventions = tasks.register<Download>("downloadSemanticConventions") {
     src(semanticConventionsRepoZip)
     dest(layout.buildDirectory.file("semantic-conventions-${semanticConventionsVersion}/semantic-conventions.zip"))
     overwrite(false)
 }
 
-val refreshSemanticConventions by tasks.registering(Copy::class) {
+val refreshSemanticConventions = tasks.register<Copy>("refreshSemanticConventions") {
     dependsOn(downloadSemanticConventions)
 
     from(zipTree(downloadSemanticConventions.get().dest))

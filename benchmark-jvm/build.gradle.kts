@@ -24,7 +24,7 @@ kotlin {
                 implementation(project(":benchmark-fixtures"))
             }
         }
-        val jvmMain by getting {
+        jvmMain {
             dependencies {
                 implementation(project.dependencies.platform(libs.opentelemetry.bom))
                 implementation(libs.opentelemetry.api)

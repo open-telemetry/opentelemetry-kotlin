@@ -8,7 +8,7 @@ plugins {
 
 kotlin {
     sourceSets {
-        val jvmAndAndroidMain by getting {
+        getByName("jvmAndAndroidMain") {
             dependencies {
                 implementation(project.dependencies.platform(libs.opentelemetry.bom))
                 implementation(project.dependencies.platform(libs.opentelemetry.bom.alpha))

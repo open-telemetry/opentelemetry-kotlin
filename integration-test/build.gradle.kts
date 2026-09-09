@@ -7,7 +7,7 @@ plugins {
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(project(":api-ext"))
                 implementation(project(":sdk-api"))
