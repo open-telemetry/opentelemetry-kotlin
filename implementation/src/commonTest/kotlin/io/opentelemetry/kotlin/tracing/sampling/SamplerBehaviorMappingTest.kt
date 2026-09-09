@@ -162,11 +162,11 @@ internal class SamplerBehaviorMappingTest {
             localParentNotSampled: String = "AlwaysOffSampler",
         ): String =
             "ParentBased{" +
-                    "root:$root," +
-                    "remoteParentSampled:$remoteParentSampled," +
-                    "remoteParentNotSampled:$remoteParentNotSampled," +
-                    "localParentSampled:$localParentSampled," +
-                    "localParentNotSampled:$localParentNotSampled" +
-                    "}"
+                "root:$root," +
+                "remoteParentSampled:$remoteParentSampled," +
+                "remoteParentNotSampled:$remoteParentNotSampled," +
+                "localParentSampled:$localParentSampled," +
+                "localParentNotSampled:$localParentNotSampled" +
+                "}"
     }
 }
