@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 
 @OptIn(ExperimentalApi::class)
-internal class CompositeTextMapPropagator(
+public class CompositeTextMapPropagator(
     private val delegates: List<TextMapPropagator>,
 ) : TextMapPropagator {
 

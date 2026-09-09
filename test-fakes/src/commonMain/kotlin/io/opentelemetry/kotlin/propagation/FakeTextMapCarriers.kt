@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.propagation
 import io.opentelemetry.kotlin.ExperimentalApi
 
 @OptIn(ExperimentalApi::class)
-internal object MapTextMapGetter : TextMapGetter<Map<String, String>> {
+object FakeTextMapGetter : TextMapGetter<Map<String, String>> {
     override fun keys(carrier: Map<String, String>): Collection<String> = carrier.keys
     override fun get(carrier: Map<String, String>?, key: String): String? = carrier?.get(key)
     override fun getAll(carrier: Map<String, String>?, key: String): List<String> =
@@ -11,8 +11,8 @@ internal object MapTextMapGetter : TextMapGetter<Map<String, String>> {
 }
 
 @OptIn(ExperimentalApi::class)
-internal object MapTextMapSetter : TextMapSetter<MutableMap<String, String>> {
+object FakeTextMapSetter : TextMapSetter<MutableMap<String, String>> {
     override fun set(carrier: MutableMap<String, String>?, key: String, value: String) {
-        carrier?.put(key, value)
+        carrier?.set(key, value)
     }
 }

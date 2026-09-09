@@ -47,9 +47,9 @@ internal class CompatB3PropagatorApiTest {
         val traceId = "0af7651916cd43dd8448eb211c80319c"
         val spanId = "b7ad6b7169203331"
         val incoming = mapOf("b3" to "$traceId-$spanId-1")
-        val extracted = propagator.extract(contextFactory.root(), incoming, MapTextMapGetter)
+        val extracted = propagator.extract(contextFactory.root(), incoming, FakeTextMapGetter)
         val outgoing = mutableMapOf<String, String>()
-        propagator.inject(extracted, outgoing, MapTextMapSetter)
+        propagator.inject(extracted, outgoing, FakeTextMapSetter)
         assertEquals("$traceId-$spanId-1", outgoing["b3"])
     }
 
@@ -65,9 +65,9 @@ internal class CompatB3PropagatorApiTest {
             "X-B3-SpanId" to spanId,
             "X-B3-Sampled" to "1",
         )
-        val extracted = propagator.extract(contextFactory.root(), incoming, MapTextMapGetter)
+        val extracted = propagator.extract(contextFactory.root(), incoming, FakeTextMapGetter)
         val outgoing = mutableMapOf<String, String>()
-        propagator.inject(extracted, outgoing, MapTextMapSetter)
+        propagator.inject(extracted, outgoing, FakeTextMapSetter)
         assertEquals(traceId, outgoing["X-B3-TraceId"])
         assertEquals(spanId, outgoing["X-B3-SpanId"])
         assertEquals("1", outgoing["X-B3-Sampled"])

@@ -24,10 +24,10 @@ internal class CompatPropagatorApiTest {
 
         val carrier = mutableMapOf<String, String>()
         val seeded = contextFactory.root().set(key, "value")
-        composite.inject(seeded, carrier, MapTextMapSetter)
+        composite.inject(seeded, carrier, FakeTextMapSetter)
         assertTrue(carrier.isEmpty())
 
-        val extracted = composite.extract(seeded, carrier, MapTextMapGetter)
+        val extracted = composite.extract(seeded, carrier, FakeTextMapGetter)
         assertEquals("value", extracted.get(key))
     }
 
@@ -37,11 +37,11 @@ internal class CompatPropagatorApiTest {
         val composite = dsl.composite(recording)
 
         val carrier = mutableMapOf<String, String>()
-        composite.inject(contextFactory.root(), carrier, MapTextMapSetter)
+        composite.inject(contextFactory.root(), carrier, FakeTextMapSetter)
         assertTrue(recording.injectCalled)
         assertEquals(mapOf("foo" to "set-by-foo"), carrier)
 
-        composite.extract(contextFactory.root(), carrier, MapTextMapGetter)
+        composite.extract(contextFactory.root(), carrier, FakeTextMapGetter)
         assertTrue(recording.extractCalled)
     }
 
@@ -52,7 +52,7 @@ internal class CompatPropagatorApiTest {
         val composite = dsl.composite(a, b)
 
         val carrier = linkedMapOf<String, String>()
-        composite.inject(contextFactory.root(), carrier, MapTextMapSetter)
+        composite.inject(contextFactory.root(), carrier, FakeTextMapSetter)
 
         assertEquals(listOf("a", "b"), carrier.keys.toList())
         assertTrue(a.injectCalled)
@@ -68,7 +68,7 @@ internal class CompatPropagatorApiTest {
             ContextWritingPropagator(keyB, "beta"),
         )
 
-        val result = composite.extract(contextFactory.root(), emptyMap(), MapTextMapGetter)
+        val result = composite.extract(contextFactory.root(), emptyMap(), FakeTextMapGetter)
 
         assertEquals("alpha", result.get(keyA))
         assertEquals("beta", result.get(keyB))
@@ -118,10 +118,10 @@ internal class CompatPropagatorApiTest {
             "traceparent" to "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01",
             "tracestate" to "vendor=value",
         )
-        val extracted = propagator.extract(contextFactory.root(), incoming, MapTextMapGetter)
+        val extracted = propagator.extract(contextFactory.root(), incoming, FakeTextMapGetter)
 
         val outgoing = mutableMapOf<String, String>()
-        propagator.inject(extracted, outgoing, MapTextMapSetter)
+        propagator.inject(extracted, outgoing, FakeTextMapSetter)
 
         assertEquals(incoming["traceparent"], outgoing["traceparent"])
         assertEquals(incoming["tracestate"], outgoing["tracestate"])

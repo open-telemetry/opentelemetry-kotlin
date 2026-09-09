@@ -13,7 +13,7 @@ import io.opentelemetry.kotlin.context.Context
  * https://www.w3.org/TR/baggage/
  */
 @OptIn(ExperimentalApi::class)
-internal object W3CBaggagePropagator : TextMapPropagator {
+public object W3CBaggagePropagator : TextMapPropagator {
 
     private const val FIELD = "baggage"
     private const val ENTRY_DELIMITER = ','

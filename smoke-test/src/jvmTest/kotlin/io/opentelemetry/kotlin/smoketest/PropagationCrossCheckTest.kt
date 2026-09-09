@@ -4,8 +4,8 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.createOpenTelemetry
-import io.opentelemetry.kotlin.propagation.TextMapGetter
-import io.opentelemetry.kotlin.propagation.TextMapSetter
+import io.opentelemetry.kotlin.propagation.FakeTextMapGetter
+import io.opentelemetry.kotlin.propagation.FakeTextMapSetter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -84,9 +84,9 @@ internal class PropagationCrossCheckTest {
     }
 
     private fun roundTrip(otel: OpenTelemetry, seed: Map<String, String>): Map<String, String> {
-        val extracted = otel.propagator.extract(otel.context.root(), seed, MapTextMapGetter)
+        val extracted = otel.propagator.extract(otel.context.root(), seed, FakeTextMapGetter)
         val out = mutableMapOf<String, String>()
-        otel.propagator.inject(extracted, out, MapTextMapSetter)
+        otel.propagator.inject(extracted, out, FakeTextMapSetter)
         return out
     }
 }
@@ -95,18 +95,3 @@ private class OtelRefs(
     val impl: OpenTelemetry,
     val compat: OpenTelemetry,
 )
-
-@OptIn(ExperimentalApi::class)
-private object MapTextMapGetter : TextMapGetter<Map<String, String>> {
-    override fun keys(carrier: Map<String, String>): Collection<String> = carrier.keys
-    override fun get(carrier: Map<String, String>?, key: String): String? = carrier?.get(key)
-    override fun getAll(carrier: Map<String, String>?, key: String): List<String> =
-        carrier?.get(key)?.let { listOf(it) } ?: emptyList()
-}
-
-@OptIn(ExperimentalApi::class)
-private object MapTextMapSetter : TextMapSetter<MutableMap<String, String>> {
-    override fun set(carrier: MutableMap<String, String>?, key: String, value: String) {
-        carrier?.set(key, value)
-    }
-}

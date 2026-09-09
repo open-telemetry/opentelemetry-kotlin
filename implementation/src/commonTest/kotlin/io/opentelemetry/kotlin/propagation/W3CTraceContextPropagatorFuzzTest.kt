@@ -102,7 +102,7 @@ internal class W3CTraceContextPropagatorFuzzTest {
                     put("tracestate", ts)
                 }
             }
-            val extracted = propagator.extract(root, carrier, MapTextMapGetter)
+            val extracted = propagator.extract(root, carrier, FakeTextMapGetter)
             if (extracted != root) {
                 assertTrue(
                     extracted.extractSpan().spanContext.isValid,
@@ -137,9 +137,9 @@ internal class W3CTraceContextPropagatorFuzzTest {
             val context = contextFactory.root().storeSpan(spanFactory.fromSpanContext(original))
 
             val carrier = mutableMapOf<String, String>()
-            propagator.inject(context, carrier, MapTextMapSetter)
+            propagator.inject(context, carrier, FakeTextMapSetter)
 
-            val extracted = propagator.extract(contextFactory.root(), carrier, MapTextMapGetter)
+            val extracted = propagator.extract(contextFactory.root(), carrier, FakeTextMapGetter)
             val sc = extracted.extractSpan().spanContext
 
             assertEquals(traceId, sc.traceId)

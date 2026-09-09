@@ -55,7 +55,7 @@ internal class B3PropagatorErrorReportingTest {
     @Test
     fun `extract single reports ApiMisuse for wrong number of parts`() {
         val ctx = contextFactory.root()
-        assertSame(ctx, singlePropagator.extract(ctx, mapOf("b3" to traceId), MapTextMapGetter))
+        assertSame(ctx, singlePropagator.extract(ctx, mapOf("b3" to traceId), FakeTextMapGetter))
 
         assertEquals(1, handler.apiMisuses.size)
         val error = handler.apiMisuses.single()
@@ -69,7 +69,7 @@ internal class B3PropagatorErrorReportingTest {
         val ctx = contextFactory.root()
         assertSame(
             ctx,
-            singlePropagator.extract(ctx, mapOf("b3" to "${"0".repeat(32)}-$spanId-1"), MapTextMapGetter),
+            singlePropagator.extract(ctx, mapOf("b3" to "${"0".repeat(32)}-$spanId-1"), FakeTextMapGetter),
         )
 
         assertEquals(1, handler.apiMisuses.size)
@@ -83,7 +83,7 @@ internal class B3PropagatorErrorReportingTest {
         val ctx = contextFactory.root()
         assertSame(
             ctx,
-            singlePropagator.extract(ctx, mapOf("b3" to "$traceId-${"0".repeat(16)}-1"), MapTextMapGetter),
+            singlePropagator.extract(ctx, mapOf("b3" to "$traceId-${"0".repeat(16)}-1"), FakeTextMapGetter),
         )
 
         assertEquals(1, handler.apiMisuses.size)
@@ -100,7 +100,7 @@ internal class B3PropagatorErrorReportingTest {
             multiPropagator.extract(
                 ctx,
                 mapOf("X-B3-TraceId" to "not-a-valid-trace-id", "X-B3-SpanId" to spanId),
-                MapTextMapGetter,
+                FakeTextMapGetter,
             ),
         )
 
@@ -118,7 +118,7 @@ internal class B3PropagatorErrorReportingTest {
             multiPropagator.extract(
                 ctx,
                 mapOf("X-B3-TraceId" to traceId, "X-B3-SpanId" to "short"),
-                MapTextMapGetter,
+                FakeTextMapGetter,
             ),
         )
 

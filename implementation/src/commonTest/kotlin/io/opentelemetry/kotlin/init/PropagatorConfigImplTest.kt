@@ -8,8 +8,8 @@ import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
-import io.opentelemetry.kotlin.propagation.MapTextMapGetter
-import io.opentelemetry.kotlin.propagation.MapTextMapSetter
+import io.opentelemetry.kotlin.propagation.FakeTextMapGetter
+import io.opentelemetry.kotlin.propagation.FakeTextMapSetter
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -34,13 +34,13 @@ internal class PropagatorConfigImplTest {
         assertEquals(emptyList(), propagator.fields().toList())
 
         val carrier = mutableMapOf<String, String>()
-        propagator.inject(contextWithSpan, carrier, MapTextMapSetter)
+        propagator.inject(contextWithSpan, carrier, FakeTextMapSetter)
         assertTrue(carrier.isEmpty())
 
         val result = propagator.extract(
             context = contextFactory.root(),
             carrier = mapOf("traceparent" to "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"),
-            getter = MapTextMapGetter
+            getter = FakeTextMapGetter
         )
         assertSame(contextFactory.root(), result)
     }
@@ -53,13 +53,13 @@ internal class PropagatorConfigImplTest {
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
 
         val carrier = mutableMapOf<String, String>()
-        propagator.inject(contextWithSpan, carrier, MapTextMapSetter)
+        propagator.inject(contextWithSpan, carrier, FakeTextMapSetter)
         assertTrue(carrier.contains("traceparent"))
 
         val result = propagator.extract(
             context = contextFactory.root(),
             carrier = mapOf("traceparent" to "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"),
-            getter = MapTextMapGetter
+            getter = FakeTextMapGetter
         )
         assertNotSame(contextFactory.root(), result)
     }
