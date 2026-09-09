@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
-@OptIn(ExperimentalApi::class)
 internal class CreateOpenTelemetryConfigFileTest {
 
     @Test

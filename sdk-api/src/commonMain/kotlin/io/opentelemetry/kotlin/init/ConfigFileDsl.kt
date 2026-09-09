@@ -15,7 +15,10 @@ public interface ConfigFileDsl {
      *
      * Relative or absolute paths are accepted.
      *
-     * The SDK does not read or act on the file yet, so this API has no effect.
+     * This file is only read on the JVM (not Android). Every other target ignores this path.
+     *
+     * SDK initialization will error if a YAML file is supplied that cannot be read or does
+     * not contain valid configuration.
      */
     public fun configFile(path: String)
 }
