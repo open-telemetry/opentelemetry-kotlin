@@ -1,10 +1,8 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
 
-@ExperimentalApi
 internal fun SamplerConfigDsl.toSampler(behavior: SamplerBehavior): Sampler = when (behavior) {
     SamplerBehavior.AlwaysOn -> alwaysOn()
     SamplerBehavior.AlwaysOff -> alwaysOff()
