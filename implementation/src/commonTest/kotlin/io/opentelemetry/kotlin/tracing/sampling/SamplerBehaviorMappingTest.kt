@@ -61,6 +61,7 @@ internal class SamplerBehaviorMappingTest {
         links = emptyList(),
     )
 
+    /** Maps [SamplerBehavior.AlwaysOn] to AlwaysOnSampler. */
     @Test
     fun alwaysOnMapsToAlwaysOnSampler() {
         val sampler = samplerDsl.toSampler(SamplerBehavior.AlwaysOn)
@@ -68,6 +69,7 @@ internal class SamplerBehaviorMappingTest {
         assertEquals(Decision.RECORD_AND_SAMPLE, sample(sampler).decision)
     }
 
+    /** Maps [SamplerBehavior.AlwaysOff] to AlwaysOffSampler. */
     @Test
     fun alwaysOffMapsToAlwaysOffSampler() {
         val sampler = samplerDsl.toSampler(SamplerBehavior.AlwaysOff)
@@ -75,12 +77,20 @@ internal class SamplerBehaviorMappingTest {
         assertEquals(Decision.DROP, sample(sampler).decision)
     }
 
+    /**
+     * An empty [SamplerBehavior.ParentBased] fills each child with the spec default
+     * (AlwaysOn for sampled/root, AlwaysOff for not-sampled).
+     */
     @Test
     fun emptyParentBasedUsesSchemaChildDefaults() {
         val sampler = samplerDsl.toSampler(SamplerBehavior.ParentBased())
         assertEquals(parentBasedDescription(root = "AlwaysOnSampler"), sampler.description)
     }
 
+    /**
+     * A [SamplerBehavior.ParentBased] that sets only `root` keeps the spec defaults for
+     * all other parent-based scenarios (remote/local and sampled/not sampled).
+     */
     @Test
     fun omittedParentBasedChildrenKeepDefaults() {
         val sampler = samplerDsl.toSampler(
@@ -89,6 +99,10 @@ internal class SamplerBehaviorMappingTest {
         assertEquals(parentBasedDescription(root = "AlwaysOffSampler"), sampler.description)
     }
 
+    /**
+     * Each ParentBased child maps even when it is the opposite of the spec default,
+     * which `shouldSample` then honors for all five parent cases.
+     */
     @Test
     fun invertedParentBasedChildrenAreMapped() {
         val sampler = samplerDsl.toSampler(
@@ -130,6 +144,10 @@ internal class SamplerBehaviorMappingTest {
         )
     }
 
+    /**
+     * Nested [SamplerBehavior.ParentBased] is mapped recursively: the inner root
+     * decides when there is no parent; outer child defaults still apply with a parent.
+     */
     @Test
     fun nestedParentBasedMapsRecursively() {
         val sampler = samplerDsl.toSampler(
