@@ -33,7 +33,6 @@ kotlin {
                 implementation(project(":exporters-core"))
                 implementation(project(":noop"))
                 implementation(project(":semconv"))
-                implementation(project(":serializable-models"))
                 implementation(libs.kotlinx.coroutines)
             }
         }
