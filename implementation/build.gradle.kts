@@ -41,6 +41,7 @@ kotlin {
                 implementation(project(":api-ext"))
                 implementation(project(":test-fakes"))
                 implementation(project(":integration-test"))
+                implementation(project(":serializable-models"))
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.kotest.property)
             }
