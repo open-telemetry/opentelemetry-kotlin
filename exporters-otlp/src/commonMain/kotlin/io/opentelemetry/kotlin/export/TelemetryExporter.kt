@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.ioDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -8,10 +9,12 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
 import kotlin.coroutines.CoroutineContext
 import kotlin.random.Random
 
 private const val SHUTDOWN_TIMEOUT_MS = 5000L
+private const val MAX_CONCURRENT_EXPORT_COROUTINES = 5
 
 internal class TelemetryExporter<T>(
     private val initialDelayMs: Long,
@@ -26,20 +29,42 @@ internal class TelemetryExporter<T>(
     private val shutdownState: MutableShutdownState = MutableShutdownState()
     private val scope: CoroutineScope =
         CoroutineScope(SupervisorJob() + coroutineContext + telemetryExceptionHandler("OTLP exporter", sdkErrorHandler))
+    private val exportSemaphore = Semaphore(MAX_CONCURRENT_EXPORT_COROUTINES)
 
     /**
      * Exports telemetry via coroutines and uses exponential backoff when a failure
      * is encountered.
      */
-    fun export(telemetry: List<T>): OperationResultCode =
-        shutdownState.ifActive {
-            if (telemetry.isNotEmpty()) {
-                scope.launch {
-                    exportTelemetry(telemetry)
-                }
-            }
-            Success
+    suspend fun export(telemetry: List<T>): OperationResultCode {
+        if (shutdownState.isShutdown) {
+            return Failure
         }
+        if (telemetry.isEmpty()) {
+            return Success
+        }
+
+        exportSemaphore.acquire()
+
+        if (shutdownState.isShutdown) {
+            exportSemaphore.release()
+            return Failure
+        }
+
+        val job = try {
+            scope.launch {
+                exportTelemetry(telemetry)
+            }
+        } catch (error: Throwable) {
+            exportSemaphore.release()
+            throw error
+        }
+
+        job.invokeOnCompletion {
+            exportSemaphore.release()
+        }
+
+        return Success
+    }
 
     private suspend fun exportTelemetry(telemetry: List<T>) {
         var delayMs = initialDelayMs
