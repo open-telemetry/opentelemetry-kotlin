@@ -33,14 +33,15 @@ import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
  * generally be encouraged to migrate to [createCompatOpenTelemetry] as a long-term goal.
  */
 @ExperimentalApi
-public fun OtelJavaOpenTelemetry.toOtelKotlinApi(): OpenTelemetry {
+public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
+    clock: Clock = ClockAdapter(OtelJavaClock.getDefault())
+): OpenTelemetry {
     val idGenerator = CompatIdGenerator()
     val traceFlags = CompatTraceFlagsFactory()
     val traceState = CompatTraceStateFactory()
     val spanContext = CompatSpanContextFactory()
     val contextFactory = CompatContextFactory()
     val span = CompatSpanFactory(spanContext)
-    val clock = ClockAdapter(OtelJavaClock.getDefault())
     return CompatOpenTelemetryImpl(
         tracerProvider = TracerProviderAdapter(unobfuscatedTracerProvider(), clock, CompatSpanLimitsConfig()),
         loggerProvider = LoggerProviderAdapter(unobfuscatedLoggerProvider()),

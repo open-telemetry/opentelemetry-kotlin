@@ -8,7 +8,8 @@ public final class io/opentelemetry/kotlin/OpenTelemetryCompatExtKt {
 }
 
 public final class io/opentelemetry/kotlin/OtelJavaOpenTelemetryExtKt {
-	public static final fun toOtelKotlinApi (Lio/opentelemetry/api/OpenTelemetry;)Lio/opentelemetry/kotlin/OpenTelemetry;
+	public static final fun toOtelKotlinApi (Lio/opentelemetry/api/OpenTelemetry;Lio/opentelemetry/kotlin/Clock;)Lio/opentelemetry/kotlin/OpenTelemetry;
+	public static synthetic fun toOtelKotlinApi$default (Lio/opentelemetry/api/OpenTelemetry;Lio/opentelemetry/kotlin/Clock;ILjava/lang/Object;)Lio/opentelemetry/kotlin/OpenTelemetry;
 }
 
 public final class io/opentelemetry/kotlin/context/ContextExtKt {
