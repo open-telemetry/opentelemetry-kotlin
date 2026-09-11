@@ -6,7 +6,7 @@ plugins {
 
 kotlin {
     sourceSets {
-        val commonTest by getting {
+        getByName("commonTest") {
             dependencies {
                 implementation(project(":core"))
                 implementation(project(":implementation"))
@@ -20,7 +20,7 @@ kotlin {
                 implementation(libs.ktor.client.encoding)
             }
         }
-        val jvmTest by getting {
+        getByName("jvmTest") {
             dependencies {
                 implementation(project(":compat"))
             }

@@ -10,7 +10,7 @@ repositories {
     mavenCentral()
 }
 
-version = project.properties["version"] as String
+version = project.findProperty("version") as String
 
 dependencies {
     implementation(gradleApi())

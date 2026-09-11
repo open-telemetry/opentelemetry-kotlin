@@ -9,7 +9,7 @@ plugins {
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        getByName("commonMain") {
             dependencies {
                 implementation(project(":sdk-api"))
                 api(project(":behavior"))
@@ -19,14 +19,14 @@ kotlin {
                 implementation(libs.okio)
             }
         }
-        val commonTest by getting {
+        getByName("commonTest") {
             dependencies {
                 implementation(project(":test-fakes"))
                 implementation(libs.kotlin.test)
                 implementation(libs.okio.fakefilesystem)
             }
         }
-        val jvmTest by getting {
+        getByName("jvmTest") {
             dependencies {
                 implementation(libs.kotlin.test)
             }

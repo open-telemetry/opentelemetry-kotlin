@@ -21,7 +21,7 @@ fun Project.configureKotlin(
         }
 
         if (!project.isJvmAndroidModule()) {
-            js(IR) {
+            js {
                 nodejs()
                 browser {
                     testTask {

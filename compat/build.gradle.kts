@@ -9,7 +9,7 @@ plugins {
 
 kotlin {
     sourceSets {
-        val jvmAndAndroidMain by getting {
+        getByName("jvmAndAndroidMain") {
             dependencies {
                 api(project(":core"))
                 implementation(project(":sdk-api"))
@@ -27,7 +27,7 @@ kotlin {
                 implementation(libs.opentelemetry.extension.trace.propagators)
             }
         }
-        val jvmTest by getting {
+        getByName("jvmTest") {
             dependencies {
                 implementation(project(":test-fakes"))
                 implementation(project(":integration-test"))

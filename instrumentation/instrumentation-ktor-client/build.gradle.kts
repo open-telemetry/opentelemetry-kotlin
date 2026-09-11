@@ -9,13 +9,13 @@ plugins {
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        getByName("commonMain") {
             dependencies {
                 api(project(":api"))
                 api(libs.ktor.client.core)
             }
         }
-        val commonTest by getting {
+        getByName("commonTest") {
             dependencies {
                 implementation(project(":implementation"))
                 implementation(project(":test-fakes"))

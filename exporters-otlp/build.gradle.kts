@@ -18,7 +18,7 @@ buildkonfig {
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        getByName("commonMain") {
             dependencies {
                 implementation(project(":sdk-api"))
                 implementation(project(":sdk-common"))
@@ -30,7 +30,7 @@ kotlin {
                 implementation(libs.ktor.client.encoding)
             }
         }
-        val commonTest by getting {
+        getByName("commonTest") {
             dependencies {
                 implementation(project(":test-fakes"))
                 implementation(libs.kotlin.test.common)
@@ -39,7 +39,7 @@ kotlin {
                 implementation(libs.ktor.client.mock)
             }
         }
-        val jvmAndAndroidMain by getting {
+        getByName("jvmAndAndroidMain") {
             dependencies {
                 implementation(libs.ktor.client.okhttp)
             }

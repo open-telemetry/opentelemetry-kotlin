@@ -9,13 +9,13 @@ plugins {
 
 kotlin {
     sourceSets {
-        val jvmAndAndroidMain by getting {
+        getByName("jvmAndAndroidMain") {
             dependencies {
                 api(project(":api"))
                 api(libs.ktor.server.core)
             }
         }
-        val jvmTest by getting {
+        getByName("jvmTest") {
             dependencies {
                 implementation(project(":implementation"))
                 implementation(project(":test-fakes"))

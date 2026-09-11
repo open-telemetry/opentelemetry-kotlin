@@ -9,13 +9,13 @@ plugins {
 
 kotlin {
     sourceSets {
-        val jvmAndAndroidMain by getting {
+        getByName("jvmAndAndroidMain") {
             dependencies {
                 api(project(":api"))
                 implementation(libs.kotlinx.coroutines)
             }
         }
-        val jvmTest by getting {
+        getByName("jvmTest") {
             dependencies {
                 implementation(project(":test-fakes"))
                 implementation(libs.kotlinx.coroutines.test)
