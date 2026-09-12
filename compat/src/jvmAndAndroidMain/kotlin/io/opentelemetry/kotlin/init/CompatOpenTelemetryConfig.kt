@@ -10,9 +10,13 @@ import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
+import io.opentelemetry.kotlin.config.envar.EnvVarReader
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
@@ -27,7 +31,8 @@ import kotlin.concurrent.Volatile
 @ExperimentalApi
 internal class CompatOpenTelemetryConfig(
     clock: Clock,
-    private val behaviorReader: CompatBehaviorReader = defaultCompatBehaviorReader(),
+    envVarReader: EnvVarReader = EnvVarReader { System.getenv(it) },
+    suppliedBehaviorReader: CompatBehaviorReader? = null,
 ) : OpenTelemetryConfigDsl {
 
     @Volatile private var configuredErrorHandler: SdkErrorHandler = NoopSdkErrorHandler
@@ -38,6 +43,10 @@ internal class CompatOpenTelemetryConfig(
     internal val meterProviderConfig = CompatMeterProviderConfig(clock)
     private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
     internal val propagatorCfg = CompatPropagatorConfigImpl()
+    private val behaviorReader: CompatBehaviorReader = suppliedBehaviorReader ?: defaultCompatBehaviorReader(
+        envVarReader = envVarReader,
+        onSamplerWarning = ::reportSamplerWarning,
+    )
 
     private var customIdGenerator: (() -> IdGenerator)? = null
 
@@ -78,6 +87,10 @@ internal class CompatOpenTelemetryConfig(
         val declared =
             ResourceAdapter(OtelJavaResource.create(globalResourceAttrs.otelJavaAttributes(), globalResourceSchemaUrl))
         return resourceDetectionConfig.detectors.detectResource(CompatResourceFactory, sdkErrorHandler).merge(declared)
+    }
+
+    internal fun applyResolvedSampler() {
+        tracerProviderConfig.applyResolvedSampler(resolvedBehavior.tracerProvider?.sampler)
     }
 
     override fun context(action: ContextConfigDsl.() -> Unit) {
@@ -128,4 +141,14 @@ internal class CompatOpenTelemetryConfig(
 
     internal fun resolveSpanLimits(): SpanLimitsBehavior =
         resolvedBehavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior()
+
+    private fun reportSamplerWarning(message: String) {
+        sdkErrorHandler.reportError(
+            SdkError.ApiMisuse(
+                api = "OTEL_TRACES_SAMPLER",
+                message = message,
+                severity = SdkErrorSeverity.WARNING,
+            )
+        )
+    }
 }
