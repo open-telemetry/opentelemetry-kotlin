@@ -39,6 +39,20 @@ public data class OtlpGrpcMetricExporter(
    */
   public val compression: String? = null,
   /**
+   * Configure the maximum size of each export request message in bytes, before compression.
+   * Value must be non-negative. A value of 0 indicates no limit (infinity) and is not recommended.
+   * If omitted or null, 67108864 (64 MiB) is used.
+   */
+  @SerialName("max_request_size")
+  public val maxRequestSize: Long? = null,
+  /**
+   * Configure the maximum size of each export response in bytes, after decompression.
+   * Value must be positive.
+   * If omitted or null, 4194304 (4 MiB) is used.
+   */
+  @SerialName("max_response_size")
+  public val maxResponseSize: Long? = null,
+  /**
    * Configure max time (in milliseconds) to wait for each export.
    * Value must be non-negative. A value of 0 indicates no limit (infinity).
    * If omitted or null, 10000 is used.
