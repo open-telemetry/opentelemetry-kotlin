@@ -34,4 +34,13 @@ public data class MeterProvider(
    */
   @SerialName("meter_configurator/development")
   public val meterConfiguratorDevelopment: ExperimentalMeterConfigurator? = null,
+  /**
+   * Controls how multiple matching Views are applied to an Instrument.
+   * Values include:
+   * * composable: Combines (merges) matching Views into unified metric streams unless distinct stream names are configured.
+   * * independent: Creates separate metric streams independently for each matching View.
+   * If omitted, independent is used.
+   */
+  @SerialName("view_matching_mode/development")
+  public val viewMatchingModeDevelopment: ExperimentalViewMatchingMode? = null,
 )

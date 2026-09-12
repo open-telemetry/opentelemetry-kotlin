@@ -13,7 +13,7 @@ plugins {
 }
 
 // release version of https://github.com/open-telemetry/opentelemetry-configuration
-val openTelemetryConfigurationVersion = "1.1.0"
+val openTelemetryConfigurationVersion = "1.2.0"
 val openTelemetryConfigurationRepoZip =
     "https://github.com/open-telemetry/opentelemetry-configuration/archive/v${openTelemetryConfigurationVersion}.zip"
 

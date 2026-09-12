@@ -19,6 +19,12 @@ public data class Sampler(
   @SerialName("always_on")
   public val alwaysOn: AlwaysOnSampler? = null,
   /**
+   * Configure sampler to be always_record.
+   * If omitted, ignore.
+   */
+  @SerialName("always_record")
+  public val alwaysRecord: AlwaysRecordSampler? = null,
+  /**
    * Configure sampler to be composite.
    * If omitted, ignore.
    */

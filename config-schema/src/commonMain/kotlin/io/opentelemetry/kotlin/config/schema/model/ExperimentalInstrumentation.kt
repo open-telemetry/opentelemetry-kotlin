@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 public data class ExperimentalInstrumentation(
   /**
    * Configure general SemConv options that may apply to multiple languages and instrumentations.
-   * Instrumenation may merge general config options with the language specific configuration at .instrumentation.<language>.
+   * Instrumentation may merge general config options with the language specific configuration at .instrumentation.<language>.
    * If omitted, default values as described in ExperimentalGeneralInstrumentation are used.
    */
   public val general: ExperimentalGeneralInstrumentation? = null,
