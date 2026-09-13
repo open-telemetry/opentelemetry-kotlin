@@ -2,6 +2,8 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.LogLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -20,7 +22,7 @@ internal class LoggerProviderConfigImpl(
 ) : LoggerProviderConfigDsl, ResourceConfigDsl by resourceConfigImpl {
 
     private var processor: LogRecordProcessor? = null
-    private var logLimitsAction: LogLimitsConfigDsl.() -> Unit = {}
+    private val logLimits = LogLimitsConfigDslImpl()
     private val defaultLoggerConfig = LoggerConfigImpl(true)
     private var loggerConfigurator: LoggerConfigurator = LoggerConfigurator {
         defaultLoggerConfig
@@ -41,7 +43,7 @@ internal class LoggerProviderConfigImpl(
     }
 
     override fun logLimits(action: LogLimitsConfigDsl.() -> Unit) {
-        logLimitsAction = action
+        logLimits.action()
     }
 
     override fun loggerConfigurator(configurator: LoggerConfigurator) {
@@ -51,21 +53,28 @@ internal class LoggerProviderConfigImpl(
     fun generateLoggingConfig(
         base: Resource,
         globalLimits: AttributeLimitsBehavior,
+        logLimits: LogLimitsBehavior,
     ): LoggingConfig = LoggingConfig(
         processor = processor,
-        logLimits = generateLogLimitsConfig(globalLimits),
+        logLimits = generateLogLimitsConfig(globalLimits, logLimits),
         resource = base.merge(resourceConfigImpl.generateResource()),
         sdkErrorHandler = sdkErrorHandler,
         loggerConfigurator = loggerConfigurator,
     )
 
+    fun toBehavior(): LoggerProviderBehavior =
+        LoggerProviderBehavior(
+            logLimits = logLimits.toBehavior()
+        )
+
     /**
      * A limit left unset by the log limits falls back to the global attribute limits, then to the
      * default this SDK applies.
      */
-    private fun generateLogLimitsConfig(globalLimits: AttributeLimitsBehavior): AttributeLimitsBehavior {
-        val impl = LogLimitsConfigDslImpl()
-        logLimitsAction(impl)
-        return globalLimits.mergeWith(impl.toBehavior())
+    private fun generateLogLimitsConfig(
+        globalLimits: AttributeLimitsBehavior,
+        logLimits: LogLimitsBehavior
+    ): AttributeLimitsBehavior {
+        return globalLimits.mergeWith(logLimits)
     }
 }

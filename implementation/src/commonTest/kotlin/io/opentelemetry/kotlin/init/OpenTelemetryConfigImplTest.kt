@@ -154,6 +154,43 @@ internal class OpenTelemetryConfigImplTest {
     }
 
     @Test
+    fun testLocalLogLimits() {
+        val cfg = OpenTelemetryConfigImpl(clock).apply {
+            attributeLimits {
+                attributeCountLimit = 64
+                attributeValueLengthLimit = 256
+            }
+            loggerProvider {
+                logLimits {
+                    attributeCountLimit = 8
+                    attributeValueLengthLimit = 16
+                }
+            }
+        }
+        val logLimits = cfg.generateLoggingConfig().logLimits
+        assertEquals(8, logLimits.attributeCountLimit)
+        assertEquals(16, logLimits.attributeValueLengthLimit)
+    }
+
+    @Test
+    fun testLocalLogLimits2() {
+        val cfg = OpenTelemetryConfigImpl(clock).apply {
+            attributeLimits {
+                attributeCountLimit = 64
+            }
+            loggerProvider {
+                logLimits {
+                    attributeValueLengthLimit = 256
+                }
+            }
+        }
+        with(cfg.generateLoggingConfig().logLimits) {
+            assertEquals(64, attributeCountLimit)
+            assertEquals(256, attributeValueLengthLimit)
+        }
+    }
+
+    @Test
     fun testSignalZeroAttrLimitBeatsGlobal() {
         val cfg = OpenTelemetryConfigImpl(clock).apply {
             attributeLimits {
