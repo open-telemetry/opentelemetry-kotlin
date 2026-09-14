@@ -32,6 +32,7 @@ public fun createCompatOpenTelemetry(
     val span = CompatSpanFactory(spanContext)
 
     val cfg = CompatOpenTelemetryConfig(clock).apply(config)
+    cfg.applyResolvedSampler()
     val resolvedIdGenerator = cfg.resolveIdGenerator()
     val base = cfg.buildGlobalResource()
     val globalLimits = cfg.resolveAttributeLimits()

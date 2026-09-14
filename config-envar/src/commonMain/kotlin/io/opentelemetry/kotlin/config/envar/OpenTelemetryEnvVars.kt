@@ -16,13 +16,16 @@ import io.opentelemetry.kotlin.config.envar.tracing.TracesExporterEnvVars
  * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
  */
 @ExperimentalApi
-class OpenTelemetryEnvVars(private val reader: EnvVarReader) {
+class OpenTelemetryEnvVars(
+    private val reader: EnvVarReader,
+    private val onSamplerWarning: (String) -> Unit = {},
+) {
 
     fun toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
         attributeLimits = AttributeLimitsEnvVars(reader).toBehavior(),
         tracerProvider = TracerProviderBehavior(
             spanLimits = SpanLimitsEnvVars(reader).toBehavior(),
-            sampler = SamplerEnvVars(reader).toBehavior(),
+            sampler = SamplerEnvVars(reader, onSamplerWarning).toBehavior(),
             processor = TracesExporterEnvVars(reader).toBehavior(),
         ),
         loggerProvider = LoggerProviderBehavior(

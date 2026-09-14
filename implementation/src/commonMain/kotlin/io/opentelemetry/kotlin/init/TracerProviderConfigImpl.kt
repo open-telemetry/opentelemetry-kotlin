@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
@@ -23,6 +24,7 @@ import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
 import io.opentelemetry.kotlin.tracing.sampling.parentBased
+import io.opentelemetry.kotlin.tracing.sampling.toSampler
 
 internal class TracerProviderConfigImpl(
     private val clock: Clock,
@@ -32,6 +34,7 @@ internal class TracerProviderConfigImpl(
 
     private var processor: SpanProcessor? = null
     private var samplerAction: SamplerConfigDsl.() -> Sampler = { parentBased(root = alwaysOn()) }
+    private var samplerConfiguredByDsl = false
     private val defaultTracerConfig = TracerConfigImpl(true)
     private var tracerConfigurator: TracerConfigurator = TracerConfigurator {
         defaultTracerConfig
@@ -57,6 +60,7 @@ internal class TracerProviderConfigImpl(
     }
 
     override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
+        samplerConfiguredByDsl = true
         samplerAction = action
     }
 
@@ -76,6 +80,13 @@ internal class TracerProviderConfigImpl(
         samplerFactory = { spanFactory -> SamplerConfigImpl(spanFactory).samplerAction() },
         tracerConfigurator = tracerConfigurator,
     )
+
+    internal fun applyResolvedSampler(behavior: SamplerBehavior?) {
+        if (samplerConfiguredByDsl || behavior == null) {
+            return
+        }
+        samplerAction = { toSampler(behavior) }
+    }
 
     fun toBehavior(): TracerProviderBehavior =
         TracerProviderBehavior(

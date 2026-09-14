@@ -14,6 +14,7 @@ import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
@@ -34,6 +35,7 @@ import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.OtelJavaSamplerAdapter
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplerAdapter
+import io.opentelemetry.kotlin.tracing.sampling.toSampler
 
 @ExperimentalApi
 internal class CompatTracerProviderConfig(
@@ -47,6 +49,7 @@ internal class CompatTracerProviderConfig(
     private val resourceAttrs = CompatAttributesModel()
     private var resourceSchemaUrl: String? = null
     private val spanLimitsDsl = SpanLimitsConfigDslImpl()
+    private var samplerConfiguredByDsl = false
 
     override var serviceName: String? = null
         set(value) {
@@ -73,10 +76,22 @@ internal class CompatTracerProviderConfig(
     }
 
     override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
-        val samplerConfig = object : SamplerConfigDsl {
-            override val spanFactory = CompatSpanFactory(CompatSpanContextFactory())
+        samplerConfiguredByDsl = true
+        setSampler(newSamplerDsl().action())
+    }
+
+    internal fun applyResolvedSampler(behavior: SamplerBehavior?) {
+        if (samplerConfiguredByDsl || behavior == null) {
+            return
         }
-        val sampler = samplerConfig.action()
+        setSampler(newSamplerDsl().toSampler(behavior))
+    }
+
+    private fun newSamplerDsl(): SamplerConfigDsl = object : SamplerConfigDsl {
+        override val spanFactory = CompatSpanFactory(CompatSpanContextFactory())
+    }
+
+    private fun setSampler(sampler: Sampler) {
         val otelJavaSampler = when (sampler) {
             is SamplerAdapter -> sampler.impl
             else -> OtelJavaSamplerAdapter(sampler)

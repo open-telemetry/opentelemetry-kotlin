@@ -101,6 +101,19 @@ internal class OpenTelemetryConfigReaderTest {
     }
 
     @Test
+    fun `should forward unknown sampler warnings`() {
+        val warnings = mutableListOf<String>()
+        val reader = OpenTelemetryConfigReader(
+            envVarReader = EnvVarReader(mapOf("OTEL_TRACES_SAMPLER" to "not_a_sampler")::get),
+            declarativeConfigReader = null,
+            onSamplerWarning = warnings::add,
+        )
+        reader.read()
+        assertEquals(1, warnings.size)
+        assertTrue(warnings.single().contains("not_a_sampler"))
+    }
+
+    @Test
     fun `should propagate a failure to read the config file`() {
         assertFailsWith<IllegalStateException> {
             read(

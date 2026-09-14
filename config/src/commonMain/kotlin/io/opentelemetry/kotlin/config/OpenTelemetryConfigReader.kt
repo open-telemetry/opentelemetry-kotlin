@@ -17,6 +17,7 @@ class OpenTelemetryConfigReader(
     private val envVarReader: EnvVarReader = EnvVarReader(::getEnvVarValue),
     private val declarativeConfigReader: DeclarativeConfigReader? = platformDeclarativeConfigReader(),
     private val behaviorResolver: BehaviorResolver = BehaviorResolverImpl(),
+    private val onSamplerWarning: (String) -> Unit = {},
 ) {
 
     /**
@@ -32,7 +33,7 @@ class OpenTelemetryConfigReader(
         dsl: OpenTelemetryBehavior? = null,
         configFilePath: String? = null,
     ): OpenTelemetryBehavior = behaviorResolver.resolve(
-        envars = OpenTelemetryEnvVars(envVarReader).toBehavior(),
+        envars = OpenTelemetryEnvVars(envVarReader, onSamplerWarning).toBehavior(),
         declarativeFile = declarativeConfigReader?.let { reader ->
             val path = configFilePath ?: envVarReader.readString(CONFIG_FILE)
             path?.let(reader::read)
