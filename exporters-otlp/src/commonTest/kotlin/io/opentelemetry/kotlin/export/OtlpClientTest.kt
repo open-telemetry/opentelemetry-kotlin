@@ -217,6 +217,17 @@ internal class OtlpClientTest {
     }
 
     @Test
+    fun testCreateOtlpHttpClientInvalidValuesFallBackToDefault() {
+        val fakeHandler = FakeSdkErrorHandler()
+        val createdClient = createOtlpHttpClient(fakeHandler) {
+            endpoint = ""
+            timeoutMs = -1
+        }
+        assertEquals(DEFAULT_OTLP_HTTP_ENDPOINT, createdClient.baseUrl)
+        assertEquals(2, fakeHandler.apiMisuses.size)
+    }
+
+    @Test
     fun testExportLogRetryableError() = runTest {
         mockResponseStatus = HttpStatusCode.TooManyRequests
         val response = client.exportLogs(logRecords)

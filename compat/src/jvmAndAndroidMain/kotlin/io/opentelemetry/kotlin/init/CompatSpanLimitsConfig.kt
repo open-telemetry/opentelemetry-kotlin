@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanLimits
+import io.opentelemetry.kotlin.behavior.limitOrUnset
 
 @ExperimentalApi
 internal class CompatSpanLimitsConfig : SpanLimitsConfigDsl {
@@ -18,24 +19,24 @@ internal class CompatSpanLimitsConfig : SpanLimitsConfigDsl {
      * enforce those three limits themselves and need the default filled in here.
      */
     val effectiveAttributeCountLimit: Int
-        get() = attributeCountLimit ?: DEFAULT_ATTR_LIMIT
+        get() = limitOrUnset(attributeCountLimit) ?: DEFAULT_ATTR_LIMIT
 
     val effectiveLinkCountLimit: Int
-        get() = linkCountLimit ?: DEFAULT_LINK_LIMIT
+        get() = limitOrUnset(linkCountLimit) ?: DEFAULT_LINK_LIMIT
 
     val effectiveEventCountLimit: Int
-        get() = eventCountLimit ?: DEFAULT_EVENT_LIMIT
+        get() = limitOrUnset(eventCountLimit) ?: DEFAULT_EVENT_LIMIT
 
     /**
      * Only the limits that were configured are set, so anything left unset falls back to the Java
      * SDK's own default.
      */
     fun build(): OtelJavaSpanLimits = OtelJavaSpanLimits.builder().apply {
-        attributeCountLimit?.let(::setMaxNumberOfAttributes)
-        attributeValueLengthLimit?.let(::setMaxAttributeValueLength)
-        linkCountLimit?.let(::setMaxNumberOfLinks)
-        eventCountLimit?.let(::setMaxNumberOfEvents)
-        attributeCountPerEventLimit?.let(::setMaxNumberOfAttributesPerEvent)
-        attributeCountPerLinkLimit?.let(::setMaxNumberOfAttributesPerLink)
+        limitOrUnset(attributeCountLimit)?.let(::setMaxNumberOfAttributes)
+        limitOrUnset(attributeValueLengthLimit)?.let(::setMaxAttributeValueLength)
+        limitOrUnset(linkCountLimit)?.let(::setMaxNumberOfLinks)
+        limitOrUnset(eventCountLimit)?.let(::setMaxNumberOfEvents)
+        limitOrUnset(attributeCountPerEventLimit)?.let(::setMaxNumberOfAttributesPerEvent)
+        limitOrUnset(attributeCountPerLinkLimit)?.let(::setMaxNumberOfAttributesPerLink)
     }.build()
 }

@@ -64,4 +64,20 @@ internal class SpanLimitsConfigImplTest {
         assertEquals(5, impl.maxNumberOfAttributesPerEvent)
         assertEquals(6, impl.maxAttributeValueLength)
     }
+
+    @Test
+    fun `negative limits are treated as unset and fall back to defaults`() {
+        val cfg = CompatSpanLimitsConfig().apply {
+            attributeCountLimit = -1
+            attributeValueLengthLimit = -1
+            linkCountLimit = -1
+            eventCountLimit = -1
+            attributeCountPerEventLimit = -1
+            attributeCountPerLinkLimit = -1
+        }
+        assertEquals(DEFAULT_ATTR_LIMIT, cfg.effectiveAttributeCountLimit)
+        assertEquals(DEFAULT_LINK_LIMIT, cfg.effectiveLinkCountLimit)
+        assertEquals(DEFAULT_EVENT_LIMIT, cfg.effectiveEventCountLimit)
+        assertEquals(OtelJavaSpanLimits.getDefault(), cfg.build())
+    }
 }
