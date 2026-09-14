@@ -6,29 +6,24 @@ import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
-import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.factory.CompatIdGenerator
-import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.propagation.CompatPropagatorConfigImpl
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
-import io.opentelemetry.kotlin.resource.detectResource
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import kotlin.concurrent.Volatile
 
 @ExperimentalApi
 internal class CompatOpenTelemetryConfig(
     clock: Clock,
-    private val behaviorReader: CompatBehaviorReader = defaultCompatBehaviorReader(),
-) : OpenTelemetryConfigDsl {
+) : OpenTelemetryConfigDsl, BehaviorSupplier<OpenTelemetryBehavior> {
 
     @Volatile private var configuredErrorHandler: SdkErrorHandler = NoopSdkErrorHandler
     internal val sdkErrorHandler = GuardedSdkErrorHandler { configuredErrorHandler.onError(it) }
@@ -39,9 +34,11 @@ internal class CompatOpenTelemetryConfig(
     private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
     internal val propagatorCfg = CompatPropagatorConfigImpl()
 
-    private var customIdGenerator: (() -> IdGenerator)? = null
+    @Volatile internal var customIdGenerator: (() -> IdGenerator)? = null
+        private set
 
-    @Volatile private var configFilePath: String? = null
+    @Volatile internal var configFilePath: String? = null
+        private set
 
     override fun configFile(path: String) {
         configFilePath = path
@@ -68,17 +65,17 @@ internal class CompatOpenTelemetryConfig(
         globalResourceAttrs.apply { setTypedAttributes(map) }
     }
 
-    private val resourceDetectionConfig = CompatResourceDetectionConfig()
+    internal val resourceDetectionConfig = CompatResourceDetectionConfig()
 
     override fun resourceDetection(action: ResourceDetectionConfigDsl.() -> Unit) {
         resourceDetectionConfig.action()
     }
 
-    internal fun buildGlobalResource(): Resource {
-        val declared =
-            ResourceAdapter(OtelJavaResource.create(globalResourceAttrs.otelJavaAttributes(), globalResourceSchemaUrl))
-        return resourceDetectionConfig.detectors.detectResource(CompatResourceFactory, sdkErrorHandler).merge(declared)
-    }
+    /**
+     * The resource declared via the DSL, before any detected attributes are merged in.
+     */
+    internal fun buildDeclaredResource(): Resource =
+        ResourceAdapter(OtelJavaResource.create(globalResourceAttrs.otelJavaAttributes(), globalResourceSchemaUrl))
 
     override fun context(action: ContextConfigDsl.() -> Unit) {
         // no-op
@@ -108,24 +105,8 @@ internal class CompatOpenTelemetryConfig(
         configuredErrorHandler = handler
     }
 
-    internal fun resolveIdGenerator(): IdGenerator = customIdGenerator?.invoke() ?: CompatIdGenerator()
-
-    /**
-     * The behavior the SDK is initialized with, applying the precedence rules the resolver defines.
-     */
-    private val resolvedBehavior: OpenTelemetryBehavior by lazy {
-        behaviorReader.read(
-            configFilePath = configFilePath,
-            dsl = OpenTelemetryBehavior(
-                attributeLimits = globalAttributeLimits.toBehavior(),
-                tracerProvider = tracerProviderConfig.toBehavior(),
-            ),
-        )
-    }
-
-    internal fun resolveAttributeLimits(): AttributeLimitsBehavior =
-        resolvedBehavior.attributeLimits ?: AttributeLimitsBehavior()
-
-    internal fun resolveSpanLimits(): SpanLimitsBehavior =
-        resolvedBehavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior()
+    override fun toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
+        attributeLimits = globalAttributeLimits.toBehavior(),
+        tracerProvider = tracerProviderConfig.toBehavior(),
+    )
 }

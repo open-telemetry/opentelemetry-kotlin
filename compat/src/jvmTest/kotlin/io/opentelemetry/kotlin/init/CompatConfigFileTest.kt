@@ -9,6 +9,8 @@ import kotlin.test.assertFailsWith
 
 internal class CompatConfigFileTest {
 
+    private val clock = FakeClock()
+
     @Test
     fun `a config file that does not exist fails initialization`() {
         assertFailsWith<Exception> {
@@ -30,21 +32,25 @@ internal class CompatConfigFileTest {
 
     @Test
     fun `a config file supplies the global attribute limits`() {
-        val cfg = CompatOpenTelemetryConfig(FakeClock()).apply {
+        val cfg = CompatOpenTelemetryConfig(clock).apply {
             configFile(writeConfigFile(CONFIG_FILE))
         }
-        assertEquals(64, cfg.resolveAttributeLimits().attributeCountLimit)
+        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val configFactory = CompatSdkConfigFactory(cfg, behavior, clock)
+        assertEquals(64, configFactory.attributeLimits.attributeCountLimit)
     }
 
     @Test
     fun `the dsl takes precedence over the config file`() {
-        val cfg = CompatOpenTelemetryConfig(FakeClock()).apply {
+        val cfg = CompatOpenTelemetryConfig(clock).apply {
             configFile(writeConfigFile(CONFIG_FILE))
             attributeLimits {
                 attributeCountLimit = 32
             }
         }
-        assertEquals(32, cfg.resolveAttributeLimits().attributeCountLimit)
+        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val configFactory = CompatSdkConfigFactory(cfg, behavior, clock)
+        assertEquals(32, configFactory.attributeLimits.attributeCountLimit)
     }
 
     private fun writeConfigFile(contents: String): String {

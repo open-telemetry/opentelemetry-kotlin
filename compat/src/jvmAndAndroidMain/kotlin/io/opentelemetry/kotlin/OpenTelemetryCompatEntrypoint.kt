@@ -9,7 +9,9 @@ import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.factory.CompatTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.CompatTraceStateFactory
 import io.opentelemetry.kotlin.init.CompatOpenTelemetryConfig
+import io.opentelemetry.kotlin.init.CompatSdkConfigFactory
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
+import io.opentelemetry.kotlin.init.defaultCompatBehaviorReader
 
 /**
  * Constructs an [OpenTelemetry] instance that exposes OpenTelemetry as a Kotlin API. The SDK is
@@ -32,14 +34,14 @@ public fun createCompatOpenTelemetry(
     val span = CompatSpanFactory(spanContext)
 
     val cfg = CompatOpenTelemetryConfig(clock).apply(config)
-    val resolvedIdGenerator = cfg.resolveIdGenerator()
-    val base = cfg.buildGlobalResource()
-    val globalLimits = cfg.resolveAttributeLimits()
-    val spanLimits = cfg.resolveSpanLimits()
+    val behavior = defaultCompatBehaviorReader().read(configFilePath = cfg.configFilePath, dsl = cfg.toBehavior())
+
+    // configFactory is legacy - use behavior to control SDK functionality instead
+    val configFactory = CompatSdkConfigFactory(cfg, behavior, clock)
     return CompatOpenTelemetryImpl(
-        tracerProvider = cfg.tracerProviderConfig.build(clock, resolvedIdGenerator, base, globalLimits, spanLimits),
-        loggerProvider = cfg.loggerProviderConfig.build(clock, base, globalLimits),
-        meterProvider = cfg.meterProviderConfig.build(clock, base),
+        tracerProvider = configFactory.buildTracerProvider(),
+        loggerProvider = configFactory.buildLoggerProvider(),
+        meterProvider = configFactory.buildMeterProvider(),
         clock = clock,
         spanContext = spanContext,
         traceFlags = traceFlags,
@@ -47,7 +49,7 @@ public fun createCompatOpenTelemetry(
         context = contextFactory,
         span = span,
         baggage = CompatBaggageFactory(),
-        idGenerator = resolvedIdGenerator,
+        idGenerator = configFactory.idGenerator,
         resource = CompatResourceFactory,
         propagator = cfg.propagatorCfg.buildPropagator(),
         sdkErrorHandler = cfg.sdkErrorHandler,

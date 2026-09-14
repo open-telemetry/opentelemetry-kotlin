@@ -22,7 +22,9 @@ internal class CompatOpenTelemetryConfigTest {
             }
         }
 
-        val spanLimits = cfg.resolveSpanLimits()
+        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val configFactory = CompatSdkConfigFactory(cfg, behavior, clock)
+        val spanLimits = configFactory.spanLimits
         assertEquals(8, spanLimits.attributeCountLimit)
         assertEquals(16, spanLimits.attributeValueLengthLimit)
         assertEquals(32, spanLimits.linkCountLimit)
