@@ -9,6 +9,8 @@ import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
+import io.opentelemetry.kotlin.init.SdkConfigFactory
+import io.opentelemetry.kotlin.init.defaultBehaviorReader
 import io.opentelemetry.kotlin.logging.LoggerProviderImpl
 import io.opentelemetry.kotlin.metrics.MeterProviderImpl
 import io.opentelemetry.kotlin.tracing.TracerProviderImpl
@@ -30,8 +32,12 @@ public fun createOpenTelemetry(
     config: OpenTelemetryConfigDsl.() -> Unit = {}
 ): OpenTelemetry {
     val resourceFactory = ResourceFactoryImpl()
-    val cfg = OpenTelemetryConfigImpl(clock, resourceFactory).apply(config)
-    val idGenerator = cfg.resolveIdGenerator()
+    val cfg = OpenTelemetryConfigImpl(clock).apply(config)
+    val behavior = defaultBehaviorReader().read(configFilePath = cfg.configFilePath, dsl = cfg.toBehavior())
+
+    // configFactory is legacy - use behavior to control SDK functionality instead
+    val configFactory = SdkConfigFactory(cfg, behavior, resourceFactory)
+    val idGenerator = configFactory.idGenerator
 
     val traceFlags = TraceFlagsFactoryImpl()
     val traceState = TraceStateFactoryImpl()
@@ -47,9 +53,9 @@ public fun createOpenTelemetry(
         sdkErrorHandler = cfg.sdkErrorHandler,
     )
 
-    val tracingConfig = cfg.generateTracingConfig()
-    val loggingConfig = cfg.generateLoggingConfig()
-    val metricsConfig = cfg.generateMetricsConfig()
+    val tracingConfig = configFactory.generateTracingConfig()
+    val loggingConfig = configFactory.generateLoggingConfig()
+    val metricsConfig = configFactory.generateMetricsConfig()
     return OpenTelemetryImpl(
         tracerProvider = TracerProviderImpl(
             clock = clock,

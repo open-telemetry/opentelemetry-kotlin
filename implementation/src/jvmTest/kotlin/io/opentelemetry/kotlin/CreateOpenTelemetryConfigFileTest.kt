@@ -2,6 +2,8 @@ package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
+import io.opentelemetry.kotlin.init.SdkConfigFactory
+import io.opentelemetry.kotlin.init.defaultBehaviorReader
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -33,8 +35,10 @@ internal class CreateOpenTelemetryConfigFileTest {
         val cfg = OpenTelemetryConfigImpl(FakeClock()).apply {
             configFile(writeConfigFile(CONFIG_FILE))
         }
-        assertEquals(64, cfg.generateTracingConfig().spanLimits.attributeCountLimit)
-        assertEquals(64, cfg.generateLoggingConfig().logLimits.attributeCountLimit)
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val resolver = SdkConfigFactory(cfg, behavior)
+        assertEquals(64, resolver.generateTracingConfig().spanLimits.attributeCountLimit)
+        assertEquals(64, resolver.generateLoggingConfig().logLimits.attributeCountLimit)
     }
 
     @Test
@@ -45,8 +49,10 @@ internal class CreateOpenTelemetryConfigFileTest {
                 attributeCountLimit = 32
             }
         }
-        assertEquals(32, cfg.generateTracingConfig().spanLimits.attributeCountLimit)
-        assertEquals(32, cfg.generateLoggingConfig().logLimits.attributeCountLimit)
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val resolver = SdkConfigFactory(cfg, behavior)
+        assertEquals(32, resolver.generateTracingConfig().spanLimits.attributeCountLimit)
+        assertEquals(32, resolver.generateLoggingConfig().logLimits.attributeCountLimit)
     }
 
     private fun writeConfigFile(contents: String): String {
