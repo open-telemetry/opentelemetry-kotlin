@@ -93,4 +93,39 @@ internal class TracerProviderBehaviorTest {
         assertEquals(spanLimits, merged.spanLimits)
         assertEquals(SamplerBehavior.AlwaysOff, merged.sampler)
     }
+
+    @Test
+    fun idGeneratorStartsUnset() {
+        assertNull(TracerProviderBehavior().idGenerator)
+    }
+
+    @Test
+    fun staysUnsetWhenNeitherLayerConfiguredIdGenerator() {
+        assertNull(TracerProviderBehavior().mergeWith(TracerProviderBehavior()).idGenerator)
+    }
+
+    @Test
+    fun adoptsIdGeneratorFromWhicheverLayerSuppliedIt() {
+        val idGenerator = IdGeneratorBehavior.Random
+
+        assertEquals(
+            idGenerator,
+            TracerProviderBehavior().mergeWith(TracerProviderBehavior(idGenerator = idGenerator)).idGenerator,
+        )
+        assertEquals(
+            idGenerator,
+            TracerProviderBehavior(idGenerator = idGenerator).mergeWith(TracerProviderBehavior()).idGenerator,
+        )
+    }
+
+    @Test
+    fun idGeneratorMergeDoesNotDropOtherConfiguration() {
+        val spanLimits = SpanLimitsBehavior(linkCountLimit = 3)
+        val merged = TracerProviderBehavior(spanLimits = spanLimits).mergeWith(
+            TracerProviderBehavior(idGenerator = IdGeneratorBehavior.Random),
+        )
+
+        assertEquals(spanLimits, merged.spanLimits)
+        assertEquals(IdGeneratorBehavior.Random, merged.idGenerator)
+    }
 }
