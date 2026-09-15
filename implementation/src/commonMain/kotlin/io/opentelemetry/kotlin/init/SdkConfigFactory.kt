@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.ResourceFactory
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
+import io.opentelemetry.kotlin.factory.toIdGenerator
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.init.config.MetricsConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
@@ -23,7 +24,10 @@ internal class SdkConfigFactory(
     resourceFactory: ResourceFactory = ResourceFactoryImpl(),
 ) {
 
-    val idGenerator: IdGenerator = cfg.customIdGenerator?.invoke() ?: IdGeneratorImpl()
+    val idGenerator: IdGenerator =
+        cfg.customIdGenerator?.invoke()
+            ?: behavior.tracerProvider?.idGenerator?.toIdGenerator()
+            ?: IdGeneratorImpl()
 
     private val globalAttributeLimits: AttributeLimitsBehavior =
         behavior.attributeLimits ?: AttributeLimitsBehavior()

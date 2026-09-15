@@ -3,7 +3,9 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
+import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.DefaultImplicitContextStorage
@@ -15,6 +17,7 @@ import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
+import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.propagation.CompositeTextMapPropagator
 import io.opentelemetry.kotlin.propagation.W3CBaggagePropagator
@@ -81,7 +84,16 @@ internal class OpenTelemetryConfigImplTest {
     @Test
     fun testIdGeneratorDefault() {
         val cfg = OpenTelemetryConfigImpl(clock)
-        assertNotNull(SdkConfigFactory(cfg, OpenTelemetryBehavior()).idGenerator)
+        assertIs<IdGeneratorImpl>(SdkConfigFactory(cfg, OpenTelemetryBehavior()).idGenerator)
+    }
+
+    @Test
+    fun testIdGeneratorFromResolvedBehavior() {
+        val behavior = OpenTelemetryBehavior(
+            tracerProvider = TracerProviderBehavior(idGenerator = IdGeneratorBehavior.Random),
+        )
+
+        assertIs<IdGeneratorImpl>(SdkConfigFactory(OpenTelemetryConfigImpl(clock), behavior).idGenerator)
     }
 
     @Test
@@ -90,7 +102,11 @@ internal class OpenTelemetryConfigImplTest {
         val cfg = OpenTelemetryConfigImpl(clock).apply {
             idGenerator { custom }
         }
-        assertSame(custom, SdkConfigFactory(cfg, OpenTelemetryBehavior()).idGenerator)
+        val behavior = OpenTelemetryBehavior(
+            tracerProvider = TracerProviderBehavior(idGenerator = IdGeneratorBehavior.Random),
+        )
+
+        assertSame(custom, SdkConfigFactory(cfg, behavior).idGenerator)
     }
 
     @Test
