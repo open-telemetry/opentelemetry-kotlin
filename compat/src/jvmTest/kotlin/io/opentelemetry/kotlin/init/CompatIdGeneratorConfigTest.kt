@@ -26,6 +26,15 @@ internal class CompatIdGeneratorConfigTest {
     }
 
     @Test
+    fun usesDefaultIdGeneratorWhenTracerProviderIdGeneratorIsUnset() {
+        val cfg = CompatOpenTelemetryConfig(clock)
+        val behavior = OpenTelemetryBehavior(tracerProvider = TracerProviderBehavior())
+        val idGenerator = CompatSdkConfigFactory(cfg, behavior, clock).idGenerator
+
+        assertIs<CompatIdGenerator>(idGenerator)
+    }
+
+    @Test
     fun usesIdGeneratorFromResolvedBehavior() {
         val cfg = CompatOpenTelemetryConfig(clock)
         val idGenerator = CompatSdkConfigFactory(cfg, randomBehavior, clock).idGenerator
