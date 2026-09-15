@@ -17,6 +17,7 @@ fun OpenTelemetryConfiguration.toBehavior(): OpenTelemetryBehavior = OpenTelemet
             spanLimits = it.limits?.toBehavior(),
             processor = it.processors.toBehavior(),
             sampler = it.sampler?.toBehavior(),
+            idGenerator = it.idGenerator?.toBehavior(),
         )
     },
     loggerProvider = loggerProvider?.let {
