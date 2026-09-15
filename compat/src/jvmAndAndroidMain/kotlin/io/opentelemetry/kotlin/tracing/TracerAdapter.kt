@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
+import io.opentelemetry.kotlin.tracing.model.CompatSpanCreationCollector
 import io.opentelemetry.kotlin.tracing.model.SpanAdapter
 import java.util.concurrent.TimeUnit
 
@@ -36,19 +37,17 @@ internal class TracerAdapter(
             builder.setNoParent()
         }
 
-        val span = builder.startSpan()
+        val creationState = action?.let { CompatSpanCreationCollector(spanLimitsConfig).apply(it) }
+        creationState?.applyTo(builder)
+
         return SpanAdapter(
-            impl = span,
+            impl = builder.startSpan(),
             clock = clock,
             parentCtx = parentContext?.toOtelJavaContext() ?: OtelJavaContext.current(),
             spanKind = spanKind,
             startTimestamp = start,
             spanLimitsConfig = spanLimitsConfig,
-        ).apply {
-            setName(name)
-            if (action != null) {
-                action(this)
-            }
-        }
+            creationState = creationState,
+        )
     }
 }

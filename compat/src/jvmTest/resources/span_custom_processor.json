@@ -1,6 +1,6 @@
 [
   {
-    "name": "other",
+    "name": "override",
     "kind": "INTERNAL",
     "statusData": {
       "name": "ERROR",
@@ -62,7 +62,7 @@
     }
   },
   {
-    "name": "my_span",
+    "name": "override",
     "kind": "INTERNAL",
     "statusData": {
       "name": "ERROR",

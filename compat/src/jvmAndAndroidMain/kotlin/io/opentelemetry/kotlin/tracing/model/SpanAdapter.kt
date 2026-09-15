@@ -35,11 +35,13 @@ internal class SpanAdapter(
     val spanKind: SpanKind,
     val startTimestamp: Long,
     private val spanLimitsConfig: CompatSpanLimitsConfig,
+    creationState: CompatSpanCreationCollector? = null,
 ) : Span, AttributeContainer, SpanCreationAction, OtelJavaImplicitContextKeyed {
 
-    private val attrs: MutableMap<String, Any> = ConcurrentHashMap()
+    private val attrs: MutableMap<String, Any> = ConcurrentHashMap(creationState?.attributes.orEmpty())
     private val eventsImpl: ConcurrentLinkedQueue<SpanEventData> = ConcurrentLinkedQueue()
-    private val linksImpl: ConcurrentLinkedQueue<SpanLink> = ConcurrentLinkedQueue()
+    private val linksImpl: ConcurrentLinkedQueue<SpanLink> =
+        ConcurrentLinkedQueue(creationState?.links.orEmpty())
 
     override val parent: SpanContext = SpanContextAdapter(
         parentCtx?.let { OtelJavaSpan.fromContext(it) }?.spanContext
