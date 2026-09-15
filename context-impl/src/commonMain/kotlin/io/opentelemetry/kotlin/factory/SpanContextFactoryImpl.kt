@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.tracing.SpanContextImpl
 import io.opentelemetry.kotlin.tracing.TraceFlags
 import io.opentelemetry.kotlin.tracing.TraceState
 
-internal class SpanContextFactoryImpl(
+public class SpanContextFactoryImpl(
     private val idGenerator: IdGenerator,
     private val traceFlagsFactory: TraceFlagsFactory = TraceFlagsFactoryImpl(),
     private val traceStateFactory: TraceStateFactory = TraceStateFactoryImpl()
