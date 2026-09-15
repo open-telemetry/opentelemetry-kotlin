@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
+import io.opentelemetry.kotlin.factory.toIdGenerator
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.MeterProvider
 import io.opentelemetry.kotlin.resource.Resource
@@ -25,7 +26,10 @@ internal class CompatSdkConfigFactory(
     private val clock: Clock,
 ) {
 
-    val idGenerator: IdGenerator = cfg.customIdGenerator?.invoke() ?: CompatIdGenerator()
+    val idGenerator: IdGenerator =
+        cfg.customIdGenerator?.invoke()
+            ?: behavior.tracerProvider?.idGenerator?.toIdGenerator()
+            ?: CompatIdGenerator()
 
     val attributeLimits: AttributeLimitsBehavior =
         behavior.attributeLimits ?: AttributeLimitsBehavior()
