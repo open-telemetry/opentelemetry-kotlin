@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
@@ -119,6 +120,7 @@ internal class CompatOpenTelemetryConfig(
             dsl = OpenTelemetryBehavior(
                 attributeLimits = globalAttributeLimits.toBehavior(),
                 tracerProvider = tracerProviderConfig.toBehavior(),
+                loggerProvider = loggerProviderConfig.toBehavior(),
             ),
         )
     }
@@ -128,4 +130,7 @@ internal class CompatOpenTelemetryConfig(
 
     internal fun resolveSpanLimits(): SpanLimitsBehavior =
         resolvedBehavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior()
+
+    internal fun resolveLogLimits(): LogLimitsBehavior =
+        resolvedBehavior.loggerProvider?.logLimits ?: LogLimitsBehavior()
 }

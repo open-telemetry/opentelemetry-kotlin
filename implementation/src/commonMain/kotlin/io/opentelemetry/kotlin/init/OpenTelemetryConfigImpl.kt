@@ -83,5 +83,6 @@ internal class OpenTelemetryConfigImpl(
     override fun toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
         attributeLimits = globalAttributeLimits.toBehavior(),
         tracerProvider = tracingConfig.toBehavior(),
+        loggerProvider = loggingConfig.toBehavior(),
     )
 }

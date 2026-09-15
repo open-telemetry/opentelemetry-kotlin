@@ -30,4 +30,19 @@ internal class CompatOpenTelemetryConfigTest {
         assertEquals(128, spanLimits.attributeCountPerEventLimit)
         assertEquals(512, spanLimits.attributeCountPerLinkLimit)
     }
+
+    @Test
+    fun `log limits dsl is reflected in resolved behavior`() {
+        val cfg = CompatOpenTelemetryConfig(clock)
+        cfg.loggerProvider {
+            logLimits {
+                attributeCountLimit = 8
+                attributeValueLengthLimit = 16
+            }
+        }
+
+        val logLimits = cfg.resolveLogLimits()
+        assertEquals(8, logLimits.attributeCountLimit)
+        assertEquals(16, logLimits.attributeValueLengthLimit)
+    }
 }
