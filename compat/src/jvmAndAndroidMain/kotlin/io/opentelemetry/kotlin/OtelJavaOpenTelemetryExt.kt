@@ -43,7 +43,12 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
     val contextFactory = CompatContextFactory()
     val span = CompatSpanFactory(spanContext)
     return CompatOpenTelemetryImpl(
-        tracerProvider = TracerProviderAdapter(unobfuscatedTracerProvider(), clock, CompatSpanLimitsConfig()),
+        tracerProvider = TracerProviderAdapter(
+            unobfuscatedTracerProvider(),
+            clock,
+            CompatSpanLimitsConfig(),
+            contextFactory,
+        ),
         loggerProvider = LoggerProviderAdapter(unobfuscatedLoggerProvider()),
         meterProvider = MeterProviderAdapter(unobfuscatedMeterProvider()),
         clock = clock,

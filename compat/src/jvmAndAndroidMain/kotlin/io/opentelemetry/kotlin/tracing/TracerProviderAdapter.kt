@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.awaitOperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
+import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.scope.scopeCacheKey
 import java.util.concurrent.ConcurrentHashMap
@@ -18,6 +19,7 @@ internal class TracerProviderAdapter(
     private val tracerProvider: OtelJavaTracerProvider,
     private val clock: Clock,
     private val spanLimitsConfig: CompatSpanLimitsConfig,
+    private val contextFactory: ContextFactory,
 ) : TracerProvider, TelemetryCloseable {
 
     private val map = ConcurrentHashMap<InstrumentationScopeInfo, TracerAdapter>()
@@ -34,7 +36,7 @@ internal class TracerProviderAdapter(
             schemaUrl?.let(tracerBuilder::setSchemaUrl)
             version?.let(tracerBuilder::setInstrumentationVersion)
             val tracer = tracerBuilder.build()
-            TracerAdapter(tracer, clock, spanLimitsConfig)
+            TracerAdapter(tracer, clock, spanLimitsConfig, contextFactory)
         }
     }
 

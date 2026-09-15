@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
+import io.opentelemetry.kotlin.factory.CompatContextFactory
 import org.junit.Test
 import java.io.File
 import kotlin.test.assertEquals
@@ -36,7 +37,7 @@ internal class CompatConfigFileTest {
             configFile(writeConfigFile(CONFIG_FILE))
         }
         val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
-        val configFactory = CompatSdkConfigFactory(cfg, behavior, clock)
+        val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory())
         assertEquals(64, configFactory.attributeLimits.attributeCountLimit)
     }
 
@@ -49,7 +50,7 @@ internal class CompatConfigFileTest {
             }
         }
         val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
-        val configFactory = CompatSdkConfigFactory(cfg, behavior, clock)
+        val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory())
         assertEquals(32, configFactory.attributeLimits.attributeCountLimit)
     }
 
