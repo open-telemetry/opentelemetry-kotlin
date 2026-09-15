@@ -108,5 +108,6 @@ internal class CompatOpenTelemetryConfig(
     override fun toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
         attributeLimits = globalAttributeLimits.toBehavior(),
         tracerProvider = tracerProviderConfig.toBehavior(),
+        loggerProvider = loggerProviderConfig.toBehavior(),
     )
 }

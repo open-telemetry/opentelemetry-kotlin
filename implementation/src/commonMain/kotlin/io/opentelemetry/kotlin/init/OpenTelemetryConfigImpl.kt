@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
@@ -100,6 +101,7 @@ internal class OpenTelemetryConfigImpl(
             dsl = OpenTelemetryBehavior(
                 attributeLimits = globalAttributeLimits.toBehavior(),
                 tracerProvider = tracingConfig.toBehavior(),
+                loggerProvider = loggingConfig.toBehavior(),
             ),
         )
     }
@@ -110,11 +112,14 @@ internal class OpenTelemetryConfigImpl(
     private fun resolveSpanLimits(): SpanLimitsBehavior =
         resolvedBehavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior()
 
+    private fun resolveLogLimits(): LogLimitsBehavior =
+        resolvedBehavior.loggerProvider?.logLimits ?: LogLimitsBehavior()
+
     internal fun generateTracingConfig() =
         tracingConfig.generateTracingConfig(baseResource, resolveAttributeLimits(), resolveSpanLimits())
 
     internal fun generateLoggingConfig() =
-        loggingConfig.generateLoggingConfig(baseResource, resolveAttributeLimits())
+        loggingConfig.generateLoggingConfig(baseResource, resolveAttributeLimits(), resolveLogLimits())
 
     internal fun generateMetricsConfig() =
         metricsConfig.generateMetricsConfig(baseResource)
