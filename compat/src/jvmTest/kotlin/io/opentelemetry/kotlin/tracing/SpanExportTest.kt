@@ -134,6 +134,27 @@ internal class SpanExportTest {
     }
 
     @Test
+    fun `test kotlin span inherits active java span as parent`() = runTest {
+        val javaParent = harness.javaApi.getTracer("java_tracer").spanBuilder("java_parent").startSpan()
+        val scope = javaParent.makeCurrent()
+        val child = try {
+            harness.tracer.startSpan("kotlin_child")
+        } finally {
+            scope.close()
+        }
+
+        javaParent.end()
+        child.end()
+
+        harness.assertSpans(2, null) { spans ->
+            val exportParent = spans[0]
+            val exportChild = spans[1]
+            assertFalse(exportParent.parent.isValid)
+            assertSpanContextsMatch(exportParent.spanContext, exportChild.parent)
+        }
+    }
+
+    @Test
     fun `test span context parent for decorated span`() = runTest {
         val root = harness.kotlinApi.context.root()
 

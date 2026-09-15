@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
+import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.MeterProvider
@@ -23,6 +24,7 @@ internal class CompatSdkConfigFactory(
     private val cfg: CompatOpenTelemetryConfig,
     behavior: OpenTelemetryBehavior,
     private val clock: Clock,
+    private val contextFactory: ContextFactory,
 ) {
 
     val idGenerator: IdGenerator = cfg.customIdGenerator?.invoke() ?: CompatIdGenerator()
@@ -41,7 +43,7 @@ internal class CompatSdkConfigFactory(
         .merge(cfg.buildDeclaredResource())
 
     fun buildTracerProvider(): TracerProvider =
-        cfg.tracerProviderConfig.build(clock, idGenerator, baseResource, attributeLimits, spanLimits)
+        cfg.tracerProviderConfig.build(clock, idGenerator, baseResource, attributeLimits, spanLimits, contextFactory)
 
     fun buildLoggerProvider(): LoggerProvider =
         cfg.loggerProviderConfig.build(clock, baseResource, attributeLimits, logLimits)

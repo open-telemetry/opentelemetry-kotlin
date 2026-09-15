@@ -37,7 +37,7 @@ public fun createCompatOpenTelemetry(
     val behavior = defaultCompatBehaviorReader().read(configFilePath = cfg.configFilePath, dsl = cfg.toBehavior())
 
     // configFactory is legacy - use behavior to control SDK functionality instead
-    val configFactory = CompatSdkConfigFactory(cfg, behavior, clock)
+    val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, contextFactory)
     return CompatOpenTelemetryImpl(
         tracerProvider = configFactory.buildTracerProvider(),
         loggerProvider = configFactory.buildLoggerProvider(),
