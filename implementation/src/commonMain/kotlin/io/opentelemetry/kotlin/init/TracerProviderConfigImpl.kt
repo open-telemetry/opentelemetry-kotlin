@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
-import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
@@ -68,13 +67,12 @@ internal class TracerProviderConfigImpl(
 
     fun generateTracingConfig(
         base: Resource,
-        globalLimits: AttributeLimitsBehavior,
         spanLimits: SpanLimitsBehavior,
     ): TracingConfig {
         val action = samplerAction ?: { parentBased(root = alwaysOn()) }
         return TracingConfig(
             processor = processor,
-            spanLimits = generateSpanLimitsConfig(globalLimits, spanLimits),
+            spanLimits = generateSpanLimitsConfig(spanLimits),
             resource = base.merge(resourceConfigImpl.generateResource()),
             sdkErrorHandler = sdkErrorHandler,
             samplerFactory = { spanFactory -> SamplerConfigImpl(spanFactory).action() },
@@ -97,19 +95,13 @@ internal class TracerProviderConfigImpl(
     private class SamplerConfigImpl(override val spanFactory: SpanFactory) : SamplerConfigDsl
 
     /**
-     * A limit left unset by the span limits falls back to the global attribute limits, then to the
-     * default this SDK applies. Only the attribute limits are configurable globally.
+     * A limit left unset by [spanLimits] falls back to the default this SDK applies. The global
+     * attribute limits have already been folded in by the behavior resolver.
      */
-    private fun generateSpanLimitsConfig(
-        globalLimits: AttributeLimitsBehavior,
-        spanLimits: SpanLimitsBehavior
-    ): SpanLimitConfig {
+    private fun generateSpanLimitsConfig(spanLimits: SpanLimitsBehavior): SpanLimitConfig {
         return SpanLimitConfig(
-            attributeCountLimit = spanLimits.attributeCountLimit
-                ?: globalLimits.attributeCountLimit
-                ?: DEFAULT_ATTRIBUTE_LIMIT,
+            attributeCountLimit = spanLimits.attributeCountLimit ?: DEFAULT_ATTRIBUTE_LIMIT,
             attributeValueLengthLimit = spanLimits.attributeValueLengthLimit
-                ?: globalLimits.attributeValueLengthLimit
                 ?: DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
             linkCountLimit = spanLimits.linkCountLimit ?: DEFAULT_LINK_LIMIT,
             eventCountLimit = spanLimits.eventCountLimit ?: DEFAULT_EVENT_LIMIT,
