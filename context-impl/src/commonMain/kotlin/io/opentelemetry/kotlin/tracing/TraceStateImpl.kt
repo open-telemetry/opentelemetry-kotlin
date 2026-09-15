@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.propagation.W3CTraceStateValidator
 
 @ExperimentalApi
-internal class TraceStateImpl private constructor(
+public class TraceStateImpl private constructor(
     private val data: Map<String, String>
 ) : TraceState {
 

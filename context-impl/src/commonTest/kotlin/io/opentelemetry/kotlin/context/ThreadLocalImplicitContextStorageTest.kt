@@ -1,9 +1,7 @@
 package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
+import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertNotSame
@@ -16,7 +14,7 @@ internal class ThreadLocalImplicitContextStorageTest {
 
     @BeforeTest
     fun setUp() {
-        factory = ContextFactoryImpl(SpanFactoryImpl(SpanContextFactoryImpl(IdGeneratorImpl())))
+        factory = ContextFactoryImpl(FakeSpanFactory())
         storage = ThreadLocalImplicitContextStorage(factory::root)
     }
 

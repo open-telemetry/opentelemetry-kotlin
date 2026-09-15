@@ -5,6 +5,6 @@ import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.TraceStateImpl
 
 @ExperimentalApi
-internal class TraceStateFactoryImpl : TraceStateFactory {
+public class TraceStateFactoryImpl : TraceStateFactory {
     override val default: TraceState by lazy { TraceStateImpl.create() }
 }

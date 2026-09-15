@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.tracing.TraceFlags
 import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
 
 @ExperimentalApi
-internal class TraceFlagsFactoryImpl : TraceFlagsFactory {
+public class TraceFlagsFactoryImpl : TraceFlagsFactory {
     override val default: TraceFlags by lazy { TraceFlagsImpl(isSampled = true, isRandom = false) }
 
     override fun fromHex(hex: String): TraceFlags {
