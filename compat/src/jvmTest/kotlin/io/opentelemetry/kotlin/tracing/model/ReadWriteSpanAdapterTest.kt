@@ -93,7 +93,7 @@ internal class ReadWriteSpanAdapterTest {
                 expectedAttributes = mapOf("key" to "value")
             ),
             endAction = assertReadableSpan(
-                expectedName = "name",
+                expectedName = "new-name",
                 expectedStatus = StatusData.Error("err"),
                 expectedAttributes = mapOf("key" to "value")
             ),
@@ -104,7 +104,7 @@ internal class ReadWriteSpanAdapterTest {
             expectedCount = 1,
             assertions = { spans ->
                 with(spans.single()) {
-                    assertEquals("name", name)
+                    assertEquals("new-name", name)
                     assertEquals(newStatus.statusCode.name, status.statusCode.name)
                     assertEquals(newStatus.description, status.description)
                     assertEquals(mapOf("key" to "value"), attributes)

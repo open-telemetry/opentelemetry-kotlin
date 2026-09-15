@@ -207,6 +207,26 @@ internal class SpanExportTest {
     }
 
     @Test
+    fun `test span creation attributes and links export`() = runTest {
+        val linkedSpan = harness.tracer.startSpan("linked_span")
+        harness.tracer.startSpan("span_creation") {
+            assertAttributes()
+            addLink(linkedSpan.spanContext) { setStringAttribute("link_key", "link_value") }
+        }.end()
+        linkedSpan.end()
+
+        harness.assertSpans(expectedCount = 2) { spans ->
+            with(spans.first()) {
+                assertEquals("second_value", attributes["string_key"])
+                assertEquals(3.14, attributes["double_key"])
+                val link = links.single()
+                assertEquals(linkedSpan.spanContext.spanId, link.spanContext.spanId)
+                assertEquals("link_value", link.attributes["link_key"])
+            }
+        }
+    }
+
+    @Test
     fun `test tracer with schema url and attributes`() = runTest {
         val schemaUrl = "https://opentelemetry.io/schemas/1.21.0"
         val tracerWithSchemaUrl = harness.tracerProvider.getTracer(

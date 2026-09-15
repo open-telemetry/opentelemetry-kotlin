@@ -7,9 +7,11 @@ import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
+import io.opentelemetry.kotlin.tracing.Tracer
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.compositeSpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
+import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
 import io.opentelemetry.kotlin.tracing.sampling.alwaysOff
 import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
@@ -384,5 +386,74 @@ internal class CompatTracerProviderSamplerTest {
         ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
+    fun `sampler observes attributes and links set in the span creation lambda`() {
+        val sampler = FakeSampler()
+        val tracer = tracerWith { sampler }
+        val linked = tracer.startSpan("linked")
+
+        tracer.startSpan("span") {
+            setStringAttribute("user.key", "user.value")
+            addLink(linked.spanContext) { setStringAttribute("link.key", "link.value") }
+        }
+
+        assertEquals("user.value", sampler.lastAttributes["user.key"])
+        val observed = sampler.lastLinks.single()
+        assertEquals(linked.spanContext.spanId, observed.spanContext.spanId)
+        assertEquals("link.value", observed.attributes["link.key"])
+    }
+
+    @Test
+    fun `attribute based sampler drops spans using attributes set at creation time`() {
+        val tracer = tracerWith {
+            composite {
+                composableRuleBased {
+                    rule({ _, _, _, attributes, _ -> attributes.attributes["keep"] == true }) {
+                        composableAlwaysOn()
+                    }
+                }
+            }
+        }
+
+        val kept = tracer.startSpan("kept") { setBooleanAttribute("keep", true) }
+        val dropped = tracer.startSpan("dropped") { setBooleanAttribute("keep", false) }
+
+        assertTrue(kept.isRecording())
+        assertTrue(kept.spanContext.traceFlags.isSampled)
+        assertFalse(dropped.isRecording())
+        assertFalse(dropped.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
+    fun `attributes returned by a custom sampler are applied to the span`() {
+        val processor = FakeSpanProcessor()
+        val sdk = createCompatOpenTelemetry {
+            tracerProvider {
+                sampler {
+                    FakeSampler(
+                        SamplingResult.Decision.RECORD_AND_SAMPLE,
+                        samplerAttributes = mapOf("sampler.key" to "sampler.value"),
+                    )
+                }
+                export { compositeSpanProcessor(processor) }
+            }
+        }
+        sdk.tracerProvider.getTracer("test").startSpan("span").end()
+        assertEquals("sampler.value", processor.endCalls.single().attributes["sampler.key"])
+    }
+
+    private fun tracerWith(action: SamplerConfigDsl.() -> Sampler): Tracer {
+        val clock = FakeClock()
+        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+            sampler(action)
+        }
+        return config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test")
     }
 }

@@ -12,6 +12,7 @@ import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.TraceState
+import io.opentelemetry.kotlin.tracing.ext.toOtelJavaLinkData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import io.opentelemetry.kotlin.tracing.model.TraceStateAdapter
@@ -37,7 +38,7 @@ internal class SamplerAdapter(
             spanKind.toOtelJavaSpanKind(),
             (attributes as? CompatAttributesModel)?.otelJavaAttributes()
                 ?: OtelJavaAttributes.empty(),
-            emptyList(),
+            links.map { it.toOtelJavaLinkData() },
         )
         val decision = when (result.decision) {
             OtelJavaSamplingDecision.DROP -> SamplingResult.Decision.DROP
