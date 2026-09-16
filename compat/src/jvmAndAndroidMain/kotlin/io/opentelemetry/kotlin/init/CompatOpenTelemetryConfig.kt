@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
@@ -34,8 +35,7 @@ internal class CompatOpenTelemetryConfig(
     private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
     internal val propagatorCfg = CompatPropagatorConfigImpl()
 
-    @Volatile internal var customIdGenerator: (() -> IdGenerator)? = null
-        private set
+    @Volatile private var idGeneratorBehavior: IdGeneratorBehavior? = null
 
     @Volatile internal var configFilePath: String? = null
         private set
@@ -98,7 +98,7 @@ internal class CompatOpenTelemetryConfig(
     }
 
     override fun idGenerator(action: () -> IdGenerator) {
-        customIdGenerator = action
+        idGeneratorBehavior = IdGeneratorBehavior.Custom(action)
     }
 
     override fun errorHandler(handler: SdkErrorHandler) {
@@ -107,7 +107,7 @@ internal class CompatOpenTelemetryConfig(
 
     override fun toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
         attributeLimits = globalAttributeLimits.toBehavior(),
-        tracerProvider = tracerProviderConfig.toBehavior(),
+        tracerProvider = tracerProviderConfig.toBehavior().copy(idGenerator = idGeneratorBehavior),
         loggerProvider = loggerProviderConfig.toBehavior(),
     )
 }

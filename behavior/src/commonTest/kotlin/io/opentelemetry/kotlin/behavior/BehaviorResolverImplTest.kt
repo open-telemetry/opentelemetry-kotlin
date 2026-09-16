@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.behavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 
 internal class BehaviorResolverImplTest {
 
@@ -165,6 +166,24 @@ internal class BehaviorResolverImplTest {
             SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOff),
             resolved.tracerProvider?.sampler
         )
+    }
+
+    @Test
+    fun dslCustomIdGeneratorOverridesDeclarativeRandomIdGenerator() {
+        val custom = IdGeneratorBehavior.Custom {
+            error("The supplier should not be called while resolving behavior")
+        }
+        val resolved = resolver.resolve(
+            envars = null,
+            declarativeFile = OpenTelemetryBehavior(
+                tracerProvider = TracerProviderBehavior(idGenerator = IdGeneratorBehavior.Random),
+            ),
+            dsl = OpenTelemetryBehavior(
+                tracerProvider = TracerProviderBehavior(idGenerator = custom),
+            ),
+        )
+
+        assertSame(custom, resolved.tracerProvider?.idGenerator)
     }
 
     private fun resolveSpanLimits(

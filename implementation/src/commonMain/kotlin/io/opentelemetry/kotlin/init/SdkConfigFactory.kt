@@ -24,8 +24,7 @@ internal class SdkConfigFactory(
 ) {
 
     val idGenerator: IdGenerator =
-        cfg.customIdGenerator?.invoke()
-            ?: behavior.tracerProvider?.idGenerator?.toIdGenerator()
+        behavior.tracerProvider?.idGenerator?.toIdGenerator()
             ?: IdGeneratorImpl()
 
     private val spanLimits: SpanLimitsBehavior =

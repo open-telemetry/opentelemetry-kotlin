@@ -28,8 +28,7 @@ internal class CompatSdkConfigFactory(
 ) {
 
     val idGenerator: IdGenerator =
-        cfg.customIdGenerator?.invoke()
-            ?: behavior.tracerProvider?.idGenerator?.toIdGenerator()
+        behavior.tracerProvider?.idGenerator?.toIdGenerator()
             ?: CompatIdGenerator()
 
     val spanLimits: SpanLimitsBehavior =

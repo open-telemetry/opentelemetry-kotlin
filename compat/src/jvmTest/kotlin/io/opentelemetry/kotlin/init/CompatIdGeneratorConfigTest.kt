@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.init
 
+import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
 import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
@@ -45,12 +46,17 @@ internal class CompatIdGeneratorConfigTest {
     }
 
     @Test
-    fun customIdGeneratorTakesPrecedenceOverResolvedBehavior() {
+    fun dslCustomIdGeneratorTakesPrecedenceOverResolvedBehavior() {
         val custom = FakeIdGenerator()
         val cfg = CompatOpenTelemetryConfig(clock).apply {
             idGenerator { custom }
         }
-        val idGenerator = CompatSdkConfigFactory(cfg, randomBehavior, clock, CompatContextFactory()).idGenerator
+        val behavior = BehaviorResolverImpl().resolve(
+            envars = null,
+            declarativeFile = randomBehavior,
+            dsl = cfg.toBehavior(),
+        )
+        val idGenerator = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory()).idGenerator
 
         assertSame(custom, idGenerator)
     }

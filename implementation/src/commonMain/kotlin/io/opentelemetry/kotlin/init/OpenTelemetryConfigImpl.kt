@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
@@ -34,8 +35,7 @@ internal class OpenTelemetryConfigImpl(
     private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
     internal val resourceDetectionConfig = ResourceDetectionConfigImpl()
 
-    @Volatile internal var customIdGenerator: (() -> IdGenerator)? = null
-        private set
+    @Volatile private var idGeneratorBehavior: IdGeneratorBehavior? = null
 
     @Volatile internal var configFilePath: String? = null
         private set
@@ -73,7 +73,7 @@ internal class OpenTelemetryConfigImpl(
     }
 
     override fun idGenerator(action: () -> IdGenerator) {
-        customIdGenerator = action
+        idGeneratorBehavior = IdGeneratorBehavior.Custom(action)
     }
 
     override fun errorHandler(handler: SdkErrorHandler) {
@@ -82,7 +82,7 @@ internal class OpenTelemetryConfigImpl(
 
     override fun toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
         attributeLimits = globalAttributeLimits.toBehavior(),
-        tracerProvider = tracingConfig.toBehavior(),
+        tracerProvider = tracingConfig.toBehavior().copy(idGenerator = idGeneratorBehavior),
         loggerProvider = loggingConfig.toBehavior(),
     )
 }

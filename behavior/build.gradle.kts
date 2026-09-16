@@ -12,6 +12,7 @@ kotlin {
         commonMain {
             dependencies {
                 api(project(":api"))
+                api(project(":sdk-api"))
             }
         }
         commonTest {

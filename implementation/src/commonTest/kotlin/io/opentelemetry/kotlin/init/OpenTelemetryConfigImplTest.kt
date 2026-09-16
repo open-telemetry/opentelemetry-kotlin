@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
+import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
 import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
@@ -97,13 +98,17 @@ internal class OpenTelemetryConfigImplTest {
     }
 
     @Test
-    fun testIdGeneratorOverride() {
+    fun testDslIdGeneratorOverridesResolvedBehavior() {
         val custom = FakeIdGenerator()
         val cfg = OpenTelemetryConfigImpl(clock).apply {
             idGenerator { custom }
         }
-        val behavior = OpenTelemetryBehavior(
-            tracerProvider = TracerProviderBehavior(idGenerator = IdGeneratorBehavior.Random),
+        val behavior = BehaviorResolverImpl().resolve(
+            envars = null,
+            declarativeFile = OpenTelemetryBehavior(
+                tracerProvider = TracerProviderBehavior(idGenerator = IdGeneratorBehavior.Random),
+            ),
+            dsl = cfg.toBehavior(),
         )
 
         assertSame(custom, SdkConfigFactory(cfg, behavior).idGenerator)
