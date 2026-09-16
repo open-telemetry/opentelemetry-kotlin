@@ -92,6 +92,19 @@ internal class TraceStateImplTest {
     }
 
     @Test
+    fun testPutMovesNewAndUpdatedKeysToFront() {
+        val original = TraceStateImpl.create()
+            .put("first", "value1")
+            .put("second", "value2")
+
+        val added = original.put("third", "value3")
+        assertEquals(listOf("third", "second", "first"), added.asMap().keys.toList())
+
+        val updated = added.put("first", "updated")
+        assertEquals(listOf("first", "third", "second"), updated.asMap().keys.toList())
+    }
+
+    @Test
     fun testRemovingKeyReturnsNewInstance() {
         val original = TraceStateImpl.create()
             .put("key1", "value1")

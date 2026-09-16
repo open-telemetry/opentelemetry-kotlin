@@ -20,7 +20,11 @@ public class TraceStateImpl private constructor(
         if (!W3CTraceStateValidator.canPut(data, key, value)) {
             return this
         }
-        return TraceStateImpl(data + (key to value))
+        // W3C requires a newly added or modified key to be the first entry.
+        // Insert it before copying the existing entries so updating a key also
+        // moves it to the front of the LinkedHashMap-backed result.
+        val updated = linkedMapOf(key to value).apply { putAll(data) }
+        return TraceStateImpl(updated)
     }
 
     override fun remove(key: String): TraceState {
