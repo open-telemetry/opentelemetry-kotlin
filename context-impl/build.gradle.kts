@@ -21,6 +21,8 @@ kotlin {
         commonTest {
             dependencies {
                 implementation(project(":test-fakes"))
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.kotest.property)
             }
         }
     }

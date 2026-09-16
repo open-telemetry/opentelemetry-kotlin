@@ -14,7 +14,7 @@ import io.opentelemetry.kotlin.factory.TraceStateFactory
  * https://www.w3.org/TR/trace-context/
  */
 @OptIn(ExperimentalApi::class)
-internal class W3CTraceContextPropagator(
+public class W3CTraceContextPropagator(
     private val traceFlagsFactory: TraceFlagsFactory,
     private val traceStateFactory: TraceStateFactory,
     private val spanContextFactory: SpanContextFactory,
