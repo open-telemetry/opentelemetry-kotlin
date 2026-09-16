@@ -12,6 +12,10 @@ public final class io/opentelemetry/kotlin/OtelJavaOpenTelemetryExtKt {
 	public static synthetic fun toOtelKotlinApi$default (Lio/opentelemetry/api/OpenTelemetry;Lio/opentelemetry/kotlin/Clock;ILjava/lang/Object;)Lio/opentelemetry/kotlin/OpenTelemetry;
 }
 
+public final class io/opentelemetry/kotlin/baggage/BaggageExtKt {
+	public static final fun toOtelJavaBaggage (Lio/opentelemetry/kotlin/baggage/Baggage;)Lio/opentelemetry/api/baggage/Baggage;
+}
+
 public final class io/opentelemetry/kotlin/context/ContextExtKt {
 	public static final fun toOtelJavaContext (Lio/opentelemetry/kotlin/context/Context;)Lio/opentelemetry/context/Context;
 }
