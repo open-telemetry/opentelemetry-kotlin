@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
@@ -10,6 +9,7 @@ import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
+import io.opentelemetry.kotlin.factory.toIdGenerator
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.MeterProvider
 import io.opentelemetry.kotlin.resource.Resource
@@ -27,10 +27,10 @@ internal class CompatSdkConfigFactory(
     private val contextFactory: ContextFactory,
 ) {
 
-    val idGenerator: IdGenerator = cfg.customIdGenerator?.invoke() ?: CompatIdGenerator()
-
-    val attributeLimits: AttributeLimitsBehavior =
-        behavior.attributeLimits ?: AttributeLimitsBehavior()
+    val idGenerator: IdGenerator =
+        cfg.customIdGenerator?.invoke()
+            ?: behavior.tracerProvider?.idGenerator?.toIdGenerator()
+            ?: CompatIdGenerator()
 
     val spanLimits: SpanLimitsBehavior =
         behavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior()
@@ -43,10 +43,10 @@ internal class CompatSdkConfigFactory(
         .merge(cfg.buildDeclaredResource())
 
     fun buildTracerProvider(): TracerProvider =
-        cfg.tracerProviderConfig.build(clock, idGenerator, baseResource, attributeLimits, spanLimits, contextFactory)
+        cfg.tracerProviderConfig.build(clock, idGenerator, baseResource, spanLimits, contextFactory)
 
     fun buildLoggerProvider(): LoggerProvider =
-        cfg.loggerProviderConfig.build(clock, baseResource, attributeLimits, logLimits)
+        cfg.loggerProviderConfig.build(clock, baseResource, logLimits)
 
     fun buildMeterProvider(): MeterProvider =
         cfg.meterProviderConfig.build(clock, baseResource)

@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.config.yaml
 
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
+import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
@@ -12,10 +13,12 @@ import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.schema.model.AlwaysOffSampler
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
+import io.opentelemetry.kotlin.config.schema.model.IdGenerator
 import io.opentelemetry.kotlin.config.schema.model.LogRecordExporter
 import io.opentelemetry.kotlin.config.schema.model.LogRecordProcessor
 import io.opentelemetry.kotlin.config.schema.model.LoggerProvider
 import io.opentelemetry.kotlin.config.schema.model.OpenTelemetryConfiguration
+import io.opentelemetry.kotlin.config.schema.model.RandomIdGenerator
 import io.opentelemetry.kotlin.config.schema.model.Sampler
 import io.opentelemetry.kotlin.config.schema.model.SimpleLogRecordProcessor
 import io.opentelemetry.kotlin.config.schema.model.SimpleSpanProcessor
@@ -129,6 +132,22 @@ internal class OpenTelemetryConfigurationMapperTest {
             tracerProvider = TracerProvider(processors = emptyList()),
         )
         assertEquals(null, config.toBehavior().tracerProvider?.sampler)
+    }
+
+    @Test
+    fun mapsTracerProviderIdGenerator() {
+        val config = OpenTelemetryConfiguration(
+            fileFormat = FILE_FORMAT,
+            tracerProvider = TracerProvider(
+                processors = emptyList(),
+                idGenerator = IdGenerator(random = RandomIdGenerator()),
+            ),
+        )
+
+        assertEquals(
+            IdGeneratorBehavior.Random,
+            config.toBehavior().tracerProvider?.idGenerator,
+        )
     }
 
     private companion object {

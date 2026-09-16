@@ -38,7 +38,8 @@ internal class CompatConfigFileTest {
         }
         val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
         val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory())
-        assertEquals(64, configFactory.attributeLimits.attributeCountLimit)
+        assertEquals(64, configFactory.spanLimits.attributeCountLimit)
+        assertEquals(64, configFactory.logLimits.attributeCountLimit)
     }
 
     @Test
@@ -51,7 +52,8 @@ internal class CompatConfigFileTest {
         }
         val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
         val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory())
-        assertEquals(32, configFactory.attributeLimits.attributeCountLimit)
+        assertEquals(32, configFactory.spanLimits.attributeCountLimit)
+        assertEquals(32, configFactory.logLimits.attributeCountLimit)
     }
 
     private fun writeConfigFile(contents: String): String {

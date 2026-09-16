@@ -1,9 +1,7 @@
 package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
+import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.Test
 import kotlin.test.assertNotSame
@@ -13,7 +11,7 @@ internal class JvmThreadLocalImplicitContextStorageTest {
 
     @Test
     fun testContextIsIsolatedPerThread() {
-        val factory = ContextFactoryImpl(SpanFactoryImpl(SpanContextFactoryImpl(IdGeneratorImpl())))
+        val factory = ContextFactoryImpl(FakeSpanFactory())
         val storage = ThreadLocalImplicitContextStorage(factory::root)
 
         val mainContext = FakeContext()

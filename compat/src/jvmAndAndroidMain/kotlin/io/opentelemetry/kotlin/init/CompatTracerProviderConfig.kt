@@ -13,7 +13,6 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
-import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
@@ -105,7 +104,6 @@ internal class CompatTracerProviderConfig(
         clock: Clock,
         idGenerator: IdGenerator,
         baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build()),
-        globalLimits: AttributeLimitsBehavior,
         spanLimits: SpanLimitsBehavior,
         contextFactory: ContextFactory = CompatContextFactory(),
     ): TracerProvider {
@@ -115,10 +113,8 @@ internal class CompatTracerProviderConfig(
                 else -> OtelJavaIdGeneratorAdapter(idGenerator)
             }
         )
-        spanLimitsConfig.attributeCountLimit =
-            spanLimits.attributeCountLimit ?: globalLimits.attributeCountLimit
-        spanLimitsConfig.attributeValueLengthLimit =
-            spanLimits.attributeValueLengthLimit ?: globalLimits.attributeValueLengthLimit
+        spanLimitsConfig.attributeCountLimit = spanLimits.attributeCountLimit
+        spanLimitsConfig.attributeValueLengthLimit = spanLimits.attributeValueLengthLimit
         spanLimitsConfig.linkCountLimit = spanLimits.linkCountLimit
         spanLimitsConfig.eventCountLimit = spanLimits.eventCountLimit
         spanLimitsConfig.attributeCountPerEventLimit = spanLimits.attributeCountPerEventLimit

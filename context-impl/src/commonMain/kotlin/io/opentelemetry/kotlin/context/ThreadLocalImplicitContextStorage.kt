@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.ThreadLocal
  * if none is set. On single-threaded targets (JS) the backing [ThreadLocal] degrades to a single
  * shared slot.
  */
-internal class ThreadLocalImplicitContextStorage(
+public class ThreadLocalImplicitContextStorage(
     rootSupplier: () -> Context,
 ) : ImplicitContextStorage {
 
