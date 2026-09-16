@@ -29,7 +29,7 @@ import io.opentelemetry.kotlin.tracing.export.toProtobufByteArray
 import kotlinx.io.readByteArray
 
 internal class OtlpClient(
-    private val baseUrl: String,
+    val baseUrl: String,
     private val httpClient: HttpClient,
     private val sdkErrorHandler: SdkErrorHandler,
 ) {

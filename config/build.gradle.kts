@@ -14,6 +14,7 @@ kotlin {
                 api(project(":behavior"))
                 api(project(":config-dsl"))
                 api(project(":config-envar"))
+                api(project(":sdk-api"))
                 implementation(project(":platform-implementations"))
             }
         }
@@ -24,6 +25,7 @@ kotlin {
         }
         commonTest {
             dependencies {
+                implementation(project(":test-fakes"))
                 implementation(libs.kotlin.test)
             }
         }

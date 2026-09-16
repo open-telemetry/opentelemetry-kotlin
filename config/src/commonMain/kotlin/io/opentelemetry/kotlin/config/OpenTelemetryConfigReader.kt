@@ -6,6 +6,10 @@ import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.config.envar.EnvVarReader
 import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.getEnvVarValue
 
 /**
@@ -17,6 +21,7 @@ class OpenTelemetryConfigReader(
     private val envVarReader: EnvVarReader = EnvVarReader(::getEnvVarValue),
     private val declarativeConfigReader: DeclarativeConfigReader? = platformDeclarativeConfigReader(),
     private val behaviorResolver: BehaviorResolver = BehaviorResolverImpl(),
+    private val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
 ) {
 
     /**
@@ -32,13 +37,23 @@ class OpenTelemetryConfigReader(
         dsl: OpenTelemetryBehavior? = null,
         configFilePath: String? = null,
     ): OpenTelemetryBehavior = behaviorResolver.resolve(
-        envars = OpenTelemetryEnvVars(envVarReader).toBehavior(),
+        envars = OpenTelemetryEnvVars(envVarReader, ::reportSamplerWarning).toBehavior(),
         declarativeFile = declarativeConfigReader?.let { reader ->
             val path = configFilePath ?: envVarReader.readString(CONFIG_FILE)
             path?.let(reader::read)
         },
         dsl = dsl,
     )
+
+    private fun reportSamplerWarning(message: String) {
+        sdkErrorHandler.onError(
+            SdkError.ApiMisuse(
+                api = "OTEL_TRACES_SAMPLER",
+                message = message,
+                severity = SdkErrorSeverity.WARNING,
+            )
+        )
+    }
 
     private companion object {
         const val CONFIG_FILE = "OTEL_CONFIG_FILE"

@@ -134,6 +134,27 @@ internal class SpanExportTest {
     }
 
     @Test
+    fun `test kotlin span inherits active java span as parent`() = runTest {
+        val javaParent = harness.javaApi.getTracer("java_tracer").spanBuilder("java_parent").startSpan()
+        val scope = javaParent.makeCurrent()
+        val child = try {
+            harness.tracer.startSpan("kotlin_child")
+        } finally {
+            scope.close()
+        }
+
+        javaParent.end()
+        child.end()
+
+        harness.assertSpans(2, null) { spans ->
+            val exportParent = spans[0]
+            val exportChild = spans[1]
+            assertFalse(exportParent.parent.isValid)
+            assertSpanContextsMatch(exportParent.spanContext, exportChild.parent)
+        }
+    }
+
+    @Test
     fun `test span context parent for decorated span`() = runTest {
         val root = harness.kotlinApi.context.root()
 
@@ -204,6 +225,26 @@ internal class SpanExportTest {
             expectedCount = 2,
             goldenFileName = "span_links.json",
         )
+    }
+
+    @Test
+    fun `test span creation attributes and links export`() = runTest {
+        val linkedSpan = harness.tracer.startSpan("linked_span")
+        harness.tracer.startSpan("span_creation") {
+            assertAttributes()
+            addLink(linkedSpan.spanContext) { setStringAttribute("link_key", "link_value") }
+        }.end()
+        linkedSpan.end()
+
+        harness.assertSpans(expectedCount = 2) { spans ->
+            with(spans.first()) {
+                assertEquals("second_value", attributes["string_key"])
+                assertEquals(3.14, attributes["double_key"])
+                val link = links.single()
+                assertEquals(linkedSpan.spanContext.spanId, link.spanContext.spanId)
+                assertEquals("link_value", link.attributes["link_key"])
+            }
+        }
     }
 
     @Test

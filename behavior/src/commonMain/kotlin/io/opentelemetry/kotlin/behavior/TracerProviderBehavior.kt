@@ -25,11 +25,17 @@ data class TracerProviderBehavior(
      */
     val sampler: SamplerBehavior? = null,
 
+    /**
+     * Strategy used to generate trace and span IDs.
+     */
+    val idGenerator: IdGeneratorBehavior? = null,
+
 ) : Behavior<TracerProviderBehavior> {
 
     override fun mergeWith(higher: TracerProviderBehavior): TracerProviderBehavior = copy(
         spanLimits = mergeNode(spanLimits, higher.spanLimits),
         processor = mergeNode(processor, higher.processor),
-        sampler = mergeNode(sampler, higher.sampler)
+        sampler = mergeNode(sampler, higher.sampler),
+        idGenerator = mergeNode(idGenerator, higher.idGenerator),
     )
 }

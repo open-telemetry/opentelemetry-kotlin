@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
@@ -55,12 +54,11 @@ internal class LoggerProviderConfigImpl(
 
     fun generateLoggingConfig(
         base: Resource,
-        globalLimits: AttributeLimitsBehavior,
         logLimits: LogLimitsBehavior,
         processorBehavior: LogRecordProcessorBehavior? = null,
     ): LoggingConfig = LoggingConfig(
         processor = processor ?: processorFromConsole(processorBehavior),
-        logLimits = generateLogLimitsConfig(globalLimits, logLimits),
+        logLimits = logLimits,
         resource = base.merge(resourceConfigImpl.generateResource()),
         sdkErrorHandler = sdkErrorHandler,
         loggerConfigurator = loggerConfigurator,
@@ -78,16 +76,5 @@ internal class LoggerProviderConfigImpl(
         return LogExportConfigImpl(clock, sdkErrorHandler).run {
             simpleLogRecordProcessor(stdoutLogRecordExporter())
         }
-    }
-
-    /**
-     * A limit left unset by the log limits falls back to the global attribute limits, then to the
-     * default this SDK applies.
-     */
-    private fun generateLogLimitsConfig(
-        globalLimits: AttributeLimitsBehavior,
-        logLimits: LogLimitsBehavior
-    ): AttributeLimitsBehavior {
-        return globalLimits.mergeWith(logLimits)
     }
 }

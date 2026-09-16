@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.factory.CompatContextFactory
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -22,7 +23,9 @@ internal class CompatOpenTelemetryConfigTest {
             }
         }
 
-        val spanLimits = cfg.resolveSpanLimits()
+        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory())
+        val spanLimits = configFactory.spanLimits
         assertEquals(8, spanLimits.attributeCountLimit)
         assertEquals(16, spanLimits.attributeValueLengthLimit)
         assertEquals(32, spanLimits.linkCountLimit)
@@ -41,7 +44,8 @@ internal class CompatOpenTelemetryConfigTest {
             }
         }
 
-        val logLimits = cfg.resolveLogLimits()
+        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val logLimits = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory()).logLimits
         assertEquals(8, logLimits.attributeCountLimit)
         assertEquals(16, logLimits.attributeValueLengthLimit)
     }

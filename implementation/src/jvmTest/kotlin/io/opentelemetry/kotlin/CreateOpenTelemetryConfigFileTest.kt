@@ -2,6 +2,8 @@ package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
+import io.opentelemetry.kotlin.init.SdkConfigFactory
+import io.opentelemetry.kotlin.init.defaultBehaviorReader
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import java.io.File
@@ -37,8 +39,10 @@ internal class CreateOpenTelemetryConfigFileTest {
         val cfg = OpenTelemetryConfigImpl(FakeClock()).apply {
             configFile(writeConfigFile(CONFIG_FILE))
         }
-        assertEquals(64, cfg.generateTracingConfig().spanLimits.attributeCountLimit)
-        assertEquals(64, cfg.generateLoggingConfig().logLimits.attributeCountLimit)
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val resolver = SdkConfigFactory(cfg, behavior)
+        assertEquals(64, resolver.generateTracingConfig().spanLimits.attributeCountLimit)
+        assertEquals(64, resolver.generateLoggingConfig().logLimits.attributeCountLimit)
     }
 
     @Test
@@ -49,8 +53,10 @@ internal class CreateOpenTelemetryConfigFileTest {
                 attributeCountLimit = 32
             }
         }
-        assertEquals(32, cfg.generateTracingConfig().spanLimits.attributeCountLimit)
-        assertEquals(32, cfg.generateLoggingConfig().logLimits.attributeCountLimit)
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val resolver = SdkConfigFactory(cfg, behavior)
+        assertEquals(32, resolver.generateTracingConfig().spanLimits.attributeCountLimit)
+        assertEquals(32, resolver.generateLoggingConfig().logLimits.attributeCountLimit)
     }
 
     @Test
@@ -58,8 +64,10 @@ internal class CreateOpenTelemetryConfigFileTest {
         val cfg = OpenTelemetryConfigImpl(FakeClock()).apply {
             configFile(writeConfigFile(CONSOLE_CONFIG_FILE))
         }
-        assertNotNull(cfg.generateTracingConfig().processor)
-        assertNotNull(cfg.generateLoggingConfig().processor)
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val resolver = SdkConfigFactory(cfg, behavior)
+        assertNotNull(resolver.generateTracingConfig().processor)
+        assertNotNull(resolver.generateLoggingConfig().processor)
     }
 
     @Test
@@ -71,8 +79,10 @@ internal class CreateOpenTelemetryConfigFileTest {
             tracerProvider { export { spanProcessor } }
             loggerProvider { export { logProcessor } }
         }
-        assertSame(spanProcessor, cfg.generateTracingConfig().processor)
-        assertSame(logProcessor, cfg.generateLoggingConfig().processor)
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val resolver = SdkConfigFactory(cfg, behavior)
+        assertSame(spanProcessor, resolver.generateTracingConfig().processor)
+        assertSame(logProcessor, resolver.generateLoggingConfig().processor)
     }
 
     private fun writeConfigFile(contents: String): String {

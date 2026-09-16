@@ -1,15 +1,20 @@
 package io.opentelemetry.kotlin.attributes
 
+import io.opentelemetry.kotlin.behavior.limitOrUnset
+
 internal class AttributesModel(
-    private val attributeLimit: Int = DEFAULT_ATTRIBUTE_LIMIT,
-    private val attributeValueLengthLimit: Int = DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
+    attributeLimit: Int = DEFAULT_ATTRIBUTE_LIMIT,
+    attributeValueLengthLimit: Int = DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
     private val attrs: MutableMap<String, Any> = mutableMapOf()
 ) : AttributesMutator, AttributeContainer {
+
+    private val attributeLimit: Int = limitOrUnset(attributeLimit) ?: DEFAULT_ATTRIBUTE_LIMIT
+    private val attributeValueLengthLimit: Int = limitOrUnset(attributeValueLengthLimit) ?: DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 
     /**
      * True when [attributeValueLengthLimit] doesn't truncate anything, which is the default.
      */
-    private val truncationDisabled = attributeValueLengthLimit == Int.MAX_VALUE
+    private val truncationDisabled = this.attributeValueLengthLimit == Int.MAX_VALUE
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
         ifPreconditionsOk(key) {

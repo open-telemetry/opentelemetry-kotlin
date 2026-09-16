@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.TraceState
+import io.opentelemetry.kotlin.tracing.ext.toOtelJavaLinkData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceState
 import io.opentelemetry.kotlin.tracing.model.SpanLink
@@ -31,7 +32,7 @@ internal class OtelJavaBackedComposableSampler(internal val impl: OtelJavaCompos
             name,
             spanKind.toOtelJavaSpanKind(),
             javaAttributes,
-            emptyList(),
+            links.map { it.toOtelJavaLinkData() },
         )
 
         val javaThreshold = javaIntent.threshold

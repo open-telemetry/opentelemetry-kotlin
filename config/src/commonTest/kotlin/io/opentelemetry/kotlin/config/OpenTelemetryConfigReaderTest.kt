@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.config.envar.EnvVarReader
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -98,6 +99,21 @@ internal class OpenTelemetryConfigReaderTest {
         )
         val behavior = reader.read(configFilePath = PATH)
         assertEquals(64, behavior.logRecordAttributeCountLimit())
+    }
+
+    @Test
+    fun `should report unknown sampler via SdkErrorHandler`() {
+        val handler = FakeSdkErrorHandler()
+        val reader = OpenTelemetryConfigReader(
+            envVarReader = EnvVarReader(mapOf("OTEL_TRACES_SAMPLER" to "not_a_sampler")::get),
+            declarativeConfigReader = null,
+            sdkErrorHandler = handler,
+        )
+        reader.read()
+        assertEquals(1, handler.apiMisuses.size)
+        val misuse = handler.apiMisuses.single()
+        assertTrue(misuse.message.contains("not_a_sampler"))
+        assertEquals("OTEL_TRACES_SAMPLER", misuse.api)
     }
 
     @Test

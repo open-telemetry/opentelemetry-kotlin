@@ -14,12 +14,15 @@ kotlin {
                 api(project(":api"))
                 api(project(":sdk-api"))
                 implementation(project(":sdk-common"))
+                implementation(project(":model"))
                 implementation(project(":platform-implementations"))
             }
         }
         commonTest {
             dependencies {
                 implementation(project(":test-fakes"))
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.kotest.property)
             }
         }
     }

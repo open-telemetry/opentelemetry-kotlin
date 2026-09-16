@@ -333,6 +333,16 @@ internal class AttributesMutatorImplTest {
         assertEquals(null, storedMap.values["extra"])
     }
 
+    @Test
+    fun testNegativeLimitsFallBackToDefaults() {
+        val attrs = AttributesModel(attributeLimit = -1, attributeValueLengthLimit = -1).apply {
+            setStringAttribute("key", "abcdef")
+            setByteArrayAttribute("bytes", byteArrayOf(1, 2, 3))
+        }
+        assertEquals("abcdef", attrs.attributes["key"])
+        assertEquals(0, attrs.droppedAttributesCount)
+    }
+
     private fun AttributesMutator.addTestAttributes(keyToken: String = "") {
         setStringAttribute("string$keyToken", "value")
         setDoubleAttribute("double$keyToken", 3.14)

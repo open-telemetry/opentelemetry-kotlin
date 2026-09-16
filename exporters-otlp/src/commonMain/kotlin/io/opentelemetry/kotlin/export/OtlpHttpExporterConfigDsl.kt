@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.export
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.config.validateOrUseDefault
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.init.ConfigDsl
 
@@ -56,12 +57,26 @@ internal fun createOtlpHttpClient(
     block: OtlpHttpExporterConfigDsl.() -> Unit,
 ): OtlpClient {
     val config = OtlpHttpExporterConfig().apply(block)
+    val endpoint = validateOrUseDefault(
+        sdkErrorHandler = sdkErrorHandler,
+        api = "OtlpHttpExporterConfig",
+        configParameterName = "endpoint",
+        value = config.endpoint,
+        default = DEFAULT_OTLP_HTTP_ENDPOINT,
+    ) { it.isNotBlank() }
+    val timeoutMs = validateOrUseDefault(
+        sdkErrorHandler = sdkErrorHandler,
+        api = "OtlpHttpExporterConfig",
+        configParameterName = "timeoutMs",
+        value = config.timeoutMs,
+        default = EXPORT_REQUEST_TIMEOUT_MS,
+    ) { it > 0 }
     val httpClient = config.httpClient ?: HttpClientRegistry.getOrCreate(
         engine = config.httpClientEngine,
-        requestTimeoutMs = config.timeoutMs,
+        requestTimeoutMs = timeoutMs,
     )
     return OtlpClient(
-        baseUrl = config.endpoint,
+        baseUrl = endpoint,
         httpClient = httpClient,
         sdkErrorHandler = sdkErrorHandler,
     )
