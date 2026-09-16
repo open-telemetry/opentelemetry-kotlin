@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.init
 
-import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
@@ -9,6 +8,7 @@ import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.ResourceFactory
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
+import io.opentelemetry.kotlin.factory.toIdGenerator
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.init.config.MetricsConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
@@ -23,10 +23,10 @@ internal class SdkConfigFactory(
     resourceFactory: ResourceFactory = ResourceFactoryImpl(),
 ) {
 
-    val idGenerator: IdGenerator = cfg.customIdGenerator?.invoke() ?: IdGeneratorImpl()
-
-    private val globalAttributeLimits: AttributeLimitsBehavior =
-        behavior.attributeLimits ?: AttributeLimitsBehavior()
+    val idGenerator: IdGenerator =
+        cfg.customIdGenerator?.invoke()
+            ?: behavior.tracerProvider?.idGenerator?.toIdGenerator()
+            ?: IdGeneratorImpl()
 
     private val spanLimits: SpanLimitsBehavior =
         behavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior()
@@ -42,11 +42,11 @@ internal class SdkConfigFactory(
 
     fun generateTracingConfig(): TracingConfig {
         cfg.tracingConfig.applyResolvedSampler(sampler)
-        return cfg.tracingConfig.generateTracingConfig(baseResource, globalAttributeLimits, spanLimits)
+        return cfg.tracingConfig.generateTracingConfig(baseResource, spanLimits)
     }
 
     fun generateLoggingConfig(): LoggingConfig =
-        cfg.loggingConfig.generateLoggingConfig(baseResource, globalAttributeLimits, logLimits)
+        cfg.loggingConfig.generateLoggingConfig(baseResource, logLimits)
 
     fun generateMetricsConfig(): MetricsConfig =
         cfg.metricsConfig.generateMetricsConfig(baseResource)

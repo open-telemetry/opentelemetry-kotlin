@@ -14,7 +14,7 @@ import io.opentelemetry.kotlin.tracing.TraceFlags
  * https://www.w3.org/TR/trace-context/#traceparent-header
  */
 @OptIn(ExperimentalApi::class)
-internal class TraceParent private constructor(
+public class TraceParent private constructor(
     val version: String,
     val traceId: String,
     val spanId: String,

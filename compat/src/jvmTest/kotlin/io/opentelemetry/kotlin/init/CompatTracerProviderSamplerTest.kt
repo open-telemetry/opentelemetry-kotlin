@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
@@ -32,14 +31,13 @@ import org.junit.Test
 internal class CompatTracerProviderSamplerTest {
 
     private val idGenerator = CompatIdGenerator()
-    private val noGlobalLimits = AttributeLimitsBehavior()
     private val noSpanLimits = SpanLimitsBehavior()
 
     @Test
     fun `default sampler records and samples spans`() {
         val clock = FakeClock()
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler)
-        val provider = config.build(clock, idGenerator, globalLimits = noGlobalLimits, spanLimits = noSpanLimits)
+        val provider = config.build(clock, idGenerator, spanLimits = noSpanLimits)
         val span = provider.getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
@@ -54,7 +52,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
@@ -70,7 +67,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
@@ -85,7 +81,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
@@ -101,7 +96,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
@@ -130,7 +124,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
@@ -146,7 +139,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
@@ -177,7 +169,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
@@ -193,7 +184,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
@@ -209,7 +199,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
@@ -225,7 +214,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
@@ -241,7 +229,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
@@ -257,7 +244,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
@@ -320,7 +306,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
@@ -342,7 +327,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
@@ -358,7 +342,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
@@ -381,7 +364,6 @@ internal class CompatTracerProviderSamplerTest {
         val span = config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())

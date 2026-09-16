@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
 
-internal class SpanFactoryImpl(
+public class SpanFactoryImpl(
     spanContextFactory: SpanContextFactory,
 ) : SpanFactory {
 

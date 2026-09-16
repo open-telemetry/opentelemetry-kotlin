@@ -20,6 +20,7 @@ import okio.fakefilesystem.FakeFileSystem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 @OptIn(ExperimentalSerializationApi::class)
@@ -79,6 +80,21 @@ internal class OpenTelemetryConfigurationParserTest {
         assertEquals(AttributeLimits(), limits)
         assertNull(limits?.attributeCountLimit)
         assertNull(limits?.attributeValueLengthLimit)
+    }
+
+    @Test
+    fun parsesRandomIdGenerator() {
+        val yaml = """
+            $MINIMAL_DOCUMENT
+            tracer_provider:
+              processors: []
+              id_generator:
+                random: {}
+        """.trimIndent()
+
+        val idGenerator = parser.parse(yaml).tracerProvider?.idGenerator
+
+        assertNotNull(idGenerator?.random)
     }
 
     @Test

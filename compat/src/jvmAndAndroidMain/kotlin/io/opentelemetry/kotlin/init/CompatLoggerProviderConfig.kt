@@ -87,10 +87,9 @@ internal class CompatLoggerProviderConfig(
     fun build(
         clock: Clock,
         baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build()),
-        globalLimits: AttributeLimitsBehavior,
         logLimits: LogLimitsBehavior,
     ): LoggerProvider {
-        this.logLimits = resolveLogLimits(globalLimits, logLimits)
+        this.logLimits = logLimits
         builder.setLogLimits { this.logLimits.toOtelJavaLogLimits() }
         loggerConfigurator?.let(::applyLoggerConfigurator)
         val resource = ResourceAdapter(
@@ -103,10 +102,6 @@ internal class CompatLoggerProviderConfig(
         }
         builder.setClock(OtelJavaClockWrapper(clock))
         return LoggerProviderAdapter(builder.build())
-    }
-
-    private fun resolveLogLimits(globalLimits: AttributeLimitsBehavior, logLimits: LogLimitsBehavior): AttributeLimitsBehavior {
-        return globalLimits.mergeWith(logLimits)
     }
 
     fun toBehavior(): LoggerProviderBehavior =

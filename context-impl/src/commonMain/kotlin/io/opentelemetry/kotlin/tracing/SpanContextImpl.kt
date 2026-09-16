@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.factory.toHexString
 private const val TRACE_ID_BYTES = 16
 private const val SPAN_ID_BYTES = 8
 
-class SpanContextImpl(
+public class SpanContextImpl(
     override val traceIdBytes: ByteArray,
     override val spanIdBytes: ByteArray,
     override val traceFlags: TraceFlags,
