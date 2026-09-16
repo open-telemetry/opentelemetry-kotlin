@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
+import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.resource.FakeResourceDetector
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import org.junit.Test
@@ -70,5 +71,5 @@ internal class CompatResourceDetectionConfigTest {
     }
 
     private fun baseResource(cfg: CompatOpenTelemetryConfig) =
-        CompatSdkConfigFactory(cfg, OpenTelemetryBehavior(), clock).baseResource
+        CompatSdkConfigFactory(cfg, OpenTelemetryBehavior(), clock, CompatContextFactory()).baseResource
 }
