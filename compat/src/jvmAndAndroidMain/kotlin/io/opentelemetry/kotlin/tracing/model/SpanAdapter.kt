@@ -35,7 +35,7 @@ internal class SpanAdapter(
     val spanKind: SpanKind,
     val startTimestamp: Long,
     private val spanLimitsConfig: CompatSpanLimitsConfig,
-    creationState: CompatSpanCreationCollector? = null,
+    creationState: CompatSpanCreationState? = null,
 ) : Span, AttributeContainer, SpanCreationAction, OtelJavaImplicitContextKeyed {
 
     private val attrs: MutableMap<String, Any> = ConcurrentHashMap(creationState?.attributes.orEmpty())

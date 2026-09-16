@@ -12,11 +12,11 @@ import io.opentelemetry.kotlin.tracing.SpanLinkCompatImpl
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 
 /**
- * Collects the attributes and links supplied in the span creation lambda so that they can be
+ * Holds the attributes and links supplied in the span creation lambda so that they can be
  * applied to an [OtelJavaSpanBuilder] before the span is started. This is required for sampling.
  */
 @OptIn(ExperimentalApi::class)
-internal class CompatSpanCreationCollector(
+internal class CompatSpanCreationState(
     private val spanLimitsConfig: CompatSpanLimitsConfig,
     private val attrs: CompatAttributesModel = CompatAttributesModel(),
 ) : SpanCreationAction, AttributeContainer, AttributesMutator by attrs {

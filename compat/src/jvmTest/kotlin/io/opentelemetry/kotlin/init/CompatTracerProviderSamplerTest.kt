@@ -434,7 +434,6 @@ internal class CompatTracerProviderSamplerTest {
         return config.build(
             clock,
             idGenerator,
-            globalLimits = noGlobalLimits,
             spanLimits = noSpanLimits
         ).getTracer("test")
     }
