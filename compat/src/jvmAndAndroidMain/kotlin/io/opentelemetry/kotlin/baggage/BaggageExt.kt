@@ -6,7 +6,9 @@ import io.opentelemetry.kotlin.aliases.OtelJavaBaggageEntryMetadata
 
 @OptIn(ExperimentalApi::class)
 public fun Baggage.toOtelJavaBaggage(): OtelJavaBaggage = when (this) {
-    is BaggageAdapter -> impl
+    is BaggageAdapter -> {
+        impl
+    }
     else -> {
         val builder = OtelJavaBaggage.builder()
         asMap().forEach { (name, entry) ->
