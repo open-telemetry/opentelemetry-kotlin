@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 0.8.0 (2026-09-17)
+
 ### Migration notes
 
 - `SpanProcessor.isOnEndingRequired()` no longer has a default implementation. Custom span
