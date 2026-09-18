@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
@@ -34,6 +35,8 @@ internal class CompatSdkConfigFactory(
     val spanLimits: SpanLimitsBehavior =
         behavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior()
 
+    val processor: SpanProcessorBehavior? = behavior.tracerProvider?.processor
+
     val logLimits: LogLimitsBehavior =
         behavior.loggerProvider?.logLimits ?: LogLimitsBehavior()
 
@@ -41,8 +44,10 @@ internal class CompatSdkConfigFactory(
         .detectResource(CompatResourceFactory, cfg.sdkErrorHandler)
         .merge(cfg.buildDeclaredResource())
 
-    fun buildTracerProvider(): TracerProvider =
-        cfg.tracerProviderConfig.build(clock, idGenerator, baseResource, spanLimits, contextFactory)
+    fun buildTracerProvider(): TracerProvider {
+        cfg.tracerProviderConfig.applyResolvedProcessor(processor)
+        return cfg.tracerProviderConfig.build(clock, idGenerator, baseResource, spanLimits, contextFactory)
+    }
 
     fun buildLoggerProvider(): LoggerProvider =
         cfg.loggerProviderConfig.build(clock, baseResource, logLimits)

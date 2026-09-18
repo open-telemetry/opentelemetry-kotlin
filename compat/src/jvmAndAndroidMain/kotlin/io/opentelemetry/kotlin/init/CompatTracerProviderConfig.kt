@@ -13,7 +13,9 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -48,6 +50,7 @@ internal class CompatTracerProviderConfig(
     private val resourceAttrs = CompatAttributesModel()
     private var resourceSchemaUrl: String? = null
     private val spanLimitsDsl = SpanLimitsConfigDslImpl()
+    private var hasProcessor = false
 
     override var serviceName: String? = null
         set(value) {
@@ -69,6 +72,7 @@ internal class CompatTracerProviderConfig(
     }
 
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
+        hasProcessor = true
         val processor = TraceExportConfigCompat(clock, sdkErrorHandler).action()
         builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor))
     }
@@ -133,9 +137,26 @@ internal class CompatTracerProviderConfig(
         return TracerProviderAdapter(builder.build(), clock, spanLimitsConfig, contextFactory)
     }
 
+    internal fun applyResolvedProcessor(behavior: SpanProcessorBehavior?) {
+        if (hasProcessor || behavior == null) {
+            return
+        }
+        // For now, we only support console exporter via the behavior
+        if (behavior?.console != null) {
+            hasProcessor = true
+            val processor = TraceExportConfigCompat(clock, sdkErrorHandler).action()
+            builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor))
+        }
+    }
+
     fun toBehavior(): TracerProviderBehavior =
         TracerProviderBehavior(
-            spanLimits = spanLimitsDsl.toBehavior()
+            spanLimits = spanLimitsDsl.toBehavior(),
+            processor = if (hasProcessor) {
+                SpanProcessorBehavior(console = ConsoleExporterBehavior())
+            } else {
+                null
+            }
         )
 
     private class TraceExportConfigCompat(
