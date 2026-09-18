@@ -240,4 +240,117 @@ internal class TraceStateImplTest {
         val result3 = traceState.put(invalidKey2, "value")
         assertSame(traceState, result3)
     }
+
+    @Test
+    fun testPutMovesModifiedKeyToFront() {
+        // Per W3C spec: modified keys MUST be moved to the beginning (left) of the list
+        val traceState = TraceStateImpl.create()
+            .put("key1", "value1")
+            .put("key2", "value2")
+            .put("key3", "value3")
+
+        // After initial puts, order is: key3, key2, key1 (most recent first)
+        // Update key2 - it should move to the front
+        val updated = traceState.put("key2", "new-value2")
+
+        // Verify the value was updated
+        assertEquals("new-value2", updated.get("key2"))
+        assertEquals("value1", updated.get("key1"))
+        assertEquals("value3", updated.get("key3"))
+
+        // Verify iteration order: modified key first, then preserved relative order of others
+        val entries = updated.asMap().entries.toList()
+        assertEquals("key2", entries[0].key)
+        assertEquals("key3", entries[1].key)
+        assertEquals("key1", entries[2].key)
+    }
+
+    @Test
+    fun testPutAddsNewKeyToFront() {
+        // Per W3C spec: new key/value pairs SHOULD be added to the beginning of the list
+        val traceState = TraceStateImpl.create()
+            .put("key1", "value1")
+            .put("key2", "value2")
+
+        // Add new key - it should be at the front
+        val updated = traceState.put("key3", "value3")
+
+        // Verify the value was added
+        assertEquals("value3", updated.get("key3"))
+        assertEquals("value1", updated.get("key1"))
+        assertEquals("value2", updated.get("key2"))
+
+        // Verify iteration order: new key should be first
+        // Since successive put() calls each move the new key to front,
+        // the order is key3 (most recent), key2, key1
+        val entries = updated.asMap().entries.toList()
+        assertEquals("key3", entries[0].key)
+        assertEquals("key2", entries[1].key)
+        assertEquals("key1", entries[2].key)
+    }
+
+    @Test
+    fun testPutPreservesOrderOfUnmodifiedKeys() {
+        // Per W3C spec: order of unmodified key/value pairs MUST be preserved
+        val traceState = TraceStateImpl.create()
+            .put("key1", "value1")
+            .put("key2", "value2")
+            .put("key3", "value3")
+            .put("key4", "value4")
+
+        // After the initial puts, the order is: key4, key3, key2, key1 (most recent first)
+        // Update key2 - it should move to front, preserving relative order of others
+        val updated = traceState.put("key2", "new-value2")
+
+        val entries = updated.asMap().entries.toList()
+        assertEquals("key2", entries[0].key) // Modified key moved to front
+        assertEquals("key4", entries[1].key) // Preserved relative order
+        assertEquals("key3", entries[2].key) // Preserved relative order
+        assertEquals("key1", entries[3].key) // Preserved relative order
+    }
+
+    @Test
+    fun testPutMultipleUpdatesMoveEachToFront() {
+        val traceState = TraceStateImpl.create()
+            .put("key1", "value1")
+            .put("key2", "value2")
+            .put("key3", "value3")
+
+        // After initial puts, order is: key3, key2, key1 (most recent first)
+        // Update key3 - should move to front (already at front, but this is the operation)
+        val updated1 = traceState.put("key3", "new-value3")
+        var entries = updated1.asMap().entries.toList()
+        assertEquals("key3", entries[0].key)
+        assertEquals("key2", entries[1].key)
+        assertEquals("key1", entries[2].key)
+
+        // Update key1 - should move to front
+        val updated2 = updated1.put("key1", "new-value1")
+        entries = updated2.asMap().entries.toList()
+        assertEquals("key1", entries[0].key)
+        assertEquals("key3", entries[1].key)
+        assertEquals("key2", entries[2].key)
+    }
+
+    @Test
+    fun testRemovePreservesOrder() {
+        val traceState = TraceStateImpl.create()
+            .put("key1", "value1")
+            .put("key2", "value2")
+            .put("key3", "value3")
+
+        // After initial puts, order is: key3, key2, key1 (most recent first)
+        // Remove key2 - should preserve order of remaining keys
+        val updated = traceState.remove("key2")
+
+        assertEquals(2, updated.asMap().size)
+        assertNull(updated.get("key2"))
+        assertEquals("value1", updated.get("key1"))
+        assertEquals("value3", updated.get("key3"))
+
+        // Verify iteration order is preserved: key3, key1
+        val entries = updated.asMap().entries.toList()
+        assertEquals("key3", entries[0].key)
+        assertEquals("key1", entries[1].key)
+    }
 }

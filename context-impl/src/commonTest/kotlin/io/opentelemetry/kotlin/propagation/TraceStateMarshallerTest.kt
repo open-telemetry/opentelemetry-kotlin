@@ -28,7 +28,9 @@ internal class TraceStateMarshallerTest {
             .put("bar", "2")
             .put("baz", "3")
         val ts = TraceStateMarshaller(state)
-        assertEquals("foo=1,bar=2,baz=3", ts.encode())
+        // Per W3C spec: new keys SHOULD be added to the beginning of the list
+        // So the order should be baz=3,bar=2,foo=1 (most recent first)
+        assertEquals("baz=3,bar=2,foo=1", ts.encode())
     }
 
     @Test
@@ -53,6 +55,7 @@ internal class TraceStateMarshallerTest {
     @Test
     fun `decode parses multiple list-members preserving order`() {
         val ts = TraceStateMarshaller.decode("foo=1,bar=2,baz=3", factory)
+        // Decoding now preserves the order from the header directly
         assertEquals("foo=1,bar=2,baz=3", ts.encode())
     }
 
