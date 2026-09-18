@@ -118,7 +118,7 @@ internal class W3CTraceContextPropagatorTest {
             .put("baz", "3")
         val context = contextWithSpan(spanContext(traceState = state))
         val carrier = injectInto(context)
-        assertEquals("foo=1,bar=2,baz=3", carrier["tracestate"])
+        assertEquals("baz=3,bar=2,foo=1", carrier["tracestate"])
     }
 
     @Test

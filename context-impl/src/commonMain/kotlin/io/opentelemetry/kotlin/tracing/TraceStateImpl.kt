@@ -9,7 +9,7 @@ public class TraceStateImpl private constructor(
 ) : TraceState {
 
     companion object {
-        fun create(): TraceState = TraceStateImpl(emptyMap())
+        fun create(): TraceState = TraceStateImpl(LinkedHashMap())
     }
 
     override fun get(key: String): String? = data[key]
@@ -20,7 +20,15 @@ public class TraceStateImpl private constructor(
         if (!W3CTraceStateValidator.canPut(data, key, value)) {
             return this
         }
-        return TraceStateImpl(data + (key to value))
+
+        if (data.containsKey(key) && data.getValue(key) == value) {
+            return this
+        }
+
+        val newData = linkedMapOf(key to value)
+        newData.putAll(data - key)
+
+        return TraceStateImpl(newData)
     }
 
     override fun remove(key: String): TraceState {

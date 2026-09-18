@@ -190,6 +190,41 @@ internal class TraceStateImplTest {
     }
 
     @Test
+    fun testPutAddsNewKeysToBeginning(){
+        val traceState = TraceStateImpl.create()
+            .put("vendor3", "c")
+            .put("vendor2", "b")
+            .put("vendor1", "a")
+
+        assertEquals(
+            listOf("vendor1" to "a", "vendor2" to "b", "vendor3" to "c"),
+            traceState.asMap().toList()
+        )
+    }
+
+    @Test
+    fun testPutReturnsSameInstanceForExistingKeyAndValue() {
+        val traceState = TraceStateImpl.create()
+        .put("vendor1", "a")
+        .put("vendor2", "b")
+
+        assertSame(traceState, traceState.put("vendor1", "a"))
+    }
+
+    @Test
+    fun testPutMovesExistingKeyToBeginning(){
+        val traceState = TraceStateImpl.create()
+            .put("key", "value")
+            .put("key2", "value2")
+            .put("key2", "newValue")
+
+        assertEquals(
+            listOf("key2" to "newValue", "key" to "value"),
+            traceState.asMap().toList().reversed()
+        )
+    }
+
+    @Test
     fun testTrailingWhitespace() {
         val traceState = TraceStateImpl.create()
         val result = traceState.put("key", "value ")
