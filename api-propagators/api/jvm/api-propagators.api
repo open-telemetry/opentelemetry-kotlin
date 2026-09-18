@@ -1,0 +1,8 @@
+public abstract interface class io/opentelemetry/kotlin/propagation/Propagators {
+	public abstract fun none ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
+}
+
+public final class io/opentelemetry/kotlin/propagation/PropagatorsEntrypointKt {
+	public static final fun createPropagators ()Lio/opentelemetry/kotlin/propagation/Propagators;
+}
+

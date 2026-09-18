@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.SpanContextFactory
@@ -10,23 +9,29 @@ import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.propagation.B3Propagator
 import io.opentelemetry.kotlin.propagation.CompositeTextMapPropagator
+import io.opentelemetry.kotlin.propagation.Propagators
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.propagation.TextMapSetter
 import io.opentelemetry.kotlin.propagation.W3CBaggagePropagator
 import io.opentelemetry.kotlin.propagation.W3CTraceContextPropagator
+import io.opentelemetry.kotlin.propagation.createPropagators
 import kotlin.concurrent.Volatile
 
 @OptIn(ExperimentalApi::class)
-internal class PropagatorConfigImpl : PropagatorConfigDsl {
+internal class PropagatorConfigImpl(
+    propagators: Propagators = createPropagators(),
+) : PropagatorConfigDsl {
 
-    private var configured: TextMapPropagator = NoopOpenTelemetry.propagator
+    private val none: TextMapPropagator = propagators.none()
 
-    @Volatile private var w3cTraceContextImpl: TextMapPropagator = NoopOpenTelemetry.propagator
+    private var configured: TextMapPropagator = none
 
-    @Volatile private var b3SingleImpl: TextMapPropagator = NoopOpenTelemetry.propagator
+    @Volatile private var w3cTraceContextImpl: TextMapPropagator = none
 
-    @Volatile private var b3MultiImpl: TextMapPropagator = NoopOpenTelemetry.propagator
+    @Volatile private var b3SingleImpl: TextMapPropagator = none
+
+    @Volatile private var b3MultiImpl: TextMapPropagator = none
 
     override fun composite(vararg propagators: TextMapPropagator): TextMapPropagator {
         configured = CompositeTextMapPropagator(propagators.toList())

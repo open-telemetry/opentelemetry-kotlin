@@ -34,6 +34,7 @@ kotlin {
                 implementation(project(":semconv"))
                 implementation(project(":exporters-core"))
                 implementation(project(":noop"))
+                implementation(project(":api-propagators"))
                 implementation(project(":semconv"))
                 implementation(libs.kotlinx.coroutines)
             }

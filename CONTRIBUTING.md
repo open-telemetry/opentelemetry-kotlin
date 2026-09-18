@@ -49,7 +49,7 @@ or add `signing.skip=true` to your local `gradle.properties`.
 
 The following guidelines should be followed during development:
 
-1. Public interfaces only belong in `api` or `api-ext`.
+1. Public interfaces only belong in `api`, `api-ext`, `sdk-api`, or `api-propagators`.
 2. `api` aims to remain as close to the [OTel specification](https://opentelemetry.io/docs/specs/otel/) as possible.
 3. Enhancements and syntactic sugar that are not part of the OTel specification should be placed in `api-ext`.
 4. 1 class per source-file is preferred

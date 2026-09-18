@@ -1,6 +1,6 @@
 public final class io/opentelemetry/kotlin/OpenTelemetryImplEntrypointKt {
-	public static final fun createOpenTelemetry (Lio/opentelemetry/kotlin/Clock;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/OpenTelemetry;
-	public static synthetic fun createOpenTelemetry$default (Lio/opentelemetry/kotlin/Clock;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/OpenTelemetry;
+	public static final fun createOpenTelemetry (Lio/opentelemetry/kotlin/Clock;Lio/opentelemetry/kotlin/propagation/Propagators;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/OpenTelemetry;
+	public static synthetic fun createOpenTelemetry$default (Lio/opentelemetry/kotlin/Clock;Lio/opentelemetry/kotlin/propagation/Propagators;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/OpenTelemetry;
 }
 
 public final class io/opentelemetry/kotlin/tracing/sampling/BuiltInSamplerApiKt {
