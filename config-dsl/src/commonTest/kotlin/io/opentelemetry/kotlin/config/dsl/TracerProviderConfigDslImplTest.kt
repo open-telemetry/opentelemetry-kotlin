@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.config.dsl
 
+import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import kotlin.test.Test
@@ -42,7 +43,7 @@ internal class TracerProviderConfigDslImplTest {
         dsl.sampler { alwaysOff() }
 
         val behavior = dsl.toBehavior()
-        assertEquals(SpanProcessorBehavior(), behavior.processor)
+        assertEquals(SpanProcessorBehavior(console = ConsoleExporterBehavior()), behavior.processor)
         assertEquals(SamplerBehavior.AlwaysOff, behavior.sampler)
     }
 
@@ -52,7 +53,7 @@ internal class TracerProviderConfigDslImplTest {
         dsl.export { error("behavior mapping does not run the export lambda") }
 
         assertEquals(
-            SpanProcessorBehavior(),
+            SpanProcessorBehavior(console = ConsoleExporterBehavior()),
             dsl.toBehavior().processor,
         )
     }

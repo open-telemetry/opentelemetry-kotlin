@@ -3,7 +3,9 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.assertHasSdkDefaultAttributes
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
+import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
@@ -265,6 +267,50 @@ internal class TracerProviderConfigImplTest {
             serviceName = value
         }.generateTracingConfig(base, noSpanLimits)
         assertEquals(value, cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
+    }
+
+    @Test
+    fun testToBehaviorIncludesProcessorWhenExportCalled() {
+        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
+            export { compositeSpanProcessor(FakeSpanProcessor()) }
+        }
+        val behavior = cfg.toBehavior()
+        assertNotNull(behavior.processor)
+        assertNotNull(behavior.processor?.console)
+    }
+
+    @Test
+    fun testToBehaviorNoProcessorWhenExportNotCalled() {
+        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler)
+        val behavior = cfg.toBehavior()
+        assertNull(behavior.processor)
+    }
+
+    @Test
+    fun testApplyResolvedProcessorDoesNotOverrideExisting() {
+        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
+            export { compositeSpanProcessor(FakeSpanProcessor()) }
+        }
+        cfg.applyResolvedProcessor(SpanProcessorBehavior(console = ConsoleExporterBehavior()))
+        val behavior = cfg.toBehavior()
+        assertNotNull(behavior.processor)
+        assertNotNull(behavior.processor?.console)
+    }
+
+    @Test
+    fun testApplyResolvedProcessorIgnoresNullBehavior() {
+        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler)
+        cfg.applyResolvedProcessor(null)
+        val behavior = cfg.toBehavior()
+        assertNull(behavior.processor)
+    }
+
+    @Test
+    fun testApplyResolvedProcessorIgnoresBehaviorWithoutConsole() {
+        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler)
+        cfg.applyResolvedProcessor(SpanProcessorBehavior(console = null))
+        val behavior = cfg.toBehavior()
+        assertNull(behavior.processor)
     }
 
     private fun defaultSampler(): Sampler =

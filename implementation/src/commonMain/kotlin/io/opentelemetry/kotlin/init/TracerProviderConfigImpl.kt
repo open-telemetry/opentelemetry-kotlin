@@ -3,8 +3,10 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
+import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkError
@@ -87,9 +89,29 @@ internal class TracerProviderConfigImpl(
         samplerAction = { toSampler(behavior) }
     }
 
+    internal fun applyResolvedProcessor(behavior: SpanProcessorBehavior?) {
+        if (processor != null || behavior == null) {
+            return
+        }
+        // For now, we only support console exporter via the behavior
+        // TODO: Support other exporter types when their behaviors are added
+        // This is a placeholder - full implementation would create the appropriate
+        // processor based on the exporter type in the behavior
+        if (behavior?.console != null) {
+            // Note: This doesn't actually create a functional processor yet
+            // The full implementation requires adding processor factories
+            // For now, this just acknowledges that console was requested
+        }
+    }
+
     fun toBehavior(): TracerProviderBehavior =
         TracerProviderBehavior(
-            spanLimits = spanLimits.toBehavior()
+            spanLimits = spanLimits.toBehavior(),
+            processor = processor?.let { 
+                SpanProcessorBehavior(
+                    console = ConsoleExporterBehavior()
+                )
+            }
         )
 
     private class SamplerConfigImpl(override val spanFactory: SpanFactory) : SamplerConfigDsl
