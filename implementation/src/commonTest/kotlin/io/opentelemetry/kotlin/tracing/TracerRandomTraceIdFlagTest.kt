@@ -65,7 +65,7 @@ internal class TracerRandomTraceIdFlagTest {
     @Test
     fun testRandomFlagIsPropagatedInTraceParentHeader() {
         val idGenerator = IdGeneratorImpl()
-        val spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlagsFactory, traceStateFactory)
+        val spanContextFactory = SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory)
         val spanFactory = SpanFactoryImpl(spanContextFactory)
         val propagator = W3CTraceContextPropagator(
             traceFlagsFactory = traceFlagsFactory,
@@ -97,7 +97,7 @@ internal class TracerRandomTraceIdFlagTest {
     }
 
     private fun startChildOfRemoteParent(idGenerator: IdGenerator, parentFlags: String): Span {
-        val spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlagsFactory, traceStateFactory)
+        val spanContextFactory = SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory)
         val spanFactory = SpanFactoryImpl(spanContextFactory)
         val parent = spanContextFactory.create(
             traceId = "12345678901234567890123456789012",
@@ -114,7 +114,7 @@ internal class TracerRandomTraceIdFlagTest {
         idGenerator: IdGenerator,
         sampler: Sampler = AlwaysOnSampler,
     ): TracerImpl {
-        val spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlagsFactory, traceStateFactory)
+        val spanContextFactory = SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory)
         return TracerImpl(
             clock = FakeClock(),
             processor = FakeSpanProcessor(),

@@ -34,8 +34,7 @@ internal class SpanContextOverrideTest {
         val idGenerator = IdGeneratorImpl()
         traceFlagsFactory = TraceFlagsFactoryImpl()
         traceStateFactory = TraceStateFactoryImpl()
-        spanContextFactory =
-            SpanContextFactoryImpl(idGenerator, traceFlagsFactory, traceStateFactory)
+        spanContextFactory = SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory)
         val spanFactory = SpanFactoryImpl(spanContextFactory)
         val contextFactory = ContextFactoryImpl(spanFactory)
         tracer = TracerImpl(

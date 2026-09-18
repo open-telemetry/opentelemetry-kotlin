@@ -7,7 +7,7 @@ import kotlin.test.assertFalse
 
 internal class SpanFactoryImplTest {
 
-    private val factory = SpanFactoryImpl(SpanContextFactoryImpl(FakeIdGenerator()))
+    private val factory = SpanFactoryImpl(SpanContextFactoryImpl())
 
     @Test
     fun testInvalidSpan() {

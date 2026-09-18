@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
@@ -27,10 +26,9 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class BuiltInCompositeSamplerTest {
 
-    private val idGenerator = IdGeneratorImpl()
     private val traceFlagsFactory = TraceFlagsFactoryImpl()
     private val traceStateFactory = TraceStateFactoryImpl()
-    private val spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlagsFactory, traceStateFactory)
+    private val spanContextFactory = SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory)
     private val spanFactory = SpanFactoryImpl(spanContextFactory)
     private val contextFactory = ContextFactoryImpl(spanFactory)
 

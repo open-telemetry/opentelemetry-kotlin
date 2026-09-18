@@ -10,7 +10,6 @@ import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
-import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
@@ -48,8 +47,7 @@ internal class TracerProviderConfigImplTest {
 
     private val traceFlagsFactory = TraceFlagsFactoryImpl()
     private val traceStateFactory = TraceStateFactoryImpl()
-    private val spanContextFactory =
-        SpanContextFactoryImpl(IdGeneratorImpl(), traceFlagsFactory, traceStateFactory)
+    private val spanContextFactory = SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory)
     private val contextFactory = ContextFactoryImpl(SpanFactoryImpl(spanContextFactory))
 
     @Test

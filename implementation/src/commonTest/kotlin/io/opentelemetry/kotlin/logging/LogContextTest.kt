@@ -7,7 +7,6 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
-import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactory
@@ -40,10 +39,9 @@ internal class LogContextTest {
     fun setUp() {
         clock = FakeClock()
         processor = FakeLogRecordProcessor()
-        val idGenerator = IdGeneratorImpl()
         val traceFlags = TraceFlagsFactoryImpl()
         val traceState = TraceStateFactoryImpl()
-        spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlags, traceState)
+        spanContextFactory = SpanContextFactoryImpl(traceFlags, traceState)
         spanFactory = SpanFactoryImpl(spanContextFactory)
         contextFactory = ContextFactoryImpl(spanFactory)
         logger = LoggerImpl(

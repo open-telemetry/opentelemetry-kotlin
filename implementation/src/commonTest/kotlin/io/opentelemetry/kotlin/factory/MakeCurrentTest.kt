@@ -11,7 +11,7 @@ internal class MakeCurrentTest {
 
     @BeforeTest
     fun setUp() {
-        val spanFactory = SpanFactoryImpl(SpanContextFactoryImpl(IdGeneratorImpl()))
+        val spanFactory = SpanFactoryImpl(SpanContextFactoryImpl())
         contextFactory = ContextFactoryImpl(spanFactory)
     }
 

@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.config.envar.EnvVarReader
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -22,8 +21,7 @@ import kotlin.test.assertIs
 internal class ResolvedSamplerConfigFileTest {
 
     private val clock = FakeClock()
-    private val idGenerator = IdGeneratorImpl()
-    private val spanContextFactory = SpanContextFactoryImpl(idGenerator)
+    private val spanContextFactory = SpanContextFactoryImpl()
     private val spanFactory = SpanFactoryImpl(spanContextFactory)
     private val contextFactory = ContextFactoryImpl(spanFactory)
 

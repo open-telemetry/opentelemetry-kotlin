@@ -108,7 +108,7 @@ internal class TracerInvalidIdTest {
     @Test
     fun testChildOfRemoteParentIsNotRemote() {
         val idGenerator = IdGeneratorImpl()
-        val parent = remoteParent(idGenerator)
+        val parent = remoteParent()
         val span = startChildOf(parent, idGenerator)
         assertFalse(span.spanContext.isRemote)
         assertTrue(span.toReadableSpan().parent.isRemote)
@@ -119,19 +119,13 @@ internal class TracerInvalidIdTest {
     fun testDescendantOfRemoteParentIsNotRemote() {
         val idGenerator = IdGeneratorImpl()
         val tracer = buildTracer(idGenerator)
-        val spanFactory = SpanFactoryImpl(
-            SpanContextFactoryImpl(
-                idGenerator,
-                traceFlagsFactory,
-                traceStateFactory
-            )
-        )
+        val spanFactory = SpanFactoryImpl(SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory))
         val contextFactory = ContextFactoryImpl(spanFactory)
 
         val child = tracer.startSpan(
             "child",
             parentContext = contextFactory.root()
-                .storeSpan(spanFactory.fromSpanContext(remoteParent(idGenerator))),
+                .storeSpan(spanFactory.fromSpanContext(remoteParent())),
         )
         val grandchild = tracer.startSpan(
             "grandchild",
@@ -150,8 +144,8 @@ internal class TracerInvalidIdTest {
         assertFalse(span.spanContext.isRemote)
     }
 
-    private fun remoteParent(idGenerator: IdGenerator): SpanContext =
-        SpanContextFactoryImpl(idGenerator, traceFlagsFactory, traceStateFactory).create(
+    private fun remoteParent(): SpanContext =
+        SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory).create(
             traceId = "12345678901234567890123456789012",
             spanId = "1234567890123456",
             traceFlags = traceFlagsFactory.default,
@@ -160,21 +154,14 @@ internal class TracerInvalidIdTest {
         )
 
     private fun startChildOf(parent: SpanContext, idGenerator: IdGenerator): Span {
-        val spanFactory = SpanFactoryImpl(
-            SpanContextFactoryImpl(
-                idGenerator,
-                traceFlagsFactory,
-                traceStateFactory
-            )
-        )
+        val spanFactory = SpanFactoryImpl(SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory))
         val parentContext =
             ContextFactoryImpl(spanFactory).root().storeSpan(spanFactory.fromSpanContext(parent))
         return buildTracer(idGenerator).startSpan("test", parentContext = parentContext)
     }
 
     private fun buildTracer(idGenerator: IdGenerator): TracerImpl {
-        val spanContextFactory =
-            SpanContextFactoryImpl(idGenerator, traceFlagsFactory, traceStateFactory)
+        val spanContextFactory = SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory)
         return TracerImpl(
             clock = FakeClock(),
             processor = FakeSpanProcessor(),
