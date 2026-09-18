@@ -13,7 +13,9 @@ import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.LogLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -39,6 +41,7 @@ internal class CompatLoggerProviderConfig(
     internal var logLimits: AttributeLimitsBehavior = AttributeLimitsBehavior()
         private set
     private var loggerConfigurator: LoggerConfigurator? = null
+    private var hasProcessor = false
     override var serviceName: String? = null
         set(value) {
             field = value
@@ -59,6 +62,7 @@ internal class CompatLoggerProviderConfig(
     }
 
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
+        hasProcessor = true
         val processor = LogExportConfigCompat(clock, sdkErrorHandler).action()
         builder.addLogRecordProcessor(OtelJavaLogRecordProcessorAdapter(processor))
     }
@@ -104,9 +108,26 @@ internal class CompatLoggerProviderConfig(
         return LoggerProviderAdapter(builder.build())
     }
 
+    internal fun applyResolvedProcessor(behavior: LogRecordProcessorBehavior?) {
+        if (hasProcessor || behavior == null) {
+            return
+        }
+        // For now, we only support console exporter via the behavior
+        if (behavior?.console != null) {
+            hasProcessor = true
+            val processor = LogExportConfigCompat(clock, sdkErrorHandler).action()
+            builder.addLogRecordProcessor(OtelJavaLogRecordProcessorAdapter(processor))
+        }
+    }
+
     fun toBehavior(): LoggerProviderBehavior =
         LoggerProviderBehavior(
             logLimits = logLimitsDsl.toBehavior(),
+            processor = if (hasProcessor) {
+                LogRecordProcessorBehavior(console = ConsoleExporterBehavior())
+            } else {
+                null
+            }
         )
 
     private class LogExportConfigCompat(

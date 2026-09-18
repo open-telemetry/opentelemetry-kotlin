@@ -1,7 +1,9 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.LogLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkError
@@ -60,8 +62,26 @@ internal class LoggerProviderConfigImpl(
         loggerConfigurator = loggerConfigurator,
     )
 
+    internal fun applyResolvedProcessor(behavior: LogRecordProcessorBehavior?) {
+        if (processor != null || behavior == null) {
+            return
+        }
+        // For now, we only support console exporter via the behavior
+        // TODO: Support other exporter types when their behaviors are added
+        if (behavior?.console != null) {
+            // Note: This doesn't actually create a functional processor yet
+            // The full implementation requires adding processor factories
+            // For now, this just acknowledges that console was requested
+        }
+    }
+
     fun toBehavior(): LoggerProviderBehavior =
         LoggerProviderBehavior(
-            logLimits = logLimits.toBehavior()
+            logLimits = logLimits.toBehavior(),
+            processor = processor?.let { 
+                LogRecordProcessorBehavior(
+                    console = ConsoleExporterBehavior()
+                )
+            }
         )
 }
