@@ -54,6 +54,7 @@ include(
     "examples:example-app-android",
     ":smoke-test",
     ":gradle-integration-test",
+    ":serializable-models"
 )
 
 includeFromDir("instrumentation")
