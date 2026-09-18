@@ -1,7 +1,9 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
+import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -144,5 +146,49 @@ internal class LoggerProviderConfigImplTest {
             resource(attrs)
         }.generateLoggingConfig(base, noLogLimits)
         assertEquals(count + sdkDefaultAttributes.size, cfg.resource.attributes.size)
+    }
+
+    @Test
+    fun testToBehaviorIncludesProcessorWhenExportCalled() {
+        val cfg = LoggerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
+            export { compositeLogRecordProcessor(FakeLogRecordProcessor()) }
+        }
+        val behavior = cfg.toBehavior()
+        assertNotNull(behavior.processor)
+        assertNotNull(behavior.processor?.console)
+    }
+
+    @Test
+    fun testToBehaviorNoProcessorWhenExportNotCalled() {
+        val cfg = LoggerProviderConfigImpl(clock, NoopSdkErrorHandler)
+        val behavior = cfg.toBehavior()
+        assertNull(behavior.processor)
+    }
+
+    @Test
+    fun testApplyResolvedProcessorDoesNotOverrideExisting() {
+        val cfg = LoggerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
+            export { compositeLogRecordProcessor(FakeLogRecordProcessor()) }
+        }
+        cfg.applyResolvedProcessor(LogRecordProcessorBehavior(console = ConsoleExporterBehavior()))
+        val behavior = cfg.toBehavior()
+        assertNotNull(behavior.processor)
+        assertNotNull(behavior.processor?.console)
+    }
+
+    @Test
+    fun testApplyResolvedProcessorIgnoresNullBehavior() {
+        val cfg = LoggerProviderConfigImpl(clock, NoopSdkErrorHandler)
+        cfg.applyResolvedProcessor(null)
+        val behavior = cfg.toBehavior()
+        assertNull(behavior.processor)
+    }
+
+    @Test
+    fun testApplyResolvedProcessorIgnoresBehaviorWithoutConsole() {
+        val cfg = LoggerProviderConfigImpl(clock, NoopSdkErrorHandler)
+        cfg.applyResolvedProcessor(LogRecordProcessorBehavior(console = null))
+        val behavior = cfg.toBehavior()
+        assertNull(behavior.processor)
     }
 }

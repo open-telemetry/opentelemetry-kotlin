@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
@@ -33,6 +34,8 @@ internal class SdkConfigFactory(
     private val logLimits: LogLimitsBehavior =
         behavior.loggerProvider?.logLimits ?: LogLimitsBehavior()
 
+    private val logProcessor: LogRecordProcessorBehavior? = behavior.loggerProvider?.processor
+
     private val sampler: SamplerBehavior? = behavior.tracerProvider?.sampler
 
     private val baseResource = sdkDefaultResource()
@@ -44,8 +47,10 @@ internal class SdkConfigFactory(
         return cfg.tracingConfig.generateTracingConfig(baseResource, spanLimits)
     }
 
-    fun generateLoggingConfig(): LoggingConfig =
-        cfg.loggingConfig.generateLoggingConfig(baseResource, logLimits)
+    fun generateLoggingConfig(): LoggingConfig {
+        cfg.loggingConfig.applyResolvedProcessor(logProcessor)
+        return cfg.loggingConfig.generateLoggingConfig(baseResource, logLimits)
+    }
 
     fun generateMetricsConfig(): MetricsConfig =
         cfg.metricsConfig.generateMetricsConfig(baseResource)
