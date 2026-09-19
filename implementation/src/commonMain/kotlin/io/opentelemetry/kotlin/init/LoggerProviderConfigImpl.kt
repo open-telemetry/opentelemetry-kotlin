@@ -57,7 +57,7 @@ internal class LoggerProviderConfigImpl(
         logLimits: LogLimitsBehavior,
         processorBehavior: LogRecordProcessorBehavior? = null,
     ): LoggingConfig = LoggingConfig(
-        processor = processor ?: processorFromConsole(processorBehavior),
+        processor = processor ?: processorFromBehavior(processorBehavior),
         logLimits = logLimits,
         resource = base.merge(resourceConfigImpl.generateResource()),
         sdkErrorHandler = sdkErrorHandler,
