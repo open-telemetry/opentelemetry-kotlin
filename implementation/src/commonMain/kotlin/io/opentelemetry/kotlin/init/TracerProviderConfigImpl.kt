@@ -96,7 +96,7 @@ internal class TracerProviderConfigImpl(
             spanLimits = spanLimits.toBehavior()
         )
 
-    private fun processorFromConsole(processorBehavior: SpanProcessorBehavior?): SpanProcessor? {
+    private fun processorFromBehaviorprocessorBehavior: SpanProcessorBehavior?): SpanProcessor? {
         if (processorBehavior?.console == null) {
             return null
         }
