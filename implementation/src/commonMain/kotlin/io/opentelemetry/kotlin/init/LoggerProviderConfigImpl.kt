@@ -69,7 +69,7 @@ internal class LoggerProviderConfigImpl(
             logLimits = logLimits.toBehavior()
         )
 
-    private fun processorFromConsole(processorBehavior: LogRecordProcessorBehavior?): LogRecordProcessor? {
+    private fun processorFromBehavior(processorBehavior: LogRecordProcessorBehavior?): LogRecordProcessor? {
         if (processorBehavior?.console == null) {
             return null
         }
