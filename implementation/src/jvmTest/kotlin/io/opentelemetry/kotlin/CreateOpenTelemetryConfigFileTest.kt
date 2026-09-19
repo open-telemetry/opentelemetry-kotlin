@@ -4,10 +4,14 @@ import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
 import io.opentelemetry.kotlin.init.SdkConfigFactory
 import io.opentelemetry.kotlin.init.defaultBehaviorReader
+import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
+import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertSame
 
 internal class CreateOpenTelemetryConfigFileTest {
 
@@ -55,6 +59,32 @@ internal class CreateOpenTelemetryConfigFileTest {
         assertEquals(32, resolver.generateLoggingConfig().logLimits.attributeCountLimit)
     }
 
+    @Test
+    fun `a config file with console exporters installs processors`() {
+        val cfg = OpenTelemetryConfigImpl(FakeClock()).apply {
+            configFile(writeConfigFile(CONSOLE_CONFIG_FILE))
+        }
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val resolver = SdkConfigFactory(cfg, behavior)
+        assertNotNull(resolver.generateTracingConfig().processor)
+        assertNotNull(resolver.generateLoggingConfig().processor)
+    }
+
+    @Test
+    fun `the dsl export takes precedence over console in the config file`() {
+        val spanProcessor = FakeSpanProcessor()
+        val logProcessor = FakeLogRecordProcessor()
+        val cfg = OpenTelemetryConfigImpl(FakeClock()).apply {
+            configFile(writeConfigFile(CONSOLE_CONFIG_FILE))
+            tracerProvider { export { spanProcessor } }
+            loggerProvider { export { logProcessor } }
+        }
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val resolver = SdkConfigFactory(cfg, behavior)
+        assertSame(spanProcessor, resolver.generateTracingConfig().processor)
+        assertSame(logProcessor, resolver.generateLoggingConfig().processor)
+    }
+
     private fun writeConfigFile(contents: String): String {
         val file = File.createTempFile("opentelemetry-config", ".yaml")
         file.deleteOnExit()
@@ -67,6 +97,20 @@ internal class CreateOpenTelemetryConfigFileTest {
             file_format: "1.0"
             attribute_limits:
               attribute_count_limit: 64
+        """.trimIndent()
+
+        val CONSOLE_CONFIG_FILE = """
+            file_format: "1.0"
+            tracer_provider:
+              processors:
+                - simple:
+                    exporter:
+                      console: {}
+            logger_provider:
+              processors:
+                - simple:
+                    exporter:
+                      console: {}
         """.trimIndent()
     }
 }

@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkError
@@ -20,6 +21,8 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.TracerConfigImpl
 import io.opentelemetry.kotlin.tracing.TracerConfigurator
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
+import io.opentelemetry.kotlin.tracing.export.simpleSpanProcessor
+import io.opentelemetry.kotlin.tracing.export.stdoutSpanExporter
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
 import io.opentelemetry.kotlin.tracing.sampling.parentBased
@@ -68,10 +71,11 @@ internal class TracerProviderConfigImpl(
     fun generateTracingConfig(
         base: Resource,
         spanLimits: SpanLimitsBehavior,
+        processorBehavior: SpanProcessorBehavior? = null,
     ): TracingConfig {
         val action = samplerAction ?: { parentBased(root = alwaysOn()) }
         return TracingConfig(
-            processor = processor,
+            processor = processor ?: processorFromConsole(processorBehavior),
             spanLimits = generateSpanLimitsConfig(spanLimits),
             resource = base.merge(resourceConfigImpl.generateResource()),
             sdkErrorHandler = sdkErrorHandler,
@@ -91,6 +95,15 @@ internal class TracerProviderConfigImpl(
         TracerProviderBehavior(
             spanLimits = spanLimits.toBehavior()
         )
+
+    private fun processorFromConsole(processorBehavior: SpanProcessorBehavior?): SpanProcessor? {
+        if (processorBehavior?.console == null) {
+            return null
+        }
+        return TraceExportConfigImpl(clock, sdkErrorHandler).run {
+            simpleSpanProcessor(stdoutSpanExporter())
+        }
+    }
 
     private class SamplerConfigImpl(override val spanFactory: SpanFactory) : SamplerConfigDsl
 
