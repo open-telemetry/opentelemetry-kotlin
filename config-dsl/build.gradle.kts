@@ -12,6 +12,7 @@ kotlin {
         commonMain {
             dependencies {
                 api(project(":behavior"))
+                implementation(project(":api-ext"))
                 api(project(":sdk-api"))
             }
         }

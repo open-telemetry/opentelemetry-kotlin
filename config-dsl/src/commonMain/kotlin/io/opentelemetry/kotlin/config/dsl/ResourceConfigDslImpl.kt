@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.config.dsl
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.attributes.setAttributes
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.init.ResourceConfigDsl
 
@@ -23,7 +24,7 @@ class ResourceConfigDslImpl : ResourceConfigDsl, BehaviorSupplier<ResourceBehavi
     }
 
     override fun resource(map: Map<String, Any>) {
-        attributes.putAll(map)
+        attributes.setAttributes(map)
     }
 
     override fun toBehavior(): ResourceBehavior = ResourceBehavior(
@@ -35,22 +36,6 @@ class ResourceConfigDslImpl : ResourceConfigDsl, BehaviorSupplier<ResourceBehavi
 
 private class ResourceAttributesMutator : AttributesMutator {
     private val attributes = mutableMapOf<String, Any>()
-
-    fun putAll(values: Map<String, Any>) {
-        values.forEach { (key, value) ->
-            when (value) {
-                is AnyValue -> setAnyValueAttribute(key, value)
-                is String -> setStringAttribute(key, value)
-                is Boolean -> setBooleanAttribute(key, value)
-                is Long -> setLongAttribute(key, value)
-                is Number -> setNumericAttribute(key, value)
-                is ByteArray -> setByteArrayAttribute(key, value)
-                is Collection<*> -> setCollectionAttribute(key, value.toList())
-                is Array<*> -> setCollectionAttribute(key, value.toList())
-                else -> setStringAttribute(key, value.toString())
-            }
-        }
-    }
 
     fun toMap(): Map<String, Any> = attributes.toMap()
 
@@ -64,33 +49,6 @@ private class ResourceAttributesMutator : AttributesMutator {
     override fun setDoubleListAttribute(key: String, value: List<Double>) = set(key, value.toList())
     override fun setByteArrayAttribute(key: String, value: ByteArray) = set(key, value.copyOf())
     override fun setAnyValueAttribute(key: String, value: AnyValue) = set(key, value.copyValue())
-
-    private fun setNumericAttribute(key: String, value: Number) {
-        val doubleValue = value.toDouble()
-        if (doubleValue.isFinite() && doubleValue == value.toLong().toDouble()) {
-            setLongAttribute(key, value.toLong())
-        } else {
-            setDoubleAttribute(key, doubleValue)
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun setCollectionAttribute(key: String, values: List<*>) {
-        when {
-            values.all { it is String } -> setStringListAttribute(key, values as List<String>)
-            values.all { it is Boolean } -> setBooleanListAttribute(key, values as List<Boolean>)
-            values.all { it is Long } -> setLongListAttribute(key, values as List<Long>)
-            values.all { it is Number } -> {
-                val numbers = values.filterIsInstance<Number>()
-                if (numbers.all { it.toDouble().isFinite() && it.toDouble() == it.toLong().toDouble() }) {
-                    setLongListAttribute(key, numbers.map { it.toLong() })
-                } else {
-                    setDoubleListAttribute(key, numbers.map { it.toDouble() })
-                }
-            }
-            else -> setStringListAttribute(key, values.map { it.toString() })
-        }
-    }
 
     private fun AnyValue.copyValue(): AnyValue = when (this) {
         AnyValue.NullValue -> this
