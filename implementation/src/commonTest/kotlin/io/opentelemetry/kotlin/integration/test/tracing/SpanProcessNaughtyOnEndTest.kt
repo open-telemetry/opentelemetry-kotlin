@@ -90,6 +90,7 @@ internal class SpanProcessNaughtyOnEndTest {
 
         override fun isStartRequired(): Boolean = true
         override fun isEndRequired(): Boolean = true
+        override fun isOnEndingRequired(): Boolean = false
         override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
         override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
     }

@@ -4,9 +4,11 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
+import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
-import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.logging.LogRecordDataImpl
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.LogRecordData
@@ -28,11 +30,19 @@ internal class LogRecordModel(
     severityText: String?,
     severityNumber: SeverityNumber?,
     spanContext: SpanContext,
-    logLimitConfig: LogLimitConfig,
+    logLimits: AttributeLimitsBehavior,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : ReadWriteLogRecord {
 
     private val lock = ReentrantReadWriteLock()
+
+    private var timestampImpl: Long? = timestamp
+    private var observedTimestampImpl: Long? = observedTimestamp
+    private var severityNumberImpl: SeverityNumber? = severityNumber
+    private var severityTextImpl: String? = severityText
+    private var bodyImpl: Any? = body
+    private var spanContextImpl: SpanContext = spanContext
+    private var eventNameImpl: String? = eventName
 
     /**
      * Runs [action] behind the write lock. Input supplied by the host application must never escape
@@ -46,87 +56,60 @@ internal class LogRecordModel(
         }
     }
 
-    override var timestamp: Long? = timestamp
-        get() = lock.read {
-            field
-        }
-        set(value) {
-            mutate("LogRecord.timestamp failed") {
-                field = value
-            }
+    override var timestamp: Long?
+        get() = lock.read { timestampImpl }
+        set(value) = mutate("LogRecord.timestamp failed") {
+            timestampImpl = value
         }
 
-    override var observedTimestamp: Long? = observedTimestamp
-        get() = lock.read {
-            field
-        }
-        set(value) {
-            mutate("LogRecord.observedTimestamp failed") {
-                field = value
-            }
+    override var observedTimestamp: Long?
+        get() = lock.read { observedTimestampImpl }
+        set(value) = mutate("LogRecord.observedTimestamp failed") {
+            observedTimestampImpl = value
         }
 
-    override var severityNumber: SeverityNumber? = severityNumber
-        get() = lock.read {
-            field
-        }
-        set(value) {
-            mutate("LogRecord.severityNumber failed") {
-                field = value
-            }
+    override var severityNumber: SeverityNumber?
+        get() = lock.read { severityNumberImpl }
+        set(value) = mutate("LogRecord.severityNumber failed") {
+            severityNumberImpl = value
         }
 
-    override var severityText: String? = severityText
-        get() = lock.read {
-            field
-        }
-        set(value) {
-            mutate("LogRecord.severityText failed") {
-                field = value
-            }
+    override var severityText: String?
+        get() = lock.read { severityTextImpl }
+        set(value) = mutate("LogRecord.severityText failed") {
+            severityTextImpl = value
         }
 
-    override var body: Any? = body
-        get() = lock.read {
-            field
-        }
-        set(value) {
-            mutate("LogRecord.body failed") {
-                field = value
-            }
+    override var body: Any?
+        get() = lock.read { bodyImpl }
+        set(value) = mutate("LogRecord.body failed") {
+            bodyImpl = value
         }
 
-    override var spanContext: SpanContext = spanContext
-        get() = lock.read {
-            field
-        }
-        set(value) {
-            mutate("LogRecord.spanContext failed") {
-                field = value
-            }
+    override var spanContext: SpanContext
+        get() = lock.read { spanContextImpl }
+        set(value) = mutate("LogRecord.spanContext failed") {
+            spanContextImpl = value
         }
 
-    override var eventName: String? = eventName
-        get() = lock.read {
-            field
-        }
-        set(value) {
-            mutate("LogRecord.eventName failed") {
-                field = value
-            }
+    override var eventName: String?
+        get() = lock.read { eventNameImpl }
+        set(value) = mutate("LogRecord.eventName failed") {
+            eventNameImpl = value
         }
 
     private val attrs by lazy {
         AttributesModel(
-            attributeLimit = logLimitConfig.attributeCountLimit,
-            attributeValueLengthLimit = logLimitConfig.attributeValueLengthLimit,
+            attributeLimit = logLimits.attributeCountLimit ?: DEFAULT_ATTRIBUTE_LIMIT,
+            attributeValueLengthLimit = logLimits.attributeValueLengthLimit
+                ?: DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
             attrs = mutableMapOf()
         )
     }
 
     override val attributes: Map<String, Any>
         get() = lock.read {
-            attrs.attributes.toMap()
+            attrs.attributes
         }
 
     override val droppedAttributesCount: Int
@@ -206,17 +189,23 @@ internal class LogRecordModel(
         }
     }
 
-    override fun toLogRecordData(): LogRecordData = LogRecordDataImpl(
-        timestamp,
-        observedTimestamp,
-        severityNumber,
-        severityText,
-        body,
-        eventName,
-        spanContext,
-        attributes,
-        resource,
-        instrumentationScopeInfo,
-        droppedAttributesCount
-    )
+    /**
+     * Takes the snapshot under a single read lock so that the returned [LogRecordData] is internally
+     * consistent.
+     */
+    override fun toLogRecordData(): LogRecordData = lock.read {
+        LogRecordDataImpl(
+            timestampImpl,
+            observedTimestampImpl,
+            severityNumberImpl,
+            severityTextImpl,
+            bodyImpl,
+            eventNameImpl,
+            spanContextImpl,
+            attrs.attributes,
+            resource,
+            instrumentationScopeInfo,
+            attrs.droppedAttributesCount
+        )
+    }
 }

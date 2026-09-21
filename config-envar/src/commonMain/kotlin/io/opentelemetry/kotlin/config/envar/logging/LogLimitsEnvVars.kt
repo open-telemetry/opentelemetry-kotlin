@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.limitOrUnset
 import io.opentelemetry.kotlin.config.envar.EnvVarReader
-import io.opentelemetry.kotlin.config.envar.model.EnvVarName.Companion.envVarName
 
 /**
  * Maps the log record limit environment variables onto the behavior they supply. A variable that is
@@ -21,8 +20,7 @@ class LogLimitsEnvVars(private val reader: EnvVarReader) {
     )
 
     private companion object {
-        val ATTRIBUTE_COUNT_LIMIT = envVarName("OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT")
-        val ATTRIBUTE_VALUE_LENGTH_LIMIT =
-            envVarName("OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT")
+        const val ATTRIBUTE_COUNT_LIMIT = "OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT"
+        const val ATTRIBUTE_VALUE_LENGTH_LIMIT = "OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT"
     }
 }

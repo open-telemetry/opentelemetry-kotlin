@@ -1,10 +1,12 @@
 package io.opentelemetry.kotlin.tracing.export
 
+import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaExtendedSpanProcessor
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanProcessor
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -31,6 +33,29 @@ internal class SpanProcessorExtTest {
         val adapter = impl.toOtelKotlinSpanProcessor()
         assertTrue(adapter.isStartRequired())
         assertTrue(adapter.isEndRequired())
+        assertFalse(adapter.isOnEndingRequired())
+    }
+
+    @Test
+    fun testExtendedProcessorIsRequired() {
+        val impl = FakeOtelJavaExtendedSpanProcessor(onEndingRequired = false)
+        assertFalse(impl.toOtelKotlinSpanProcessor().isOnEndingRequired())
+        assertTrue(FakeOtelJavaExtendedSpanProcessor().toOtelKotlinSpanProcessor().isOnEndingRequired())
+    }
+
+    @Test
+    fun toOtelKotlinExtendedSpanProcessor() = runTest {
+        val impl = FakeOtelJavaExtendedSpanProcessor()
+        val harness = OtelKotlinHarness(testScheduler)
+        harness.config.spanProcessors.add(impl.toOtelKotlinSpanProcessor())
+
+        val tracer = harness.javaApi.tracerProvider.get("tracer")
+        val spanName = "my_span"
+        tracer.spanBuilder(spanName).startSpan().end()
+
+        assertSame(spanName, impl.startCalls.single().name)
+        assertSame(spanName, impl.endingCalls.single().name)
+        assertSame(spanName, impl.endCalls.single().name)
     }
 
     @Test

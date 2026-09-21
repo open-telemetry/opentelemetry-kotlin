@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 
 internal class ResourceImplTest {
@@ -136,5 +137,30 @@ internal class ResourceImplTest {
         val merged = base.merge(other)
         assertEquals(DEFAULT_ATTRIBUTE_LIMIT + 1, merged.attributes.size)
         assertEquals("value", merged.attributes["extra"])
+    }
+
+    @Test
+    fun testEqualsAndHashCodeByAttributesAndSchemaUrl() {
+        val a = ResourceImpl(
+            AttributesModel(attrs = mutableMapOf("k" to "v")),
+            "https://example.com/schema",
+        )
+        val b = ResourceImpl(
+            AttributesModel(attrs = mutableMapOf("k" to "v")),
+            "https://example.com/schema",
+        )
+        val differentAttrs = ResourceImpl(
+            AttributesModel(attrs = mutableMapOf("k" to "other")),
+            "https://example.com/schema",
+        )
+        val differentSchema = ResourceImpl(
+            AttributesModel(attrs = mutableMapOf("k" to "v")),
+            "https://example.com/other",
+        )
+
+        assertEquals(a, b)
+        assertEquals(a.hashCode(), b.hashCode())
+        assertNotEquals(a, differentAttrs)
+        assertNotEquals(a, differentSchema)
     }
 }

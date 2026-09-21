@@ -19,13 +19,13 @@ val otelProtoRepoZip =
     "https://github.com/open-telemetry/opentelemetry-proto/archive/v${otelProtoVersion}.zip"
 val protoResultDir = layout.buildDirectory.dir("proto")
 
-val downloadOtelProtoDefinitions by tasks.registering(Download::class) {
+val downloadOtelProtoDefinitions = tasks.register<Download>("downloadOtelProtoDefinitions") {
     src(otelProtoRepoZip)
     dest(layout.buildDirectory.file("opentelemetry-proto-${otelProtoVersion}.zip"))
     overwrite(false)
 }
 
-val updateOtelProtoDefinitions by tasks.registering(Copy::class) {
+val updateOtelProtoDefinitions = tasks.register<Copy>("updateOtelProtoDefinitions") {
     val prefix = "opentelemetry-proto-$otelProtoVersion"
 
     dependsOn(downloadOtelProtoDefinitions)
@@ -48,7 +48,7 @@ tasks.withType<WireTask>().configureEach {
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(project(":sdk-api"))
                 implementation(project(":sdk-common"))
@@ -56,7 +56,7 @@ kotlin {
                 implementation(libs.wire.runtime)
             }
         }
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(project(":test-fakes"))
                 implementation(libs.kotlin.test.common)

@@ -2,6 +2,204 @@
 
 ## Unreleased
 
+## Version 0.8.0 (2026-09-17)
+
+### Migration notes
+
+- `SpanProcessor.isOnEndingRequired()` no longer has a default implementation. Custom span
+  processors must declare whether they need to observe a span that is ending.
+  ([#895](https://github.com/open-telemetry/opentelemetry-kotlin/pull/895))
+- The OTLP HTTP exporters are now configured with a lambda rather than positional
+  parameters, e.g. `otlpHttpSpanExporter { endpoint = "..." }`. The request timeout, a Ktor
+  engine, and a pre-configured `HttpClient` are set the same way.
+  ([#994](https://github.com/open-telemetry/opentelemetry-kotlin/pull/994))
+- The opentelemetry-configuration schema used by declarative config has been updated to
+  v1.2.0.
+  ([#1035](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1035))
+
+### 📈 Enhancements
+
+- [Experimental] Some configuration can now be read via YAML and environment variables in addition to the DSL (JVM only)
+  ([#886](https://github.com/open-telemetry/opentelemetry-kotlin/pull/886))
+  ([#831](https://github.com/open-telemetry/opentelemetry-kotlin/pull/831))
+  ([#978](https://github.com/open-telemetry/opentelemetry-kotlin/pull/978))
+  ([#996](https://github.com/open-telemetry/opentelemetry-kotlin/pull/996))
+  ([#1009](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1009))
+  ([#1010](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1010))
+  ([#1013](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1013))
+  ([#1015](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1015))
+  ([#1017](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1017))
+  ([#1023](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1023))
+  ([#1029](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1029))
+  ([#1030](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1030))
+  ([#1036](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1036))
+  ([#1042](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1042))
+  ([#1043](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1043))
+  ([#1045](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1045))
+  ([#1048](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1048))
+  ([#1049](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1049))
+  ([#1050](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1050))
+- `OpenTelemetrySdk` is now a `TelemetryCloseable`, so the SDK can be flushed and shut down,
+  in both `implementation` and `compat`.
+  ([#894](https://github.com/open-telemetry/opentelemetry-kotlin/pull/894))
+  ([#999](https://github.com/open-telemetry/opentelemetry-kotlin/pull/999))
+- OTLP HTTP requests are now gzip compressed.
+  ([#997](https://github.com/open-telemetry/opentelemetry-kotlin/pull/997))
+- OTLP exporters share a single default Ktor engine rather than creating one per exporter.
+  ([#990](https://github.com/open-telemetry/opentelemetry-kotlin/pull/990))
+- Processors and exporters run their coroutines on the I/O dispatcher.
+  ([#898](https://github.com/open-telemetry/opentelemetry-kotlin/pull/898))
+- `toOtelKotlinApi()` accepts a `Clock`, so `compat` can be given a custom clock.
+  ([#1034](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1034))
+
+### 🛠️ Bug fixes
+
+- In `compat`, a span created without an explicit parent context now inherits the implicit
+  context rather than starting a new trace.
+  ([#1047](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1047))
+- Run `SpanProcessor.onEnding` after releasing the span write lock, so a processor that
+  hands the span to another thread cannot deadlock, and only call the processors that ask
+  to observe a span starting or ending.
+  ([#993](https://github.com/open-telemetry/opentelemetry-kotlin/pull/993))
+  ([#895](https://github.com/open-telemetry/opentelemetry-kotlin/pull/895))
+- Take a log record snapshot under a single lock, so an exported record cannot mix values
+  from before and after a concurrent mutation.
+  ([#892](https://github.com/open-telemetry/opentelemetry-kotlin/pull/892))
+- Apply the W3C 512-character `tracestate` limit when decoding.
+  ([#985](https://github.com/open-telemetry/opentelemetry-kotlin/pull/985))
+- Sanitize instrument descriptions to the specification.
+  ([#959](https://github.com/open-telemetry/opentelemetry-kotlin/pull/959))
+- Fall back to the default, and report to `SdkErrorHandler`, when a configured value or
+  limit is invalid, rather than honouring it.
+  ([#1046](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1046))
+
+## Version 0.7.0 (2026-08-26)
+
+### Migration notes
+
+- `SdkErrorHandler` now has a single `onError(SdkError)` method in place of `onApiMisuse`,
+  `onSdkCodeError`, and `onUserCodeError`.
+  ([#710](https://github.com/open-telemetry/opentelemetry-kotlin/pull/710))
+- `Sampler.shouldSample` now receives the trace ID as a `ByteArray` rather than a hex
+  `String`.
+  ([#817](https://github.com/open-telemetry/opentelemetry-kotlin/pull/817))
+- The `ContextFactory.with(Context, Map)` extension has been removed. Create a key with
+  `ContextFactory.createKey(name)` and use `Context.set(key, value)` instead.
+  ([#837](https://github.com/open-telemetry/opentelemetry-kotlin/pull/837))
+- `ReadableLogRecord` now extends the new `LogRecordData` interface and exposes
+  `toLogRecordData()`, mirroring the existing `ReadableSpan`/`SpanData` split.
+  ([#822](https://github.com/open-telemetry/opentelemetry-kotlin/pull/822))
+- The default resource now carries a schema URL matching the semantic conventions these
+  artifacts were generated from.
+  ([#754](https://github.com/open-telemetry/opentelemetry-kotlin/pull/754))
+- Semantic conventions have been updated to v1.44.0.
+  ([#779](https://github.com/open-telemetry/opentelemetry-kotlin/pull/779))
+- The opentelemetry-java BOM used by `compat` has been updated to 1.65.0.
+  ([#767](https://github.com/open-telemetry/opentelemetry-kotlin/pull/767))
+
+### 📈 Enhancements
+
+- Add the composite sampler (`composite { }`) and the built-in composable samplers, in both
+  `implementation` and `compat`.
+  ([#708](https://github.com/open-telemetry/opentelemetry-kotlin/pull/708))
+  ([#709](https://github.com/open-telemetry/opentelemetry-kotlin/pull/709))
+  ([#772](https://github.com/open-telemetry/opentelemetry-kotlin/pull/772))
+  ([#775](https://github.com/open-telemetry/opentelemetry-kotlin/pull/775))
+  ([#986](https://github.com/open-telemetry/opentelemetry-kotlin/pull/986))
+- Add a span event bridge, published as the new `span-event-bridge` module, which converts
+  log records into span events via `spanEventBridgeLogRecordProcessor()`.
+  ([#761](https://github.com/open-telemetry/opentelemetry-kotlin/pull/761))
+- `IdGenerator` now declares whether it produces random trace IDs via
+  `generatesRandomTraceIds`.
+  ([#755](https://github.com/open-telemetry/opentelemetry-kotlin/pull/755))
+- Errors raised by exporters, processors, providers, propagators, samplers, and export
+  coroutines are now reported to `SdkErrorHandler`.
+  ([#763](https://github.com/open-telemetry/opentelemetry-kotlin/pull/763))
+  ([#771](https://github.com/open-telemetry/opentelemetry-kotlin/pull/771))
+  ([#830](https://github.com/open-telemetry/opentelemetry-kotlin/pull/830))
+  ([#840](https://github.com/open-telemetry/opentelemetry-kotlin/pull/840))
+  ([#841](https://github.com/open-telemetry/opentelemetry-kotlin/pull/841))
+  ([#842](https://github.com/open-telemetry/opentelemetry-kotlin/pull/842))
+  ([#849](https://github.com/open-telemetry/opentelemetry-kotlin/pull/849))
+  ([#910](https://github.com/open-telemetry/opentelemetry-kotlin/pull/910))
+- OTLP exporters reuse a single Ktor `HttpClient` per engine and timeout combination rather
+  than creating one per export.
+  ([#843](https://github.com/open-telemetry/opentelemetry-kotlin/pull/843))
+
+### 🛠️ Bug fixes
+
+- Populate the event name in `compat`.
+  ([#717](https://github.com/open-telemetry/opentelemetry-kotlin/pull/717))
+- Link a child span to its parent correctly when the parent `Span` is decorated.
+  ([#716](https://github.com/open-telemetry/opentelemetry-kotlin/pull/716))
+- Fix several protobuf conversion errors in the OTLP payload, including `AnyValue`
+  conversion and mapping `StatusCode` with a `when` rather than by ordinal.
+  ([#757](https://github.com/open-telemetry/opentelemetry-kotlin/pull/757))
+  ([#758](https://github.com/open-telemetry/opentelemetry-kotlin/pull/758))
+  ([#828](https://github.com/open-telemetry/opentelemetry-kotlin/pull/828))
+  ([#835](https://github.com/open-telemetry/opentelemetry-kotlin/pull/835))
+  ([#903](https://github.com/open-telemetry/opentelemetry-kotlin/pull/903))
+- OTLP payloads now carry one `Resource` and `InstrumentationScope` per group of spans
+  rather than repeating them per span, and set `schema_url` on `ResourceSpans` and
+  `ResourceLogs`.
+  ([#883](https://github.com/open-telemetry/opentelemetry-kotlin/pull/883))
+  ([#984](https://github.com/open-telemetry/opentelemetry-kotlin/pull/984))
+- Deduplicate instrumentation scopes by name, version, schema URL, and attributes.
+  ([#812](https://github.com/open-telemetry/opentelemetry-kotlin/pull/812))
+  ([#988](https://github.com/open-telemetry/opentelemetry-kotlin/pull/988))
+- Use spec-length zero IDs in `NoopSpanContext`, derive `SpanContextImpl.isValid` from the
+  ID bytes, and construct a `SpanContext` from bytes without a hex round trip.
+  ([#881](https://github.com/open-telemetry/opentelemetry-kotlin/pull/881))
+  ([#896](https://github.com/open-telemetry/opentelemetry-kotlin/pull/896))
+  ([#981](https://github.com/open-telemetry/opentelemetry-kotlin/pull/981))
+- Accept only ASCII digits in the hex validators.
+  ([#888](https://github.com/open-telemetry/opentelemetry-kotlin/pull/888))
+- Do not inherit `isRemote` on locally created spans.
+  ([#889](https://github.com/open-telemetry/opentelemetry-kotlin/pull/889))
+- Do not throw on an out-of-range `OtelTraceState` threshold.
+  ([#897](https://github.com/open-telemetry/opentelemetry-kotlin/pull/897))
+- Sanitize span context trace flags rather than propagating invalid values.
+  ([#819](https://github.com/open-telemetry/opentelemetry-kotlin/pull/819))
+- Enforce the W3C baggage size limits when extracting baggage.
+  ([#941](https://github.com/open-telemetry/opentelemetry-kotlin/pull/941))
+- Do not include untrusted header values in `B3Propagator` error messages.
+  ([#975](https://github.com/open-telemetry/opentelemetry-kotlin/pull/975))
+- Validate instrument name syntax and sanitize instrument units to the specification.
+  ([#960](https://github.com/open-telemetry/opentelemetry-kotlin/pull/960))
+  ([#961](https://github.com/open-telemetry/opentelemetry-kotlin/pull/961))
+- Ignore `Unset` when setting a span status, per the specification.
+  ([#944](https://github.com/open-telemetry/opentelemetry-kotlin/pull/944))
+- Return defensive snapshots and copies rather than live collections in `toSpanData`, the
+  log record export path, and the in-memory exporters.
+  ([#822](https://github.com/open-telemetry/opentelemetry-kotlin/pull/822))
+  ([#899](https://github.com/open-telemetry/opentelemetry-kotlin/pull/899))
+  ([#900](https://github.com/open-telemetry/opentelemetry-kotlin/pull/900))
+  ([#920](https://github.com/open-telemetry/opentelemetry-kotlin/pull/920))
+  ([#983](https://github.com/open-telemetry/opentelemetry-kotlin/pull/983))
+- Harden `SpanModel` and `LogRecordModel` against concurrent access, and make
+  `DefaultImplicitContextStorage.current` volatile.
+  ([#803](https://github.com/open-telemetry/opentelemetry-kotlin/pull/803))
+  ([#815](https://github.com/open-telemetry/opentelemetry-kotlin/pull/815))
+  ([#816](https://github.com/open-telemetry/opentelemetry-kotlin/pull/816))
+  ([#834](https://github.com/open-telemetry/opentelemetry-kotlin/pull/834))
+  ([#849](https://github.com/open-telemetry/opentelemetry-kotlin/pull/849))
+  ([#943](https://github.com/open-telemetry/opentelemetry-kotlin/pull/943))
+  ([#949](https://github.com/open-telemetry/opentelemetry-kotlin/pull/949))
+  ([#980](https://github.com/open-telemetry/opentelemetry-kotlin/pull/980))
+- Stop swallowing `CancellationException` in coroutines, and rethrow from `wrapOperation`.
+  ([#813](https://github.com/open-telemetry/opentelemetry-kotlin/pull/813))
+  ([#950](https://github.com/open-telemetry/opentelemetry-kotlin/pull/950))
+- Improve the batch processor's handling of full queues and flush requests.
+  ([#827](https://github.com/open-telemetry/opentelemetry-kotlin/pull/827))
+- Fix an NPE in the `compat` context adapter.
+  ([#829](https://github.com/open-telemetry/opentelemetry-kotlin/pull/829))
+- Sanitize nonsensical `BatchTelemetryConfig` values instead of honouring them.
+  ([#902](https://github.com/open-telemetry/opentelemetry-kotlin/pull/902))
+- Default the stdout exporters to `platformLog`.
+  ([#942](https://github.com/open-telemetry/opentelemetry-kotlin/pull/942))
+- Match span event bridge IDs by bytes rather than hex.
+  ([#982](https://github.com/open-telemetry/opentelemetry-kotlin/pull/982))
+
 ## Version 0.6.0 (2026-07-28)
 
 ### Migration notes

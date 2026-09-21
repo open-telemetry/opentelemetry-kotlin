@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.tracing.sampling
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -71,19 +70,26 @@ internal class OtelTraceStateTest {
     }
 
     @Test
-    fun rejectsNegativeThreshold() {
+    fun ignoresNegativeThreshold() {
         val ot = OtelTraceState.parse("")
-        assertFailsWith(IllegalArgumentException::class) {
-            ot.setThreshold(-1L)
-        }
+        ot.setThreshold(-1L)
+        assertTrue(ot.encode().isEmpty())
     }
 
     @Test
-    fun rejectsThresholdExceeding14HexDigits() {
+    fun ignoresThresholdExceeding14HexDigits() {
         val ot = OtelTraceState.parse("")
-        assertFailsWith(IllegalArgumentException::class) {
-            ot.setThreshold(0xffffffffffffff + 1)
-        }
+        ot.setThreshold(0xffffffffffffff + 1)
+        assertTrue(ot.encode().isEmpty())
+    }
+
+    @Test
+    fun keepsExistingThresholdWhenOutOfRange() {
+        val ot = OtelTraceState.parse("th:123")
+        ot.setThreshold(-1L)
+        assertEquals(0x12300000000000, ot.th)
+        ot.setThreshold(0xffffffffffffff + 1)
+        assertEquals(0x12300000000000, ot.th)
     }
 
     @Test

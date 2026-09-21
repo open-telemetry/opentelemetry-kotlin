@@ -35,6 +35,17 @@ internal class InMemoryLogRecordExporterTest {
     }
 
     @Test
+    fun testExportedRecordsAreSnapshots() = runTest {
+        exporter.export(fakeTelemetry)
+        val firstSnapshot = exporter.exportedLogRecords
+
+        exporter.export(fakeTelemetry)
+
+        assertEquals(fakeTelemetry, firstSnapshot)
+        assertEquals(fakeTelemetry + fakeTelemetry, exporter.exportedLogRecords)
+    }
+
+    @Test
     fun testExportReturnsFailureAfterShutdown() = runTest {
         exporter.shutdown()
         val result = exporter.export(fakeTelemetry)

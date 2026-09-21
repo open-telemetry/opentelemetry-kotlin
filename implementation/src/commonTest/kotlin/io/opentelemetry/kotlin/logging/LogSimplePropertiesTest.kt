@@ -32,7 +32,7 @@ internal class LogSimplePropertiesTest {
             spanContextFactory = FakeSpanContextFactory(),
             key = key,
             resource = FakeResource(),
-            logLimitConfig = fakeLogLimitsConfig,
+            logLimits = fakeLogLimitsConfig,
             shutdownState = MutableShutdownState(),
             sdkErrorHandler = NoopSdkErrorHandler,
         )

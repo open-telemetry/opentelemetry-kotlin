@@ -1,0 +1,98 @@
+package io.opentelemetry.kotlin.metrics
+
+import io.opentelemetry.kotlin.metrics.instrument.InstrumentDescriptor
+import io.opentelemetry.kotlin.metrics.instrument.InstrumentKind
+import io.opentelemetry.kotlin.metrics.instrument.InstrumentValueType
+import io.opentelemetry.kotlin.metrics.view.InstrumentSelector
+import io.opentelemetry.kotlin.metrics.view.View
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+internal class MetricDescriptorTest {
+
+    @Test
+    fun `uses instrument name and description when the view omits them`() {
+        val descriptor = MetricDescriptor.create(
+            sourceInstrument = instrument,
+            view = view(),
+        )
+
+        assertEquals(instrument.name, descriptor.name)
+        assertEquals(instrument.description, descriptor.description)
+    }
+
+    @Test
+    fun `uses name and description configured by the view`() {
+        val descriptor = MetricDescriptor.create(
+            sourceInstrument = instrument,
+            view = view(name = "view-name", description = "view-description"),
+        )
+
+        assertEquals("view-name", descriptor.name)
+        assertEquals("view-description", descriptor.description)
+    }
+
+    @Test
+    fun `selector does not participate in resolved descriptor equality`() {
+        val first = MetricDescriptor.create(
+            sourceInstrument = instrument,
+            view = view(selector = { _, _ -> true }),
+        )
+        val second = MetricDescriptor.create(
+            sourceInstrument = instrument,
+            view = view(selector = { _, _ -> true }),
+        )
+
+        assertEquals(first, second)
+        assertEquals(first.hashCode(), second.hashCode())
+    }
+
+    @Test
+    fun `metric name comparison is case insensitive`() {
+        val first = MetricDescriptor.create(
+            sourceInstrument = instrument,
+            view = view(name = "http.server.request.duration"),
+        )
+        val second = MetricDescriptor.create(
+            sourceInstrument = instrument,
+            view = view(name = "HTTP.SERVER.REQUEST.DURATION"),
+        )
+
+        assertEquals(first, second)
+        assertEquals(first.hashCode(), second.hashCode())
+    }
+
+    @Test
+    fun `invalid cardinality limit falls back to the SDK default`() {
+        listOf(0, -1).forEach { invalidLimit ->
+            val descriptor = MetricDescriptor.create(
+                sourceInstrument = instrument,
+                view = view(cardinalityLimit = invalidLimit),
+            )
+
+            assertEquals(MetricStorage.DEFAULT_MAX_CARDINALITY, descriptor.cardinalityLimit)
+        }
+    }
+
+    private fun view(
+        selector: InstrumentSelector = InstrumentSelector { _, _ -> true },
+        name: String? = null,
+        description: String? = null,
+        cardinalityLimit: Int = MetricStorage.DEFAULT_MAX_CARDINALITY,
+    ): View = View(
+        selector = selector,
+        name = name,
+        description = description,
+        cardinalityLimit = cardinalityLimit,
+    )
+
+    private companion object {
+        val instrument = InstrumentDescriptor(
+            name = "instrument-name",
+            unit = "ms",
+            description = "instrument-description",
+            kind = InstrumentKind.HISTOGRAM,
+            valueType = InstrumentValueType.DOUBLE,
+        )
+    }
+}

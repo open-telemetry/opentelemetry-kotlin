@@ -1,19 +1,35 @@
 package io.opentelemetry.kotlin.config.envar
 
-import io.opentelemetry.kotlin.config.envar.model.EnvVarName.Companion.envVarName
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 internal class EnvVarReaderTest {
 
-    private val name = envVarName("OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT")
+    private val name = "OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT"
 
     @Test
     fun `should read an int`() {
         assertEquals(64, EnvVarReader { "64" }.readInt(name))
         assertEquals(0, EnvVarReader { "0" }.readInt(name))
         assertEquals(-1, EnvVarReader { "-1" }.readInt(name))
+    }
+
+    @Test
+    fun `should read a raw string`() {
+        assertEquals("64", EnvVarReader { "64" }.readString(name))
+        assertEquals("", EnvVarReader { "" }.readString(name))
+        assertEquals("/etc/otel/config.yaml", EnvVarReader { "/etc/otel/config.yaml" }.readString(name))
+    }
+
+    @Test
+    fun `should treat an unset env var as unset when read as a string`() {
+        assertNull(EnvVarReader { null }.readString(name))
+    }
+
+    @Test
+    fun `should treat a failed read as unset when read as a string`() {
+        assertNull(EnvVarReader { error("cannot read env vars here") }.readString(name))
     }
 
     @Test
@@ -25,7 +41,7 @@ internal class EnvVarReaderTest {
             null
         }.readInt(name)
 
-        assertEquals(name.value, requested)
+        assertEquals(name, requested)
     }
 
     @Test

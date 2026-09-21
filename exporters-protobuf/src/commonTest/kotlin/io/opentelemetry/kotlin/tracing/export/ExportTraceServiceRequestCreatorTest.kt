@@ -1,8 +1,10 @@
 package io.opentelemetry.kotlin.tracing.export
 
+import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.factory.toHexString
+import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.FakeTraceFlags
 import io.opentelemetry.kotlin.tracing.FakeTraceState
@@ -216,5 +218,88 @@ class ExportTraceServiceRequestCreatorTest {
         assertEquals(1, scopeSpans.spans.size)
         val span = scopeSpans.spans[0]
         assertEquals(telemetry.spanContext.traceId, span.trace_id.toByteArray().toHexString())
+    }
+
+    @Test
+    fun testGroupsSpansWithSameResourceAndScope() {
+        val resource = FakeResource()
+        val scope = FakeInstrumentationScopeInfo()
+        val request = listOf(
+            FakeSpanData(name = "a", resource = resource, instrumentationScopeInfo = scope),
+            FakeSpanData(name = "b", resource = resource, instrumentationScopeInfo = scope),
+        ).toExportTraceServiceRequest()
+
+        assertEquals(1, request.resource_spans.size)
+        assertEquals(1, request.resource_spans[0].scope_spans.size)
+        assertEquals(2, request.resource_spans[0].scope_spans[0].spans.size)
+    }
+
+    @Test
+    fun testGroupsSpansWithSameResourceAndDifferentScopes() {
+        val resource = FakeResource()
+        val request = listOf(
+            FakeSpanData(name = "a", resource = resource, instrumentationScopeInfo = FakeInstrumentationScopeInfo(name = "one")),
+            FakeSpanData(name = "b", resource = resource, instrumentationScopeInfo = FakeInstrumentationScopeInfo(name = "two")),
+        ).toExportTraceServiceRequest()
+
+        assertEquals(1, request.resource_spans.size)
+        assertEquals(2, request.resource_spans[0].scope_spans.size)
+        assertEquals(1, request.resource_spans[0].scope_spans[0].spans.size)
+        assertEquals(1, request.resource_spans[0].scope_spans[1].spans.size)
+    }
+
+    @Test
+    fun testGroupsSpansWithDifferentResources() {
+        val request = listOf(
+            FakeSpanData(
+                name = "a",
+                resource = FakeResource(attributes = mapOf("service.name" to "a"), schemaUrl = "https://example.com/a"),
+            ),
+            FakeSpanData(
+                name = "b",
+                resource = FakeResource(attributes = mapOf("service.name" to "b"), schemaUrl = "https://example.com/b"),
+            ),
+        ).toExportTraceServiceRequest()
+
+        assertEquals(2, request.resource_spans.size)
+        assertEquals(1, request.resource_spans[0].scope_spans.size)
+        assertEquals(1, request.resource_spans[1].scope_spans.size)
+    }
+
+    @Test
+    fun testUsesEmptySchemaUrlWhenScopeHasNone() {
+        val request = listOf(
+            FakeSpanData(instrumentationScopeInfo = FakeInstrumentationScopeInfo(schemaUrl = null)),
+        ).toExportTraceServiceRequest()
+
+        assertEquals("", request.resource_spans[0].scope_spans[0].schema_url)
+    }
+
+    @Test
+    fun testUsesResourceSchemaUrlOnResourceSpans() {
+        val request = listOf(
+            FakeSpanData(resource = FakeResource(schemaUrl = "https://example.com/resource")),
+        ).toExportTraceServiceRequest()
+
+        assertEquals("https://example.com/resource", request.resource_spans[0].schema_url)
+    }
+
+    @Test
+    fun testUsesEmptySchemaUrlWhenResourceHasNone() {
+        val request = listOf(
+            FakeSpanData(resource = FakeResource(schemaUrl = null)),
+        ).toExportTraceServiceRequest()
+
+        assertEquals("", request.resource_spans[0].schema_url)
+    }
+
+    @Test
+    fun testRoundTripPreservesResourceSchemaUrl() {
+        val original = listOf(
+            FakeSpanData(resource = FakeResource(schemaUrl = "https://example.com/resource")),
+        )
+        val result = original.toProtobufByteArray().toSpanDataList()
+
+        assertEquals("https://example.com/resource", result.single().resource.schemaUrl)
     }
 }

@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -9,7 +10,6 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
-import io.opentelemetry.kotlin.init.config.LogLimitConfig
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
@@ -30,18 +30,25 @@ internal class LoggerProviderImplTest {
     private val loggerConfigurator = LoggerConfigurator { LoggerConfigImpl(true) }
     private val loggingConfig = LoggingConfig(
         null,
-        LogLimitConfig(100, 100),
+        AttributeLimitsBehavior(100, 100),
         ResourceImpl(AttributesModel(), null),
         NoopSdkErrorHandler,
         loggerConfigurator,
     )
     private val contextFactory = FakeContextFactory()
     private val spanContextFactory = FakeSpanContextFactory()
+    private val attributeLimits = AttributeLimitsBehavior()
     private lateinit var impl: LoggerProviderImpl
 
     @BeforeTest
     fun setup() {
-        impl = LoggerProviderImpl(clock, loggingConfig, contextFactory, spanContextFactory)
+        impl = LoggerProviderImpl(
+            clock,
+            loggingConfig,
+            contextFactory,
+            spanContextFactory,
+            attributeLimits,
+        )
     }
 
     @Test
@@ -54,12 +61,18 @@ internal class LoggerProviderImplTest {
         val handler = FakeSdkErrorHandler()
         val config = LoggingConfig(
             null,
-            LogLimitConfig(100, 100),
+            AttributeLimitsBehavior(100, 100),
             ResourceImpl(AttributesModel(), null),
             handler,
             loggerConfigurator,
         )
-        val provider = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
+        val provider = LoggerProviderImpl(
+            clock,
+            config,
+            contextFactory,
+            spanContextFactory,
+            attributeLimits,
+        )
         provider.getLogger(name = "")
         assertEquals(1, handler.apiMisuses.size)
         assertEquals("LoggerProvider.getLogger", handler.apiMisuses.single().api)
@@ -142,12 +155,18 @@ internal class LoggerProviderImplTest {
         )
         val config = LoggingConfig(
             processor,
-            LogLimitConfig(100, 100),
+            AttributeLimitsBehavior(100, 100),
             FakeResource(),
             NoopSdkErrorHandler,
             loggerConfigurator,
         )
-        impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
+        impl = LoggerProviderImpl(
+            clock,
+            config,
+            contextFactory,
+            spanContextFactory,
+            attributeLimits,
+        )
         impl.getLogger(name = "test")
 
         val result = impl.forceFlush()
@@ -166,12 +185,18 @@ internal class LoggerProviderImplTest {
         )
         val config = LoggingConfig(
             processor,
-            LogLimitConfig(100, 100),
+            AttributeLimitsBehavior(100, 100),
             FakeResource(),
             NoopSdkErrorHandler,
             loggerConfigurator,
         )
-        impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
+        impl = LoggerProviderImpl(
+            clock,
+            config,
+            contextFactory,
+            spanContextFactory,
+            attributeLimits,
+        )
         impl.getLogger(name = "test")
 
         val result = impl.shutdown()
@@ -191,12 +216,18 @@ internal class LoggerProviderImplTest {
         val processor = FakeLogRecordProcessor()
         val config = LoggingConfig(
             processor,
-            LogLimitConfig(100, 100),
+            AttributeLimitsBehavior(100, 100),
             FakeResource(),
             NoopSdkErrorHandler,
             loggerConfigurator,
         )
-        impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
+        impl = LoggerProviderImpl(
+            clock,
+            config,
+            contextFactory,
+            spanContextFactory,
+            attributeLimits,
+        )
         val logger = impl.getLogger(name = "test")
         impl.shutdown()
         logger.emit(body = "should not emit")
@@ -243,9 +274,10 @@ internal class LoggerProviderImplTest {
         errorHandler: SdkErrorHandler,
     ) = LoggerProviderImpl(
         clock,
-        LoggingConfig(processor, LogLimitConfig(100, 100), FakeResource(), errorHandler, loggerConfigurator),
+        LoggingConfig(processor, AttributeLimitsBehavior(100, 100), FakeResource(), errorHandler, loggerConfigurator),
         contextFactory,
         spanContextFactory,
+        attributeLimits
     )
 
     private class ThrowingSdkErrorHandler : SdkErrorHandler {

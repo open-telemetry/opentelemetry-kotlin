@@ -72,7 +72,7 @@ internal class LogRecordMutatorErrorHandlingTest {
         severityText = null,
         severityNumber = SeverityNumber.INFO,
         spanContext = FakeSpanContext.VALID,
-        logLimitConfig = fakeLogLimitsConfig,
+        logLimits = fakeLogLimitsConfig,
         sdkErrorHandler = errorHandler,
     )
 

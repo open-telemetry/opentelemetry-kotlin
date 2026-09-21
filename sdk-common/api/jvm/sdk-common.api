@@ -18,6 +18,7 @@ public final class io/opentelemetry/kotlin/error/GuardKt {
 	public static synthetic fun guardOrDefault$default (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun guardOrDefaultSuspend (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun guardOrDefaultSuspend$default (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun reportError (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Lio/opentelemetry/kotlin/error/SdkError;)V
 	public static final fun reportUserCodeError (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Throwable;Ljava/lang/String;)V
 }
 

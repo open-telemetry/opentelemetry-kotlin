@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 internal class BatchTelemetryConfigTest {
 
@@ -35,5 +36,44 @@ internal class BatchTelemetryConfigTest {
         assertEquals(default.exportTimeoutMs, cfg.exportTimeoutMs)
         assertEquals(default.maxExportBatchSize, cfg.maxExportBatchSize)
         assertEquals(default.forceFlushTimeoutMs, cfg.forceFlushTimeoutMs)
+    }
+
+    @Test
+    fun testZeroQueueBatchAndForceFlushFallBackToDefaults() {
+        val handler = FakeSdkErrorHandler()
+        val cfg = BatchTelemetryConfig(
+            maxQueueSize = 0,
+            maxExportBatchSize = 0,
+            forceFlushTimeoutMs = 0,
+            sdkErrorHandler = handler,
+        )
+        assertEquals(3, handler.apiMisuses.size)
+        assertEquals(BatchTelemetryDefaults.MAX_QUEUE_SIZE, cfg.maxQueueSize)
+        assertEquals(BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE, cfg.maxExportBatchSize)
+        assertEquals(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS, cfg.forceFlushTimeoutMs)
+    }
+
+    @Test
+    fun testMaxExportBatchSizeCappedToQueueSize() {
+        val handler = FakeSdkErrorHandler()
+        val cfg = BatchTelemetryConfig(
+            maxQueueSize = 10,
+            maxExportBatchSize = 100,
+            sdkErrorHandler = handler,
+        )
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals(10, cfg.maxExportBatchSize)
+        assertEquals(10, cfg.maxQueueSize)
+    }
+
+    @Test
+    fun testZeroExportTimeoutMeansNoLimit() {
+        val handler = FakeSdkErrorHandler()
+        val cfg = BatchTelemetryConfig(
+            exportTimeoutMs = 0,
+            sdkErrorHandler = handler,
+        )
+        assertTrue(handler.apiMisuses.isEmpty())
+        assertEquals(Long.MAX_VALUE, cfg.exportTimeoutMs)
     }
 }

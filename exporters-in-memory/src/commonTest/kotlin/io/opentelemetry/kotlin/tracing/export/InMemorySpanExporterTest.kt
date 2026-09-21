@@ -35,6 +35,17 @@ internal class InMemorySpanExporterTest {
     }
 
     @Test
+    fun testExportedSpansAreSnapshots() = runTest {
+        exporter.export(fakeTelemetry)
+        val firstSnapshot = exporter.exportedSpans
+
+        exporter.export(fakeTelemetry)
+
+        assertEquals(fakeTelemetry, firstSnapshot)
+        assertEquals(fakeTelemetry + fakeTelemetry, exporter.exportedSpans)
+    }
+
+    @Test
     fun testExportReturnsFailureAfterShutdown() = runTest {
         exporter.shutdown()
         val result = exporter.export(fakeTelemetry)

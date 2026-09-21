@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
-import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
@@ -20,17 +19,13 @@ internal class CompositeLogRecordProcessor(
     ),
 ) : LogRecordProcessor, TelemetryCloseable by telemetryCloseable {
 
-    private val lock = ReentrantReadWriteLock()
-
     override fun onEmit(log: ReadWriteLogRecord, context: Context) {
-        lock.write {
-            batchExportOperation(
-                processors,
-                sdkErrorHandler
-            ) {
-                it.onEmit(log, context)
-                OperationResultCode.Success
-            }
+        batchExportOperation(
+            processors,
+            sdkErrorHandler
+        ) {
+            it.onEmit(log, context)
+            OperationResultCode.Success
         }
     }
 
@@ -41,8 +36,6 @@ internal class CompositeLogRecordProcessor(
         eventName: String?,
     ): Boolean {
         // returns true if _any_ of the processors are enabled.
-        return lock.read {
-            processors.any { it.enabled(context, instrumentationScopeInfo, severityNumber, eventName) }
-        }
+        return processors.any { it.enabled(context, instrumentationScopeInfo, severityNumber, eventName) }
     }
 }

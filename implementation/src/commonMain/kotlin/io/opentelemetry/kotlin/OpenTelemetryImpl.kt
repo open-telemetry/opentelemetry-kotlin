@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.export.TelemetryCloseable
+import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.factory.BaggageFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
@@ -17,7 +18,6 @@ import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.MeterProvider
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.tracing.TracerProvider
-import kotlinx.coroutines.withTimeout
 
 internal class OpenTelemetryImpl(
     override val tracerProvider: TracerProvider,
@@ -34,7 +34,7 @@ internal class OpenTelemetryImpl(
     override val resource: ResourceFactory,
     override val propagator: TextMapPropagator,
     private val timeoutMs: Long = 3000,
-) : OpenTelemetrySdk, TelemetryCloseable {
+) : OpenTelemetrySdk {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
 
@@ -74,11 +74,7 @@ internal class OpenTelemetryImpl(
         }
 
     private suspend fun withOverallTimeout(action: suspend () -> OperationResultCode): OperationResultCode =
-        try {
-            withTimeout(timeoutMs) { action() }
-        } catch (_: Throwable) {
-            Failure
-        }
+        runWithTimeout(timeoutMs, action)
 
     private fun combineResults(vararg results: OperationResultCode): OperationResultCode =
         when {

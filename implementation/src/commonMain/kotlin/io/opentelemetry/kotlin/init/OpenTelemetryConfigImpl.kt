@@ -1,22 +1,26 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
+import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.IdGenerator
-import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.ResourceFactory
-import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
+import io.opentelemetry.kotlin.propagation.Propagators
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
-import io.opentelemetry.kotlin.resource.detectResource
+import io.opentelemetry.kotlin.propagation.createPropagators
 import kotlin.concurrent.Volatile
 
 internal class OpenTelemetryConfigImpl(
     clock: Clock,
-    private val resourceFactory: ResourceFactory = ResourceFactoryImpl(),
-    private val globalResourceConfig: ResourceConfigImpl = ResourceConfigImpl(),
-) : OpenTelemetryConfigDsl, ResourceConfigDsl by globalResourceConfig {
+    propagators: Propagators = createPropagators(),
+    internal val globalResourceConfig: ResourceConfigImpl = ResourceConfigImpl(),
+) : OpenTelemetryConfigDsl,
+    ResourceConfigDsl by globalResourceConfig,
+    BehaviorSupplier<OpenTelemetryBehavior> {
 
     @Volatile private var configuredErrorHandler: SdkErrorHandler = NoopSdkErrorHandler
 
@@ -30,14 +34,17 @@ internal class OpenTelemetryConfigImpl(
     internal val loggingConfig: LoggerProviderConfigImpl = LoggerProviderConfigImpl(clock, sdkErrorHandler)
     internal val metricsConfig: MeterProviderConfigImpl = MeterProviderConfigImpl(sdkErrorHandler)
     internal val contextConfig: ContextConfigImpl = ContextConfigImpl()
-    internal val propagatorCfg: PropagatorConfigImpl = PropagatorConfigImpl()
-    private val globalAttributeLimits = AttributeLimitsConfigImpl()
-    private val resourceDetectionConfig = ResourceDetectionConfigImpl()
+    internal val propagatorCfg: PropagatorConfigImpl = PropagatorConfigImpl(propagators)
+    private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
+    internal val resourceDetectionConfig = ResourceDetectionConfigImpl()
 
-    private var customIdGenerator: (() -> IdGenerator)? = null
+    @Volatile private var idGeneratorBehavior: IdGeneratorBehavior? = null
+
+    @Volatile internal var configFilePath: String? = null
+        private set
 
     override fun configFile(path: String) {
-        // no-op
+        configFilePath = path
     }
 
     override fun attributeLimits(action: AttributeLimitsConfigDsl.() -> Unit) {
@@ -69,27 +76,16 @@ internal class OpenTelemetryConfigImpl(
     }
 
     override fun idGenerator(action: () -> IdGenerator) {
-        customIdGenerator = action
+        idGeneratorBehavior = IdGeneratorBehavior.Custom(action)
     }
 
     override fun errorHandler(handler: SdkErrorHandler) {
         configuredErrorHandler = handler
     }
 
-    internal fun resolveIdGenerator(): IdGenerator = customIdGenerator?.invoke() ?: IdGeneratorImpl()
-
-    private val baseResource by lazy {
-        sdkDefaultResource()
-            .merge(resourceDetectionConfig.detectors.detectResource(resourceFactory, sdkErrorHandler))
-            .merge(globalResourceConfig.generateResource())
-    }
-
-    internal fun generateTracingConfig() =
-        tracingConfig.generateTracingConfig(baseResource, globalAttributeLimits)
-
-    internal fun generateLoggingConfig() =
-        loggingConfig.generateLoggingConfig(baseResource, globalAttributeLimits)
-
-    internal fun generateMetricsConfig() =
-        metricsConfig.generateMetricsConfig(baseResource)
+    override fun toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
+        attributeLimits = globalAttributeLimits.toBehavior(),
+        tracerProvider = tracingConfig.toBehavior().copy(idGenerator = idGeneratorBehavior),
+        loggerProvider = loggingConfig.toBehavior(),
+    )
 }

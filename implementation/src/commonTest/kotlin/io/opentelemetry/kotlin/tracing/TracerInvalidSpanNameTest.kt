@@ -35,7 +35,7 @@ internal class TracerInvalidSpanNameTest {
         idGenerator = IdGeneratorImpl()
         val traceFlags = TraceFlagsFactoryImpl()
         val traceState = TraceStateFactoryImpl()
-        spanContextFactory = SpanContextFactoryImpl(idGenerator, traceFlags, traceState)
+        spanContextFactory = SpanContextFactoryImpl(traceFlags, traceState)
         contextFactory = ContextFactoryImpl(SpanFactoryImpl(spanContextFactory))
         processor = FakeSpanProcessor()
     }

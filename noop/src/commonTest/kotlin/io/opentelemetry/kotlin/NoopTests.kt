@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.config.NoopConfigProperties
 import io.opentelemetry.kotlin.config.NoopConfigProvider
 import io.opentelemetry.kotlin.context.NoopContext
 import io.opentelemetry.kotlin.context.NoopContextKey
+import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.NoopBaggageFactory
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.propagation.NoopTextMapPropagator
@@ -14,6 +15,7 @@ import io.opentelemetry.kotlin.tracing.NoopSpan
 import io.opentelemetry.kotlin.tracing.NoopSpanContext
 import io.opentelemetry.kotlin.tracing.NoopTraceFlags
 import io.opentelemetry.kotlin.tracing.SpanKind
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -284,6 +286,35 @@ internal class NoopTests {
         assertSame(emptySet(), NoopConfigProperties.propertyKeys)
     }
 
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testNoopMetrics() {
+        val meter = NoopOpenTelemetry.meterProvider.getMeter("test-meter")
+        val longCounter = meter.createLongUpDownCounter(
+            name = "store.inventory",
+            unit = "{item}",
+            description = "items in stock",
+        )
+        assertEquals("store.inventory", longCounter.name)
+        assertEquals("{item}", longCounter.unit)
+        assertEquals("items in stock", longCounter.description)
+        assertFalse(longCounter.enabled())
+        longCounter.add(1)
+        longCounter.add(-1) { setStringAttribute("account.type", "commercial") }
+
+        val doubleCounter = meter.createDoubleUpDownCounter(
+            name = "queue.depth",
+            unit = "{item}",
+            description = "queue size",
+        )
+        assertEquals("queue.depth", doubleCounter.name)
+        assertEquals("{item}", doubleCounter.unit)
+        assertEquals("queue size", doubleCounter.description)
+        assertFalse(doubleCounter.enabled())
+        doubleCounter.add(1.0)
+        doubleCounter.add(-1.0) { setStringAttribute("account.type", "commercial") }
+    }
+
     private fun verifySpanOperationsAreNoop(span: NoopSpan) {
         // Test primitive attributes
         span.setStringAttribute("key", "value")
@@ -310,5 +341,12 @@ internal class NoopTests {
 
         // Verify no data is recorded
         assertFalse(span.isRecording())
+    }
+
+    @Test
+    fun testNoopFlushAndShutdown() = runTest {
+        val otel = NoopOpenTelemetry as OpenTelemetrySdk
+        assertEquals(OperationResultCode.Success, otel.forceFlush())
+        assertEquals(OperationResultCode.Success, otel.shutdown())
     }
 }

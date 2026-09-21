@@ -78,7 +78,7 @@ internal class OtelJavaMeterBuilderAdapterTest {
             capturedName = name
             capturedVersion = version
             capturedSchemaUrl = schemaUrl
-            return object : Meter {}
+            return FakeMeter(name)
         }
     }
 }

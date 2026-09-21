@@ -22,4 +22,28 @@ internal class LoggerProviderBehaviorTest {
         assertEquals(1, merged.logLimits?.attributeCountLimit)
         assertEquals(99, merged.logLimits?.attributeValueLengthLimit)
     }
+
+    @Test
+    fun processorStartsUnset() {
+        assertNull(LoggerProviderBehavior().processor)
+    }
+
+    @Test
+    fun staysUnsetWhenNeitherLayerConfiguredProcessor() {
+        assertNull(LoggerProviderBehavior().mergeWith(LoggerProviderBehavior()).processor)
+    }
+
+    @Test
+    fun adoptsProcessorFromWhicheverLayerSuppliedIt() {
+        val processor = LogRecordProcessorBehavior()
+
+        assertEquals(
+            processor,
+            LoggerProviderBehavior().mergeWith(LoggerProviderBehavior(processor = processor)).processor,
+        )
+        assertEquals(
+            processor,
+            LoggerProviderBehavior(processor = processor).mergeWith(LoggerProviderBehavior()).processor,
+        )
+    }
 }

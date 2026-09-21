@@ -9,20 +9,27 @@ plugins {
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 api(project(":behavior"))
                 api(project(":config-dsl"))
                 api(project(":config-envar"))
-                api(project(":config-yaml"))
+                api(project(":sdk-api"))
+                implementation(project(":platform-implementations"))
             }
         }
-        val commonTest by getting {
+        jvmMain {
             dependencies {
+                implementation(project(":config-yaml"))
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation(project(":test-fakes"))
                 implementation(libs.kotlin.test)
             }
         }
-        val jvmTest by getting {
+        jvmTest {
             dependencies {
                 implementation(libs.kotlin.test)
             }

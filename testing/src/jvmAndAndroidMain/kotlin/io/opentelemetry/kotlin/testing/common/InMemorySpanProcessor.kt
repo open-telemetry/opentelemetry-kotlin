@@ -9,7 +9,7 @@ internal class InMemorySpanProcessor(private val exporter: InMemorySpanExporter)
     override fun onStart(parentContext: OtelJavaContext, span: OtelJavaReadWriteSpan) {
     }
 
-    override fun isStartRequired(): Boolean = true
+    override fun isStartRequired(): Boolean = false
 
     override fun onEnd(span: OtelJavaReadableSpan) {
         if (!span.spanContext.traceFlags.isSampled) {

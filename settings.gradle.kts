@@ -18,6 +18,8 @@ include(
     ":core",
     ":api",
     ":api-ext",
+    ":api-propagators",
+    ":context-impl",
     ":context-coroutines",
     ":sdk-ext",
     ":sdk-api",
@@ -53,6 +55,7 @@ include(
     "examples:example-app-android",
     ":smoke-test",
     ":gradle-integration-test",
+    ":serializable-models"
 )
 
 includeFromDir("instrumentation")

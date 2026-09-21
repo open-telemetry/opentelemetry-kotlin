@@ -16,6 +16,7 @@ import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.proto.trace.v1.Span
+import io.opentelemetry.proto.trace.v1.Status
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -56,7 +57,7 @@ class SpanDataProtobufConversionTest {
         assertEquals(obj.spanContext.spanId, protobuf.span_id.toByteArray().toHexString())
         assertEquals(obj.startTimestamp, protobuf.start_time_unix_nano)
         assertEquals(obj.endTimestamp, protobuf.end_time_unix_nano)
-        assertEquals(obj.status.statusCode.ordinal, protobuf.status?.code?.ordinal)
+        assertEquals(Status.StatusCode.STATUS_CODE_ERROR, protobuf.status?.code)
         assertEquals(obj.status.description, protobuf.status?.message)
         assertAttributesMatch(obj.attributes, protobuf.attributes)
         assertEventsMatch(obj.events, protobuf.events)
@@ -198,6 +199,19 @@ class SpanDataProtobufConversionTest {
         kindMappings.forEach { (spanKind, protoKind) ->
             val protobuf = FakeSpanData(spanKind = spanKind).toProtobuf()
             assertEquals(protoKind, protobuf.kind)
+        }
+    }
+
+    @Test
+    fun testStatusCodeMapping() {
+        val statusMappings = mapOf(
+            StatusData.Unset to Status.StatusCode.STATUS_CODE_UNSET,
+            StatusData.Ok to Status.StatusCode.STATUS_CODE_OK,
+            StatusData.Error("Whoops") to Status.StatusCode.STATUS_CODE_ERROR,
+        )
+        statusMappings.forEach { (status, protoCode) ->
+            val protobuf = FakeSpanData(status = status).toProtobuf()
+            assertEquals(protoCode, protobuf.status?.code)
         }
     }
 

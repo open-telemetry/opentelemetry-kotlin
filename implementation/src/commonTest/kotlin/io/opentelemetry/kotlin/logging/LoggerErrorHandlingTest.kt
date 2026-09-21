@@ -108,7 +108,7 @@ internal class LoggerErrorHandlingTest {
         spanContextFactory = FakeSpanContextFactory(),
         key = key,
         resource = FakeResource(),
-        logLimitConfig = fakeLogLimitsConfig,
+        logLimits = fakeLogLimitsConfig,
         shutdownState = MutableShutdownState(),
         sdkErrorHandler = errorHandler,
     )

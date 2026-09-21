@@ -22,7 +22,7 @@ import io.opentelemetry.kotlin.tracing.export.stdoutSpanExporter
 @OptIn(ExperimentalApi::class)
 internal fun TraceExportConfigDsl.createSpanProcessor(url: String?): SpanProcessor = when (url) {
     null -> simpleSpanProcessor(stdoutSpanExporter())
-    else -> batchSpanProcessor(otlpHttpSpanExporter(url))
+    else -> batchSpanProcessor(otlpHttpSpanExporter { endpoint = url })
 }
 
 /**
@@ -32,6 +32,6 @@ internal fun TraceExportConfigDsl.createSpanProcessor(url: String?): SpanProcess
 @OptIn(ExperimentalApi::class)
 internal fun LogExportConfigDsl.createLogRecordProcessor(url: String?): LogRecordProcessor = when (url) {
     null -> simpleLogRecordProcessor(stdoutLogRecordExporter())
-    else -> batchLogRecordProcessor(otlpHttpLogRecordExporter(url))
+    else -> batchLogRecordProcessor(otlpHttpLogRecordExporter { endpoint = url })
 }
 

@@ -20,32 +20,35 @@ buildkonfig {
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(project(":sdk-api"))
                 implementation(project(":sdk-common"))
                 implementation(project(":api-ext"))
                 implementation(project(":sdk-api"))
-                implementation(project(":config-envar"))
+                implementation(project(":config"))
+                implementation(project(":context-impl"))
+                implementation(project(":config-dsl"))
                 implementation(project(":model"))
                 implementation(project(":platform-implementations"))
                 implementation(project(":semconv"))
                 implementation(project(":exporters-core"))
                 implementation(project(":noop"))
+                implementation(project(":api-propagators"))
                 implementation(project(":semconv"))
                 implementation(libs.kotlinx.coroutines)
             }
         }
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(project(":api-ext"))
                 implementation(project(":test-fakes"))
                 implementation(project(":integration-test"))
+                implementation(project(":serializable-models"))
                 implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.kotest.property)
             }
         }
-        val jvmTest by getting {
+        jvmTest {
             dependencies {
                 implementation(project(":compat"))
                 implementation(project(":java-typealiases"))

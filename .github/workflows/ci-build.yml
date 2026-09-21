@@ -26,9 +26,9 @@ jobs:
           persist-credentials: false
 
       - name: Setup Java
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
         with:
-          distribution: 'adopt'
+          distribution: temurin
           java-version: |
             17
             21
@@ -42,12 +42,12 @@ jobs:
         run: ./gradlew build :benchmark-android:assemble :benchmark-android:compileReleaseAndroidTestKotlin :benchmark-jvm:assemble :examples:example-app-android:assembleRelease koverXmlReport -x :gradle-integration-test:test --stacktrace
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: open-telemetry/opentelemetry-kotlin
           fail_ci_if_error: false
-          files: build/reports/kover/reportRelease.xml
+          files: build/reports/kover/report.xml
 
   # Runs on macOS because the klib fixture consumes the library's iOS klibs, which KGP only
   # publishes from a macOS host. The rest of the suite is host-independent, so it all runs here.
@@ -62,9 +62,9 @@ jobs:
           persist-credentials: false
 
       - name: Setup Java
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
         with:
-          distribution: 'adopt'
+          distribution: temurin
           java-version: |
             17
             21

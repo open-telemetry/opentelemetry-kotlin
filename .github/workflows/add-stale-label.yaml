@@ -18,18 +18,20 @@ jobs:
       - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93 # v11.0.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          days-before-stale: 21
+          days-before-stale: 14
           days-before-close: 14
+          # increase limit to avoid silent failures if default 30 operations is exceeded
+          operations-per-run: 100
           only-labels: "needs author feedback"
           stale-issue-label: stale
           stale-issue-message: >
             This has been automatically marked as stale because it has been marked
-            as needing author feedback and has not had any activity for 21 days.
+            as needing author feedback and has not had any activity for 14 days.
             It will be closed automatically if there is no response from the author
             within 14 additional days from this comment.
           stale-pr-label: stale
           stale-pr-message: >
             This has been automatically marked as stale because it has been marked
-            as needing author feedback and has not had any activity for 21 days.
+            as needing author feedback and has not had any activity for 14 days.
             It will be closed automatically if there is no response from the author
             within 14 additional days from this comment.

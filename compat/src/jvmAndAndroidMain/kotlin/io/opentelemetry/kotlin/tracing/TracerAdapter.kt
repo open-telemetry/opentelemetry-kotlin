@@ -1,19 +1,21 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaTracer
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
+import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
+import io.opentelemetry.kotlin.tracing.model.CompatSpanCreationState
 import io.opentelemetry.kotlin.tracing.model.SpanAdapter
 import java.util.concurrent.TimeUnit
 
 internal class TracerAdapter(
     private val tracer: OtelJavaTracer,
     private val clock: Clock,
-    private val spanLimitsConfig: CompatSpanLimitsConfig
+    private val spanLimitsConfig: CompatSpanLimitsConfig,
+    private val contextFactory: ContextFactory,
 ) : Tracer {
 
     override fun enabled(): Boolean = true
@@ -26,29 +28,24 @@ internal class TracerAdapter(
         action: (SpanCreationAction.() -> Unit)?
     ): Span {
         val start = startTimestamp ?: clock.now()
+        val parentCtx = (parentContext ?: contextFactory.implicit()).toOtelJavaContext()
+
         val builder = tracer.spanBuilder(name)
             .setSpanKind(spanKind.toOtelJavaSpanKind())
             .setStartTimestamp(start, TimeUnit.NANOSECONDS)
+            .setParent(parentCtx)
 
-        if (parentContext != null) {
-            builder.setParent(parentContext.toOtelJavaContext())
-        } else {
-            builder.setNoParent()
-        }
+        val creationState = action?.let { CompatSpanCreationState(spanLimitsConfig).apply(it) }
+        creationState?.applyTo(builder)
 
-        val span = builder.startSpan()
         return SpanAdapter(
-            impl = span,
+            impl = builder.startSpan(),
             clock = clock,
-            parentCtx = parentContext?.toOtelJavaContext() ?: OtelJavaContext.current(),
+            parentCtx = parentCtx,
             spanKind = spanKind,
             startTimestamp = start,
             spanLimitsConfig = spanLimitsConfig,
-        ).apply {
-            setName(name)
-            if (action != null) {
-                action(this)
-            }
-        }
+            creationState = creationState,
+        )
     }
 }

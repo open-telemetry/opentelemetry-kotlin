@@ -110,6 +110,24 @@ class CommonProtobufConversionTest {
     }
 
     @Test
+    fun testResourceDeserialization_usesSchemaUrl() {
+        val proto = io.opentelemetry.proto.resource.v1.Resource(
+            attributes = emptyList()
+        )
+        val resource = proto.toResource("https://example.com/schema")
+        assertEquals("https://example.com/schema", resource.schemaUrl)
+    }
+
+    @Test
+    fun testResourceDeserialization_emptySchemaUrlIsNull() {
+        val proto = io.opentelemetry.proto.resource.v1.Resource(
+            attributes = emptyList()
+        )
+        val resource = proto.toResource("")
+        assertNull(resource.schemaUrl)
+    }
+
+    @Test
     fun testResourceDeserialization_asNewResource() {
         val resource = deserializedResource()
 

@@ -5,7 +5,14 @@ import io.opentelemetry.kotlin.aliases.OtelJavaAlwaysRecordSampler
 import io.opentelemetry.kotlin.aliases.OtelJavaComposableSampler
 import io.opentelemetry.kotlin.aliases.OtelJavaCompositeSampler
 import io.opentelemetry.kotlin.aliases.OtelJavaSampler
+import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.context.toOtelKotlinContext
+import io.opentelemetry.kotlin.factory.SpanFactory
+import io.opentelemetry.kotlin.init.ComposableRuleBasedConfigDsl
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
+import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.SamplingPredicate as OtelJavaSamplingPredicate
 
 /**
  * Configures sampling so that spans are always recorded and sampled.
@@ -100,6 +107,66 @@ public fun SamplerConfigDsl.composableProbability(ratio: Double): ComposableSamp
 @ExperimentalApi
 public fun SamplerConfigDsl.composableParentThreshold(root: ComposableSampler): ComposableSampler =
     OtelJavaBackedComposableSampler(OtelJavaComposableSampler.parentThreshold(root.toOtelJavaComposableSampler()))
+
+/**
+ * A [ComposableSampler] that leaves the sampling decision to [delegate] but adds attributes to
+ * spans that are sampled.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composableannotating
+ */
+@ExperimentalApi
+public fun SamplerConfigDsl.composableAnnotating(
+    delegate: ComposableSampler,
+    attributes: AttributesMutator.() -> Unit,
+): ComposableSampler = OtelJavaBackedComposableSampler(
+    OtelJavaComposableSampler.annotating(
+        delegate.toOtelJavaComposableSampler(),
+        CompatAttributesModel().apply(attributes).otelJavaAttributes(),
+    )
+)
+
+/**
+ * A [ComposableSampler] that evaluates rules in the order they are declared, delegating to the
+ * first matching rule's sampler. Spans that match no rule are not sampled.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composablerulebased
+ */
+@ExperimentalApi
+public fun SamplerConfigDsl.composableRuleBased(
+    block: ComposableRuleBasedConfigDsl.() -> Unit,
+): ComposableSampler = OtelJavaBackedComposableSampler(
+    CompatComposableRuleBasedConfig(this).apply(block).build()
+)
+
+private class CompatComposableRuleBasedConfig(
+    private val dsl: SamplerConfigDsl,
+) : ComposableRuleBasedConfigDsl {
+
+    override val spanFactory: SpanFactory
+        get() = dsl.spanFactory
+
+    private val builder = OtelJavaComposableSampler.ruleBasedBuilder()
+
+    override fun rule(predicate: SamplingPredicate, sampler: SamplerConfigDsl.() -> ComposableSampler) {
+        builder.add(
+            predicate.toOtelJavaSamplingPredicate(),
+            dsl.sampler().toOtelJavaComposableSampler(),
+        )
+    }
+
+    fun build(): OtelJavaComposableSampler = builder.build()
+}
+
+private fun SamplingPredicate.toOtelJavaSamplingPredicate(): OtelJavaSamplingPredicate =
+    OtelJavaSamplingPredicate { parentContext, _, name, spanKind, attributes, _ ->
+        matches(
+            parentContext.toOtelKotlinContext(),
+            name,
+            spanKind.toOtelKotlinSpanKind(),
+            CompatAttributesModel(attributes.toBuilder()),
+            emptyList(),
+        )
+    }
 
 private fun Sampler.toOtelJavaSampler(): OtelJavaSampler = when (this) {
     is SamplerAdapter -> impl

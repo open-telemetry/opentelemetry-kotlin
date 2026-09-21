@@ -1,15 +1,20 @@
 package io.opentelemetry.kotlin.attributes
 
+import io.opentelemetry.kotlin.behavior.limitOrUnset
+
 internal class AttributesModel(
-    private val attributeLimit: Int = DEFAULT_ATTRIBUTE_LIMIT,
-    private val attributeValueLengthLimit: Int = DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
+    attributeLimit: Int = DEFAULT_ATTRIBUTE_LIMIT,
+    attributeValueLengthLimit: Int = DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
     private val attrs: MutableMap<String, Any> = mutableMapOf()
 ) : AttributesMutator, AttributeContainer {
+
+    private val attributeLimit: Int = limitOrUnset(attributeLimit) ?: DEFAULT_ATTRIBUTE_LIMIT
+    private val attributeValueLengthLimit: Int = limitOrUnset(attributeValueLengthLimit) ?: DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 
     /**
      * True when [attributeValueLengthLimit] doesn't truncate anything, which is the default.
      */
-    private val truncationDisabled = attributeValueLengthLimit == Int.MAX_VALUE
+    private val truncationDisabled = this.attributeValueLengthLimit == Int.MAX_VALUE
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
         ifPreconditionsOk(key) {
@@ -40,7 +45,7 @@ internal class AttributesModel(
         value: List<Boolean>
     ) {
         ifPreconditionsOk(key) {
-            attrs[key] = value
+            attrs[key] = value.toList()
         }
     }
 
@@ -62,7 +67,7 @@ internal class AttributesModel(
         value: List<Long>
     ) {
         ifPreconditionsOk(key) {
-            attrs[key] = value
+            attrs[key] = value.toList()
         }
     }
 
@@ -71,7 +76,7 @@ internal class AttributesModel(
         value: List<Double>
     ) {
         ifPreconditionsOk(key) {
-            attrs[key] = value
+            attrs[key] = value.toList()
         }
     }
 
@@ -83,7 +88,7 @@ internal class AttributesModel(
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
         ifPreconditionsOk(key) {
-            attrs[key] = truncateAnyValue(value)
+            attrs[key] = copyAnyValue(truncateAnyValue(value))
         }
     }
 
@@ -159,6 +164,17 @@ internal class AttributesModel(
                 value
             }
         }
+    }
+
+    private fun copyAnyValue(value: AnyValue): AnyValue = when (value) {
+        is AnyValue.BytesValue -> AnyValue.BytesValue(value.value.copyOf())
+        is AnyValue.ListValue -> AnyValue.ListValue(value.values.map(::copyAnyValue))
+        is AnyValue.MapValue -> AnyValue.MapValue(value.values.mapValues { (_, nested) -> copyAnyValue(nested) })
+        AnyValue.NullValue,
+        is AnyValue.StringValue,
+        is AnyValue.BoolValue,
+        is AnyValue.LongValue,
+        is AnyValue.DoubleValue -> value
     }
 
     private var droppedAttributesCountImpl = 0

@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
@@ -51,7 +52,7 @@ internal class ProbabilitySampler(
         } else {
             if (parentSpanContext.isValid && !parentSpanContext.traceFlags.isRandom && !compatibilityWarningLogged) {
                 compatibilityWarningLogged = true
-                sdkErrorHandler.onError(
+                sdkErrorHandler.reportError(
                     SdkError.ApiMisuse(
                         api = "ProbabilitySampler.shouldSample",
                         message = COMPATIBILITY_WARNING,

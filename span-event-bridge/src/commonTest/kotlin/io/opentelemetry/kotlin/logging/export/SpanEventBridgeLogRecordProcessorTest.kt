@@ -70,6 +70,21 @@ internal class SpanEventBridgeLogRecordProcessorTest {
     }
 
     @Test
+    fun testEventBridgedWhenIdsMatchByContentNotIdentity() {
+        val span = FakeSpan(spanContext = FakeSpanContext.VALID)
+        val log = eventLogRecord(
+            spanContext = FakeSpanContext(
+                traceIdBytes = FakeSpanContext.VALID.traceIdBytes.copyOf(),
+                spanIdBytes = FakeSpanContext.VALID.spanIdBytes.copyOf(),
+            ),
+        )
+
+        SpanEventBridgeLogRecordProcessor().onEmit(log, FakeContext(span = span))
+
+        assertEquals("my_event", span.events.single().name)
+    }
+
+    @Test
     fun testLogRecordWithoutEventNameNotBridged() {
         assertNotBridged(eventLogRecord(eventName = null))
     }

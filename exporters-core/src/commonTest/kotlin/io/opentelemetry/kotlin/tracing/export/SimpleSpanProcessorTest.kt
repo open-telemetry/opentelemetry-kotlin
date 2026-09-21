@@ -6,12 +6,17 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.FakeTraceFlags
+import io.opentelemetry.kotlin.tracing.data.SpanData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 internal class SimpleSpanProcessorTest {
@@ -19,8 +24,9 @@ internal class SimpleSpanProcessorTest {
     @Test
     fun testSpanProcessorDefaults() = runTest {
         val processor = FakeTraceExportConfig().simpleSpanProcessor(FakeSpanExporter())
-        assertTrue(processor.isStartRequired())
+        assertFalse(processor.isStartRequired())
         assertTrue(processor.isEndRequired())
+        assertFalse(processor.isOnEndingRequired())
         assertEquals(OperationResultCode.Success, processor.shutdown())
         assertEquals(OperationResultCode.Success, processor.forceFlush())
     }
@@ -87,5 +93,43 @@ internal class SimpleSpanProcessorTest {
         processor.shutdown()
 
         assertEquals(OperationResultCode.Success, processor.forceFlush())
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testConcurrentExportsAreSerialized() = runTest {
+        val exporter = SuspendingSpanExporter()
+        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+        val processor = SimpleSpanProcessor(exporter, scope)
+
+        repeat(5) { processor.onEnd(FakeReadWriteSpan(name = "span_$it")) }
+        advanceUntilIdle()
+
+        assertFalse(exporter.observedConcurrentExport)
+        assertEquals(List(5) { "span_$it" }, exporter.exports)
+    }
+
+    private class SuspendingSpanExporter : SpanExporter {
+        val exports: MutableList<String> = mutableListOf()
+        var observedConcurrentExport: Boolean = false
+        private var activeExports: Int = 0
+
+        override suspend fun export(telemetry: List<SpanData>): OperationResultCode {
+            activeExports++
+            if (activeExports > 1) {
+                observedConcurrentExport = true
+            }
+            delay(EXPORT_DURATION_MS)
+            exports += telemetry.map(SpanData::name)
+            activeExports--
+            return OperationResultCode.Success
+        }
+
+        override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
+        override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
+
+        private companion object {
+            const val EXPORT_DURATION_MS = 2L
+        }
     }
 }

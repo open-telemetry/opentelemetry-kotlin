@@ -2,10 +2,12 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -17,6 +19,7 @@ import io.opentelemetry.kotlin.provider.ApiProviderImpl
 
 internal class MeterProviderImpl(
     metricsConfig: MetricsConfig,
+    private val attributeLimits: AttributeLimitsBehavior,
 ) : MeterProvider, TelemetryCloseable {
 
     private val sdkErrorHandler = metricsConfig.sdkErrorHandler
@@ -29,6 +32,7 @@ internal class MeterProviderImpl(
             MeterImpl(
                 instrumentationScopeInfo = key,
                 resource = metricsConfig.resource,
+                sdkErrorHandler = sdkErrorHandler,
             )
         }
     }
@@ -42,7 +46,7 @@ internal class MeterProviderImpl(
         sdkErrorHandler.guardOrDefault(noopMeter, "MeterProvider.getMeter failed") {
             shutdownState.ifActiveOrElse(noopMeter) {
                 if (name.isEmpty()) {
-                    sdkErrorHandler.onError(
+                    sdkErrorHandler.reportError(
                         SdkError.ApiMisuse(
                             api = "MeterProvider.getMeter",
                             message = "Meter requested without instrumentation scope name",
@@ -50,7 +54,13 @@ internal class MeterProviderImpl(
                         )
                     )
                 }
-                val key = apiProvider.createInstrumentationScopeInfo(name, version, schemaUrl, attributes)
+                val key = apiProvider.createInstrumentationScopeInfo(
+                    name,
+                    version,
+                    schemaUrl,
+                    attributes,
+                    attributeLimits
+                )
                 apiProvider.getOrCreate(key)
             }
         }

@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.config
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 
 /**
  * Validate the given value against a validating function, and return that value if it's valid. Otherwise, return the provided default.
@@ -17,7 +18,7 @@ public fun <T> validateOrUseDefault(
 ): T = if (validator(value)) {
     value
 } else {
-    sdkErrorHandler.onError(
+    sdkErrorHandler.reportError(
         SdkError.ApiMisuse(
             api,
             "$value is not a valid value for $configParameterName. $default used instead.",

@@ -1,8 +1,10 @@
 package io.opentelemetry.kotlin.logging.export
 
+import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
+import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.FakeTraceFlags
@@ -141,5 +143,88 @@ class ExportLogsServiceRequestTest {
         val logRecords = scopeLogs.log_records[0]
 
         assertEquals(telemetry.body, logRecords.body?.string_value)
+    }
+
+    @Test
+    fun testGroupsLogsWithSameResourceAndScope() {
+        val resource = FakeResource()
+        val scope = FakeInstrumentationScopeInfo()
+        val request = listOf(
+            FakeLogRecordData(body = "a", resource = resource, instrumentationScopeInfo = scope),
+            FakeLogRecordData(body = "b", resource = resource, instrumentationScopeInfo = scope),
+        ).toExportLogsServiceRequest()
+
+        assertEquals(1, request.resource_logs.size)
+        assertEquals(1, request.resource_logs[0].scope_logs.size)
+        assertEquals(2, request.resource_logs[0].scope_logs[0].log_records.size)
+    }
+
+    @Test
+    fun testGroupsLogsWithSameResourceAndDifferentScopes() {
+        val resource = FakeResource()
+        val request = listOf(
+            FakeLogRecordData(body = "a", resource = resource, instrumentationScopeInfo = FakeInstrumentationScopeInfo(name = "one")),
+            FakeLogRecordData(body = "b", resource = resource, instrumentationScopeInfo = FakeInstrumentationScopeInfo(name = "two")),
+        ).toExportLogsServiceRequest()
+
+        assertEquals(1, request.resource_logs.size)
+        assertEquals(2, request.resource_logs[0].scope_logs.size)
+        assertEquals(1, request.resource_logs[0].scope_logs[0].log_records.size)
+        assertEquals(1, request.resource_logs[0].scope_logs[1].log_records.size)
+    }
+
+    @Test
+    fun testGroupsLogsWithDifferentResources() {
+        val request = listOf(
+            FakeLogRecordData(
+                body = "a",
+                resource = FakeResource(attributes = mapOf("service.name" to "a"), schemaUrl = "https://example.com/a"),
+            ),
+            FakeLogRecordData(
+                body = "b",
+                resource = FakeResource(attributes = mapOf("service.name" to "b"), schemaUrl = "https://example.com/b"),
+            ),
+        ).toExportLogsServiceRequest()
+
+        assertEquals(2, request.resource_logs.size)
+        assertEquals(1, request.resource_logs[0].scope_logs.size)
+        assertEquals(1, request.resource_logs[1].scope_logs.size)
+    }
+
+    @Test
+    fun testUsesEmptySchemaUrlWhenScopeHasNone() {
+        val request = listOf(
+            FakeLogRecordData(instrumentationScopeInfo = FakeInstrumentationScopeInfo(schemaUrl = null)),
+        ).toExportLogsServiceRequest()
+
+        assertEquals("", request.resource_logs[0].scope_logs[0].schema_url)
+    }
+
+    @Test
+    fun testUsesResourceSchemaUrlOnResourceLogs() {
+        val request = listOf(
+            FakeLogRecordData(resource = FakeResource(schemaUrl = "https://example.com/resource")),
+        ).toExportLogsServiceRequest()
+
+        assertEquals("https://example.com/resource", request.resource_logs[0].schema_url)
+    }
+
+    @Test
+    fun testUsesEmptySchemaUrlWhenResourceHasNone() {
+        val request = listOf(
+            FakeLogRecordData(resource = FakeResource(schemaUrl = null)),
+        ).toExportLogsServiceRequest()
+
+        assertEquals("", request.resource_logs[0].schema_url)
+    }
+
+    @Test
+    fun testRoundTripPreservesResourceSchemaUrl() {
+        val original = listOf(
+            FakeLogRecordData(resource = FakeResource(schemaUrl = "https://example.com/resource")),
+        )
+        val result = original.toProtobufByteArray().toLogRecordDataList()
+
+        assertEquals("https://example.com/resource", result.single().resource.schemaUrl)
     }
 }

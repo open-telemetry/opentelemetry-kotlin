@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.export
 
-import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -10,6 +9,8 @@ import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * A simple span processor that immediately exports spans to a [SpanExporter].
@@ -21,7 +22,7 @@ internal class SimpleSpanProcessor(
     private val scope: CoroutineScope,
 ) : SpanProcessor {
 
-    private val lock = ReentrantReadWriteLock()
+    private val exportMutex = Mutex()
     private val shutdownState = MutableShutdownState()
 
     override fun onStart(
@@ -39,15 +40,16 @@ internal class SimpleSpanProcessor(
         }
         shutdownState.execute {
             scope.launch {
-                lock.write {
+                exportMutex.withLock {
                     exporter.export(listOf(span))
                 }
             }
         }
     }
 
-    override fun isStartRequired(): Boolean = true
+    override fun isStartRequired(): Boolean = false
     override fun isEndRequired(): Boolean = true
+    override fun isOnEndingRequired(): Boolean = false
 
     override suspend fun forceFlush(): OperationResultCode =
         runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS) { exporter.forceFlush() }

@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
-import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -11,6 +10,8 @@ import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * A simple log record processor that immediately exports log records to a [LogRecordExporter].
@@ -22,7 +23,7 @@ internal class SimpleLogRecordProcessor(
     private val scope: CoroutineScope,
 ) : LogRecordProcessor {
 
-    private val lock = ReentrantReadWriteLock()
+    private val exportMutex = Mutex()
     private val shutdownState = MutableShutdownState()
 
     override fun onEmit(
@@ -32,7 +33,7 @@ internal class SimpleLogRecordProcessor(
         shutdownState.execute {
             val data = log.toLogRecordData()
             scope.launch {
-                lock.write {
+                exportMutex.withLock {
                     exporter.export(listOf(data))
                 }
             }

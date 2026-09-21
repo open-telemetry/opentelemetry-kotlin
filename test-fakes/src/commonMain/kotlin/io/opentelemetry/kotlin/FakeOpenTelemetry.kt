@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.BaggageFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.FakeBaggageFactory
@@ -40,4 +41,20 @@ class FakeOpenTelemetry : OpenTelemetrySdk {
     override val idGenerator: IdGenerator = FakeIdGenerator()
     override val resource: ResourceFactory = FakeResourceFactory()
     override val propagator: TextMapPropagator = FakeTextMapPropagator()
+
+    var forceFlushCount: Int = 0
+        private set
+
+    var shutdownCount: Int = 0
+        private set
+
+    override suspend fun forceFlush(): OperationResultCode {
+        forceFlushCount++
+        return OperationResultCode.Success
+    }
+
+    override suspend fun shutdown(): OperationResultCode {
+        shutdownCount++
+        return OperationResultCode.Success
+    }
 }

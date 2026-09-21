@@ -157,4 +157,22 @@ internal class ShutdownStateTest {
         assertTrue(state.isShutdown)
         assertEquals(Failure, result)
     }
+
+    @Test
+    fun testShutdownWithActionRunsActionOnceOnly() = runTest {
+        var invocations = 0
+        val first = state.shutdown {
+            invocations++
+            Success
+        }
+        val second = state.shutdown {
+            invocations++
+            Failure
+        }
+
+        assertEquals(1, invocations)
+        assertEquals(Success, first)
+        assertEquals(Success, second)
+        assertTrue(state.isShutdown)
+    }
 }

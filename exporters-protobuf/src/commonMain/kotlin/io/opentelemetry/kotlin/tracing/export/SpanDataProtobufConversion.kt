@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.SpanData
+import io.opentelemetry.kotlin.tracing.StatusCode
 import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -31,8 +32,7 @@ fun SpanData.toProtobuf() = Span(
     attributes = attributes.createKeyValues(),
     status = Status(
         message = status.description ?: "",
-        code = Status.StatusCode.fromValue(status.statusCode.ordinal)
-            ?: Status.StatusCode.STATUS_CODE_UNSET
+        code = status.statusCode.toProtoStatusCode(),
     ),
     events = events.toSpanEvent(),
     dropped_events_count = droppedEventsCount,
@@ -106,6 +106,12 @@ private fun SpanContext.toSpanFlagsInt(remoteContext: SpanContext): Int {
 private fun Int.isRemoteContext(): Boolean =
     (this and SpanFlags.SPAN_FLAGS_CONTEXT_HAS_IS_REMOTE_MASK.value) != 0 &&
         (this and SpanFlags.SPAN_FLAGS_CONTEXT_IS_REMOTE_MASK.value) != 0
+
+private fun StatusCode.toProtoStatusCode(): Status.StatusCode = when (this) {
+    StatusCode.UNSET -> Status.StatusCode.STATUS_CODE_UNSET
+    StatusCode.OK -> Status.StatusCode.STATUS_CODE_OK
+    StatusCode.ERROR -> Status.StatusCode.STATUS_CODE_ERROR
+}
 
 private fun SpanKind.toProtoSpanKind(): Span.SpanKind = when (this) {
     SpanKind.SERVER -> Span.SpanKind.SPAN_KIND_SERVER

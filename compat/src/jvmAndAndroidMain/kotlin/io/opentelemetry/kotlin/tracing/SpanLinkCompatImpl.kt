@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.tracing.model.SpanLink
 @OptIn(ExperimentalApi::class)
 internal class SpanLinkCompatImpl(
     override val spanContext: SpanContext,
-    private val attrs: CompatAttributesModel
+    internal val attrs: CompatAttributesModel
 ) : SpanLink, AttributesMutator by attrs, AttributeContainer by attrs {
     // opentelemetry-java's attribute builder does not track dropped attributes on the write path.
     override val droppedAttributesCount: Int = 0

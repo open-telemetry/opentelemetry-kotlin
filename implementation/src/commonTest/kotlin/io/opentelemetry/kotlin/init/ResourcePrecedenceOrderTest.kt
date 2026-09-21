@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.init
 
+import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.resource.FakeResourceDetector
 import io.opentelemetry.kotlin.sdkDefaultSchemaUrl
@@ -19,8 +20,9 @@ internal class ResourcePrecedenceOrderTest {
     @Test
     fun testSdkDefaults() {
         val cfg = OpenTelemetryConfigImpl(clock)
-        val tracing = cfg.generateTracingConfig()
-        val logging = cfg.generateLoggingConfig()
+        val resolver = SdkConfigFactory(cfg, OpenTelemetryBehavior())
+        val tracing = resolver.generateTracingConfig()
+        val logging = resolver.generateLoggingConfig()
 
         val traceAttrs = tracing.resource.attributes
         assertNotNull(traceAttrs[TelemetryAttributes.TELEMETRY_SDK_NAME])
@@ -43,9 +45,10 @@ internal class ResourcePrecedenceOrderTest {
         )
 
         val cfg = OpenTelemetryConfigImpl(clock)
-        assertEquals(schemaUrl, cfg.generateTracingConfig().resource.schemaUrl)
-        assertEquals(schemaUrl, cfg.generateLoggingConfig().resource.schemaUrl)
-        assertEquals(schemaUrl, cfg.generateMetricsConfig().resource.schemaUrl)
+        val resolver = SdkConfigFactory(cfg, OpenTelemetryBehavior())
+        assertEquals(schemaUrl, resolver.generateTracingConfig().resource.schemaUrl)
+        assertEquals(schemaUrl, resolver.generateLoggingConfig().resource.schemaUrl)
+        assertEquals(schemaUrl, resolver.generateMetricsConfig().resource.schemaUrl)
     }
 
     @Test
@@ -53,8 +56,9 @@ internal class ResourcePrecedenceOrderTest {
         val cfg = OpenTelemetryConfigImpl(clock)
         cfg.resource(mapOf(testKey to "top"))
 
-        assertEquals(sdkDefaultSchemaUrl, cfg.generateTracingConfig().resource.schemaUrl)
-        assertEquals(sdkDefaultSchemaUrl, cfg.generateLoggingConfig().resource.schemaUrl)
+        val resolver = SdkConfigFactory(cfg, OpenTelemetryBehavior())
+        assertEquals(sdkDefaultSchemaUrl, resolver.generateTracingConfig().resource.schemaUrl)
+        assertEquals(sdkDefaultSchemaUrl, resolver.generateLoggingConfig().resource.schemaUrl)
     }
 
     @Test
@@ -62,8 +66,9 @@ internal class ResourcePrecedenceOrderTest {
         val cfg = OpenTelemetryConfigImpl(clock)
         cfg.resource(customSchemaUrl) { }
 
-        assertEquals(customSchemaUrl, cfg.generateTracingConfig().resource.schemaUrl)
-        assertEquals(customSchemaUrl, cfg.generateLoggingConfig().resource.schemaUrl)
+        val resolver = SdkConfigFactory(cfg, OpenTelemetryBehavior())
+        assertEquals(customSchemaUrl, resolver.generateTracingConfig().resource.schemaUrl)
+        assertEquals(customSchemaUrl, resolver.generateLoggingConfig().resource.schemaUrl)
     }
 
     @Test
@@ -71,13 +76,14 @@ internal class ResourcePrecedenceOrderTest {
         val cfg = OpenTelemetryConfigImpl(clock)
         cfg.resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to "custom-sdk"))
 
+        val resolver = SdkConfigFactory(cfg, OpenTelemetryBehavior())
         assertEquals(
             "custom-sdk",
-            cfg.generateTracingConfig().resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME]
+            resolver.generateTracingConfig().resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME]
         )
         assertEquals(
             "custom-sdk",
-            cfg.generateLoggingConfig().resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME]
+            resolver.generateLoggingConfig().resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME]
         )
     }
 
@@ -88,9 +94,10 @@ internal class ResourcePrecedenceOrderTest {
             resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to "tracer-sdk"))
         }
 
+        val resolver = SdkConfigFactory(cfg, OpenTelemetryBehavior())
         assertEquals(
             "tracer-sdk",
-            cfg.generateTracingConfig().resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME]
+            resolver.generateTracingConfig().resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME]
         )
     }
 
@@ -102,8 +109,9 @@ internal class ResourcePrecedenceOrderTest {
             resource(mapOf(testKey to "provider"))
         }
 
-        assertEquals("provider", cfg.generateTracingConfig().resource.attributes[testKey])
-        assertEquals("top", cfg.generateLoggingConfig().resource.attributes[testKey])
+        val resolver = SdkConfigFactory(cfg, OpenTelemetryBehavior())
+        assertEquals("provider", resolver.generateTracingConfig().resource.attributes[testKey])
+        assertEquals("top", resolver.generateLoggingConfig().resource.attributes[testKey])
     }
 
     @Test
@@ -114,8 +122,9 @@ internal class ResourcePrecedenceOrderTest {
             resource(mapOf(testKey to "tracer-only"))
         }
 
-        assertEquals("tracer-only", cfg.generateTracingConfig().resource.attributes[testKey])
-        assertEquals("top", cfg.generateLoggingConfig().resource.attributes[testKey])
+        val resolver = SdkConfigFactory(cfg, OpenTelemetryBehavior())
+        assertEquals("tracer-only", resolver.generateTracingConfig().resource.attributes[testKey])
+        assertEquals("top", resolver.generateLoggingConfig().resource.attributes[testKey])
     }
 
     @Test
@@ -125,9 +134,10 @@ internal class ResourcePrecedenceOrderTest {
             detector(FakeResourceDetector(attributes = mapOf(ServiceAttributes.SERVICE_NAME to "detected")))
         }
 
-        assertEquals("detected", cfg.generateTracingConfig().resource.attributes[ServiceAttributes.SERVICE_NAME])
-        assertEquals("detected", cfg.generateLoggingConfig().resource.attributes[ServiceAttributes.SERVICE_NAME])
-        assertEquals("detected", cfg.generateMetricsConfig().resource.attributes[ServiceAttributes.SERVICE_NAME])
+        val resolver = SdkConfigFactory(cfg, OpenTelemetryBehavior())
+        assertEquals("detected", resolver.generateTracingConfig().resource.attributes[ServiceAttributes.SERVICE_NAME])
+        assertEquals("detected", resolver.generateLoggingConfig().resource.attributes[ServiceAttributes.SERVICE_NAME])
+        assertEquals("detected", resolver.generateMetricsConfig().resource.attributes[ServiceAttributes.SERVICE_NAME])
     }
 
     @Test
@@ -137,9 +147,10 @@ internal class ResourcePrecedenceOrderTest {
             detector(FakeResourceDetector(attributes = mapOf(testKey to "detected")))
         }
 
-        assertEquals("detected", cfg.generateTracingConfig().resource.attributes[testKey])
-        assertEquals("detected", cfg.generateLoggingConfig().resource.attributes[testKey])
-        assertEquals("detected", cfg.generateMetricsConfig().resource.attributes[testKey])
+        val resolver = SdkConfigFactory(cfg, OpenTelemetryBehavior())
+        assertEquals("detected", resolver.generateTracingConfig().resource.attributes[testKey])
+        assertEquals("detected", resolver.generateLoggingConfig().resource.attributes[testKey])
+        assertEquals("detected", resolver.generateMetricsConfig().resource.attributes[testKey])
     }
 
     @Test
@@ -153,8 +164,9 @@ internal class ResourcePrecedenceOrderTest {
             resource(mapOf(testKey to "provider"))
         }
 
-        assertEquals("provider", cfg.generateTracingConfig().resource.attributes[testKey])
-        assertEquals("top", cfg.generateLoggingConfig().resource.attributes[testKey])
+        val resolver = SdkConfigFactory(cfg, OpenTelemetryBehavior())
+        assertEquals("provider", resolver.generateTracingConfig().resource.attributes[testKey])
+        assertEquals("top", resolver.generateLoggingConfig().resource.attributes[testKey])
     }
 
     @Test
@@ -165,7 +177,8 @@ internal class ResourcePrecedenceOrderTest {
         }
         cfg.serviceName = "explicit"
 
-        assertEquals("explicit", cfg.generateTracingConfig().resource.attributes[ServiceAttributes.SERVICE_NAME])
+        val resolver = SdkConfigFactory(cfg, OpenTelemetryBehavior())
+        assertEquals("explicit", resolver.generateTracingConfig().resource.attributes[ServiceAttributes.SERVICE_NAME])
     }
 
     @Test
@@ -176,9 +189,10 @@ internal class ResourcePrecedenceOrderTest {
             detector(detector)
         }
 
-        cfg.generateTracingConfig()
-        cfg.generateLoggingConfig()
-        cfg.generateMetricsConfig()
+        val resolver = SdkConfigFactory(cfg, OpenTelemetryBehavior())
+        resolver.generateTracingConfig()
+        resolver.generateLoggingConfig()
+        resolver.generateMetricsConfig()
 
         assertEquals(1, detector.detectCount)
     }
@@ -191,6 +205,7 @@ internal class ResourcePrecedenceOrderTest {
             detector(FakeResourceDetector(attributes = mapOf(testKey to "detected"), schemaUrl = schemaUrl))
         }
 
-        assertEquals(schemaUrl, cfg.generateTracingConfig().resource.schemaUrl)
+        val resolver = SdkConfigFactory(cfg, OpenTelemetryBehavior())
+        assertEquals(schemaUrl, resolver.generateTracingConfig().resource.schemaUrl)
     }
 }

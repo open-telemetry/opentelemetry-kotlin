@@ -9,7 +9,7 @@ plugins {
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(project(":sdk-api"))
                 implementation(project(":sdk-common"))
@@ -17,14 +17,14 @@ kotlin {
                 implementation(libs.kotlinx.coroutines)
             }
         }
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(project(":test-fakes"))
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
             }
         }
-        val jvmTest by getting {
+        jvmTest {
             dependencies {
                 implementation(libs.kotlin.test)
             }

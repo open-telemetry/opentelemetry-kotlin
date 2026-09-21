@@ -9,12 +9,12 @@ plugins {
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 api(project(":sdk-api"))
             }
         }
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(project(":test-fakes"))
             }

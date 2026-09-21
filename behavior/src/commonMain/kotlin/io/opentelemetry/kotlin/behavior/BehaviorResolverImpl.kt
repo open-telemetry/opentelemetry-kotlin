@@ -11,6 +11,6 @@ class BehaviorResolverImpl : BehaviorResolver {
         dsl: OpenTelemetryBehavior?,
     ): OpenTelemetryBehavior {
         val layers = listOfNotNull(declarativeFile ?: envars, dsl)
-        return mergeBehaviors(layers)
+        return mergeBehaviors(layers).applyGlobalAttributeLimits()
     }
 }

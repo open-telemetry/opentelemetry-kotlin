@@ -12,7 +12,9 @@ internal class OtelTraceState private constructor(
         get() = pairs[THRESHOLD_KEY]?.threshold()
 
     fun setThreshold(threshold: Long) {
-        require(threshold in 0x0..0xffffffffffffff)
+        if (threshold !in 0x0..0xffffffffffffff) {
+            return
+        }
         pairs[THRESHOLD_KEY] = if (threshold == 0L) {
             "0"
         } else {

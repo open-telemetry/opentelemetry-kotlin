@@ -7,11 +7,11 @@ plugins {
 
 android {
     namespace = "io.opentelemetry.kotlin.example.app.android"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig {
         applicationId = "io.opentelemetry.kotlin.example.app"
         minSdk = 23
-        targetSdk = 36
+        targetSdk = 37
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

@@ -8,19 +8,18 @@ plugins {
     id("io.opentelemetry.kotlin.build-logic")
     id("signing")
     id("com.vanniktech.maven.publish")
-    id("org.jetbrains.kotlinx.kover")
     alias(libs.plugins.download)
     alias(libs.plugins.kotlin.serialization)
 }
 
 // release version of https://github.com/open-telemetry/opentelemetry-configuration
-val openTelemetryConfigurationVersion = "1.1.0"
+val openTelemetryConfigurationVersion = "1.2.0"
 val openTelemetryConfigurationRepoZip =
     "https://github.com/open-telemetry/opentelemetry-configuration/archive/v${openTelemetryConfigurationVersion}.zip"
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 api(libs.kotlin.serialization)
             }
@@ -28,7 +27,7 @@ kotlin {
     }
 }
 
-val downloadOpenTelemetryConfiguration by tasks.registering(Download::class) {
+val downloadOpenTelemetryConfiguration = tasks.register<Download>("downloadOpenTelemetryConfiguration") {
     src(openTelemetryConfigurationRepoZip)
     dest(
         layout.buildDirectory.file(
@@ -38,7 +37,7 @@ val downloadOpenTelemetryConfiguration by tasks.registering(Download::class) {
     overwrite(false)
 }
 
-val refreshOpenTelemetryConfiguration by tasks.registering(Copy::class) {
+val refreshOpenTelemetryConfiguration = tasks.register<Copy>("refreshOpenTelemetryConfiguration") {
     dependsOn(downloadOpenTelemetryConfiguration)
 
     from(zipTree(downloadOpenTelemetryConfiguration.get().dest))

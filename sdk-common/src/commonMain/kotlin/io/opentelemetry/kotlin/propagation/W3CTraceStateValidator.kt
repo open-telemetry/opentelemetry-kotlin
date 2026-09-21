@@ -6,7 +6,8 @@ package io.opentelemetry.kotlin.propagation
  *
  * https://www.w3.org/TR/trace-context/#tracestate-header
  *
- * This complements [W3CTraceStateCodec], which handles the structure of the list only.
+ * This complements [W3CTraceStateCodec], which handles the list structure and combined-header
+ * size limits. This type validates key/value characters and whether a new entry may be put.
  */
 public object W3CTraceStateValidator {
 

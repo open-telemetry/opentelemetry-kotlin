@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -47,6 +48,7 @@ internal class TracerProviderImplTest {
             traceFlagsFactory = FakeTraceFlagsFactory(),
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
+            attributeLimits = AttributeLimitsBehavior(),
         )
     }
 
@@ -72,6 +74,7 @@ internal class TracerProviderImplTest {
             traceFlagsFactory = FakeTraceFlagsFactory(),
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
+            attributeLimits = AttributeLimitsBehavior(),
         )
         provider.getTracer(name = "")
         assertEquals(1, handler.apiMisuses.size)
@@ -167,6 +170,7 @@ internal class TracerProviderImplTest {
             traceFlagsFactory = FakeTraceFlagsFactory(),
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
+            attributeLimits = AttributeLimitsBehavior(),
         )
         provider.getTracer(name = "test")
 
@@ -198,6 +202,7 @@ internal class TracerProviderImplTest {
             traceFlagsFactory = FakeTraceFlagsFactory(),
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
+            attributeLimits = AttributeLimitsBehavior(),
         )
         provider.getTracer(name = "test")
 
@@ -269,6 +274,7 @@ internal class TracerProviderImplTest {
         traceFlagsFactory = FakeTraceFlagsFactory(),
         spanFactory = FakeSpanFactory(),
         idGenerator = FakeIdGenerator(),
+        attributeLimits = AttributeLimitsBehavior(),
     )
 
     private class ThrowingSdkErrorHandler : SdkErrorHandler {

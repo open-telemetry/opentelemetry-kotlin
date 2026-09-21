@@ -9,7 +9,7 @@ plugins {
 kotlin {
     jvmToolchain(17)
     sourceSets {
-        val jvmAndAndroidMain by getting {
+        getByName("jvmAndAndroidMain") {
             dependencies {
                 api(project(":core"))
                 api(project(":compat"))

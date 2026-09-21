@@ -20,7 +20,6 @@ internal class CompatSpanContextFactory : SpanContextFactory {
             traceIdBytes = impl.traceId.hexToByteArray(),
             spanIdBytes = impl.spanId.hexToByteArray(),
             traceFlags = TraceFlagsAdapter(impl.traceFlags),
-            isValid = impl.isValid,
             isRemote = impl.isRemote,
             traceState = TraceStateAdapter(impl.traceState)
         )

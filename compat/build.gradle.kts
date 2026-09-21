@@ -9,11 +9,14 @@ plugins {
 
 kotlin {
     sourceSets {
-        val jvmAndAndroidMain by getting {
+        getByName("jvmAndAndroidMain") {
             dependencies {
                 api(project(":core"))
                 implementation(project(":sdk-api"))
                 implementation(project(":sdk-common"))
+                implementation(project(":config"))
+                implementation(project(":context-impl"))
+                implementation(project(":config-dsl"))
                 implementation(project(":model"))
                 implementation(project(":java-typealiases"))
                 implementation(libs.kotlinx.coroutines)
@@ -25,7 +28,7 @@ kotlin {
                 implementation(libs.opentelemetry.extension.trace.propagators)
             }
         }
-        val jvmTest by getting {
+        jvmTest {
             dependencies {
                 implementation(project(":test-fakes"))
                 implementation(project(":integration-test"))

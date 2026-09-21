@@ -1,0 +1,163 @@
+package io.opentelemetry.kotlin.config.envar
+
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
+import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
+import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.behavior.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import kotlin.test.Test
+import kotlin.test.assertContains
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+
+internal class OpenTelemetryEnvVarsTest {
+
+    @Test
+    fun emptyEnv() {
+        val behavior = behaviorFrom(emptyMap())
+        assertEquals(AttributeLimitsBehavior(), behavior.attributeLimits)
+        assertEquals(LogLimitsBehavior(), behavior.loggerProvider?.logLimits)
+    }
+
+    @Test
+    fun globalAndLogRecordLimits() {
+        val behavior = behaviorFrom(
+            mapOf(
+                "OTEL_ATTRIBUTE_COUNT_LIMIT" to "64",
+                "OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT" to "256",
+                "OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT" to "8",
+            )
+        )
+        assertEquals(
+            AttributeLimitsBehavior(attributeCountLimit = 64, attributeValueLengthLimit = 256),
+            behavior.attributeLimits,
+        )
+        assertEquals(8, behavior.loggerProvider?.logLimits?.attributeCountLimit)
+    }
+
+    @Test
+    fun disallowedValueUnset() {
+        val behavior = behaviorFrom(mapOf("OTEL_ATTRIBUTE_COUNT_LIMIT" to "-1"))
+        assertNull(behavior.attributeLimits?.attributeCountLimit)
+    }
+
+    @Test
+    fun `should read every node from its own env vars`() {
+        val env = mapOf(
+            "OTEL_ATTRIBUTE_COUNT_LIMIT" to "1",
+            "OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT" to "2",
+            "OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT" to "3",
+            "OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT" to "4",
+            "OTEL_SPAN_LINK_COUNT_LIMIT" to "5",
+            "OTEL_SPAN_EVENT_COUNT_LIMIT" to "6",
+            "OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT" to "7",
+            "OTEL_LINK_ATTRIBUTE_COUNT_LIMIT" to "8",
+            "OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT" to "9",
+            "OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT" to "10",
+        )
+
+        val expected = OpenTelemetryBehavior(
+            attributeLimits = AttributeLimitsBehavior(
+                attributeCountLimit = 1,
+                attributeValueLengthLimit = 2,
+            ),
+            tracerProvider = TracerProviderBehavior(
+                spanLimits = SpanLimitsBehavior(
+                    attributeCountLimit = 3,
+                    attributeValueLengthLimit = 4,
+                    linkCountLimit = 5,
+                    eventCountLimit = 6,
+                    attributeCountPerEventLimit = 7,
+                    attributeCountPerLinkLimit = 8,
+                ),
+            ),
+            loggerProvider = LoggerProviderBehavior(
+                logLimits = LogLimitsBehavior(
+                    attributeCountLimit = 9,
+                    attributeValueLengthLimit = 10,
+                ),
+            ),
+        )
+        assertEquals(expected, toBehavior(env::get))
+    }
+
+    @Test
+    fun `should leave every limit unset when the environment configures nothing`() {
+        val expected = OpenTelemetryBehavior(
+            attributeLimits = AttributeLimitsBehavior(),
+            tracerProvider = TracerProviderBehavior(spanLimits = SpanLimitsBehavior()),
+            loggerProvider = LoggerProviderBehavior(logLimits = LogLimitsBehavior()),
+        )
+        assertEquals(expected, toBehavior(getEnvVar = { null }))
+    }
+
+    @Test
+    fun `should map sampler env vars`() {
+        val env = mapOf(
+            "OTEL_TRACES_SAMPLER" to "always_off",
+        )
+        val behavior = toBehavior(env::get)
+        assertEquals(SamplerBehavior.AlwaysOff, behavior.tracerProvider?.sampler)
+    }
+
+    @Test
+    fun `should leave sampler unset when OTEL_TRACES_SAMPLER is unset`() {
+        assertNull(toBehavior(getEnvVar = { null }).tracerProvider?.sampler)
+    }
+
+    @Test
+    fun `should map console exporter env vars onto processor behavior`() {
+        val env = mapOf(
+            "OTEL_TRACES_EXPORTER" to "console",
+            "OTEL_LOGS_EXPORTER" to "console",
+        )
+        val behavior = toBehavior(env::get)
+        val console = ConsoleExporterBehavior()
+        assertEquals(SpanProcessorBehavior(console = console), behavior.tracerProvider?.processor)
+        assertEquals(LogRecordProcessorBehavior(console = console), behavior.loggerProvider?.processor)
+    }
+
+    @Test
+    fun `should leave processor unset when exporter env vars are unset`() {
+        val behavior = toBehavior(getEnvVar = { null })
+        assertEquals(null, behavior.tracerProvider?.processor)
+        assertEquals(null, behavior.loggerProvider?.processor)
+    }
+
+    @Test
+    fun `should forward onWarning for unknown sampler`() {
+        val warnings = mutableListOf<String>()
+        toBehavior(env("not_a_sampler"), warnings::add)
+        assertEquals(1, warnings.size)
+        assertContains(warnings.single(), "not_a_sampler")
+    }
+
+    @Test
+    fun `should not warn when sampler is unset`() {
+        val warnings = mutableListOf<String>()
+        toBehavior(getEnvVar = { null }, onWarning = warnings::add)
+        assertTrue(warnings.isEmpty())
+    }
+
+    private fun behaviorFrom(vars: Map<String, String>) =
+        OpenTelemetryEnvVars(EnvVarReader { vars[it] }).toBehavior()
+
+    private fun env(sampler: String): (String) -> String? {
+        val values = buildMap {
+            put("OTEL_TRACES_SAMPLER", sampler)
+        }
+        return values::get
+    }
+
+    private fun toBehavior(
+        getEnvVar: (String) -> String?,
+        onWarning: (String) -> Unit = {},
+    ): OpenTelemetryBehavior =
+        OpenTelemetryEnvVars(EnvVarReader(getEnvVar), onWarning).toBehavior()
+}

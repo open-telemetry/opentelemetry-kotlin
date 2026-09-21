@@ -8,11 +8,12 @@ plugins {
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 api(project(":sdk-api"))
                 api(project(":api-ext"))
                 api(project(":noop"))
+                api(project(":api-propagators"))
                 api(project(":exporters-core"))
                 api(project(":semconv"))
                 implementation(project(":model"))

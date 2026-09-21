@@ -2,9 +2,9 @@ package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.guard
+import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
@@ -15,21 +15,21 @@ import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryRepositoryImpl
 import io.opentelemetry.kotlin.export.TimeoutTelemetryCloseable
+import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.init.LogExportConfigDsl
+import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeout
 
 /**
  * Creates a processor that persists telemetry before exporting it. This effectively glues
@@ -55,7 +55,7 @@ internal class PersistingLogRecordProcessor(
     private val exportTimeoutMs: Long,
     maxExportBatchSize: Int,
     private val sdkErrorHandler: SdkErrorHandler,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher = ioDispatcher,
 ) : LogRecordProcessor {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
@@ -98,16 +98,8 @@ internal class PersistingLogRecordProcessor(
 
     override fun onEmit(log: ReadWriteLogRecord, context: Context) {
         shutdownState.execute {
-            try {
+            sdkErrorHandler.guard("LogRecordProcessor.onEmit failed") {
                 composite.onEmit(log, context)
-            } catch (e: Throwable) {
-                sdkErrorHandler.onError(
-                    SdkError.UserCodeError(
-                        e,
-                        "LogRecordProcessor.onEmit failed",
-                        SdkErrorSeverity.WARNING
-                    )
-                )
             }
         }
     }
@@ -147,10 +139,11 @@ internal class PersistingLogRecordProcessor(
                     repository.delete(record)
                     return@forEach
                 }
-                val result = try {
-                    withTimeout(exportTimeoutMs) { exporter.export(telemetry) }
-                } catch (e: Throwable) {
-                    Failure
+                val result = sdkErrorHandler.guardOrDefaultSuspend(
+                    Failure,
+                    "Persisted export failed",
+                ) {
+                    runWithTimeout(exportTimeoutMs) { exporter.export(telemetry) }
                 }
                 if (result == Success) {
                     repository.delete(record)

@@ -92,6 +92,7 @@ internal class SpanProcessOnEndingReadTest {
 
         override fun isStartRequired(): Boolean = true
         override fun isEndRequired(): Boolean = true
+        override fun isOnEndingRequired(): Boolean = true
         override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
         override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
     }

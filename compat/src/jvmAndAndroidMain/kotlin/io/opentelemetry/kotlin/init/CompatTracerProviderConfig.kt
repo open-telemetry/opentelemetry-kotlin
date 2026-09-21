@@ -13,9 +13,14 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
+import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.OtelJavaIdGeneratorAdapter
 import io.opentelemetry.kotlin.resource.Resource
@@ -39,10 +44,10 @@ internal class CompatTracerProviderConfig(
 
     private val builder: OtelJavaSdkTracerProviderBuilder = OtelJavaSdkTracerProvider.builder()
     internal val spanLimitsConfig = CompatSpanLimitsConfig()
-    private var spanLimitsAction: (SpanLimitsConfigDsl.() -> Unit)? = null
     private var tracerConfigurator: TracerConfigurator? = null
     private val resourceAttrs = CompatAttributesModel()
     private var resourceSchemaUrl: String? = null
+    private val spanLimitsDsl = SpanLimitsConfigDslImpl()
 
     override var serviceName: String? = null
         set(value) {
@@ -60,7 +65,7 @@ internal class CompatTracerProviderConfig(
     }
 
     override fun spanLimits(action: SpanLimitsConfigDsl.() -> Unit) {
-        spanLimitsAction = action
+        spanLimitsDsl.action()
     }
 
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
@@ -99,7 +104,8 @@ internal class CompatTracerProviderConfig(
         clock: Clock,
         idGenerator: IdGenerator,
         baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build()),
-        globalLimits: AttributeLimitsConfigDsl? = null,
+        spanLimits: SpanLimitsBehavior,
+        contextFactory: ContextFactory = CompatContextFactory(),
     ): TracerProvider {
         builder.setIdGenerator(
             when (idGenerator) {
@@ -107,11 +113,12 @@ internal class CompatTracerProviderConfig(
                 else -> OtelJavaIdGeneratorAdapter(idGenerator)
             }
         )
-        spanLimitsAction?.invoke(spanLimitsConfig)
-        spanLimitsConfig.attributeCountLimit =
-            spanLimitsConfig.attributeCountLimit ?: globalLimits?.attributeCountLimit
-        spanLimitsConfig.attributeValueLengthLimit =
-            spanLimitsConfig.attributeValueLengthLimit ?: globalLimits?.attributeValueLengthLimit
+        spanLimitsConfig.attributeCountLimit = spanLimits.attributeCountLimit
+        spanLimitsConfig.attributeValueLengthLimit = spanLimits.attributeValueLengthLimit
+        spanLimitsConfig.linkCountLimit = spanLimits.linkCountLimit
+        spanLimitsConfig.eventCountLimit = spanLimits.eventCountLimit
+        spanLimitsConfig.attributeCountPerEventLimit = spanLimits.attributeCountPerEventLimit
+        spanLimitsConfig.attributeCountPerLinkLimit = spanLimits.attributeCountPerLinkLimit
         builder.setSpanLimits(spanLimitsConfig.build())
         tracerConfigurator?.let(::applyTracerConfigurator)
         val resource = ResourceAdapter(
@@ -123,8 +130,13 @@ internal class CompatTracerProviderConfig(
             builder.setResource(OtelJavaResource.create(attrs, merged.schemaUrl))
         }
         builder.setClock(OtelJavaClockWrapper(clock))
-        return TracerProviderAdapter(builder.build(), clock, spanLimitsConfig)
+        return TracerProviderAdapter(builder.build(), clock, spanLimitsConfig, contextFactory)
     }
+
+    fun toBehavior(): TracerProviderBehavior =
+        TracerProviderBehavior(
+            spanLimits = spanLimitsDsl.toBehavior()
+        )
 
     private class TraceExportConfigCompat(
         override val clock: Clock,

@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
@@ -21,11 +22,12 @@ internal class MeterProviderImplTest {
         resource = ResourceImpl(AttributesModel(), null),
         sdkErrorHandler = NoopSdkErrorHandler,
     )
+    private val attributeLimits = AttributeLimitsBehavior()
     private lateinit var impl: MeterProviderImpl
 
     @BeforeTest
     fun setup() {
-        impl = MeterProviderImpl(metricsConfig)
+        impl = MeterProviderImpl(metricsConfig, attributeLimits)
     }
 
     @Test
@@ -40,7 +42,8 @@ internal class MeterProviderImplTest {
             resource = ResourceImpl(AttributesModel(), null),
             sdkErrorHandler = handler,
         )
-        val provider = MeterProviderImpl(config)
+        val attributeLimits = AttributeLimitsBehavior()
+        val provider = MeterProviderImpl(config, attributeLimits)
         provider.getMeter(name = "")
         assertEquals(1, handler.apiMisuses.size)
         assertEquals("MeterProvider.getMeter", handler.apiMisuses.single().api)
@@ -84,7 +87,8 @@ internal class MeterProviderImplTest {
     fun testThrowingAttributesReturnsNoopMeter() {
         val errorHandler = FakeSdkErrorHandler()
         val provider = MeterProviderImpl(
-            MetricsConfig(resource = ResourceImpl(AttributesModel(), null), sdkErrorHandler = errorHandler)
+            MetricsConfig(resource = ResourceImpl(AttributesModel(), null), sdkErrorHandler = errorHandler),
+            attributeLimits = AttributeLimitsBehavior()
         )
 
         val meter = provider.getMeter(name = "name") { error("boom") }

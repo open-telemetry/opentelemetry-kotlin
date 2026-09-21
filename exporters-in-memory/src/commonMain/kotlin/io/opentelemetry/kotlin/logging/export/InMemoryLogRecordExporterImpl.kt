@@ -3,14 +3,15 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.data.LogRecordData
+import io.opentelemetry.kotlin.threadSafeList
 
 internal class InMemoryLogRecordExporterImpl : InMemoryLogRecordExporter {
 
-    private val impl = mutableListOf<LogRecordData>()
+    private val impl = threadSafeList<LogRecordData>()
     private val shutdownState = MutableShutdownState()
 
     override val exportedLogRecords: List<LogRecordData>
-        get() = impl
+        get() = impl.toList()
 
     override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode =
         shutdownState.ifActive {

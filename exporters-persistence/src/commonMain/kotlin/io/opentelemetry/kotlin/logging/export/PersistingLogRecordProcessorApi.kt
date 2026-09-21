@@ -7,10 +7,10 @@ import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.PersistedTelemetryConfig
 import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryFileSystemImpl
-import io.opentelemetry.kotlin.export.getFileSystem
+import io.opentelemetry.kotlin.getFileSystem
 import io.opentelemetry.kotlin.init.LogExportConfigDsl
+import io.opentelemetry.kotlin.ioDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import okio.Path
 
 /**
@@ -57,7 +57,7 @@ internal fun LogExportConfigDsl.persistingLogRecordProcessorImpl(
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
     sdkErrorHandler: SdkErrorHandler = this.sdkErrorHandler,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher = ioDispatcher,
 ): LogRecordProcessor {
     return PersistingLogRecordProcessor(
         processor = processor,

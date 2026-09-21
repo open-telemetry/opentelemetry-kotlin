@@ -20,7 +20,7 @@ internal class BatchTelemetryConfig(
         configParameterName = "maxQueueSize",
         value = maxQueueSize,
         default = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
-    ) { it >= 0 }
+    ) { it > 0 }
 
     /**
      * Delay between scheduled flushes, in milliseconds.
@@ -35,6 +35,7 @@ internal class BatchTelemetryConfig(
 
     /**
      * Timeout for a single export operation, in milliseconds.
+     * Zero means no limit (infinity).
      */
     val exportTimeoutMs: Long = validateOrUseDefault(
         sdkErrorHandler = sdkErrorHandler,
@@ -42,25 +43,30 @@ internal class BatchTelemetryConfig(
         configParameterName = "exportTimeoutMs",
         value = exportTimeoutMs,
         default = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
-    ) { it >= 0 }
+    ) { it >= 0 }.let { timeout ->
+        if (timeout == 0L) {
+            Long.MAX_VALUE
+        } else {
+            timeout
+        }
+    }
 
     /**
      * Maximum number of telemetry items to export per batch. Will be capped at maxQueueSize if it exceeds it.
      */
-    val maxExportBatchSize: Int = if (maxExportBatchSize < 0) {
-        validateOrUseDefault(
+    val maxExportBatchSize: Int = run {
+        val positive = validateOrUseDefault(
             sdkErrorHandler = sdkErrorHandler,
             api = API,
             configParameterName = "maxExportBatchSize",
             value = maxExportBatchSize,
             default = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
-        ) { it >= 0 }
-    } else {
+        ) { it > 0 }
         validateOrUseDefault(
             sdkErrorHandler = sdkErrorHandler,
             api = API,
             configParameterName = "maxExportBatchSize",
-            value = maxExportBatchSize,
+            value = positive,
             default = this.maxQueueSize,
         ) { it <= this.maxQueueSize }
     }
@@ -74,7 +80,7 @@ internal class BatchTelemetryConfig(
         configParameterName = "forceFlushTimeoutMs",
         value = forceFlushTimeoutMs,
         default = BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS,
-    ) { it >= 0 }
+    ) { it > 0 }
 
     private companion object {
         const val API = "BatchTelemetryConfig"

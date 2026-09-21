@@ -3,10 +3,12 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -23,6 +25,7 @@ internal class LoggerProviderImpl(
     loggingConfig: LoggingConfig,
     contextFactory: ContextFactory,
     spanContextFactory: SpanContextFactory,
+    private val attributeLimits: AttributeLimitsBehavior,
 ) : LoggerProvider, TelemetryCloseable {
 
     private val sdkErrorHandler = loggingConfig.sdkErrorHandler
@@ -64,7 +67,7 @@ internal class LoggerProviderImpl(
         sdkErrorHandler.guardOrDefault(noopLogger, "LoggerProvider.getLogger failed") {
             shutdownState.ifActiveOrElse(noopLogger) {
                 if (name.isEmpty()) {
-                    sdkErrorHandler.onError(
+                    sdkErrorHandler.reportError(
                         SdkError.ApiMisuse(
                             api = "LoggerProvider.getLogger",
                             message = "Logger requested without instrumentation scope name",
@@ -72,7 +75,13 @@ internal class LoggerProviderImpl(
                         )
                     )
                 }
-                val key = apiProvider.createInstrumentationScopeInfo(name, version, schemaUrl, attributes)
+                val key = apiProvider.createInstrumentationScopeInfo(
+                    name,
+                    version,
+                    schemaUrl,
+                    attributes,
+                    attributeLimits,
+                )
                 apiProvider.getOrCreate(key)
             }
         }

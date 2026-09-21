@@ -1,20 +1,25 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
+import io.opentelemetry.kotlin.tracing.Tracer
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.compositeSpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
+import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
 import io.opentelemetry.kotlin.tracing.sampling.alwaysOff
 import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
 import io.opentelemetry.kotlin.tracing.sampling.composableAlwaysOff
 import io.opentelemetry.kotlin.tracing.sampling.composableAlwaysOn
+import io.opentelemetry.kotlin.tracing.sampling.composableAnnotating
 import io.opentelemetry.kotlin.tracing.sampling.composableParentThreshold
 import io.opentelemetry.kotlin.tracing.sampling.composableProbability
+import io.opentelemetry.kotlin.tracing.sampling.composableRuleBased
 import io.opentelemetry.kotlin.tracing.sampling.composite
 import io.opentelemetry.kotlin.tracing.sampling.parentBased
 import org.junit.Assert.assertEquals
@@ -26,12 +31,13 @@ import org.junit.Test
 internal class CompatTracerProviderSamplerTest {
 
     private val idGenerator = CompatIdGenerator()
+    private val noSpanLimits = SpanLimitsBehavior()
 
     @Test
     fun `default sampler records and samples spans`() {
         val clock = FakeClock()
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler)
-        val provider = config.build(clock, idGenerator)
+        val provider = config.build(clock, idGenerator, spanLimits = noSpanLimits)
         val span = provider.getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
@@ -43,7 +49,11 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { alwaysOn() }
         }
-        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -54,7 +64,11 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { FakeSampler(SamplingResult.Decision.DROP) }
         }
-        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
     }
 
@@ -64,7 +78,11 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { FakeSampler(SamplingResult.Decision.RECORD_AND_SAMPLE) }
         }
-        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -75,7 +93,11 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { alwaysOff() }
         }
-        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
     }
@@ -99,7 +121,11 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { parentBased(root = alwaysOn()) }
         }
-        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -110,7 +136,11 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { parentBased(root = alwaysOff()) }
         }
-        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
     }
@@ -136,7 +166,11 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { composite { composableAlwaysOn() } }
         }
-        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -147,7 +181,11 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { composite { composableAlwaysOff() } }
         }
-        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
     }
@@ -158,7 +196,11 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { composite { composableProbability(1.0) } }
         }
-        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -169,7 +211,11 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { composite { composableProbability(0.0) } }
         }
-        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
     }
@@ -180,7 +226,11 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { composite { composableParentThreshold(root = composableAlwaysOn()) } }
         }
-        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -191,8 +241,200 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { composite { composableParentThreshold(root = composableAlwaysOff()) } }
         }
-        val span = config.build(clock, idGenerator).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
+    fun `composite with composableAnnotating samples and attaches attributes`() {
+        val processor = FakeSpanProcessor()
+        val sdk = createCompatOpenTelemetry {
+            tracerProvider {
+                sampler {
+                    composite {
+                        composableAnnotating(composableAlwaysOn()) {
+                            setStringAttribute("sampling.rule", "on")
+                        }
+                    }
+                }
+                export { compositeSpanProcessor(processor) }
+            }
+        }
+        sdk.tracerProvider.getTracer("test").startSpan("span").end()
+        assertEquals(1, processor.endCalls.size)
+        assertEquals("on", processor.endCalls.single().attributes["sampling.rule"])
+    }
+
+    @Test
+    fun `composite with composableAnnotating does not annotate dropped spans`() {
+        val processor = FakeSpanProcessor()
+        val sdk = createCompatOpenTelemetry {
+            tracerProvider {
+                sampler {
+                    composite {
+                        composableAnnotating(composableAlwaysOff()) {
+                            setStringAttribute("sampling.rule", "off")
+                        }
+                    }
+                }
+                export { compositeSpanProcessor(processor) }
+            }
+        }
+        val span = sdk.tracerProvider.getTracer("test").startSpan("span")
+        assertFalse(span.isRecording())
+        span.end()
+        assertEquals(0, processor.endCalls.size)
+    }
+
+    @Test
+    fun `composite with composableRuleBased samples when a rule matches`() {
+        val clock = FakeClock()
+        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+            sampler {
+                composite {
+                    composableRuleBased {
+                        rule({ _, name, _, _, _ -> name == "span" }) { composableAlwaysOn() }
+                    }
+                }
+            }
+        }
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
+        assertTrue(span.isRecording())
+        assertTrue(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
+    fun `composite with composableRuleBased drops when no rule matches`() {
+        val clock = FakeClock()
+        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+            sampler {
+                composite {
+                    composableRuleBased {
+                        rule({ _, name, _, _, _ -> name == "other" }) { composableAlwaysOn() }
+                    }
+                }
+            }
+        }
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
+        assertFalse(span.isRecording())
+        assertFalse(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
+    fun `composite with composableRuleBased drops when there are no rules`() {
+        val clock = FakeClock()
+        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+            sampler { composite { composableRuleBased { } } }
+        }
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
+        assertFalse(span.isRecording())
+        assertFalse(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
+    fun `composite with composableRuleBased first matching rule wins`() {
+        val clock = FakeClock()
+        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+            sampler {
+                composite {
+                    composableRuleBased {
+                        rule({ _, _, _, _, _ -> true }) { composableAlwaysOn() }
+                        rule({ _, _, _, _, _ -> true }) { composableAlwaysOff() }
+                    }
+                }
+            }
+        }
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
+        assertTrue(span.isRecording())
+        assertTrue(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
+    fun `sampler observes attributes and links set in the span creation lambda`() {
+        val sampler = FakeSampler()
+        val tracer = tracerWith { sampler }
+        val linked = tracer.startSpan("linked")
+
+        tracer.startSpan("span") {
+            setStringAttribute("user.key", "user.value")
+            addLink(linked.spanContext) { setStringAttribute("link.key", "link.value") }
+        }
+
+        assertEquals("user.value", sampler.lastAttributes["user.key"])
+        val observed = sampler.lastLinks.single()
+        assertEquals(linked.spanContext.spanId, observed.spanContext.spanId)
+        assertEquals("link.value", observed.attributes["link.key"])
+    }
+
+    @Test
+    fun `attribute based sampler drops spans using attributes set at creation time`() {
+        val tracer = tracerWith {
+            composite {
+                composableRuleBased {
+                    rule({ _, _, _, attributes, _ -> attributes.attributes["keep"] == true }) {
+                        composableAlwaysOn()
+                    }
+                }
+            }
+        }
+
+        val kept = tracer.startSpan("kept") { setBooleanAttribute("keep", true) }
+        val dropped = tracer.startSpan("dropped") { setBooleanAttribute("keep", false) }
+
+        assertTrue(kept.isRecording())
+        assertTrue(kept.spanContext.traceFlags.isSampled)
+        assertFalse(dropped.isRecording())
+        assertFalse(dropped.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
+    fun `attributes returned by a custom sampler are applied to the span`() {
+        val processor = FakeSpanProcessor()
+        val sdk = createCompatOpenTelemetry {
+            tracerProvider {
+                sampler {
+                    FakeSampler(
+                        SamplingResult.Decision.RECORD_AND_SAMPLE,
+                        samplerAttributes = mapOf("sampler.key" to "sampler.value"),
+                    )
+                }
+                export { compositeSpanProcessor(processor) }
+            }
+        }
+        sdk.tracerProvider.getTracer("test").startSpan("span").end()
+        assertEquals("sampler.value", processor.endCalls.single().attributes["sampler.key"])
+    }
+
+    private fun tracerWith(action: SamplerConfigDsl.() -> Sampler): Tracer {
+        val clock = FakeClock()
+        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+            sampler(action)
+        }
+        return config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test")
     }
 }

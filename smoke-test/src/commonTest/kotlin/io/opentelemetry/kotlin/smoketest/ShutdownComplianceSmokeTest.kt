@@ -30,14 +30,20 @@ class ShutdownComplianceSmokeTest {
             tracerProvider {
                 export {
                     simpleSpanProcessor(
-                        otlpHttpSpanExporter(server.baseUrl, server.mockEngine)
+                        otlpHttpSpanExporter {
+                            endpoint = server.baseUrl
+                            httpClientEngine = server.mockEngine
+                        }
                     )
                 }
             }
             loggerProvider {
                 export {
                     simpleLogRecordProcessor(
-                        otlpHttpLogRecordExporter(server.baseUrl, server.mockEngine)
+                        otlpHttpLogRecordExporter {
+                            endpoint = server.baseUrl
+                            httpClientEngine = server.mockEngine
+                        }
                     )
                 }
             }
