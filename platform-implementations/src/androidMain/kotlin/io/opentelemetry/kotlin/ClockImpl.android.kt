@@ -11,11 +11,6 @@ import android.os.SystemClock
  * (e.g. clock adjustments via NTP or manual changes causing time to jump or move backwards).
  * It also avoids the problem of [SystemClock.elapsedRealtimeNanos] not providing wall-clock time.
  */
-public actual fun getCurrentTimeNanos(): Long = AndroidClock.now()
+public actual fun getCurrentTimeNanos(): Long = androidClock.now()
 
-private object AndroidClock {
-    private val baselineNanos =
-        System.currentTimeMillis() * 1_000_000L - SystemClock.elapsedRealtimeNanos()
-
-    fun now(): Long = baselineNanos + SystemClock.elapsedRealtimeNanos()
-}
+private val androidClock = MonotonicWallClock(System::currentTimeMillis, SystemClock::elapsedRealtimeNanos)
