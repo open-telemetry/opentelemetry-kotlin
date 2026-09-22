@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.config.yaml
 
-import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.LogExporterBehavior
 import io.opentelemetry.kotlin.config.schema.model.BatchLogRecordProcessor
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
 import io.opentelemetry.kotlin.config.schema.model.LogRecordExporter
@@ -14,8 +13,8 @@ import kotlin.test.assertNull
 internal class LogRecordProcessorMapperTest {
 
     @Test
-    fun emptyProcessorsLeaveBehaviorUnset() {
-        assertNull(emptyList<LogRecordProcessor>().toBehavior())
+    fun emptyProcessorsLeaveExporterUnset() {
+        assertNull(emptyList<LogRecordProcessor>().toExporterBehavior())
     }
 
     @Test
@@ -23,10 +22,7 @@ internal class LogRecordProcessorMapperTest {
         val processors = listOf(
             LogRecordProcessor(simple = SimpleLogRecordProcessor(exporter = consoleExporter())),
         )
-        assertEquals(
-            LogRecordProcessorBehavior(console = ConsoleExporterBehavior()),
-            processors.toBehavior(),
-        )
+        assertEquals(LogExporterBehavior.Console, processors.toExporterBehavior())
     }
 
     @Test
@@ -34,10 +30,7 @@ internal class LogRecordProcessorMapperTest {
         val processors = listOf(
             LogRecordProcessor(batch = BatchLogRecordProcessor(exporter = consoleExporter())),
         )
-        assertEquals(
-            LogRecordProcessorBehavior(console = ConsoleExporterBehavior()),
-            processors.toBehavior(),
-        )
+        assertEquals(LogExporterBehavior.Console, processors.toExporterBehavior())
     }
 
     @Test
@@ -45,7 +38,7 @@ internal class LogRecordProcessorMapperTest {
         val processors = listOf(
             LogRecordProcessor(simple = SimpleLogRecordProcessor(exporter = LogRecordExporter())),
         )
-        assertNull(processors.toBehavior())
+        assertNull(processors.toExporterBehavior())
     }
 
     private fun consoleExporter() = LogRecordExporter(console = ConsoleExporter())

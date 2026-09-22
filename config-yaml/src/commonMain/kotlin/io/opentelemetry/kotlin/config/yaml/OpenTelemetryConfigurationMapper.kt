@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.config.yaml
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
@@ -23,7 +24,16 @@ fun OpenTelemetryConfiguration.toBehavior(): OpenTelemetryBehavior = OpenTelemet
     loggerProvider = loggerProvider?.let {
         LoggerProviderBehavior(
             logLimits = it.limits?.toBehavior(),
-            processor = it.processors.toBehavior(),
+            processor = it.processors.toLogProcessorBehavior(),
         )
     },
 )
+
+/**
+ * Converts YAML log processor configuration to LogRecordProcessorBehavior.
+ */
+@ExperimentalApi
+private fun List<io.opentelemetry.kotlin.config.schema.model.LogRecordProcessor>.toLogProcessorBehavior(): LogRecordProcessorBehavior? {
+    val exporter = toExporterBehavior() ?: return null
+    return LogRecordProcessorBehavior(exporter = exporter)
+}

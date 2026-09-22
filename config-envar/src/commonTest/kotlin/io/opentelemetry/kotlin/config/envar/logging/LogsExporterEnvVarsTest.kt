@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.config.envar.logging
 
-import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.LogExporterBehavior
 import io.opentelemetry.kotlin.config.envar.EnvVarReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -15,17 +14,14 @@ internal class LogsExporterEnvVarsTest {
     }
 
     @Test
-    fun `should map console`() {
-        assertEquals(
-            LogRecordProcessorBehavior(console = ConsoleExporterBehavior()),
-            toBehavior(env("console")),
-        )
+    fun `should map console to ConsoleExporter`() {
+        assertEquals(LogExporterBehavior.Console, toBehavior(env("console")))
     }
 
     @Test
     fun `should leave known non-console exporters unset`() {
         listOf("otlp", "logging", "none", "otlp/stdout", "").forEach { name ->
-            assertNull(toBehavior(env(name)), "<$name> should not configure a processor")
+            assertNull(toBehavior(env(name)), "<$name> should not configure an exporter")
         }
     }
 

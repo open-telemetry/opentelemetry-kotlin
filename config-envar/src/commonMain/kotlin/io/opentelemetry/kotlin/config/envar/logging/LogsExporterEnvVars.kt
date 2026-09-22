@@ -1,12 +1,11 @@
 package io.opentelemetry.kotlin.config.envar.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.LogExporterBehavior
 import io.opentelemetry.kotlin.config.envar.EnvVarReader
 
 /**
- * Maps `OTEL_LOGS_EXPORTER` onto processor behavior. Console is the only exporter this mapper
+ * Maps `OTEL_LOGS_EXPORTER` onto exporter behavior. Console is the only exporter this mapper
  * understands. Unrecognized exporter names are ignored (and reported via [onWarning]).
  *
  * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#exporter-selection
@@ -16,10 +15,10 @@ class LogsExporterEnvVars(
     private val reader: EnvVarReader,
     private val onWarning: (String) -> Unit = {},
 ) {
-    fun toBehavior(): LogRecordProcessorBehavior? {
+    fun toBehavior(): LogExporterBehavior? {
         val name = reader.readString(EXPORTER)?.takeIf { it.isNotEmpty() } ?: return null
         return when (name.lowercase()) {
-            CONSOLE -> LogRecordProcessorBehavior(console = ConsoleExporterBehavior())
+            CONSOLE -> LogExporterBehavior.Console
             OTLP, LOGGING, NONE, OTLP_STDOUT -> null
             else -> null.also { onWarning("Unknown OTEL_LOGS_EXPORTER value '$name'; ignoring") }
         }

@@ -7,26 +7,26 @@ import kotlin.test.assertNull
 internal class LogRecordProcessorBehaviorTest {
 
     @Test
-    fun consoleStartsUnset() {
-        assertNull(LogRecordProcessorBehavior().console)
+    fun exporterStartsUnset() {
+        assertNull(LogRecordProcessorBehavior().exporter)
     }
 
     @Test
-    fun staysUnsetWhenNeitherLayerConfiguredConsole() {
-        assertNull(LogRecordProcessorBehavior().mergeWith(LogRecordProcessorBehavior()).console)
+    fun staysUnsetWhenNeitherLayerConfiguredExporter() {
+        assertNull(LogRecordProcessorBehavior().mergeWith(LogRecordProcessorBehavior()).exporter)
     }
 
     @Test
-    fun adoptsConsoleFromWhicheverLayerSuppliedIt() {
-        val console = ConsoleExporterBehavior()
+    fun adoptsExporterFromWhicheverLayerSuppliedIt() {
+        val exporter = LogExporterBehavior.Console
 
         assertEquals(
-            console,
-            LogRecordProcessorBehavior().mergeWith(LogRecordProcessorBehavior(console = console)).console,
+            exporter,
+            LogRecordProcessorBehavior().mergeWith(LogRecordProcessorBehavior(exporter = exporter)).exporter,
         )
         assertEquals(
-            console,
-            LogRecordProcessorBehavior(console = console).mergeWith(LogRecordProcessorBehavior()).console,
+            exporter,
+            LogRecordProcessorBehavior(exporter = exporter).mergeWith(LogRecordProcessorBehavior()).exporter,
         )
     }
 }

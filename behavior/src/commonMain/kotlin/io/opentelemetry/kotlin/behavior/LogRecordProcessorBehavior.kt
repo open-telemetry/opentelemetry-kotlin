@@ -11,13 +11,13 @@ import io.opentelemetry.kotlin.ExperimentalApi
 data class LogRecordProcessorBehavior(
 
     /**
-     * Console log exporter. Selecting it is the whole configuration.
+     * Log exporter configuration.
      */
-    val console: ConsoleExporterBehavior? = null,
+    val exporter: LogExporterBehavior? = null,
 
 ) : Behavior<LogRecordProcessorBehavior> {
 
     override fun mergeWith(higher: LogRecordProcessorBehavior): LogRecordProcessorBehavior = copy(
-        console = mergeNode(console, higher.console),
+        exporter = mergeNode(exporter, higher.exporter),
     )
 }

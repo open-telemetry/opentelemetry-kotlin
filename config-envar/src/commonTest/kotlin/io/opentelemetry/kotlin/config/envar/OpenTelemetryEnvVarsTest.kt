@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.config.envar
 
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
+import io.opentelemetry.kotlin.behavior.LogExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
@@ -120,7 +121,7 @@ internal class OpenTelemetryEnvVarsTest {
         val behavior = toBehavior(env::get)
         val console = ConsoleExporterBehavior()
         assertEquals(SpanProcessorBehavior(console = console), behavior.tracerProvider?.processor)
-        assertEquals(LogRecordProcessorBehavior(console = console), behavior.loggerProvider?.processor)
+        assertEquals(LogRecordProcessorBehavior(exporter = LogExporterBehavior.Console), behavior.loggerProvider?.processor)
     }
 
     @Test

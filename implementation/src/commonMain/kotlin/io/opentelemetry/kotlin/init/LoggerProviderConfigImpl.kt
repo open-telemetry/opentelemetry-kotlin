@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.behavior.LogExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
@@ -70,9 +71,12 @@ internal class LoggerProviderConfigImpl(
         )
 
     private fun processorFromBehavior(processorBehavior: LogRecordProcessorBehavior?): LogRecordProcessor? {
-        if (processorBehavior?.console == null) {
+        val exporter = processorBehavior?.exporter
+
+        if (exporter !is LogExporterBehavior.Console) {
             return null
         }
+
         return LogExportConfigImpl(clock, sdkErrorHandler).run {
             simpleLogRecordProcessor(stdoutLogRecordExporter())
         }
