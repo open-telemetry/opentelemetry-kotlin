@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.config.envar
 
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -46,7 +47,7 @@ internal class AttributeLimitsEnvVarsTest {
     }
 
     private fun toBehavior(getEnvVar: (String) -> String?) =
-        AttributeLimitsEnvVars(EnvVarReader(getEnvVar)).toBehavior()
+        AttributeLimitsEnvVars(reportingEnvVarReader(getEnvVar)).toBehavior()
 
     private companion object {
         val INVALID_VALUES = listOf("invalid", "", "-1", "2147483648")

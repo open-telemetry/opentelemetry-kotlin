@@ -3,25 +3,25 @@ package io.opentelemetry.kotlin.config.envar.logging
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
-import io.opentelemetry.kotlin.config.envar.EnvVarReader
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Invalid
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Value
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
+import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 
 /**
  * Maps `OTEL_LOGS_EXPORTER` onto processor behavior. Console is the only exporter this mapper
- * understands. Unrecognized exporter names are ignored (and reported via [onWarning]).
+ * understands. Unrecognized exporter names are ignored and reported as warnings.
  *
  * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#exporter-selection
  */
 @ExperimentalApi
-class LogsExporterEnvVars(
-    private val reader: EnvVarReader,
-    private val onWarning: (String) -> Unit = {},
-) {
-    fun toBehavior(): LogRecordProcessorBehavior? {
-        val name = reader.readString(EXPORTER)?.takeIf { it.isNotEmpty() } ?: return null
-        return when (name.lowercase()) {
-            CONSOLE -> LogRecordProcessorBehavior(console = ConsoleExporterBehavior())
-            OTLP, LOGGING, NONE, OTLP_STDOUT -> null
-            else -> null.also { onWarning("Unknown OTEL_LOGS_EXPORTER value '$name'; ignoring") }
+class LogsExporterEnvVars(private val reader: ReportingEnvVarReader) {
+
+    fun toBehavior(): LogRecordProcessorBehavior? = reader.readStringAndTransform(EXPORTER) { name ->
+        when (name.lowercase()) {
+            CONSOLE -> Value(LogRecordProcessorBehavior(console = ConsoleExporterBehavior()))
+            OTLP, LOGGING, NONE, OTLP_STDOUT -> Value(null)
+            else -> Invalid(EnvVarReadWarning(EXPORTER, "Unknown value '$name'; ignoring"))
         }
     }
 

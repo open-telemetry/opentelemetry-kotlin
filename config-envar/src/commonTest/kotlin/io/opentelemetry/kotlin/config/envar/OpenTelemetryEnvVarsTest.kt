@@ -10,11 +10,11 @@ import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
+import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
-import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 internal class OpenTelemetryEnvVarsTest {
 
@@ -100,7 +100,7 @@ internal class OpenTelemetryEnvVarsTest {
     @Test
     fun `should map sampler env vars`() {
         val env = mapOf(
-            "OTEL_TRACES_SAMPLER" to "always_off",
+            "OTEL_TRACES_SAMPLER" to "ALWAYS_OFF",
         )
         val behavior = toBehavior(env::get)
         assertEquals(SamplerBehavior.AlwaysOff, behavior.tracerProvider?.sampler)
@@ -114,8 +114,8 @@ internal class OpenTelemetryEnvVarsTest {
     @Test
     fun `should map console exporter env vars onto processor behavior`() {
         val env = mapOf(
-            "OTEL_TRACES_EXPORTER" to "console",
-            "OTEL_LOGS_EXPORTER" to "console",
+            "OTEL_TRACES_EXPORTER" to "CONSOLE",
+            "OTEL_LOGS_EXPORTER" to "CONSOLE",
         )
         val behavior = toBehavior(env::get)
         val console = ConsoleExporterBehavior()
@@ -131,33 +131,33 @@ internal class OpenTelemetryEnvVarsTest {
     }
 
     @Test
-    fun `should forward onWarning for unknown sampler`() {
-        val warnings = mutableListOf<String>()
-        toBehavior(env("not_a_sampler"), warnings::add)
-        assertEquals(1, warnings.size)
-        assertContains(warnings.single(), "not_a_sampler")
-    }
+    fun `should forward warnings from invalid env vars`() {
+        val env = mapOf(
+            "OTEL_ATTRIBUTE_COUNT_LIMIT" to "invalid",
+            "OTEL_TRACES_SAMPLER" to "not_a_sampler",
+            "OTEL_TRACES_EXPORTER" to "not_an_exporter",
+            "OTEL_LOGS_EXPORTER" to "not_an_exporter",
+        )
+        val warnings = mutableListOf<EnvVarReadWarning>()
+        toBehavior(env::get, warnings::add)
 
-    @Test
-    fun `should not warn when sampler is unset`() {
-        val warnings = mutableListOf<String>()
-        toBehavior(getEnvVar = { null }, onWarning = warnings::add)
-        assertTrue(warnings.isEmpty())
+        assertEquals(
+            setOf(
+                "OTEL_ATTRIBUTE_COUNT_LIMIT",
+                "OTEL_TRACES_SAMPLER",
+                "OTEL_TRACES_EXPORTER",
+                "OTEL_LOGS_EXPORTER",
+            ),
+            warnings.map { it.name }.toSet(),
+        )
     }
 
     private fun behaviorFrom(vars: Map<String, String>) =
-        OpenTelemetryEnvVars(EnvVarReader { vars[it] }).toBehavior()
-
-    private fun env(sampler: String): (String) -> String? {
-        val values = buildMap {
-            put("OTEL_TRACES_SAMPLER", sampler)
-        }
-        return values::get
-    }
+        OpenTelemetryEnvVars(reportingEnvVarReader(getEnvVar = vars::get)).toBehavior()
 
     private fun toBehavior(
         getEnvVar: (String) -> String?,
-        onWarning: (String) -> Unit = {},
+        onWarning: (EnvVarReadWarning) -> Unit = {},
     ): OpenTelemetryBehavior =
-        OpenTelemetryEnvVars(EnvVarReader(getEnvVar), onWarning).toBehavior()
+        OpenTelemetryEnvVars(reportingEnvVarReader(getEnvVar, onWarning)).toBehavior()
 }

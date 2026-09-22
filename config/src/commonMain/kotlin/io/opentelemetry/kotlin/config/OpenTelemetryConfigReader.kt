@@ -4,8 +4,10 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.BehaviorResolver
 import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.config.envar.EnvVarReader
 import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
+import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -18,11 +20,13 @@ import io.opentelemetry.kotlin.getEnvVarValue
  */
 @ExperimentalApi
 class OpenTelemetryConfigReader(
-    private val envVarReader: EnvVarReader = EnvVarReader(::getEnvVarValue),
+    envVarReader: EnvVarReader = EnvVarReader(::getEnvVarValue),
     private val declarativeConfigReader: DeclarativeConfigReader? = platformDeclarativeConfigReader(),
     private val behaviorResolver: BehaviorResolver = BehaviorResolverImpl(),
     private val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
 ) {
+
+    private val reportingEnvVarReader = ReportingEnvVarReader(envVarReader, ::reportEnvironmentWarning)
 
     /**
      * Resolves behavior against the DSL, YAML, and envars.
@@ -37,19 +41,19 @@ class OpenTelemetryConfigReader(
         dsl: OpenTelemetryBehavior? = null,
         configFilePath: String? = null,
     ): OpenTelemetryBehavior = behaviorResolver.resolve(
-        envars = OpenTelemetryEnvVars(envVarReader, ::reportSamplerWarning).toBehavior(),
+        envars = OpenTelemetryEnvVars(reportingEnvVarReader).toBehavior(),
         declarativeFile = declarativeConfigReader?.let { reader ->
-            val path = configFilePath ?: envVarReader.readString(CONFIG_FILE)
+            val path = configFilePath ?: reportingEnvVarReader.readString(CONFIG_FILE)
             path?.let(reader::read)
         },
         dsl = dsl,
     )
 
-    private fun reportSamplerWarning(message: String) {
+    private fun reportEnvironmentWarning(warning: EnvVarReadWarning) {
         sdkErrorHandler.onError(
             SdkError.ApiMisuse(
-                api = "OTEL_TRACES_SAMPLER",
-                message = message,
+                api = warning.name,
+                message = warning.message,
                 severity = SdkErrorSeverity.WARNING,
             )
         )
