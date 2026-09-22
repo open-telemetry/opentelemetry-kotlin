@@ -21,6 +21,13 @@ internal class OpenTelemetryConfigReaderTest {
     }
 
     @Test
+    fun `should use the default environment variable reader`() {
+        val reader = OpenTelemetryConfigReader(declarativeConfigReader = null)
+        val behavior = reader.read(dsl = logAttributeCountLimit(64))
+        assertEquals(64, behavior.logRecordAttributeCountLimit())
+    }
+
+    @Test
     fun `should apply the dsl when it is the only mechanism`() {
         val behavior = read(dsl = logAttributeCountLimit(64))
         assertEquals(64, behavior.logRecordAttributeCountLimit())
