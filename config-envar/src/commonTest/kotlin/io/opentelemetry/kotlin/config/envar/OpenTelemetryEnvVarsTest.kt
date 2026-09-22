@@ -100,7 +100,7 @@ internal class OpenTelemetryEnvVarsTest {
     @Test
     fun `should map sampler env vars`() {
         val env = mapOf(
-            "OTEL_TRACES_SAMPLER" to "ALWAYS_OFF",
+            "OTEL_TRACES_SAMPLER" to "always_off",
         )
         val behavior = toBehavior(env::get)
         assertEquals(SamplerBehavior.AlwaysOff, behavior.tracerProvider?.sampler)
@@ -114,8 +114,8 @@ internal class OpenTelemetryEnvVarsTest {
     @Test
     fun `should map console exporter env vars onto processor behavior`() {
         val env = mapOf(
-            "OTEL_TRACES_EXPORTER" to "CONSOLE",
-            "OTEL_LOGS_EXPORTER" to "CONSOLE",
+            "OTEL_TRACES_EXPORTER" to "console",
+            "OTEL_LOGS_EXPORTER" to "console",
         )
         val behavior = toBehavior(env::get)
         val console = ConsoleExporterBehavior()
