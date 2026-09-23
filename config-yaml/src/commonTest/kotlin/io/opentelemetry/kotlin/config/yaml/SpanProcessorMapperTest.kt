@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.config.yaml
 
-import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
 import io.opentelemetry.kotlin.config.schema.model.BatchSpanProcessor
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
 import io.opentelemetry.kotlin.config.schema.model.SimpleSpanProcessor
@@ -14,8 +13,8 @@ import kotlin.test.assertNull
 internal class SpanProcessorMapperTest {
 
     @Test
-    fun emptyProcessorsLeaveBehaviorUnset() {
-        assertNull(emptyList<SpanProcessor>().toBehavior())
+    fun emptyProcessorsLeaveExporterUnset() {
+        assertNull(emptyList<SpanProcessor>().toExporterBehavior())
     }
 
     @Test
@@ -23,7 +22,7 @@ internal class SpanProcessorMapperTest {
         val processors = listOf(
             SpanProcessor(simple = SimpleSpanProcessor(exporter = consoleExporter())),
         )
-        assertEquals(SpanProcessorBehavior(console = ConsoleExporterBehavior()), processors.toBehavior())
+        assertEquals(SpanExporterBehavior.Console, processors.toExporterBehavior())
     }
 
     @Test
@@ -31,7 +30,7 @@ internal class SpanProcessorMapperTest {
         val processors = listOf(
             SpanProcessor(batch = BatchSpanProcessor(exporter = consoleExporter())),
         )
-        assertEquals(SpanProcessorBehavior(console = ConsoleExporterBehavior()), processors.toBehavior())
+        assertEquals(SpanExporterBehavior.Console, processors.toExporterBehavior())
     }
 
     @Test
@@ -39,7 +38,32 @@ internal class SpanProcessorMapperTest {
         val processors = listOf(
             SpanProcessor(simple = SimpleSpanProcessor(exporter = SpanExporter())),
         )
-        assertNull(processors.toBehavior())
+        assertNull(processors.toExporterBehavior())
+    }
+
+    @Test
+    fun usesFirstProcessorWhenMultiplePresent() {
+        val processors = listOf(
+            SpanProcessor(simple = SimpleSpanProcessor(exporter = consoleExporter())),
+            SpanProcessor(batch = BatchSpanProcessor(exporter = consoleExporter())),
+        )
+        assertEquals(SpanExporterBehavior.Console, processors.toExporterBehavior())
+    }
+
+    @Test
+    fun unsupportedExporterReturnsNull() {
+        val processors = listOf(
+            SpanProcessor(simple = SimpleSpanProcessor(exporter = SpanExporter())),
+        )
+        assertNull(processors.toExporterBehavior())
+    }
+
+    @Test
+    fun processorWithoutExporterReturnsNull() {
+        val processors = listOf(
+            SpanProcessor(simple = SimpleSpanProcessor(exporter = SpanExporter())),
+        )
+        assertNull(processors.toExporterBehavior())
     }
 
     private fun consoleExporter() = SpanExporter(console = ConsoleExporter())

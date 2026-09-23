@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.config.envar.tracing
 
-import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
@@ -16,24 +15,21 @@ internal class TracesExporterEnvVarsTest {
     }
 
     @Test
-    fun `should map console`() {
-        assertEquals(
-            SpanProcessorBehavior(console = ConsoleExporterBehavior()),
-            toBehavior(env("console")),
-        )
+    fun `should map console to ConsoleExporter`() {
+        assertEquals(SpanExporterBehavior.Console, toBehavior(env("console")))
     }
 
     @Test
     fun `should leave known non-console exporters unset`() {
         listOf("otlp", "logging", "none", "otlp/stdout", "").forEach { name ->
-            assertNull(toBehavior(env(name)), "<$name> should not configure a processor")
+            assertNull(toBehavior(env(name)), "<$name> should not configure an exporter")
         }
     }
 
     @Test
     fun `should leave unknown exporter unset`() {
         listOf("not_an_exporter", "zipkin").forEach { name ->
-            assertNull(toBehavior(env(name)), "<$name> should not configure a processor")
+            assertNull(toBehavior(env(name)), "<$name> should not configure an exporter")
         }
     }
 

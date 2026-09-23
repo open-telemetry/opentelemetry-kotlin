@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
@@ -118,9 +119,8 @@ internal class OpenTelemetryEnvVarsTest {
             "OTEL_LOGS_EXPORTER" to "console",
         )
         val behavior = toBehavior(env::get)
-        val console = ConsoleExporterBehavior()
-        assertEquals(SpanProcessorBehavior(console = console), behavior.tracerProvider?.processor)
-        assertEquals(LogRecordProcessorBehavior(console = console), behavior.loggerProvider?.processor)
+        assertEquals(SpanProcessorBehavior.Simple(exporter = SpanExporterBehavior.Console), behavior.tracerProvider?.processor)
+        assertEquals(LogRecordProcessorBehavior(console = ConsoleExporterBehavior()), behavior.loggerProvider?.processor)
     }
 
     @Test

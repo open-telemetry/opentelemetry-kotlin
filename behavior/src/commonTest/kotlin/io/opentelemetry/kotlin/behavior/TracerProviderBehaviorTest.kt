@@ -42,7 +42,7 @@ internal class TracerProviderBehaviorTest {
 
     @Test
     fun adoptsProcessorFromWhicheverLayerSuppliedIt() {
-        val processor = SpanProcessorBehavior()
+        val processor = SpanProcessorBehavior.Simple(exporter = SpanExporterBehavior.Console)
 
         assertEquals(processor, TracerProviderBehavior().mergeWith(TracerProviderBehavior(processor = processor)).processor)
         assertEquals(processor, TracerProviderBehavior(processor = processor).mergeWith(TracerProviderBehavior()).processor)

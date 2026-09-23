@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
@@ -21,6 +22,7 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.TracerConfigImpl
 import io.opentelemetry.kotlin.tracing.TracerConfigurator
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
+import io.opentelemetry.kotlin.tracing.export.batchSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.simpleSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.stdoutSpanExporter
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
@@ -97,11 +99,20 @@ internal class TracerProviderConfigImpl(
         )
 
     private fun processorFromBehavior(processorBehavior: SpanProcessorBehavior?): SpanProcessor? {
-        if (processorBehavior?.console == null) {
+        val exporter = processorBehavior?.exporter
+
+        if (exporter !is SpanExporterBehavior.Console) {
             return null
         }
+
         return TraceExportConfigImpl(clock, sdkErrorHandler).run {
-            simpleSpanProcessor(stdoutSpanExporter())
+            when (processorBehavior) {
+                is SpanProcessorBehavior.Simple ->
+                    simpleSpanProcessor(stdoutSpanExporter())
+
+                is SpanProcessorBehavior.Batch ->
+                    batchSpanProcessor(stdoutSpanExporter())
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.config.envar
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.envar.logging.LogLimitsEnvVars
 import io.opentelemetry.kotlin.config.envar.logging.LogsExporterEnvVars
@@ -26,11 +27,16 @@ class OpenTelemetryEnvVars(
         tracerProvider = TracerProviderBehavior(
             spanLimits = SpanLimitsEnvVars(reader).toBehavior(),
             sampler = SamplerEnvVars(reader).toBehavior(),
-            processor = TracesExporterEnvVars(reader).toBehavior(),
+            processor = toProcessorBehavior(),
         ),
         loggerProvider = LoggerProviderBehavior(
             logLimits = LogLimitsEnvVars(reader).toBehavior(),
             processor = LogsExporterEnvVars(reader).toBehavior(),
         ),
     )
+
+    private fun toProcessorBehavior(): SpanProcessorBehavior? {
+        val exporter = TracesExporterEnvVars(reader).toBehavior()
+        return exporter?.let { SpanProcessorBehavior.Simple(exporter = it) }
+    }
 }
