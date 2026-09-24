@@ -17,6 +17,7 @@ kotlin {
                 implementation(project(":semconv"))
                 implementation(project(":exporters-core"))
                 implementation(project(":integration-test"))
+                implementation(project(":serializable-models"))
                 implementation(libs.ktor.serialization.kotlinx.json)
             }
         }
