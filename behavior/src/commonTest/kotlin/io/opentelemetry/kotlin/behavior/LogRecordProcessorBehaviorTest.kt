@@ -29,4 +29,31 @@ internal class LogRecordProcessorBehaviorTest {
             LogRecordProcessorBehavior(console = console).mergeWith(LogRecordProcessorBehavior()).console,
         )
     }
+
+    @Test
+    fun httpStartsUnset() {
+        assertNull(LogRecordProcessorBehavior().http)
+    }
+
+    @Test
+    fun httpStaysUnsetWhenNeitherLayerConfigured() {
+        assertNull(LogRecordProcessorBehavior().mergeWith(LogRecordProcessorBehavior()).http)
+    }
+
+    @Test
+    fun adoptsHttpFromWhicheverLayerSuppliedIt() {
+        val http = OtlpHttpExporterBehavior(
+            endpoint = "https://example.com",
+            timeout = 10_000,
+        )
+
+        assertEquals(
+            http,
+            LogRecordProcessorBehavior().mergeWith(LogRecordProcessorBehavior(http = http)).http,
+        )
+        assertEquals(
+            http,
+            LogRecordProcessorBehavior(http = http).mergeWith(LogRecordProcessorBehavior()).http,
+        )
+    }
 }

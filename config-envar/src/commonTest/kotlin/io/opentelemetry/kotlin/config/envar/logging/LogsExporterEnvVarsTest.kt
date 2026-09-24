@@ -2,7 +2,8 @@ package io.opentelemetry.kotlin.config.envar.logging
 
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
-import io.opentelemetry.kotlin.config.envar.EnvVarReader
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
+import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -36,22 +37,23 @@ internal class LogsExporterEnvVarsTest {
 
     @Test
     fun `should warn on unknown exporter`() {
-        val warnings = mutableListOf<String>()
-        LogsExporterEnvVars(EnvVarReader(env("not_an_exporter")), warnings::add).toBehavior()
+        val warnings = mutableListOf<EnvVarReadWarning>()
+        LogsExporterEnvVars(reportingEnvVarReader(env("not_an_exporter"), warnings::add)).toBehavior()
         assertEquals(1, warnings.size)
+        assertEquals("OTEL_LOGS_EXPORTER", warnings.single().name)
     }
 
     @Test
     fun `should not warn when exporter is unset`() {
-        val warnings = mutableListOf<String>()
-        LogsExporterEnvVars(EnvVarReader { null }, warnings::add).toBehavior()
+        val warnings = mutableListOf<EnvVarReadWarning>()
+        LogsExporterEnvVars(reportingEnvVarReader({ null }, warnings::add)).toBehavior()
         assertEquals(emptyList(), warnings)
     }
 
     @Test
     fun `should not warn on known non-console exporters`() {
-        val warnings = mutableListOf<String>()
-        LogsExporterEnvVars(EnvVarReader(env("otlp")), warnings::add).toBehavior()
+        val warnings = mutableListOf<EnvVarReadWarning>()
+        LogsExporterEnvVars(reportingEnvVarReader(env("otlp"), warnings::add)).toBehavior()
         assertEquals(emptyList(), warnings)
     }
 
@@ -63,5 +65,5 @@ internal class LogsExporterEnvVarsTest {
     }
 
     private fun toBehavior(getEnvVar: (String) -> String?) =
-        LogsExporterEnvVars(EnvVarReader(getEnvVar)).toBehavior()
+        LogsExporterEnvVars(reportingEnvVarReader(getEnvVar)).toBehavior()
 }

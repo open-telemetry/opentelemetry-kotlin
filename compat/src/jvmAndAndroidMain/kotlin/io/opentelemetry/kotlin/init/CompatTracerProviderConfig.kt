@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
@@ -35,6 +36,7 @@ import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.OtelJavaSamplerAdapter
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplerAdapter
+import io.opentelemetry.kotlin.tracing.sampling.toSampler
 
 @ExperimentalApi
 internal class CompatTracerProviderConfig(
@@ -48,6 +50,7 @@ internal class CompatTracerProviderConfig(
     private val resourceAttrs = CompatAttributesModel()
     private var resourceSchemaUrl: String? = null
     private val spanLimitsDsl = SpanLimitsConfigDslImpl()
+    private var sampler: Sampler? = null
 
     override var serviceName: String? = null
         set(value) {
@@ -74,10 +77,21 @@ internal class CompatTracerProviderConfig(
     }
 
     override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
-        val samplerConfig = object : SamplerConfigDsl {
-            override val spanFactory = CompatSpanFactory(CompatSpanContextFactory())
+        sampler = newSamplerDsl.action()
+    }
+
+    internal fun applyResolvedSampler(behavior: SamplerBehavior?) {
+        if (sampler != null || behavior == null) {
+            return
         }
-        val sampler = samplerConfig.action()
+        sampler = newSamplerDsl.toSampler(behavior)
+    }
+
+    private val newSamplerDsl: SamplerConfigDsl = object : SamplerConfigDsl {
+        override val spanFactory = CompatSpanFactory(CompatSpanContextFactory())
+    }
+
+    private fun setSampler(sampler: Sampler) {
         val otelJavaSampler = when (sampler) {
             is SamplerAdapter -> sampler.impl
             else -> OtelJavaSamplerAdapter(sampler)
@@ -130,6 +144,7 @@ internal class CompatTracerProviderConfig(
             builder.setResource(OtelJavaResource.create(attrs, merged.schemaUrl))
         }
         builder.setClock(OtelJavaClockWrapper(clock))
+        sampler?.let(::setSampler)
         return TracerProviderAdapter(builder.build(), clock, spanLimitsConfig, contextFactory)
     }
 

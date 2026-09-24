@@ -9,15 +9,18 @@ import io.opentelemetry.kotlin.ExperimentalApi
  */
 @ExperimentalApi
 data class SpanProcessorBehavior(
-
     /**
-     * Console span exporter. Selecting it is the whole configuration.
+     * Console span exporter.
      */
     val console: ConsoleExporterBehavior? = null,
-
+    /**
+     * HTTP log exporter.
+     */
+    val http: OtlpHttpExporterBehavior? = null,
 ) : Behavior<SpanProcessorBehavior> {
 
     override fun mergeWith(higher: SpanProcessorBehavior): SpanProcessorBehavior = copy(
         console = mergeNode(console, higher.console),
+        http = mergeNode(http, higher.http),
     )
 }

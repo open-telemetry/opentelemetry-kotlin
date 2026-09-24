@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
-import io.opentelemetry.kotlin.config.envar.EnvVarReader
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity

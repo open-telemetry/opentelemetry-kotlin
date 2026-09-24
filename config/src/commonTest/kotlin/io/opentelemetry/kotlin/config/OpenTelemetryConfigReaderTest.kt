@@ -3,8 +3,9 @@ package io.opentelemetry.kotlin.config
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.config.envar.EnvVarReader
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -16,6 +17,13 @@ internal class OpenTelemetryConfigReaderTest {
     @Test
     fun `should apply the environment when it is the only mechanism`() {
         val behavior = read(env = mapOf(LOGRECORD_COUNT to "64"))
+        assertEquals(64, behavior.logRecordAttributeCountLimit())
+    }
+
+    @Test
+    fun `should use the default environment variable reader`() {
+        val reader = OpenTelemetryConfigReader(declarativeConfigReader = null)
+        val behavior = reader.read(dsl = logAttributeCountLimit(64))
         assertEquals(64, behavior.logRecordAttributeCountLimit())
     }
 
@@ -114,6 +122,7 @@ internal class OpenTelemetryConfigReaderTest {
         val misuse = handler.apiMisuses.single()
         assertTrue(misuse.message.contains("not_a_sampler"))
         assertEquals("OTEL_TRACES_SAMPLER", misuse.api)
+        assertEquals(SdkErrorSeverity.WARNING, misuse.severity)
     }
 
     @Test

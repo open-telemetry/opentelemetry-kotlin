@@ -1,7 +1,8 @@
 package io.opentelemetry.kotlin.config.envar.tracing
 
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
-import io.opentelemetry.kotlin.config.envar.EnvVarReader
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
+import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -48,15 +49,16 @@ internal class SamplerEnvVarsTest {
 
     @Test
     fun `should warn on unknown sampler`() {
-        val warnings = mutableListOf<String>()
-        SamplerEnvVars(EnvVarReader(env("not_a_sampler")), warnings::add).toBehavior()
+        val warnings = mutableListOf<EnvVarReadWarning>()
+        SamplerEnvVars(reportingEnvVarReader(env("not_a_sampler"), warnings::add)).toBehavior()
         assertEquals(1, warnings.size)
+        assertEquals("OTEL_TRACES_SAMPLER", warnings.single().name)
     }
 
     @Test
     fun `should not warn when sampler is unset`() {
-        val warnings = mutableListOf<String>()
-        SamplerEnvVars(EnvVarReader { null }, warnings::add).toBehavior()
+        val warnings = mutableListOf<EnvVarReadWarning>()
+        SamplerEnvVars(reportingEnvVarReader({ null }, warnings::add)).toBehavior()
         assertEquals(emptyList(), warnings)
     }
 
@@ -68,5 +70,5 @@ internal class SamplerEnvVarsTest {
     }
 
     private fun toBehavior(getEnvVar: (String) -> String?) =
-        SamplerEnvVars(EnvVarReader(getEnvVar)).toBehavior()
+        SamplerEnvVars(reportingEnvVarReader(getEnvVar)).toBehavior()
 }

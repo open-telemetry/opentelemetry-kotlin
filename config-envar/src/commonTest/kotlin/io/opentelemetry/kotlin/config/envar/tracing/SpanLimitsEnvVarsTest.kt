@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.config.envar.tracing
 
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
-import io.opentelemetry.kotlin.config.envar.EnvVarReader
+import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -65,7 +65,7 @@ internal class SpanLimitsEnvVarsTest {
     }
 
     private fun toBehavior(getEnvVar: (String) -> String?) =
-        SpanLimitsEnvVars(EnvVarReader(getEnvVar)).toBehavior()
+        SpanLimitsEnvVars(reportingEnvVarReader(getEnvVar)).toBehavior()
 
     private companion object {
         val INVALID_VALUES = listOf("invalid", "", "-1", "2147483648")

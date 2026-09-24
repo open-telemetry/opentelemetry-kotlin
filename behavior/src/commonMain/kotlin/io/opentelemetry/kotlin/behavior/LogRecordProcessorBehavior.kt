@@ -9,15 +9,18 @@ import io.opentelemetry.kotlin.ExperimentalApi
  */
 @ExperimentalApi
 data class LogRecordProcessorBehavior(
-
     /**
-     * Console log exporter. Selecting it is the whole configuration.
+     * Console log exporter.
      */
     val console: ConsoleExporterBehavior? = null,
-
+    /**
+     * HTTP log exporter.
+     */
+    val http: OtlpHttpExporterBehavior? = null,
 ) : Behavior<LogRecordProcessorBehavior> {
 
     override fun mergeWith(higher: LogRecordProcessorBehavior): LogRecordProcessorBehavior = copy(
         console = mergeNode(console, higher.console),
+        http = mergeNode(http, higher.http),
     )
 }

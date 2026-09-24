@@ -2,8 +2,7 @@ package io.opentelemetry.kotlin.config.envar.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
-import io.opentelemetry.kotlin.behavior.limitOrUnset
-import io.opentelemetry.kotlin.config.envar.EnvVarReader
+import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 
 /**
  * Maps the span limit environment variables onto the behavior they supply. A variable that is unset,
@@ -12,15 +11,17 @@ import io.opentelemetry.kotlin.config.envar.EnvVarReader
  * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#span-limits
  */
 @ExperimentalApi
-class SpanLimitsEnvVars(private val reader: EnvVarReader) {
+class SpanLimitsEnvVars(
+    private val reader: ReportingEnvVarReader,
+) {
 
     fun toBehavior(): SpanLimitsBehavior = SpanLimitsBehavior(
-        attributeCountLimit = limitOrUnset(reader.readInt(ATTRIBUTE_COUNT_LIMIT)),
-        attributeValueLengthLimit = limitOrUnset(reader.readInt(ATTRIBUTE_VALUE_LENGTH_LIMIT)),
-        linkCountLimit = limitOrUnset(reader.readInt(LINK_COUNT_LIMIT)),
-        eventCountLimit = limitOrUnset(reader.readInt(EVENT_COUNT_LIMIT)),
-        attributeCountPerEventLimit = limitOrUnset(reader.readInt(EVENT_ATTRIBUTE_COUNT_LIMIT)),
-        attributeCountPerLinkLimit = limitOrUnset(reader.readInt(LINK_ATTRIBUTE_COUNT_LIMIT)),
+        attributeCountLimit = reader.readNonNegativeInt(ATTRIBUTE_COUNT_LIMIT),
+        attributeValueLengthLimit = reader.readNonNegativeInt(ATTRIBUTE_VALUE_LENGTH_LIMIT),
+        linkCountLimit = reader.readNonNegativeInt(LINK_COUNT_LIMIT),
+        eventCountLimit = reader.readNonNegativeInt(EVENT_COUNT_LIMIT),
+        attributeCountPerEventLimit = reader.readNonNegativeInt(EVENT_ATTRIBUTE_COUNT_LIMIT),
+        attributeCountPerLinkLimit = reader.readNonNegativeInt(LINK_ATTRIBUTE_COUNT_LIMIT),
     )
 
     private companion object {

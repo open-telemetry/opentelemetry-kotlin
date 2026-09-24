@@ -3,7 +3,9 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.assertHasSdkDefaultAttributes
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
+import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
@@ -120,6 +122,29 @@ internal class TracerProviderConfigImplTest {
             assertEquals(128, attributeCountPerEventLimit)
             assertEquals(Int.MAX_VALUE, attributeValueLengthLimit)
         }
+    }
+
+    @Test
+    fun testConsoleBehaviorInstallsProcessor() {
+        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).generateTracingConfig(
+            base,
+            noSpanLimits,
+            SpanProcessorBehavior(console = ConsoleExporterBehavior()),
+        )
+        assertNotNull(cfg.processor)
+    }
+
+    @Test
+    fun testDslExportTakesPrecedenceOverConsoleBehavior() {
+        val dslProcessor = FakeSpanProcessor()
+        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
+            export { dslProcessor }
+        }.generateTracingConfig(
+            base,
+            noSpanLimits,
+            SpanProcessorBehavior(console = ConsoleExporterBehavior()),
+        )
+        assertSame(dslProcessor, cfg.processor)
     }
 
     @Test

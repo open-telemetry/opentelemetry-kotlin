@@ -2,27 +2,27 @@ package io.opentelemetry.kotlin.config.envar.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
-import io.opentelemetry.kotlin.config.envar.EnvVarReader
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Invalid
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Value
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
+import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 
 /**
  * Maps `OTEL_TRACES_SAMPLER` onto behavior.
- * Unrecognized sampler names are ignored (and reported via [onWarning]).
+ * Unrecognized sampler names are ignored and reported as warnings.
  *
  * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#general-sdk-configuration
  */
 @ExperimentalApi
-class SamplerEnvVars(
-    private val reader: EnvVarReader,
-    private val onWarning: (String) -> Unit = {},
-) {
-    fun toBehavior(): SamplerBehavior? {
-        val name = reader.readString(SAMPLER)?.takeIf { it.isNotEmpty() } ?: return null
-        return when (name.lowercase()) {
-            ALWAYS_ON -> SamplerBehavior.AlwaysOn
-            ALWAYS_OFF -> SamplerBehavior.AlwaysOff
-            PARENT_BASED_ALWAYS_ON -> SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOn)
-            PARENT_BASED_ALWAYS_OFF -> SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOff)
-            else -> null.also { onWarning("Unknown OTEL_TRACES_SAMPLER value '$name'; ignoring") }
+class SamplerEnvVars(private val reader: ReportingEnvVarReader) {
+
+    fun toBehavior(): SamplerBehavior? = reader.readStringAndTransform(SAMPLER) { name ->
+        when (name.lowercase()) {
+            ALWAYS_ON -> Value(SamplerBehavior.AlwaysOn)
+            ALWAYS_OFF -> Value(SamplerBehavior.AlwaysOff)
+            PARENT_BASED_ALWAYS_ON -> Value(SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOn))
+            PARENT_BASED_ALWAYS_OFF -> Value(SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOff))
+            else -> Invalid(EnvVarReadWarning(SAMPLER, "Unknown value '$name'; ignoring"))
         }
     }
 

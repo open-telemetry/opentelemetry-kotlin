@@ -34,7 +34,8 @@ public fun createCompatOpenTelemetry(
     val span = CompatSpanFactory(spanContext)
 
     val cfg = CompatOpenTelemetryConfig(clock).apply(config)
-    val behavior = defaultCompatBehaviorReader().read(configFilePath = cfg.configFilePath, dsl = cfg.toBehavior())
+    val behavior = defaultCompatBehaviorReader(sdkErrorHandler = cfg.sdkErrorHandler)
+        .read(configFilePath = cfg.configFilePath, dsl = cfg.toBehavior())
 
     // configFactory is legacy - use behavior to control SDK functionality instead
     val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, contextFactory)

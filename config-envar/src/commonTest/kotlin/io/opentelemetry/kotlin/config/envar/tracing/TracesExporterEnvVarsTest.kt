@@ -2,7 +2,8 @@ package io.opentelemetry.kotlin.config.envar.tracing
 
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
-import io.opentelemetry.kotlin.config.envar.EnvVarReader
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
+import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -39,23 +40,24 @@ internal class TracesExporterEnvVarsTest {
     @Test
     fun `should warn on unknown exporter`() {
         listOf("not_an_exporter", "zipkin").forEach { name ->
-            val warnings = mutableListOf<String>()
-            TracesExporterEnvVars(EnvVarReader(env(name)), warnings::add).toBehavior()
+            val warnings = mutableListOf<EnvVarReadWarning>()
+            TracesExporterEnvVars(reportingEnvVarReader(env(name), warnings::add)).toBehavior()
             assertEquals(1, warnings.size, "<$name> should warn")
+            assertEquals("OTEL_TRACES_EXPORTER", warnings.single().name)
         }
     }
 
     @Test
     fun `should not warn when exporter is unset`() {
-        val warnings = mutableListOf<String>()
-        TracesExporterEnvVars(EnvVarReader { null }, warnings::add).toBehavior()
+        val warnings = mutableListOf<EnvVarReadWarning>()
+        TracesExporterEnvVars(reportingEnvVarReader({ null }, warnings::add)).toBehavior()
         assertEquals(emptyList(), warnings)
     }
 
     @Test
     fun `should not warn on known non-console exporters`() {
-        val warnings = mutableListOf<String>()
-        TracesExporterEnvVars(EnvVarReader(env("otlp")), warnings::add).toBehavior()
+        val warnings = mutableListOf<EnvVarReadWarning>()
+        TracesExporterEnvVars(reportingEnvVarReader(env("otlp"), warnings::add)).toBehavior()
         assertEquals(emptyList(), warnings)
     }
 
@@ -67,5 +69,5 @@ internal class TracesExporterEnvVarsTest {
     }
 
     private fun toBehavior(getEnvVar: (String) -> String?) =
-        TracesExporterEnvVars(EnvVarReader(getEnvVar)).toBehavior()
+        TracesExporterEnvVars(reportingEnvVarReader(getEnvVar)).toBehavior()
 }
