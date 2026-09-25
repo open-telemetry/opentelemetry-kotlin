@@ -33,4 +33,9 @@ class OpenTelemetryEnvVars(
             processor = LogsExporterEnvVars(reader).toBehavior(),
         ),
     )
+
+    internal companion object {
+        const val OTLP_ENDPOINT = "OTEL_EXPORTER_OTLP_ENDPOINT"
+        const val OTLP_TIMEOUT = "OTEL_EXPORTER_OTLP_TIMEOUT"
+    }
 }

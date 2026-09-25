@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
@@ -121,6 +122,18 @@ internal class OpenTelemetryEnvVarsTest {
         val console = ConsoleExporterBehavior()
         assertEquals(SpanProcessorBehavior(console = console), behavior.tracerProvider?.processor)
         assertEquals(LogRecordProcessorBehavior(console = console), behavior.loggerProvider?.processor)
+    }
+
+    @Test
+    fun `should map otlp http exporter env vars onto processor behavior`() {
+        val env = mapOf(
+            "OTEL_TRACES_EXPORTER" to "otlp",
+            "OTEL_LOGS_EXPORTER" to "otlp",
+        )
+        val behavior = toBehavior(env::get)
+        val http = OtlpHttpExporterBehavior()
+        assertEquals(SpanProcessorBehavior(http = http), behavior.tracerProvider?.processor)
+        assertEquals(LogRecordProcessorBehavior(http = http), behavior.loggerProvider?.processor)
     }
 
     @Test
