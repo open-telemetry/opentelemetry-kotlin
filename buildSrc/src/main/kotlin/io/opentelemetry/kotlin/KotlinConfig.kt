@@ -32,12 +32,14 @@ fun Project.configureKotlin(
                 binaries.library()
             }
 
-            val frameworkName = createIosFrameworkName(project.name)
+            val frameworkName = createAppleFrameworkName(project.name)
             val framework = XCFramework(frameworkName)
 
             listOf(
                 iosArm64(),
-                iosSimulatorArm64()
+                iosSimulatorArm64(),
+                tvosArm64(),
+                tvosSimulatorArm64(),
             ).forEach { target ->
                 compilerOptions.configureCompiler()
                 target.binaries.framework {
@@ -92,7 +94,7 @@ fun KotlinCommonCompilerOptions.configureCompiler() {
     freeCompilerArgs.addAll("-Xexpect-actual-classes", "-Xsuppress-version-warnings")
 }
 
-private fun createIosFrameworkName(input: String): String {
+private fun createAppleFrameworkName(input: String): String {
     return input
         .split("-")
         .mapIndexed { _, part ->
