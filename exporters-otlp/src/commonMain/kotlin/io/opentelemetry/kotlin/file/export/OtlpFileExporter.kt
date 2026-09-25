@@ -3,10 +3,10 @@ package io.opentelemetry.kotlin.file.export
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.data.LogRecordData
-import io.opentelemetry.kotlin.logging.export.JsonLogRecordExporter
+import io.opentelemetry.kotlin.logging.encode.JsonLogRecordEncoder
 import io.opentelemetry.kotlin.logging.export.LogRecordExporter
-import io.opentelemetry.kotlin.logging.model.ReadableLogRecord
 import io.opentelemetry.kotlin.tracing.data.SpanData
+import io.opentelemetry.kotlin.tracing.encode.JsonSpanEncoder
 import io.opentelemetry.kotlin.tracing.export.SpanExporter
 import okio.BufferedSink
 
@@ -15,14 +15,14 @@ import okio.BufferedSink
  */
 internal class FileLogRecordExporter(
     private val sink: BufferedSink,
-    private val encoder: JsonLogRecordExporter
+    private val encoder: JsonLogRecordEncoder
 ) : LogRecordExporter {
     private val shutdownState = MutableShutdownState()
 
     override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode =
         shutdownState.ifActive {
             telemetry.forEach { logRecord ->
-                sink.writeUtf8(encoder.encode(logRecord, sink))
+                sink.writeUtf8(encoder.encode(logRecord))
                 sink.writeUtf8("\n")
             }
             sink.flush()
@@ -42,14 +42,14 @@ internal class FileLogRecordExporter(
  */
 internal class FileSpanExporter(
     private val sink: BufferedSink,
-    private val encoder: OtlpJsonSpanEncoder
+    private val encoder: JsonSpanEncoder
 ) : SpanExporter {
     private val shutdownState = MutableShutdownState()
 
     override suspend fun export(telemetry: List<SpanData>): OperationResultCode =
         shutdownState.ifActive {
             telemetry.forEach { spanData ->
-                sink.writeUtf8(encoder.encode(spanData, sink))
+                sink.writeUtf8(encoder.encode(spanData))
                 sink.writeUtf8("\n")
             }
             sink.flush()
