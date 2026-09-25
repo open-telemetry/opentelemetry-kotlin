@@ -3,9 +3,11 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
@@ -40,17 +42,24 @@ internal class CompatSdkConfigFactory(
 
     private val sampler: SamplerBehavior? = behavior.tracerProvider?.sampler
 
+    private val spanProcessor: SpanProcessorBehavior? = behavior.tracerProvider?.processor
+
+    private val logProcessor: LogRecordProcessorBehavior? = behavior.loggerProvider?.processor
+
     val baseResource: Resource = cfg.resourceDetectionConfig.detectors
         .detectResource(CompatResourceFactory, cfg.sdkErrorHandler)
         .merge(cfg.buildDeclaredResource())
 
     fun buildTracerProvider(): TracerProvider {
         cfg.tracerProviderConfig.applyResolvedSampler(sampler)
+        cfg.tracerProviderConfig.applyResolvedProcessor(spanProcessor)
         return cfg.tracerProviderConfig.build(clock, idGenerator, baseResource, spanLimits, contextFactory)
     }
 
-    fun buildLoggerProvider(): LoggerProvider =
-        cfg.loggerProviderConfig.build(clock, baseResource, logLimits)
+    fun buildLoggerProvider(): LoggerProvider {
+        cfg.loggerProviderConfig.applyResolvedProcessor(logProcessor)
+        return cfg.loggerProviderConfig.build(clock, baseResource, logLimits)
+    }
 
     fun buildMeterProvider(): MeterProvider =
         cfg.meterProviderConfig.build(clock, baseResource)

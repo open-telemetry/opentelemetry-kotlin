@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
@@ -18,6 +19,7 @@ import io.opentelemetry.kotlin.config.schema.model.LogRecordExporter
 import io.opentelemetry.kotlin.config.schema.model.LogRecordProcessor
 import io.opentelemetry.kotlin.config.schema.model.LoggerProvider
 import io.opentelemetry.kotlin.config.schema.model.OpenTelemetryConfiguration
+import io.opentelemetry.kotlin.config.schema.model.OtlpHttpExporter
 import io.opentelemetry.kotlin.config.schema.model.RandomIdGenerator
 import io.opentelemetry.kotlin.config.schema.model.Sampler
 import io.opentelemetry.kotlin.config.schema.model.SimpleLogRecordProcessor
@@ -104,6 +106,57 @@ internal class OpenTelemetryConfigurationMapperTest {
                 ),
                 loggerProvider = LoggerProviderBehavior(
                     processor = LogRecordProcessorBehavior(console = console),
+                ),
+            ),
+            config.toBehavior(),
+        )
+    }
+
+    @Test
+    fun mapsHttpExportersOntoProcessorBehavior() {
+        val http = OtlpHttpExporterBehavior(
+            endpoint = "http://localhost:4317",
+            timeout = 10_000,
+        )
+        val config = OpenTelemetryConfiguration(
+            fileFormat = FILE_FORMAT,
+            tracerProvider = TracerProvider(
+                processors = listOf(
+                    SpanProcessor(
+                        simple = SimpleSpanProcessor(
+                            exporter = SpanExporter(
+                                otlpHttp = OtlpHttpExporter(
+                                    endpoint = "http://localhost:4317",
+                                    timeout = 10_000,
+                                )
+                            )
+                        )
+                    ),
+                ),
+            ),
+            loggerProvider = LoggerProvider(
+                processors = listOf(
+                    LogRecordProcessor(
+                        simple = SimpleLogRecordProcessor(
+                            exporter = LogRecordExporter(
+                                otlpHttp = OtlpHttpExporter(
+                                    endpoint = "http://localhost:4317",
+                                    timeout = 10_000,
+                                )
+                            )
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        assertEquals(
+            OpenTelemetryBehavior(
+                tracerProvider = TracerProviderBehavior(
+                    processor = SpanProcessorBehavior(http = http),
+                ),
+                loggerProvider = LoggerProviderBehavior(
+                    processor = LogRecordProcessorBehavior(http = http),
                 ),
             ),
             config.toBehavior(),

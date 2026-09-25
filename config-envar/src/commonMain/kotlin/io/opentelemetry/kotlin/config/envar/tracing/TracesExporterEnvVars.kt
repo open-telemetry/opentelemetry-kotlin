@@ -30,8 +30,8 @@ class TracesExporterEnvVars(
                     http = OtlpHttpExporterBehavior(
                         endpoint = reader.readString(OTLP_TRACES_ENDPOINT)
                             ?: reader.readString(OpenTelemetryEnvVars.OTLP_ENDPOINT),
-                        timeout = reader.readNonNegativeInt(OTLP_TRACES_TIMEOUT)
-                            ?: reader.readNonNegativeInt(OpenTelemetryEnvVars.OTLP_TIMEOUT)
+                        timeout = reader.readNonNegativeLong(OTLP_TRACES_TIMEOUT)
+                            ?: reader.readNonNegativeLong(OpenTelemetryEnvVars.OTLP_TIMEOUT)
                     )
                 )
             )

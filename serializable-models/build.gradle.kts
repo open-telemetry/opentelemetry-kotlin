@@ -9,6 +9,7 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
+            api(project(":sdk-api"))
             implementation(project(":api-ext"))
             implementation(project(":semconv"))
             implementation(libs.kotlin.serialization)

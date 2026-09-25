@@ -22,6 +22,10 @@ class ReportingEnvVarReader(
         delegate.readNonNegativeInt(name)
             .resolveNullable()
 
+    fun readNonNegativeLong(name: String): Long? =
+        delegate.readNonNegativeLong(name)
+            .resolveNullable()
+
     fun readBoolean(name: String): Boolean =
         delegate.readBoolean(name)
             .resolveNullable()

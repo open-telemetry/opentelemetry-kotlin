@@ -24,6 +24,7 @@ kotlin {
                 implementation(project.dependencies.platform(libs.opentelemetry.bom.alpha))
                 implementation(libs.opentelemetry.api)
                 implementation(libs.opentelemetry.sdk)
+                implementation(libs.opentelemetry.exporter.logging)
                 implementation(libs.opentelemetry.sdk.extension.incubator)
                 implementation(libs.opentelemetry.extension.trace.propagators)
             }

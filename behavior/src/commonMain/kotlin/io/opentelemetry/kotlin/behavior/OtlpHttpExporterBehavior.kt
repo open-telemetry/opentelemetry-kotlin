@@ -18,7 +18,7 @@ data class OtlpHttpExporterBehavior(
     /**
      * Maximum time (in milliseconds) to wait for each export.
      */
-    val timeout: Int? = null,
+    val timeout: Long? = null,
 ) : Behavior<OtlpHttpExporterBehavior> {
     override fun mergeWith(higher: OtlpHttpExporterBehavior): OtlpHttpExporterBehavior {
         return copy(
