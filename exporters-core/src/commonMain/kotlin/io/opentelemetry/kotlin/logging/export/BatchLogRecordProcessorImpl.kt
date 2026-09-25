@@ -8,6 +8,8 @@ import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.BatchTelemetryProcessor
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.export.and
+import io.opentelemetry.kotlin.export.guardExporterCode
 import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
@@ -19,7 +21,7 @@ internal class BatchLogRecordProcessorImpl(
     scheduleDelayMs: Long,
     exportTimeoutMs: Long,
     maxExportBatchSize: Int,
-    sdkErrorHandler: SdkErrorHandler,
+    private val sdkErrorHandler: SdkErrorHandler,
     dispatcher: CoroutineDispatcher = ioDispatcher,
 ) : LogRecordProcessor {
 
@@ -34,7 +36,8 @@ internal class BatchLogRecordProcessorImpl(
                 sdkErrorHandler = sdkErrorHandler,
             ),
             dispatcher = dispatcher,
-            exportAction = exporter::export
+            flushAction = exporter::forceFlush,
+            exportAction = exporter::export,
         )
 
     override fun onEmit(
@@ -55,8 +58,8 @@ internal class BatchLogRecordProcessorImpl(
 
     override suspend fun shutdown(): OperationResultCode =
         shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS) {
-            val exporterResult = exporter.shutdown()
-            processor.shutdown()
-            exporterResult
+            processor.shutdown() and sdkErrorHandler.guardExporterCode("Exporter shutdown failed") {
+                exporter.shutdown()
+            }
         }
 }

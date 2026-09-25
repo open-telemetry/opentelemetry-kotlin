@@ -7,6 +7,8 @@ import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.BatchTelemetryProcessor
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.export.and
+import io.opentelemetry.kotlin.export.guardExporterCode
 import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
@@ -18,7 +20,7 @@ internal class BatchSpanProcessorImpl(
     scheduleDelayMs: Long,
     exportTimeoutMs: Long,
     maxExportBatchSize: Int,
-    sdkErrorHandler: SdkErrorHandler,
+    private val sdkErrorHandler: SdkErrorHandler,
     dispatcher: CoroutineDispatcher = ioDispatcher,
 ) : SpanProcessor {
 
@@ -33,7 +35,8 @@ internal class BatchSpanProcessorImpl(
                 sdkErrorHandler = sdkErrorHandler,
             ),
             dispatcher = dispatcher,
-            exportAction = exporter::export
+            flushAction = exporter::forceFlush,
+            exportAction = exporter::export,
         )
 
     override fun onEnd(span: ReadableSpan) {
@@ -60,8 +63,8 @@ internal class BatchSpanProcessorImpl(
 
     override suspend fun shutdown(): OperationResultCode =
         shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS) {
-            val exporterResult = exporter.shutdown()
-            processor.shutdown()
-            exporterResult
+            processor.shutdown() and sdkErrorHandler.guardExporterCode("Exporter shutdown failed") {
+                exporter.shutdown()
+            }
         }
 }

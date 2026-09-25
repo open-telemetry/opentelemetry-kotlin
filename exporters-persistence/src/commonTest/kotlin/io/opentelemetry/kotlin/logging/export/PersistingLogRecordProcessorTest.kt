@@ -22,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -429,6 +430,7 @@ internal class PersistingLogRecordProcessorTest {
         advanceTimeBy(5000)
         assertEquals(1, delayingProcessor.logs.size)
         advanceTimeBy(5000)
+        runCurrent()
         assertEquals(1, exporter.logs.size)
         val resultDeferred = async { processor.shutdown() }
         advanceTimeBy(4000)
