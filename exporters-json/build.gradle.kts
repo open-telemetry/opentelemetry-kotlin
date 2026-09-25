@@ -16,7 +16,6 @@ kotlin {
                 implementation(project(":sdk-common"))
                 implementation(project(":semconv"))
                 implementation(project(":exporters-core"))
-                implementation(project(":integration-test"))
                 implementation(project(":serializable-models"))
                 implementation(libs.ktor.serialization.kotlinx.json)
             }
@@ -24,6 +23,7 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(project(":test-fakes"))
+                implementation(project(":integration-test"))
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
             }
