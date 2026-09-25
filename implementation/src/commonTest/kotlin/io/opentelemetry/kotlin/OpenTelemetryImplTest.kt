@@ -211,6 +211,7 @@ internal class OpenTelemetryImplTest {
         idGenerator = FakeIdGenerator(),
         resource = FakeResourceFactory(),
         propagator = NoopOpenTelemetry.propagator,
+        propagators = FakePropagators(),
     )
 
     private class FakeCloseableTracerProvider(

@@ -2,3 +2,10 @@ public final class io/opentelemetry/kotlin/NoopOpenTelemetryEntrypointKt {
 	public static final fun getNoopOpenTelemetry ()Lio/opentelemetry/kotlin/OpenTelemetry;
 }
 
+public final class io/opentelemetry/kotlin/propagation/NoopTextMapPropagator : io/opentelemetry/kotlin/propagation/TextMapPropagator {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/propagation/NoopTextMapPropagator;
+	public fun extract (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/Object;Lio/opentelemetry/kotlin/propagation/TextMapGetter;)Lio/opentelemetry/kotlin/context/Context;
+	public fun fields ()Ljava/util/Collection;
+	public fun inject (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/Object;Lio/opentelemetry/kotlin/propagation/TextMapSetter;)V
+}
+

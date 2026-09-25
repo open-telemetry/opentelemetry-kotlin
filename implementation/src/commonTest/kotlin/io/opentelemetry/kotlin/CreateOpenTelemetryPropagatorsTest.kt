@@ -1,8 +1,6 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.propagation.FakeTextMapPropagator
-import io.opentelemetry.kotlin.propagation.Propagators
-import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.propagation.W3CBaggagePropagator
 import io.opentelemetry.kotlin.propagation.createPropagators
 import kotlin.test.Test
@@ -10,10 +8,6 @@ import kotlin.test.assertSame
 
 @OptIn(ExperimentalApi::class)
 internal class CreateOpenTelemetryPropagatorsTest {
-
-    private class FakePropagators(private val none: TextMapPropagator) : Propagators {
-        override fun none(): TextMapPropagator = none
-    }
 
     @Test
     fun `default propagators are used when none are supplied`() {

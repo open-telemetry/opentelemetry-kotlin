@@ -15,6 +15,7 @@ import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.MeterProvider
+import io.opentelemetry.kotlin.propagation.Propagators
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.tracing.TracerProvider
 
@@ -32,8 +33,9 @@ internal class CompatOpenTelemetryImpl(
     override val idGenerator: IdGenerator,
     override val resource: ResourceFactory,
     override val propagator: TextMapPropagator,
+    private val propagators: Propagators,
     sdkErrorHandler: SdkErrorHandler,
-) : OpenTelemetrySdk {
+) : OpenTelemetrySdk, Propagators by propagators {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
 

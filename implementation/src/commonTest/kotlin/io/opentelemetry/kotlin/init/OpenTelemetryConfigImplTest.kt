@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.init
 
-import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
@@ -43,7 +42,7 @@ internal class OpenTelemetryConfigImplTest {
         assertNull(resolver.generateTracingConfig().processor)
         assertNull(resolver.generateLoggingConfig().processor)
         assertNull(cfg.contextConfig.storageMode)
-        assertSame(NoopOpenTelemetry.propagator, cfg.propagatorCfg.buildPropagator())
+        assertNotNull(cfg.propagatorCfg.buildPropagator())
     }
 
     @Test

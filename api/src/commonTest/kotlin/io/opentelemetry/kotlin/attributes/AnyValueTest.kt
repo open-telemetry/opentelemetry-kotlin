@@ -1,7 +1,8 @@
-@file:OptIn(io.opentelemetry.kotlin.ExperimentalApi::class)
+@file:OptIn(ExperimentalApi::class)
 
 package io.opentelemetry.kotlin.attributes
 
+import io.opentelemetry.kotlin.ExperimentalApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals

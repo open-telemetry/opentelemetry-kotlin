@@ -19,7 +19,9 @@ import io.opentelemetry.kotlin.factory.CompatTraceStateFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.logging.LoggerProviderAdapter
 import io.opentelemetry.kotlin.metrics.MeterProviderAdapter
+import io.opentelemetry.kotlin.propagation.Propagators
 import io.opentelemetry.kotlin.propagation.TextMapPropagatorAdapter
+import io.opentelemetry.kotlin.propagation.createPropagators
 import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
 
 /**
@@ -34,7 +36,8 @@ import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
  */
 @ExperimentalApi
 public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
-    clock: Clock = ClockAdapter(OtelJavaClock.getDefault())
+    clock: Clock = ClockAdapter(OtelJavaClock.getDefault()),
+    propagators: Propagators = createPropagators(),
 ): OpenTelemetry {
     val idGenerator = CompatIdGenerator()
     val traceFlags = CompatTraceFlagsFactory()
@@ -60,7 +63,8 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
         baggage = CompatBaggageFactory(),
         idGenerator = idGenerator,
         resource = CompatResourceFactory,
-        propagator = TextMapPropagatorAdapter(propagators.textMapPropagator),
+        propagator = TextMapPropagatorAdapter(this.propagators.textMapPropagator),
+        propagators = propagators,
         sdkErrorHandler = NoopSdkErrorHandler,
     )
 }

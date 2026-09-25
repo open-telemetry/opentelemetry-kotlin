@@ -11,8 +11,6 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                api(project(":api"))
-                implementation(project(":noop"))
             }
         }
         commonTest {

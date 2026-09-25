@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.propagation
 
-import io.opentelemetry.kotlin.NoopOpenTelemetry
+import io.opentelemetry.kotlin.context.FakeContext
 import kotlin.test.Test
 import kotlin.test.assertNotSame
 import kotlin.test.assertSame
@@ -29,13 +29,13 @@ internal class PropagatorsEntrypointTest {
     @Test
     fun `none injects nothing`() {
         val carrier = mutableMapOf<String, String>()
-        propagators.none().inject(NoopOpenTelemetry.context.root(), carrier, FakeTextMapSetter)
+        propagators.none().inject(FakeContext(), carrier, FakeTextMapSetter)
         assertTrue(carrier.isEmpty())
     }
 
     @Test
     fun `none extracts nothing`() {
-        val context = NoopOpenTelemetry.context.root()
+        val context = FakeContext()
         val carrier = mapOf("traceparent" to "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01")
         assertSame(context, propagators.none().extract(context, carrier, FakeTextMapGetter))
     }

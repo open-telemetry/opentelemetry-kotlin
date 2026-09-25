@@ -41,6 +41,7 @@ internal object NoopOpenTelemetryImpl : OpenTelemetrySdk {
     override val idGenerator: IdGenerator = NoopIdGenerator
     override val resource: ResourceFactory = NoopResourceFactory
     override val propagator: TextMapPropagator = NoopTextMapPropagator
+    override fun none(): TextMapPropagator = NoopTextMapPropagator
 
     override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
     override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success

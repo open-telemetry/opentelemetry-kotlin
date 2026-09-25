@@ -1,6 +1,10 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.factory.BaggageFactory
+import io.opentelemetry.kotlin.factory.SpanContextFactory
+import io.opentelemetry.kotlin.factory.TraceFlagsFactory
+import io.opentelemetry.kotlin.factory.TraceStateFactory
 
 /**
  * Constructs Propagator instances. This does not require an
@@ -11,7 +15,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * https://opentelemetry.io/docs/specs/otel/context/api-propagators/
  */
 @ExperimentalApi
-public interface Propagators {
+public interface Propagators : PropagatorFactory {
 
     /**
      * Returns a [TextMapPropagator] that injects and extracts nothing.
@@ -19,4 +23,24 @@ public interface Propagators {
      * https://opentelemetry.io/docs/specs/otel/context/api-propagators/#textmap-propagator
      */
     public fun none(): TextMapPropagator
+
+    /**
+     * Factory that constructs SpanContext objects.
+     */
+    public val spanContext: SpanContextFactory
+
+    /**
+     * Factory that constructs TraceFlags objects.
+     */
+    public val traceFlags: TraceFlagsFactory
+
+    /**
+     * Factory that constructs TraceState objects.
+     */
+    public val traceState: TraceStateFactory
+
+    /**
+     * Factory that constructs Baggage objects.
+     */
+    public val baggage: BaggageFactory
 }

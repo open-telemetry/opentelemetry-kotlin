@@ -6,3 +6,14 @@ plugins {
     id("com.vanniktech.maven.publish")
     id("org.jetbrains.kotlinx.kover")
 }
+
+kotlin {
+    sourceSets {
+        commonMain {
+            dependencies {
+                api(project(":api-propagators"))
+            }
+        }
+    }
+}
+

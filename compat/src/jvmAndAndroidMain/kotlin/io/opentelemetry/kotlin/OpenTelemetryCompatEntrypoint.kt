@@ -12,6 +12,8 @@ import io.opentelemetry.kotlin.init.CompatOpenTelemetryConfig
 import io.opentelemetry.kotlin.init.CompatSdkConfigFactory
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 import io.opentelemetry.kotlin.init.defaultCompatBehaviorReader
+import io.opentelemetry.kotlin.propagation.Propagators
+import io.opentelemetry.kotlin.propagation.createPropagators
 
 /**
  * Constructs an [OpenTelemetry] instance that exposes OpenTelemetry as a Kotlin API. The SDK is
@@ -25,6 +27,13 @@ import io.opentelemetry.kotlin.init.defaultCompatBehaviorReader
 @ExperimentalApi
 public fun createCompatOpenTelemetry(
     clock: Clock = ClockAdapter(io.opentelemetry.sdk.common.Clock.getDefault()),
+
+    /**
+     * Defines the [Propagators] that OpenTelemetry constructs its propagators from. Pass an
+     * instance obtained from [createPropagators] to share it with code that ran before the SDK was
+     * initialized.
+     */
+    propagators: Propagators = createPropagators(),
     config: OpenTelemetryConfigDsl.() -> Unit = {}
 ): OpenTelemetry {
     val traceFlags = CompatTraceFlagsFactory()
@@ -54,5 +63,6 @@ public fun createCompatOpenTelemetry(
         resource = CompatResourceFactory,
         propagator = cfg.propagatorCfg.buildPropagator(),
         sdkErrorHandler = cfg.sdkErrorHandler,
+        propagators = propagators,
     )
 }

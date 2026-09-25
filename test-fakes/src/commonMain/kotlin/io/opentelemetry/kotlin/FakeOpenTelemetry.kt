@@ -41,6 +41,7 @@ class FakeOpenTelemetry : OpenTelemetrySdk {
     override val idGenerator: IdGenerator = FakeIdGenerator()
     override val resource: ResourceFactory = FakeResourceFactory()
     override val propagator: TextMapPropagator = FakeTextMapPropagator()
+    override fun none(): TextMapPropagator = FakeTextMapPropagator()
 
     var forceFlushCount: Int = 0
         private set
