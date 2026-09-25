@@ -10,9 +10,11 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":api-ext"))
-            implementation(project(":test-fakes"))
             implementation(project(":semconv"))
             implementation(libs.kotlin.serialization)
+        }
+        commonTest.dependencies {
+            implementation(project(":test-fakes"))
         }
     }
 }
