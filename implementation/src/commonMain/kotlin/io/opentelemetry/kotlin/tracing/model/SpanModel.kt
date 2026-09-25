@@ -117,7 +117,11 @@ internal class SpanModel(
     }
 
     override fun end(timestamp: Long) {
-        endInternal(timestamp)
+        if (timestamp == 0L) {
+            end()
+        } else {
+            endInternal(timestamp)
+        }
     }
 
     @Suppress("NOTHING_TO_INLINE")
