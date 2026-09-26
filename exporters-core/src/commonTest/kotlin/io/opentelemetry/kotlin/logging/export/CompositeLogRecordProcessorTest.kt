@@ -8,9 +8,11 @@ import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
 import kotlinx.coroutines.test.runTest
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -219,5 +221,41 @@ internal class CompositeLogRecordProcessorTest {
         val second = FakeLogRecordProcessor(enabledResult = { true })
         val processor = CompositeLogRecordProcessor(listOf(first, second), errorHandler)
         assertTrue(processor.enabled(fakeContext, scopeInfo, null, null))
+    }
+
+    @Test
+    fun testEnabledThrowingProcessorDefaultsToEnabled() {
+        val failure = IllegalStateException("enabled failed")
+        val first = FakeLogRecordProcessor(enabledResult = { false })
+        val second = FakeLogRecordProcessor(enabledResult = { throw failure })
+        val processor = CompositeLogRecordProcessor(listOf(first, second), errorHandler)
+
+        assertTrue(processor.enabled(fakeContext, scopeInfo, null, null))
+        assertEquals(1, errorHandler.userCodeErrors.size)
+        assertSame(failure, errorHandler.userCodeErrors.single().cause)
+        assertEquals("LogRecordProcessor.enabled failed", errorHandler.userCodeErrors.single().message)
+    }
+
+    @Test
+    fun testEnabledShortCircuitsBeforeThrowingProcessor() {
+        val first = FakeLogRecordProcessor(enabledResult = { true })
+        val second = FakeLogRecordProcessor(enabledResult = { error("must not be called") })
+        val processor = CompositeLogRecordProcessor(listOf(first, second), errorHandler)
+
+        assertTrue(processor.enabled(fakeContext, scopeInfo, null, null))
+        assertFalse(errorHandler.hasErrors())
+    }
+
+    @Test
+    fun testEnabledCancellationPropagates() {
+        val cancellation = CancellationException("cancelled")
+        val delegate = FakeLogRecordProcessor(enabledResult = { throw cancellation })
+        val processor = CompositeLogRecordProcessor(listOf(delegate), errorHandler)
+
+        val thrown = assertFailsWith<CancellationException> {
+            processor.enabled(fakeContext, scopeInfo, null, null)
+        }
+        assertSame(cancellation, thrown)
+        assertFalse(errorHandler.hasErrors())
     }
 }
