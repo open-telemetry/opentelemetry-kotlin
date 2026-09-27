@@ -10,6 +10,39 @@ internal class BehaviorResolverImplTest {
     private val resolver = BehaviorResolverImpl()
 
     @Test
+    fun dslRefinesDeclarativeBatchSettingsAndPreservesExporter() {
+        val http = OtlpHttpExporterBehavior(endpoint = "https://example.com")
+        val resolved = resolver.resolve(
+            envars = OpenTelemetryBehavior(
+                loggerProvider = LoggerProviderBehavior(
+                    processor = LogRecordProcessorBehavior(
+                        batch = BatchLogRecordProcessorBehavior(exportTimeout = 60_000),
+                    ),
+                ),
+            ),
+            declarativeFile = OpenTelemetryBehavior(
+                loggerProvider = LoggerProviderBehavior(
+                    processor = LogRecordProcessorBehavior(
+                        http = http,
+                        batch = BatchLogRecordProcessorBehavior(scheduleDelay = 1_000, maxQueueSize = 2_048),
+                    ),
+                ),
+            ),
+            dsl = OpenTelemetryBehavior(
+                loggerProvider = LoggerProviderBehavior(
+                    processor = LogRecordProcessorBehavior(
+                        batch = BatchLogRecordProcessorBehavior(scheduleDelay = 0),
+                    ),
+                ),
+            ),
+        )
+
+        val processor = resolved.loggerProvider?.processor
+        assertEquals(http, processor?.http)
+        assertEquals(BatchLogRecordProcessorBehavior(scheduleDelay = 0, maxQueueSize = 2_048), processor?.batch)
+    }
+
+    @Test
     fun leavesEverythingUnsetWhenNoLayerConfiguresAnything() {
         val resolved = resolver.resolve(envars = null, declarativeFile = null, dsl = null)
 

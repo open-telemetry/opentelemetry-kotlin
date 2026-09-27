@@ -7,6 +7,38 @@ import kotlin.test.assertNull
 internal class LogRecordProcessorBehaviorTest {
 
     @Test
+    fun batchStartsUnsetAndRemainsUnsetWhenNeitherLayerConfiguresIt() {
+        val empty = LogRecordProcessorBehavior()
+
+        assertNull(empty.batch)
+        assertNull(empty.mergeWith(empty).batch)
+    }
+
+    @Test
+    fun adoptsBatchFromWhicheverLayerSuppliedIt() {
+        val batch = BatchLogRecordProcessorBehavior(scheduleDelay = 1_000)
+        val configured = LogRecordProcessorBehavior(batch = batch)
+        val empty = LogRecordProcessorBehavior()
+
+        assertEquals(configured, configured.mergeWith(empty))
+        assertEquals(configured, empty.mergeWith(configured))
+    }
+
+    @Test
+    fun mergesBatchSettingsWithoutDroppingExporterConfiguration() {
+        val http = OtlpHttpExporterBehavior(endpoint = "https://example.com")
+        val merged = LogRecordProcessorBehavior(
+            http = http,
+            batch = BatchLogRecordProcessorBehavior(scheduleDelay = 1_000, maxQueueSize = 2_048),
+        ).mergeWith(
+            LogRecordProcessorBehavior(batch = BatchLogRecordProcessorBehavior(scheduleDelay = 2_000)),
+        )
+
+        assertEquals(http, merged.http)
+        assertEquals(BatchLogRecordProcessorBehavior(scheduleDelay = 2_000, maxQueueSize = 2_048), merged.batch)
+    }
+
+    @Test
     fun consoleStartsUnset() {
         assertNull(LogRecordProcessorBehavior().console)
     }
