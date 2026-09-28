@@ -24,6 +24,7 @@ kotlin {
                 implementation(project(":sdk-common"))
                 implementation(project(":exporters-protobuf"))
                 implementation(project(":exporters-json"))
+                implementation(project(":serializable-models"))
                 implementation(project(":platform-implementations"))
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.cio)

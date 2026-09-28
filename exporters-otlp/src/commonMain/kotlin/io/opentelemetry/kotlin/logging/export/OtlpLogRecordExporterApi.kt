@@ -4,7 +4,9 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.export.EXPORT_INITIAL_DELAY_MS
 import io.opentelemetry.kotlin.export.EXPORT_MAX_ATTEMPTS
 import io.opentelemetry.kotlin.export.EXPORT_MAX_ATTEMPT_INTERVAL_MS
+import io.opentelemetry.kotlin.export.OtlpFileExporterConfigDsl
 import io.opentelemetry.kotlin.export.OtlpHttpExporterConfigDsl
+import io.opentelemetry.kotlin.export.createOtlpFileExporter
 import io.opentelemetry.kotlin.export.createOtlpHttpClient
 import io.opentelemetry.kotlin.init.LogExportConfigDsl
 
@@ -21,4 +23,19 @@ public fun LogExportConfigDsl.otlpHttpLogRecordExporter(
         EXPORT_MAX_ATTEMPT_INTERVAL_MS,
         EXPORT_MAX_ATTEMPTS,
         sdkErrorHandler,
+    )
+
+/**
+ * Creates a log record exporter that writes telemetry to a file.
+ */
+@ExperimentalApi
+public fun LogExportConfigDsl.otlpFileLogRecordExporter(
+    block: OtlpFileExporterConfigDsl.() -> Unit
+): LogRecordExporter =
+    OtlpFileLogRecordExporter(
+        fileExporter = createOtlpFileExporter(block),
+        initialDelayMs = EXPORT_INITIAL_DELAY_MS,
+        maxAttemptIntervalMs = EXPORT_MAX_ATTEMPT_INTERVAL_MS,
+        maxAttempts = EXPORT_MAX_ATTEMPTS,
+        sdkErrorHandler = sdkErrorHandler
     )
