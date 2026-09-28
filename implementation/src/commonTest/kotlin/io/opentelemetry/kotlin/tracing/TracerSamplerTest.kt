@@ -58,7 +58,6 @@ internal class TracerSamplerTest {
         processor = processor,
         contextFactory = contextFactory,
         spanContextFactory = spanContextFactory,
-        traceFlagsFactory = TraceFlagsFactoryImpl(),
         scope = key,
         resource = FakeResource(),
         spanLimitConfig = limitsCfg,

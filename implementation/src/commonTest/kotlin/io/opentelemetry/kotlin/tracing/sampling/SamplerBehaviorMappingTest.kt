@@ -31,7 +31,7 @@ internal class SamplerBehaviorMappingTest {
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean): Context {
         val traceFlags = if (sampled) {
-            traceFlagsFactory.default
+            TraceFlagsImpl(isSampled = true, isRandom = false)
         } else {
             TraceFlagsImpl(isSampled = false, isRandom = false)
         }

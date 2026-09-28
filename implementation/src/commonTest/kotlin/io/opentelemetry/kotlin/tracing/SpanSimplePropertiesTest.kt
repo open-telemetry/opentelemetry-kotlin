@@ -7,7 +7,6 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
-import io.opentelemetry.kotlin.factory.FakeTraceFlagsFactory
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.BeforeTest
@@ -28,7 +27,6 @@ internal class SpanSimplePropertiesTest {
             processor = FakeSpanProcessor(),
             contextFactory = FakeContextFactory(),
             spanContextFactory = FakeSpanContextFactory(),
-            traceFlagsFactory = FakeTraceFlagsFactory(),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

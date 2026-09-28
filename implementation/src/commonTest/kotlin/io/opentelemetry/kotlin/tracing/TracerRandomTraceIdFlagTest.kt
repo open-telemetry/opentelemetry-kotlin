@@ -120,7 +120,6 @@ internal class TracerRandomTraceIdFlagTest {
             processor = FakeSpanProcessor(),
             contextFactory = ContextFactoryImpl(SpanFactoryImpl(spanContextFactory)),
             spanContextFactory = spanContextFactory,
-            traceFlagsFactory = traceFlagsFactory,
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

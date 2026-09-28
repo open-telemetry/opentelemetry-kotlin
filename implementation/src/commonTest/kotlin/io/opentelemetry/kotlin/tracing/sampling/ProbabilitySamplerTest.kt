@@ -114,7 +114,7 @@ internal class ProbabilitySamplerTest {
         val context = createParentContext(
             traceId = traceId,
             otTraceStateValue = "rv:$aboveThreshold",
-            flags = traceFlagsFactory.default
+            flags = TraceFlagsImpl(isSampled = true, isRandom = false)
         )
         val result = ProbabilitySampler(ratio, sdkErrorHandler).shouldSample(
             context = context,
@@ -133,7 +133,7 @@ internal class ProbabilitySamplerTest {
         val context = createParentContext(
             traceId = traceId,
             otTraceStateValue = "rv:garbage",
-            flags = traceFlagsFactory.default
+            flags = TraceFlagsImpl(isSampled = true, isRandom = false)
         )
         val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
             context = context,
@@ -152,7 +152,7 @@ internal class ProbabilitySamplerTest {
         val context = createParentContext(
             traceId = traceId,
             otTraceStateValue = "th:123",
-            flags = traceFlagsFactory.default
+            flags = TraceFlagsImpl(isSampled = true, isRandom = false)
         )
         val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
             context = context,
@@ -171,7 +171,7 @@ internal class ProbabilitySamplerTest {
         val context = createParentContext(
             traceId = traceId,
             otTraceStateValue = "rv:a0000000000000;th:c", // rv < th
-            flags = TraceFlagsImpl(isSampled = true, traceFlagsFactory.default.isRandom),
+            flags = TraceFlagsImpl(isSampled = true, isRandom = false),
         )
         val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
             context = context,

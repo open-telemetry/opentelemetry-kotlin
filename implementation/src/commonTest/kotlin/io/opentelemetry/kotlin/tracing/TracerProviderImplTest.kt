@@ -12,7 +12,6 @@ import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
-import io.opentelemetry.kotlin.factory.FakeTraceFlagsFactory
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.ResourceImpl
@@ -45,7 +44,6 @@ internal class TracerProviderImplTest {
             tracingConfig = tracingConfig,
             contextFactory = FakeContextFactory(),
             spanContextFactory = FakeSpanContextFactory(),
-            traceFlagsFactory = FakeTraceFlagsFactory(),
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
@@ -71,7 +69,6 @@ internal class TracerProviderImplTest {
             tracingConfig = config,
             contextFactory = FakeContextFactory(),
             spanContextFactory = FakeSpanContextFactory(),
-            traceFlagsFactory = FakeTraceFlagsFactory(),
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
@@ -167,7 +164,6 @@ internal class TracerProviderImplTest {
             tracingConfig = config,
             contextFactory = FakeContextFactory(),
             spanContextFactory = FakeSpanContextFactory(),
-            traceFlagsFactory = FakeTraceFlagsFactory(),
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
@@ -199,7 +195,6 @@ internal class TracerProviderImplTest {
             tracingConfig = config,
             contextFactory = FakeContextFactory(),
             spanContextFactory = FakeSpanContextFactory(),
-            traceFlagsFactory = FakeTraceFlagsFactory(),
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
@@ -271,7 +266,6 @@ internal class TracerProviderImplTest {
         tracingConfig = TracingConfig(processor, fakeSpanLimitsConfig, FakeResource(), errorHandler),
         contextFactory = FakeContextFactory(),
         spanContextFactory = FakeSpanContextFactory(),
-        traceFlagsFactory = FakeTraceFlagsFactory(),
         spanFactory = FakeSpanFactory(),
         idGenerator = FakeIdGenerator(),
         attributeLimits = AttributeLimitsBehavior(),

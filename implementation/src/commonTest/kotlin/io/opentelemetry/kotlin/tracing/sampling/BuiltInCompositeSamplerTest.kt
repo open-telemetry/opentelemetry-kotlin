@@ -40,7 +40,7 @@ internal class BuiltInCompositeSamplerTest {
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean, otValue: String? = null): Context {
         val traceFlags = if (sampled) {
-            traceFlagsFactory.default
+            TraceFlagsImpl(isSampled = true, isRandom = false)
         } else {
             TraceFlagsImpl(isSampled = false, isRandom = false)
         }

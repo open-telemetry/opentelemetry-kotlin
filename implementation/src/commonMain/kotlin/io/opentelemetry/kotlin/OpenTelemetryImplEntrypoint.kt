@@ -73,7 +73,6 @@ public fun createOpenTelemetry(
             tracingConfig = tracingConfig,
             contextFactory = contextFactory,
             spanContextFactory = spanContext,
-            traceFlagsFactory = traceFlags,
             spanFactory = span,
             idGenerator = idGenerator,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior()

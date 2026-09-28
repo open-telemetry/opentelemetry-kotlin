@@ -60,7 +60,6 @@ internal class LogContextTest {
             processor = FakeSpanProcessor(),
             contextFactory = contextFactory,
             spanContextFactory = spanContextFactory,
-            traceFlagsFactory = traceFlags,
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

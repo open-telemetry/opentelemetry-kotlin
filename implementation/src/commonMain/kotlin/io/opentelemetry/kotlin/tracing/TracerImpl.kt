@@ -14,7 +14,6 @@ import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.SPAN_ID_BYTES
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.TRACE_ID_BYTES
-import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.isValidSpanIdBytes
 import io.opentelemetry.kotlin.factory.isValidTraceIdBytes
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
@@ -33,7 +32,6 @@ internal class TracerImpl(
     private val processor: SpanProcessor?,
     private val contextFactory: ContextFactory,
     spanContextFactory: SpanContextFactory,
-    traceFlagsFactory: TraceFlagsFactory,
     private val idGenerator: IdGenerator,
     private val scope: InstrumentationScopeInfo,
     private val resource: Resource,
@@ -47,7 +45,7 @@ internal class TracerImpl(
     private val root = contextFactory.root()
     private val invalidSpanContext = spanContextFactory.invalid
     private val invalidSpan = NonRecordingSpan(invalidSpanContext, invalidSpanContext)
-    private val sampledFlags = traceFlagsFactory.default
+    private val sampledFlags = TraceFlagsImpl(isSampled = true, isRandom = false)
     private val sampledRandomFlags = TraceFlagsImpl(isSampled = true, isRandom = true)
     private val unsampledFlags = TraceFlagsImpl(isSampled = false, isRandom = false)
     private val unsampledRandomFlags = TraceFlagsImpl(isSampled = false, isRandom = true)

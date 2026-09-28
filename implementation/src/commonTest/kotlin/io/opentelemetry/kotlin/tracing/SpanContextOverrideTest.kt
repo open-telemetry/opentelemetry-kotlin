@@ -42,7 +42,6 @@ internal class SpanContextOverrideTest {
             processor = processor,
             contextFactory = contextFactory,
             spanContextFactory = spanContextFactory,
-            traceFlagsFactory = traceFlagsFactory,
             scope = scope,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,
@@ -53,7 +52,7 @@ internal class SpanContextOverrideTest {
         ctx = spanContextFactory.create(
             traceId = "0af7651916cd43dd8448eb211c80319c",
             spanId = "b7ad6b7169203331",
-            traceFlags = traceFlagsFactory.default,
+            traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
             traceState = traceStateFactory.default,
             isRemote = false,
         )

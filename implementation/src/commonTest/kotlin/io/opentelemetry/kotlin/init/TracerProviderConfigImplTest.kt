@@ -300,7 +300,7 @@ internal class TracerProviderConfigImplTest {
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean): Context {
         val traceFlags = when {
-            sampled -> traceFlagsFactory.default
+            sampled -> TraceFlagsImpl(isSampled = true, isRandom = false)
             else -> TraceFlagsImpl(isSampled = false, isRandom = false)
         }
         val parentSpanContext = spanContextFactory.create(

@@ -12,7 +12,7 @@ internal class TraceFlagsFactoryImplTest {
     fun testDefaultProperty() {
         val flags = factory.default
 
-        assertTrue(flags.isSampled)
+        assertFalse(flags.isSampled)
         assertFalse(flags.isRandom)
     }
 

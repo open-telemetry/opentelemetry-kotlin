@@ -148,7 +148,7 @@ internal class TracerInvalidIdTest {
         SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory).create(
             traceId = "12345678901234567890123456789012",
             spanId = "1234567890123456",
-            traceFlags = traceFlagsFactory.default,
+            traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
             traceState = traceStateFactory.default,
             isRemote = true,
         )
@@ -167,7 +167,6 @@ internal class TracerInvalidIdTest {
             processor = FakeSpanProcessor(),
             contextFactory = ContextFactoryImpl(SpanFactoryImpl(spanContextFactory)),
             spanContextFactory = spanContextFactory,
-            traceFlagsFactory = traceFlagsFactory,
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

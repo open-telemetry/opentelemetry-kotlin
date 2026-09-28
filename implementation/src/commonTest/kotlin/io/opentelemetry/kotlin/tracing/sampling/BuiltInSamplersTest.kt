@@ -49,7 +49,6 @@ internal class BuiltInSamplersTest {
         processor = FakeSpanProcessor(),
         contextFactory = contextFactory,
         spanContextFactory = spanContextFactory,
-        traceFlagsFactory = traceFlagsFactory,
         scope = scope,
         resource = FakeResource(),
         spanLimitConfig = fakeSpanLimitsConfig,
@@ -61,7 +60,7 @@ internal class BuiltInSamplersTest {
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean): Context {
         val traceFlags = when {
-            sampled -> traceFlagsFactory.default
+            sampled -> TraceFlagsImpl(isSampled = true, isRandom = false)
             else -> TraceFlagsImpl(isSampled = false, isRandom = false)
         }
         val parentSpanContext = spanContextFactory.create(
