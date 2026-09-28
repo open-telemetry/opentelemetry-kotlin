@@ -1,13 +1,13 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.clock.ClockAdapter
-import io.opentelemetry.kotlin.factory.CompatBaggageFactory
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.factory.CompatTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.CompatTraceStateFactory
+import io.opentelemetry.kotlin.factory.DefaultBaggageFactory
 import io.opentelemetry.kotlin.init.CompatOpenTelemetryConfig
 import io.opentelemetry.kotlin.init.CompatSdkConfigFactory
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
@@ -49,7 +49,7 @@ public fun createCompatOpenTelemetry(
         traceState = traceState,
         context = contextFactory,
         span = span,
-        baggage = CompatBaggageFactory(),
+        baggage = DefaultBaggageFactory,
         idGenerator = configFactory.idGenerator,
         resource = CompatResourceFactory,
         propagator = cfg.propagatorCfg.buildPropagator(),

@@ -3,8 +3,7 @@ package io.opentelemetry.kotlin.propagation
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.baggage.Baggage
 import io.opentelemetry.kotlin.baggage.BaggageEntry
-import io.opentelemetry.kotlin.baggage.BaggageEntryMetadataImpl
-import io.opentelemetry.kotlin.baggage.BaggageImpl
+import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.context.Context
 
 /**
@@ -84,13 +83,14 @@ public object W3CBaggagePropagator : TextMapPropagator {
     }
 
     private fun decode(header: String): Baggage? {
-        var baggage: Baggage = BaggageImpl.EMPTY
         val budget = HeaderBudget(MAX_HEADER_BYTES)
-        for (rawElement in header.split(ENTRY_DELIMITER)) {
-            val parsed = parseElementIfFits(rawElement, budget) ?: continue
-            baggage = baggage.set(parsed.key, parsed.value, BaggageEntryMetadataImpl(parsed.metadata))
+        val baggage = createBaggage {
+            for (rawElement in header.split(ENTRY_DELIMITER)) {
+                val parsed = parseElementIfFits(rawElement, budget) ?: continue
+                put(parsed.key, parsed.value, parsed.metadata)
+            }
         }
-        return baggage.takeIf { it !== BaggageImpl.EMPTY }
+        return baggage.takeIf { it.asMap().isNotEmpty() }
     }
 
     /**

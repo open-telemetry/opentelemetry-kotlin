@@ -2,10 +2,10 @@ package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaBaggage
-import io.opentelemetry.kotlin.baggage.BaggageAdapter
 import io.opentelemetry.kotlin.baggage.FakeBaggage
 import io.opentelemetry.kotlin.baggage.FakeBaggageEntry
 import io.opentelemetry.kotlin.baggage.FakeBaggageEntryMetadata
+import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import org.junit.Test
@@ -25,9 +25,10 @@ internal class CompatContextFactoryBaggageTest {
 
     @Test
     fun `storeBaggage then extractBaggage round-trips entries`() {
-        val baggage = BaggageAdapter(
-            OtelJavaBaggage.builder().put("user", "alice").put("region", "eu").build()
-        )
+        val baggage = createBaggage {
+            put("user", "alice")
+            put("region", "eu")
+        }
 
         val extracted = factory.root().storeBaggage(baggage).extractBaggage()
 
@@ -37,7 +38,7 @@ internal class CompatContextFactoryBaggageTest {
 
     @Test
     fun `clearBaggage on populated context yields empty baggage`() {
-        val baggage = BaggageAdapter(OtelJavaBaggage.builder().put("user", "alice").build())
+        val baggage = createBaggage { put("user", "alice") }
         val cleared = factory.root().storeBaggage(baggage).clearBaggage()
 
         assertTrue(cleared.extractBaggage().asMap().isEmpty())
@@ -46,7 +47,7 @@ internal class CompatContextFactoryBaggageTest {
 
     @Test
     fun `kotlin storeBaggage interops with otel-java fromContext`() {
-        val baggage = BaggageAdapter(OtelJavaBaggage.builder().put("user", "alice").build())
+        val baggage = createBaggage { put("user", "alice") }
         val stored = factory.root().storeBaggage(baggage)
 
         val javaBaggage = OtelJavaBaggage.fromContext(stored.toOtelJavaContext())
@@ -62,6 +63,28 @@ internal class CompatContextFactoryBaggageTest {
         val extracted = javaCtx.toOtelKotlinContext().extractBaggage()
 
         assertEquals("alice", extracted.getValue("user"))
+    }
+
+    @Test
+    fun `extractBaggage drops otel-java entries rejected by kotlin validation`() {
+        val javaBaggage = OtelJavaBaggage.builder().put("bad key", "b").put("good", "g").build()
+        val javaCtx = javaBaggage.storeInContext(factory.root().toOtelJavaContext())
+
+        val extracted = javaCtx.toOtelKotlinContext().extractBaggage()
+
+        assertNull(extracted.getValue("bad key"))
+        assertEquals("g", extracted.getValue("good"))
+    }
+
+    @Test
+    fun `modifying extracted baggage writes back only valid otel-java entries`() {
+        val javaBaggage = OtelJavaBaggage.builder().put("bad key", "b").put("good", "g").build()
+        val ctx = javaBaggage.storeInContext(factory.root().toOtelJavaContext()).toOtelKotlinContext()
+
+        val updated = ctx.storeBaggage(ctx.extractBaggage().set("user", "alice"))
+        val written = OtelJavaBaggage.fromContext(updated.toOtelJavaContext())
+
+        assertEquals(mapOf("good" to "g", "user" to "alice"), written.asMap().mapValues { it.value.value })
     }
 
     @Test

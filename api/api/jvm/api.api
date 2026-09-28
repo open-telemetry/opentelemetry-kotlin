@@ -120,6 +120,11 @@ public abstract interface class io/opentelemetry/kotlin/baggage/BaggageEntryMeta
 	public abstract fun getValue ()Ljava/lang/String;
 }
 
+public final class io/opentelemetry/kotlin/baggage/BaggageEntrypointKt {
+	public static final fun createBaggage (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/baggage/Baggage;
+	public static synthetic fun createBaggage$default (Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/baggage/Baggage;
+}
+
 public abstract interface class io/opentelemetry/kotlin/config/ConfigProperties {
 	public abstract fun getBoolean (Ljava/lang/String;)Ljava/lang/Boolean;
 	public abstract fun getBooleanList (Ljava/lang/String;)Ljava/util/List;

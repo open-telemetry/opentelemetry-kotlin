@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin
 
-import io.opentelemetry.kotlin.factory.CompatBaggageFactory
-import org.junit.Assert
+import io.opentelemetry.kotlin.baggage.createBaggage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertSame
@@ -28,7 +27,7 @@ internal class OpenTelemetrySdkTest {
     @Test
     fun `retrieve baggage factory`() {
         val sdk = createCompatOpenTelemetry()
-        Assert.assertTrue(sdk.baggage is CompatBaggageFactory)
+        assertSame(createBaggage(), sdk.baggage.empty())
 
         val baggage = sdk.baggage.create {
             put("user", "alice")

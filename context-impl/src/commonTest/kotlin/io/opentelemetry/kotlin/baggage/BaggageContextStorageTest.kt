@@ -17,12 +17,12 @@ internal class BaggageContextStorageTest {
 
     @Test
     fun `extractBaggage on root returns empty baggage`() {
-        assertSame(BaggageImpl.EMPTY, factory.root().extractBaggage())
+        assertSame(createBaggage(), factory.root().extractBaggage())
     }
 
     @Test
     fun `storeBaggage then extractBaggage round-trips entries`() {
-        val baggage = BaggageImpl.EMPTY.set("user", "alice").set("region", "eu")
+        val baggage = createBaggage().set("user", "alice").set("region", "eu")
         val stored = factory.root().storeBaggage(baggage)
 
         val extracted = stored.extractBaggage()
@@ -33,27 +33,27 @@ internal class BaggageContextStorageTest {
 
     @Test
     fun `clearBaggage on populated context yields empty baggage`() {
-        val populated = factory.root().storeBaggage(BaggageImpl.EMPTY.set("user", "alice"))
+        val populated = factory.root().storeBaggage(createBaggage().set("user", "alice"))
 
         val cleared = populated.clearBaggage()
 
-        assertSame(BaggageImpl.EMPTY, cleared.extractBaggage())
+        assertSame(createBaggage(), cleared.extractBaggage())
         assertNull(cleared.extractBaggage().getValue("user"))
     }
 
     @Test
     fun `storing baggage does not mutate original context`() {
         val root = factory.root()
-        val derived = root.storeBaggage(BaggageImpl.EMPTY.set("user", "alice"))
+        val derived = root.storeBaggage(createBaggage().set("user", "alice"))
 
         assertNotSame(root, derived)
-        assertSame(BaggageImpl.EMPTY, root.extractBaggage())
+        assertSame(createBaggage(), root.extractBaggage())
         assertEquals("alice", derived.extractBaggage().getValue("user"))
     }
 
     @Test
     fun `clearBaggage does not mutate original context`() {
-        val populated = factory.root().storeBaggage(BaggageImpl.EMPTY.set("user", "alice"))
+        val populated = factory.root().storeBaggage(createBaggage().set("user", "alice"))
 
         val cleared = populated.clearBaggage()
 

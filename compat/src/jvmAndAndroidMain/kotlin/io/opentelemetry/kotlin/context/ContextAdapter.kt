@@ -7,8 +7,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.baggage.Baggage
-import io.opentelemetry.kotlin.baggage.BaggageAdapter
 import io.opentelemetry.kotlin.baggage.toOtelJavaBaggage
+import io.opentelemetry.kotlin.baggage.toOtelKotlinBaggage
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.ext.storeInContext
@@ -49,7 +49,7 @@ internal class ContextAdapter(
         return ContextAdapter(baggage.toOtelJavaBaggage().storeInContext(impl), repository)
     }
 
-    override fun extractBaggage(): Baggage = BaggageAdapter(OtelJavaBaggage.fromContext(impl))
+    override fun extractBaggage(): Baggage = OtelJavaBaggage.fromContext(impl).toOtelKotlinBaggage()
 
     override fun clearBaggage(): Context =
         ContextAdapter(OtelJavaBaggage.empty().storeInContext(impl), repository)

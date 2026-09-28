@@ -1,11 +1,11 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.export.TelemetryCloseable
-import io.opentelemetry.kotlin.factory.BaggageFactoryImpl
 import io.opentelemetry.kotlin.factory.FakeBaggageFactory
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
@@ -23,7 +23,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
+import kotlin.test.assertSame
 
 @OptIn(ExperimentalApi::class)
 internal class OpenTelemetryImplTest {
@@ -171,7 +171,7 @@ internal class OpenTelemetryImplTest {
     @Test
     fun testBaggageFactory() {
         val api = createOpenTelemetry()
-        assertIs<BaggageFactoryImpl>(api.baggage)
+        assertSame(createBaggage(), api.baggage.empty())
 
         val baggage = api.baggage.create {
             put("user", "alice")
