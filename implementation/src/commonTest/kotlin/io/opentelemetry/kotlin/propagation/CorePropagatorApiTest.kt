@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
@@ -93,7 +92,6 @@ internal class CorePropagatorApiTest {
             traceStateFactory = traceStateFactory,
             spanContextFactory = spanContextFactory,
             spanFactory = spanFactory,
-            sdkErrorHandler = NoopSdkErrorHandler,
         )
     }
 }

@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.TraceStateImpl
 
@@ -20,10 +19,7 @@ public class TraceStateMarshaller(public val traceState: TraceState) {
     fun encode(): String = W3CTraceStateCodec.encode(state)
 
     companion object {
-        fun decode(
-            header: String,
-            @Suppress("UNUSED_PARAMETER") traceStateFactory: TraceStateFactory,
-        ): TraceStateMarshaller {
+        fun decode(header: String): TraceStateMarshaller {
             val decodedMap = W3CTraceStateCodec.decode(header)
             // Build TraceState directly from the decoded map to preserve order
             // Apply validation to filter out invalid entries

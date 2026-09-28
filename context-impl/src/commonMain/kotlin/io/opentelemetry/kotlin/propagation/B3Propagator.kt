@@ -4,10 +4,6 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.context.ContextKeyImpl
-import io.opentelemetry.kotlin.error.SdkError
-import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.error.SdkErrorSeverity
-import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
@@ -32,7 +28,6 @@ public class B3Propagator(
     private val traceStateFactory: TraceStateFactory,
     private val spanContextFactory: SpanContextFactory,
     private val spanFactory: SpanFactory,
-    private val sdkErrorHandler: SdkErrorHandler,
 ) : TextMapPropagator {
 
     override fun fields(): Collection<String> = when (format) {
@@ -97,37 +92,14 @@ public class B3Propagator(
         val header = getter.get(carrier, COMBINED_HEADER) ?: return null
         val parts = header.split(DELIMITER)
         if (parts.size !in 2..4) {
-            sdkErrorHandler.reportError(
-                SdkError.ApiMisuse(
-                    api = "B3Propagator.extractSingle",
-                    message = "B3 single header has wrong number of parts",
-                    severity = SdkErrorSeverity.WARNING,
-                )
-            )
             return null
         }
-        val traceId = normalizeTraceId(parts[0]) ?: run {
-            sdkErrorHandler.reportError(
-                SdkError.ApiMisuse(
-                    api = "B3Propagator.extractSingle",
-                    message = "B3 invalid traceId in single header",
-                    severity = SdkErrorSeverity.WARNING,
-                )
-            )
-            return null
-        }
+        val traceId = normalizeTraceId(parts[0]) ?: return null
         val rawSpanId = parts[1]
         val sampled = parts.getOrNull(2)
         val debug = sampled == "d"
         val spanContext = buildContext(debug, sampled, traceId, rawSpanId)
         if (!spanContext.isValid) {
-            sdkErrorHandler.reportError(
-                SdkError.ApiMisuse(
-                    api = "B3Propagator.extractSingle",
-                    message = "B3 invalid spanId in single header",
-                    severity = SdkErrorSeverity.WARNING,
-                )
-            )
             return null
         }
         return context.storeSpan(spanFactory.fromSpanContext(spanContext)).let {
@@ -138,29 +110,11 @@ public class B3Propagator(
     private fun <T> extractMulti(context: Context, carrier: T?, getter: TextMapGetter<T>): Context? {
         val rawTraceId = getter.get(carrier, TRACE_ID_HEADER)
         val rawSpanId = getter.get(carrier, SPAN_ID_HEADER) ?: return null
-        val traceId = normalizeTraceId(rawTraceId) ?: run {
-            if (rawTraceId != null) {
-                sdkErrorHandler.reportError(
-                    SdkError.ApiMisuse(
-                        api = "B3Propagator.extractMulti",
-                        message = "B3 invalid traceId in multi header",
-                        severity = SdkErrorSeverity.WARNING,
-                    )
-                )
-            }
-            return null
-        }
+        val traceId = normalizeTraceId(rawTraceId) ?: return null
         val debug = getter.get(carrier, DEBUG_HEADER) == "1"
         val sampled = getter.get(carrier, SAMPLED_HEADER)
         val spanContext = buildContext(debug, sampled, traceId, rawSpanId)
         if (!spanContext.isValid) {
-            sdkErrorHandler.reportError(
-                SdkError.ApiMisuse(
-                    api = "B3Propagator.extractMulti",
-                    message = "B3 invalid spanId in multi header",
-                    severity = SdkErrorSeverity.WARNING,
-                )
-            )
             return null
         }
         return context.storeSpan(spanFactory.fromSpanContext(spanContext)).let {

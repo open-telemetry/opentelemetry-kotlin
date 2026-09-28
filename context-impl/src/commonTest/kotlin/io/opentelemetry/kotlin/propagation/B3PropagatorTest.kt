@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
@@ -25,9 +24,9 @@ internal class B3PropagatorTest {
     private val contextFactory = ContextFactoryImpl(spanFactory)
 
     private val singlePropagator =
-        B3Propagator(B3Format.SINGLE, traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory, NoopSdkErrorHandler)
+        B3Propagator(B3Format.SINGLE, traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory)
     private val multiPropagator =
-        B3Propagator(B3Format.MULTI, traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory, NoopSdkErrorHandler)
+        B3Propagator(B3Format.MULTI, traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory)
 
     private val traceId = "0af7651916cd43dd8448eb211c80319c"
     private val spanId = "b7ad6b7169203331"
@@ -228,6 +227,32 @@ internal class B3PropagatorTest {
             multiPropagator.extract(
                 ctx,
                 mapOf("X-B3-TraceId" to traceId, "X-B3-SpanId" to "0".repeat(16), "X-B3-Sampled" to "1"),
+                FakeTextMapGetter,
+            )
+        )
+    }
+
+    @Test
+    fun `extract multi returns original context for invalid traceId`() {
+        val ctx = contextFactory.root()
+        assertSame(
+            ctx,
+            multiPropagator.extract(
+                ctx,
+                mapOf("X-B3-TraceId" to "not-a-valid-trace-id", "X-B3-SpanId" to spanId),
+                FakeTextMapGetter,
+            )
+        )
+    }
+
+    @Test
+    fun `extract multi returns original context for invalid spanId`() {
+        val ctx = contextFactory.root()
+        assertSame(
+            ctx,
+            multiPropagator.extract(
+                ctx,
+                mapOf("X-B3-TraceId" to traceId, "X-B3-SpanId" to "short"),
                 FakeTextMapGetter,
             )
         )

@@ -1,10 +1,6 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.error.SdkError
-import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.error.SdkErrorSeverity
-import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.tracing.TraceFlags
 
@@ -55,29 +51,13 @@ public class TraceParent private constructor(
             traceId: String,
             spanId: String,
             traceFlags: TraceFlags,
-            sdkErrorHandler: SdkErrorHandler,
         ): TraceParent? {
-            val errorMessage =
-                if (version.length != VERSION_LEN || !version.isLowerHex() || version == FORBIDDEN_VERSION) {
-                    "version must be $VERSION_LEN lowercase hex characters and not $FORBIDDEN_VERSION"
-                } else if (traceId.length != TRACE_ID_LEN || !traceId.isLowerHex()) {
-                    "traceId must be $TRACE_ID_LEN lowercase hex characters"
-                } else if (spanId.length != SPAN_ID_LEN || !spanId.isLowerHex()) {
-                    "spanId must be $SPAN_ID_LEN lowercase hex characters"
-                } else {
-                    null
-                }
-
-            return if (errorMessage == null) {
+            val valid = version.length == VERSION_LEN && version.isLowerHex() && version != FORBIDDEN_VERSION &&
+                traceId.length == TRACE_ID_LEN && traceId.isLowerHex() &&
+                spanId.length == SPAN_ID_LEN && spanId.isLowerHex()
+            return if (valid) {
                 TraceParent(version, traceId, spanId, traceFlags)
             } else {
-                sdkErrorHandler.reportError(
-                    SdkError.ApiMisuse(
-                        api = "TraceParent.create",
-                        message = errorMessage,
-                        severity = SdkErrorSeverity.WARNING,
-                    )
-                )
                 null
             }
         }
@@ -85,7 +65,6 @@ public class TraceParent private constructor(
         fun decode(
             header: String,
             traceFlagsFactory: TraceFlagsFactory,
-            sdkErrorHandler: SdkErrorHandler,
         ): TraceParent? {
             if (header.length < LEN_V00) {
                 return null
@@ -115,7 +94,6 @@ public class TraceParent private constructor(
                 traceId = parts[1],
                 spanId = parts[2],
                 traceFlags = traceFlagsFactory.fromHex(flagsStr),
-                sdkErrorHandler = sdkErrorHandler,
             )
         }
 

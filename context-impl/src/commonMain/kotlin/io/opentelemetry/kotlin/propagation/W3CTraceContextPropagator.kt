@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
@@ -19,7 +18,6 @@ public class W3CTraceContextPropagator(
     private val traceStateFactory: TraceStateFactory,
     private val spanContextFactory: SpanContextFactory,
     private val spanFactory: SpanFactory,
-    private val sdkErrorHandler: SdkErrorHandler,
 ) : TextMapPropagator {
 
     override fun fields(): Collection<String> = FIELDS
@@ -35,7 +33,6 @@ public class W3CTraceContextPropagator(
             traceId = spanContext.traceId,
             spanId = spanContext.spanId,
             traceFlags = spanContext.traceFlags,
-            sdkErrorHandler = sdkErrorHandler,
         )?.let {
             setter.set(carrier, TRACEPARENT, it.encode())
         }
@@ -48,12 +45,12 @@ public class W3CTraceContextPropagator(
 
     override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context {
         val rawTraceparent = getter.get(carrier, TRACEPARENT) ?: return context
-        val parsed = TraceParent.decode(rawTraceparent, traceFlagsFactory, sdkErrorHandler) ?: return context
+        val parsed = TraceParent.decode(rawTraceparent, traceFlagsFactory) ?: return context
 
         val rawTracestate = getter.get(carrier, TRACESTATE)
         val traceState = when (rawTracestate) {
             null -> traceStateFactory.default
-            else -> TraceStateMarshaller.decode(rawTracestate, traceStateFactory).traceState
+            else -> TraceStateMarshaller.decode(rawTracestate).traceState
         }
 
         val spanContext = spanContextFactory.create(

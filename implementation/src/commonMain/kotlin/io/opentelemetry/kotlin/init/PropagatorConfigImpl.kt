@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
@@ -64,14 +63,12 @@ internal class PropagatorConfigImpl(
         traceStateFactory: TraceStateFactory,
         spanContextFactory: SpanContextFactory,
         spanFactory: SpanFactory,
-        sdkErrorHandler: SdkErrorHandler,
     ) {
         w3cTraceContextImpl = W3CTraceContextPropagator(
             traceFlagsFactory = traceFlagsFactory,
             traceStateFactory = traceStateFactory,
             spanContextFactory = spanContextFactory,
             spanFactory = spanFactory,
-            sdkErrorHandler = sdkErrorHandler,
         )
         b3SingleImpl = B3Propagator(
             B3Format.SINGLE,
@@ -79,7 +76,6 @@ internal class PropagatorConfigImpl(
             traceStateFactory,
             spanContextFactory,
             spanFactory,
-            sdkErrorHandler,
         )
         b3MultiImpl = B3Propagator(
             B3Format.MULTI,
@@ -87,7 +83,6 @@ internal class PropagatorConfigImpl(
             traceStateFactory,
             spanContextFactory,
             spanFactory,
-            sdkErrorHandler,
         )
     }
 
