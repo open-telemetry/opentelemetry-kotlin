@@ -2,10 +2,12 @@ package io.opentelemetry.kotlin.config.yaml
 
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
 import io.opentelemetry.kotlin.config.schema.model.BatchLogRecordProcessor
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
 import io.opentelemetry.kotlin.config.schema.model.LogRecordExporter
 import io.opentelemetry.kotlin.config.schema.model.LogRecordProcessor
+import io.opentelemetry.kotlin.config.schema.model.OtlpHttpExporter
 import io.opentelemetry.kotlin.config.schema.model.SimpleLogRecordProcessor
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -30,6 +32,17 @@ internal class LogRecordProcessorMapperTest {
     }
 
     @Test
+    fun mapsHttpFromASimpleProcessor() {
+        val processors = listOf(
+            LogRecordProcessor(simple = SimpleLogRecordProcessor(exporter = httpExporter())),
+        )
+        assertEquals(
+            LogRecordProcessorBehavior(http = OtlpHttpExporterBehavior()),
+            processors.toBehavior(),
+        )
+    }
+
+    @Test
     fun mapsConsoleFromABatchProcessor() {
         val processors = listOf(
             LogRecordProcessor(batch = BatchLogRecordProcessor(exporter = consoleExporter())),
@@ -41,7 +54,16 @@ internal class LogRecordProcessorMapperTest {
     }
 
     @Test
-    fun leavesProcessorsWithoutConsoleUnset() {
+    fun mapsHttpFromABatchProcessor() {
+        val processors = listOf(LogRecordProcessor(batch = BatchLogRecordProcessor(exporter = httpExporter())))
+        assertEquals(
+            LogRecordProcessorBehavior(http = OtlpHttpExporterBehavior()),
+            processors.toBehavior(),
+        )
+    }
+
+    @Test
+    fun leavesProcessorsWithNoKnownExportersUnset() {
         val processors = listOf(
             LogRecordProcessor(simple = SimpleLogRecordProcessor(exporter = LogRecordExporter())),
         )
@@ -49,4 +71,5 @@ internal class LogRecordProcessorMapperTest {
     }
 
     private fun consoleExporter() = LogRecordExporter(console = ConsoleExporter())
+    private fun httpExporter() = LogRecordExporter(otlpHttp = OtlpHttpExporter())
 }

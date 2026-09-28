@@ -17,10 +17,14 @@ data class LogRecordProcessorBehavior(
      * HTTP log exporter.
      */
     val http: OtlpHttpExporterBehavior? = null,
+
+    /** Batching settings for the configured log exporter. */
+    val batch: BatchLogRecordProcessorBehavior? = null,
 ) : Behavior<LogRecordProcessorBehavior> {
 
     override fun mergeWith(higher: LogRecordProcessorBehavior): LogRecordProcessorBehavior = copy(
         console = mergeNode(console, higher.console),
         http = mergeNode(http, higher.http),
+        batch = mergeNode(batch, higher.batch),
     )
 }

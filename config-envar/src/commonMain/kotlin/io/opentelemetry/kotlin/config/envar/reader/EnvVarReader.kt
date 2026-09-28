@@ -23,6 +23,15 @@ class EnvVarReader(private val getEnvVar: (String) -> String?) {
             ?: Invalid(EnvVarReadWarning(name, "Invalid integer value '$value'; ignoring"))
     }
 
+    /**
+     * Reads the value of [name] as a [Long].
+     */
+    fun readLong(name: String): EnvVarReadResult<Long> = readString(name).flatMap { value ->
+        value.toLongOrNull()
+            ?.let(::Value)
+            ?: Invalid(EnvVarReadWarning(name, "Invalid long value '$value'; ignoring"))
+    }
+
     /** Reads the value of [name] as a Boolean. */
     fun readBoolean(name: String): EnvVarReadResult<Boolean> = readString(name).flatMap { value ->
         when {
@@ -56,5 +65,16 @@ internal fun EnvVarReader.readNonNegativeInt(name: String): EnvVarReadResult<Int
             Value(value)
         } else {
             Invalid(EnvVarReadWarning(name, "Negative integer value '$value' is not allowed; ignoring"))
+        }
+    }
+
+/** Reads a non-negative long value from [name]. */
+@ExperimentalApi
+internal fun EnvVarReader.readNonNegativeLong(name: String): EnvVarReadResult<Long> =
+    readLong(name).flatMap { value ->
+        if (value >= 0) {
+            Value(value)
+        } else {
+            Invalid(EnvVarReadWarning(name, "Negative long value '$value' is not allowed; ignoring"))
         }
     }

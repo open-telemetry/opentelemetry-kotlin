@@ -68,6 +68,7 @@ opentelemetry-bom = { group = "io.opentelemetry", name = "opentelemetry-bom", ve
 opentelemetry-bom-alpha = { group = "io.opentelemetry", name = "opentelemetry-bom-alpha", version.ref = "otel-alpha" }
 opentelemetry-api = { group = "io.opentelemetry", name = "opentelemetry-api"}
 opentelemetry-sdk = { group = "io.opentelemetry", name = "opentelemetry-sdk"}
+opentelemetry-exporter-logging = { group = "io.opentelemetry", name = "opentelemetry-exporter-logging"}
 opentelemetry-sdk-extension-incubator = { group = "io.opentelemetry", name = "opentelemetry-sdk-extension-incubator"}
 opentelemetry-extension-trace-propagators = { group = "io.opentelemetry", name = "opentelemetry-extension-trace-propagators" }
 kotlin-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }

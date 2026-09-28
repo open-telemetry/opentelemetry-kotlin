@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.init
 
+import io.opentelemetry.exporter.logging.SystemOutLogRecordExporter
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaLoggerConfig
@@ -14,6 +15,7 @@ import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.LogLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -27,6 +29,7 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
 import io.opentelemetry.kotlin.scope.toOtelKotlinInstrumentationScopeInfo
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
+import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor as OtelJavaSimpleLogRecordProcessor
 
 @ExperimentalApi
 internal class CompatLoggerProviderConfig(
@@ -48,6 +51,7 @@ internal class CompatLoggerProviderConfig(
     private val resourceAttrs = CompatAttributesModel()
     private var resourceSchemaUrl: String? = null
     private val logLimitsDsl = LogLimitsConfigDslImpl()
+    private var exportConfigured = false
 
     override fun resource(schemaUrl: String?, attributes: AttributesMutator.() -> Unit) {
         resourceSchemaUrl = schemaUrl
@@ -59,8 +63,19 @@ internal class CompatLoggerProviderConfig(
     }
 
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
+        exportConfigured = true
         val processor = LogExportConfigCompat(clock, sdkErrorHandler).action()
         builder.addLogRecordProcessor(OtelJavaLogRecordProcessorAdapter(processor))
+    }
+
+    internal fun applyResolvedProcessor(behavior: LogRecordProcessorBehavior?) {
+        if (exportConfigured || behavior?.console == null) {
+            return
+        }
+        exportConfigured = true
+        builder.addLogRecordProcessor(
+            OtelJavaSimpleLogRecordProcessor.create(SystemOutLogRecordExporter.create())
+        )
     }
 
     override fun logLimits(action: LogLimitsConfigDsl.() -> Unit) {

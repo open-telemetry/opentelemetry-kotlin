@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.init
 
+import io.opentelemetry.exporter.logging.LoggingSpanExporter
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaIdGenerator
@@ -15,6 +16,7 @@ import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -37,6 +39,7 @@ import io.opentelemetry.kotlin.tracing.sampling.OtelJavaSamplerAdapter
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplerAdapter
 import io.opentelemetry.kotlin.tracing.sampling.toSampler
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor as OtelJavaSimpleSpanProcessor
 
 @ExperimentalApi
 internal class CompatTracerProviderConfig(
@@ -51,6 +54,7 @@ internal class CompatTracerProviderConfig(
     private var resourceSchemaUrl: String? = null
     private val spanLimitsDsl = SpanLimitsConfigDslImpl()
     private var sampler: Sampler? = null
+    private var exportConfigured = false
 
     override var serviceName: String? = null
         set(value) {
@@ -72,6 +76,7 @@ internal class CompatTracerProviderConfig(
     }
 
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
+        exportConfigured = true
         val processor = TraceExportConfigCompat(clock, sdkErrorHandler).action()
         builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor))
     }
@@ -85,6 +90,14 @@ internal class CompatTracerProviderConfig(
             return
         }
         sampler = newSamplerDsl.toSampler(behavior)
+    }
+
+    internal fun applyResolvedProcessor(behavior: SpanProcessorBehavior?) {
+        if (exportConfigured || behavior?.console == null) {
+            return
+        }
+        exportConfigured = true
+        builder.addSpanProcessor(OtelJavaSimpleSpanProcessor.create(LoggingSpanExporter.create()))
     }
 
     private val newSamplerDsl: SamplerConfigDsl = object : SamplerConfigDsl {
