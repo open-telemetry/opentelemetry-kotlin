@@ -3,11 +3,11 @@ package io.opentelemetry.kotlin
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.DefaultBaggageFactory
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
 import io.opentelemetry.kotlin.init.SdkConfigFactory
@@ -50,9 +50,9 @@ public fun createOpenTelemetry(
     val configFactory = SdkConfigFactory(cfg, behavior, resourceFactory)
     val idGenerator = configFactory.idGenerator
 
-    val traceFlags = TraceFlagsFactoryImpl()
-    val traceState = TraceStateFactoryImpl()
-    val spanContext = SpanContextFactoryImpl(traceFlags, traceState)
+    val traceFlags = DefaultTraceFlagsFactory
+    val traceState = DefaultTraceStateFactory
+    val spanContext = DefaultSpanContextFactory
 
     val span = SpanFactoryImpl(spanContext)
     val contextFactory = ContextFactoryImpl(span, cfg.sdkErrorHandler, cfg.contextConfig::generateStorage)

@@ -1,10 +1,10 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.init.B3Format
 import io.opentelemetry.kotlin.init.PropagatorConfigImpl
 import kotlin.test.Test
@@ -16,9 +16,9 @@ import kotlin.test.assertSame
 internal class CorePropagatorApiTest {
 
     private val dsl = PropagatorConfigImpl()
-    private val traceFlagsFactory = TraceFlagsFactoryImpl()
-    private val traceStateFactory = TraceStateFactoryImpl()
-    private val spanContextFactory = SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory)
+    private val traceFlagsFactory = DefaultTraceFlagsFactory
+    private val traceStateFactory = DefaultTraceStateFactory
+    private val spanContextFactory = DefaultSpanContextFactory
     private val spanFactory = SpanFactoryImpl(spanContextFactory)
 
     @Test

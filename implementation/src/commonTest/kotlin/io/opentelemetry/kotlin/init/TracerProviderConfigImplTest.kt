@@ -11,11 +11,11 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.sdkDefaultAttributes
 import io.opentelemetry.kotlin.sdkDefaultSchemaUrl
@@ -47,9 +47,9 @@ internal class TracerProviderConfigImplTest {
     private val base = sdkDefaultResource()
     private val noSpanLimits = SpanLimitsBehavior()
 
-    private val traceFlagsFactory = TraceFlagsFactoryImpl()
-    private val traceStateFactory = TraceStateFactoryImpl()
-    private val spanContextFactory = SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory)
+    private val traceFlagsFactory = DefaultTraceFlagsFactory
+    private val traceStateFactory = DefaultTraceStateFactory
+    private val spanContextFactory = DefaultSpanContextFactory
     private val contextFactory = ContextFactoryImpl(SpanFactoryImpl(spanContextFactory))
 
     @Test

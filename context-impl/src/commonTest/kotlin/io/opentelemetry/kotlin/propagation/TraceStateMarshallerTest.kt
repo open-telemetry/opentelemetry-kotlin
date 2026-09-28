@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
+import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -13,7 +13,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class TraceStateMarshallerTest {
 
-    private val factory = TraceStateFactoryImpl()
+    private val factory = DefaultTraceStateFactory
 
     @Test
     fun `encode produces a single key=value list-member`() {

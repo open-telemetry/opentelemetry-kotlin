@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,7 +17,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class TraceParentTest {
 
-    private val flagsFactory = TraceFlagsFactoryImpl()
+    private val flagsFactory = DefaultTraceFlagsFactory
     private val traceId = "0af7651916cd43dd8448eb211c80319c"
     private val spanId = "b7ad6b7169203331"
     private val canonicalHeader = "00-$traceId-$spanId-01"
