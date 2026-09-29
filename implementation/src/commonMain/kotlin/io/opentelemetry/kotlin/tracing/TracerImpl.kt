@@ -24,6 +24,7 @@ import io.opentelemetry.kotlin.tracing.model.SpanModel
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
+import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision.DROP
 
 internal class TracerImpl(
     private val clock: Clock,
@@ -85,14 +86,28 @@ internal class TracerImpl(
                 val collector = SpanCreationCollector(spanLimitConfig)
                 action?.invoke(collector)
 
-                val result = sampler.shouldSample(
-                    context = ctx,
-                    traceIdBytes = traceIdBytes,
-                    name = name,
-                    spanKind = spanKind,
-                    attributes = collector.attributes,
-                    links = collector.links
-                )
+                val result = sdkErrorHandler.guardOrDefault(
+                    SamplingResultSnapshot(
+                        decision = DROP,
+                        attributes = emptyMap(),
+                        traceState = parentSpanContext.traceState,
+                    ),
+                    "Sampler.shouldSample failed",
+                ) {
+                    val samplingResult = sampler.shouldSample(
+                        context = ctx,
+                        traceIdBytes = traceIdBytes,
+                        name = name,
+                        spanKind = spanKind,
+                        attributes = collector.attributes,
+                        links = collector.links
+                    )
+                    SamplingResultSnapshot(
+                        decision = samplingResult.decision,
+                        attributes = samplingResult.attributes.attributes.toMap(),
+                        traceState = samplingResult.traceState,
+                    )
+                }
 
                 val sampled = result.decision == SamplingResult.Decision.RECORD_AND_SAMPLE
                 val spanContext = calculateSpanContext(
@@ -123,7 +138,7 @@ internal class TracerImpl(
                     initialDroppedLinksCount = collector.droppedLinksCount,
                     sdkErrorHandler = sdkErrorHandler
                 )
-                spanModel.setAttributes(result.attributes.attributes)
+                spanModel.setAttributes(result.attributes)
                 spanModel.setAttributes(collector.attributes.attributes)
                 sdkErrorHandler.guard {
                     processor?.takeIf(SpanProcessor::isStartRequired)
@@ -132,6 +147,12 @@ internal class TracerImpl(
                 CreatedSpan(spanModel)
             }
         }
+
+    private data class SamplingResultSnapshot(
+        val decision: SamplingResult.Decision,
+        val attributes: Map<String, Any>,
+        val traceState: TraceState,
+    )
 
     private fun calculateSpanContext(
         traceIdBytes: ByteArray,

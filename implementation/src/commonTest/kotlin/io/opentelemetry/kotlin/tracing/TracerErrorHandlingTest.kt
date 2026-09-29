@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.attributes.AttributeContainer
+import io.opentelemetry.kotlin.attributes.EmptyAttributeContainer
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
@@ -38,8 +39,6 @@ internal class TracerErrorHandlingTest {
         Case("trace ID generation throws", idGenerator = HostileIdGenerator(traceId = true)),
         Case("span ID generation throws", idGenerator = HostileIdGenerator(spanId = true)),
         Case("trace ID randomness flag throws", idGenerator = HostileIdGenerator(randomness = true)),
-        Case("sampler throws", sampler = HostileSampler()),
-        Case("sampling decision throws", sampler = HostileSampler(decisionOnly = true)),
         Case("span creation action throws", action = { boom() }),
     )
 
@@ -78,6 +77,32 @@ internal class TracerErrorHandlingTest {
         assertTrue(span.isRecording())
         assertEquals(1, errorHandler.userCodeErrors.size)
         assertEquals(1, processor.startCalls.size)
+    }
+
+    @Test
+    fun testHostileSamplerDropsSpanWithoutInvalidatingContext() {
+        listOf(
+            Case("sampler throws", sampler = HostileSampler(SamplingFailure.SAMPLER)),
+            Case("sampling decision throws", sampler = HostileSampler(SamplingFailure.DECISION)),
+            Case("sampling attributes throw", sampler = HostileSampler(SamplingFailure.ATTRIBUTES)),
+            Case("sampling trace state throws", sampler = HostileSampler(SamplingFailure.TRACE_STATE)),
+        ).forEach { case ->
+            val errorHandler = FakeSdkErrorHandler()
+            val processor = FakeSpanProcessor()
+            val tracer = createTracer(case, processor, errorHandler)
+
+            val span = tracer.startSpan("test-span")
+
+            assertIs<NonRecordingSpan>(span, case.name)
+            assertFalse(span.isRecording(), case.name)
+            assertTrue(span.spanContext.isValid, case.name)
+            assertTrue(processor.startCalls.isEmpty(), case.name)
+
+            val error = errorHandler.userCodeErrors.single()
+            assertEquals("Sampler.shouldSample failed", error.message, case.name)
+            assertEquals(SdkErrorSeverity.WARNING, error.severity, case.name)
+            assertEquals("boom", error.cause.message, case.name)
+        }
     }
 
     @Test
@@ -147,11 +172,15 @@ internal class TracerErrorHandlingTest {
         override val invalidSpanId: ByteArray = delegate.invalidSpanId
     }
 
-    /**
-     * Throws from [shouldSample], or - if [decisionOnly] - from the returned result instead.
-     */
+    private enum class SamplingFailure {
+        SAMPLER,
+        DECISION,
+        ATTRIBUTES,
+        TRACE_STATE,
+    }
+
     private class HostileSampler(
-        private val decisionOnly: Boolean = false,
+        private val failure: SamplingFailure,
     ) : Sampler {
         override fun shouldSample(
             context: Context,
@@ -160,21 +189,32 @@ internal class TracerErrorHandlingTest {
             spanKind: SpanKind,
             attributes: AttributeContainer,
             links: List<SpanLink>,
-        ): SamplingResult = when {
-            decisionOnly -> HostileSamplingResult()
-            else -> boom()
+        ): SamplingResult = when (failure) {
+            SamplingFailure.SAMPLER -> boom()
+            else -> HostileSamplingResult(failure)
         }
 
         override val description: String = "HostileSampler"
     }
 
-    private class HostileSamplingResult : SamplingResult {
+    private class HostileSamplingResult(
+        private val failure: SamplingFailure,
+    ) : SamplingResult {
         override val decision: SamplingResult.Decision
-            get() = boom()
+            get() = when (failure) {
+                SamplingFailure.DECISION -> boom()
+                else -> SamplingResult.Decision.DROP
+            }
         override val attributes: AttributeContainer
-            get() = boom()
+            get() = when (failure) {
+                SamplingFailure.ATTRIBUTES -> boom()
+                else -> EmptyAttributeContainer
+            }
         override val traceState: TraceState
-            get() = boom()
+            get() = when (failure) {
+                SamplingFailure.TRACE_STATE -> boom()
+                else -> FakeTraceState()
+            }
     }
 
     private class ThrowingSdkErrorHandler : SdkErrorHandler {
