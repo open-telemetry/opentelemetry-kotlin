@@ -9,22 +9,22 @@ import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.factory.CompatContextFactory
-import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
-import io.opentelemetry.kotlin.factory.CompatTraceFlagsFactory
-import io.opentelemetry.kotlin.factory.CompatTraceStateFactory
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.ext.storeInContext
+import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanAdapter
-import io.opentelemetry.kotlin.tracing.model.SpanContextAdapter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 internal class SpanExtTest {
 
-    private val spanContextFactory = CompatSpanContextFactory()
-    private val traceStateFactory = CompatTraceStateFactory()
-    private val traceFlagsFactory = CompatTraceFlagsFactory()
+    private val spanContextFactory = DefaultSpanContextFactory
+    private val traceStateFactory = DefaultTraceStateFactory
+    private val traceFlagsFactory = DefaultTraceFlagsFactory
     private val spanFactory = CompatSpanFactory(spanContextFactory)
     private val contextFactory = CompatContextFactory()
     private val generator = OtelJavaIdGenerator.random()
@@ -83,6 +83,6 @@ internal class SpanExtTest {
         assertSpanContextsMatch(spanContextFactory.invalid, observed)
 
         val retrievedSpan = ctx.extractSpan()
-        assertSpanContextsMatch(SpanContextAdapter(spanContext), retrievedSpan.spanContext)
+        assertSpanContextsMatch(spanContext.toOtelKotlinSpanContext(), retrievedSpan.spanContext)
     }
 }

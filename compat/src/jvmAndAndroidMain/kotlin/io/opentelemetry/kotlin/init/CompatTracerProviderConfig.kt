@@ -21,9 +21,9 @@ import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
-import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.OtelJavaIdGeneratorAdapter
 import io.opentelemetry.kotlin.resource.Resource
@@ -101,7 +101,7 @@ internal class CompatTracerProviderConfig(
     }
 
     private val newSamplerDsl: SamplerConfigDsl = object : SamplerConfigDsl {
-        override val spanFactory = CompatSpanFactory(CompatSpanContextFactory())
+        override val spanFactory = CompatSpanFactory(DefaultSpanContextFactory)
     }
 
     private fun setSampler(sampler: Sampler) {

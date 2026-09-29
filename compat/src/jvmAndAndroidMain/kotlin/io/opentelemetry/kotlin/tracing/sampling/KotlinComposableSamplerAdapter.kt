@@ -12,7 +12,7 @@ import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceState
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanLink
-import io.opentelemetry.kotlin.tracing.model.TraceStateAdapter
+import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinTraceState
 import java.util.function.Function
 
 /** Sentinel used when the delegate's intent is `null` (never sample); `R` is always < 2^56. */
@@ -45,7 +45,7 @@ internal class KotlinComposableSamplerAdapter(private val delegate: ComposableSa
             Function.identity()
         } else {
             Function { javaTraceState ->
-                traceStateProvider(TraceStateAdapter(javaTraceState), SamplingResult.Decision.RECORD_AND_SAMPLE)
+                traceStateProvider(javaTraceState.toOtelKotlinTraceState(), SamplingResult.Decision.RECORD_AND_SAMPLE)
                     .toOtelJavaTraceState()
             }
         }

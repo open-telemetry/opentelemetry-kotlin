@@ -14,8 +14,8 @@ import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaLinkData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
+import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinTraceState
 import io.opentelemetry.kotlin.tracing.model.SpanLink
-import io.opentelemetry.kotlin.tracing.model.TraceStateAdapter
 
 internal class SamplerAdapter(
     internal val impl: OtelJavaSampler,
@@ -52,9 +52,8 @@ internal class SamplerAdapter(
         return object : SamplingResult {
             override val decision = decision
             override val attributes: AttributeContainer = resultAttributes
-            override val traceState: TraceState = TraceStateAdapter(
-                result.getUpdatedTraceState(OtelJavaTraceState.getDefault()),
-            )
+            override val traceState: TraceState =
+                result.getUpdatedTraceState(OtelJavaTraceState.getDefault()).toOtelKotlinTraceState()
         }
     }
 }

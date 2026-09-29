@@ -6,7 +6,7 @@ import kotlin.test.assertTrue
 
 internal class TraceFlagsFactoryTest {
 
-    private val factory = CompatTraceFlagsFactory()
+    private val factory = DefaultTraceFlagsFactory
 
     @Test
     fun `default property`() {

@@ -15,7 +15,7 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
 import io.opentelemetry.kotlin.scope.toOtelKotlinInstrumentationScopeInfo
 import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.kotlin.tracing.model.SpanContextAdapter
+import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 
 @Suppress("UNUSED_PARAMETER")
 internal class ReadWriteLogRecordAdapter(
@@ -47,7 +47,7 @@ internal class ReadWriteLogRecordAdapter(
         }
 
     override var spanContext: SpanContext
-        get() = SpanContextAdapter(impl.spanContext)
+        get() = impl.spanContext.toOtelKotlinSpanContext()
         set(value) {
         }
 

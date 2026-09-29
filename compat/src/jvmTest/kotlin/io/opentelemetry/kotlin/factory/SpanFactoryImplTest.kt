@@ -7,9 +7,9 @@ import kotlin.test.assertTrue
 
 internal class SpanFactoryImplTest {
 
-    private val spanContextFactory = CompatSpanContextFactory()
-    private val traceStateFactory = CompatTraceStateFactory()
-    private val traceFlagsFactory = CompatTraceFlagsFactory()
+    private val spanContextFactory = DefaultSpanContextFactory
+    private val traceStateFactory = DefaultTraceStateFactory
+    private val traceFlagsFactory = DefaultTraceFlagsFactory
     private val contextFactory = CompatContextFactory()
     private val spanFactory = CompatSpanFactory(spanContextFactory)
 

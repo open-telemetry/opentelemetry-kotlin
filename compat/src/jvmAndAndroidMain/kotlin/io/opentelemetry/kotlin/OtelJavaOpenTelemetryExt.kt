@@ -11,11 +11,11 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
-import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
-import io.opentelemetry.kotlin.factory.CompatTraceFlagsFactory
-import io.opentelemetry.kotlin.factory.CompatTraceStateFactory
 import io.opentelemetry.kotlin.factory.DefaultBaggageFactory
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.logging.LoggerProviderAdapter
 import io.opentelemetry.kotlin.metrics.MeterProviderAdapter
@@ -37,9 +37,9 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
     clock: Clock = ClockAdapter(OtelJavaClock.getDefault())
 ): OpenTelemetry {
     val idGenerator = CompatIdGenerator()
-    val traceFlags = CompatTraceFlagsFactory()
-    val traceState = CompatTraceStateFactory()
-    val spanContext = CompatSpanContextFactory()
+    val traceFlags = DefaultTraceFlagsFactory
+    val traceState = DefaultTraceStateFactory
+    val spanContext = DefaultSpanContextFactory
     val contextFactory = CompatContextFactory()
     val span = CompatSpanFactory(spanContext)
     return CompatOpenTelemetryImpl(

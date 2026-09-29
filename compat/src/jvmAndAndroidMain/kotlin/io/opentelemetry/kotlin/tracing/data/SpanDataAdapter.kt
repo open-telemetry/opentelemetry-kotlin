@@ -9,17 +9,17 @@ import io.opentelemetry.kotlin.scope.toOtelKotlinInstrumentationScopeInfo
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.StatusData
+import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
-import io.opentelemetry.kotlin.tracing.model.SpanContextAdapter
 
 internal class SpanDataAdapter(
     val impl: OtelJavaSpanData,
 ) : SpanData {
     override val name: String = impl.name
     override val status: StatusData = impl.status.toOtelKotlinStatusData()
-    override val parent: SpanContext = SpanContextAdapter(impl.parentSpanContext)
-    override val spanContext: SpanContext = SpanContextAdapter(impl.spanContext)
+    override val parent: SpanContext = impl.parentSpanContext.toOtelKotlinSpanContext()
+    override val spanContext: SpanContext = impl.spanContext.toOtelKotlinSpanContext()
     override val spanKind: SpanKind = impl.kind.toOtelKotlinSpanKind()
     override val startTimestamp: Long = impl.startEpochNanos
     override val endTimestamp: Long? = impl.endEpochNanos

@@ -11,8 +11,8 @@ import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaLinkData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceState
+import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinTraceState
 import io.opentelemetry.kotlin.tracing.model.SpanLink
-import io.opentelemetry.kotlin.tracing.model.TraceStateAdapter
 
 internal class OtelJavaBackedComposableSampler(internal val impl: OtelJavaComposableSampler) : ComposableSampler {
 
@@ -52,7 +52,7 @@ internal class OtelJavaBackedComposableSampler(internal val impl: OtelJavaCompos
                 javaTraceStateUpdater?.let { updater ->
                     {
                             traceState, _ ->
-                        TraceStateAdapter(updater.apply(traceState.toOtelJavaTraceState()))
+                        updater.apply(traceState.toOtelJavaTraceState()).toOtelKotlinTraceState()
                     }
                 }
         }

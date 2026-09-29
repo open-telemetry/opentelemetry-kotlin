@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 
 internal class TraceStateFactoryTest {
 
-    private val factory = CompatTraceStateFactory()
+    private val factory = DefaultTraceStateFactory
 
     @Test
     fun `test valid`() {

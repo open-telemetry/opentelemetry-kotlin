@@ -6,9 +6,9 @@ import kotlin.test.assertSame
 
 internal class SpanContextFactoryTest {
 
-    private val spanContextFactory = CompatSpanContextFactory()
-    private val traceFlagsFactory = CompatTraceFlagsFactory()
-    private val traceStateFactory = CompatTraceStateFactory()
+    private val spanContextFactory = DefaultSpanContextFactory
+    private val traceFlagsFactory = DefaultTraceFlagsFactory
+    private val traceStateFactory = DefaultTraceStateFactory
 
     @Test
     fun `test invalid`() {

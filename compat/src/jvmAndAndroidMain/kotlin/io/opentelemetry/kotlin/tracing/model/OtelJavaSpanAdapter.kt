@@ -14,6 +14,7 @@ import io.opentelemetry.kotlin.attributes.setTypedAttribute
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
+import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
 import java.util.concurrent.TimeUnit
 
@@ -48,7 +49,7 @@ internal class OtelJavaSpanAdapter(private val span: Span) : OtelJavaSpan, OtelJ
         spanContext: OtelJavaSpanContext,
         attributes: OtelJavaAttributes
     ): OtelJavaSpan {
-        span.addLink(SpanContextAdapter(spanContext)) {
+        span.addLink(spanContext.toOtelKotlinSpanContext()) {
             setTypedAttributes(attributes.convertToMap())
         }
         return this
