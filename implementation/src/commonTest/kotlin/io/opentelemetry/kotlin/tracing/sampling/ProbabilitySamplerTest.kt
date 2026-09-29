@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
@@ -22,7 +21,6 @@ import kotlin.test.assertFailsWith
 internal class ProbabilitySamplerTest {
 
     private val idGenerator = IdGeneratorImpl()
-    private val traceFlagsFactory = DefaultTraceFlagsFactory
     private val traceStateFactory = DefaultTraceStateFactory
     private val spanContextFactory = DefaultSpanContextFactory
     private val spanFactory = SpanFactoryImpl(spanContextFactory)

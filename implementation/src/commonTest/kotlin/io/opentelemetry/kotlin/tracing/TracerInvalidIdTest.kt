@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
@@ -28,7 +27,6 @@ import kotlin.test.assertTrue
 internal class TracerInvalidIdTest {
 
     private val key = InstrumentationScopeInfoImpl("key", null, null, emptyMap())
-    private val traceFlagsFactory = DefaultTraceFlagsFactory
     private val traceStateFactory = DefaultTraceStateFactory
     private val zeroTraceId = "0".repeat(32)
     private val zeroSpanId = "0".repeat(16)
