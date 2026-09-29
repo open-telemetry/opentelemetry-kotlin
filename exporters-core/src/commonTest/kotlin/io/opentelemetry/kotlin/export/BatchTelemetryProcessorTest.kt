@@ -167,6 +167,26 @@ internal class BatchTelemetryProcessorTest {
     }
 
     @Test
+    fun testPartialBatchExportedAfterScheduleDelay() = runTest {
+        val exports = mutableListOf<List<Int>>()
+        val processor = createProcessor(scheduleDelayMs = 10) {
+            exports.add(it)
+            OperationResultCode.Success
+        }
+        processor.processTelemetry(1)
+        advanceTimeBy(6)
+        processor.processTelemetry(2)
+        advanceTimeBy(3)
+        assertEquals(emptyList(), exports)
+
+        // the delay runs from the first item in the batch, so later items don't extend it
+        advanceTimeBy(2)
+        assertEquals(listOf(listOf(1, 2)), exports)
+
+        processor.shutdown()
+    }
+
+    @Test
     fun testForceFlushExportsThenFlushes() = runTest {
         val events = mutableListOf<String>()
         val processor = createProcessor(
