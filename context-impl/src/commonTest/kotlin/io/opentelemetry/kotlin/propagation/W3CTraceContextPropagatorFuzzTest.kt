@@ -11,7 +11,6 @@ import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
-import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -120,7 +119,7 @@ internal class W3CTraceContextPropagatorFuzzTest {
             Arb.boolean(),
             traceStateEntriesArb,
         ) { traceId, spanId, isSampled, isRandom, entries ->
-            val flags = TraceFlagsImpl(isSampled = isSampled, isRandom = isRandom)
+            val flags = DefaultTraceFlagsFactory.create(isSampled = isSampled, isRandom = isRandom)
             val state = entries.fold(traceStateFactory.default) { acc, (k, v) -> acc.put(k, v) }
 
             val original = spanContextFactory.create(

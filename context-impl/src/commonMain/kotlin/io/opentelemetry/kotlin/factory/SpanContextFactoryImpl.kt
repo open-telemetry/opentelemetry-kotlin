@@ -9,8 +9,8 @@ private val INVALID_TRACE_ID_BYTES = ByteArray(TRACE_ID_BYTES)
 private val INVALID_SPAN_ID_BYTES = ByteArray(SPAN_ID_BYTES)
 
 public class SpanContextFactoryImpl(
-    private val traceFlagsFactory: TraceFlagsFactory = TraceFlagsFactoryImpl(),
-    private val traceStateFactory: TraceStateFactory = TraceStateFactoryImpl()
+    traceFlagsFactory: TraceFlagsFactory,
+    traceStateFactory: TraceStateFactory,
 ) : SpanContextFactory {
 
     override val invalid: SpanContext by lazy {

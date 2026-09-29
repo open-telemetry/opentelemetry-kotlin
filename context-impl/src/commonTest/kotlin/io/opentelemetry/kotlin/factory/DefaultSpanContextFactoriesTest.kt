@@ -43,4 +43,12 @@ internal class DefaultSpanContextFactoriesTest {
         assertTrue(spanContext.isValid)
         assertTrue(spanContext.isRemote)
     }
+
+    @Test
+    fun `trace flags factory creates shared instances from booleans`() {
+        val unsampled = DefaultTraceFlagsFactory.create(isSampled = false, isRandom = false)
+        val sampledRandom = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = true)
+        assertSame(DefaultTraceFlagsFactory.default, unsampled)
+        assertSame(DefaultTraceFlagsFactory.fromHex("03"), sampledRandom)
+    }
 }

@@ -6,13 +6,13 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.TraceFlags
-import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -112,7 +112,7 @@ internal class ProbabilitySamplerTest {
         val context = createParentContext(
             traceId = traceId,
             otTraceStateValue = "rv:$aboveThreshold",
-            flags = TraceFlagsImpl(isSampled = true, isRandom = false)
+            flags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false)
         )
         val result = ProbabilitySampler(ratio, sdkErrorHandler).shouldSample(
             context = context,
@@ -131,7 +131,7 @@ internal class ProbabilitySamplerTest {
         val context = createParentContext(
             traceId = traceId,
             otTraceStateValue = "rv:garbage",
-            flags = TraceFlagsImpl(isSampled = true, isRandom = false)
+            flags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false)
         )
         val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
             context = context,
@@ -150,7 +150,7 @@ internal class ProbabilitySamplerTest {
         val context = createParentContext(
             traceId = traceId,
             otTraceStateValue = "th:123",
-            flags = TraceFlagsImpl(isSampled = true, isRandom = false)
+            flags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false)
         )
         val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
             context = context,
@@ -169,7 +169,7 @@ internal class ProbabilitySamplerTest {
         val context = createParentContext(
             traceId = traceId,
             otTraceStateValue = "rv:a0000000000000;th:c", // rv < th
-            flags = TraceFlagsImpl(isSampled = true, isRandom = false),
+            flags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false),
         )
         val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
             context = context,

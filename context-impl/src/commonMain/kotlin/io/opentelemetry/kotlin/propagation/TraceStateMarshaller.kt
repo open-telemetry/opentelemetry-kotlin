@@ -1,8 +1,8 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.factory.buildTraceState
 import io.opentelemetry.kotlin.tracing.TraceState
-import io.opentelemetry.kotlin.tracing.TraceStateImpl
 
 /**
  * Implementation of a W3C `tracestate` header.
@@ -21,16 +21,11 @@ public class TraceStateMarshaller(public val traceState: TraceState) {
     companion object {
         fun decode(header: String): TraceStateMarshaller {
             val decodedMap = W3CTraceStateCodec.decode(header)
-            // Build TraceState directly from the decoded map to preserve order
-            // Apply validation to filter out invalid entries
-            val filteredMap = linkedMapOf<String, String>()
-            decodedMap.forEach { (key, value) ->
-                if (W3CTraceStateValidator.canPut(filteredMap, key, value)) {
-                    filteredMap[key] = value
-                }
+            // preserves header order and drops invalid entries
+            val traceState = buildTraceState {
+                decodedMap.forEach { (key, value) -> put(key, value) }
             }
-            val state = TraceStateImpl.fromMap(filteredMap)
-            return TraceStateMarshaller(state)
+            return TraceStateMarshaller(traceState)
         }
     }
 }

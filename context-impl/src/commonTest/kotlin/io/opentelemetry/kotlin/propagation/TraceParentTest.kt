@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
-import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -21,7 +20,7 @@ internal class TraceParentTest {
     private val traceId = "0af7651916cd43dd8448eb211c80319c"
     private val spanId = "b7ad6b7169203331"
     private val canonicalHeader = "00-$traceId-$spanId-01"
-    private val traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false)
+    private val traceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false)
 
     @Test
     fun `encode produces the canonical version 00 traceparent header`() {
@@ -53,7 +52,7 @@ internal class TraceParentTest {
             version = "00",
             traceId = traceId,
             spanId = spanId,
-            traceFlags = TraceFlagsImpl(isSampled = false, isRandom = false),
+            traceFlags = DefaultTraceFlagsFactory.default,
         )
         assertNotNull(tp)
         assertEquals("00-$traceId-$spanId-00", tp.encode())
@@ -65,7 +64,7 @@ internal class TraceParentTest {
             version = "00",
             traceId = traceId,
             spanId = spanId,
-            traceFlags = TraceFlagsImpl(isSampled = false, isRandom = true),
+            traceFlags = DefaultTraceFlagsFactory.create(isSampled = false, isRandom = true),
         )
         assertNotNull(tp)
         assertEquals("00-$traceId-$spanId-02", tp.encode())
@@ -77,7 +76,7 @@ internal class TraceParentTest {
             version = "00",
             traceId = traceId,
             spanId = spanId,
-            traceFlags = TraceFlagsImpl(isSampled = true, isRandom = true),
+            traceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = true),
         )
         assertNotNull(tp)
         assertEquals("00-$traceId-$spanId-03", tp.encode())
@@ -89,7 +88,7 @@ internal class TraceParentTest {
             version = "00",
             traceId = traceId,
             spanId = spanId,
-            traceFlags = TraceFlagsImpl(isSampled = false, isRandom = false),
+            traceFlags = DefaultTraceFlagsFactory.default,
         )
         assertNotNull(tp)
         val flags = tp.encode().substringAfterLast('-')

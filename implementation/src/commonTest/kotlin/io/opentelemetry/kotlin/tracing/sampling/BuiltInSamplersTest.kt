@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
@@ -18,7 +19,6 @@ import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeTraceState
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.SpanKind
-import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
 import io.opentelemetry.kotlin.tracing.TracerImpl
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.fakeSpanLimitsConfig
@@ -58,8 +58,8 @@ internal class BuiltInSamplersTest {
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean): Context {
         val traceFlags = when {
-            sampled -> TraceFlagsImpl(isSampled = true, isRandom = false)
-            else -> TraceFlagsImpl(isSampled = false, isRandom = false)
+            sampled -> DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false)
+            else -> DefaultTraceFlagsFactory.default
         }
         val parentSpanContext = spanContextFactory.create(
             traceId = "12345678901234567890123456789012",

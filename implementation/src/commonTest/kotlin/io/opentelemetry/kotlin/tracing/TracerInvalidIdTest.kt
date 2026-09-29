@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
@@ -146,7 +147,7 @@ internal class TracerInvalidIdTest {
         DefaultSpanContextFactory.create(
             traceId = "12345678901234567890123456789012",
             spanId = "1234567890123456",
-            traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
+            traceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false),
             traceState = traceStateFactory.default,
             isRemote = true,
         )

@@ -4,19 +4,12 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.propagation.W3CTraceStateValidator
 
 @ExperimentalApi
-public class TraceStateImpl private constructor(
+public class TraceStateImpl internal constructor(
     private val data: LinkedHashMap<String, String>
 ) : TraceState {
 
-    companion object {
-        fun create(): TraceState = TraceStateImpl(linkedMapOf())
-
-        internal fun fromMap(map: Map<String, String>): TraceState {
-            // For decoding: preserve the order from the input map
-            val linkedMap = linkedMapOf<String, String>()
-            map.forEach { (k, v) -> linkedMap[k] = v }
-            return TraceStateImpl(linkedMap)
-        }
+    public companion object {
+        public val EMPTY: TraceState = TraceStateImpl(linkedMapOf())
     }
 
     override fun get(key: String): String? = data[key]

@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
+import io.opentelemetry.kotlin.tracing.TraceFlags
 import io.opentelemetry.kotlin.tracing.TraceState
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -64,7 +64,7 @@ internal class W3CTraceContextPropagatorTest {
     fun `inject writes canonical traceparent for a valid sampled span`() {
         val context = contextWithSpan(
             spanContext(
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
+                traceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false),
             ),
         )
         val carrier = injectInto(context)
@@ -75,7 +75,7 @@ internal class W3CTraceContextPropagatorTest {
     fun `inject writes flags 00 when not sampled`() {
         val context = contextWithSpan(
             spanContext(
-                traceFlags = TraceFlagsImpl(isSampled = false, isRandom = false),
+                traceFlags = DefaultTraceFlagsFactory.default,
             ),
         )
         val carrier = injectInto(context)
@@ -86,7 +86,7 @@ internal class W3CTraceContextPropagatorTest {
     fun `inject writes flags 03 when sampled and random bits set`() {
         val context = contextWithSpan(
             spanContext(
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = true),
+                traceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = true),
             ),
         )
         val carrier = injectInto(context)
@@ -265,7 +265,7 @@ internal class W3CTraceContextPropagatorTest {
     fun `inject and extract round-trip preserves traceId spanId flags and tracestate`() {
         val state = traceStateFactory.default.put("vendor", "value")
         val original = spanContext(
-            traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
+            traceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false),
             traceState = state,
         )
         val carrier = injectInto(contextWithSpan(original))
@@ -280,7 +280,7 @@ internal class W3CTraceContextPropagatorTest {
     }
 
     private fun spanContext(
-        traceFlags: io.opentelemetry.kotlin.tracing.TraceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
+        traceFlags: TraceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false),
         traceState: TraceState = traceStateFactory.default,
     ): SpanContext = spanContextFactory.create(
         traceId = traceId,

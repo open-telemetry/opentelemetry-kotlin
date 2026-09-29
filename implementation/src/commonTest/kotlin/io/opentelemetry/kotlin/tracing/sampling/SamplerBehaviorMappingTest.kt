@@ -5,13 +5,13 @@ import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.SpanKind
-import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,9 +29,9 @@ internal class SamplerBehaviorMappingTest {
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean): Context {
         val traceFlags = if (sampled) {
-            TraceFlagsImpl(isSampled = true, isRandom = false)
+            DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false)
         } else {
-            TraceFlagsImpl(isSampled = false, isRandom = false)
+            DefaultTraceFlagsFactory.default
         }
         val parentSpanContext = spanContextFactory.create(
             traceId = "12345678901234567890123456789012",

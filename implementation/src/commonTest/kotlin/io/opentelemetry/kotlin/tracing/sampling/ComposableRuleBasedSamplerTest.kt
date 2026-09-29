@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
@@ -13,7 +14,6 @@ import io.opentelemetry.kotlin.init.SamplerConfigDsl
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.SpanLinkImpl
-import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -244,9 +244,9 @@ internal class ComposableRuleBasedSamplerTest {
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean, otValue: String? = null): Context {
         val traceFlags = if (sampled) {
-            TraceFlagsImpl(isSampled = true, isRandom = false)
+            DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false)
         } else {
-            TraceFlagsImpl(isSampled = false, isRandom = false)
+            DefaultTraceFlagsFactory.default
         }
         val traceState = otValue?.let { traceStateFactory.default.put("ot", it) } ?: traceStateFactory.default
         val parentSpanContext = spanContextFactory.create(

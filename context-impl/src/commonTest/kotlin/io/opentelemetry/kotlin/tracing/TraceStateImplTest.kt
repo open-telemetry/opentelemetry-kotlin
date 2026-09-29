@@ -10,7 +10,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testEmptyTraceStateReturnsNullForKey() {
-        val traceState = TraceStateImpl.create()
+        val traceState = TraceStateImpl.EMPTY
 
         assertNull(traceState.get("any-key"))
         assertTrue(traceState.asMap().isEmpty())
@@ -18,7 +18,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testTraceStateRetrievesValues() {
-        val traceState = TraceStateImpl.create()
+        val traceState = TraceStateImpl.EMPTY
             .put("key", "value")
             .put("version", "1.0")
 
@@ -29,7 +29,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testAsMapPerformsDeepCopy() {
-        val traceState = TraceStateImpl.create()
+        val traceState = TraceStateImpl.EMPTY
             .put("key1", "value1")
             .put("key2", "value2")
 
@@ -48,7 +48,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testEmptyValues() {
-        val original = TraceStateImpl.create()
+        val original = TraceStateImpl.EMPTY
         val traceState = original
             .put("empty", "")
             .put("space", " ")
@@ -57,7 +57,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testWhitespaceIgnored() {
-        val traceState = TraceStateImpl.create()
+        val traceState = TraceStateImpl.EMPTY
 
         // Invalid values with control characters should return same instance
         val result1 = traceState.put("key", "value\twith\ttab")
@@ -75,7 +75,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testPutAddingNewKvp() {
-        val traceState = TraceStateImpl.create()
+        val traceState = TraceStateImpl.EMPTY
         val newTraceState = traceState.put("key", "value")
 
         assertNull(traceState.get("key")) // Original unchanged
@@ -84,7 +84,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testPutUpdatesExistingKvp() {
-        val original = TraceStateImpl.create().put("vendor", "old-value")
+        val original = TraceStateImpl.EMPTY.put("vendor", "old-value")
         val updated = original.put("vendor", "new-value")
 
         assertEquals("old-value", original.get("vendor")) // Original unchanged
@@ -93,7 +93,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testRemovingKeyReturnsNewInstance() {
-        val original = TraceStateImpl.create()
+        val original = TraceStateImpl.EMPTY
             .put("key1", "value1")
             .put("key2", "value2")
         val updated = original.remove("key1")
@@ -105,7 +105,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testRemoveFailureReturnsSameInstance() {
-        val original = TraceStateImpl.create().put("key1", "value1")
+        val original = TraceStateImpl.EMPTY.put("key1", "value1")
         val result = original.remove("nonexistent")
 
         assertSame(original, result) // Same instance
@@ -113,7 +113,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testPutValidatesKeyFormat() {
-        val traceState = TraceStateImpl.create()
+        val traceState = TraceStateImpl.EMPTY
 
         // Valid simple keys should work
         val result1 = traceState.put("key", "value") // starts with letter
@@ -161,7 +161,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testPutValidatesKeyLengthLimit() {
-        val traceState = TraceStateImpl.create()
+        val traceState = TraceStateImpl.EMPTY
 
         // Valid simple key at max length (256 chars)
         val maxLengthKey = "a".repeat(256)
@@ -176,7 +176,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testPutValidatesValueLengthLimit() {
-        val traceState = TraceStateImpl.create()
+        val traceState = TraceStateImpl.EMPTY
 
         // Valid value at max length (256 chars)
         val maxLengthValue = "a".repeat(256)
@@ -191,7 +191,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testTrailingWhitespace() {
-        val traceState = TraceStateImpl.create()
+        val traceState = TraceStateImpl.EMPTY
         val result = traceState.put("key", "value ")
         assertSame(traceState, result)
 
@@ -202,7 +202,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testMaxEntries() {
-        var traceState = TraceStateImpl.create()
+        var traceState = TraceStateImpl.EMPTY
         for (i in 1..32) {
             traceState = traceState.put("key$i", "value$i")
         }
@@ -220,7 +220,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testPutValidatesMultiTenantLengthLimit() {
-        val traceState = TraceStateImpl.create()
+        val traceState = TraceStateImpl.EMPTY
 
         // Valid length limits
         val longTenant = "a".repeat(241) // max tenant length (1 + 0*240)
@@ -244,7 +244,7 @@ internal class TraceStateImplTest {
     @Test
     fun testPutMovesModifiedKeyToFront() {
         // Per W3C spec: modified keys MUST be moved to the beginning (left) of the list
-        val traceState = TraceStateImpl.create()
+        val traceState = TraceStateImpl.EMPTY
             .put("key1", "value1")
             .put("key2", "value2")
             .put("key3", "value3")
@@ -268,7 +268,7 @@ internal class TraceStateImplTest {
     @Test
     fun testPutAddsNewKeyToFront() {
         // Per W3C spec: new key/value pairs SHOULD be added to the beginning of the list
-        val traceState = TraceStateImpl.create()
+        val traceState = TraceStateImpl.EMPTY
             .put("key1", "value1")
             .put("key2", "value2")
 
@@ -292,7 +292,7 @@ internal class TraceStateImplTest {
     @Test
     fun testPutPreservesOrderOfUnmodifiedKeys() {
         // Per W3C spec: order of unmodified key/value pairs MUST be preserved
-        val traceState = TraceStateImpl.create()
+        val traceState = TraceStateImpl.EMPTY
             .put("key1", "value1")
             .put("key2", "value2")
             .put("key3", "value3")
@@ -311,7 +311,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testPutMultipleUpdatesMoveEachToFront() {
-        val traceState = TraceStateImpl.create()
+        val traceState = TraceStateImpl.EMPTY
             .put("key1", "value1")
             .put("key2", "value2")
             .put("key3", "value3")
@@ -334,7 +334,7 @@ internal class TraceStateImplTest {
 
     @Test
     fun testRemovePreservesOrder() {
-        val traceState = TraceStateImpl.create()
+        val traceState = TraceStateImpl.EMPTY
             .put("key1", "value1")
             .put("key2", "value2")
             .put("key3", "value3")
