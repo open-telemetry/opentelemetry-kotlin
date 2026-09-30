@@ -25,3 +25,14 @@ public fun createCompositePropagator(vararg propagators: TextMapPropagator): Tex
  */
 @ExperimentalApi
 public fun createW3CBaggagePropagator(): TextMapPropagator = W3CBaggagePropagator
+
+/**
+ * Returns a [TextMapPropagator] that injects nothing, extracts nothing (returning the supplied
+ * context unchanged) and declares no fields.
+ *
+ * This does not require an [io.opentelemetry.kotlin.OpenTelemetry] instance.
+ *
+ * https://opentelemetry.io/docs/specs/otel/context/api-propagators/#global-propagators
+ */
+@ExperimentalApi
+public fun createNoopPropagator(): TextMapPropagator = NoopTextMapPropagator

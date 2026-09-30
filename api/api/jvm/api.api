@@ -320,6 +320,7 @@ public abstract interface class io/opentelemetry/kotlin/metrics/SynchronousInstr
 
 public final class io/opentelemetry/kotlin/propagation/PropagatorEntrypointsKt {
 	public static final fun createCompositePropagator ([Lio/opentelemetry/kotlin/propagation/TextMapPropagator;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
+	public static final fun createNoopPropagator ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public static final fun createW3CBaggagePropagator ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 }
 
