@@ -55,6 +55,7 @@ kotlin {
                 implementation(project(":integration-test"))
                 implementation(project.dependencies.platform(libs.opentelemetry.bom))
                 implementation(libs.opentelemetry.api)
+                implementation(libs.opentelemetry.sdk)
             }
         }
     }

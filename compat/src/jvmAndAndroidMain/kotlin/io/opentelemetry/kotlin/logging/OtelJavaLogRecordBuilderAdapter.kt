@@ -19,6 +19,7 @@ internal class OtelJavaLogRecordBuilderAdapter(private val impl: Logger) :
     private var severity: OtelJavaSeverity? = null
     private var severityText: String? = null
     private var body: Any? = null
+    private var eventName: String? = null
     private val attrs = ConcurrentHashMap<String, Any>()
 
     override fun setTimestamp(timestamp: Long, unit: TimeUnit): OtelJavaLogRecordBuilder {
@@ -65,6 +66,11 @@ internal class OtelJavaLogRecordBuilderAdapter(private val impl: Logger) :
         return this
     }
 
+    override fun setEventName(eventName: String): OtelJavaLogRecordBuilder {
+        this.eventName = eventName
+        return this
+    }
+
     override fun <T : Any?> setAttribute(
         key: OtelJavaAttributeKey<T>,
         value: T?
@@ -76,6 +82,7 @@ internal class OtelJavaLogRecordBuilderAdapter(private val impl: Logger) :
     override fun emit() {
         impl.emit(
             body = body,
+            eventName = eventName,
             timestamp = timestamp,
             observedTimestamp = observedTimestamp,
             context = context?.toOtelKotlinContext(),

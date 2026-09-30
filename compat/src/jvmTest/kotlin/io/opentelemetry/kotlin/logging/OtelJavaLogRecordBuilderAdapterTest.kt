@@ -36,6 +36,17 @@ internal class OtelJavaLogRecordBuilderAdapterTest {
     }
 
     @Test
+    fun `test event name is forwarded`() {
+        val impl = FakeLogger("logger")
+        val adapter = OtelJavaLogRecordBuilderAdapter(impl)
+
+        adapter.setEventName("my.event")
+        adapter.emit()
+
+        assertEquals("my.event", impl.logs.single().eventName)
+    }
+
+    @Test
     fun `test attributes preserve their types`() {
         val impl = FakeLogger("logger")
         val adapter = OtelJavaLogRecordBuilderAdapter(impl)
