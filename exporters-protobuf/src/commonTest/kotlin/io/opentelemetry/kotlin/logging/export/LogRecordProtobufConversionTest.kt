@@ -4,9 +4,11 @@ import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.export.assertAttributesMatch
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
+import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -27,8 +29,8 @@ class LogRecordProtobufConversionTest {
         assertEquals(0, protobuf.time_unix_nano)
         assertEquals(0, protobuf.observed_time_unix_nano)
         assertNull(protobuf.body)
-        assertEquals(obj.spanContext.traceId, protobuf.trace_id.toByteArray().toHexString())
-        assertEquals(obj.spanContext.spanId, protobuf.span_id.toByteArray().toHexString())
+        assertEquals(0, protobuf.trace_id.size)
+        assertEquals(0, protobuf.span_id.size)
         assertEquals("", protobuf.severity_text)
         assertEquals(0, protobuf.severity_number.ordinal)
         assertAttributesMatch(obj.attributes, protobuf.attributes)
@@ -46,7 +48,7 @@ class LogRecordProtobufConversionTest {
             "doubleList" to listOf(6.0, 12.0),
             "boolList" to listOf(true, false),
         )
-        val obj = FakeLogRecordData(attributes = attrs)
+        val obj = FakeLogRecordData(attributes = attrs, spanContext = FakeSpanContext.VALID)
         val protobuf = obj.toProtobuf()
         assertEquals(obj.timestamp, protobuf.time_unix_nano)
         assertEquals(obj.observedTimestamp, protobuf.observed_time_unix_nano)
@@ -56,6 +58,15 @@ class LogRecordProtobufConversionTest {
         assertEquals(obj.severityText, protobuf.severity_text)
         assertEquals(obj.severityNumber?.severityNumber, protobuf.severity_number.value)
         assertAttributesMatch(obj.attributes, protobuf.attributes)
+    }
+
+    @Test
+    fun testInvalidSpanContextRoundTrip() {
+        val obj = FakeLogRecordData(spanContext = FakeSpanContext.INVALID)
+        val restored = obj.toProtobuf().toLogRecordData(obj.resource, obj.instrumentationScopeInfo)
+        assertFalse(restored.spanContext.isValid)
+        assertEquals(FakeSpanContext.INVALID.traceId, restored.spanContext.traceId)
+        assertEquals(FakeSpanContext.INVALID.spanId, restored.spanContext.spanId)
     }
 
     @Test

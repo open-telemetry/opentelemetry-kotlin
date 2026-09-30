@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.export.conversion.DeserializedSpanContext
 import io.opentelemetry.kotlin.export.conversion.createKeyValues
 import io.opentelemetry.kotlin.export.conversion.toAttributeMap
 import io.opentelemetry.kotlin.export.conversion.toFlagsInt
+import io.opentelemetry.kotlin.export.conversion.toIdByteString
 import io.opentelemetry.kotlin.export.conversion.toMapValue
 import io.opentelemetry.kotlin.export.conversion.toNestedAnyValue
 import io.opentelemetry.kotlin.export.conversion.toProtoAnyValue
@@ -40,12 +41,11 @@ import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN
 import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN2
 import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN3
 import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN4
-import okio.ByteString.Companion.toByteString
 
 
 internal fun LogRecordData.toProtobuf(): LogRecord = LogRecord(
-    trace_id = spanContext.traceIdBytes.toByteString(),
-    span_id = spanContext.spanIdBytes.toByteString(),
+    trace_id = spanContext.traceIdBytes.toIdByteString(),
+    span_id = spanContext.spanIdBytes.toIdByteString(),
     flags = spanContext.traceFlags.toFlagsInt(),
     time_unix_nano = timestamp ?: 0L,
     observed_time_unix_nano = observedTimestamp ?: 0L,
