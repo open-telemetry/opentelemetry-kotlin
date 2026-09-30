@@ -212,8 +212,7 @@ internal class SpanModel(
     ) {
         mutate("Span.addLink failed") {
             if (linksList.size < spanLimitConfig.linkCountLimit) {
-                val link = buildSpanLink(spanContext, attributes, spanLimitConfig)
-                linksList.add(link)
+                buildSpanLink(spanContext, attributes, spanLimitConfig)?.let(linksList::add)
             } else {
                 droppedLinksCountImpl++
             }
