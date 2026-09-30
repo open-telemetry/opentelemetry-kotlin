@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.aliases.OtelJavaTracer
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
@@ -13,7 +12,6 @@ import java.util.concurrent.TimeUnit
 
 internal class TracerAdapter(
     private val tracer: OtelJavaTracer,
-    private val clock: Clock,
     private val spanLimitsConfig: CompatSpanLimitsConfig,
     private val contextFactory: ContextFactory,
 ) : Tracer {
@@ -41,10 +39,8 @@ internal class TracerAdapter(
 
         return SpanAdapter(
             impl = builder.startSpan(),
-            clock = clock,
             parentCtx = parentCtx,
             spanKind = spanKind,
-            startTimestamp = startTimestamp ?: clock.now(),
             spanLimitsConfig = spanLimitsConfig,
             creationState = creationState,
         )

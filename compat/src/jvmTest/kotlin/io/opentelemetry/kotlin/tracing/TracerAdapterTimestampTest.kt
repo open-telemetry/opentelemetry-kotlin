@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaReadableSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanData
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanProcessor
-import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.toOtelKotlinApi
@@ -21,13 +20,11 @@ internal class TracerAdapterTimestampTest {
     private val sdkClock = SteppingClock(start = 1_000_000)
     private val ended = mutableListOf<OtelJavaSpanData>()
 
-    // The adapter's clock reads far ahead of the SDK's, as a wall clock drifts from a monotonic one.
     private val tracer = TracerProviderAdapter(
         OtelJavaSdkTracerProvider.builder()
             .setClock(sdkClock)
             .addSpanProcessor(CapturingProcessor(ended))
             .build(),
-        FakeClock(time = 9_000_000),
         CompatSpanLimitsConfig(),
         CompatContextFactory(),
     ).getTracer("test")
@@ -91,6 +88,30 @@ internal class TracerAdapterTimestampTest {
         val child = spans.first { it.name == "child" }
         assertEquals(1_000_010, child.startEpochNanos)
         assertEquals(1_000_015, child.endEpochNanos)
+    }
+
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun `event on child span is timed by the parent's anchored clock`() {
+        val clock = SteppingClock(start = 1_000_000)
+        val spans = mutableListOf<OtelJavaSpanData>()
+        val provider = OtelJavaSdkTracerProvider.builder()
+            .setClock(clock)
+            .addSpanProcessor(CapturingProcessor(spans))
+            .build()
+        val kotlinTracer = OtelJavaOpenTelemetrySdk.builder().setTracerProvider(provider).build()
+            .toOtelKotlinApi(clock = { clock.now() })
+            .tracerProvider.getTracer("test")
+
+        val parent = kotlinTracer.startSpan("parent")
+        val child = kotlinTracer.startSpan("child", parentContext = CompatContextFactory().root().storeSpan(parent))
+        clock.advance(wall = 1_000, mono = 200)
+        child.addEvent("event")
+        child.end()
+        parent.end()
+
+        val event = spans.first { it.name == "child" }.events.single()
+        assertEquals(1_000_200, event.epochNanos)
     }
 
     private class SteppingClock(start: Long) : OtelJavaClock {

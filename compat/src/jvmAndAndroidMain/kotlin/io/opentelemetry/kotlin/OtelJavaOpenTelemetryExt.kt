@@ -45,7 +45,6 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
     return CompatOpenTelemetryImpl(
         tracerProvider = TracerProviderAdapter(
             unobfuscatedTracerProvider(),
-            clock,
             CompatSpanLimitsConfig(),
             contextFactory,
         ),

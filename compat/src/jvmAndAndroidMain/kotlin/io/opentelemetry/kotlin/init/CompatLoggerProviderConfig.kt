@@ -115,7 +115,7 @@ internal class CompatLoggerProviderConfig(
             val attrs = attrsFromMap(merged.attributes)
             builder.setResource(OtelJavaResource.create(attrs, merged.schemaUrl))
         }
-        builder.setClock(OtelJavaClockWrapper(clock))
+        builder.setClock(clock.toOtelJavaClock())
         return LoggerProviderAdapter(builder.build())
     }
 

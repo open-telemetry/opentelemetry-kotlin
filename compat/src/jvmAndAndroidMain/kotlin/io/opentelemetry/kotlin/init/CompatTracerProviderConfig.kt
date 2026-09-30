@@ -156,9 +156,9 @@ internal class CompatTracerProviderConfig(
             val attrs = attrsFromMap(merged.attributes)
             builder.setResource(OtelJavaResource.create(attrs, merged.schemaUrl))
         }
-        builder.setClock(OtelJavaClockWrapper(clock))
+        builder.setClock(clock.toOtelJavaClock())
         sampler?.let(::setSampler)
-        return TracerProviderAdapter(builder.build(), clock, spanLimitsConfig, contextFactory)
+        return TracerProviderAdapter(builder.build(), spanLimitsConfig, contextFactory)
     }
 
     fun toBehavior(): TracerProviderBehavior =

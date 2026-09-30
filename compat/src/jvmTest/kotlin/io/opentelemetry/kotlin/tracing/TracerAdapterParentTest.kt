@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
-import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import kotlin.test.Test
@@ -16,7 +15,6 @@ internal class TracerAdapterParentTest {
     private val contextFactory = CompatContextFactory()
     private val tracer = TracerProviderAdapter(
         javaTracerProvider,
-        FakeClock(),
         CompatSpanLimitsConfig(),
         contextFactory,
     ).getTracer("test")
