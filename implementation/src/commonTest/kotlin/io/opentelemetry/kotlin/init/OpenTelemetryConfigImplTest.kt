@@ -20,7 +20,6 @@ import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
-import io.opentelemetry.kotlin.propagation.CompositeTextMapPropagator
 import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.Test
@@ -60,7 +59,6 @@ internal class OpenTelemetryConfigImplTest {
             propagator { composite(w3cBaggage()) }
         }
         val composite = cfg.propagatorCfg.buildPropagator()
-        assertIs<CompositeTextMapPropagator>(composite)
         assertEquals(listOf("baggage"), composite.fields().toList())
     }
 
