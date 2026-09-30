@@ -12,9 +12,9 @@ import io.opentelemetry.kotlin.propagation.Propagators
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.propagation.TextMapSetter
-import io.opentelemetry.kotlin.propagation.W3CBaggagePropagator
 import io.opentelemetry.kotlin.propagation.W3CTraceContextPropagator
 import io.opentelemetry.kotlin.propagation.createPropagators
+import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
 import kotlin.concurrent.Volatile
 
 @OptIn(ExperimentalApi::class)
@@ -38,7 +38,7 @@ internal class PropagatorConfigImpl(
     }
 
     override fun w3cBaggage(): TextMapPropagator {
-        configured = W3CBaggagePropagator
+        configured = createW3CBaggagePropagator()
         return configured
     }
 

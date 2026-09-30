@@ -86,9 +86,9 @@ internal class CompatPropagatorApiTest {
     }
 
     @Test
-    fun `w3cBaggage returns an adapter wrapping the Java W3CBaggagePropagator`() {
+    fun `w3cBaggage returns the api W3C baggage propagator`() {
         val propagator = dsl.w3cBaggage()
-        assertTrue(propagator is TextMapPropagatorAdapter)
+        assertSame(createW3CBaggagePropagator(), propagator)
         assertEquals(listOf("baggage"), propagator.fields().toList())
     }
 

@@ -2,11 +2,10 @@ package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.baggage.Baggage
-import io.opentelemetry.kotlin.baggage.FakeBaggageEntryMetadata
+import io.opentelemetry.kotlin.baggage.BaggageEntryMetadataImpl
 import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.FakeSpanFactory
+import io.opentelemetry.kotlin.context.FakeBaggageContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -17,8 +16,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class W3CBaggagePropagatorTest {
 
-    private val propagator = W3CBaggagePropagator
-    private val contextFactory = ContextFactoryImpl(FakeSpanFactory())
+    private val propagator = createW3CBaggagePropagator()
 
     @Test
     fun `fields returns only the baggage header`() {
@@ -28,7 +26,7 @@ internal class W3CBaggagePropagatorTest {
     @Test
     fun `inject does nothing when baggage is empty`() {
         val carrier = mutableMapOf<String, String>()
-        propagator.inject(contextFactory.root(), carrier, FakeTextMapSetter)
+        propagator.inject(root(), carrier, MapTextMapSetter)
         assertTrue(carrier.isEmpty())
     }
 
@@ -68,14 +66,14 @@ internal class W3CBaggagePropagatorTest {
 
     @Test
     fun `inject appends metadata when non-empty`() {
-        val baggage = createBaggage().set("k", "v", FakeBaggageEntryMetadata("propagation=public"))
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("propagation=public"))
         val carrier = injectInto(baggage)
         assertEquals("k=v;propagation=public", carrier["baggage"])
     }
 
     @Test
     fun `inject omits metadata separator when metadata is empty`() {
-        val baggage = createBaggage().set("k", "v", FakeBaggageEntryMetadata(""))
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl(""))
         val carrier = injectInto(baggage)
         assertEquals("k=v", carrier["baggage"])
     }
@@ -183,8 +181,8 @@ internal class W3CBaggagePropagatorTest {
 
     @Test
     fun `extract returns original context when header is absent`() {
-        val ctx = contextFactory.root()
-        val result = propagator.extract(ctx, emptyMap(), FakeTextMapGetter)
+        val ctx = root()
+        val result = propagator.extract(ctx, emptyMap(), MapTextMapGetter)
         assertSame(ctx, result)
     }
 
@@ -233,15 +231,15 @@ internal class W3CBaggagePropagatorTest {
 
     @Test
     fun `extract returns original context when all entries are malformed`() {
-        val ctx = contextFactory.root()
-        val result = propagator.extract(ctx, mapOf("baggage" to "=,;,no-equals"), FakeTextMapGetter)
+        val ctx = root()
+        val result = propagator.extract(ctx, mapOf("baggage" to "=,;,no-equals"), MapTextMapGetter)
         assertSame(ctx, result)
     }
 
     @Test
     fun `extract returns original context for invalid percent encoding`() {
-        val ctx = contextFactory.root()
-        val result = propagator.extract(ctx, mapOf("baggage" to "k=%ZZ"), FakeTextMapGetter)
+        val ctx = root()
+        val result = propagator.extract(ctx, mapOf("baggage" to "k=%ZZ"), MapTextMapGetter)
         assertSame(ctx, result)
     }
 
@@ -263,15 +261,15 @@ internal class W3CBaggagePropagatorTest {
 
     @Test
     fun `extract returns original context for truncated percent encoding`() {
-        val ctx = contextFactory.root()
-        val result = propagator.extract(ctx, mapOf("baggage" to "k=%A"), FakeTextMapGetter)
+        val ctx = root()
+        val result = propagator.extract(ctx, mapOf("baggage" to "k=%A"), MapTextMapGetter)
         assertSame(ctx, result)
     }
 
     @Test
     fun `extract returns original context when only the low hex digit is invalid`() {
-        val ctx = contextFactory.root()
-        val result = propagator.extract(ctx, mapOf("baggage" to "k=%AZ"), FakeTextMapGetter)
+        val ctx = root()
+        val result = propagator.extract(ctx, mapOf("baggage" to "k=%AZ"), MapTextMapGetter)
         assertSame(ctx, result)
     }
 
@@ -284,7 +282,7 @@ internal class W3CBaggagePropagatorTest {
     @Test
     fun `extract combines multiple baggage headers`() {
         val carrier = mapOf("baggage" to listOf("a=1", "b=2,c=3"))
-        val ctx = propagator.extract(contextFactory.root(), carrier, MultiValueMapTextMapGetter)
+        val ctx = propagator.extract(root(), carrier, MultiValueMapTextMapGetter)
         val baggage = ctx.extractBaggage()
         assertEquals("1", baggage.getValue("a"))
         assertEquals("2", baggage.getValue("b"))
@@ -295,7 +293,7 @@ internal class W3CBaggagePropagatorTest {
     @Test
     fun `extract reads a single baggage header via getAll`() {
         val carrier = mapOf("baggage" to listOf("k=v"))
-        val baggage = propagator.extract(contextFactory.root(), carrier, MultiValueMapTextMapGetter)
+        val baggage = propagator.extract(root(), carrier, MultiValueMapTextMapGetter)
             .extractBaggage()
         assertEquals("v", baggage.getValue("k"))
         assertEquals(1, baggage.asMap().size)
@@ -303,7 +301,7 @@ internal class W3CBaggagePropagatorTest {
 
     @Test
     fun `extract returns original context when getAll returns no headers`() {
-        val ctx = contextFactory.root()
+        val ctx = root()
         val result = propagator.extract(ctx, emptyMap(), MultiValueMapTextMapGetter)
         assertSame(ctx, result)
     }
@@ -311,12 +309,12 @@ internal class W3CBaggagePropagatorTest {
     @Test
     fun `inject and extract round-trip preserves entries and metadata`() {
         val original = createBaggage()
-            .set("user.id", "alice", FakeBaggageEntryMetadata("propagation=public"))
+            .set("user.id", "alice", BaggageEntryMetadataImpl("propagation=public"))
             .set("session", "café 1!2@3")
         val carrier = injectInto(original)
 
-        val ctx = contextFactory.root()
-        val extracted = propagator.extract(ctx, carrier, FakeTextMapGetter).extractBaggage()
+        val ctx = root()
+        val extracted = propagator.extract(ctx, carrier, MapTextMapGetter).extractBaggage()
         assertEquals("alice", extracted.getValue("user.id"))
         assertEquals("propagation=public", extracted.asMap()["user.id"]?.metadata?.value)
         assertEquals("café 1!2@3", extracted.getValue("session"))
@@ -324,19 +322,21 @@ internal class W3CBaggagePropagatorTest {
 
     private fun injectInto(baggage: Baggage): MutableMap<String, String> {
         val carrier = mutableMapOf<String, String>()
-        val ctx: Context = contextFactory.root().storeBaggage(baggage)
-        propagator.inject(ctx, carrier, FakeTextMapSetter)
+        val ctx: Context = root().storeBaggage(baggage)
+        propagator.inject(ctx, carrier, MapTextMapSetter)
         return carrier
     }
 
     private fun extract(header: String): Baggage {
         val ctx = propagator.extract(
-            contextFactory.root(),
+            root(),
             mapOf("baggage" to header),
-            FakeTextMapGetter,
+            MapTextMapGetter,
         )
         return ctx.extractBaggage()
     }
+
+    private fun root(): Context = FakeBaggageContext()
 
     private fun extractedHeaderSize(baggage: Baggage): Int =
         injectInto(baggage)["baggage"]?.length ?: 0
@@ -347,5 +347,18 @@ internal class W3CBaggagePropagatorTest {
             carrier?.get(key)?.firstOrNull()
         override fun getAll(carrier: Map<String, List<String>>?, key: String): List<String> =
             carrier?.get(key).orEmpty()
+    }
+
+    private object MapTextMapGetter : TextMapGetter<Map<String, String>> {
+        override fun keys(carrier: Map<String, String>): Collection<String> = carrier.keys
+        override fun get(carrier: Map<String, String>?, key: String): String? = carrier?.get(key)
+        override fun getAll(carrier: Map<String, String>?, key: String): List<String> =
+            carrier?.get(key)?.let { listOf(it) } ?: emptyList()
+    }
+
+    private object MapTextMapSetter : TextMapSetter<MutableMap<String, String>> {
+        override fun set(carrier: MutableMap<String, String>?, key: String, value: String) {
+            carrier?.set(key, value)
+        }
     }
 }

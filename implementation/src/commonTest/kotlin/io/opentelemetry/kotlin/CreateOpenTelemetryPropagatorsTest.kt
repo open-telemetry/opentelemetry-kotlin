@@ -3,8 +3,8 @@ package io.opentelemetry.kotlin
 import io.opentelemetry.kotlin.propagation.FakeTextMapPropagator
 import io.opentelemetry.kotlin.propagation.Propagators
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
-import io.opentelemetry.kotlin.propagation.W3CBaggagePropagator
 import io.opentelemetry.kotlin.propagation.createPropagators
+import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
 import kotlin.test.Test
 import kotlin.test.assertSame
 
@@ -32,6 +32,6 @@ internal class CreateOpenTelemetryPropagatorsTest {
         val api = createOpenTelemetry(propagators = FakePropagators(FakeTextMapPropagator())) {
             propagator { w3cBaggage() }
         }
-        assertSame(W3CBaggagePropagator, api.propagator)
+        assertSame(createW3CBaggagePropagator(), api.propagator)
     }
 }

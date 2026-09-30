@@ -31,13 +31,13 @@ internal class CorePropagatorApiTest {
 
     @Test
     fun `w3cBaggage returns the W3C baggage propagator singleton`() {
-        assertSame(W3CBaggagePropagator, dsl.w3cBaggage())
+        assertSame(createW3CBaggagePropagator(), dsl.w3cBaggage())
     }
 
     @Test
     fun `w3cBaggage call captures the result and buildPropagator returns it`() {
         dsl.w3cBaggage()
-        assertSame(W3CBaggagePropagator, dsl.buildPropagator())
+        assertSame(createW3CBaggagePropagator(), dsl.buildPropagator())
     }
 
     @Test

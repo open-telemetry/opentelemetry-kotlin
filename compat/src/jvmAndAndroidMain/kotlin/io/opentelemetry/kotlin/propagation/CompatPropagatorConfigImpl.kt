@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.propagation
 
-import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator
 import io.opentelemetry.context.propagation.TextMapPropagator.composite
 import io.opentelemetry.kotlin.ExperimentalApi
@@ -21,7 +20,7 @@ internal class CompatPropagatorConfigImpl : PropagatorConfigDsl {
     }
 
     override fun w3cBaggage(): TextMapPropagator {
-        configured = TextMapPropagatorAdapter(W3CBaggagePropagator.getInstance())
+        configured = createW3CBaggagePropagator()
         return configured
     }
 
