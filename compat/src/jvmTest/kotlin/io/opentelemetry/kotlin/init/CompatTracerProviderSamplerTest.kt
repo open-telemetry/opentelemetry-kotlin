@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.tracing.Tracer
@@ -218,6 +219,39 @@ internal class CompatTracerProviderSamplerTest {
         ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
+    fun `invalid composableProbability falls back to default sampler`() {
+        val clock = FakeClock()
+        val errorHandler = FakeSdkErrorHandler()
+        val config = CompatTracerProviderConfig(clock, errorHandler).apply {
+            sampler { composite { composableProbability(1.5) } }
+        }
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
+        assertTrue(span.isRecording())
+        assertTrue(span.spanContext.traceFlags.isSampled)
+        assertTrue(errorHandler.userCodeErrors.single().cause is IllegalArgumentException)
+    }
+
+    @Test
+    fun `throwing sampler action falls back to default sampler`() {
+        val clock = FakeClock()
+        val errorHandler = FakeSdkErrorHandler()
+        val config = CompatTracerProviderConfig(clock, errorHandler).apply {
+            sampler { error("boom") }
+        }
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
+        assertTrue(span.isRecording())
+        assertEquals("boom", errorHandler.userCodeErrors.single().cause.message)
     }
 
     @Test

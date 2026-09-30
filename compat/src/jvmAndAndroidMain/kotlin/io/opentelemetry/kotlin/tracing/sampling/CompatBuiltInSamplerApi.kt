@@ -95,8 +95,12 @@ public fun SamplerConfigDsl.composableAlwaysOff(): ComposableSampler =
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composableprobability
  */
 @ExperimentalApi
-public fun SamplerConfigDsl.composableProbability(ratio: Double): ComposableSampler =
-    OtelJavaBackedComposableSampler(OtelJavaComposableSampler.probability(ratio))
+public fun SamplerConfigDsl.composableProbability(ratio: Double): ComposableSampler {
+    // opentelemetry-java does not reject out-of-range ratios, but silently drops spans.
+    // fail here so we can fallback to the default sampler.
+    require(ratio in 0.0..1.0) { "ratio must be between 0 and 1, got $ratio" }
+    return OtelJavaBackedComposableSampler(OtelJavaComposableSampler.probability(ratio))
+}
 
 /**
  * A [ComposableSampler] that honors the parent's sampling threshold when present, falling back
