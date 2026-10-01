@@ -126,6 +126,22 @@ internal class LogsExporterEnvVarsTest {
         )
     }
 
+    @Test
+    fun `should skip malformed header entries`() {
+        val configs = mapOf(
+            LogsExporterEnvVars.LOGS_EXPORTER to Exporter.OTLP.value,
+            OpenTelemetryEnvVars.OTLP_HEADERS to "key1=value1,malformed,key2=value2",
+        )
+        assertEquals(
+            LogRecordProcessorBehavior(
+                http = OtlpHttpExporterBehavior(
+                    headers = mapOf("key1" to "value1", "key2" to "value2")
+                )
+            ),
+            toBehavior(configs::get),
+        )
+    }
+
     private fun toBehavior(getEnvVar: (String) -> String?) =
         LogsExporterEnvVars(
             reportingEnvVarReader(getEnvVar),

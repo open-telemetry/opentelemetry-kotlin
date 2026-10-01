@@ -12,7 +12,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
  */
 @ExperimentalApi
 internal fun interface CompatBehaviorReader {
-    fun read(configFilePath: String?, dsl: OpenTelemetryBehavior): OpenTelemetryBehavior
+    fun read(configFilePath: String?, dsl: () -> OpenTelemetryBehavior): OpenTelemetryBehavior
 }
 
 /**

@@ -44,7 +44,7 @@ internal class ResolvedSamplerConfigTest {
         val behavior = defaultBehaviorReader(
             envVarReader = EnvVarReader(getEnvVar),
             sdkErrorHandler = cfg.sdkErrorHandler,
-        ).read(cfg.configFilePath, cfg.toBehavior())
+        ).read(cfg.configFilePath, cfg::toBehavior)
         return SdkConfigFactory(cfg, behavior).generateTracingConfig()
     }
 
