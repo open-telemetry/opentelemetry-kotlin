@@ -78,7 +78,7 @@ internal class CompatTracerProviderConfig(
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
         exportConfigured = true
         val processor = TraceExportConfigCompat(clock, sdkErrorHandler).action()
-        builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor))
+        builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor, sdkErrorHandler))
     }
 
     override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
