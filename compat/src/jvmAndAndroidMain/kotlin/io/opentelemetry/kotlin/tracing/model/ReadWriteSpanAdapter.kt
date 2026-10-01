@@ -37,7 +37,11 @@ internal class ReadWriteSpanAdapter(
     }
 
     override fun end(timestamp: Long) {
-        impl.end(timestamp, TimeUnit.NANOSECONDS)
+        if (timestamp > 0) {
+            impl.end(timestamp, TimeUnit.NANOSECONDS)
+        } else {
+            impl.end()
+        }
     }
 
     override fun isRecording(): Boolean = impl.isRecording
@@ -63,7 +67,11 @@ internal class ReadWriteSpanAdapter(
         if (attributes != null) {
             attributes(container)
         }
-        impl.addEvent(name, container.otelJavaAttributes(), timestamp ?: 0, TimeUnit.NANOSECONDS)
+        if (timestamp != null && timestamp > 0) {
+            impl.addEvent(name, container.otelJavaAttributes(), timestamp, TimeUnit.NANOSECONDS)
+        } else {
+            impl.addEvent(name, container.otelJavaAttributes())
+        }
     }
 
     override fun setBooleanAttribute(key: String, value: Boolean) {

@@ -23,7 +23,7 @@ internal class ReadWriteLogRecordAdapter(
 ) : ReadWriteLogRecord {
 
     override var timestamp: Long?
-        get() = impl.timestampEpochNanos
+        get() = impl.timestampEpochNanos.takeIf { it > 0L }
         set(value) {
         }
 

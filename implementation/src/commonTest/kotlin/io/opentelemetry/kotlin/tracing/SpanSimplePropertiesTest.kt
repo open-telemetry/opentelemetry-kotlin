@@ -149,4 +149,18 @@ internal class SpanSimplePropertiesTest {
         val span = tracer.startSpan("test", startTimestamp = now)
         assertEquals(now, (span.toReadableSpan()).startTimestamp)
     }
+
+    @Test
+    fun testSpanStartTimestampZero() {
+        clock.time = 5
+        val span = tracer.startSpan("test", startTimestamp = 0)
+        assertEquals(clock.time, (span.toReadableSpan()).startTimestamp)
+    }
+
+    @Test
+    fun testSpanStartTimestampNegative() {
+        clock.time = 5
+        val span = tracer.startSpan("test", startTimestamp = -1)
+        assertEquals(clock.time, (span.toReadableSpan()).startTimestamp)
+    }
 }

@@ -112,7 +112,7 @@ internal class TracerImpl(
                     processor = processor,
                     name = name,
                     spanKind = spanKind,
-                    startTimestamp = startTimestamp ?: clock.now(),
+                    startTimestamp = startTimestamp?.takeIf { it > 0 } ?: clock.now(),
                     instrumentationScopeInfo = scope,
                     resource = resource,
                     parent = parentSpanContext,
