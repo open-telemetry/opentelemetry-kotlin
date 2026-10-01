@@ -9,7 +9,9 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.URLBuilder
 import io.ktor.http.contentType
+import io.ktor.http.encodedPath
 import io.ktor.utils.io.readRemaining
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
@@ -32,6 +34,7 @@ internal class OtlpClient(
     val baseUrl: String,
     private val httpClient: HttpClient,
     private val sdkErrorHandler: SdkErrorHandler,
+    internal val signalEndpoint: String? = null,
     private val headers: suspend () -> Map<String, String> = { emptyMap() },
 ) {
 
@@ -55,7 +58,17 @@ internal class OtlpClient(
         requestSerializer: () -> ByteArray,
         parsePartialSuccess: (body: ByteArray) -> OtlpPartialSuccess?,
     ): OtlpResponse = sdkErrorHandler.guardOrDefaultSuspend(Unknown, "OTLP export failed") {
-        val url = "$baseUrl/${endpoint.path}"
+        val url = signalEndpoint?.let {
+            val builder = URLBuilder(it)
+            if (builder.encodedPath.isEmpty()) {
+                builder.encodedPath = "/"
+            }
+            builder.buildString()
+        } ?: if (baseUrl.endsWith('/')) {
+            "$baseUrl${endpoint.path}"
+        } else {
+            "$baseUrl/${endpoint.path}"
+        }
         val requestHeaders = headers()
         val response = httpClient.post(url) {
             compress("gzip")
