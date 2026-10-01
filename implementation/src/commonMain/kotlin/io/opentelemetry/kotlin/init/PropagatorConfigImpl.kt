@@ -7,22 +7,19 @@ import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.propagation.B3Propagator
-import io.opentelemetry.kotlin.propagation.Propagators
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.propagation.TextMapSetter
 import io.opentelemetry.kotlin.propagation.W3CTraceContextPropagator
 import io.opentelemetry.kotlin.propagation.createCompositePropagator
-import io.opentelemetry.kotlin.propagation.createPropagators
+import io.opentelemetry.kotlin.propagation.createNoopPropagator
 import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
 import kotlin.concurrent.Volatile
 
 @OptIn(ExperimentalApi::class)
-internal class PropagatorConfigImpl(
-    propagators: Propagators = createPropagators(),
-) : PropagatorConfigDsl {
+internal class PropagatorConfigImpl : PropagatorConfigDsl {
 
-    private val none: TextMapPropagator = propagators.none()
+    private val none: TextMapPropagator = createNoopPropagator()
 
     private var configured: TextMapPropagator = none
 

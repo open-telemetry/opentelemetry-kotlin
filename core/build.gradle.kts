@@ -13,7 +13,6 @@ kotlin {
                 api(project(":sdk-api"))
                 api(project(":api-ext"))
                 api(project(":noop"))
-                api(project(":api-propagators"))
                 api(project(":exporters-core"))
                 api(project(":semconv"))
                 implementation(project(":model"))
