@@ -15,6 +15,7 @@ import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 internal class SpanLinkTest {
 
@@ -177,6 +178,29 @@ internal class SpanLinkTest {
 
         retrieveLinks(3)
         // links beyond the limit added after creation are dropped and counted
+        assertEquals(1, processor.endCalls.single().droppedLinksCount)
+    }
+
+    @Test
+    fun testLinkAttributesNotInvokedWhenNotRecording() {
+        var invoked = false
+        tracer.startSpan("test").apply {
+            end()
+            addLink(fakeSpanContext) { invoked = true }
+        }
+        assertFalse(invoked)
+    }
+
+    @Test
+    fun testLinkAttributesNotInvokedWhenLimitReached() {
+        var invocations = 0
+        tracer.startSpan("test").apply {
+            repeat(linkLimit + 1) {
+                addLink(fakeSpanContext) { invocations++ }
+            }
+            end()
+        }
+        assertEquals(linkLimit, invocations)
         assertEquals(1, processor.endCalls.single().droppedLinksCount)
     }
 

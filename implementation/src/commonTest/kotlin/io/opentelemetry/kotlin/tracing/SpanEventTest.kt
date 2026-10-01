@@ -14,6 +14,7 @@ import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 internal class SpanEventTest {
 
@@ -113,6 +114,29 @@ internal class SpanEventTest {
         }
         // an event added after the span ends is ignored, not counted as dropped
         assertEquals(0, span.toReadableSpan().droppedEventsCount)
+    }
+
+    @Test
+    fun testEventAttributesNotInvokedWhenNotRecording() {
+        var invoked = false
+        tracer.startSpan("test").apply {
+            end()
+            addEvent("event") { invoked = true }
+        }
+        assertFalse(invoked)
+    }
+
+    @Test
+    fun testEventAttributesNotInvokedWhenLimitReached() {
+        var invocations = 0
+        tracer.startSpan("test").apply {
+            repeat(eventLimit + 1) {
+                addEvent("event") { invocations++ }
+            }
+            end()
+        }
+        assertEquals(eventLimit, invocations)
+        assertEquals(1, processor.endCalls.single().droppedEventsCount)
     }
 
     @Test
