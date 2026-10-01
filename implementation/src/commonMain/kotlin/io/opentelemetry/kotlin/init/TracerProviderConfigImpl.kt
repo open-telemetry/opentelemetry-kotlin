@@ -12,7 +12,6 @@ import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.reportError
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.config.DEFAULT_EVENT_LIMIT
 import io.opentelemetry.kotlin.init.config.DEFAULT_LINK_LIMIT
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
@@ -24,8 +23,6 @@ import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.export.simpleSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.stdoutSpanExporter
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
-import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
-import io.opentelemetry.kotlin.tracing.sampling.parentBased
 import io.opentelemetry.kotlin.tracing.sampling.toSampler
 
 internal class TracerProviderConfigImpl(
@@ -104,8 +101,6 @@ internal class TracerProviderConfigImpl(
             simpleSpanProcessor(stdoutSpanExporter())
         }
     }
-
-    private class SamplerConfigImpl(override val spanFactory: SpanFactory) : SamplerConfigDsl
 
     /**
      * A limit left unset by [spanLimits] falls back to the default this SDK applies. The global

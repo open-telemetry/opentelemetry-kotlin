@@ -12,16 +12,6 @@ import io.opentelemetry.kotlin.tracing.export.compositeSpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
-import io.opentelemetry.kotlin.tracing.sampling.alwaysOff
-import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
-import io.opentelemetry.kotlin.tracing.sampling.composableAlwaysOff
-import io.opentelemetry.kotlin.tracing.sampling.composableAlwaysOn
-import io.opentelemetry.kotlin.tracing.sampling.composableAnnotating
-import io.opentelemetry.kotlin.tracing.sampling.composableParentThreshold
-import io.opentelemetry.kotlin.tracing.sampling.composableProbability
-import io.opentelemetry.kotlin.tracing.sampling.composableRuleBased
-import io.opentelemetry.kotlin.tracing.sampling.composite
-import io.opentelemetry.kotlin.tracing.sampling.parentBased
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

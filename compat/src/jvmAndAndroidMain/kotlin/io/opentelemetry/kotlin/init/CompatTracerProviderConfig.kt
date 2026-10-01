@@ -35,6 +35,7 @@ import io.opentelemetry.kotlin.tracing.TracerProvider
 import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
 import io.opentelemetry.kotlin.tracing.export.OtelJavaSpanProcessorAdapter
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
+import io.opentelemetry.kotlin.tracing.sampling.CompatSamplerConfig
 import io.opentelemetry.kotlin.tracing.sampling.OtelJavaSamplerAdapter
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplerAdapter
@@ -100,9 +101,7 @@ internal class CompatTracerProviderConfig(
         builder.addSpanProcessor(OtelJavaSimpleSpanProcessor.create(LoggingSpanExporter.create()))
     }
 
-    private val newSamplerDsl: SamplerConfigDsl = object : SamplerConfigDsl {
-        override val spanFactory = CompatSpanFactory(DefaultSpanContextFactory)
-    }
+    private val newSamplerDsl: SamplerConfigDsl = CompatSamplerConfig(CompatSpanFactory(DefaultSpanContextFactory))
 
     private fun setSampler(sampler: Sampler) {
         val otelJavaSampler = when (sampler) {
