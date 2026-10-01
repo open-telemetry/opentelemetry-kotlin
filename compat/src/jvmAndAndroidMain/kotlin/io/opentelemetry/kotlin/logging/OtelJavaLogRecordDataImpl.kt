@@ -24,6 +24,7 @@ internal class OtelJavaLogRecordDataImpl(
     private val severityTextImpl: String?,
     private val bodyImpl: OtelJavaBody,
     private val attributesImpl: OtelJavaAttributes,
+    private val totalAttributeCountImpl: Int,
     private val eventNameImpl: String?,
 ) : OtelJavaLogRecordData {
 
@@ -40,5 +41,5 @@ internal class OtelJavaLogRecordDataImpl(
     override fun getBody(): OtelJavaBody = bodyImpl
 
     override fun getAttributes(): OtelJavaAttributes = attributesImpl
-    override fun getTotalAttributeCount(): Int = attributesImpl.size()
+    override fun getTotalAttributeCount(): Int = totalAttributeCountImpl
 }

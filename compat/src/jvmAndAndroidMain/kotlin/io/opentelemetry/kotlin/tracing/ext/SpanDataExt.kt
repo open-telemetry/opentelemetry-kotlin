@@ -2,11 +2,11 @@
 
 package io.opentelemetry.kotlin.tracing.ext
 
-import io.opentelemetry.kotlin.aliases.OtelJavaInstrumentationLibraryInfo
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanData
 import io.opentelemetry.kotlin.aliases.OtelJavaStatusData
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.resourceFromMap
+import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
 import io.opentelemetry.kotlin.tracing.data.OtelJavaSpanDataImpl
 import io.opentelemetry.kotlin.tracing.data.SpanData
 
@@ -20,12 +20,9 @@ internal fun SpanData.toOtelJavaSpanData(): OtelJavaSpanData {
         startEpochNanosImpl = startTimestamp,
         endEpochNanosImpl = endTimestamp ?: 0,
         resourceImpl = resource.let(::resourceFromMap),
-        scopeImpl = OtelJavaInstrumentationLibraryInfo.create(
-            instrumentationScopeInfo.name,
-            instrumentationScopeInfo.version,
-            instrumentationScopeInfo.schemaUrl
-        ),
+        scopeImpl = instrumentationScopeInfo.toOtelJavaInstrumentationScopeInfo(),
         attributesImpl = attrsFromMap(attributes),
+        totalAttributeCountImpl = attributes.size + droppedAttributesCount,
         eventsImpl = events.map { it.toOtelJavaEventData() },
         totalRecordedEventsImpl = events.size + droppedEventsCount,
         linksImpl = links.map { it.toOtelJavaLinkData() },

@@ -22,6 +22,13 @@ internal class LogRecordDataExtTest {
     }
 
     @Test
+    fun testLogRecordDroppedAttributesConversion() {
+        val record = FakeLogRecordData(droppedAttributesCount = 3)
+        val observed = record.toOtelJavaLogRecordData()
+        assertEquals(record.attributes.size + 3, observed.totalAttributeCount)
+    }
+
+    @Test
     fun testLogRecordEventNameConversion() {
         val record = FakeLogRecordData(eventName = "my_event_name")
         val observed = record.toOtelJavaLogRecordData()
