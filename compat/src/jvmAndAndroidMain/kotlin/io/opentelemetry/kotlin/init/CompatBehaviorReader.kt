@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.config.OpenTelemetryConfigReader
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.getEnvVarValue
 
 /**
  * Reads the behavior supplied by every configuration mechanism, then resolves their precedence.
@@ -21,7 +22,7 @@ internal fun interface CompatBehaviorReader {
  */
 @ExperimentalApi
 internal fun defaultCompatBehaviorReader(
-    envVarReader: EnvVarReader = EnvVarReader { System.getenv(it) },
+    envVarReader: EnvVarReader = EnvVarReader(::getEnvVarValue),
     sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
 ): CompatBehaviorReader {
     val configReader = OpenTelemetryConfigReader(
