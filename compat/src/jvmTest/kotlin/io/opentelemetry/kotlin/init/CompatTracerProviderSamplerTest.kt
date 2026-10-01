@@ -271,6 +271,21 @@ internal class CompatTracerProviderSamplerTest {
     }
 
     @Test
+    fun `sampler attributes override span attributes with the same key`() {
+        val processor = FakeSpanProcessor()
+        val sdk = createCompatOpenTelemetry {
+            tracerProvider {
+                sampler { FakeSampler(samplerAttributes = mapOf("shared.key" to "sampler.value")) }
+                export { compositeSpanProcessor(processor) }
+            }
+        }
+        sdk.tracerProvider.getTracer("test").startSpan("span") {
+            setStringAttribute("shared.key", "span.value")
+        }.end()
+        assertEquals("sampler.value", processor.endCalls.single().attributes["shared.key"])
+    }
+
+    @Test
     fun `composite with composableAnnotating does not annotate dropped spans`() {
         val processor = FakeSpanProcessor()
         val sdk = createCompatOpenTelemetry {

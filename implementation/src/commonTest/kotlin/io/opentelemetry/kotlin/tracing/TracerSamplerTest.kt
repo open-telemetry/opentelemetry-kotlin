@@ -116,13 +116,40 @@ internal class TracerSamplerTest {
     }
 
     @Test
-    fun testSpanAttrsOverrideSamplerAttrs() {
+    fun testSamplerAttrsOverrideSpanAttrs() {
         val sampler = FakeSampler(samplerAttributes = mapOf("shared.key" to "sampler.value"))
         val tracer = buildTracer(sampler)
         val span = tracer.startSpan("test") {
             setStringAttribute("shared.key", "span.value")
         }
-        assertEquals("span.value", span.toReadableSpan().attributes["shared.key"])
+        assertEquals("sampler.value", span.toReadableSpan().attributes["shared.key"])
+    }
+
+    @Test
+    fun testSamplerAttrsAtLimitOverrideButDoNotAdd() {
+        val cfg = fakeSpanLimitsConfig
+        val limitedConfig = SpanLimitConfig(
+            attributeCountLimit = 2,
+            attributeValueLengthLimit = cfg.attributeValueLengthLimit,
+            linkCountLimit = cfg.linkCountLimit,
+            eventCountLimit = cfg.eventCountLimit,
+            attributeCountPerEventLimit = cfg.attributeCountPerEventLimit,
+            attributeCountPerLinkLimit = cfg.attributeCountPerLinkLimit,
+        )
+        val sampler = FakeSampler(
+            samplerAttributes = mapOf(
+                "b" to "sampler",
+                "c" to "sampler",
+            )
+        )
+        val tracer = buildTracer(sampler, limitedConfig)
+        val span = tracer.startSpan("test") {
+            setStringAttribute("a", "user")
+            setStringAttribute("b", "user")
+        }
+        val readable = span.toReadableSpan()
+        assertEquals(mapOf("a" to "user", "b" to "sampler"), readable.attributes)
+        assertEquals(1, readable.droppedAttributesCount)
     }
 
     @Test

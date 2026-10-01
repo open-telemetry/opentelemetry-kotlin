@@ -123,8 +123,8 @@ internal class TracerImpl(
                     initialDroppedLinksCount = collector.droppedLinksCount,
                     sdkErrorHandler = sdkErrorHandler
                 )
-                spanModel.setAttributes(result.attributes.attributes)
                 spanModel.setAttributes(collector.attributes.attributes)
+                spanModel.setAttributes(result.attributes.attributes)
                 sdkErrorHandler.guard {
                     processor?.takeIf(SpanProcessor::isStartRequired)
                         ?.onStart(ReadWriteSpanImpl(spanModel), ctx)
