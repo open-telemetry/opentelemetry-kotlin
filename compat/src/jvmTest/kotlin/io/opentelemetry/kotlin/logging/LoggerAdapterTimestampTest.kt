@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordData
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProvider
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaClock
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordProcessor
 import kotlin.test.Test
@@ -18,7 +19,8 @@ internal class LoggerAdapterTimestampTest {
         OtelJavaSdkLoggerProvider.builder()
             .setClock(sdkClock)
             .addLogRecordProcessor(processor)
-            .build()
+            .build(),
+        NoopSdkErrorHandler,
     ).getLogger("test")
 
     private val emitted: OtelJavaLogRecordData

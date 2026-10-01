@@ -10,6 +10,8 @@ import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setFlattenedAnyValueAttribute
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.Span
@@ -31,6 +33,7 @@ internal class SpanAdapter(
     parentCtx: OtelJavaContext?,
     val spanKind: SpanKind,
     private val spanLimitsConfig: CompatSpanLimitsConfig,
+    private val sdkErrorHandler: SdkErrorHandler,
     creationState: CompatSpanCreationState? = null,
 ) : Span, AttributeContainer, SpanCreationAction, OtelJavaImplicitContextKeyed {
 
@@ -61,11 +64,15 @@ internal class SpanAdapter(
     }
 
     override fun end() {
-        impl.end()
+        sdkErrorHandler.guard("Span.end failed") {
+            impl.end()
+        }
     }
 
     override fun end(timestamp: Long) {
-        impl.end(timestamp, TimeUnit.NANOSECONDS)
+        sdkErrorHandler.guard("Span.end failed") {
+            impl.end(timestamp, TimeUnit.NANOSECONDS)
+        }
     }
 
     override fun isRecording(): Boolean = impl.isRecording
@@ -73,7 +80,7 @@ internal class SpanAdapter(
     override fun addLink(
         spanContext: SpanContext,
         attributes: (AttributesMutator.() -> Unit)?
-    ) {
+    ) = sdkErrorHandler.guard("Span.addLink failed") {
         val container = CompatAttributesModel()
         if (attributes != null) {
             attributes(container)
@@ -88,7 +95,7 @@ internal class SpanAdapter(
         name: String,
         timestamp: Long?,
         attributes: (AttributesMutator.() -> Unit)?
-    ) {
+    ) = sdkErrorHandler.guard("Span.addEvent failed") {
         val container = CompatAttributesModel()
         if (attributes != null) {
             attributes(container)

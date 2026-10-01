@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProvider
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordProcessor
 import kotlinx.coroutines.test.runTest
@@ -12,7 +13,7 @@ import kotlin.test.assertSame
 
 internal class LoggerProviderAdapterTest {
 
-    private val adapter = LoggerProviderAdapter(OtelJavaSdkLoggerProvider.builder().build())
+    private val adapter = LoggerProviderAdapter(OtelJavaSdkLoggerProvider.builder().build(), NoopSdkErrorHandler)
 
     @Test
     fun testDupeLoggerProviderAttributes() {
@@ -49,7 +50,7 @@ internal class LoggerProviderAdapterTest {
         val provider = OtelJavaSdkLoggerProvider.builder()
             .addLogRecordProcessor(processor)
             .build()
-        val adapter = LoggerProviderAdapter(provider)
+        val adapter = LoggerProviderAdapter(provider, NoopSdkErrorHandler)
 
         assertEquals(OperationResultCode.Success, adapter.forceFlush())
         assertEquals(1, processor.flushCount)

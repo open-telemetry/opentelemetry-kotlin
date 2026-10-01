@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceFlags
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
@@ -73,6 +74,7 @@ internal class SpanExtTest {
             OtelJavaContext.root(),
             SpanKind.INTERNAL,
             CompatSpanLimitsConfig(),
+            NoopSdkErrorHandler,
         )
         val root = contextFactory.root()
         val ctx = span.storeInContext(root)

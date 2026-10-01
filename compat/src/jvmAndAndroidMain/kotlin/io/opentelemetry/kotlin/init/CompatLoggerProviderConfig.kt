@@ -65,7 +65,7 @@ internal class CompatLoggerProviderConfig(
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
         exportConfigured = true
         val processor = LogExportConfigCompat(clock, sdkErrorHandler).action()
-        builder.addLogRecordProcessor(OtelJavaLogRecordProcessorAdapter(processor))
+        builder.addLogRecordProcessor(OtelJavaLogRecordProcessorAdapter(processor, sdkErrorHandler))
     }
 
     internal fun applyResolvedProcessor(behavior: LogRecordProcessorBehavior?) {
@@ -116,7 +116,7 @@ internal class CompatLoggerProviderConfig(
             builder.setResource(OtelJavaResource.create(attrs, merged.schemaUrl))
         }
         builder.setClock(clock.toOtelJavaClock())
-        return LoggerProviderAdapter(builder.build())
+        return LoggerProviderAdapter(builder.build(), sdkErrorHandler)
     }
 
     fun toBehavior(): LoggerProviderBehavior =

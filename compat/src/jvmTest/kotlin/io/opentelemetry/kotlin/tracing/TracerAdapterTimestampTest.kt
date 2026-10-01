@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaReadableSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanData
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanProcessor
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.toOtelKotlinApi
@@ -27,6 +28,7 @@ internal class TracerAdapterTimestampTest {
             .build(),
         CompatSpanLimitsConfig(),
         CompatContextFactory(),
+        NoopSdkErrorHandler,
     ).getTracer("test")
 
     @Test
