@@ -1,4 +1,4 @@
-package io.opentelemetry.kotlin.propagation
+package io.opentelemetry.kotlin.propagation.utils
 
 /**
  * Codec for the list format used by the W3C `tracestate` header.

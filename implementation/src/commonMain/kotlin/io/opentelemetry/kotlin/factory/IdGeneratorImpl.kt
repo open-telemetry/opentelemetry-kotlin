@@ -1,5 +1,8 @@
 package io.opentelemetry.kotlin.factory
 
+import io.opentelemetry.kotlin.propagation.utils.SPAN_ID_BYTES
+import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_BYTES
+import io.opentelemetry.kotlin.propagation.utils.isAllZeroBytes
 import kotlin.random.Random
 
 /**

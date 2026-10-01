@@ -1,5 +1,9 @@
 package io.opentelemetry.kotlin.factory
 
+import io.opentelemetry.kotlin.propagation.utils.SPAN_ID_BYTES
+import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_BYTES
+import io.opentelemetry.kotlin.propagation.utils.isValidSpanIdBytes
+import io.opentelemetry.kotlin.propagation.utils.isValidTraceIdBytes
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanContextImpl
 import io.opentelemetry.kotlin.tracing.TraceFlags

@@ -1,4 +1,4 @@
-package io.opentelemetry.kotlin.propagation
+package io.opentelemetry.kotlin.propagation.utils
 
 import kotlin.test.Test
 import kotlin.test.assertFalse

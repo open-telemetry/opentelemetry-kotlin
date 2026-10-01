@@ -2,8 +2,8 @@ package io.opentelemetry.kotlin.export.conversion
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.factory.toHexString
-import io.opentelemetry.kotlin.propagation.W3CTraceStateCodec
-import io.opentelemetry.kotlin.propagation.W3CTraceStateValidator
+import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateCodec
+import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateValidator
 import io.opentelemetry.kotlin.resource.MutableResource
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext

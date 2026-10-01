@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
-import io.opentelemetry.kotlin.factory.isValidLowercaseHex
+import io.opentelemetry.kotlin.propagation.utils.isValidLowercaseHex
 
 internal class OtelTraceState private constructor(
     private val pairs: LinkedHashMap<String, String>
