@@ -23,6 +23,20 @@ internal class BaggageImpl private constructor(
             else -> BaggageImpl(entries - name)
         }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other !is BaggageImpl) {
+            return false
+        }
+        return entries == other.entries
+    }
+
+    override fun hashCode(): Int = entries.hashCode()
+
+    override fun toString(): String = "BaggageImpl(entries=$entries)"
+
     private fun setImpl(name: String, value: String, metadata: BaggageEntryMetadata): Baggage {
         if (!isValidKey(name)) {
             return this

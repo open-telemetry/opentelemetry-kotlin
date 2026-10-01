@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.baggage
 import io.opentelemetry.kotlin.ExperimentalApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -149,5 +150,31 @@ internal class BaggageImplTest {
         val updated = full.set("k0", "new")
         assertEquals(BaggageImpl.MAX_ENTRIES, updated.asMap().size)
         assertEquals("new", updated.getValue("k0"))
+    }
+
+    @Test
+    fun `equal when entries match regardless of insertion order`() {
+        val a = BaggageImpl.EMPTY.set("k1", "v1").set("k2", "v2")
+        val b = BaggageImpl.EMPTY.set("k2", "v2").set("k1", "v1")
+        assertEquals(a, b)
+        assertEquals(a.hashCode(), b.hashCode())
+    }
+
+    @Test
+    fun `not equal when value differs`() {
+        assertNotEquals(BaggageImpl.EMPTY.set("k", "v1"), BaggageImpl.EMPTY.set("k", "v2"))
+    }
+
+    @Test
+    fun `not equal when metadata differs`() {
+        val a = BaggageImpl.EMPTY.set("k", "v", BaggageEntryMetadataImpl("m1"))
+        val b = BaggageImpl.EMPTY.set("k", "v", BaggageEntryMetadataImpl("m2"))
+        assertNotEquals(a, b)
+    }
+
+    @Test
+    fun `set then remove equals original`() {
+        val original = BaggageImpl.EMPTY.set("k1", "v1")
+        assertEquals(original, original.set("k2", "v2").remove("k2"))
     }
 }
