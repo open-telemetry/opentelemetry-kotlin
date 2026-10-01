@@ -361,6 +361,19 @@ public abstract interface class io/opentelemetry/kotlin/tracing/SpanContext {
 	public abstract fun isValid ()Z
 }
 
+public abstract interface class io/opentelemetry/kotlin/tracing/SpanContextCreationAction {
+	public abstract fun traceFlags (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun traceState (Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/opentelemetry/kotlin/tracing/SpanContextEntrypointKt {
+	public static final fun createSpanContext (Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/SpanContext;
+	public static final fun createSpanContext ([B[BZLkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/SpanContext;
+	public static synthetic fun createSpanContext$default (Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/SpanContext;
+	public static synthetic fun createSpanContext$default ([B[BZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/SpanContext;
+	public static final fun invalidSpanContext ()Lio/opentelemetry/kotlin/tracing/SpanContext;
+}
+
 public abstract interface class io/opentelemetry/kotlin/tracing/SpanCreationAction : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/SpanLinkCreator {
 }
 
@@ -423,11 +436,22 @@ public abstract interface class io/opentelemetry/kotlin/tracing/TraceFlags {
 	public abstract fun isSampled ()Z
 }
 
+public abstract interface class io/opentelemetry/kotlin/tracing/TraceFlagsCreationAction {
+	public abstract fun isRandom ()Z
+	public abstract fun isSampled ()Z
+	public abstract fun setRandom (Z)V
+	public abstract fun setSampled (Z)V
+}
+
 public abstract interface class io/opentelemetry/kotlin/tracing/TraceState {
 	public abstract fun asMap ()Ljava/util/Map;
 	public abstract fun get (Ljava/lang/String;)Ljava/lang/String;
 	public abstract fun put (Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/TraceState;
 	public abstract fun remove (Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/TraceState;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/TraceStateCreationAction {
+	public abstract fun put (Ljava/lang/String;Ljava/lang/String;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/Tracer {
