@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteLogRecord
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.logging.LoggerConfig
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.export.LogRecordExporter
@@ -26,6 +27,8 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class OtelJavaLogRecordProcessorOnKotlinSdkTest {
@@ -73,6 +76,42 @@ internal class OtelJavaLogRecordProcessorOnKotlinSdkTest {
         assertEquals("value", log.getAttribute(stringKey))
         assertEquals(OtelJavaSeverity.DEBUG2, log.severity)
         assertEquals("logger", log.instrumentationScopeInfo.name)
+    }
+
+    @Test
+    fun testJavaApiExceptionIsExported() = runTest {
+        val exception = IllegalStateException("boom")
+        harness.kotlinApi.toOtelJavaApi().logsBridge.get("logger")
+            .logRecordBuilder()
+            .setException(exception)
+            .emit()
+        val attrs = harness.exportedLog().attributes
+        assertEquals(IllegalStateException::class.qualifiedName, attrs["exception.type"])
+        assertEquals("boom", attrs["exception.message"])
+        assertTrue((attrs["exception.stacktrace"] as String).contains("boom"))
+    }
+
+    @Test
+    fun testJavaApiIsEnabledHonoursLoggerConfig() = runTest {
+        harness.config.loggerProvider = {
+            loggerConfigurator { scope ->
+                object : LoggerConfig {
+                    override val enabled = scope.name != "disabled"
+                    override val minimumSeverity = SeverityNumber.WARN
+                }
+            }
+        }
+        val logsBridge = harness.kotlinApi.toOtelJavaApi().logsBridge
+        val enabled = logsBridge.get("enabled")
+        val disabled = logsBridge.get("disabled")
+
+        assertTrue(enabled.isEnabled(OtelJavaSeverity.UNDEFINED_SEVERITY_NUMBER))
+        assertTrue(enabled.isEnabled(OtelJavaSeverity.WARN))
+        assertTrue(enabled.isEnabled(OtelJavaSeverity.ERROR, OtelJavaContext.root()))
+        assertFalse(enabled.isEnabled(OtelJavaSeverity.INFO))
+        assertFalse(enabled.isEnabled(OtelJavaSeverity.INFO, OtelJavaContext.root()))
+        assertFalse(disabled.isEnabled(OtelJavaSeverity.UNDEFINED_SEVERITY_NUMBER))
+        assertFalse(disabled.isEnabled(OtelJavaSeverity.ERROR))
     }
 
     @Test

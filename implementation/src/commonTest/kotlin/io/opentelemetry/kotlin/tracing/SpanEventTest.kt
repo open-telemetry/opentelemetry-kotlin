@@ -143,6 +143,19 @@ internal class SpanEventTest {
         assertEquals(1, event.droppedAttributesCount)
     }
 
+    @Test
+    fun testSpanEventWithInvalidTimestampUsesClock() {
+        clock.time = 2
+        tracer.startSpan("test").apply {
+            addEvent("event", 0)
+            addEvent("event2", -1)
+            end()
+        }
+        val events = retrieveEvents(2)
+        assertEventData(events[0], "event", clock.time, emptyMap())
+        assertEventData(events[1], "event2", clock.time, emptyMap())
+    }
+
     private fun retrieveEvents(expected: Int): List<SpanEventData> {
         val events = processor.endCalls.single().events
         assertEquals(expected, events.size)

@@ -112,7 +112,7 @@ internal class TracerImpl(
                     processor = processor,
                     name = name,
                     spanKind = spanKind,
-                    startTimestamp = startTimestamp ?: clock.now(),
+                    startTimestamp = startTimestamp?.takeIf { it > 0 } ?: clock.now(),
                     instrumentationScopeInfo = scope,
                     resource = resource,
                     parent = parentSpanContext,
@@ -123,8 +123,8 @@ internal class TracerImpl(
                     initialDroppedLinksCount = collector.droppedLinksCount,
                     sdkErrorHandler = sdkErrorHandler
                 )
-                spanModel.setAttributes(result.attributes.attributes)
                 spanModel.setAttributes(collector.attributes.attributes)
+                spanModel.setAttributes(result.attributes.attributes)
                 sdkErrorHandler.guard {
                     processor?.takeIf(SpanProcessor::isStartRequired)
                         ?.onStart(ReadWriteSpanImpl(spanModel), ctx)

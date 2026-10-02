@@ -62,5 +62,11 @@ internal class OtlpHttpExporterBehaviorTest {
             mapOf("key" to "value", "key2" to "value2"),
             OtlpHttpExporterBehavior.buildHeaderMap("key=value,key2=value2")
         )
+        assertEquals(
+            mapOf("key" to "value", "key3" to "value3"),
+            OtlpHttpExporterBehavior.buildHeaderMap("key=value,garbage,key3=value3")
+        )
+        assertEquals(emptyMap(), OtlpHttpExporterBehavior.buildHeaderMap("garbage"))
+        assertEquals(mapOf("key" to "value"), OtlpHttpExporterBehavior.buildHeaderMap("key=value,"))
     }
 }
