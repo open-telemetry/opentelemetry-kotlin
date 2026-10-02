@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.tracing.Tracer
@@ -211,6 +212,39 @@ internal class CompatTracerProviderSamplerTest {
     }
 
     @Test
+    fun `invalid composableProbability falls back to default sampler`() {
+        val clock = FakeClock()
+        val errorHandler = FakeSdkErrorHandler()
+        val config = CompatTracerProviderConfig(clock, errorHandler).apply {
+            sampler { composite { composableProbability(1.5) } }
+        }
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
+        assertTrue(span.isRecording())
+        assertTrue(span.spanContext.traceFlags.isSampled)
+        assertTrue(errorHandler.userCodeErrors.single().cause is IllegalArgumentException)
+    }
+
+    @Test
+    fun `throwing sampler action falls back to default sampler`() {
+        val clock = FakeClock()
+        val errorHandler = FakeSdkErrorHandler()
+        val config = CompatTracerProviderConfig(clock, errorHandler).apply {
+            sampler { error("boom") }
+        }
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
+        assertTrue(span.isRecording())
+        assertEquals("boom", errorHandler.userCodeErrors.single().cause.message)
+    }
+
+    @Test
     fun `composite with composableParentThreshold falls back to root on root spans`() {
         val clock = FakeClock()
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
@@ -258,6 +292,21 @@ internal class CompatTracerProviderSamplerTest {
         sdk.tracerProvider.getTracer("test").startSpan("span").end()
         assertEquals(1, processor.endCalls.size)
         assertEquals("on", processor.endCalls.single().attributes["sampling.rule"])
+    }
+
+    @Test
+    fun `sampler attributes override span attributes with the same key`() {
+        val processor = FakeSpanProcessor()
+        val sdk = createCompatOpenTelemetry {
+            tracerProvider {
+                sampler { FakeSampler(samplerAttributes = mapOf("shared.key" to "sampler.value")) }
+                export { compositeSpanProcessor(processor) }
+            }
+        }
+        sdk.tracerProvider.getTracer("test").startSpan("span") {
+            setStringAttribute("shared.key", "span.value")
+        }.end()
+        assertEquals("sampler.value", processor.endCalls.single().attributes["shared.key"])
     }
 
     @Test

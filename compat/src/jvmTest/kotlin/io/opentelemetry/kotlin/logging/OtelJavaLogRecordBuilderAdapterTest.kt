@@ -7,6 +7,7 @@ import org.junit.Test
 import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertSame
 
 internal class OtelJavaLogRecordBuilderAdapterTest {
 
@@ -44,6 +45,16 @@ internal class OtelJavaLogRecordBuilderAdapterTest {
         adapter.emit()
 
         assertEquals("my.event", impl.logs.single().eventName)
+    }
+
+    @Test
+    fun `test exception is forwarded`() {
+        val impl = RecordingLogger()
+        val adapter = OtelJavaLogRecordBuilderAdapter(impl)
+        val exception = IllegalStateException("boom")
+        adapter.setException(exception)
+        adapter.emit()
+        assertSame(exception, impl.emittedExceptions.single())
     }
 
     @Test

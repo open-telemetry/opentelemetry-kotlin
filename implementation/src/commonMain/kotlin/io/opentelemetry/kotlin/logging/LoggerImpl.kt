@@ -97,12 +97,12 @@ internal class LoggerImpl(
                     return@execute
                 }
 
-                val now = clock.now()
                 val log = LogRecordModel(
                     resource = resource,
                     instrumentationScopeInfo = key,
-                    timestamp = timestamp ?: now,
-                    observedTimestamp = observedTimestamp ?: now,
+                    // the spec leaves timestamp unset when unknown, but fills in observedTimestamp
+                    timestamp = timestamp?.takeIf { it > 0 },
+                    observedTimestamp = observedTimestamp?.takeIf { it > 0 } ?: clock.now(),
                     body = body,
                     severityText = severityText,
                     severityNumber = severityNumber ?: SeverityNumber.UNKNOWN,

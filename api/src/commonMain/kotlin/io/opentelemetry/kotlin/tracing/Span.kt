@@ -51,7 +51,7 @@ public interface Span : AttributesMutator, SpanLinkCreator, SpanEventCreator {
     public fun end()
 
     /**
-     * Ends the span, setting an explicit end-time in nanoseconds.
+     * Ends the span, setting an explicit end-time in nanoseconds. Uses the current time if <= 0.
      */
     @ThreadSafe
     public fun end(timestamp: Long)

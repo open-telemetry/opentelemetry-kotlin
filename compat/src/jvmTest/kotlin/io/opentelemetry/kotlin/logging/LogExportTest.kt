@@ -46,11 +46,24 @@ internal class LogExportTest {
 
     @Test
     fun `test primitive AnyValue body is unwrapped`() = runTest {
-        // Java OTel's Body is a string, so the payload is rendered rather than AnyValue.toString().
         harness.logger.emit(AnyValue.LongValue(3))
 
         harness.assertLogRecords(1, null) { logs ->
-            assertEquals("3", logs[0].body)
+            assertEquals(3L, logs[0].body)
+        }
+    }
+
+    @Test
+    fun `test structured AnyValue body is preserved`() = runTest {
+        val body = AnyValue.MapValue(
+            mapOf(
+                "list" to AnyValue.ListValue(listOf(AnyValue.StringValue("a"), AnyValue.BoolValue(true))),
+                "bytes" to AnyValue.BytesValue(byteArrayOf(1, 2)),
+            )
+        )
+        harness.logger.emit(body)
+        harness.assertLogRecords(1, null) { logs ->
+            assertEquals(body, logs[0].body)
         }
     }
 

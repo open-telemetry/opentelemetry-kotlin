@@ -23,7 +23,7 @@ import io.opentelemetry.kotlin.tracing.SpanContext
 internal class LogRecordModel(
     override val resource: Resource,
     override val instrumentationScopeInfo: InstrumentationScopeInfo,
-    timestamp: Long,
+    timestamp: Long?,
     observedTimestamp: Long,
     body: Any?,
     eventName: String?,

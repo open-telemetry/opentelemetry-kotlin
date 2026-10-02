@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteLogRecord
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.attributes.setFlattenedAnyValueAttribute
+import io.opentelemetry.kotlin.attributes.toOtelKotlinBody
 import io.opentelemetry.kotlin.logging.LogRecordDataImpl
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.LogRecordData
@@ -23,7 +24,7 @@ internal class ReadWriteLogRecordAdapter(
 ) : ReadWriteLogRecord {
 
     override var timestamp: Long?
-        get() = impl.timestampEpochNanos
+        get() = impl.timestampEpochNanos.takeIf { it > 0L }
         set(value) {
         }
 
@@ -42,7 +43,7 @@ internal class ReadWriteLogRecordAdapter(
         }
 
     override var body: Any?
-        get() = impl.bodyValue?.asString()
+        get() = impl.bodyValue?.toOtelKotlinBody()
         set(value) {
         }
 

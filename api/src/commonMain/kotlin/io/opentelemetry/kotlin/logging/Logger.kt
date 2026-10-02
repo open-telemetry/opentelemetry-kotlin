@@ -39,8 +39,9 @@ public interface Logger {
      *   [io.opentelemetry.kotlin.attributes.AnyValue] for structured body types, and any other
      *   type that will be converted via toString().
      * - [eventName] - the name of the event, or null if none is set
-     * - [timestamp] - the timestamp at which the event occurred
-     * - [observedTimestamp] - the timestamp at which the event was entered into the OpenTelemetry API
+     * - [timestamp] - the timestamp at which the event occurred, or null if unknown. Values <= 0 are treated as unknown
+     * - [observedTimestamp] - the timestamp at which the event was entered into the OpenTelemetry API.
+     *   Defaults to the current time if null or <= 0.
      * - [context] - the context in which the log was emitted
      * - [severityNumber] - the severity of the log
      * - [severityText] - a string representation of the severity at the point it was captured

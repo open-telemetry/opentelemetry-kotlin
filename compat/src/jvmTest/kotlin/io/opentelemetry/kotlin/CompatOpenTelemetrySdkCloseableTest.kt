@@ -7,6 +7,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordExporter
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanExporter
+import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
+import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor
 import kotlinx.coroutines.runBlocking
@@ -97,5 +99,41 @@ internal class CompatOpenTelemetrySdkCloseableTest {
         assertEquals(Success, sdk.shutdown())
         assertEquals(Success, sdk.shutdown())
         assertFalse(tracer.startSpan("after").isRecording())
+    }
+
+    @Test
+    fun `flush and shutdown reach processors registered via the dsl`() = runBlocking {
+        val calls = mutableListOf<String>()
+        val spanProcessor = FakeSpanProcessor(
+            flushCode = {
+                calls.add("span-flush")
+                Success
+            },
+            shutdownCode = {
+                calls.add("span-shutdown")
+                Success
+            },
+        )
+        val logProcessor = FakeLogRecordProcessor(
+            flushCode = {
+                calls.add("log-flush")
+                Success
+            },
+            shutdownCode = {
+                calls.add("log-shutdown")
+                Success
+            },
+        )
+        val sdk = createCompatOpenTelemetry {
+            tracerProvider { export { spanProcessor } }
+            loggerProvider { export { logProcessor } }
+        } as OpenTelemetrySdk
+
+        assertEquals(Success, sdk.forceFlush())
+        assertEquals(setOf("span-flush", "log-flush"), calls.toSet())
+
+        calls.clear()
+        assertEquals(Success, sdk.shutdown())
+        assertEquals(setOf("span-shutdown", "log-shutdown"), calls.toSet())
     }
 }

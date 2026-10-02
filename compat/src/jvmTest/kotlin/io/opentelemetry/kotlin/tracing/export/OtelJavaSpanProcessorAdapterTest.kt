@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
@@ -95,11 +96,11 @@ internal class OtelJavaSpanProcessorAdapterTest {
     fun `isOnEndingRequired delegates to impl`() {
         assertEquals(
             true,
-            OtelJavaSpanProcessorAdapter(FakeSpanProcessor(onEndingRequired = true)).isOnEndingRequired()
+            OtelJavaSpanProcessorAdapter(FakeSpanProcessor(onEndingRequired = true), FakeSdkErrorHandler()).isOnEndingRequired()
         )
         assertEquals(
             false,
-            OtelJavaSpanProcessorAdapter(FakeSpanProcessor(onEndingRequired = false)).isOnEndingRequired()
+            OtelJavaSpanProcessorAdapter(FakeSpanProcessor(onEndingRequired = false), FakeSdkErrorHandler()).isOnEndingRequired()
         )
     }
 
