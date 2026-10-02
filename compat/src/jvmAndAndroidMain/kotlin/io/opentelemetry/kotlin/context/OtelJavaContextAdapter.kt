@@ -14,7 +14,7 @@ internal class OtelJavaContextAdapter(
         return impl.get(repository.get(key))
     }
 
-    override fun <V : Any> with(key: OtelJavaContextKey<V>, value: V): OtelJavaContext {
+    override fun <V : Any> with(key: OtelJavaContextKey<V>, value: V?): OtelJavaContext {
         val ctx = impl.set(repository.get(key), value)
         return OtelJavaContextAdapter(ctx, repository)
     }

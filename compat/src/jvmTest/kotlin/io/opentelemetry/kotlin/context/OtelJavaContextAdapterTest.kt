@@ -29,4 +29,21 @@ internal class OtelJavaContextAdapterTest {
         assertNull(newCtx.get(key2))
         assertNull(newCtx.get(key3))
     }
+
+    @Test
+    fun `with null value clears the existing value`() {
+        val ctx = OtelJavaContextAdapter(contextFactory.root(), OtelJavaContextKeyRepository())
+        val key = OtelJavaContextKey.named<String>("foo")
+        val withValue = ctx.with(key, "value1")
+        val result = withValue.with(key, javaNull())
+
+        assertNull(result.get(key))
+        assertEquals("value1", withValue.get(key))
+    }
+
+    /**
+     * Simulates a Java caller passing null, bypassing Kotlin's non-null view of the parameter.
+     */
+    @Suppress("UNCHECKED_CAST")
+    private fun <R> javaNull(): R = null as R
 }
