@@ -1,26 +1,17 @@
 package io.opentelemetry.kotlin.init
 
-import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.aliases.OtelJavaResource
-import io.opentelemetry.kotlin.aliases.OtelJavaSdkMeterProvider
-import io.opentelemetry.kotlin.aliases.OtelJavaSdkMeterProviderBuilder
+import io.opentelemetry.kotlin.aliases.OtelJavaMeterProvider
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
-import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.metrics.MeterProvider
 import io.opentelemetry.kotlin.metrics.MeterProviderAdapter
-import io.opentelemetry.kotlin.resource.Resource
-import io.opentelemetry.kotlin.resource.ResourceAdapter
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 
 @ExperimentalApi
-internal class CompatMeterProviderConfig(
-    private val clock: Clock,
-) : MeterProviderConfigDsl {
+internal class CompatMeterProviderConfig : MeterProviderConfigDsl {
 
-    private val builder: OtelJavaSdkMeterProviderBuilder = OtelJavaSdkMeterProvider.builder()
     override var serviceName: String? = null
         set(value) {
             field = value
@@ -39,19 +30,8 @@ internal class CompatMeterProviderConfig(
         resourceAttrs.apply { setTypedAttributes(map) }
     }
 
-    fun build(
-        clock: Clock = this.clock,
-        baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build()),
-    ): MeterProvider {
-        val resource = ResourceAdapter(
-            OtelJavaResource.create(resourceAttrs.otelJavaAttributes(), resourceSchemaUrl)
-        )
-        val merged = baseResource.merge(resource)
-        if (merged.attributes.isNotEmpty() || merged.schemaUrl != null) {
-            val attrs = attrsFromMap(merged.attributes)
-            builder.setResource(OtelJavaResource.create(attrs, merged.schemaUrl))
-        }
-        builder.setClock(clock.toOtelJavaClock())
-        return MeterProviderAdapter(builder.build())
-    }
+    /**
+     * Return a noop provider for now.
+     */
+    fun build(): MeterProvider = MeterProviderAdapter(OtelJavaMeterProvider.noop())
 }

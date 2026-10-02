@@ -25,9 +25,9 @@ internal class OtelJavaSpanProcessorAdapter(
     private val sdkErrorHandler: SdkErrorHandler,
 ) : OtelJavaSpanProcessor, OtelJavaExtendedSpanProcessor {
 
-    private val scope = CoroutineScope(
-        SupervisorJob() + Dispatchers.Default + telemetryExceptionHandler("SpanProcessor", sdkErrorHandler)
-    )
+    private val scope by lazy {
+        CoroutineScope(SupervisorJob() + Dispatchers.Default + telemetryExceptionHandler("SpanProcessor", sdkErrorHandler))
+    }
 
     override fun onStart(parentContext: OtelJavaContext, span: OtelJavaReadWriteSpan) {
         sdkErrorHandler.guard("SpanProcessor.onStart failed") {

@@ -61,6 +61,5 @@ internal class CompatSdkConfigFactory(
         return cfg.loggerProviderConfig.build(clock, baseResource, logLimits)
     }
 
-    fun buildMeterProvider(): MeterProvider =
-        cfg.meterProviderConfig.build(clock, baseResource)
+    fun buildMeterProvider(): MeterProvider = cfg.meterProviderConfig.build()
 }
