@@ -13,12 +13,15 @@ import io.ktor.http.contentType
 import io.ktor.utils.io.readRemaining
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
-import io.opentelemetry.kotlin.export.OtlpClient.Companion.MAX_ERROR_BODY_BYTES
+import io.opentelemetry.kotlin.error.reportUserCodeError
+import io.opentelemetry.kotlin.export.OtlpClient.Companion.MAX_RESPONSE_BODY_BYTES
 import io.opentelemetry.kotlin.export.OtlpResponse.ClientError
 import io.opentelemetry.kotlin.export.OtlpResponse.PartialSuccess
+import io.opentelemetry.kotlin.export.OtlpResponse.ResponseTooLarge
 import io.opentelemetry.kotlin.export.OtlpResponse.RetryableError
 import io.opentelemetry.kotlin.export.OtlpResponse.ServerError
 import io.opentelemetry.kotlin.export.OtlpResponse.Success
+import io.opentelemetry.kotlin.export.OtlpResponse.UnexpectedStatus
 import io.opentelemetry.kotlin.export.OtlpResponse.Unknown
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.export.deserializeLogRecordPartialSuccess
@@ -64,32 +67,51 @@ internal class OtlpClient(
             requestHeaders.forEach { (name, value) -> header(name, value) }
             setBody(requestSerializer())
         }
-        // A 200 can still be a partial success and error responses can carry an error message,
-        // so the body is always parsed rather than relying on the status code alone (see #558).
-        val body = parsePartialSuccess(response.boundedBodyBytes())
-        when (val code = response.status.value) {
-            200 -> when (body) {
+        classifyResponse(response, parsePartialSuccess)
+    }
+
+    /**
+     * Classifies a response according to the OTLP/HTTP spec.:
+     *
+     * See https://opentelemetry.io/docs/specs/otlp/
+     */
+    private suspend fun classifyResponse(
+        response: HttpResponse,
+        parsePartialSuccess: (body: ByteArray) -> OtlpPartialSuccess?,
+    ): OtlpResponse {
+        val code = response.status.value
+        val body = response.boundedBodyBytes() ?: run {
+            sdkErrorHandler.reportUserCodeError(
+                IllegalStateException("OTLP response body exceeded $MAX_RESPONSE_BODY_BYTES bytes"),
+                "OTLP response discarded (status=$code)",
+            )
+            return ResponseTooLarge(code)
+        }
+        return when (code) {
+            in 200..299 -> when (val partialSuccess = parsePartialSuccess(body)) {
                 null -> Success
-                else -> PartialSuccess(body.rejectedCount, body.errorMessage)
+                else -> PartialSuccess(partialSuccess.rejectedCount, partialSuccess.errorMessage)
             }
 
             429, 502, 503, 504 -> RetryableError(
                 code,
                 response.parseRetryAfterMs(),
-                body?.errorMessage,
+                body.deserializeStatusMessage(),
             )
 
-            in 400..499 -> ClientError(code, body?.errorMessage)
-            in 500..599 -> ServerError(code, body?.errorMessage)
-            else -> Unknown
+            in 400..499 -> ClientError(code, body.deserializeStatusMessage())
+            in 500..599 -> ServerError(code, body.deserializeStatusMessage())
+            else -> UnexpectedStatus(code)
         }
     }
 
     /**
-     * Reads at most [MAX_ERROR_BODY_BYTES] from the response body.
+     * Reads the response body, returning null if it exceeds [MAX_RESPONSE_BODY_BYTES].
      */
-    private suspend fun HttpResponse.boundedBodyBytes(): ByteArray =
-        bodyAsChannel().readRemaining(MAX_ERROR_BODY_BYTES).readByteArray()
+    private suspend fun HttpResponse.boundedBodyBytes(): ByteArray? =
+        bodyAsChannel().readRemaining(MAX_RESPONSE_BODY_BYTES + 1).use { packet ->
+            packet.readByteArray().takeIf { it.size <= MAX_RESPONSE_BODY_BYTES }
+        }
 
     /**
      * Parses the Retry-After header (in seconds) as milliseconds.
@@ -100,6 +122,6 @@ internal class OtlpClient(
     }
 
     private companion object {
-        const val MAX_ERROR_BODY_BYTES: Long = 4 * 1024 * 1024
+        const val MAX_RESPONSE_BODY_BYTES: Long = 4 * 1024 * 1024
     }
 }

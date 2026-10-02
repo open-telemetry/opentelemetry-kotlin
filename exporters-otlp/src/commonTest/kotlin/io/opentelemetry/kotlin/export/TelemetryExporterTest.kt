@@ -70,6 +70,49 @@ internal class TelemetryExporterTest {
     }
 
     @Test
+    fun testTerminalResponsesAreNotRetried() = runTest {
+        listOf(
+            OtlpResponse.ServerError(500, null),
+            OtlpResponse.UnexpectedStatus(301),
+            OtlpResponse.ResponseTooLarge(503),
+            OtlpResponse.PartialSuccess(1, null),
+        ).forEach { response ->
+            var attempts = 0
+            val exporter = TelemetryExporter<String>(
+                initialDelayMs = 100,
+                maxAttemptIntervalMs = 1000,
+                maxAttempts = 3,
+                sdkErrorHandler = NoopSdkErrorHandler,
+                coroutineContext = StandardTestDispatcher(testScheduler),
+            ) {
+                attempts++
+                response
+            }
+            exporter.export(listOf("data"))
+            advanceUntilIdle()
+            assertEquals(1, attempts, "$response")
+        }
+    }
+
+    @Test
+    fun testUnknownIsRetried() = runTest {
+        var attempts = 0
+        val exporter = TelemetryExporter<String>(
+            initialDelayMs = 100,
+            maxAttemptIntervalMs = 1000,
+            maxAttempts = 3,
+            sdkErrorHandler = NoopSdkErrorHandler,
+            coroutineContext = StandardTestDispatcher(testScheduler),
+        ) {
+            attempts++
+            OtlpResponse.Unknown
+        }
+        exporter.export(listOf("data"))
+        advanceUntilIdle()
+        assertEquals(3, attempts)
+    }
+
+    @Test
     fun testSuccessIsNotRetried() = runTest {
         var attempts = 0
         val exporter = TelemetryExporter<String>(
