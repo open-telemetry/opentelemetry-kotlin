@@ -176,6 +176,25 @@ class SpanDataProtobufConversionTest {
     }
 
     @Test
+    fun testParentSpanIdConversion() {
+        val root = FakeSpanData(parent = FakeSpanContext.INVALID).toProtobuf()
+        assertEquals(0, root.parent_span_id.size)
+
+        val child = FakeSpanData(parent = localContext).toProtobuf()
+        assertEquals(localContext.spanId, child.parent_span_id.toByteArray().toHexString())
+    }
+
+    @Test
+    fun testRootSpanRoundTrip() {
+        val obj = FakeSpanData(parent = FakeSpanContext.INVALID, spanContext = localContext)
+        val roundTrip = obj.toProtobuf().toSpanData(FakeResource(), FakeInstrumentationScopeInfo())
+
+        assertFalse(roundTrip.parent.isValid)
+        assertEquals(FakeSpanContext.INVALID.spanId, roundTrip.parent.spanId)
+        assertTrue(roundTrip.spanContext.isValid)
+    }
+
+    @Test
     fun testLocalParentRoundTrip() {
         val obj = FakeSpanData(
             parent = localContext,

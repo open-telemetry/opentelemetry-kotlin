@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.init
 
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.tracing.sampling.ComposableRuleBasedSampler
 import io.opentelemetry.kotlin.tracing.sampling.ComposableSampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplingPredicate
@@ -8,10 +7,7 @@ import io.opentelemetry.kotlin.tracing.sampling.SamplingRule
 
 internal class ComposableRuleBasedConfigImpl(
     private val dsl: SamplerConfigDsl,
-) : ComposableRuleBasedConfigDsl {
-
-    override val spanFactory: SpanFactory
-        get() = dsl.spanFactory
+) : ComposableRuleBasedConfigDsl, SamplerConfigDsl by dsl {
 
     private val rules = mutableListOf<SamplingRule>()
 

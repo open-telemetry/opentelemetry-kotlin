@@ -10,6 +10,8 @@ import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setFlattenedAnyValueAttribute
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.Span
@@ -31,6 +33,7 @@ internal class SpanAdapter(
     parentCtx: OtelJavaContext?,
     val spanKind: SpanKind,
     private val spanLimitsConfig: CompatSpanLimitsConfig,
+    private val sdkErrorHandler: SdkErrorHandler,
     creationState: CompatSpanCreationState? = null,
 ) : Span, AttributeContainer, SpanCreationAction, OtelJavaImplicitContextKeyed {
 
@@ -61,11 +64,19 @@ internal class SpanAdapter(
     }
 
     override fun end() {
-        impl.end()
+        sdkErrorHandler.guard("Span.end failed") {
+            impl.end()
+        }
     }
 
     override fun end(timestamp: Long) {
-        impl.end(timestamp, TimeUnit.NANOSECONDS)
+        sdkErrorHandler.guard("Span.end failed") {
+            if (timestamp > 0) {
+                impl.end(timestamp, TimeUnit.NANOSECONDS)
+            } else {
+                impl.end()
+            }
+        }
     }
 
     override fun isRecording(): Boolean = impl.isRecording
@@ -73,7 +84,7 @@ internal class SpanAdapter(
     override fun addLink(
         spanContext: SpanContext,
         attributes: (AttributesMutator.() -> Unit)?
-    ) {
+    ) = sdkErrorHandler.guard("Span.addLink failed") {
         val container = CompatAttributesModel()
         if (attributes != null) {
             attributes(container)
@@ -88,13 +99,13 @@ internal class SpanAdapter(
         name: String,
         timestamp: Long?,
         attributes: (AttributesMutator.() -> Unit)?
-    ) {
+    ) = sdkErrorHandler.guard("Span.addEvent failed") {
         val container = CompatAttributesModel()
         if (attributes != null) {
             attributes(container)
         }
         // As with the span start: left unset, the SDK stamps the event with the clock it times the span by.
-        if (timestamp != null) {
+        if (timestamp != null && timestamp > 0) {
             impl.addEvent(name, container.otelJavaAttributes(), timestamp, TimeUnit.NANOSECONDS)
         } else {
             impl.addEvent(name, container.otelJavaAttributes())

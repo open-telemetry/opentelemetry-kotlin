@@ -13,8 +13,8 @@ import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.SpanContextFactory
-import io.opentelemetry.kotlin.factory.isValidTraceIdBytes
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
+import io.opentelemetry.kotlin.propagation.utils.isValidTraceIdBytes
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.model.CreatedSpan
@@ -112,7 +112,7 @@ internal class TracerImpl(
                     processor = processor,
                     name = name,
                     spanKind = spanKind,
-                    startTimestamp = startTimestamp ?: clock.now(),
+                    startTimestamp = startTimestamp?.takeIf { it > 0 } ?: clock.now(),
                     instrumentationScopeInfo = scope,
                     resource = resource,
                     parent = parentSpanContext,
@@ -123,8 +123,8 @@ internal class TracerImpl(
                     initialDroppedLinksCount = collector.droppedLinksCount,
                     sdkErrorHandler = sdkErrorHandler
                 )
-                spanModel.setAttributes(result.attributes.attributes)
                 spanModel.setAttributes(collector.attributes.attributes)
+                spanModel.setAttributes(result.attributes.attributes)
                 sdkErrorHandler.guard {
                     processor?.takeIf(SpanProcessor::isStartRequired)
                         ?.onStart(ReadWriteSpanImpl(spanModel), ctx)

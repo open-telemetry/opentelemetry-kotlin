@@ -14,7 +14,7 @@ import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
-import io.opentelemetry.kotlin.init.SamplerConfigDsl
+import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeTraceState
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
@@ -38,9 +38,7 @@ internal class BuiltInSamplersTest {
     private val contextFactory = ContextFactoryImpl(spanFactory)
     private val scope = InstrumentationScopeInfoImpl("test", null, null, emptyMap())
 
-    private val samplerDsl = object : SamplerConfigDsl {
-        override val spanFactory = this@BuiltInSamplersTest.spanFactory
-    }
+    private val samplerDsl = SamplerConfigImpl(spanFactory)
 
     private fun buildTracer(sampler: Sampler) = TracerImpl(
         clock = clock,

@@ -1,15 +1,23 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.aliases.OtelJavaCompletableResultCode
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Test
+import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class CompletableResultCodeExtTest {
@@ -103,6 +111,58 @@ internal class CompletableResultCodeExtTest {
             awaitOperationResultCode(TIMEOUT_MS) { OtelJavaCompletableResultCode() }
         )
         assertEquals(TIMEOUT_MS, testScheduler.currentTime)
+    }
+
+    @Test
+    fun `test launch completes with the action result`() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val success = launchAsCompletableResultCode(errorHandler, "test") { OperationResultCode.Success }
+        val failure = launchAsCompletableResultCode(errorHandler, "test") { OperationResultCode.Failure }
+        advanceUntilIdle()
+
+        assertTrue(success.isSuccess)
+        assertTrue(failure.isDone)
+        assertFalse(failure.isSuccess)
+        assertFalse(errorHandler.hasErrors())
+    }
+
+    @Test
+    fun `test launch reports exceptions and fails`() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val result = launchAsCompletableResultCode(errorHandler, "test") { error("boom") }
+        advanceUntilIdle()
+
+        assertTrue(result.isDone)
+        assertFalse(result.isSuccess)
+        assertEquals("test", errorHandler.userCodeErrors.single().message)
+    }
+
+    @Test
+    fun `test launch fails on timeout`() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val result = launchAsCompletableResultCode(errorHandler, "test", TIMEOUT_MS) {
+            awaitCancellation()
+        }
+        advanceUntilIdle()
+
+        assertTrue(result.isDone)
+        assertFalse(result.isSuccess)
+        assertEquals(TIMEOUT_MS, testScheduler.currentTime)
+        assertFalse(errorHandler.hasErrors())
+    }
+
+    @Test
+    fun `test launch on a cancelled scope fails`() {
+        var called = false
+        val scope = CoroutineScope(Job().apply { cancel() })
+        val result = scope.launchAsCompletableResultCode(FakeSdkErrorHandler(), "test") {
+            called = true
+            OperationResultCode.Success
+        }.join(TIMEOUT_MS, TimeUnit.MILLISECONDS)
+
+        assertTrue(result.isDone)
+        assertFalse(result.isSuccess)
+        assertFalse(called)
     }
 
     private companion object {

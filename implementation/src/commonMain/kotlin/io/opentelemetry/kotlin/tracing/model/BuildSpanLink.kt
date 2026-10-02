@@ -9,6 +9,9 @@ import io.opentelemetry.kotlin.tracing.SpanLinkImpl
 /**
  * Builds a single [SpanLink] with per-link attribute limits applied.
  *
+ * Returns null if the link has an invalid [SpanContext] and both its
+ * attributes and trace state are empty, as per: https://opentelemetry.io/docs/specs/otel/trace/api/#link
+ *
  * Extracted as a shared helper so that [SpanModel] and [SpanCreationCollector]
  * apply the same limits without duplicating the logic.
  */
@@ -16,11 +19,14 @@ internal fun buildSpanLink(
     spanContext: SpanContext,
     attributes: (AttributesMutator.() -> Unit)?,
     spanLimitConfig: SpanLimitConfig
-): SpanLink {
+): SpanLink? {
     val container = AttributesModel(
         attributeLimit = spanLimitConfig.attributeCountPerLinkLimit,
         attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
     )
     attributes?.invoke(container)
+    if (!spanContext.isValid && container.attributes.isEmpty() && spanContext.traceState.asMap().isEmpty()) {
+        return null
+    }
     return SpanLinkImpl(spanContext, container)
 }

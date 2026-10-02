@@ -81,13 +81,17 @@ internal class SpanModel(
     private inline fun mutate(details: String, action: () -> Unit) {
         sdkErrorHandler.guard(details) {
             lock.write {
-                val isEndingOnThisThread = state == State.ENDING &&
-                    endingSpan.isInitialized() && endingSpan.value.get() === this
-                if (state == State.STARTED || isEndingOnThisThread) {
+                if (canMutateInternal()) {
                     action()
                 }
             }
         }
+    }
+
+    private fun canMutateInternal(): Boolean {
+        val isEndingOnThisThread = state == State.ENDING &&
+            endingSpan.isInitialized() && endingSpan.value.get() === this
+        return state == State.STARTED || isEndingOnThisThread
     }
 
     override fun setName(name: String) {
@@ -117,7 +121,7 @@ internal class SpanModel(
     }
 
     override fun end(timestamp: Long) {
-        if (timestamp == 0L) {
+        if (timestamp <= 0L) {
             end()
         } else {
             endInternal(timestamp)
@@ -210,12 +214,22 @@ internal class SpanModel(
         spanContext: SpanContext,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
-        mutate("Span.addLink failed") {
-            if (linksList.size < spanLimitConfig.linkCountLimit) {
-                val link = buildSpanLink(spanContext, attributes, spanLimitConfig)
-                linksList.add(link)
-            } else {
-                droppedLinksCountImpl++
+        sdkErrorHandler.guard("Span.addLink failed") {
+            val hasCapacity = reserve(
+                hasCapacity = { linksList.size < spanLimitConfig.linkCountLimit },
+                onDropped = { droppedLinksCountImpl++ }
+            )
+            if (!hasCapacity) {
+                return
+            }
+            // avoid running user code under the lock
+            val link = buildSpanLink(spanContext, attributes, spanLimitConfig) ?: return
+            mutate("Span.addLink failed") {
+                if (linksList.size < spanLimitConfig.linkCountLimit) {
+                    linksList.add(link)
+                } else {
+                    droppedLinksCountImpl++
+                }
             }
         }
     }
@@ -225,22 +239,49 @@ internal class SpanModel(
         timestamp: Long?,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
-        mutate("Span.addEvent failed") {
-            if (eventsList.size < spanLimitConfig.eventCountLimit) {
-                val container = AttributesModel(
-                    attributeLimit = spanLimitConfig.attributeCountPerEventLimit,
-                    attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
-                )
-                if (attributes != null) {
-                    attributes(container)
+        sdkErrorHandler.guard("Span.addEvent failed") {
+            val hasCapacity = reserve(
+                hasCapacity = { eventsList.size < spanLimitConfig.eventCountLimit },
+                onDropped = { droppedEventsCountImpl++ }
+            )
+            if (!hasCapacity) {
+                return
+            }
+            // avoid running user code under the lock
+            val eventTimestamp = timestamp?.takeIf { it > 0 } ?: clock.now()
+            val container = AttributesModel(
+                attributeLimit = spanLimitConfig.attributeCountPerEventLimit,
+                attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
+            )
+            if (attributes != null) {
+                attributes(container)
+            }
+            val event = SpanEventImpl(name, eventTimestamp, container)
+            mutate("Span.addEvent failed") {
+                if (eventsList.size < spanLimitConfig.eventCountLimit) {
+                    eventsList.add(event)
+                } else {
+                    droppedEventsCountImpl++
                 }
-                val event = SpanEventImpl(name, timestamp ?: clock.now(), container)
-                eventsList.add(event)
-            } else {
-                droppedEventsCountImpl++
             }
         }
     }
+
+    private inline fun reserve(hasCapacity: () -> Boolean, onDropped: () -> Unit): Boolean =
+        lock.write {
+            when {
+                !canMutateInternal() -> {
+                    false
+                }
+                hasCapacity() -> {
+                    true
+                }
+                else -> {
+                    onDropped()
+                    false
+                }
+            }
+        }
 
     /**
      * Takes the snapshot under a single read lock so that the returned [ReadableSpan] is internally

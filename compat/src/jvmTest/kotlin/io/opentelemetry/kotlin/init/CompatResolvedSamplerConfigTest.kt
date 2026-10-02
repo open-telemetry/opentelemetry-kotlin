@@ -12,7 +12,6 @@ import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
-import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -39,7 +38,7 @@ internal class CompatResolvedSamplerConfigTest {
         val behavior = resolved ?: defaultCompatBehaviorReader(
             envVarReader = EnvVarReader(getEnvVar),
             sdkErrorHandler = cfg.sdkErrorHandler,
-        ).read(cfg.configFilePath, cfg.toBehavior())
+        ).read(cfg.configFilePath, cfg::toBehavior)
         return CompatSdkConfigFactory(cfg, behavior, clock, contextFactory)
             .buildTracerProvider()
             .getTracer("test")

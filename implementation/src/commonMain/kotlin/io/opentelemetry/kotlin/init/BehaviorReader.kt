@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.getEnvVarValue
  * Reads the behavior supplied by every configuration mechanism, then resolves their precedence.
  */
 internal fun interface BehaviorReader {
-    fun read(configFilePath: String?, dsl: OpenTelemetryBehavior): OpenTelemetryBehavior
+    fun read(configFilePath: String?, dsl: () -> OpenTelemetryBehavior): OpenTelemetryBehavior
 }
 
 /**

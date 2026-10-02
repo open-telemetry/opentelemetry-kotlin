@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanProcessor
@@ -18,6 +19,7 @@ internal class TracerProviderAdapterTest {
         OtelJavaSdkTracerProvider.builder().build(),
         CompatSpanLimitsConfig(),
         CompatContextFactory(),
+        NoopSdkErrorHandler,
     )
 
     @Test
@@ -59,6 +61,7 @@ internal class TracerProviderAdapterTest {
             provider,
             CompatSpanLimitsConfig(),
             CompatContextFactory(),
+            NoopSdkErrorHandler,
         )
 
         assertEquals(OperationResultCode.Success, adapter.forceFlush())

@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.propagation.utils.isValidHex
 import io.opentelemetry.kotlin.tracing.TraceFlags
 import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
 

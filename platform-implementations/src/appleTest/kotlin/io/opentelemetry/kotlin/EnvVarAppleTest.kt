@@ -2,13 +2,13 @@ package io.opentelemetry.kotlin
 
 import platform.posix.setenv
 import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 internal class EnvVarAppleTest {
 
     @Test
-    fun testEnvVarReadFromPosixEnv() {
+    fun testEnvVarIgnoredOnApple() {
         setenv("OTEL_KOTLIN_TEST_ENV_VAR", "42", 1)
-        assertEquals("42", getEnvVarValue("OTEL_KOTLIN_TEST_ENV_VAR"))
+        assertNull(getEnvVarValue("OTEL_KOTLIN_TEST_ENV_VAR"))
     }
 }

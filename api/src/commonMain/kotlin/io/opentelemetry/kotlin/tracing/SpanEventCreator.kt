@@ -14,7 +14,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 public interface SpanEventCreator {
 
     /**
-     * Adds an event to the span.
+     * Adds an event to the span. The timestamp defaults to the current time if null or <= 0.
      */
     public fun addEvent(
         name: String,

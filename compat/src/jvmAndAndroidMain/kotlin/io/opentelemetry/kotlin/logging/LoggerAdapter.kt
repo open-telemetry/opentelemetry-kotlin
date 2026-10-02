@@ -6,24 +6,28 @@ import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
-import io.opentelemetry.kotlin.attributes.toFlattenedBodyString
+import io.opentelemetry.kotlin.attributes.toOtelJavaValue
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guard
+import io.opentelemetry.kotlin.error.guardOrDefault
 import java.util.concurrent.TimeUnit
 
 @ExperimentalApi
 internal class LoggerAdapter(
     private val impl: OtelJavaLogger,
+    private val sdkErrorHandler: SdkErrorHandler,
 ) : Logger {
 
     override fun enabled(
         context: Context?,
         severityNumber: SeverityNumber?,
         eventName: String?,
-    ): Boolean {
+    ): Boolean = sdkErrorHandler.guardOrDefault(false, "Logger.enabled failed") {
         // eventName has no equivalent in opentelemetry-java, so it is not taken into account
         val severity = (severityNumber ?: SeverityNumber.UNKNOWN).toOtelJavaSeverityNumber()
-        return when (context) {
+        when (context) {
             null -> impl.isEnabled(severity)
             else -> impl.isEnabled(severity, context.toOtelJavaContext())
         }
@@ -40,17 +44,19 @@ internal class LoggerAdapter(
         exception: Throwable?,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
-        processTelemetry(
-            eventName = eventName,
-            body = body,
-            timestamp = timestamp,
-            observedTimestamp = observedTimestamp,
-            context = context,
-            severityNumber = severityNumber,
-            severityText = severityText,
-            exception = exception,
-            attributes = attributes
-        )
+        sdkErrorHandler.guard("Logger.emit failed") {
+            processTelemetry(
+                eventName = eventName,
+                body = body,
+                timestamp = timestamp,
+                observedTimestamp = observedTimestamp,
+                context = context,
+                severityNumber = severityNumber,
+                severityText = severityText,
+                exception = exception,
+                attributes = attributes
+            )
+        }
     }
 
     private fun processTelemetry(
@@ -67,15 +73,15 @@ internal class LoggerAdapter(
         val builder = impl.logRecordBuilder()
 
         if (body != null && body != AnyValue.NullValue) {
-            builder.setBody(body.toFlattenedBodyString())
+            builder.setBody(body.toOtelJavaValue())
         }
         if (eventName != null) {
             builder.setEventName(eventName)
         }
-        if (timestamp != null) {
+        if (timestamp != null && timestamp > 0) {
             builder.setTimestamp(timestamp, TimeUnit.NANOSECONDS)
         }
-        if (observedTimestamp != null) {
+        if (observedTimestamp != null && observedTimestamp > 0) {
             builder.setObservedTimestamp(observedTimestamp, TimeUnit.NANOSECONDS)
         }
         if (context != null) {

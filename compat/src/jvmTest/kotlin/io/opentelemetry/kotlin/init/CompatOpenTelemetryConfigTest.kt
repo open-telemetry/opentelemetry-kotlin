@@ -23,7 +23,7 @@ internal class CompatOpenTelemetryConfigTest {
             }
         }
 
-        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory())
         val spanLimits = configFactory.spanLimits
         assertEquals(8, spanLimits.attributeCountLimit)
@@ -44,7 +44,7 @@ internal class CompatOpenTelemetryConfigTest {
             }
         }
 
-        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val logLimits = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory()).logLimits
         assertEquals(8, logLimits.attributeCountLimit)
         assertEquals(16, logLimits.attributeValueLengthLimit)

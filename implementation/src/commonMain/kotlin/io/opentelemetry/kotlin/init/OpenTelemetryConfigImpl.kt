@@ -9,14 +9,11 @@ import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.IdGenerator
-import io.opentelemetry.kotlin.propagation.Propagators
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
-import io.opentelemetry.kotlin.propagation.createPropagators
 import kotlin.concurrent.Volatile
 
 internal class OpenTelemetryConfigImpl(
     clock: Clock,
-    propagators: Propagators = createPropagators(),
     internal val globalResourceConfig: ResourceConfigImpl = ResourceConfigImpl(),
 ) : OpenTelemetryConfigDsl,
     ResourceConfigDsl by globalResourceConfig,
@@ -34,7 +31,7 @@ internal class OpenTelemetryConfigImpl(
     internal val loggingConfig: LoggerProviderConfigImpl = LoggerProviderConfigImpl(clock, sdkErrorHandler)
     internal val metricsConfig: MeterProviderConfigImpl = MeterProviderConfigImpl(sdkErrorHandler)
     internal val contextConfig: ContextConfigImpl = ContextConfigImpl()
-    internal val propagatorCfg: PropagatorConfigImpl = PropagatorConfigImpl(propagators)
+    internal val propagatorCfg: PropagatorConfigImpl = PropagatorConfigImpl()
     private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
     internal val resourceDetectionConfig = ResourceDetectionConfigImpl()
 

@@ -41,7 +41,7 @@ internal class SpanCreationCollector(
         attributes: (AttributesMutator.() -> Unit)?,
     ) {
         if (linksList.size < spanLimitConfig.linkCountLimit) {
-            linksList.add(buildSpanLink(spanContext, attributes, spanLimitConfig))
+            buildSpanLink(spanContext, attributes, spanLimitConfig)?.let(linksList::add)
         } else {
             droppedLinksCountImpl++
         }
