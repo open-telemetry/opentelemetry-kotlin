@@ -1,4 +1,4 @@
-package io.opentelemetry.kotlin.factory
+package io.opentelemetry.kotlin.propagation.utils
 
 import kotlin.test.Test
 import kotlin.test.assertContentEquals

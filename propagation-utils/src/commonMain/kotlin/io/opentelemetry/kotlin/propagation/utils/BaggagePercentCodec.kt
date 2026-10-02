@@ -6,7 +6,6 @@ private const val BYTE_MASK = 0xFF
 private const val HEX_SHIFT = 4
 private const val HEX_MASK = 0xF
 private const val PERCENT_SEQUENCE_LENGTH = 3
-private const val DECIMAL_BASE = 10
 private const val OCTET_EXCLAIM = 0x21
 private const val OCTET_HASH = 0x23
 private const val OCTET_PLUS = 0x2B
@@ -28,7 +27,7 @@ private val HEX_UPPER = charArrayOf(
  *
  * baggage-octet = %x21 / %x23-2B / %x2D-3A / %x3C-5B / %x5D-7E
  */
-internal fun percentEncodeBaggageValue(value: String): String {
+public fun percentEncodeBaggageValue(value: String): String {
     val sb = StringBuilder(value.length)
     for (byte in value.encodeToByteArray()) {
         val b = byte.toInt() and BYTE_MASK
@@ -46,7 +45,7 @@ internal fun percentEncodeBaggageValue(value: String): String {
 /**
  * Decodes `%HH` sequences in [value]. Returns null if [value] contains a malformed sequence.
  */
-internal fun percentDecodeBaggageValue(value: String): String? {
+public fun percentDecodeBaggageValue(value: String): String? {
     if (!value.contains(PERCENT_CHAR)) {
         return value
     }
@@ -71,8 +70,8 @@ private fun decodeHexPair(value: String, start: Int): Int? {
     if (start + 2 >= value.length) {
         return null
     }
-    val hi = hexDigit(value[start + 1])
-    val lo = hexDigit(value[start + 2])
+    val hi = value[start + 1].hexDigitValue()
+    val lo = value[start + 2].hexDigitValue()
     if (hi < 0 || lo < 0) {
         return null
     }
@@ -86,11 +85,4 @@ private fun isBaggageOctet(b: Int): Boolean = when (b) {
     in OCTET_LT..OCTET_LBRACKET -> true
     in OCTET_RBRACKET..OCTET_TILDE -> true
     else -> false
-}
-
-private fun hexDigit(c: Char): Int = when (c) {
-    in '0'..'9' -> c - '0'
-    in 'a'..'f' -> c - 'a' + DECIMAL_BASE
-    in 'A'..'F' -> c - 'A' + DECIMAL_BASE
-    else -> -1
 }

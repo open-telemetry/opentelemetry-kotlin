@@ -17,6 +17,7 @@ rootProject.name = "opentelemetry-kotlin"
 include(
     ":core",
     ":api",
+    ":propagation-utils",
     ":api-ext",
     ":context-impl",
     ":context-coroutines",

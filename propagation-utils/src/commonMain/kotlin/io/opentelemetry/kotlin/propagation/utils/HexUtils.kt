@@ -3,9 +3,7 @@ package io.opentelemetry.kotlin.propagation.utils
 /**
  * Returns true if the character is a valid hexadecimal digit (0-9, a-f, A-F).
  */
-public fun Char.isHexDigit(): Boolean {
-    return this in '0'..'9' || this in 'a'..'f' || this in 'A'..'F'
-}
+public fun Char.isHexDigit(): Boolean = hexDigitValue() >= 0
 
 /**
  * Returns true if the character is a valid lowercase hexadecimal digit (0-9, a-f).

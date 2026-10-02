@@ -8,7 +8,7 @@ private val TCHAR_SPECIALS = setOf(
  * RFC 7230 token: 1*tchar.
  * tchar = "!" / "#" / "$" / "%" / "&" / "'" / "*" / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~" / DIGIT / ALPHA
  */
-internal fun isValidBaggageKey(name: String): Boolean {
+public fun isValidBaggageKey(name: String): Boolean {
     if (name.isEmpty()) {
         return false
     }
@@ -20,7 +20,7 @@ internal fun isValidBaggageKey(name: String): Boolean {
  * meaningless inside a baggage value (NUL). Other non-octet characters are accepted
  * and percent-encoded by the propagator at inject time.
  */
-internal fun isValidBaggageValue(value: String): Boolean =
+public fun isValidBaggageValue(value: String): Boolean =
     value.all { c -> c != '\r' && c != '\n' && c.code != 0 }
 
 private fun isTChar(c: Char): Boolean {
