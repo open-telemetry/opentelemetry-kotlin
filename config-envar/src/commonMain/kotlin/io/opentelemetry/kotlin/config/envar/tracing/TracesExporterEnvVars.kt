@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
+import io.opentelemetry.kotlin.config.envar.Exporter
 import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Invalid
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Value
@@ -20,12 +21,12 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 class TracesExporterEnvVars(
     private val reader: ReportingEnvVarReader,
 ) {
-    fun toBehavior(): SpanProcessorBehavior? = reader.readStringAndTransform(EXPORTER) { name ->
+    fun toBehavior(): SpanProcessorBehavior? = reader.readStringAndTransform(TRACES_EXPORTER) { name ->
         // TODO: Add support to multiple exporters being in use simultaneously once we have the SpanProcessor
         //  fully implemented.
-        when (name.lowercase()) {
-            CONSOLE -> Value(SpanProcessorBehavior(console = ConsoleExporterBehavior()))
-            OTLP -> Value(
+        when (Exporter.fromValue(name.lowercase())) {
+            Exporter.CONSOLE -> Value(SpanProcessorBehavior(console = ConsoleExporterBehavior()))
+            Exporter.OTLP -> Value(
                 SpanProcessorBehavior(
                     http = OtlpHttpExporterBehavior(
                         endpoint = reader.readString(OTLP_TRACES_ENDPOINT)
@@ -39,21 +40,15 @@ class TracesExporterEnvVars(
                     )
                 )
             )
-            LOGGING, NONE, OTLP_STDOUT -> Value(null)
-            else -> Invalid(EnvVarReadWarning(EXPORTER, "Unknown value '$name'; ignoring"))
+            null -> Invalid(EnvVarReadWarning(TRACES_EXPORTER, "Unknown value '$name'; ignoring"))
+            else -> Value(null) // Known exporter, but not yet supported.
         }
     }
 
     internal companion object {
-        const val EXPORTER = "OTEL_TRACES_EXPORTER"
+        const val TRACES_EXPORTER = "OTEL_TRACES_EXPORTER"
         const val OTLP_TRACES_ENDPOINT = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"
         const val OTLP_TRACES_TIMEOUT = "OTEL_EXPORTER_OTLP_TRACES_TIMEOUT"
         const val OTLP_TRACES_HEADERS = "OTEL_EXPORTER_OTLP_TRACES_HEADERS"
-
-        const val CONSOLE = "console"
-        const val OTLP = "otlp"
-        const val LOGGING = "logging"
-        const val NONE = "none"
-        const val OTLP_STDOUT = "otlp/stdout"
     }
 }

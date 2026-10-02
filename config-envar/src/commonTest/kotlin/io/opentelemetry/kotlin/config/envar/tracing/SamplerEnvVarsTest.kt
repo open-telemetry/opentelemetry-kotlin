@@ -16,19 +16,19 @@ internal class SamplerEnvVarsTest {
 
     @Test
     fun `should map always_on`() {
-        assertEquals(SamplerBehavior.AlwaysOn, toBehavior(env("always_on")))
+        assertEquals(SamplerBehavior.AlwaysOn, toBehavior(env(SamplerEnvVars.ALWAYS_ON)))
     }
 
     @Test
     fun `should map always_off`() {
-        assertEquals(SamplerBehavior.AlwaysOff, toBehavior(env("always_off")))
+        assertEquals(SamplerBehavior.AlwaysOff, toBehavior(env(SamplerEnvVars.ALWAYS_OFF)))
     }
 
     @Test
     fun `should map parentbased_always_on`() {
         assertEquals(
             SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOn),
-            toBehavior(env("parentbased_always_on")),
+            toBehavior(env(SamplerEnvVars.PARENT_BASED_ALWAYS_ON)),
         )
     }
 
@@ -36,7 +36,7 @@ internal class SamplerEnvVarsTest {
     fun `should map parentbased_always_off`() {
         assertEquals(
             SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOff),
-            toBehavior(env("parentbased_always_off")),
+            toBehavior(env(SamplerEnvVars.PARENT_BASED_ALWAYS_OFF)),
         )
     }
 
@@ -52,7 +52,7 @@ internal class SamplerEnvVarsTest {
         val warnings = mutableListOf<EnvVarReadWarning>()
         SamplerEnvVars(reportingEnvVarReader(env("not_a_sampler"), warnings::add)).toBehavior()
         assertEquals(1, warnings.size)
-        assertEquals("OTEL_TRACES_SAMPLER", warnings.single().name)
+        assertEquals(SamplerEnvVars.SAMPLER, warnings.single().name)
     }
 
     @Test
@@ -64,7 +64,7 @@ internal class SamplerEnvVarsTest {
 
     private fun env(sampler: String): (String) -> String? {
         val values = buildMap {
-            put("OTEL_TRACES_SAMPLER", sampler)
+            put(SamplerEnvVars.SAMPLER, sampler)
         }
         return values::get
     }

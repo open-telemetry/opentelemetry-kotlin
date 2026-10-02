@@ -40,6 +40,16 @@ internal class ReportingEnvVarReaderTest {
     }
 
     @Test
+    fun `should allow zero by default and report it when disallowed`() {
+        val warnings = mutableListOf<EnvVarReadWarning>()
+        val reader = reader("0", warnings::add)
+
+        assertEquals(0, reader.readNonNegativeInt(name))
+        assertNull(reader.readNonNegativeInt(name, acceptZero = false))
+        assertEquals(name, warnings.single().name)
+    }
+
+    @Test
     fun `should resolve parsed results`() {
         val warnings = mutableListOf<EnvVarReadWarning>()
         assertEquals(5, reader("known").readStringAndTransform(name) { Value(it.length) })

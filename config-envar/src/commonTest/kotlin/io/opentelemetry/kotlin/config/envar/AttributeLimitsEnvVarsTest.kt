@@ -10,8 +10,8 @@ internal class AttributeLimitsEnvVarsTest {
     @Test
     fun `should read every limit`() {
         val env = mapOf(
-            "OTEL_ATTRIBUTE_COUNT_LIMIT" to "64",
-            "OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT" to "256",
+            AttributeLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT to "64",
+            AttributeLimitsEnvVars.ATTRIBUTE_VALUE_LENGTH_LIMIT to "256",
         )
         val behavior = toBehavior(env::get)
         assertEquals(

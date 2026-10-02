@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.config.envar.Exporter
 import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Invalid
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Value
@@ -20,12 +21,12 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 class LogsExporterEnvVars(
     private val reader: ReportingEnvVarReader,
 ) {
-    fun toBehavior(): LogRecordProcessorBehavior? = reader.readStringAndTransform(EXPORTER) { name ->
+    fun toBehavior(): LogRecordProcessorBehavior? = reader.readStringAndTransform(LOGS_EXPORTER) { name ->
         // TODO: Add support to multiple exporters being in use simultaneously once we have the LogRecordProcessor
         //  fully implemented.
-        when (name.lowercase()) {
-            CONSOLE -> Value(LogRecordProcessorBehavior(console = ConsoleExporterBehavior()))
-            OTLP -> Value(
+        when (Exporter.fromValue(name.lowercase())) {
+            Exporter.CONSOLE -> Value(LogRecordProcessorBehavior(console = ConsoleExporterBehavior()))
+            Exporter.OTLP -> Value(
                 LogRecordProcessorBehavior(
                     http = OtlpHttpExporterBehavior(
                         endpoint = reader.readString(OTLP_LOGS_ENDPOINT)
@@ -39,21 +40,15 @@ class LogsExporterEnvVars(
                     )
                 )
             )
-            LOGGING, NONE, OTLP_STDOUT -> Value(null)
-            else -> Invalid(EnvVarReadWarning(EXPORTER, "Unknown value '$name'; ignoring"))
+            null -> Invalid(EnvVarReadWarning(LOGS_EXPORTER, "Unknown value '$name'; ignoring"))
+            else -> Value(null) // Known exporter, but not yet supported.
         }
     }
 
     internal companion object {
-        const val EXPORTER = "OTEL_LOGS_EXPORTER"
+        const val LOGS_EXPORTER = "OTEL_LOGS_EXPORTER"
         const val OTLP_LOGS_ENDPOINT = "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT"
         const val OTLP_LOGS_TIMEOUT = "OTEL_EXPORTER_OTLP_LOGS_TIMEOUT"
         const val OTLP_LOGS_HEADERS = "OTEL_EXPORTER_OTLP_LOGS_HEADERS"
-
-        const val CONSOLE = "console"
-        const val OTLP = "otlp"
-        const val LOGGING = "logging"
-        const val NONE = "none"
-        const val OTLP_STDOUT = "otlp/stdout"
     }
 }

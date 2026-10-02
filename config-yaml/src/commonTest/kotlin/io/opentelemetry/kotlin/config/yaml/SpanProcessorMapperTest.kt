@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.config.yaml
 
+import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
@@ -51,7 +52,10 @@ internal class SpanProcessorMapperTest {
         val processors = listOf(
             SpanProcessor(batch = BatchSpanProcessor(exporter = consoleExporter())),
         )
-        assertEquals(SpanProcessorBehavior(console = ConsoleExporterBehavior()), processors.toBehavior())
+        assertEquals(
+            SpanProcessorBehavior(console = ConsoleExporterBehavior(), batch = BatchSpanProcessorBehavior()),
+            processors.toBehavior(),
+        )
     }
 
     @Test
@@ -63,7 +67,8 @@ internal class SpanProcessorMapperTest {
                     endpoint = "http://localhost:4317",
                     timeout = 10_000,
                     headers = mapOf("key" to "value")
-                )
+                ),
+                batch = BatchSpanProcessorBehavior(),
             ),
             processors.toBehavior(),
         )
@@ -91,9 +96,29 @@ internal class SpanProcessorMapperTest {
                     endpoint = "http://localhost:4317",
                     timeout = 10_000,
                     headers = mapOf("key" to "value")
-                )
+                ),
+                batch = BatchSpanProcessorBehavior(),
             ),
             processors.toBehavior(),
+        )
+    }
+
+    @Test
+    fun mapsBatchOptions() {
+        val processors = listOf(
+            SpanProcessor(
+                batch = BatchSpanProcessor(
+                    exporter = consoleExporter(),
+                    scheduleDelay = 100,
+                    exportTimeout = 200,
+                    maxQueueSize = 40,
+                    maxExportBatchSize = 20,
+                )
+            )
+        )
+        assertEquals(
+            BatchSpanProcessorBehavior(100, 200, 40, 20),
+            processors.toBehavior()?.batch,
         )
     }
 

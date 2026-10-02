@@ -1,12 +1,16 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.aliases.OtelJavaExtendedSpanProcessor
+import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteSpan
+import io.opentelemetry.kotlin.aliases.OtelJavaReadableSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanProcessor
 import io.opentelemetry.kotlin.awaitOperationResultCode
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.tracing.model.OtelJavaReadWriteSpanAdapter
+import io.opentelemetry.kotlin.tracing.model.OtelJavaReadableSpanAdapter
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpanAdapter
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
@@ -24,25 +28,19 @@ internal class SpanProcessorAdapter(
         parentContext: Context
     ) {
         shutdownState.execute {
-            if (span is ReadWriteSpanAdapter) {
-                impl.onStart(parentContext.toOtelJavaContext(), span.impl)
-            }
+            impl.onStart(parentContext.toOtelJavaContext(), span.toOtelJavaReadWriteSpan())
         }
     }
 
     override fun onEnding(span: ReadWriteSpan) {
         shutdownState.execute {
-            if (span is ReadWriteSpanAdapter) {
-                extendedImpl?.onEnding(span.impl)
-            }
+            extendedImpl?.onEnding(span.toOtelJavaReadWriteSpan())
         }
     }
 
     override fun onEnd(span: ReadableSpan) {
         shutdownState.execute {
-            if (span is ReadableSpanAdapter) {
-                impl.onEnd(span.impl)
-            }
+            impl.onEnd(span.toOtelJavaReadableSpan())
         }
     }
 
@@ -56,4 +54,17 @@ internal class SpanProcessorAdapter(
         shutdownState.shutdown {
             awaitOperationResultCode { impl.shutdown() }
         }
+
+    /**
+     * Spans from the compat SDK are unwrapped to the underlying opentelemetry-java span.
+     * Spans from the opentelemetry-kotlin SDK are decorated to conform to the Java API.
+     */
+    private fun ReadWriteSpan.toOtelJavaReadWriteSpan(): OtelJavaReadWriteSpan =
+        (this as? ReadWriteSpanAdapter)?.impl ?: OtelJavaReadWriteSpanAdapter(this)
+
+    private fun ReadableSpan.toOtelJavaReadableSpan(): OtelJavaReadableSpan = when (this) {
+        is ReadableSpanAdapter -> impl
+        is ReadWriteSpanAdapter -> impl
+        else -> OtelJavaReadableSpanAdapter(this)
+    }
 }

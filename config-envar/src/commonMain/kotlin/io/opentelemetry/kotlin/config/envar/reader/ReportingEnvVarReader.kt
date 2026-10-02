@@ -18,8 +18,15 @@ class ReportingEnvVarReader(
         delegate.readString(name)
             .resolveNullable()
 
-    fun readNonNegativeInt(name: String): Int? =
+    fun readNonNegativeInt(name: String, acceptZero: Boolean = true): Int? =
         delegate.readNonNegativeInt(name)
+            .flatMap { value ->
+                if (acceptZero || value > 0) {
+                    Value(value)
+                } else {
+                    Invalid(EnvVarReadWarning(name, "Zero is not allowed; ignoring"))
+                }
+            }
             .resolveNullable()
 
     fun readNonNegativeLong(name: String): Long? =

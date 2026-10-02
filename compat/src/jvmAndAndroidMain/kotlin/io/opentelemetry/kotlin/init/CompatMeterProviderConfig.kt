@@ -51,7 +51,7 @@ internal class CompatMeterProviderConfig(
             val attrs = attrsFromMap(merged.attributes)
             builder.setResource(OtelJavaResource.create(attrs, merged.schemaUrl))
         }
-        builder.setClock(OtelJavaClockWrapper(clock))
+        builder.setClock(clock.toOtelJavaClock())
         return MeterProviderAdapter(builder.build())
     }
 }

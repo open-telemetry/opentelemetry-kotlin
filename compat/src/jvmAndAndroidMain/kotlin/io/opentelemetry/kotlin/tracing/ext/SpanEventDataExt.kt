@@ -7,5 +7,6 @@ import io.opentelemetry.kotlin.tracing.data.SpanEventData
 public fun SpanEventData.toOtelJavaEventData(): OtelJavaEventData = OtelJavaEventData.create(
     timestamp,
     name,
-    attrsFromMap(attributes)
+    attrsFromMap(attributes),
+    attributes.size + droppedAttributesCount
 )

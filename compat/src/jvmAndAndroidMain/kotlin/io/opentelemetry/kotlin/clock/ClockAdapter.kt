@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.aliases.OtelJavaClock
 
 internal class ClockAdapter(
-    private val clock: OtelJavaClock = OtelJavaClock.getDefault()
+    internal val impl: OtelJavaClock = OtelJavaClock.getDefault()
 ) : Clock {
-    override fun now(): Long = clock.now()
+    override fun now(): Long = impl.now()
 }

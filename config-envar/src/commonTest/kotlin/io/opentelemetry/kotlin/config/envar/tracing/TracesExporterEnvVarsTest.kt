@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.config.envar.tracing
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
+import io.opentelemetry.kotlin.config.envar.Exporter
 import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
@@ -21,7 +22,7 @@ internal class TracesExporterEnvVarsTest {
     @Test
     fun `should map implemented exporters`() {
         var configs = mapOf(
-            TracesExporterEnvVars.EXPORTER to TracesExporterEnvVars.CONSOLE
+            TracesExporterEnvVars.TRACES_EXPORTER to Exporter.CONSOLE.value
         )
         assertEquals(
             SpanProcessorBehavior(console = ConsoleExporterBehavior()),
@@ -29,7 +30,7 @@ internal class TracesExporterEnvVarsTest {
         )
 
         configs = mapOf(
-            TracesExporterEnvVars.EXPORTER to TracesExporterEnvVars.OTLP,
+            TracesExporterEnvVars.TRACES_EXPORTER to Exporter.OTLP.value,
             OpenTelemetryEnvVars.OTLP_ENDPOINT to "http://localhost:4317",
             OpenTelemetryEnvVars.OTLP_TIMEOUT to "1",
             OpenTelemetryEnvVars.OTLP_HEADERS to "key1=value1,key2=value2",
@@ -48,29 +49,28 @@ internal class TracesExporterEnvVarsTest {
 
     @Test
     fun `should leave known non-implemented exporters unset`() {
-        val exporters =
-            listOf(TracesExporterEnvVars.LOGGING, TracesExporterEnvVars.NONE, TracesExporterEnvVars.OTLP_STDOUT, "")
-        exporters.forEach { name ->
+        val exporters = listOf(Exporter.LOGGING, Exporter.NONE, Exporter.OTLP_STDOUT)
+        exporters.forEach { exporter ->
             assertNull(
-                toBehavior(mapOf(TracesExporterEnvVars.EXPORTER to name)::get),
-                "<$name> should not configure a processor"
+                toBehavior(mapOf(TracesExporterEnvVars.TRACES_EXPORTER to exporter.value)::get),
+                "<$exporter> should not configure a processor"
             )
         }
     }
 
     @Test
     fun `should leave unknown exporter unset`() {
-        val configs = mapOf(TracesExporterEnvVars.EXPORTER to unknownExporter)
+        val configs = mapOf(TracesExporterEnvVars.TRACES_EXPORTER to unknownExporter)
         assertNull(toBehavior(configs::get))
     }
 
     @Test
     fun `should warn on unknown exporter`() {
-        val configs = mapOf(TracesExporterEnvVars.EXPORTER to unknownExporter)
+        val configs = mapOf(TracesExporterEnvVars.TRACES_EXPORTER to unknownExporter)
         val warnings = mutableListOf<EnvVarReadWarning>()
         TracesExporterEnvVars(reportingEnvVarReader(configs::get, warnings::add)).toBehavior()
         assertEquals(1, warnings.size)
-        assertEquals(TracesExporterEnvVars.EXPORTER, warnings.single().name)
+        assertEquals(TracesExporterEnvVars.TRACES_EXPORTER, warnings.single().name)
     }
 
     @Test
@@ -82,7 +82,7 @@ internal class TracesExporterEnvVarsTest {
 
     @Test
     fun `should not warn on known non-implemented exporters`() {
-        val configs = mapOf(TracesExporterEnvVars.EXPORTER to TracesExporterEnvVars.OTLP)
+        val configs = mapOf(TracesExporterEnvVars.TRACES_EXPORTER to Exporter.OTLP.value)
         val warnings = mutableListOf<EnvVarReadWarning>()
         TracesExporterEnvVars(reportingEnvVarReader(configs::get, warnings::add)).toBehavior()
         assertEquals(emptyList(), warnings)
@@ -91,7 +91,7 @@ internal class TracesExporterEnvVarsTest {
     @Test
     fun `Signal-specific configs override base configs`() {
         val configs = mutableMapOf(
-            TracesExporterEnvVars.EXPORTER to TracesExporterEnvVars.OTLP,
+            TracesExporterEnvVars.TRACES_EXPORTER to Exporter.OTLP.value,
             OpenTelemetryEnvVars.OTLP_ENDPOINT to "http://localhost:4317",
             OpenTelemetryEnvVars.OTLP_TIMEOUT to "1",
             OpenTelemetryEnvVars.OTLP_HEADERS to "key1=value1,key2=value2",
@@ -119,6 +119,22 @@ internal class TracesExporterEnvVarsTest {
                     endpoint = "http://localhost:4317/traces",
                     timeout = 2,
                     headers = mapOf("key3" to "value3", "key4" to "value4")
+                )
+            ),
+            toBehavior(configs::get),
+        )
+    }
+
+    @Test
+    fun `should skip malformed header entries`() {
+        val configs = mapOf(
+            TracesExporterEnvVars.TRACES_EXPORTER to Exporter.OTLP.value,
+            OpenTelemetryEnvVars.OTLP_HEADERS to "key1=value1,malformed,key2=value2",
+        )
+        assertEquals(
+            SpanProcessorBehavior(
+                http = OtlpHttpExporterBehavior(
+                    headers = mapOf("key1" to "value1", "key2" to "value2")
                 )
             ),
             toBehavior(configs::get),

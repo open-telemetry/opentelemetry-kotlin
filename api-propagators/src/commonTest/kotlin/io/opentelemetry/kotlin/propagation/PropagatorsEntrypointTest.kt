@@ -22,6 +22,11 @@ internal class PropagatorsEntrypointTest {
     }
 
     @Test
+    fun `none returns the api noop propagator`() {
+        assertSame(createNoopPropagator(), propagators.none())
+    }
+
+    @Test
     fun `none declares no fields`() {
         assertTrue(propagators.none().fields().isEmpty())
     }

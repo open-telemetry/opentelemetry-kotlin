@@ -21,8 +21,8 @@ import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.logging.NoopLoggerProvider
 import io.opentelemetry.kotlin.metrics.MeterProvider
 import io.opentelemetry.kotlin.metrics.NoopMeterProvider
-import io.opentelemetry.kotlin.propagation.NoopTextMapPropagator
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
+import io.opentelemetry.kotlin.propagation.createNoopPropagator
 import io.opentelemetry.kotlin.tracing.NoopTracerProvider
 import io.opentelemetry.kotlin.tracing.TracerProvider
 
@@ -40,7 +40,7 @@ internal object NoopOpenTelemetryImpl : OpenTelemetrySdk {
     override val baggage: BaggageFactory = NoopBaggageFactory
     override val idGenerator: IdGenerator = NoopIdGenerator
     override val resource: ResourceFactory = NoopResourceFactory
-    override val propagator: TextMapPropagator = NoopTextMapPropagator
+    override val propagator: TextMapPropagator = createNoopPropagator()
 
     override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
     override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success

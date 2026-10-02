@@ -24,7 +24,7 @@ class SpanLimitsEnvVars(
         attributeCountPerLinkLimit = reader.readNonNegativeInt(LINK_ATTRIBUTE_COUNT_LIMIT),
     )
 
-    private companion object {
+    internal companion object {
         const val ATTRIBUTE_COUNT_LIMIT = "OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT"
         const val ATTRIBUTE_VALUE_LENGTH_LIMIT = "OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT"
         const val LINK_COUNT_LIMIT = "OTEL_SPAN_LINK_COUNT_LIMIT"

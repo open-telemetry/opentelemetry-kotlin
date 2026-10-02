@@ -12,11 +12,11 @@ kotlin {
         commonMain {
             dependencies {
                 api(project(":api"))
-                implementation(project(":noop"))
             }
         }
         commonTest {
             dependencies {
+                implementation(project(":noop"))
                 implementation(project(":test-fakes"))
             }
         }

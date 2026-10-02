@@ -318,6 +318,12 @@ public abstract interface class io/opentelemetry/kotlin/metrics/SynchronousInstr
 	public abstract fun enabled ()Z
 }
 
+public final class io/opentelemetry/kotlin/propagation/PropagatorEntrypointsKt {
+	public static final fun createCompositePropagator ([Lio/opentelemetry/kotlin/propagation/TextMapPropagator;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
+	public static final fun createNoopPropagator ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
+	public static final fun createW3CBaggagePropagator ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
+}
+
 public abstract interface class io/opentelemetry/kotlin/propagation/TextMapGetter {
 	public abstract fun get (Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;
 	public abstract fun getAll (Ljava/lang/Object;Ljava/lang/String;)Ljava/util/List;

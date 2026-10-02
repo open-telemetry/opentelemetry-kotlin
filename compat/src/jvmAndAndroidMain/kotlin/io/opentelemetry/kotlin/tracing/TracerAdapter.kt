@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.aliases.OtelJavaTracer
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
@@ -13,7 +12,6 @@ import java.util.concurrent.TimeUnit
 
 internal class TracerAdapter(
     private val tracer: OtelJavaTracer,
-    private val clock: Clock,
     private val spanLimitsConfig: CompatSpanLimitsConfig,
     private val contextFactory: ContextFactory,
 ) : Tracer {
@@ -27,23 +25,22 @@ internal class TracerAdapter(
         startTimestamp: Long?,
         action: (SpanCreationAction.() -> Unit)?
     ): Span {
-        val start = startTimestamp ?: clock.now()
         val parentCtx = (parentContext ?: contextFactory.implicit()).toOtelJavaContext()
 
         val builder = tracer.spanBuilder(name)
             .setSpanKind(spanKind.toOtelJavaSpanKind())
-            .setStartTimestamp(start, TimeUnit.NANOSECONDS)
             .setParent(parentCtx)
+        // Left unset, the SDK stamps the start with the same clock it uses for end(). Filling it in
+        // from [clock] would mix two clocks, skewing durations and ending short spans before they start.
+        startTimestamp?.let { builder.setStartTimestamp(it, TimeUnit.NANOSECONDS) }
 
         val creationState = action?.let { CompatSpanCreationState(spanLimitsConfig).apply(it) }
         creationState?.applyTo(builder)
 
         return SpanAdapter(
             impl = builder.startSpan(),
-            clock = clock,
             parentCtx = parentCtx,
             spanKind = spanKind,
-            startTimestamp = start,
             spanLimitsConfig = spanLimitsConfig,
             creationState = creationState,
         )

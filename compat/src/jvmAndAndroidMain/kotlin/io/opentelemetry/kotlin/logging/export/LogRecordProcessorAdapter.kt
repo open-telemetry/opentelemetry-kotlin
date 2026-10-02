@@ -21,9 +21,8 @@ internal class LogRecordProcessorAdapter(
         context: Context
     ) {
         shutdownState.execute {
-            if (log is ReadWriteLogRecordAdapter) {
-                impl.onEmit(context.toOtelJavaContext(), log.impl)
-            }
+            val javaLog = (log as? ReadWriteLogRecordAdapter)?.impl ?: OtelJavaReadWriteLogRecordAdapter(log)
+            impl.onEmit(context.toOtelJavaContext(), javaLog)
         }
     }
 

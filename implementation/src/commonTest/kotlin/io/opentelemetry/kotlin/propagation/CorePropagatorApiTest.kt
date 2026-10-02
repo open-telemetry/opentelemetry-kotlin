@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
@@ -9,8 +10,8 @@ import io.opentelemetry.kotlin.init.B3Format
 import io.opentelemetry.kotlin.init.PropagatorConfigImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
 internal class CorePropagatorApiTest {
@@ -22,22 +23,26 @@ internal class CorePropagatorApiTest {
     private val spanFactory = SpanFactoryImpl(spanContextFactory)
 
     @Test
-    fun `composite with single propagator wraps in CompositeTextMapPropagator`() {
+    fun `composite with single propagator delegates to it`() {
         val single = FakeTextMapPropagator(listOf("foo"))
         val composite = dsl.composite(single)
-        assertIs<CompositeTextMapPropagator>(composite)
         assertEquals(listOf("foo"), composite.fields().toList())
+
+        val carrier = mutableMapOf<String, String>()
+        composite.inject(FakeContext(), carrier, FakeTextMapSetter)
+        assertTrue(single.injectCalled)
+        assertEquals(listOf("foo"), carrier.keys.toList())
     }
 
     @Test
     fun `w3cBaggage returns the W3C baggage propagator singleton`() {
-        assertSame(W3CBaggagePropagator, dsl.w3cBaggage())
+        assertSame(createW3CBaggagePropagator(), dsl.w3cBaggage())
     }
 
     @Test
     fun `w3cBaggage call captures the result and buildPropagator returns it`() {
         dsl.w3cBaggage()
-        assertSame(W3CBaggagePropagator, dsl.buildPropagator())
+        assertSame(createW3CBaggagePropagator(), dsl.buildPropagator())
     }
 
     @Test

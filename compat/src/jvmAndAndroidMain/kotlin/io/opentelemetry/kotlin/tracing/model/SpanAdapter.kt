@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.model
 
-import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaImplicitContextKeyed
@@ -16,11 +15,9 @@ import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanCreationAction
-import io.opentelemetry.kotlin.tracing.SpanEventCompatImpl
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.SpanLinkCompatImpl
 import io.opentelemetry.kotlin.tracing.StatusData
-import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusData
@@ -31,16 +28,13 @@ import java.util.concurrent.TimeUnit
 
 internal class SpanAdapter(
     val impl: OtelJavaSpan,
-    private val clock: Clock,
     parentCtx: OtelJavaContext?,
     val spanKind: SpanKind,
-    val startTimestamp: Long,
     private val spanLimitsConfig: CompatSpanLimitsConfig,
     creationState: CompatSpanCreationState? = null,
 ) : Span, AttributeContainer, SpanCreationAction, OtelJavaImplicitContextKeyed {
 
     private val attrs: MutableMap<String, Any> = ConcurrentHashMap(creationState?.attributes.orEmpty())
-    private val eventsImpl: ConcurrentLinkedQueue<SpanEventData> = ConcurrentLinkedQueue()
     private val linksImpl: ConcurrentLinkedQueue<SpanLink> =
         ConcurrentLinkedQueue(creationState?.links.orEmpty())
 
@@ -52,9 +46,6 @@ internal class SpanAdapter(
 
     override val attributes: Map<String, Any>
         get() = attrs.toMap()
-
-    val events: List<SpanEventData>
-        get() = eventsImpl.toList()
 
     val links: List<SpanLinkData>
         get() = linksImpl.toList()
@@ -74,7 +65,11 @@ internal class SpanAdapter(
     }
 
     override fun end(timestamp: Long) {
-        impl.end(timestamp, TimeUnit.NANOSECONDS)
+        if (timestamp > 0) {
+            impl.end(timestamp, TimeUnit.NANOSECONDS)
+        } else {
+            impl.end()
+        }
     }
 
     override fun isRecording(): Boolean = impl.isRecording
@@ -102,11 +97,12 @@ internal class SpanAdapter(
         if (attributes != null) {
             attributes(container)
         }
-        val time = timestamp ?: clock.now()
-        if (eventsImpl.size < spanLimitsConfig.effectiveEventCountLimit) {
-            eventsImpl.add(SpanEventCompatImpl(name, time, container))
+        // As with the span start: left unset, the SDK stamps the event with the clock it times the span by.
+        if (timestamp != null && timestamp > 0) {
+            impl.addEvent(name, container.otelJavaAttributes(), timestamp, TimeUnit.NANOSECONDS)
+        } else {
+            impl.addEvent(name, container.otelJavaAttributes())
         }
-        impl.addEvent(name, container.otelJavaAttributes(), time, TimeUnit.NANOSECONDS)
     }
 
     override fun setBooleanAttribute(key: String, value: Boolean) {

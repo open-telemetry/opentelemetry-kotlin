@@ -10,8 +10,8 @@ internal class LogLimitsEnvVarsTest {
     @Test
     fun `should read every limit`() {
         val env = mapOf(
-            "OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT" to "64",
-            "OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT" to "256",
+            LogLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT to "64",
+            LogLimitsEnvVars.ATTRIBUTE_VALUE_LENGTH_LIMIT to "256",
         )
         val behavior = toBehavior(env::get)
         assertEquals(
