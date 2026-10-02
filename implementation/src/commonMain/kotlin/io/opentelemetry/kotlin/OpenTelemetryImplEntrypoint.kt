@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.DefaultBaggageFactory
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
@@ -84,7 +83,6 @@ public fun createOpenTelemetry(
         traceState = traceState,
         context = contextFactory,
         span = span,
-        baggage = DefaultBaggageFactory,
         idGenerator = idGenerator,
         resource = resourceFactory,
         propagator = cfg.propagatorCfg.buildPropagator(),

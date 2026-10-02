@@ -1,7 +1,5 @@
 package io.opentelemetry.kotlin
 
-import io.opentelemetry.kotlin.baggage.createBaggage
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertSame
 import org.junit.Test
@@ -22,20 +20,6 @@ internal class OpenTelemetrySdkTest {
         assertSame(a, b)
         assertNotSame(b, c)
         assertNotSame(c, d)
-    }
-
-    @Test
-    fun `retrieve baggage factory`() {
-        val sdk = createCompatOpenTelemetry()
-        assertSame(createBaggage(), sdk.baggage.empty())
-
-        val baggage = sdk.baggage.create {
-            put("user", "alice")
-            put("region", "eu", metadata = "secure")
-        }
-        assertEquals("alice", baggage.getValue("user"))
-        assertEquals("eu", baggage.getValue("region"))
-        assertEquals("secure", baggage.asMap()["region"]?.metadata?.value)
     }
 
     @Test

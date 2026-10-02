@@ -5,9 +5,8 @@ import io.opentelemetry.kotlin.ExperimentalApi
 /**
  * DSL receiver for assembling a [Baggage] instance.
  *
- * Obtained via [io.opentelemetry.kotlin.factory.BaggageFactory.create]; callers configure
- * entries using [put] and [remove] inside the DSL block. The resulting [Baggage] is returned
- * by the factory once the block completes.
+ * Obtained via [createBaggage]; callers configure entries using [put] and [remove] inside the
+ * DSL block. The resulting [Baggage] is returned by [createBaggage] once the block completes.
  *
  * https://opentelemetry.io/docs/specs/otel/baggage/api/#baggage-builder
  */

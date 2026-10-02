@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.runWithTimeout
-import io.opentelemetry.kotlin.factory.BaggageFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.ResourceFactory
@@ -29,7 +28,6 @@ internal class OpenTelemetryImpl(
     override val traceState: TraceStateFactory,
     override val context: ContextFactory,
     override val span: SpanFactory,
-    override val baggage: BaggageFactory,
     override val idGenerator: IdGenerator,
     override val resource: ResourceFactory,
     override val propagator: TextMapPropagator,
