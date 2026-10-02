@@ -9,9 +9,11 @@ import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.logging.LogRecordDataImpl
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.LogRecordData
+import io.opentelemetry.kotlin.logging.normalizeLogBody
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
 
@@ -40,7 +42,9 @@ internal class LogRecordModel(
     private var observedTimestampImpl: Long? = observedTimestamp
     private var severityNumberImpl: SeverityNumber? = severityNumber
     private var severityTextImpl: String? = severityText
-    private var bodyImpl: Any? = body
+    private var bodyImpl: Any? = sdkErrorHandler.guardOrDefault(null, BODY_ERROR) {
+        normalizeLogBody(body)
+    }
     private var spanContextImpl: SpanContext = spanContext
     private var eventNameImpl: String? = eventName
 
@@ -82,8 +86,11 @@ internal class LogRecordModel(
 
     override var body: Any?
         get() = lock.read { bodyImpl }
-        set(value) = mutate("LogRecord.body failed") {
-            bodyImpl = value
+        set(value) = sdkErrorHandler.guard(BODY_ERROR) {
+            val normalized = normalizeLogBody(value)
+            lock.write {
+                bodyImpl = normalized
+            }
         }
 
     override var spanContext: SpanContext
@@ -209,3 +216,5 @@ internal class LogRecordModel(
         )
     }
 }
+
+private const val BODY_ERROR = "LogRecord.body failed"

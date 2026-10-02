@@ -41,7 +41,8 @@ internal class LogRecordDataExtTest {
         val structuredBody = mapOf("key" to "value")
         val record = FakeLogRecordData(body = structuredBody)
         val observed = record.toOtelJavaLogRecordData()
-        assertEquals(structuredBody.toString(), observed.bodyValue?.asString())
+        assertEquals(OtelJavaValueType.KEY_VALUE_LIST, observed.bodyValue?.type)
+        assertEquals("""{"key":"value"}""", observed.bodyValue?.asString())
     }
 
     @Test

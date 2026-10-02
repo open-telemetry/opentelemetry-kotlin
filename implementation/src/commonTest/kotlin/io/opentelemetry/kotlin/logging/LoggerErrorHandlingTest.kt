@@ -21,6 +21,7 @@ import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 internal class LoggerErrorHandlingTest {
@@ -84,6 +85,21 @@ internal class LoggerErrorHandlingTest {
     }
 
     @Test
+    fun testHostileBodyStillEmitsLog() {
+        val errorHandler = FakeSdkErrorHandler()
+        val processor = FakeLogRecordProcessor()
+        val logger = createLogger(Case("healthy"), processor, errorHandler)
+        logger.emit(body = HostileBody(), eventName = "event")
+
+        val error = errorHandler.userCodeErrors.single()
+        assertEquals("LogRecord.body failed", error.message)
+        assertEquals("boom", error.cause.message)
+        val log = processor.logs.single()
+        assertNull(log.body)
+        assertEquals("event", log.eventName)
+    }
+
+    @Test
     fun testThrowingErrorHandlerDoesNotEscapeEmit() {
         val processor = FakeLogRecordProcessor()
         val logger = createLogger(
@@ -134,6 +150,10 @@ internal class LoggerErrorHandlingTest {
     private class HostileThrowable : Throwable() {
         override val message: String
             get() = boom()
+    }
+
+    private class HostileBody {
+        override fun toString(): String = boom()
     }
 
     private class ThrowingSdkErrorHandler : SdkErrorHandler {

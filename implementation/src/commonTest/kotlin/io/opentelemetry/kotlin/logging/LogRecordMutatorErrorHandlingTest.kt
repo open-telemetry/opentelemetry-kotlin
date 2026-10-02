@@ -56,6 +56,28 @@ internal class LogRecordMutatorErrorHandlingTest {
     }
 
     @Test
+    fun testHostileBodyDoesNotEscapeSetter() {
+        val errorHandler = FakeSdkErrorHandler()
+        val log = createLogRecord(errorHandler)
+        log.body = "original"
+        log.body = HostileBody()
+
+        val error = errorHandler.userCodeErrors.single()
+        assertEquals("LogRecord.body failed", error.message)
+        assertEquals("boom", error.cause.message)
+        assertEquals("original", log.body)
+    }
+
+    @Test
+    fun testBodySetterCopiesMutableBody() {
+        val log = createLogRecord(FakeSdkErrorHandler())
+        val bytes = byteArrayOf(1, 2)
+        log.body = bytes
+        bytes[0] = 9
+        assertEquals(AnyValue.BytesValue(byteArrayOf(1, 2)), log.toLogRecordData().body)
+    }
+
+    @Test
     fun testThrowingErrorHandlerDoesNotEscapeMutator() {
         val log = createLogRecord(ThrowingSdkErrorHandler())
         log.setStringListAttribute("key", HostileList())
@@ -88,6 +110,10 @@ internal class LogRecordMutatorErrorHandlingTest {
             get() = boom()
 
         override fun iterator(): Iterator<T> = boom()
+    }
+
+    private class HostileBody {
+        override fun toString(): String = boom()
     }
 
     private class ThrowingSdkErrorHandler : SdkErrorHandler {

@@ -12,6 +12,7 @@ import io.opentelemetry.kotlin.export.conversion.toNestedAnyValue
 import io.opentelemetry.kotlin.export.conversion.toProtoAnyValue
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.SeverityNumber
+import io.opentelemetry.kotlin.logging.normalizeLogBody
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.proto.common.v1.AnyValue
@@ -51,7 +52,7 @@ internal fun LogRecordData.toProtobuf(): LogRecord = LogRecord(
     observed_time_unix_nano = observedTimestamp ?: 0L,
     severity_number = severityNumber?.convertSeverityNumber() ?: SEVERITY_NUMBER_UNSPECIFIED,
     severity_text = severityText ?: "",
-    body = body?.toAnyValue(),
+    body = body.toProtoBody(),
     attributes = attributes.createKeyValues(),
     event_name = eventName ?: "",
     dropped_attributes_count = droppedAttributesCount,
@@ -78,15 +79,18 @@ internal fun LogRecord.toLogRecordData(
     droppedAttributesCount = dropped_attributes_count
 )
 
-private fun Any.toAnyValue(): AnyValue = when (this) {
-    is KotlinAnyValue -> toProtoAnyValue()
-    is String  -> AnyValue(string_value = this)
-    is Boolean -> AnyValue(bool_value = this)
-    is Long    -> AnyValue(int_value = this)
-    is Int     -> AnyValue(int_value = this.toLong())
-    is Double  -> AnyValue(double_value = this)
-    is Float   -> AnyValue(double_value = this.toDouble())
-    else       -> AnyValue(string_value = this.toString())
+private fun Any?.toProtoBody(): AnyValue? = try {
+    when (val body = normalizeLogBody(this)) {
+        null -> null
+        is KotlinAnyValue -> body.toProtoAnyValue()
+        is String -> AnyValue(string_value = body)
+        is Boolean -> AnyValue(bool_value = body)
+        is Long -> AnyValue(int_value = body)
+        is Double -> AnyValue(double_value = body)
+        else -> AnyValue(string_value = body.toString())
+    }
+} catch (ignored: Throwable) {
+    null
 }
 
 private fun AnyValue.toAny(): Any? = when {

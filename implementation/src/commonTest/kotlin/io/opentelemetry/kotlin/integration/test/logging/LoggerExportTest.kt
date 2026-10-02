@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.integration.test.logging
 
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.semconv.ExceptionAttributes
@@ -107,10 +108,17 @@ internal class LoggerExportTest {
 
     @Test
     fun testLogWithStructuredBodyExported() = runTest {
-        val body = mapOf("message" to "hello", "count" to 42L)
+        val body = mutableMapOf<String, Any>("message" to "hello", "count" to 42L)
         harness.logger.emit(body = body)
+        body["message"] = "changed"
+        val expected = AnyValue.MapValue(
+            mapOf(
+                "message" to AnyValue.StringValue("hello"),
+                "count" to AnyValue.LongValue(42),
+            )
+        )
         harness.assertLogRecords(expectedCount = 1) { logs ->
-            assertEquals(body, logs.single().body)
+            assertEquals(expected, logs.single().body)
         }
     }
 

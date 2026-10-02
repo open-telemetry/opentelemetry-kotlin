@@ -3,21 +3,21 @@ package io.opentelemetry.kotlin.attributes
 import io.opentelemetry.kotlin.aliases.OtelJavaKeyValue
 import io.opentelemetry.kotlin.aliases.OtelJavaValue
 import io.opentelemetry.kotlin.aliases.OtelJavaValueType
+import io.opentelemetry.kotlin.logging.normalizeLogBody
 import java.nio.ByteBuffer
 
 /**
  * Converts a log record body into opentelemetry-java's [OtelJavaValue] so that structured
  * [AnyValue] bodies keep their shape.
  */
-internal fun Any.toOtelJavaValue(): OtelJavaValue<*> = when (this) {
-    is AnyValue -> toOtelJavaValue()
-    is String -> OtelJavaValue.of(this)
-    is Boolean -> OtelJavaValue.of(this)
-    is Long -> OtelJavaValue.of(this)
-    is Int -> OtelJavaValue.of(toLong())
-    is Double -> OtelJavaValue.of(this)
-    is Float -> OtelJavaValue.of(toDouble())
-    else -> OtelJavaValue.of(toString())
+internal fun Any.toOtelJavaValue(): OtelJavaValue<*> = when (val body = normalizeLogBody(this)) {
+    null -> OtelJavaValue.empty()
+    is AnyValue -> body.toOtelJavaValue()
+    is String -> OtelJavaValue.of(body)
+    is Boolean -> OtelJavaValue.of(body)
+    is Long -> OtelJavaValue.of(body)
+    is Double -> OtelJavaValue.of(body)
+    else -> OtelJavaValue.of(body.toString())
 }
 
 internal fun AnyValue.toOtelJavaValue(): OtelJavaValue<*> = when (this) {
