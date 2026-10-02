@@ -12,13 +12,18 @@ import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
 import io.opentelemetry.kotlin.attributes.setTypedAttribute
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.factory.CompatContextFactory
+import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
 import java.util.concurrent.TimeUnit
 
-internal class OtelJavaSpanAdapter(private val span: Span) : OtelJavaSpan, OtelJavaImplicitContextKeyed {
+internal class OtelJavaSpanAdapter(
+    private val span: Span,
+    private val contextFactory: ContextFactory = CompatContextFactory(),
+) : OtelJavaSpan, OtelJavaImplicitContextKeyed {
 
     override fun <T : Any?> setAttribute(key: OtelJavaAttributeKey<T?>, value: T?): OtelJavaSpan {
         value?.let { span.setTypedAttribute(key.key, it) }
@@ -102,7 +107,8 @@ internal class OtelJavaSpanAdapter(private val span: Span) : OtelJavaSpan, OtelJ
         return if ((span is OtelJavaImplicitContextKeyed)) {
             span.makeCurrent()
         } else {
-            super<OtelJavaImplicitContextKeyed>.makeCurrent()
+            val scope = contextFactory.implicit().storeSpan(span).attach()
+            OtelJavaScope { scope.detach() }
         }
     }
 }

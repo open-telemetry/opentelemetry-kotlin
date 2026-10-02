@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaContextKey
 
 @ExperimentalApi
 internal class OtelJavaContextAdapter(
-    private val impl: Context,
+    internal val impl: Context,
     private val repository: OtelJavaContextKeyRepository = OtelJavaContextKeyRepository.INSTANCE,
 ) : OtelJavaContext {
 
