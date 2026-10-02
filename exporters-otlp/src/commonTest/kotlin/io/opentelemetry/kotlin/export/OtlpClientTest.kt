@@ -9,7 +9,9 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import io.ktor.http.toHttpDate
 import io.ktor.util.GZipEncoder
+import io.ktor.util.date.GMTDate
 import io.ktor.util.toMap
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.toByteArray
@@ -32,7 +34,9 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class OtlpClientTest {
@@ -291,6 +295,42 @@ internal class OtlpClientTest {
         val response = client.exportTraces(spans)
         assertIs<OtlpResponse.RetryableError>(response)
         assertEquals(12_000L, response.retryAfterMs)
+    }
+
+    @Test
+    fun testRetryAfterHttpDateInFuture() = runTest {
+        val nowSeconds = GMTDate().timestamp / 1000
+        val retryAt = GMTDate((nowSeconds + 30) * 1000)
+        val retryAfterMs = exportTracesWithRetryAfter(retryAt.toHttpDate())
+        assertNotNull(retryAfterMs)
+        assertTrue(retryAfterMs in 25_000L..30_000L, "unexpected retryAfterMs $retryAfterMs")
+    }
+
+    @Test
+    fun testRetryAfterHttpDateInPastIsZero() = runTest {
+        assertEquals(0L, exportTracesWithRetryAfter("Wed, 21 Oct 2015 07:28:00 GMT"))
+    }
+
+    @Test
+    fun testRetryAfterLargeSecondsDoesNotOverflow() = runTest {
+        val retryAfterMs = exportTracesWithRetryAfter(Long.MAX_VALUE.toString())
+        assertNotNull(retryAfterMs)
+        assertTrue(retryAfterMs > 0)
+    }
+
+    @Test
+    fun testRetryAfterMalformedIsIgnored() = runTest {
+        listOf("soon", "-5", "1.5", "", "99999999999999999999").forEach {
+            assertNull(exportTracesWithRetryAfter(it), "expected null for '$it'")
+        }
+    }
+
+    private suspend fun exportTracesWithRetryAfter(value: String): Long? {
+        mockResponseStatus = HttpStatusCode.TooManyRequests
+        mockResponseHeaders = headersOf(HttpHeaders.RetryAfter, value)
+        val response = client.exportTraces(spans)
+        assertIs<OtlpResponse.RetryableError>(response)
+        return response.retryAfterMs
     }
 
     @Test

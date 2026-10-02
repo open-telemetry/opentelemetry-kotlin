@@ -227,12 +227,12 @@ internal class OtlpServerResponseTest {
     }
 
     @Test
-    fun testRetryAfterSecondsIsHonoured() = runTest {
+    fun testRetryAfterSecondsIsCappedAtMaxInterval() = runTest {
         listOf(HttpStatusCode.TooManyRequests, HttpStatusCode.ServiceUnavailable).forEach { status ->
             val (server, responses) = export(failure(status, retryAfter = "30"), traceSuccess())
             assertEquals(2, server.requestCount, "status $status")
             assertEquals(30_000L, assertIs<OtlpResponse.RetryableError>(responses.first()).retryAfterMs)
-            assertEquals(listOf(30_000L), server.intervals(), "status $status")
+            assertEquals(listOf(MAX_INTERVAL_MS), server.intervals(), "status $status")
         }
     }
 
@@ -244,7 +244,7 @@ internal class OtlpServerResponseTest {
 
     @Test
     fun testUnsupportedRetryAfterFallsBackToBackoff() = runTest {
-        listOf("Wed, 21 Oct 2026 07:28:00 GMT", "-1", "soon").forEach { retryAfter ->
+        listOf("-1", "soon").forEach { retryAfter ->
             val (server, responses) = export(
                 failure(HttpStatusCode.TooManyRequests, retryAfter = retryAfter),
                 traceSuccess(),

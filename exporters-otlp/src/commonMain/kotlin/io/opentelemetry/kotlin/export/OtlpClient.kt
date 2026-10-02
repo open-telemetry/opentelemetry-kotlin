@@ -10,6 +10,7 @@ import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import io.ktor.http.fromHttpToGmtDate
 import io.ktor.utils.io.readRemaining
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
@@ -114,11 +115,17 @@ internal class OtlpClient(
         }
 
     /**
-     * Parses the Retry-After header (in seconds) as milliseconds.
+     * Parses the Retry-After header as milliseconds. The header is either a number of seconds or an
+     * HTTP-date relative to when the response was received. Returns null if the header is absent or malformed.
      */
     private fun HttpResponse.parseRetryAfterMs(): Long? {
-        val header = headers[HttpHeaders.RetryAfter] ?: return null
-        return header.toLongOrNull()?.takeIf { it >= 0 }?.let { it * 1000L }
+        val header = headers[HttpHeaders.RetryAfter]?.trim() ?: return null
+        if (header.isNotEmpty() && header.all { it in '0'..'9' }) {
+            val seconds = header.toLongOrNull() ?: return null
+            return seconds.coerceAtMost(Long.MAX_VALUE / 1000L) * 1000L
+        }
+        val date = runCatching { header.fromHttpToGmtDate() }.getOrNull() ?: return null
+        return (date.timestamp - responseTime.timestamp).coerceAtLeast(0)
     }
 
     private companion object {

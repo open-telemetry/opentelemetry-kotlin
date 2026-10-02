@@ -53,7 +53,7 @@ internal class TelemetryExporter<T>(
                 }
 
                 is OtlpResponse.RetryableError -> {
-                    delay((response.retryAfterMs ?: jittered(delayMs)).milliseconds)
+                    delay((response.retryAfterMs?.coerceAtMost(maxAttemptIntervalMs) ?: jittered(delayMs)).milliseconds)
                     delayMs = (delayMs * 2).coerceAtMost(maxAttemptIntervalMs)
                 }
 

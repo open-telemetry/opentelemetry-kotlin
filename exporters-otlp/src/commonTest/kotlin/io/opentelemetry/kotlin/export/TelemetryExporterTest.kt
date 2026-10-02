@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.random.Random
@@ -166,11 +167,28 @@ internal class TelemetryExporterTest {
     @Test
     fun testHonorsRetryAfter() = runTest {
         val retryAfterMs = 5000L
+        val timestamps = recordRetryAfterAttempts(retryAfterMs, maxAttemptIntervalMs = 10_000)
+        assertEquals(2, timestamps.size)
+        assertEquals(retryAfterMs, timestamps[1] - timestamps[0])
+    }
+
+    @Test
+    fun testRetryAfterIsCappedAtMaxAttemptInterval() = runTest {
+        val maxAttemptIntervalMs = 1000L
+        val timestamps = recordRetryAfterAttempts(Long.MAX_VALUE, maxAttemptIntervalMs)
+        assertEquals(2, timestamps.size)
+        assertEquals(maxAttemptIntervalMs, timestamps[1] - timestamps[0])
+    }
+
+    private fun TestScope.recordRetryAfterAttempts(
+        retryAfterMs: Long,
+        maxAttemptIntervalMs: Long,
+    ): List<Long> {
         val timestamps = mutableListOf<Long>()
         var attempts = 0
         val exporter = TelemetryExporter<String>(
             initialDelayMs = 100,
-            maxAttemptIntervalMs = 1000,
+            maxAttemptIntervalMs = maxAttemptIntervalMs,
             maxAttempts = 3,
             coroutineContext = StandardTestDispatcher(testScheduler),
             random = Random(0),
@@ -185,9 +203,7 @@ internal class TelemetryExporterTest {
         }
         exporter.export(listOf("data"))
         advanceUntilIdle()
-
-        assertEquals(2, timestamps.size)
-        assertEquals(retryAfterMs, timestamps[1] - timestamps[0])
+        return timestamps
     }
 
     fun testExportDoesNotPropagateExportActionFailure() {
