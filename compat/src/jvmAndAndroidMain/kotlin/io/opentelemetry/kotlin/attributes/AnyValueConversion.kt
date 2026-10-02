@@ -20,7 +20,7 @@ internal fun Any.toOtelJavaValue(): OtelJavaValue<*> = when (this) {
     else -> OtelJavaValue.of(toString())
 }
 
-private fun AnyValue.toOtelJavaValue(): OtelJavaValue<*> = when (this) {
+internal fun AnyValue.toOtelJavaValue(): OtelJavaValue<*> = when (this) {
     AnyValue.NullValue -> OtelJavaValue.empty()
     is AnyValue.StringValue -> OtelJavaValue.of(value)
     is AnyValue.BoolValue -> OtelJavaValue.of(value)
@@ -43,7 +43,7 @@ internal fun OtelJavaValue<*>.toOtelKotlinBody(): Any? = when (type) {
     else -> toOtelKotlinAnyValue()
 }
 
-private fun OtelJavaValue<*>?.toOtelKotlinAnyValue(): AnyValue {
+internal fun OtelJavaValue<*>?.toOtelKotlinAnyValue(): AnyValue {
     val payload = this?.value
     val result = when (this?.type) {
         OtelJavaValueType.STRING -> (payload as? String)?.let(AnyValue::StringValue)

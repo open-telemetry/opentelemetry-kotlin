@@ -77,7 +77,7 @@ internal class ResourceAdapterTest {
 
         val result = base.asNewResource {
             attributes["any"] = AnyValue.LongValue(3)
-            attributes["unrepresentable"] = AnyValue.MapValue(mapOf("k" to AnyValue.LongValue(1)))
+            attributes["map"] = AnyValue.MapValue(mapOf("k" to AnyValue.LongValue(1)))
             attributes["bytes"] = byteArrayOf(1, 2)
         }
 
@@ -85,9 +85,8 @@ internal class ResourceAdapterTest {
         assertEquals("hello", attrs["str"])
         // Flattened to a long rather than serialized via AnyValue.toString().
         assertEquals(3L, attrs["any"])
-        // Variants Java OTel cannot represent are dropped, as is a ByteArray.
-        assertNull(attrs["unrepresentable"])
-        assertNull(attrs["bytes"])
+        assertEquals(AnyValue.MapValue(mapOf("k" to AnyValue.LongValue(1))), attrs["map"])
+        assertEquals(AnyValue.BytesValue(byteArrayOf(1, 2)), attrs["bytes"])
     }
 
     @Test

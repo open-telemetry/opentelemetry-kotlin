@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.attributes
 
 import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.common.Value
 import io.opentelemetry.kotlin.resource.FakeResource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -36,9 +37,7 @@ internal class OtelJavaAttributesExtTest {
     }
 
     @Test
-    fun testAttrsFromMapDropsUnrepresentableAnyValues() {
-        // Java OTel's Attributes API has no AnyValue analogue, so these variants cannot be
-        // represented and are dropped rather than stringified.
+    fun testAttrsFromMapStoresComplexAnyValues() {
         val attrs = attrsFromMap(
             mapOf(
                 "null" to AnyValue.NullValue,
@@ -47,13 +46,34 @@ internal class OtelJavaAttributesExtTest {
                 "map" to AnyValue.MapValue(mapOf("k" to AnyValue.StringValue("v")))
             )
         )
-        assertEquals(0, attrs.size())
+        assertEquals(Value.empty(), attrs.get(AttributeKey.valueKey("null")))
+        assertEquals(Value.of(byteArrayOf(1, 2)), attrs.get(AttributeKey.valueKey("bytes")))
+        assertEquals(Value.of(listOf(Value.of(1L))), attrs.get(AttributeKey.valueKey("list")))
+        assertEquals(Value.of(mapOf("k" to Value.of("v"))), attrs.get(AttributeKey.valueKey("map")))
     }
 
     @Test
-    fun testAttrsFromMapDropsByteArray() {
+    fun testAttrsFromMapStoresByteArray() {
         val attrs = attrsFromMap(mapOf("bytes" to byteArrayOf(1, 2)))
-        assertEquals(0, attrs.size())
+        assertEquals(Value.of(byteArrayOf(1, 2)), attrs.get(AttributeKey.valueKey("bytes")))
+    }
+
+    @Test
+    fun testComplexAnyValuesRoundTripViaConvertToMap() {
+        val original = mapOf<String, Any>(
+            "null" to AnyValue.NullValue,
+            "list" to AnyValue.ListValue(listOf(AnyValue.LongValue(1), AnyValue.StringValue("a"))),
+            "map" to AnyValue.MapValue(
+                mapOf("nested" to AnyValue.ListValue(listOf(AnyValue.BoolValue(true))))
+            )
+        )
+        assertEquals(original, attrsFromMap(original).convertToMap())
+    }
+
+    @Test
+    fun testBytesRoundTripViaConvertToMap() {
+        val map = attrsFromMap(mapOf("bytes" to byteArrayOf(1, 2))).convertToMap()
+        assertEquals(AnyValue.BytesValue(byteArrayOf(1, 2)), map["bytes"])
     }
 
     @Test

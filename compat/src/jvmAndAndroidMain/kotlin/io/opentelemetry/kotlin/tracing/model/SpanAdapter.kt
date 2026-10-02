@@ -5,11 +5,12 @@ import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaImplicitContextKeyed
 import io.opentelemetry.kotlin.aliases.OtelJavaScope
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
+import io.opentelemetry.kotlin.aliases.OtelJavaValue
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
-import io.opentelemetry.kotlin.attributes.setFlattenedAnyValueAttribute
+import io.opentelemetry.kotlin.attributes.toOtelJavaValue
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
@@ -169,11 +170,17 @@ internal class SpanAdapter(
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
-        // no java implementation available
+        impl.setAttribute(OtelJavaAttributeKey.valueKey(key), OtelJavaValue.of(value))
+        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
+            attrs[key] = value
+        }
     }
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
-        setFlattenedAnyValueAttribute(key, value)
+        impl.setAttribute(OtelJavaAttributeKey.valueKey(key), value.toOtelJavaValue())
+        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
+            attrs[key] = value
+        }
     }
 
     override fun storeInContext(context: OtelJavaContext): OtelJavaContext? {

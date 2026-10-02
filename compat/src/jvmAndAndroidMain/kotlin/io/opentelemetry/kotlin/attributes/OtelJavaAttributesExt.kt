@@ -2,10 +2,16 @@ package io.opentelemetry.kotlin.attributes
 
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
+import io.opentelemetry.kotlin.aliases.OtelJavaValue
 import io.opentelemetry.kotlin.resource.Resource
 
 internal fun OtelJavaAttributes.convertToMap(): Map<String, Any> {
-    return this.asMap().mapKeys { it.key.key }
+    return this.asMap().entries.associate { (key, value) ->
+        key.key to when (value) {
+            is OtelJavaValue<*> -> value.toOtelKotlinAnyValue()
+            else -> value
+        }
+    }
 }
 
 /**

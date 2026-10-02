@@ -2,10 +2,11 @@ package io.opentelemetry.kotlin.tracing.model
 
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteSpan
+import io.opentelemetry.kotlin.aliases.OtelJavaValue
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
-import io.opentelemetry.kotlin.attributes.setFlattenedAnyValueAttribute
+import io.opentelemetry.kotlin.attributes.toOtelJavaValue
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
@@ -107,10 +108,10 @@ internal class ReadWriteSpanAdapter(
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
-        // no java implementation available
+        impl.setAttribute(OtelJavaAttributeKey.valueKey(key), OtelJavaValue.of(value))
     }
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
-        setFlattenedAnyValueAttribute(key, value)
+        impl.setAttribute(OtelJavaAttributeKey.valueKey(key), value.toOtelJavaValue())
     }
 }
