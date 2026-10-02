@@ -5,7 +5,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordData
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
 import io.opentelemetry.kotlin.aliases.OtelJavaValue
-import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.aliases.OtelJavaValueType
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.resourceFromMap
 import io.opentelemetry.kotlin.attributes.toOtelJavaValue
@@ -32,7 +32,8 @@ internal fun LogRecordData.toOtelJavaLogRecordData(): OtelJavaLogRecordData {
     )
 }
 
-private fun Any?.toOtelJavaBodyValue(): OtelJavaValue<*>? = when (this) {
-    null, AnyValue.NullValue -> null
-    else -> toOtelJavaValue()
+private fun Any?.toOtelJavaBodyValue(): OtelJavaValue<*>? = try {
+    this?.toOtelJavaValue()?.takeIf { it.type != OtelJavaValueType.EMPTY }
+} catch (ignored: Throwable) {
+    null
 }

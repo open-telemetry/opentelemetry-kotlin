@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -123,5 +124,18 @@ internal class LogRecordSnapshotTest {
         assertEquals("changed_event", data.eventName)
         assertEquals(spanContext, data.spanContext)
         assertEquals(mapOf("key" to "value"), data.attributes)
+    }
+
+    @Test
+    fun testMutableBodyIsCopiedOnEmit() {
+        val bytes = byteArrayOf(1, 2)
+        val list = mutableListOf<Any>("a", bytes)
+        logger.emit(body = list)
+        list.add("b")
+        bytes[0] = 9
+        val expected = AnyValue.ListValue(
+            listOf(AnyValue.StringValue("a"), AnyValue.BytesValue(byteArrayOf(1, 2)))
+        )
+        assertEquals(expected, processor.logs.single().toLogRecordData().body)
     }
 }

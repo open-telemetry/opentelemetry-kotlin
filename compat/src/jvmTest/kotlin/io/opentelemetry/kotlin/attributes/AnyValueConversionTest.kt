@@ -44,9 +44,26 @@ internal class AnyValueConversionTest {
     }
 
     @Test
+    fun testRawStructuredTypesToJavaValue() {
+        val map = mapOf("k" to listOf(1, "a"), "b" to byteArrayOf(1))
+        val observed = map.toOtelJavaValue()
+        assertEquals(OtelJavaValueType.KEY_VALUE_LIST, observed.type)
+        assertEquals("""{"k":[1,"a"],"b":"AQ=="}""", observed.asString())
+    }
+
+    @Test
+    fun testRawByteArrayToJavaValue() {
+        val observed = byteArrayOf(1, 2).toOtelJavaValue()
+        assertEquals(OtelJavaValueType.BYTES, observed.type)
+        assertEquals(OtelJavaValue.of(byteArrayOf(1, 2)), observed)
+    }
+
+    @Test
     fun testOtherTypesFallBackToString() {
-        val map = mapOf("k" to "v")
-        assertEquals(OtelJavaValue.of(map.toString()), map.toOtelJavaValue())
+        val obj = object {
+            override fun toString(): String = "custom"
+        }
+        assertEquals(OtelJavaValue.of("custom"), obj.toOtelJavaValue())
     }
 
     @Test
