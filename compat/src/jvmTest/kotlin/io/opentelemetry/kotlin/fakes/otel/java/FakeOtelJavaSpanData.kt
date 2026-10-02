@@ -29,6 +29,7 @@ internal class FakeOtelJavaSpanData(
     val implEnded: Boolean = true,
     val implStatusData: OtelJavaStatusData = OtelJavaStatusData.create(OtelJavaStatusCode.ERROR, "Whoops"),
     val implResource: OtelJavaResource = OtelJavaResource.create(implAttributes, "http://example.com/foo"),
+    val implTotalAttributeCount: Int = implAttributes.size(),
 ) : OtelJavaSpanData {
 
     override fun getName(): String = implName
@@ -44,7 +45,7 @@ internal class FakeOtelJavaSpanData(
     override fun hasEnded(): Boolean = implEnded
     override fun getTotalRecordedEvents(): Int = events.size
     override fun getTotalRecordedLinks(): Int = links.size
-    override fun getTotalAttributeCount(): Int = implAttributes.size()
+    override fun getTotalAttributeCount(): Int = implTotalAttributeCount
 
     @Deprecated("Deprecated in Java")
     override fun getInstrumentationLibraryInfo(): OtelJavaInstrumentationLibraryInfo = OtelJavaInstrumentationLibraryInfo.empty()

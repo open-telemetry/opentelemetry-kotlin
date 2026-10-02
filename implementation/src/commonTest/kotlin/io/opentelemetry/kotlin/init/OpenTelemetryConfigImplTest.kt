@@ -37,7 +37,7 @@ internal class OpenTelemetryConfigImplTest {
     @Test
     fun testDefaultConfig() {
         val cfg = OpenTelemetryConfigImpl(clock)
-        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         assertNull(resolver.generateTracingConfig().processor)
         assertNull(resolver.generateLoggingConfig().processor)
@@ -74,7 +74,7 @@ internal class OpenTelemetryConfigImplTest {
         cfg.context {
             assertNull(storageMode)
         }
-        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         assertNotNull(resolver.generateTracingConfig().processor)
         assertNotNull(resolver.generateLoggingConfig().processor)
@@ -119,7 +119,7 @@ internal class OpenTelemetryConfigImplTest {
                 attributeCountLimit = 64
             }
         }
-        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         assertEquals(64, resolver.generateTracingConfig().spanLimits.attributeCountLimit)
         assertEquals(64, resolver.generateLoggingConfig().logLimits.attributeCountLimit)
@@ -137,7 +137,7 @@ internal class OpenTelemetryConfigImplTest {
                 }
             }
         }
-        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         assertEquals(32, resolver.generateTracingConfig().spanLimits.attributeCountLimit)
         assertEquals(64, resolver.generateLoggingConfig().logLimits.attributeCountLimit)
@@ -155,7 +155,7 @@ internal class OpenTelemetryConfigImplTest {
                 }
             }
         }
-        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         val spanLimits = resolver.generateTracingConfig().spanLimits
         assertEquals(8, spanLimits.linkCountLimit)
@@ -176,7 +176,7 @@ internal class OpenTelemetryConfigImplTest {
                 }
             }
         }
-        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         with(resolver.generateTracingConfig().spanLimits) {
             assertEquals(64, attributeCountLimit)
@@ -199,7 +199,7 @@ internal class OpenTelemetryConfigImplTest {
                 }
             }
         }
-        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         val logLimits = resolver.generateLoggingConfig().logLimits
         assertEquals(8, logLimits.attributeCountLimit)
@@ -218,7 +218,7 @@ internal class OpenTelemetryConfigImplTest {
                 }
             }
         }
-        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         with(resolver.generateLoggingConfig().logLimits) {
             assertEquals(64, attributeCountLimit)
@@ -243,7 +243,7 @@ internal class OpenTelemetryConfigImplTest {
                 }
             }
         }
-        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         assertEquals(0, resolver.generateTracingConfig().spanLimits.attributeCountLimit)
         assertEquals(0, resolver.generateLoggingConfig().logLimits.attributeCountLimit)
@@ -257,7 +257,7 @@ internal class OpenTelemetryConfigImplTest {
                 attributeValueLengthLimit = -1
             }
         }
-        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         with(resolver.generateTracingConfig().spanLimits) {
             assertEquals(DEFAULT_ATTRIBUTE_LIMIT, attributeCountLimit)
@@ -335,7 +335,7 @@ internal class OpenTelemetryConfigImplTest {
     fun testDefaultErrorHandlerDiscardsReports() {
         val cfg = OpenTelemetryConfigImpl(clock)
         // no handler configured, so reports are swallowed rather than thrown
-        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         resolver.generateTracingConfig().sdkErrorHandler.onError(sdkError())
     }
@@ -346,7 +346,7 @@ internal class OpenTelemetryConfigImplTest {
         val cfg = OpenTelemetryConfigImpl(clock).apply {
             errorHandler(handler)
         }
-        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         resolver.generateTracingConfig().sdkErrorHandler.onError(sdkError("trace"))
         resolver.generateLoggingConfig().sdkErrorHandler.onError(sdkError("log"))
@@ -380,7 +380,7 @@ internal class OpenTelemetryConfigImplTest {
             errorHandler(first)
             errorHandler(second)
         }
-        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         resolver.generateTracingConfig().sdkErrorHandler.onError(sdkError())
         assertTrue(first.errors.isEmpty())
@@ -393,7 +393,7 @@ internal class OpenTelemetryConfigImplTest {
         val cfg = OpenTelemetryConfigImpl(clock).apply {
             errorHandler { received.add(it) }
         }
-        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         resolver.generateTracingConfig().sdkErrorHandler.onError(sdkError())
         assertEquals(1, received.size)
@@ -403,7 +403,7 @@ internal class OpenTelemetryConfigImplTest {
     @Test
     fun testDefaultAttrLimits() {
         val cfg = OpenTelemetryConfigImpl(clock)
-        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         with(resolver.generateTracingConfig().spanLimits) {
             assertEquals(DEFAULT_ATTRIBUTE_LIMIT, attributeCountLimit)

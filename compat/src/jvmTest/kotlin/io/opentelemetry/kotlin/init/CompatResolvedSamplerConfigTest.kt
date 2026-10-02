@@ -39,7 +39,7 @@ internal class CompatResolvedSamplerConfigTest {
         val behavior = resolved ?: defaultCompatBehaviorReader(
             envVarReader = EnvVarReader(getEnvVar),
             sdkErrorHandler = cfg.sdkErrorHandler,
-        ).read(cfg.configFilePath, cfg.toBehavior())
+        ).read(cfg.configFilePath, cfg::toBehavior)
         return CompatSdkConfigFactory(cfg, behavior, clock, contextFactory)
             .buildTracerProvider()
             .getTracer("test")
