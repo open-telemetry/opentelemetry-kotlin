@@ -1,14 +1,17 @@
 package io.opentelemetry.kotlin.config
 
+import io.opentelemetry.kotlin.behavior.BehaviorResolver
+import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -126,21 +129,87 @@ internal class OpenTelemetryConfigReaderTest {
     }
 
     @Test
-    fun `should propagate a failure to read the config file`() {
-        assertFailsWith<IllegalStateException> {
-            read(
-                configFilePath = PATH,
-                onRead = { error("cannot read $it") },
-            )
-        }
+    fun `should treat an unreadable config file as empty`() {
+        val handler = FakeSdkErrorHandler()
+        val behavior = read(
+            env = mapOf(LOGRECORD_COUNT to "64"),
+            dsl = logAttributeValueLengthLimit(256),
+            configFilePath = PATH,
+            onRead = { error("cannot read $it") },
+            handler = handler,
+        )
+        assertNull(behavior.logRecordAttributeCountLimit())
+        assertEquals(256, behavior.logRecordAttributeValueLengthLimit())
+        assertEquals(1, handler.sdkCodeErrors.size)
+        assertEquals(SdkErrorSeverity.ERROR, handler.sdkCodeErrors.single().severity)
+    }
+
+    @Test
+    fun `should skip malformed header entries from the environment`() {
+        val handler = FakeSdkErrorHandler()
+        val behavior = read(
+            env = mapOf(
+                "OTEL_TRACES_EXPORTER" to "otlp",
+                "OTEL_EXPORTER_OTLP_HEADERS" to "key=value,malformed",
+            ),
+            handler = handler,
+        )
+        assertEquals(mapOf("key" to "value"), behavior.tracerProvider?.processor?.http?.headers)
+        assertTrue(handler.sdkCodeErrors.isEmpty())
+    }
+
+    @Test
+    fun `should treat a failing dsl as unset`() {
+        val handler = FakeSdkErrorHandler()
+        val behavior = read(
+            env = mapOf(LOGRECORD_COUNT to "64"),
+            dslProvider = { error("dsl failed") },
+            handler = handler,
+        )
+        assertEquals(64, behavior.logRecordAttributeCountLimit())
+        assertEquals(1, handler.sdkCodeErrors.size)
+    }
+
+    @Test
+    fun `should treat failing environment variables as unset`() {
+        val behavior = read(
+            env = mapOf("OTEL_TRACES_SAMPLER" to "not_a_sampler", LOGRECORD_COUNT to "64"),
+            dsl = logAttributeValueLengthLimit(256),
+            handler = { error("handler failed") },
+        )
+        assertNull(behavior.logRecordAttributeCountLimit())
+        assertEquals(256, behavior.logRecordAttributeValueLengthLimit())
+    }
+
+    @Test
+    fun `should fall back to the dsl when resolving fails`() {
+        val handler = FakeSdkErrorHandler()
+        val dsl = logAttributeCountLimit(8)
+        val behavior = read(
+            env = mapOf(LOGRECORD_COUNT to "64"),
+            dsl = dsl,
+            resolver = object : BehaviorResolver {
+                override fun resolve(
+                    envars: OpenTelemetryBehavior?,
+                    declarativeFile: OpenTelemetryBehavior?,
+                    dsl: OpenTelemetryBehavior?,
+                ): OpenTelemetryBehavior = error("resolver failed")
+            },
+            handler = handler,
+        )
+        assertEquals(dsl, behavior)
+        assertEquals(1, handler.sdkCodeErrors.size)
     }
 
     private fun read(
         env: Map<String, String> = emptyMap(),
         dsl: OpenTelemetryBehavior? = null,
+        dslProvider: () -> OpenTelemetryBehavior? = { dsl },
         fileContents: OpenTelemetryBehavior = OpenTelemetryBehavior(),
         configFilePath: String? = null,
         onRead: (String) -> Unit = {},
+        resolver: BehaviorResolver = BehaviorResolverImpl(),
+        handler: SdkErrorHandler = NoopSdkErrorHandler,
     ): OpenTelemetryBehavior {
         val reader = OpenTelemetryConfigReader(
             envVarReader = EnvVarReader(env::get),
@@ -148,8 +217,10 @@ internal class OpenTelemetryConfigReaderTest {
                 onRead(path)
                 fileContents
             },
+            behaviorResolver = resolver,
+            sdkErrorHandler = handler,
         )
-        return reader.read(dsl = dsl, configFilePath = configFilePath)
+        return reader.read(dsl = dslProvider, configFilePath = configFilePath)
     }
 
     private fun OpenTelemetryBehavior.logRecordAttributeCountLimit() =

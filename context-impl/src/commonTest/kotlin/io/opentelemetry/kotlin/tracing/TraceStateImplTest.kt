@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -352,5 +353,34 @@ internal class TraceStateImplTest {
         val entries = updated.asMap().entries.toList()
         assertEquals("key3", entries[0].key)
         assertEquals("key1", entries[1].key)
+    }
+
+    @Test
+    fun testEqualWhenEntriesMatch() {
+        val a = TraceStateImpl.EMPTY.put("key1", "value1").put("key2", "value2")
+        val b = TraceStateImpl.EMPTY.put("key1", "value1").put("key2", "value2")
+        assertEquals(a, b)
+        assertEquals(a.hashCode(), b.hashCode())
+    }
+
+    @Test
+    fun testNotEqualWhenOrderDiffers() {
+        val a = TraceStateImpl.EMPTY.put("key1", "value1").put("key2", "value2")
+        val b = TraceStateImpl.EMPTY.put("key2", "value2").put("key1", "value1")
+        assertNotEquals(a, b)
+    }
+
+    @Test
+    fun testNotEqualWhenValueDiffers() {
+        val a = TraceStateImpl.EMPTY.put("key", "value1")
+        val b = TraceStateImpl.EMPTY.put("key", "value2")
+        assertNotEquals(a, b)
+    }
+
+    @Test
+    fun testPutThenRemoveEqualsOriginal() {
+        val original = TraceStateImpl.EMPTY.put("key1", "value1")
+        assertEquals(original, original.put("key2", "value2").remove("key2"))
+        assertEquals(TraceStateImpl.EMPTY, original.remove("key1"))
     }
 }

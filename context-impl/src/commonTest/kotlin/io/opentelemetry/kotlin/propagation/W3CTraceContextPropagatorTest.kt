@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
+import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateCodec
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.TraceFlags
 import io.opentelemetry.kotlin.tracing.TraceState

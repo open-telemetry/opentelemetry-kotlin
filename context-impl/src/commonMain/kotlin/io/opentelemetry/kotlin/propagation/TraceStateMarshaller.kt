@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.buildTraceState
+import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateCodec
 import io.opentelemetry.kotlin.tracing.TraceState
 
 /**

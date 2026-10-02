@@ -8,9 +8,10 @@ import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.TraceStateFactory
-import io.opentelemetry.kotlin.factory.isAllZerosHex
-import io.opentelemetry.kotlin.factory.isValidHex
 import io.opentelemetry.kotlin.init.B3Format
+import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_HEX_LENGTH
+import io.opentelemetry.kotlin.propagation.utils.isAllZerosHex
+import io.opentelemetry.kotlin.propagation.utils.isValidHex
 import io.opentelemetry.kotlin.tracing.SpanContext
 
 /**
@@ -145,8 +146,8 @@ public class B3Propagator(
     private fun normalizeTraceId(raw: String?): String? {
         if (raw == null) { return null }
         return when (raw.length) {
-            TRACE_ID_LENGTH -> raw.takeIf { it.isValidHex() && !it.isAllZerosHex() }
-            TRACE_ID_LENGTH / 2 -> raw.padStart(TRACE_ID_LENGTH, '0')
+            TRACE_ID_HEX_LENGTH -> raw.takeIf { it.isValidHex() && !it.isAllZerosHex() }
+            TRACE_ID_HEX_LENGTH / 2 -> raw.padStart(TRACE_ID_HEX_LENGTH, '0')
                 .takeIf { it.isValidHex() && !it.isAllZerosHex() }
             else -> null
         }
@@ -167,7 +168,6 @@ public class B3Propagator(
         private const val DEBUG_HEADER = "X-B3-Flags"
         private const val COMBINED_HEADER = "b3"
         private const val DELIMITER = "-"
-        private const val TRACE_ID_LENGTH = 32
         private const val SINGLE_HEADER_SIZE = 51 // 32 + 1 + 16 + 1 + 1
 
         private val SINGLE_FIELDS = listOf(COMBINED_HEADER)

@@ -41,18 +41,23 @@ internal class TracingConfig(
     /**
      * Factory that produces the sampler to use when creating spans.
      */
-    val samplerFactory: (SpanFactory) -> Sampler = { _ ->
-        ParentBasedSampler(
-            root = AlwaysOnSampler,
-            remoteParentSampled = AlwaysOnSampler,
-            remoteParentNotSampled = AlwaysOffSampler,
-            localParentSampled = AlwaysOnSampler,
-            localParentNotSampled = AlwaysOffSampler,
-        )
-    },
+    val samplerFactory: (SpanFactory) -> Sampler = { _ -> DefaultSampler },
 
     /**
      * Computes the per-tracer config.
      */
     val tracerConfigurator: TracerConfigurator = TracerConfigurator { TracerConfigImpl(true) },
+)
+
+/**
+ * The sampler used when none is configured, or when the configured one fails to build.
+ *
+ * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#general-sdk-configuration
+ */
+internal val DefaultSampler: Sampler = ParentBasedSampler(
+    root = AlwaysOnSampler,
+    remoteParentSampled = AlwaysOnSampler,
+    remoteParentNotSampled = AlwaysOffSampler,
+    localParentSampled = AlwaysOnSampler,
+    localParentNotSampled = AlwaysOffSampler,
 )

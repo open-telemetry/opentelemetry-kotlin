@@ -121,7 +121,7 @@ internal class SpanModel(
     }
 
     override fun end(timestamp: Long) {
-        if (timestamp == 0L) {
+        if (timestamp <= 0L) {
             end()
         } else {
             endInternal(timestamp)
@@ -223,7 +223,7 @@ internal class SpanModel(
                 return
             }
             // avoid running user code under the lock
-            val link = buildSpanLink(spanContext, attributes, spanLimitConfig)
+            val link = buildSpanLink(spanContext, attributes, spanLimitConfig) ?: return
             mutate("Span.addLink failed") {
                 if (linksList.size < spanLimitConfig.linkCountLimit) {
                     linksList.add(link)
@@ -248,7 +248,7 @@ internal class SpanModel(
                 return
             }
             // avoid running user code under the lock
-            val eventTimestamp = timestamp ?: clock.now()
+            val eventTimestamp = timestamp?.takeIf { it > 0 } ?: clock.now()
             val container = AttributesModel(
                 attributeLimit = spanLimitConfig.attributeCountPerEventLimit,
                 attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit

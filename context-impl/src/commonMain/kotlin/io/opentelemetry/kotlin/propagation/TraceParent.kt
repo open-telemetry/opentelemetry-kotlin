@@ -2,6 +2,9 @@ package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
+import io.opentelemetry.kotlin.propagation.utils.SPAN_ID_HEX_LENGTH
+import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_HEX_LENGTH
+import io.opentelemetry.kotlin.propagation.utils.isValidLowercaseHex
 import io.opentelemetry.kotlin.tracing.TraceFlags
 
 /**
@@ -32,8 +35,6 @@ public class TraceParent private constructor(
 
         private const val FORBIDDEN_VERSION = "ff"
         private const val VERSION_LEN = 2
-        private const val TRACE_ID_LEN = 32
-        private const val SPAN_ID_LEN = 16
         private const val FLAGS_LEN = 2
         private const val LEN_V00 = 55
         private const val EXPECTED_FIELD_COUNT = 4
@@ -52,9 +53,9 @@ public class TraceParent private constructor(
             spanId: String,
             traceFlags: TraceFlags,
         ): TraceParent? {
-            val valid = version.length == VERSION_LEN && version.isLowerHex() && version != FORBIDDEN_VERSION &&
-                traceId.length == TRACE_ID_LEN && traceId.isLowerHex() &&
-                spanId.length == SPAN_ID_LEN && spanId.isLowerHex()
+            val valid = version.length == VERSION_LEN && version.isValidLowercaseHex() && version != FORBIDDEN_VERSION &&
+                traceId.length == TRACE_ID_HEX_LENGTH && traceId.isValidLowercaseHex() &&
+                spanId.length == SPAN_ID_HEX_LENGTH && spanId.isValidLowercaseHex()
             return if (valid) {
                 TraceParent(version, traceId, spanId, traceFlags)
             } else {
@@ -85,7 +86,7 @@ public class TraceParent private constructor(
             }
 
             val flagsStr = parts[3]
-            if (flagsStr.length != FLAGS_LEN || !flagsStr.isLowerHex()) {
+            if (flagsStr.length != FLAGS_LEN || !flagsStr.isValidLowercaseHex()) {
                 return null
             }
 
@@ -107,7 +108,5 @@ public class TraceParent private constructor(
             }
             return byte.toString(HEX_RADIX).padStart(FLAGS_LEN, '0')
         }
-
-        private fun String.isLowerHex(): Boolean = all { it in '0'..'9' || it in 'a'..'f' }
     }
 }

@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
-/** Length in bytes of a trace ID. */
-private const val TRACE_ID_BYTES = 16
+import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_BYTES
 
 /** Index of the first of the 7 least-significant bytes that supply the 56-bit randomness value. */
 private const val RANDOMNESS_OFFSET = 9

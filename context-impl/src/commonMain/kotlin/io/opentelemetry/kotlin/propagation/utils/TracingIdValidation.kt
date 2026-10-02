@@ -1,4 +1,4 @@
-package io.opentelemetry.kotlin.factory
+package io.opentelemetry.kotlin.propagation.utils
 
 /**
  * The number of bytes in a trace ID.

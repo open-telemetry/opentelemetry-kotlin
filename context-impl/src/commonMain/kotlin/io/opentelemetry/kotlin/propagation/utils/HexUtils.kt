@@ -1,4 +1,4 @@
-package io.opentelemetry.kotlin.factory
+package io.opentelemetry.kotlin.propagation.utils
 
 /**
  * Returns true if the character is a valid hexadecimal digit (0-9, a-f, A-F).

@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.propagation.W3CTraceStateValidator
+import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateValidator
 import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.TraceStateImpl
 

@@ -1,4 +1,4 @@
-package io.opentelemetry.kotlin.propagation
+package io.opentelemetry.kotlin.propagation.utils
 
 /**
  * Validates the keys and values of W3C `tracestate` entries, and caps the number of entries a
