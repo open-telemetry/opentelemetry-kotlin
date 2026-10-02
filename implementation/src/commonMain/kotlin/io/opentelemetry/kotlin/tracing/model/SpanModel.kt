@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing.model
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.ClockProvider
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.ThreadLocal
@@ -30,7 +31,7 @@ import io.opentelemetry.kotlin.tracing.toSnapshot
  * span has ended, depending on which API call they make.
  */
 internal class SpanModel(
-    private val clock: Clock,
+    override val clock: Clock,
     private val processor: SpanProcessor?,
     name: String,
     override val spanKind: SpanKind,
@@ -44,7 +45,7 @@ internal class SpanModel(
     private val initialDroppedAttributesCount: Int = 0,
     initialDroppedLinksCount: Int = 0,
     private val sdkErrorHandler: SdkErrorHandler
-) : ReadWriteSpan, SpanCreationAction {
+) : ReadWriteSpan, SpanCreationAction, ClockProvider {
 
     private enum class State {
         STARTED,

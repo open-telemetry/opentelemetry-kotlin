@@ -1,5 +1,7 @@
 package io.opentelemetry.kotlin.tracing.model
 
+import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.ClockProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
@@ -47,6 +49,20 @@ internal class OtelJavaReadableSpanAdapterTest {
         assertEquals("value", javaData.attributes.get(OtelJavaAttributeKey.stringKey("key")))
         assertEquals(data.events.size, javaData.events.size)
         assertEquals(data.links.size, javaData.links.size)
+    }
+
+    @Test
+    fun testInFlightLatencyUsesSpanClock() {
+        val span = InFlightSpan(FakeSpanData(startTimestamp = 1000)) { 1500 }
+        assertEquals(500L, OtelJavaReadableSpanAdapter(span).latencyNanos)
+    }
+
+    private class InFlightSpan(
+        private val data: SpanData,
+        override val clock: Clock,
+    ) : ReadableSpan, SpanData by data, ClockProvider {
+        override val endTimestamp: Long? = null
+        override fun toSpanData(): SpanData = data
     }
 
     private class FakeReadableSpan(private val data: SpanData) : ReadableSpan, SpanData by data {

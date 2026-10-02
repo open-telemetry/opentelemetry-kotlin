@@ -94,6 +94,17 @@ internal class OtelJavaSpanProcessorOnKotlinSdkTest {
     }
 
     @Test
+    fun testInFlightLatencyUsesSdkClock() = runTest {
+        val processor = RecordingOtelJavaSpanProcessor()
+        harness.config.spanProcessors.add(processor.toOtelKotlinSpanProcessor())
+        harness.fakeClock.time = 1000
+        val span = harness.tracer.startSpan("my_span")
+        harness.fakeClock.time = 1600
+        assertEquals(600L, processor.startCalls.single().latencyNanos)
+        span.end()
+    }
+
+    @Test
     fun testJavaProcessorMutationsAreExported() = runTest {
         val processor = RecordingOtelJavaSpanProcessor(
             startAction = { span ->

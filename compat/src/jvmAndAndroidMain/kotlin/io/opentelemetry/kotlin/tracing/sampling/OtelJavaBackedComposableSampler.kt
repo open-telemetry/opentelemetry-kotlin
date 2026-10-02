@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
-import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaComposableSampler
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.attributes.toOtelJavaAttributes
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -24,14 +24,12 @@ internal class OtelJavaBackedComposableSampler(internal val impl: OtelJavaCompos
         links: List<SpanLink>,
     ): SamplingIntent {
         val traceId = context.extractSpan().spanContext.traceId
-        val javaAttributes = (attributes as? CompatAttributesModel)?.otelJavaAttributes()
-            ?: OtelJavaAttributes.empty()
         val javaIntent = impl.getSamplingIntent(
             context.toOtelJavaContext(),
             traceId,
             name,
             spanKind.toOtelJavaSpanKind(),
-            javaAttributes,
+            attributes.toOtelJavaAttributes(),
             links.map { it.toOtelJavaLinkData() },
         )
 

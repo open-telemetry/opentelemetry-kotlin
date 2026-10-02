@@ -32,7 +32,7 @@ internal fun LogRecordData.toOtelJavaLogRecordData(): OtelJavaLogRecordData {
     )
 }
 
-private fun Any?.toOtelJavaBodyValue(): OtelJavaValue<*>? = try {
+internal fun Any?.toOtelJavaBodyValue(): OtelJavaValue<*>? = try {
     this?.toOtelJavaValue()?.takeIf { it.type != OtelJavaValueType.EMPTY }
 } catch (ignored: Throwable) {
     null

@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordData
 import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteLogRecord
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
+import io.opentelemetry.kotlin.aliases.OtelJavaValue
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.setTypedAttribute
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
@@ -24,6 +25,8 @@ internal class OtelJavaReadWriteLogRecordAdapter(
     }
 
     override fun toLogRecordData(): OtelJavaLogRecordData = log.toLogRecordData().toOtelJavaLogRecordData()
+
+    override fun getBodyValue(): OtelJavaValue<*>? = log.body.toOtelJavaBodyValue()
 
     override fun getInstrumentationScopeInfo(): OtelJavaInstrumentationScopeInfo =
         log.instrumentationScopeInfo.toOtelJavaInstrumentationScopeInfo()

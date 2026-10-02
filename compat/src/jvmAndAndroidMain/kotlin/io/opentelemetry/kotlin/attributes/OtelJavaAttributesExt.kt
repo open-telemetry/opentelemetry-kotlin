@@ -20,6 +20,12 @@ internal fun OtelJavaAttributes.convertToMap(): Map<String, Any> {
 internal fun attrsFromMap(map: Map<String, Any>): OtelJavaAttributes =
     CompatAttributesModel().apply { setTypedAttributes(map) }.otelJavaAttributes()
 
+/**
+ * Converts any [AttributeContainer] to [OtelJavaAttributes], avoiding a copy when it is already compat-backed.
+ */
+internal fun AttributeContainer.toOtelJavaAttributes(): OtelJavaAttributes =
+    (this as? CompatAttributesModel)?.otelJavaAttributes() ?: attrsFromMap(attributes)
+
 internal fun resourceFromMap(resource: Resource): OtelJavaResource {
     val map = resource.attributes
     val schemaUrl = resource.schemaUrl
