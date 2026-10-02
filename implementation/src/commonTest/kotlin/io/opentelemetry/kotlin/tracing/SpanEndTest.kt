@@ -69,6 +69,15 @@ internal class SpanEndTest {
     }
 
     @Test
+    fun testSpanEndWithNegativeTimestampUsesClock() {
+        val timestamp = 50L
+        clock.time = timestamp
+        val span = tracer.startSpan("test")
+        span.end(-1)
+        assertSpanTimestamp(timestamp)
+    }
+
+    @Test
     fun testSpanIsRecording() {
         val span = tracer.startSpan("test")
         assertTrue(span.isRecording())

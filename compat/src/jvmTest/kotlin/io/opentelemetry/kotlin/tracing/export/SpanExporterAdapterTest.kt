@@ -60,10 +60,7 @@ internal class SpanExporterAdapterTest {
         assertEquals(originalScope.name, observedScope.name)
         assertEquals(originalScope.version, observedScope.version)
         assertEquals(originalScope.schemaUrl, observedScope.schemaUrl)
-        assertEquals(
-            emptyMap(),
-            observedScope.attributes.convertToMap()
-        ) // otel-java don't support this
+        assertEquals(originalScope.attributes, observedScope.attributes.convertToMap())
 
         val originalEvent = original.events.single()
         val observedEvent = observed.events.single()

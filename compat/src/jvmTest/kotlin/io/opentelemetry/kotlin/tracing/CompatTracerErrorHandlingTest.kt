@@ -126,7 +126,7 @@ internal class CompatTracerErrorHandlingTest {
         assertEquals("boom", error.cause.message)
     }
 
-    private fun boom(): Nothing = throw IllegalStateException("boom")
+    private fun boom(): Nothing = error("boom")
 
     private inner class HostileSampler : Sampler {
         override fun shouldSample(

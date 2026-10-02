@@ -6,5 +6,6 @@ import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 
 public fun SpanLinkData.toOtelJavaLinkData(): OtelJavaLinkData = OtelJavaLinkData.create(
     spanContext.toOtelJavaSpanContext(),
-    attrsFromMap(attributes)
+    attrsFromMap(attributes),
+    attributes.size + droppedAttributesCount
 )

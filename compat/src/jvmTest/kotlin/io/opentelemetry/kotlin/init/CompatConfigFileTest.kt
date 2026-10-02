@@ -1,11 +1,14 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.exporter.logging.LoggingSpanExporter
+import io.opentelemetry.kotlin.OpenTelemetrySdk
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -15,7 +18,6 @@ import java.util.logging.Level
 import java.util.logging.LogRecord
 import java.util.logging.Logger
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 internal class CompatConfigFileTest {
@@ -23,22 +25,24 @@ internal class CompatConfigFileTest {
     private val clock = FakeClock()
 
     @Test
-    fun `a config file that does not exist fails initialization`() {
-        assertFailsWith<Exception> {
-            createCompatOpenTelemetry {
-                configFile("does-not-exist.yaml")
-            }
+    fun `a config file that does not exist is reported`() {
+        val handler = FakeSdkErrorHandler()
+        createCompatOpenTelemetry {
+            errorHandler(handler)
+            configFile("does-not-exist.yaml")
         }
+        assertEquals(1, handler.sdkCodeErrors.size)
     }
 
     @Test
-    fun `a config file that is not valid fails initialization`() {
+    fun `a config file that is not valid is reported`() {
+        val handler = FakeSdkErrorHandler()
         val path = writeConfigFile("file_format: [not, a, string")
-        assertFailsWith<Exception> {
-            createCompatOpenTelemetry {
-                configFile(path)
-            }
+        createCompatOpenTelemetry {
+            errorHandler(handler)
+            configFile(path)
         }
+        assertEquals(1, handler.sdkCodeErrors.size)
     }
 
     @Test
@@ -46,7 +50,7 @@ internal class CompatConfigFileTest {
         val cfg = CompatOpenTelemetryConfig(clock).apply {
             configFile(writeConfigFile(CONFIG_FILE))
         }
-        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory())
         assertEquals(64, configFactory.spanLimits.attributeCountLimit)
         assertEquals(64, configFactory.logLimits.attributeCountLimit)
@@ -60,7 +64,7 @@ internal class CompatConfigFileTest {
                 attributeCountLimit = 32
             }
         }
-        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory())
         assertEquals(32, configFactory.spanLimits.attributeCountLimit)
         assertEquals(32, configFactory.logLimits.attributeCountLimit)
@@ -79,6 +83,20 @@ internal class CompatConfigFileTest {
             assertTrue(messages.any { it.contains("compat-console-span") })
         }
         assertTrue(stdout.contains("compat-console-log"))
+    }
+
+    @Test
+    fun `a batch config file buffers spans until flush`() {
+        captureJul(LoggingSpanExporter::class.java.name) { messages ->
+            val sdk = createCompatOpenTelemetry {
+                configFile(writeConfigFile(BATCH_CONSOLE_CONFIG_FILE))
+            } as OpenTelemetrySdk
+            sdk.tracerProvider.getTracer("test").startSpan("batch-console-span").end()
+            assertTrue(messages.isEmpty())
+            runBlocking { sdk.forceFlush() }
+            assertTrue(messages.any { it.contains("batch-console-span") })
+            runBlocking { sdk.shutdown() }
+        }
     }
 
     @Test
@@ -103,7 +121,7 @@ internal class CompatConfigFileTest {
         return file.absolutePath
     }
 
-    private fun captureJul(loggerName: String, block: () -> Unit): List<String> {
+    private fun captureJul(loggerName: String, block: (List<String>) -> Unit): List<String> {
         val logger = Logger.getLogger(loggerName)
         val messages = mutableListOf<String>()
         val handler = object : Handler() {
@@ -121,7 +139,7 @@ internal class CompatConfigFileTest {
         logger.level = Level.ALL
         logger.useParentHandlers = false
         try {
-            block()
+            block(messages)
         } finally {
             logger.removeHandler(handler)
             logger.level = previousLevel
@@ -159,6 +177,16 @@ internal class CompatConfigFileTest {
             logger_provider:
               processors:
                 - simple:
+                    exporter:
+                      console: {}
+        """.trimIndent()
+
+        val BATCH_CONSOLE_CONFIG_FILE = """
+            file_format: "1.0"
+            tracer_provider:
+              processors:
+                - batch:
+                    schedule_delay: 60000
                     exporter:
                       console: {}
         """.trimIndent()

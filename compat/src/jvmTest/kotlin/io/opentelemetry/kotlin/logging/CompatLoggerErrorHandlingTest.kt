@@ -64,5 +64,5 @@ internal class CompatLoggerErrorHandlingTest {
         assertEquals("boom", error.cause.message)
     }
 
-    private fun boom(): Nothing = throw IllegalStateException("boom")
+    private fun boom(): Nothing = error("boom")
 }

@@ -46,4 +46,22 @@ public class TraceStateImpl internal constructor(
         }
         return TraceStateImpl(newData)
     }
+
+    // W3C tracestate order is significant, so compare ordered entries rather than map equality
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other !is TraceStateImpl) {
+            return false
+        }
+        return data.entries.toList() == other.data.entries.toList()
+    }
+
+    override fun hashCode(): Int = data.entries.toList().hashCode()
+
+    override fun toString(): String =
+        data.entries.joinToString(separator = ",", prefix = "TraceStateImpl(", postfix = ")") {
+            "${it.key}=${it.value}"
+        }
 }

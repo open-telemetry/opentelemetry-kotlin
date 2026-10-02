@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
-import io.opentelemetry.kotlin.attributes.toFlattenedBodyString
+import io.opentelemetry.kotlin.attributes.toOtelJavaValue
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -73,15 +73,15 @@ internal class LoggerAdapter(
         val builder = impl.logRecordBuilder()
 
         if (body != null && body != AnyValue.NullValue) {
-            builder.setBody(body.toFlattenedBodyString())
+            builder.setBody(body.toOtelJavaValue())
         }
         if (eventName != null) {
             builder.setEventName(eventName)
         }
-        if (timestamp != null) {
+        if (timestamp != null && timestamp > 0) {
             builder.setTimestamp(timestamp, TimeUnit.NANOSECONDS)
         }
-        if (observedTimestamp != null) {
+        if (observedTimestamp != null && observedTimestamp > 0) {
             builder.setObservedTimestamp(observedTimestamp, TimeUnit.NANOSECONDS)
         }
         if (context != null) {

@@ -71,7 +71,11 @@ internal class SpanAdapter(
 
     override fun end(timestamp: Long) {
         sdkErrorHandler.guard("Span.end failed") {
-            impl.end(timestamp, TimeUnit.NANOSECONDS)
+            if (timestamp > 0) {
+                impl.end(timestamp, TimeUnit.NANOSECONDS)
+            } else {
+                impl.end()
+            }
         }
     }
 
@@ -101,7 +105,7 @@ internal class SpanAdapter(
             attributes(container)
         }
         // As with the span start: left unset, the SDK stamps the event with the clock it times the span by.
-        if (timestamp != null) {
+        if (timestamp != null && timestamp > 0) {
             impl.addEvent(name, container.otelJavaAttributes(), timestamp, TimeUnit.NANOSECONDS)
         } else {
             impl.addEvent(name, container.otelJavaAttributes())

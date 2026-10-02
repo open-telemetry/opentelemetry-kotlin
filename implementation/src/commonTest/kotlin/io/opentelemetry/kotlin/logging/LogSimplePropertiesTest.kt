@@ -46,7 +46,7 @@ internal class LogSimplePropertiesTest {
 
         val log = processor.logs.single()
         assertNull(log.body)
-        assertEquals(now, log.timestamp)
+        assertNull(log.timestamp)
         assertEquals(now, log.observedTimestamp)
         assertEquals(SeverityNumber.UNKNOWN, log.severityNumber)
         assertNull(log.severityText)
@@ -70,5 +70,25 @@ internal class LogSimplePropertiesTest {
         assertEquals(3, log.observedTimestamp)
         assertEquals(SeverityNumber.INFO, log.severityNumber)
         assertEquals(severityText, log.severityText)
+    }
+
+    @Test
+    fun testZeroTimestampsAreInvalid() {
+        clock.time = 5
+        logger.emit(timestamp = 0, observedTimestamp = 0)
+
+        val log = processor.logs.single()
+        assertNull(log.timestamp)
+        assertEquals(clock.time, log.observedTimestamp)
+    }
+
+    @Test
+    fun testNegativeTimestampsAreInvalid() {
+        clock.time = 5
+        logger.emit(timestamp = -1, observedTimestamp = -1)
+
+        val log = processor.logs.single()
+        assertNull(log.timestamp)
+        assertEquals(clock.time, log.observedTimestamp)
     }
 }
