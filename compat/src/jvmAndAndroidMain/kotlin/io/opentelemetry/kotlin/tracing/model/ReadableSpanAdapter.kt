@@ -33,8 +33,8 @@ internal class ReadableSpanAdapter(
         get() = impl.name
     override val status: StatusData
         get() = impl.toSpanData().status.toOtelKotlinStatusData()
-    override val endTimestamp: Long
-        get() = impl.toSpanData().endEpochNanos
+    override val endTimestamp: Long?
+        get() = impl.toSpanData().let { data -> data.endEpochNanos.takeIf { data.hasEnded() } }
     override val attributes: Map<String, Any>
         get() = impl.attributes.convertToMap()
     override val events: List<SpanEventData>

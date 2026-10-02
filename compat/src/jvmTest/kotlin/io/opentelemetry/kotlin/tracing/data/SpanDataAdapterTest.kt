@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanData
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import kotlin.test.assertNull
 
 internal class SpanDataAdapterTest {
 
@@ -39,5 +40,17 @@ internal class SpanDataAdapterTest {
         assertEquals(0, adapter.droppedAttributesCount)
         assertEquals(0, adapter.events.single().droppedAttributesCount)
         assertEquals(0, adapter.links.single().droppedAttributesCount)
+    }
+
+    @Test
+    fun testEndTimestampNullWhenNotEnded() {
+        val adapter = SpanDataAdapter(FakeOtelJavaSpanData(implEndNs = 0, implEnded = false))
+        assertNull(adapter.endTimestamp)
+    }
+
+    @Test
+    fun testEndTimestampWhenEnded() {
+        val adapter = SpanDataAdapter(FakeOtelJavaSpanData(implStartNs = 100, implEndNs = 200, implEnded = true))
+        assertEquals(200L, adapter.endTimestamp)
     }
 }
