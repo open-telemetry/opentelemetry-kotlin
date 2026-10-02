@@ -19,5 +19,10 @@ kotlin {
                 implementation(project(":model"))
             }
         }
+        commonTest {
+            dependencies {
+                implementation(project(":test-fakes"))
+            }
+        }
     }
 }
