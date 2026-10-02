@@ -1,12 +1,12 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
-import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaSampler
 import io.opentelemetry.kotlin.aliases.OtelJavaSamplingDecision
-import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
+import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.EmptyAttributeContainer
+import io.opentelemetry.kotlin.attributes.toOtelJavaAttributes
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.factory.toHexString
@@ -31,13 +31,13 @@ internal class SamplerAdapter(
         attributes: AttributeContainer,
         links: List<SpanLink>,
     ): SamplingResult {
+        val javaContext = context.toOtelJavaContext()
         val result = impl.shouldSample(
-            context.toOtelJavaContext(),
+            javaContext,
             traceIdBytes.toHexString(),
             name,
             spanKind.toOtelJavaSpanKind(),
-            (attributes as? CompatAttributesModel)?.otelJavaAttributes()
-                ?: OtelJavaAttributes.empty(),
+            attributes.toOtelJavaAttributes(),
             links.map { it.toOtelJavaLinkData() },
         )
         val decision = when (result.decision) {
@@ -45,6 +45,8 @@ internal class SamplerAdapter(
             OtelJavaSamplingDecision.RECORD_ONLY -> SamplingResult.Decision.RECORD_ONLY
             else -> SamplingResult.Decision.RECORD_AND_SAMPLE
         }
+        val parentTraceState = OtelJavaSpan.fromContext(javaContext).spanContext.traceState
+        val resultTraceState = result.getUpdatedTraceState(parentTraceState).toOtelKotlinTraceState()
         val resultAttributes: AttributeContainer = when {
             result.attributes.isEmpty -> EmptyAttributeContainer
             else -> CompatAttributesModel(result.attributes.toBuilder())
@@ -52,8 +54,7 @@ internal class SamplerAdapter(
         return object : SamplingResult {
             override val decision = decision
             override val attributes: AttributeContainer = resultAttributes
-            override val traceState: TraceState =
-                result.getUpdatedTraceState(OtelJavaTraceState.getDefault()).toOtelKotlinTraceState()
+            override val traceState: TraceState = resultTraceState
         }
     }
 }

@@ -32,7 +32,7 @@ internal fun LogRecordData.toOtelJavaLogRecordData(): OtelJavaLogRecordData {
     )
 }
 
-private fun Any?.toOtelJavaBodyValue(): OtelJavaValue<*>? = when (this) {
+internal fun Any?.toOtelJavaBodyValue(): OtelJavaValue<*>? = when (this) {
     null, AnyValue.NullValue -> null
     else -> toOtelJavaValue()
 }
