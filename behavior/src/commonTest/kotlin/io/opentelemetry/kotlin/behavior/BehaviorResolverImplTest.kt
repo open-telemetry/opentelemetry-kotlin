@@ -11,7 +11,7 @@ internal class BehaviorResolverImplTest {
 
     @Test
     fun dslRefinesDeclarativeBatchSettingsAndPreservesExporter() {
-        val http = OtlpHttpExporterBehavior(endpoint = "https://example.com")
+        val http = OtlpHttpLogsExporterBehavior()
         val resolved = resolver.resolve(
             envars = OpenTelemetryBehavior(
                 loggerProvider = LoggerProviderBehavior(
@@ -44,7 +44,7 @@ internal class BehaviorResolverImplTest {
 
     @Test
     fun dslSelectsSimpleProcessorAndPreservesDeclarativeExporter() {
-        val http = OtlpHttpExporterBehavior(endpoint = "https://example.com")
+        val http = OtlpHttpLogsExporterBehavior()
         val resolved = resolver.resolve(
             envars = null,
             declarativeFile = OpenTelemetryBehavior(
@@ -66,7 +66,7 @@ internal class BehaviorResolverImplTest {
 
     @Test
     fun dslSelectsSimpleSpanProcessorAndPreservesDeclarativeExporter() {
-        val http = OtlpHttpExporterBehavior(endpoint = "https://example.com")
+        val http = OtlpHttpLogsExporterBehavior()
         val resolved = resolver.resolve(
             envars = null,
             declarativeFile = OpenTelemetryBehavior(
