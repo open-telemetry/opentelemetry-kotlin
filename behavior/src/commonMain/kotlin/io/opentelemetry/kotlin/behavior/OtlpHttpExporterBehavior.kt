@@ -2,13 +2,13 @@ package io.opentelemetry.kotlin.behavior
 
 import io.opentelemetry.kotlin.ExperimentalApi
 
-@ExperimentalApi
 /**
  * Selecting the OTLP HTTP exporter.
  *
  * https://opentelemetry.io/docs/specs/otel/protocol/exporter/
  */
-data class OtlpHttpExporterBehavior(
+@ExperimentalApi
+abstract class OtlpHttpExporterBehavior(
     // TODO: Add all fields supported by the spec.
     //  Blocked by #974. (OTLP exporter configuration surface)
     /**
@@ -17,15 +17,15 @@ data class OtlpHttpExporterBehavior(
      * When used as the generic OTLP endpoint, the exporter appends the
      * signal-specific path (`/v1/traces`, `/v1/metrics`, or `/v1/logs`).
      */
-    val endpoint: String? = null,
+    open val endpoint: String,
     /**
      * Maximum time (in milliseconds) to wait for each export.
      */
-    val timeout: Long? = null,
+    open val timeout: Long = DEFAULT_TIMEOUT,
     /**
      * Configure headers.
      */
-    val headers: Map<String, String?>? = null,
+    open val headers: Map<String, String?>? = null,
 ) : Behavior<OtlpHttpExporterBehavior> {
 
     companion object {
