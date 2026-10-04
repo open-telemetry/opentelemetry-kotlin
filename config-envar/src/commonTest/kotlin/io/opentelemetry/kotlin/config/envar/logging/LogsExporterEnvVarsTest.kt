@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.config.envar.logging
 
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
 import io.opentelemetry.kotlin.config.envar.Exporter
 import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
@@ -20,7 +20,8 @@ internal class LogsExporterEnvVarsTest {
     }
 
     @Test
-    fun `should map implemented exporters`() {
+    fun `should map implemented exporters with default values`() {
+        // console
         var configs = mapOf(
             LogsExporterEnvVars.LOGS_EXPORTER to Exporter.CONSOLE.value,
         )
@@ -31,13 +32,25 @@ internal class LogsExporterEnvVarsTest {
 
         configs = mapOf(
             LogsExporterEnvVars.LOGS_EXPORTER to Exporter.OTLP.value,
+        )
+        assertEquals(
+            LogRecordProcessorBehavior(http = OtlpHttpLogsExporterBehavior()),
+            toBehavior(configs::get),
+        )
+    }
+
+    @Test
+    fun `should map implemented exporters with set values`() {
+        // Console has no values to set
+        val configs = mapOf(
+            LogsExporterEnvVars.LOGS_EXPORTER to Exporter.OTLP.value,
             OpenTelemetryEnvVars.OTLP_ENDPOINT to "http://localhost:4317",
             OpenTelemetryEnvVars.OTLP_TIMEOUT to "1",
             OpenTelemetryEnvVars.OTLP_HEADERS to "key1=value1,key2=value2",
         )
         assertEquals(
             LogRecordProcessorBehavior(
-                http = OtlpHttpExporterBehavior(
+                http = OtlpHttpLogsExporterBehavior(
                     endpoint = "http://localhost:4317",
                     timeout = 1,
                     headers = mapOf("key1" to "value1", "key2" to "value2")
@@ -90,7 +103,7 @@ internal class LogsExporterEnvVarsTest {
     }
 
     @Test
-    fun `Signal-specific configs override base configs`() {
+    fun `signal-specific configs override base configs`() {
         val configs = mutableMapOf(
             LogsExporterEnvVars.LOGS_EXPORTER to Exporter.OTLP.value,
             OpenTelemetryEnvVars.OTLP_ENDPOINT to "http://localhost:4317",
@@ -99,7 +112,7 @@ internal class LogsExporterEnvVarsTest {
         )
         assertEquals(
             LogRecordProcessorBehavior(
-                http = OtlpHttpExporterBehavior(
+                http = OtlpHttpLogsExporterBehavior(
                     endpoint = "http://localhost:4317",
                     timeout = 1,
                     headers = mapOf("key1" to "value1", "key2" to "value2")
@@ -116,7 +129,7 @@ internal class LogsExporterEnvVarsTest {
         )
         assertEquals(
             LogRecordProcessorBehavior(
-                http = OtlpHttpExporterBehavior(
+                http = OtlpHttpLogsExporterBehavior(
                     endpoint = "http://localhost:4317/logs",
                     timeout = 2,
                     headers = mapOf("key3" to "value3", "key4" to "value4")
@@ -134,7 +147,7 @@ internal class LogsExporterEnvVarsTest {
         )
         assertEquals(
             LogRecordProcessorBehavior(
-                http = OtlpHttpExporterBehavior(
+                http = OtlpHttpLogsExporterBehavior(
                     headers = mapOf("key1" to "value1", "key2" to "value2")
                 )
             ),
