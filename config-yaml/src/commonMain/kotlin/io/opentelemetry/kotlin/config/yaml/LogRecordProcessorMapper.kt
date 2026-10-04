@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
 import io.opentelemetry.kotlin.behavior.SimpleLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.config.schema.model.LogRecordProcessor
 
@@ -32,9 +33,9 @@ fun List<LogRecordProcessor>.toBehavior(): LogRecordProcessorBehavior? {
                             "${pair.name}=${pair.value}"
                         }
                     ).orEmpty()
-            val httpExporterBehavior = OtlpHttpExporterBehavior(
-                endpoint = httpExporter.endpoint,
-                timeout = httpExporter.timeout,
+            val httpExporterBehavior = OtlpHttpLogsExporterBehavior(
+                endpoint = httpExporter.endpoint ?: OtlpHttpLogsExporterBehavior.DEFAULT_ENDPOINT,
+                timeout = httpExporter.timeout ?: OtlpHttpExporterBehavior.DEFAULT_TIMEOUT,
                 headers = headers.ifEmpty { null }
             )
             return LogRecordProcessorBehavior(http = httpExporterBehavior, simple = simple)
