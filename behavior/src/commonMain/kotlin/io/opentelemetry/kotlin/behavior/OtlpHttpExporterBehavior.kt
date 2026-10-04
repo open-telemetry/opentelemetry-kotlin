@@ -13,8 +13,11 @@ abstract class OtlpHttpExporterBehavior(
     //  Blocked by #974. (OTLP exporter configuration surface)
     /**
      * Target to which the exporter is going to send spans, metrics, or logs.
+     *
+     * When used as the generic OTLP endpoint, the exporter appends the
+     * signal-specific path (`/v1/traces`, `/v1/metrics`, or `/v1/logs`).
      */
-    open val endpoint: String,
+    open val endpoint: String, // TODO: Add endpoint validation.
     /**
      * Maximum time (in milliseconds) to wait for each export.
      */
