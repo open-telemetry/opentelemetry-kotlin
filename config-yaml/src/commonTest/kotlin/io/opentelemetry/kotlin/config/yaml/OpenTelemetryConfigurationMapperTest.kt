@@ -7,7 +7,8 @@ import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SimpleLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.SimpleSpanProcessorBehavior
@@ -116,10 +117,6 @@ internal class OpenTelemetryConfigurationMapperTest {
 
     @Test
     fun mapsHttpExportersOntoProcessorBehavior() {
-        val http = OtlpHttpExporterBehavior(
-            endpoint = "http://localhost:4317",
-            timeout = 10_000,
-        )
         val config = OpenTelemetryConfiguration(
             fileFormat = FILE_FORMAT,
             tracerProvider = TracerProvider(
@@ -155,10 +152,22 @@ internal class OpenTelemetryConfigurationMapperTest {
         assertEquals(
             OpenTelemetryBehavior(
                 tracerProvider = TracerProviderBehavior(
-                    processor = SpanProcessorBehavior(http = http, simple = SimpleSpanProcessorBehavior()),
+                    processor = SpanProcessorBehavior(
+                        http = OtlpHttpSpanExporterBehavior(
+                            endpoint = "http://localhost:4317",
+                            timeout = 10_000,
+                        ),
+                        simple = SimpleSpanProcessorBehavior(),
+                    ),
                 ),
                 loggerProvider = LoggerProviderBehavior(
-                    processor = LogRecordProcessorBehavior(http = http, simple = SimpleLogRecordProcessorBehavior()),
+                    processor = LogRecordProcessorBehavior(
+                        http = OtlpHttpLogsExporterBehavior(
+                            endpoint = "http://localhost:4317",
+                            timeout = 10_000,
+                        ),
+                        simple = SimpleLogRecordProcessorBehavior()
+                    ),
                 ),
             ),
             config.toBehavior(),

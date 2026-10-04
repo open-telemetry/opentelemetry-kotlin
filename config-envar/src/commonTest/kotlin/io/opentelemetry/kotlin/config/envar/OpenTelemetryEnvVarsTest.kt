@@ -6,7 +6,8 @@ import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
@@ -142,18 +143,23 @@ internal class OpenTelemetryEnvVarsTest {
         val env = mapOf(
             TracesExporterEnvVars.TRACES_EXPORTER to Exporter.OTLP.value,
             LogsExporterEnvVars.LOGS_EXPORTER to Exporter.OTLP.value,
-            "OTEL_EXPORTER_OTLP_ENDPOINT" to "http://localhost:4317",
-            "OTEL_EXPORTER_OTLP_TIMEOUT" to "1",
-            "OTEL_EXPORTER_OTLP_HEADERS" to "key1=value1,key2=value2",
+            OpenTelemetryEnvVars.OTLP_ENDPOINT to "http://localhost:4317",
+            OpenTelemetryEnvVars.OTLP_TIMEOUT to "1",
+            OpenTelemetryEnvVars.OTLP_HEADERS to "key1=value1,key2=value2",
         )
         val behavior = toBehavior(env::get)
-        val http = OtlpHttpExporterBehavior(
+        val spanHttp = OtlpHttpSpanExporterBehavior(
             endpoint = "http://localhost:4317",
             timeout = 1,
             headers = mapOf("key1" to "value1", "key2" to "value2")
         )
-        assertEquals(SpanProcessorBehavior(http = http), behavior.tracerProvider?.processor)
-        assertEquals(LogRecordProcessorBehavior(http = http), behavior.loggerProvider?.processor)
+        val logsHttp = OtlpHttpLogsExporterBehavior(
+            endpoint = "http://localhost:4317",
+            timeout = 1,
+            headers = mapOf("key1" to "value1", "key2" to "value2")
+        )
+        assertEquals(SpanProcessorBehavior(http = spanHttp), behavior.tracerProvider?.processor)
+        assertEquals(LogRecordProcessorBehavior(http = logsHttp), behavior.loggerProvider?.processor)
     }
 
     @Test

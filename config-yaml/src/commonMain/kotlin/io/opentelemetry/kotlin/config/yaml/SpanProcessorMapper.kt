@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
 import io.opentelemetry.kotlin.behavior.SimpleSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.config.schema.model.SpanProcessor
 
@@ -47,9 +48,9 @@ fun List<SpanProcessor>.toBehavior(): SpanProcessorBehavior? {
                             "${pair.name}=${pair.value}"
                         }
                     ).orEmpty()
-            val httpExporterBehavior = OtlpHttpExporterBehavior(
-                endpoint = httpExporter.endpoint,
-                timeout = httpExporter.timeout,
+            val httpExporterBehavior = OtlpHttpSpanExporterBehavior(
+                endpoint = httpExporter.endpoint ?: OtlpHttpSpanExporterBehavior.DEFAULT_ENDPOINT,
+                timeout = httpExporter.timeout ?: OtlpHttpExporterBehavior.DEFAULT_TIMEOUT,
                 headers = headers.ifEmpty { null }
             )
             return SpanProcessorBehavior(

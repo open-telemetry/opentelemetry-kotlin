@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.config.envar.tracing
 
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.config.envar.Exporter
 import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
@@ -20,7 +20,7 @@ internal class TracesExporterEnvVarsTest {
     }
 
     @Test
-    fun `should map implemented exporters`() {
+    fun `should map implemented exporters with default values`() {
         var configs = mapOf(
             TracesExporterEnvVars.TRACES_EXPORTER to Exporter.CONSOLE.value
         )
@@ -31,13 +31,25 @@ internal class TracesExporterEnvVarsTest {
 
         configs = mapOf(
             TracesExporterEnvVars.TRACES_EXPORTER to Exporter.OTLP.value,
+        )
+        assertEquals(
+            SpanProcessorBehavior(http = OtlpHttpSpanExporterBehavior()),
+            toBehavior(configs::get)
+        )
+    }
+
+    @Test
+    fun `should map implemented exporters with set values`() {
+        // Console has no values to set
+        val configs = mapOf(
+            TracesExporterEnvVars.TRACES_EXPORTER to Exporter.OTLP.value,
             OpenTelemetryEnvVars.OTLP_ENDPOINT to "http://localhost:4317",
             OpenTelemetryEnvVars.OTLP_TIMEOUT to "1",
             OpenTelemetryEnvVars.OTLP_HEADERS to "key1=value1,key2=value2",
         )
         assertEquals(
             SpanProcessorBehavior(
-                http = OtlpHttpExporterBehavior(
+                http = OtlpHttpSpanExporterBehavior(
                     endpoint = "http://localhost:4317",
                     timeout = 1,
                     headers = mapOf("key1" to "value1", "key2" to "value2")
@@ -98,7 +110,7 @@ internal class TracesExporterEnvVarsTest {
         )
         assertEquals(
             SpanProcessorBehavior(
-                http = OtlpHttpExporterBehavior(
+                http = OtlpHttpSpanExporterBehavior(
                     endpoint = "http://localhost:4317",
                     timeout = 1,
                     headers = mapOf("key1" to "value1", "key2" to "value2")
@@ -115,7 +127,7 @@ internal class TracesExporterEnvVarsTest {
         )
         assertEquals(
             SpanProcessorBehavior(
-                http = OtlpHttpExporterBehavior(
+                http = OtlpHttpSpanExporterBehavior(
                     endpoint = "http://localhost:4317/traces",
                     timeout = 2,
                     headers = mapOf("key3" to "value3", "key4" to "value4")
@@ -133,7 +145,7 @@ internal class TracesExporterEnvVarsTest {
         )
         assertEquals(
             SpanProcessorBehavior(
-                http = OtlpHttpExporterBehavior(
+                http = OtlpHttpSpanExporterBehavior(
                     headers = mapOf("key1" to "value1", "key2" to "value2")
                 )
             ),
