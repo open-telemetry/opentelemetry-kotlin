@@ -51,6 +51,19 @@ internal class SpanProcessorMapperTest {
     }
 
     @Test
+    fun mapsHttpDefaultValuesFromASimpleProcessor() {
+        val processors = listOf(
+            SpanProcessor(simple = SimpleSpanProcessor(exporter = SpanExporter(otlpHttp = OtlpHttpExporter())))
+        )
+        assertEquals(
+            SpanProcessorBehavior(
+                http = OtlpHttpSpanExporterBehavior(),
+            ),
+            processors.toBehavior(),
+        )
+    }
+
+    @Test
     fun mapsHttpFromASimpleProcessor() {
         val processors = listOf(
             SpanProcessor(simple = SimpleSpanProcessor(exporter = httpExporter())),
