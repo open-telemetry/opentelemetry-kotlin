@@ -101,6 +101,17 @@ internal class AttributesMutatorImplTest {
     }
 
     @Test
+    fun testByteArrayAttributeIsCopied() {
+        val bytes = byteArrayOf(0x01, 0x02, 0x03)
+        val model = AttributesModel(attributeLimit).apply {
+            setByteArrayAttribute("bytes", bytes)
+        }
+        bytes[0] = 0x09
+        val stored = model.attributes["bytes"] as ByteArray
+        assertTrue(stored.contentEquals(byteArrayOf(0x01, 0x02, 0x03)))
+    }
+
+    @Test
     fun testByteArrayValueTruncated() {
         val attrs = AttributesModel(attributeLimit = attributeLimit, attributeValueLengthLimit = 3).apply {
             setByteArrayAttribute("bytes", byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05, 0x06))
