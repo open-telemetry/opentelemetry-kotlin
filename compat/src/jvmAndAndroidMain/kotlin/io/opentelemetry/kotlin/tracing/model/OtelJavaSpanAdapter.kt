@@ -21,7 +21,7 @@ import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
 import java.util.concurrent.TimeUnit
 
 internal class OtelJavaSpanAdapter(
-    private val span: Span,
+    internal val span: Span,
     private val contextFactory: ContextFactory = CompatContextFactory(),
 ) : OtelJavaSpan, OtelJavaImplicitContextKeyed {
 
