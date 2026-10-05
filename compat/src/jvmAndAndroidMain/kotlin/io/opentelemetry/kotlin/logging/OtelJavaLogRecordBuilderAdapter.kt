@@ -4,7 +4,9 @@ import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordBuilder
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
+import io.opentelemetry.kotlin.aliases.OtelJavaValue
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.attributes.toOtelKotlinBody
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
@@ -64,6 +66,11 @@ internal class OtelJavaLogRecordBuilderAdapter(private val impl: Logger) :
 
     override fun setBody(body: String): OtelJavaLogRecordBuilder {
         this.body = body
+        return this
+    }
+
+    override fun setBody(body: OtelJavaValue<*>): OtelJavaLogRecordBuilder {
+        this.body = body.toOtelKotlinBody()
         return this
     }
 

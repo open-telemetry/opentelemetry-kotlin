@@ -1,8 +1,10 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.common.Value
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaContextKey
+import io.opentelemetry.kotlin.attributes.AnyValue
 import org.junit.Test
 import java.time.Instant
 import kotlin.test.assertEquals
@@ -88,5 +90,39 @@ internal class OtelJavaLogRecordBuilderAdapterTest {
         adapter.emit()
 
         assertFalse(impl.logs.single().attributes.containsKey("nullable"))
+    }
+
+    @Test
+    fun `test structured body keeps its shape`() {
+        val impl = FakeLogger("logger")
+        val adapter = OtelJavaLogRecordBuilderAdapter(impl)
+        adapter.setBody(Value.of(mapOf("k" to Value.of(listOf(Value.of(1L), Value.of("v"))))))
+        adapter.emit()
+
+        val expected = AnyValue.MapValue(
+            mapOf("k" to AnyValue.ListValue(listOf(AnyValue.LongValue(1L), AnyValue.StringValue("v"))))
+        )
+        assertEquals(expected, impl.logs.single().body)
+    }
+
+    @Test
+    fun `test primitive value body is unwrapped`() {
+        val impl = FakeLogger("logger")
+        val adapter = OtelJavaLogRecordBuilderAdapter(impl)
+        adapter.setBody(Value.of(42L))
+        adapter.emit()
+
+        assertEquals(42L, impl.logs.single().body)
+    }
+
+    @Test
+    fun `test value attribute keeps its shape`() {
+        val impl = FakeLogger("logger")
+        val adapter = OtelJavaLogRecordBuilderAdapter(impl)
+        adapter.setAttribute(AttributeKey.valueKey("map"), Value.of(mapOf("k" to Value.of("v"))))
+        adapter.emit()
+
+        val expected = AnyValue.MapValue(mapOf("k" to AnyValue.StringValue("v")))
+        assertEquals(expected, impl.logs.single().attributes["map"])
     }
 }
