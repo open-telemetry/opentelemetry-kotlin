@@ -73,4 +73,8 @@ internal class OtelJavaContextAdapter(
         null -> NonRecordingSpan(DefaultSpanContextFactory.invalid, DefaultSpanContextFactory.invalid)
         else -> NonRecordingSpan(DefaultSpanContextFactory.invalid, spanContext.toOtelKotlinSpanContext())
     }
+
+    override fun equals(other: Any?): Boolean = other is OtelJavaContextAdapter && other.impl == impl
+
+    override fun hashCode(): Int = impl.hashCode()
 }

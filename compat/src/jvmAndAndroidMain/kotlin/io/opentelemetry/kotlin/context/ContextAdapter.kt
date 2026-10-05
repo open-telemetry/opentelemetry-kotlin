@@ -58,4 +58,8 @@ internal class ContextAdapter(
 
     override fun clearBaggage(): Context =
         ContextAdapter(OtelJavaBaggage.empty().storeInContext(impl), repository)
+
+    override fun equals(other: Any?): Boolean = other is ContextAdapter && other.impl == impl
+
+    override fun hashCode(): Int = impl.hashCode()
 }
