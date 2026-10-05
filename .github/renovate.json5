@@ -21,6 +21,17 @@
         "sharedVariableName in ['android.minSdk', 'android.minCompileSdk', 'android.minAgpVersion', 'minSupportedKotlinLang', 'minSupportedKotlinPlugin', 'minSupportedKotlinKlib', 'minSupportedGradle']"
       ],
       "enabled": false
+    },
+    {
+      "description": "Newer minors of these libraries break the minimum supported Kotlin version, so only take patch updates. Remove when bumping minSupportedKotlin* in the version catalog.",
+      "matchManagers": ["gradle"],
+      "matchPackageNames": [
+        "io.ktor:**",
+        "org.jetbrains.kotlinx:kotlinx-coroutines-**",
+        "org.jetbrains.kotlinx:kotlinx-serialization-**"
+      ],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
     }
   ],
   "labels": [
