@@ -4,7 +4,10 @@
       "schemaUrl": "https://example.com/some_schema.json",
       "attributes": {
         "environment": "test",
-        "service.name": "test-service"
+        "service.name": "test-service",
+        "telemetry.sdk.language": "java",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "UNKNOWN"
       }
     },
     "instrumentationScopeInfo": {

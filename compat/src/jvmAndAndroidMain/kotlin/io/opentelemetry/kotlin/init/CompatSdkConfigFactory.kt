@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
@@ -16,6 +17,7 @@ import io.opentelemetry.kotlin.factory.toIdGenerator
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.MeterProvider
 import io.opentelemetry.kotlin.resource.Resource
+import io.opentelemetry.kotlin.resource.ResourceAdapter
 import io.opentelemetry.kotlin.resource.detectResource
 import io.opentelemetry.kotlin.tracing.TracerProvider
 
@@ -46,8 +48,8 @@ internal class CompatSdkConfigFactory(
 
     private val logProcessor: LogRecordProcessorBehavior? = behavior.loggerProvider?.processor
 
-    val baseResource: Resource = cfg.resourceDetectionConfig.detectors
-        .detectResource(CompatResourceFactory, cfg.sdkErrorHandler)
+    val baseResource: Resource = ResourceAdapter(OtelJavaResource.getDefault())
+        .merge(cfg.resourceDetectionConfig.detectors.detectResource(CompatResourceFactory, cfg.sdkErrorHandler))
         .merge(cfg.buildDeclaredResource())
 
     fun buildTracerProvider(): TracerProvider {
