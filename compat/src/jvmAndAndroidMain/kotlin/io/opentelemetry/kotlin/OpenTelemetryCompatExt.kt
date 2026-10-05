@@ -1,8 +1,10 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.aliases.OtelJavaContextPropagators
 import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
 import io.opentelemetry.kotlin.logging.OtelJavaLoggerProviderAdapter
 import io.opentelemetry.kotlin.metrics.OtelJavaMeterProviderAdapter
+import io.opentelemetry.kotlin.propagation.toOtelJavaTextMapPropagator
 import io.opentelemetry.kotlin.tracing.OtelJavaTracerProviderAdapter
 
 /**
@@ -21,5 +23,6 @@ public fun OpenTelemetry.toOtelJavaApi(): OtelJavaOpenTelemetry {
         OtelJavaTracerProviderAdapter(tracerProvider),
         OtelJavaLoggerProviderAdapter(loggerProvider),
         OtelJavaMeterProviderAdapter(meterProvider),
+        OtelJavaContextPropagators.create(propagator.toOtelJavaTextMapPropagator()),
     )
 }
