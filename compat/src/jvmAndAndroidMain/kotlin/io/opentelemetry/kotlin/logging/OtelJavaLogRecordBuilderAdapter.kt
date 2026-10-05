@@ -8,12 +8,15 @@ import io.opentelemetry.kotlin.aliases.OtelJavaValue
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.attributes.toOtelKotlinBody
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
+import io.opentelemetry.kotlin.factory.ContextFactory
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
-internal class OtelJavaLogRecordBuilderAdapter(private val impl: Logger) :
-    OtelJavaLogRecordBuilder {
+internal class OtelJavaLogRecordBuilderAdapter(
+    private val impl: Logger,
+    private val contextFactory: ContextFactory,
+) : OtelJavaLogRecordBuilder {
 
     private var timestamp: Long? = null
     private var observedTimestamp: Long? = null
@@ -98,7 +101,7 @@ internal class OtelJavaLogRecordBuilderAdapter(private val impl: Logger) :
             eventName = eventName,
             timestamp = timestamp,
             observedTimestamp = observedTimestamp,
-            context = context?.toOtelKotlinContext(),
+            context = context?.toOtelKotlinContext() ?: contextFactory.implicit(),
             severityNumber = severity?.toOtelKotlinSeverityNumber(),
             severityText = severityText,
             exception = exception,

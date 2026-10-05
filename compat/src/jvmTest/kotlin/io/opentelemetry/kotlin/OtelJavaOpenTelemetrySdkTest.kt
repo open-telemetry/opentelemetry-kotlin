@@ -16,7 +16,7 @@ internal class OtelJavaOpenTelemetrySdkTest {
     @Test
     fun `test entrypoint`() {
         val tracerProvider = OtelJavaTracerProviderAdapter(FakeTracerProvider(), CompatContextFactory())
-        val loggerProvider = OtelJavaLoggerProviderAdapter(FakeLoggerProvider())
+        val loggerProvider = OtelJavaLoggerProviderAdapter(FakeLoggerProvider(), CompatContextFactory())
         val meterProvider = OtelJavaMeterProviderAdapter(FakeMeterProvider())
 
         val propagators = OtelJavaContextPropagators.noop()

@@ -26,7 +26,7 @@ public fun OpenTelemetry.toOtelJavaApi(): OtelJavaOpenTelemetry {
     }
     return OtelJavaOpenTelemetrySdk(
         OtelJavaTracerProviderAdapter(tracerProvider, context),
-        OtelJavaLoggerProviderAdapter(loggerProvider),
+        OtelJavaLoggerProviderAdapter(loggerProvider, context),
         OtelJavaMeterProviderAdapter(meterProvider),
         OtelJavaContextPropagators.create(propagator.toOtelJavaTextMapPropagator()),
     )
