@@ -1,24 +1,36 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.aliases.OtelJavaContext
+import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaTracer
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.factory.ContextFactory
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
+import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.model.CompatSpanCreationState
 import io.opentelemetry.kotlin.tracing.model.SpanAdapter
 import java.util.concurrent.TimeUnit
 
 internal class TracerAdapter(
     private val tracer: OtelJavaTracer,
-    private val clock: Clock,
     private val spanLimitsConfig: CompatSpanLimitsConfig,
     private val contextFactory: ContextFactory,
+    private val sdkErrorHandler: SdkErrorHandler,
 ) : Tracer {
 
-    override fun enabled(): Boolean = true
+    private val invalidSpan: Span by lazy {
+        NonRecordingSpan(DefaultSpanContextFactory.invalid, DefaultSpanContextFactory.invalid)
+    }
+
+    override fun enabled(): Boolean =
+        sdkErrorHandler.guardOrDefault(false, "Tracer.enabled failed") {
+            tracer.isEnabled
+        }
 
     override fun startSpan(
         name: String,
@@ -27,25 +39,45 @@ internal class TracerAdapter(
         startTimestamp: Long?,
         action: (SpanCreationAction.() -> Unit)?
     ): Span {
-        val start = startTimestamp ?: clock.now()
-        val parentCtx = (parentContext ?: contextFactory.implicit()).toOtelJavaContext()
+        val parentCtx = sdkErrorHandler.guardOrDefault(null, "Tracer.startSpan failed") {
+            (parentContext ?: contextFactory.implicit()).toOtelJavaContext()
+        } ?: return invalidSpan
 
+        return sdkErrorHandler.guardOrDefault(null, "Tracer.startSpan failed") {
+            createSpan(name, parentCtx, spanKind, startTimestamp, action)
+        } ?: fallbackSpan(parentCtx)
+    }
+
+    private fun createSpan(
+        name: String,
+        parentCtx: OtelJavaContext,
+        spanKind: SpanKind,
+        startTimestamp: Long?,
+        action: (SpanCreationAction.() -> Unit)?
+    ): Span {
         val builder = tracer.spanBuilder(name)
             .setSpanKind(spanKind.toOtelJavaSpanKind())
-            .setStartTimestamp(start, TimeUnit.NANOSECONDS)
             .setParent(parentCtx)
+        // Left unset, the SDK stamps the start with the same clock it uses for end(). Filling it in
+        // from [clock] would mix two clocks, skewing durations and ending short spans before they start.
+        startTimestamp?.let { builder.setStartTimestamp(it, TimeUnit.NANOSECONDS) }
 
         val creationState = action?.let { CompatSpanCreationState(spanLimitsConfig).apply(it) }
         creationState?.applyTo(builder)
 
         return SpanAdapter(
             impl = builder.startSpan(),
-            clock = clock,
             parentCtx = parentCtx,
             spanKind = spanKind,
-            startTimestamp = start,
             spanLimitsConfig = spanLimitsConfig,
             creationState = creationState,
+            sdkErrorHandler = sdkErrorHandler,
         )
     }
+
+    private fun fallbackSpan(parentCtx: OtelJavaContext): Span =
+        sdkErrorHandler.guardOrDefault(invalidSpan) {
+            val parent = OtelJavaSpan.fromContext(parentCtx).spanContext.toOtelKotlinSpanContext()
+            NonRecordingSpan(parent, parent)
+        }
 }

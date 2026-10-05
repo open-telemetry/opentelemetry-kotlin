@@ -5,11 +5,14 @@ import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
+import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
+import io.opentelemetry.kotlin.factory.TraceFlagsFactory
+import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.BeforeTest
@@ -23,18 +26,18 @@ internal class SpanContextOverrideTest {
     private val scope = InstrumentationScopeInfoImpl("key", null, null, emptyMap())
     private lateinit var tracer: Tracer
     private lateinit var processor: FakeSpanProcessor
-    private lateinit var spanContextFactory: SpanContextFactoryImpl
-    private lateinit var traceFlagsFactory: TraceFlagsFactoryImpl
-    private lateinit var traceStateFactory: TraceStateFactoryImpl
+    private lateinit var spanContextFactory: SpanContextFactory
+    private lateinit var traceFlagsFactory: TraceFlagsFactory
+    private lateinit var traceStateFactory: TraceStateFactory
     private lateinit var ctx: SpanContext
 
     @BeforeTest
     fun setUp() {
         processor = FakeSpanProcessor()
         val idGenerator = IdGeneratorImpl()
-        traceFlagsFactory = TraceFlagsFactoryImpl()
-        traceStateFactory = TraceStateFactoryImpl()
-        spanContextFactory = SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory)
+        traceFlagsFactory = DefaultTraceFlagsFactory
+        traceStateFactory = DefaultTraceStateFactory
+        spanContextFactory = DefaultSpanContextFactory
         val spanFactory = SpanFactoryImpl(spanContextFactory)
         val contextFactory = ContextFactoryImpl(spanFactory)
         tracer = TracerImpl(
@@ -42,7 +45,6 @@ internal class SpanContextOverrideTest {
             processor = processor,
             contextFactory = contextFactory,
             spanContextFactory = spanContextFactory,
-            traceFlagsFactory = traceFlagsFactory,
             scope = scope,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,
@@ -53,7 +55,7 @@ internal class SpanContextOverrideTest {
         ctx = spanContextFactory.create(
             traceId = "0af7651916cd43dd8448eb211c80319c",
             spanId = "b7ad6b7169203331",
-            traceFlags = traceFlagsFactory.default,
+            traceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false),
             traceState = traceStateFactory.default,
             isRemote = false,
         )

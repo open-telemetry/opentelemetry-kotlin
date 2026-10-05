@@ -16,6 +16,8 @@ kotlin {
     }
     iosArm64()
     iosSimulatorArm64()
+    tvosArm64()
+    tvosSimulatorArm64()
 
     sourceSets {
         val commonMain by getting {

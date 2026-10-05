@@ -10,7 +10,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
-import io.opentelemetry.kotlin.context.ContextAdapter
+import io.opentelemetry.kotlin.context.toOtelKotlinContext
+import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
@@ -20,22 +21,26 @@ import java.util.concurrent.TimeUnit
 
 internal class OtelJavaSpanBuilderAdapter(
     private val tracer: Tracer,
-    private val spanName: String
+    private val spanName: String,
+    private val contextFactory: ContextFactory,
 ) : OtelJavaSpanBuilder {
 
     private var start: Long? = null
     private var parent: OtelJavaContext? = null
+    private var noParent: Boolean = false
     private var kind: OtelJavaSpanKind = OtelJavaSpanKind.INTERNAL
     private val attrs: OtelJavaAttributesBuilder = OtelJavaAttributes.builder()
     private val links: Queue<LinkBuilder> = ConcurrentLinkedQueue()
 
     override fun setParent(context: OtelJavaContext): OtelJavaSpanBuilder {
         parent = context
+        noParent = false
         return this
     }
 
     override fun setNoParent(): OtelJavaSpanBuilder {
-        parent = OtelJavaContext.root()
+        parent = null
+        noParent = true
         return this
     }
 
@@ -90,14 +95,21 @@ internal class OtelJavaSpanBuilderAdapter(
     }
 
     override fun setStartTimestamp(startTimestamp: Long, unit: TimeUnit): OtelJavaSpanBuilder {
+        if (startTimestamp <= 0) {
+            return this
+        }
         start = unit.toNanos(startTimestamp)
         return this
     }
 
     override fun startSpan(): OtelJavaSpan {
+        val parentContext = when {
+            noParent -> contextFactory.root()
+            else -> parent?.toOtelKotlinContext() ?: contextFactory.implicit()
+        }
         val span = tracer.startSpan(
             name = spanName,
-            parentContext = ContextAdapter(parent ?: OtelJavaContext.current()),
+            parentContext = parentContext,
             spanKind = kind.toOtelKotlinSpanKind(),
             startTimestamp = start,
             action = {
@@ -109,7 +121,7 @@ internal class OtelJavaSpanBuilderAdapter(
                 }
             }
         )
-        return OtelJavaSpanAdapter(span)
+        return OtelJavaSpanAdapter(span, contextFactory)
     }
 
     private class LinkBuilder(

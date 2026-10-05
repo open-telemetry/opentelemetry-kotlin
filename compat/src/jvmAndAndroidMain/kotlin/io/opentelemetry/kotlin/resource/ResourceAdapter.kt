@@ -28,4 +28,20 @@ internal class ResourceAdapter(
         }
         return ResourceAdapter(OtelJavaResource.create(attrsFromMap(mergedAttrs), mergedSchema))
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other !is ResourceAdapter) {
+            return false
+        }
+        return attributes == other.attributes && schemaUrl == other.schemaUrl
+    }
+
+    override fun hashCode(): Int {
+        var result = attributes.hashCode()
+        result = 31 * result + (schemaUrl?.hashCode() ?: 0)
+        return result
+    }
 }

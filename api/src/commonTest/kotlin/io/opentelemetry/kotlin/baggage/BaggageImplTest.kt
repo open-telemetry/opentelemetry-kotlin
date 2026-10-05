@@ -1,0 +1,180 @@
+package io.opentelemetry.kotlin.baggage
+
+import io.opentelemetry.kotlin.ExperimentalApi
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
+
+@OptIn(ExperimentalApi::class)
+internal class BaggageImplTest {
+
+    @Test
+    fun `getValue returns value for present key`() {
+        val baggage = BaggageImpl.EMPTY.set("key", "value")
+        assertEquals("value", baggage.getValue("key"))
+    }
+
+    @Test
+    fun `getValue returns null for absent key`() {
+        assertNull(BaggageImpl.EMPTY.getValue("missing"))
+    }
+
+    @Test
+    fun `asMap returns all entries`() {
+        val baggage = BaggageImpl.EMPTY.set("k", "v")
+        val map = baggage.asMap()
+        assertEquals(1, map.size)
+        assertEquals("v", map["k"]?.value)
+    }
+
+    @Test
+    fun `set without metadata adds entry and leaves original unchanged`() {
+        val original = BaggageImpl.EMPTY
+        val updated = original.set("foo", "bar")
+        assertEquals("bar", updated.getValue("foo"))
+        assertNull(original.getValue("foo"))
+    }
+
+    @Test
+    fun `set with metadata preserves metadata`() {
+        val meta = BaggageEntryMetadataImpl("myMeta")
+        val updated = BaggageImpl.EMPTY.set("foo", "bar", meta)
+        assertEquals("bar", updated.getValue("foo"))
+        assertEquals("myMeta", updated.asMap()["foo"]?.metadata?.value)
+    }
+
+    @Test
+    fun `set without metadata uses empty metadata`() {
+        val updated = BaggageImpl.EMPTY.set("foo", "bar")
+        assertEquals("", updated.asMap()["foo"]?.metadata?.value)
+    }
+
+    @Test
+    fun `set replaces existing value`() {
+        val original = BaggageImpl.EMPTY.set("key", "old")
+        val updated = original.set("key", "new")
+        assertEquals("new", updated.getValue("key"))
+    }
+
+    @Test
+    fun `remove deletes existing entry`() {
+        val original = BaggageImpl.EMPTY.set("key", "val")
+        val updated = original.remove("key")
+        assertNull(updated.getValue("key"))
+    }
+
+    @Test
+    fun `remove absent key returns same instance`() {
+        val original = BaggageImpl.EMPTY.set("key", "val")
+        val result = original.remove("missing")
+        assertSame(original, result)
+    }
+
+    @Test
+    fun `BaggageEntryImpl delegates value and metadata`() {
+        val meta = BaggageEntryMetadataImpl("m")
+        val entry = BaggageEntryImpl("v", meta)
+        assertEquals("v", entry.value)
+        assertSame(meta, entry.metadata)
+    }
+
+    @Test
+    fun `BaggageEntryMetadataImpl delegates value`() {
+        val meta = BaggageEntryMetadataImpl("someValue")
+        assertEquals("someValue", meta.value)
+    }
+
+    @Test
+    fun `asMap entries are BaggageEntryImpl instances`() {
+        val baggage = BaggageImpl.EMPTY.set("k", "v")
+        assertTrue(baggage.asMap()["k"] is BaggageEntryImpl)
+    }
+
+    @Test
+    fun `set with invalid key returns same instance`() {
+        val original = BaggageImpl.EMPTY.set("ok", "v")
+        assertSame(original, original.set("bad key", "v"))
+        assertSame(original, original.set("bad,key", "v"))
+        assertSame(original, original.set("bad;key", "v"))
+    }
+
+    @Test
+    fun `set with empty key returns same instance`() {
+        val original = BaggageImpl.EMPTY.set("ok", "v")
+        assertSame(original, original.set("", "v"))
+    }
+
+    @Test
+    fun `set with value containing CR returns same instance`() {
+        val original = BaggageImpl.EMPTY.set("ok", "v")
+        assertSame(original, original.set("k", "bad\rvalue"))
+    }
+
+    @Test
+    fun `set with value containing LF returns same instance`() {
+        val original = BaggageImpl.EMPTY.set("ok", "v")
+        assertSame(original, original.set("k", "bad\nvalue"))
+    }
+
+    @Test
+    fun `set with value containing NUL returns same instance`() {
+        val original = BaggageImpl.EMPTY.set("ok", "v")
+        assertSame(original, original.set("k", "bad\u0000value"))
+    }
+
+    @Test
+    fun `set with metadata enforces key validation`() {
+        val original = BaggageImpl.EMPTY.set("ok", "v")
+        assertSame(original, original.set("bad key", "v", BaggageEntryMetadataImpl("m")))
+    }
+
+    @Test
+    fun `set silently drops new entry beyond MAX_ENTRIES`() {
+        val full = (0 until BaggageImpl.MAX_ENTRIES).fold(BaggageImpl.EMPTY) { acc, idx ->
+            acc.set("k$idx", "v")
+        }
+        assertEquals(BaggageImpl.MAX_ENTRIES, full.asMap().size)
+        val attempted = full.set("kExtra", "v")
+        assertSame(full, attempted)
+        assertNull(attempted.getValue("kExtra"))
+    }
+
+    @Test
+    fun `set replaces existing key when at MAX_ENTRIES cap`() {
+        val full = (0 until BaggageImpl.MAX_ENTRIES).fold(BaggageImpl.EMPTY) { acc, idx ->
+            acc.set("k$idx", "v")
+        }
+        val updated = full.set("k0", "new")
+        assertEquals(BaggageImpl.MAX_ENTRIES, updated.asMap().size)
+        assertEquals("new", updated.getValue("k0"))
+    }
+
+    @Test
+    fun `equal when entries match regardless of insertion order`() {
+        val a = BaggageImpl.EMPTY.set("k1", "v1").set("k2", "v2")
+        val b = BaggageImpl.EMPTY.set("k2", "v2").set("k1", "v1")
+        assertEquals(a, b)
+        assertEquals(a.hashCode(), b.hashCode())
+    }
+
+    @Test
+    fun `not equal when value differs`() {
+        assertNotEquals(BaggageImpl.EMPTY.set("k", "v1"), BaggageImpl.EMPTY.set("k", "v2"))
+    }
+
+    @Test
+    fun `not equal when metadata differs`() {
+        val a = BaggageImpl.EMPTY.set("k", "v", BaggageEntryMetadataImpl("m1"))
+        val b = BaggageImpl.EMPTY.set("k", "v", BaggageEntryMetadataImpl("m2"))
+        assertNotEquals(a, b)
+    }
+
+    @Test
+    fun `set then remove equals original`() {
+        val original = BaggageImpl.EMPTY.set("k1", "v1")
+        assertEquals(original, original.set("k2", "v2").remove("k2"))
+    }
+}

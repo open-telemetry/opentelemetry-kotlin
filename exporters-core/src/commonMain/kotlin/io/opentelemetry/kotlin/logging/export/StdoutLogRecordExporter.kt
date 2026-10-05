@@ -55,7 +55,7 @@ internal class StdoutLogRecordExporter(
 
         logRecord.body?.let {
             append("  Body: ")
-            appendLine(it)
+            appendLine(formatBody(it))
         }
 
         logRecord.eventName?.let {
@@ -87,5 +87,11 @@ internal class StdoutLogRecordExporter(
             append(":")
             append(it)
         }
+    }
+
+    private fun formatBody(body: Any): String = try {
+        body.toString()
+    } catch (ignored: Throwable) {
+        "<unavailable>"
     }
 }

@@ -26,7 +26,7 @@ class SamplerEnvVars(private val reader: ReportingEnvVarReader) {
         }
     }
 
-    private companion object {
+    internal companion object {
         const val SAMPLER = "OTEL_TRACES_SAMPLER"
         const val ALWAYS_ON = "always_on"
         const val ALWAYS_OFF = "always_off"

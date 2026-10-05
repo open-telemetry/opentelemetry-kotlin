@@ -1,16 +1,14 @@
 package io.opentelemetry.kotlin
 
-import io.opentelemetry.kotlin.baggage.NoopBaggage
 import io.opentelemetry.kotlin.config.NoopConfigProperties
 import io.opentelemetry.kotlin.config.NoopConfigProvider
 import io.opentelemetry.kotlin.context.NoopContext
 import io.opentelemetry.kotlin.context.NoopContextKey
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.factory.NoopBaggageFactory
 import io.opentelemetry.kotlin.logging.SeverityNumber
-import io.opentelemetry.kotlin.propagation.NoopTextMapPropagator
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapSetter
+import io.opentelemetry.kotlin.propagation.createNoopPropagator
 import io.opentelemetry.kotlin.tracing.NoopSpan
 import io.opentelemetry.kotlin.tracing.NoopSpanContext
 import io.opentelemetry.kotlin.tracing.NoopTraceFlags
@@ -233,13 +231,13 @@ internal class NoopTests {
 
     @Test
     fun testNoopTextMapPropagator() {
-        assertEquals(emptyList(), NoopTextMapPropagator.fields())
+        assertEquals(emptyList(), createNoopPropagator().fields())
 
         val ctx = NoopOpenTelemetry.context.root()
         val carrier = mutableMapOf("key" to "value")
 
         // inject is a no-op — setter must never be called
-        NoopTextMapPropagator.inject(ctx, carrier, TextMapSetter { _, _, _ -> error("setter should not be called") })
+        createNoopPropagator().inject(ctx, carrier, TextMapSetter { _, _, _ -> error("setter should not be called") })
         assertEquals(mapOf("key" to "value"), carrier)
 
         // extract returns the original context unchanged
@@ -249,24 +247,12 @@ internal class NoopTests {
             override fun getAll(carrier: MutableMap<String, String>?, key: String): List<String> =
                 carrier?.get(key)?.let { listOf(it) } ?: emptyList()
         }
-        assertSame(ctx, NoopTextMapPropagator.extract(ctx, carrier, getter))
+        assertSame(ctx, createNoopPropagator().extract(ctx, carrier, getter))
     }
 
     @Test
     fun testNoopOpenTelemetryPropagator() {
-        assertSame(NoopTextMapPropagator, NoopOpenTelemetry.propagator)
-    }
-
-    @Test
-    fun testNoopBaggageFactory() {
-        assertSame(NoopBaggage, NoopBaggageFactory.empty())
-        assertSame(NoopBaggage, NoopBaggageFactory.create { })
-    }
-
-    @Test
-    fun testNoopOpenTelemetryBaggage() {
-        assertSame(NoopBaggageFactory, NoopOpenTelemetry.baggage)
-        assertSame(NoopBaggage, NoopOpenTelemetry.baggage.create { put("k", "v") })
+        assertSame(createNoopPropagator(), NoopOpenTelemetry.propagator)
     }
 
     @Test

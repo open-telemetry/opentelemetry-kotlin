@@ -2,28 +2,24 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.propagation.B3Propagator
-import io.opentelemetry.kotlin.propagation.CompositeTextMapPropagator
-import io.opentelemetry.kotlin.propagation.Propagators
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.propagation.TextMapSetter
-import io.opentelemetry.kotlin.propagation.W3CBaggagePropagator
 import io.opentelemetry.kotlin.propagation.W3CTraceContextPropagator
-import io.opentelemetry.kotlin.propagation.createPropagators
+import io.opentelemetry.kotlin.propagation.createCompositePropagator
+import io.opentelemetry.kotlin.propagation.createNoopPropagator
+import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
 import kotlin.concurrent.Volatile
 
 @OptIn(ExperimentalApi::class)
-internal class PropagatorConfigImpl(
-    propagators: Propagators = createPropagators(),
-) : PropagatorConfigDsl {
+internal class PropagatorConfigImpl : PropagatorConfigDsl {
 
-    private val none: TextMapPropagator = propagators.none()
+    private val none: TextMapPropagator = createNoopPropagator()
 
     private var configured: TextMapPropagator = none
 
@@ -34,12 +30,12 @@ internal class PropagatorConfigImpl(
     @Volatile private var b3MultiImpl: TextMapPropagator = none
 
     override fun composite(vararg propagators: TextMapPropagator): TextMapPropagator {
-        configured = CompositeTextMapPropagator(propagators.toList())
+        configured = createCompositePropagator(*propagators)
         return configured
     }
 
     override fun w3cBaggage(): TextMapPropagator {
-        configured = W3CBaggagePropagator
+        configured = createW3CBaggagePropagator()
         return configured
     }
 
@@ -64,14 +60,12 @@ internal class PropagatorConfigImpl(
         traceStateFactory: TraceStateFactory,
         spanContextFactory: SpanContextFactory,
         spanFactory: SpanFactory,
-        sdkErrorHandler: SdkErrorHandler,
     ) {
         w3cTraceContextImpl = W3CTraceContextPropagator(
             traceFlagsFactory = traceFlagsFactory,
             traceStateFactory = traceStateFactory,
             spanContextFactory = spanContextFactory,
             spanFactory = spanFactory,
-            sdkErrorHandler = sdkErrorHandler,
         )
         b3SingleImpl = B3Propagator(
             B3Format.SINGLE,
@@ -79,7 +73,6 @@ internal class PropagatorConfigImpl(
             traceStateFactory,
             spanContextFactory,
             spanFactory,
-            sdkErrorHandler,
         )
         b3MultiImpl = B3Propagator(
             B3Format.MULTI,
@@ -87,7 +80,6 @@ internal class PropagatorConfigImpl(
             traceStateFactory,
             spanContextFactory,
             spanFactory,
-            sdkErrorHandler,
         )
     }
 

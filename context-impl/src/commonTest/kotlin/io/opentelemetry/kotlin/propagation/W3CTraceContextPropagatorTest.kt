@@ -2,14 +2,14 @@ package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
+import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateCodec
 import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
+import io.opentelemetry.kotlin.tracing.TraceFlags
 import io.opentelemetry.kotlin.tracing.TraceState
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,9 +25,9 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class W3CTraceContextPropagatorTest {
 
-    private val traceFlagsFactory = TraceFlagsFactoryImpl()
-    private val traceStateFactory = TraceStateFactoryImpl()
-    private val spanContextFactory = SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory)
+    private val traceFlagsFactory = DefaultTraceFlagsFactory
+    private val traceStateFactory = DefaultTraceStateFactory
+    private val spanContextFactory = DefaultSpanContextFactory
     private val spanFactory = SpanFactoryImpl(spanContextFactory)
     private val contextFactory = ContextFactoryImpl(spanFactory)
 
@@ -36,7 +36,6 @@ internal class W3CTraceContextPropagatorTest {
         traceStateFactory = traceStateFactory,
         spanContextFactory = spanContextFactory,
         spanFactory = spanFactory,
-        sdkErrorHandler = NoopSdkErrorHandler,
     )
 
     private val traceId = "0af7651916cd43dd8448eb211c80319c"
@@ -66,7 +65,7 @@ internal class W3CTraceContextPropagatorTest {
     fun `inject writes canonical traceparent for a valid sampled span`() {
         val context = contextWithSpan(
             spanContext(
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
+                traceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false),
             ),
         )
         val carrier = injectInto(context)
@@ -77,7 +76,7 @@ internal class W3CTraceContextPropagatorTest {
     fun `inject writes flags 00 when not sampled`() {
         val context = contextWithSpan(
             spanContext(
-                traceFlags = TraceFlagsImpl(isSampled = false, isRandom = false),
+                traceFlags = DefaultTraceFlagsFactory.default,
             ),
         )
         val carrier = injectInto(context)
@@ -88,7 +87,7 @@ internal class W3CTraceContextPropagatorTest {
     fun `inject writes flags 03 when sampled and random bits set`() {
         val context = contextWithSpan(
             spanContext(
-                traceFlags = TraceFlagsImpl(isSampled = true, isRandom = true),
+                traceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = true),
             ),
         )
         val carrier = injectInto(context)
@@ -267,7 +266,7 @@ internal class W3CTraceContextPropagatorTest {
     fun `inject and extract round-trip preserves traceId spanId flags and tracestate`() {
         val state = traceStateFactory.default.put("vendor", "value")
         val original = spanContext(
-            traceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
+            traceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false),
             traceState = state,
         )
         val carrier = injectInto(contextWithSpan(original))
@@ -282,7 +281,7 @@ internal class W3CTraceContextPropagatorTest {
     }
 
     private fun spanContext(
-        traceFlags: io.opentelemetry.kotlin.tracing.TraceFlags = TraceFlagsImpl(isSampled = true, isRandom = false),
+        traceFlags: TraceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false),
         traceState: TraceState = traceStateFactory.default,
     ): SpanContext = spanContextFactory.create(
         traceId = traceId,

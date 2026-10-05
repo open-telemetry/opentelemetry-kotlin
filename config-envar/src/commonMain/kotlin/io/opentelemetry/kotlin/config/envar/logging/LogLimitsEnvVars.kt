@@ -20,7 +20,7 @@ class LogLimitsEnvVars(
         attributeValueLengthLimit = reader.readNonNegativeInt(ATTRIBUTE_VALUE_LENGTH_LIMIT),
     )
 
-    private companion object {
+    internal companion object {
         const val ATTRIBUTE_COUNT_LIMIT = "OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT"
         const val ATTRIBUTE_VALUE_LENGTH_LIMIT = "OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT"
     }

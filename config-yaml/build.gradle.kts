@@ -42,3 +42,12 @@ tasks.register<Copy>("copyiOSTestResources") {
 tasks.named("iosSimulatorArm64Test").configure {
     dependsOn("copyiOSTestResources")
 }
+
+tasks.register<Copy>("copyTvOSTestResources") {
+    from("src/commonTest/resources")
+    into("build/bin/tvosSimulatorArm64/debugTest/resources")
+}
+
+tasks.named("tvosSimulatorArm64Test").configure {
+    dependsOn("copyTvOSTestResources")
+}

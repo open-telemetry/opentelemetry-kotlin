@@ -56,4 +56,39 @@ internal class SpanProcessorBehaviorTest {
             SpanProcessorBehavior(http = http).mergeWith(SpanProcessorBehavior()).http,
         )
     }
+
+    @Test
+    fun simpleStartsUnset() {
+        assertNull(SpanProcessorBehavior().simple)
+    }
+
+    @Test
+    fun simpleStaysUnsetWhenNeitherLayerConfigured() {
+        assertNull(SpanProcessorBehavior().mergeWith(SpanProcessorBehavior()).simple)
+    }
+
+    @Test
+    fun adoptsSimpleFromWhicheverLayerSuppliedIt() {
+        val simple = SimpleSpanProcessorBehavior()
+
+        assertEquals(
+            simple,
+            SpanProcessorBehavior().mergeWith(SpanProcessorBehavior(simple = simple)).simple,
+        )
+        assertEquals(
+            simple,
+            SpanProcessorBehavior(simple = simple).mergeWith(SpanProcessorBehavior()).simple,
+        )
+    }
+
+    @Test
+    fun keepsExporterConfigurationWhenSelectingSimple() {
+        val http = OtlpHttpExporterBehavior(endpoint = "https://example.com")
+        val merged = SpanProcessorBehavior(http = http).mergeWith(
+            SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior()),
+        )
+
+        assertEquals(http, merged.http)
+        assertEquals(SimpleSpanProcessorBehavior(), merged.simple)
+    }
 }

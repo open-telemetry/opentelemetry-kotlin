@@ -7,7 +7,6 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
-import io.opentelemetry.kotlin.factory.FakeTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -16,12 +15,14 @@ import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 internal class SpanLinkTest {
 
     private val linkLimit = 3
     private val fakeSpanContext = FakeSpanContext.INVALID
     private val otherFakeSpanContext = FakeSpanContext.VALID
+    private val emptyInvalidSpanContext = FakeSpanContext(traceState = FakeTraceState(emptyMap()))
     private val key = InstrumentationScopeInfoImpl("key", null, null, emptyMap())
 
     private lateinit var tracer: TracerImpl
@@ -46,7 +47,6 @@ internal class SpanLinkTest {
             processor = processor,
             contextFactory = FakeContextFactory(),
             spanContextFactory = FakeSpanContextFactory(),
-            traceFlagsFactory = FakeTraceFlagsFactory(),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = spanLimitConfig,
@@ -144,6 +144,64 @@ internal class SpanLinkTest {
     }
 
     @Test
+    fun testInvalidSpanContextWithoutDataDropped() {
+        tracer.startSpan("test").apply {
+            addLink(emptyInvalidSpanContext)
+            addLink(emptyInvalidSpanContext) {}
+            end()
+        }
+        retrieveLinks(0)
+        assertEquals(0, processor.endCalls.single().droppedLinksCount)
+    }
+
+    @Test
+    fun testInvalidSpanContextWithoutDataDroppedDuringCreation() {
+        tracer.startSpan("test", action = {
+            addLink(emptyInvalidSpanContext)
+            addLink(emptyInvalidSpanContext) {}
+        }).apply {
+            end()
+        }
+        retrieveLinks(0)
+        assertEquals(0, processor.endCalls.single().droppedLinksCount)
+    }
+
+    @Test
+    fun testInvalidSpanContextWithAttributesKept() {
+        tracer.startSpan("test").apply {
+            addLink(emptyInvalidSpanContext) {
+                setStringAttribute("foo", "bar")
+            }
+            end()
+        }
+        val links = retrieveLinks(1)
+        assertLinkData(links[0], emptyInvalidSpanContext, mapOf("foo" to "bar"))
+    }
+
+    @Test
+    fun testInvalidSpanContextWithAttributesKeptDuringCreation() {
+        tracer.startSpan("test", action = {
+            addLink(emptyInvalidSpanContext) {
+                setStringAttribute("foo", "bar")
+            }
+        }).apply {
+            end()
+        }
+        val links = retrieveLinks(1)
+        assertLinkData(links[0], emptyInvalidSpanContext, mapOf("foo" to "bar"))
+    }
+
+    @Test
+    fun testInvalidSpanContextWithTraceStateKept() {
+        tracer.startSpan("test").apply {
+            addLink(fakeSpanContext)
+            end()
+        }
+        val links = retrieveLinks(1)
+        assertLinkData(links[0], fakeSpanContext, emptyMap())
+    }
+
+    @Test
     fun testLinksLimitNotExceeded() {
         tracer.startSpan("test", action = {
             repeat(linkLimit + 1) {
@@ -179,6 +237,29 @@ internal class SpanLinkTest {
 
         retrieveLinks(3)
         // links beyond the limit added after creation are dropped and counted
+        assertEquals(1, processor.endCalls.single().droppedLinksCount)
+    }
+
+    @Test
+    fun testLinkAttributesNotInvokedWhenNotRecording() {
+        var invoked = false
+        tracer.startSpan("test").apply {
+            end()
+            addLink(fakeSpanContext) { invoked = true }
+        }
+        assertFalse(invoked)
+    }
+
+    @Test
+    fun testLinkAttributesNotInvokedWhenLimitReached() {
+        var invocations = 0
+        tracer.startSpan("test").apply {
+            repeat(linkLimit + 1) {
+                addLink(fakeSpanContext) { invocations++ }
+            }
+            end()
+        }
+        assertEquals(linkLimit, invocations)
         assertEquals(1, processor.endCalls.single().droppedLinksCount)
     }
 

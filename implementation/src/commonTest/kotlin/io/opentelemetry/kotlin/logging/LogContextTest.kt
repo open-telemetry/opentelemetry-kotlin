@@ -6,13 +6,11 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.SpanContextFactory
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.TracerImpl
@@ -39,9 +37,7 @@ internal class LogContextTest {
     fun setUp() {
         clock = FakeClock()
         processor = FakeLogRecordProcessor()
-        val traceFlags = TraceFlagsFactoryImpl()
-        val traceState = TraceStateFactoryImpl()
-        spanContextFactory = SpanContextFactoryImpl(traceFlags, traceState)
+        spanContextFactory = DefaultSpanContextFactory
         spanFactory = SpanFactoryImpl(spanContextFactory)
         contextFactory = ContextFactoryImpl(spanFactory)
         logger = LoggerImpl(
@@ -60,7 +56,6 @@ internal class LogContextTest {
             processor = FakeSpanProcessor(),
             contextFactory = contextFactory,
             spanContextFactory = spanContextFactory,
-            traceFlagsFactory = traceFlags,
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

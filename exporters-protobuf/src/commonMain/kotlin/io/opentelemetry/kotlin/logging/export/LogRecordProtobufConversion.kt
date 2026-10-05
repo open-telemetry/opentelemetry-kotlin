@@ -6,11 +6,13 @@ import io.opentelemetry.kotlin.export.conversion.DeserializedSpanContext
 import io.opentelemetry.kotlin.export.conversion.createKeyValues
 import io.opentelemetry.kotlin.export.conversion.toAttributeMap
 import io.opentelemetry.kotlin.export.conversion.toFlagsInt
+import io.opentelemetry.kotlin.export.conversion.toIdByteString
 import io.opentelemetry.kotlin.export.conversion.toMapValue
 import io.opentelemetry.kotlin.export.conversion.toNestedAnyValue
 import io.opentelemetry.kotlin.export.conversion.toProtoAnyValue
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.SeverityNumber
+import io.opentelemetry.kotlin.logging.normalizeLogBody
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.proto.common.v1.AnyValue
@@ -40,18 +42,17 @@ import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN
 import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN2
 import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN3
 import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN4
-import okio.ByteString.Companion.toByteString
 
 
 internal fun LogRecordData.toProtobuf(): LogRecord = LogRecord(
-    trace_id = spanContext.traceIdBytes.toByteString(),
-    span_id = spanContext.spanIdBytes.toByteString(),
+    trace_id = spanContext.traceIdBytes.toIdByteString(),
+    span_id = spanContext.spanIdBytes.toIdByteString(),
     flags = spanContext.traceFlags.toFlagsInt(),
     time_unix_nano = timestamp ?: 0L,
     observed_time_unix_nano = observedTimestamp ?: 0L,
     severity_number = severityNumber?.convertSeverityNumber() ?: SEVERITY_NUMBER_UNSPECIFIED,
     severity_text = severityText ?: "",
-    body = body?.toAnyValue(),
+    body = body.toProtoBody(),
     attributes = attributes.createKeyValues(),
     event_name = eventName ?: "",
     dropped_attributes_count = droppedAttributesCount,
@@ -78,15 +79,18 @@ internal fun LogRecord.toLogRecordData(
     droppedAttributesCount = dropped_attributes_count
 )
 
-private fun Any.toAnyValue(): AnyValue = when (this) {
-    is KotlinAnyValue -> toProtoAnyValue()
-    is String  -> AnyValue(string_value = this)
-    is Boolean -> AnyValue(bool_value = this)
-    is Long    -> AnyValue(int_value = this)
-    is Int     -> AnyValue(int_value = this.toLong())
-    is Double  -> AnyValue(double_value = this)
-    is Float   -> AnyValue(double_value = this.toDouble())
-    else       -> AnyValue(string_value = this.toString())
+private fun Any?.toProtoBody(): AnyValue? = try {
+    when (val body = normalizeLogBody(this)) {
+        null -> null
+        is KotlinAnyValue -> body.toProtoAnyValue()
+        is String -> AnyValue(string_value = body)
+        is Boolean -> AnyValue(bool_value = body)
+        is Long -> AnyValue(int_value = body)
+        is Double -> AnyValue(double_value = body)
+        else -> AnyValue(string_value = body.toString())
+    }
+} catch (ignored: Throwable) {
+    null
 }
 
 private fun AnyValue.toAny(): Any? = when {

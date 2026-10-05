@@ -43,6 +43,50 @@ internal class BehaviorResolverImplTest {
     }
 
     @Test
+    fun dslSelectsSimpleProcessorAndPreservesDeclarativeExporter() {
+        val http = OtlpHttpExporterBehavior(endpoint = "https://example.com")
+        val resolved = resolver.resolve(
+            envars = null,
+            declarativeFile = OpenTelemetryBehavior(
+                loggerProvider = LoggerProviderBehavior(
+                    processor = LogRecordProcessorBehavior(http = http),
+                ),
+            ),
+            dsl = OpenTelemetryBehavior(
+                loggerProvider = LoggerProviderBehavior(
+                    processor = LogRecordProcessorBehavior(simple = SimpleLogRecordProcessorBehavior()),
+                ),
+            ),
+        )
+
+        val processor = resolved.loggerProvider?.processor
+        assertEquals(http, processor?.http)
+        assertEquals(SimpleLogRecordProcessorBehavior(), processor?.simple)
+    }
+
+    @Test
+    fun dslSelectsSimpleSpanProcessorAndPreservesDeclarativeExporter() {
+        val http = OtlpHttpExporterBehavior(endpoint = "https://example.com")
+        val resolved = resolver.resolve(
+            envars = null,
+            declarativeFile = OpenTelemetryBehavior(
+                tracerProvider = TracerProviderBehavior(
+                    processor = SpanProcessorBehavior(http = http),
+                ),
+            ),
+            dsl = OpenTelemetryBehavior(
+                tracerProvider = TracerProviderBehavior(
+                    processor = SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior()),
+                ),
+            ),
+        )
+
+        val processor = resolved.tracerProvider?.processor
+        assertEquals(http, processor?.http)
+        assertEquals(SimpleSpanProcessorBehavior(), processor?.simple)
+    }
+
+    @Test
     fun leavesEverythingUnsetWhenNoLayerConfiguresAnything() {
         val resolved = resolver.resolve(envars = null, declarativeFile = null, dsl = null)
 

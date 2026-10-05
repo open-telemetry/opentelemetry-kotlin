@@ -2,13 +2,13 @@
 
 package io.opentelemetry.kotlin.logging.export
 
-import io.opentelemetry.kotlin.aliases.OtelJavaBody
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordData
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
-import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.aliases.OtelJavaValue
+import io.opentelemetry.kotlin.aliases.OtelJavaValueType
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.resourceFromMap
-import io.opentelemetry.kotlin.attributes.toFlattenedBodyString
+import io.opentelemetry.kotlin.attributes.toOtelJavaValue
 import io.opentelemetry.kotlin.logging.OtelJavaLogRecordDataImpl
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.toOtelJavaSeverityNumber
@@ -23,15 +23,17 @@ internal fun LogRecordData.toOtelJavaLogRecordData(): OtelJavaLogRecordData {
         severityTextImpl = severityText,
         severityImpl = severityNumber?.toOtelJavaSeverityNumber()
             ?: OtelJavaSeverity.UNDEFINED_SEVERITY_NUMBER,
-        bodyImpl = body.toOtelJavaBody(),
+        bodyValueImpl = body.toOtelJavaBodyValue(),
         attributesImpl = attrsFromMap(attributes),
+        totalAttributeCountImpl = attributes.size + droppedAttributesCount,
         eventNameImpl = eventName,
         resourceImpl = resourceFromMap(resource),
         scopeImpl = instrumentationScopeInfo.toOtelJavaInstrumentationScopeInfo()
     )
 }
 
-private fun Any?.toOtelJavaBody(): OtelJavaBody = when (this) {
-    null, AnyValue.NullValue -> OtelJavaBody.empty()
-    else -> OtelJavaBody.string(toFlattenedBodyString())
+internal fun Any?.toOtelJavaBodyValue(): OtelJavaValue<*>? = try {
+    this?.toOtelJavaValue()?.takeIf { it.type != OtelJavaValueType.EMPTY }
+} catch (ignored: Throwable) {
+    null
 }

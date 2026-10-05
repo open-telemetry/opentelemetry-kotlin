@@ -5,15 +5,14 @@ import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
-import io.opentelemetry.kotlin.init.SamplerConfigDsl
+import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.SpanKind
-import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
 import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import kotlin.random.Random
@@ -26,23 +25,20 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class BuiltInCompositeSamplerTest {
 
-    private val traceFlagsFactory = TraceFlagsFactoryImpl()
-    private val traceStateFactory = TraceStateFactoryImpl()
-    private val spanContextFactory = SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory)
+    private val traceStateFactory = DefaultTraceStateFactory
+    private val spanContextFactory = DefaultSpanContextFactory
     private val spanFactory = SpanFactoryImpl(spanContextFactory)
     private val contextFactory = ContextFactoryImpl(spanFactory)
 
-    private val samplerDsl = object : SamplerConfigDsl {
-        override val spanFactory = this@BuiltInCompositeSamplerTest.spanFactory
-    }
+    private val samplerDsl = SamplerConfigImpl(spanFactory)
 
     private val traceId = "000000000000000000ffffffffffffff"
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean, otValue: String? = null): Context {
         val traceFlags = if (sampled) {
-            traceFlagsFactory.default
+            DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false)
         } else {
-            TraceFlagsImpl(isSampled = false, isRandom = false)
+            DefaultTraceFlagsFactory.default
         }
         val traceState = otValue?.let { traceStateFactory.default.put("ot", it) } ?: traceStateFactory.default
         val parentSpanContext = spanContextFactory.create(

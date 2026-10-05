@@ -8,11 +8,12 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSamplingIntent
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.attributes.toOtelJavaAttributes
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceState
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanLink
-import io.opentelemetry.kotlin.tracing.model.TraceStateAdapter
+import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinTraceState
 import java.util.function.Function
 
 /** Sentinel used when the delegate's intent is `null` (never sample); `R` is always < 2^56. */
@@ -37,15 +38,14 @@ internal class KotlinComposableSamplerAdapter(private val delegate: ComposableSa
         )
 
         val threshold = intent.threshold ?: NEVER_SAMPLE_THRESHOLD
-        val javaAttributes = (intent.attributesProvider?.invoke() as? CompatAttributesModel)
-            ?.otelJavaAttributes()
+        val javaAttributes = intent.attributesProvider?.invoke()?.toOtelJavaAttributes()
             ?: OtelJavaAttributes.empty()
         val traceStateProvider = intent.traceStateProvider
         val traceStateUpdater: Function<OtelJavaTraceState, OtelJavaTraceState> = if (traceStateProvider == null) {
             Function.identity()
         } else {
             Function { javaTraceState ->
-                traceStateProvider(TraceStateAdapter(javaTraceState), SamplingResult.Decision.RECORD_AND_SAMPLE)
+                traceStateProvider(javaTraceState.toOtelKotlinTraceState(), SamplingResult.Decision.RECORD_AND_SAMPLE)
                     .toOtelJavaTraceState()
             }
         }

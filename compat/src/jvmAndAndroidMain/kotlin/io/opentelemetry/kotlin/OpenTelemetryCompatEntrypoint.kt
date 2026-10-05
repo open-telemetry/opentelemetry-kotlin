@@ -1,13 +1,12 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.clock.ClockAdapter
-import io.opentelemetry.kotlin.factory.CompatBaggageFactory
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
-import io.opentelemetry.kotlin.factory.CompatSpanContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
-import io.opentelemetry.kotlin.factory.CompatTraceFlagsFactory
-import io.opentelemetry.kotlin.factory.CompatTraceStateFactory
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.init.CompatOpenTelemetryConfig
 import io.opentelemetry.kotlin.init.CompatSdkConfigFactory
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
@@ -27,15 +26,15 @@ public fun createCompatOpenTelemetry(
     clock: Clock = ClockAdapter(io.opentelemetry.sdk.common.Clock.getDefault()),
     config: OpenTelemetryConfigDsl.() -> Unit = {}
 ): OpenTelemetry {
-    val traceFlags = CompatTraceFlagsFactory()
-    val traceState = CompatTraceStateFactory()
-    val spanContext = CompatSpanContextFactory()
+    val traceFlags = DefaultTraceFlagsFactory
+    val traceState = DefaultTraceStateFactory
+    val spanContext = DefaultSpanContextFactory
     val contextFactory = CompatContextFactory()
     val span = CompatSpanFactory(spanContext)
 
     val cfg = CompatOpenTelemetryConfig(clock).apply(config)
     val behavior = defaultCompatBehaviorReader(sdkErrorHandler = cfg.sdkErrorHandler)
-        .read(configFilePath = cfg.configFilePath, dsl = cfg.toBehavior())
+        .read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
 
     // configFactory is legacy - use behavior to control SDK functionality instead
     val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, contextFactory)
@@ -49,7 +48,6 @@ public fun createCompatOpenTelemetry(
         traceState = traceState,
         context = contextFactory,
         span = span,
-        baggage = CompatBaggageFactory(),
         idGenerator = configFactory.idGenerator,
         resource = CompatResourceFactory,
         propagator = cfg.propagatorCfg.buildPropagator(),

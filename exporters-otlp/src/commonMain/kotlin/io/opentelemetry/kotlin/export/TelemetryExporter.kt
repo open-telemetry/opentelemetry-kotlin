@@ -10,6 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val SHUTDOWN_TIMEOUT_MS = 5000L
 
@@ -17,7 +18,7 @@ internal class TelemetryExporter<T>(
     private val initialDelayMs: Long,
     private val maxAttemptIntervalMs: Long,
     private val maxAttempts: Int,
-    private val sdkErrorHandler: SdkErrorHandler,
+    sdkErrorHandler: SdkErrorHandler,
     coroutineContext: CoroutineContext = ioDispatcher,
     private val random: Random = Random.Default,
     private val exportAction: suspend (telemetry: List<T>) -> OtlpResponse,
@@ -45,27 +46,19 @@ internal class TelemetryExporter<T>(
         var delayMs = initialDelayMs
         repeat(maxAttempts) {
             when (val response = exportAction(telemetry)) {
-                is OtlpResponse.Success -> {
-                    return
-                }
-
-                // The server accepted the request; retrying would only re-send the rejected
-                // portion, so treat a partial success as terminal.
-                is OtlpResponse.PartialSuccess -> {
-                    return
-                }
-
-                is OtlpResponse.ClientError -> {
+                is OtlpResponse.Success,
+                is OtlpResponse.PartialSuccess,
+                is OtlpResponse.UnretryableError -> {
                     return
                 }
 
                 is OtlpResponse.RetryableError -> {
-                    delay(response.retryAfterMs ?: jittered(delayMs))
+                    delay((response.retryAfterMs?.coerceAtMost(maxAttemptIntervalMs) ?: jittered(delayMs)).milliseconds)
                     delayMs = (delayMs * 2).coerceAtMost(maxAttemptIntervalMs)
                 }
 
-                is OtlpResponse.ServerError, is OtlpResponse.Unknown -> {
-                    delay(jittered(delayMs))
+                is OtlpResponse.Unknown -> {
+                    delay(jittered(delayMs).milliseconds)
                     delayMs = (delayMs * 2).coerceAtMost(maxAttemptIntervalMs)
                 }
             }

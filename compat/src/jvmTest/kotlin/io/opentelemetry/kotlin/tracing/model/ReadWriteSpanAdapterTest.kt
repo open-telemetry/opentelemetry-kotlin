@@ -127,7 +127,7 @@ internal class ReadWriteSpanAdapterTest {
         assertEquals(expected.name, name)
         assertEquals(expected.status, status.toOtelJavaStatusData())
         assertEquals(expected.hasEnded(), hasEnded)
-        assertEquals(expected.endEpochNanos, endTimestamp)
+        assertEquals(expected.endEpochNanos.takeIf { expected.hasEnded() }, endTimestamp)
         assertEquals(expected.attributes.convertToMap(), attributes)
         assertEquals(expected.events, events.map { it.toOtelJavaEventData() })
         assertEquals(expected.links, links.map { it.toOtelJavaLinkData() })

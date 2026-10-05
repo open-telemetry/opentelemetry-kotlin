@@ -10,14 +10,11 @@ import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
-import io.opentelemetry.kotlin.factory.SPAN_ID_BYTES
 import io.opentelemetry.kotlin.factory.SpanContextFactory
-import io.opentelemetry.kotlin.factory.TRACE_ID_BYTES
-import io.opentelemetry.kotlin.factory.TraceFlagsFactory
-import io.opentelemetry.kotlin.factory.isValidSpanIdBytes
-import io.opentelemetry.kotlin.factory.isValidTraceIdBytes
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
+import io.opentelemetry.kotlin.propagation.utils.isValidTraceIdBytes
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.model.CreatedSpan
@@ -32,8 +29,7 @@ internal class TracerImpl(
     private val clock: Clock,
     private val processor: SpanProcessor?,
     private val contextFactory: ContextFactory,
-    spanContextFactory: SpanContextFactory,
-    traceFlagsFactory: TraceFlagsFactory,
+    private val spanContextFactory: SpanContextFactory,
     private val idGenerator: IdGenerator,
     private val scope: InstrumentationScopeInfo,
     private val resource: Resource,
@@ -47,10 +43,6 @@ internal class TracerImpl(
     private val root = contextFactory.root()
     private val invalidSpanContext = spanContextFactory.invalid
     private val invalidSpan = NonRecordingSpan(invalidSpanContext, invalidSpanContext)
-    private val sampledFlags = traceFlagsFactory.default
-    private val sampledRandomFlags = TraceFlagsImpl(isSampled = true, isRandom = true)
-    private val unsampledFlags = TraceFlagsImpl(isSampled = false, isRandom = false)
-    private val unsampledRandomFlags = TraceFlagsImpl(isSampled = false, isRandom = true)
 
     override fun enabled(): Boolean =
         sdkErrorHandler.guardOrDefault(false, "Tracer.enabled failed") {
@@ -120,7 +112,7 @@ internal class TracerImpl(
                     processor = processor,
                     name = name,
                     spanKind = spanKind,
-                    startTimestamp = startTimestamp ?: clock.now(),
+                    startTimestamp = startTimestamp?.takeIf { it > 0 } ?: clock.now(),
                     instrumentationScopeInfo = scope,
                     resource = resource,
                     parent = parentSpanContext,
@@ -131,8 +123,8 @@ internal class TracerImpl(
                     initialDroppedLinksCount = collector.droppedLinksCount,
                     sdkErrorHandler = sdkErrorHandler
                 )
-                spanModel.setAttributes(result.attributes.attributes)
                 spanModel.setAttributes(collector.attributes.attributes)
+                spanModel.setAttributes(result.attributes.attributes)
                 sdkErrorHandler.guard {
                     processor?.takeIf(SpanProcessor::isStartRequired)
                         ?.onStart(ReadWriteSpanImpl(spanModel), ctx)
@@ -148,25 +140,11 @@ internal class TracerImpl(
         randomTraceId: Boolean,
         traceState: TraceState,
     ): SpanContext {
-        val validTraceId = traceIdBytes.isValidTraceIdBytes()
-        val validSpanId = spanIdBytes.isValidSpanIdBytes()
-
-        return SpanContextImpl(
-            // replace invalid IDs with all zeros
-            traceIdBytes = when {
-                validTraceId -> traceIdBytes
-                else -> ByteArray(TRACE_ID_BYTES)
-            },
-            spanIdBytes = when {
-                validSpanId -> spanIdBytes
-                else -> ByteArray(SPAN_ID_BYTES)
-            },
-            traceFlags = when {
-                sampled && randomTraceId -> sampledRandomFlags
-                sampled -> sampledFlags
-                randomTraceId -> unsampledRandomFlags
-                else -> unsampledFlags
-            },
+        // invalid IDs are replaced with all zeros
+        return spanContextFactory.create(
+            traceIdBytes = traceIdBytes,
+            spanIdBytes = spanIdBytes,
+            traceFlags = DefaultTraceFlagsFactory.create(isSampled = sampled, isRandom = randomTraceId),
             isRemote = false,
             traceState = traceState,
         )

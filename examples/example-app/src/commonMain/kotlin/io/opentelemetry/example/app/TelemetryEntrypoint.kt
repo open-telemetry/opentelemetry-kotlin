@@ -4,9 +4,6 @@ package io.opentelemetry.example.app
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
-import io.opentelemetry.kotlin.tracing.sampling.composableParentThreshold
-import io.opentelemetry.kotlin.tracing.sampling.composableProbability
-import io.opentelemetry.kotlin.tracing.sampling.composite
 
 /**
  * Initializes the OpenTelemetry SDK.

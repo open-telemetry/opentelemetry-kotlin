@@ -3,10 +3,12 @@ package io.opentelemetry.kotlin.config.yaml
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.SimpleLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.config.schema.model.BatchLogRecordProcessor
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
 import io.opentelemetry.kotlin.config.schema.model.LogRecordExporter
 import io.opentelemetry.kotlin.config.schema.model.LogRecordProcessor
+import io.opentelemetry.kotlin.config.schema.model.NameStringValuePair
 import io.opentelemetry.kotlin.config.schema.model.OtlpHttpExporter
 import io.opentelemetry.kotlin.config.schema.model.SimpleLogRecordProcessor
 import kotlin.test.Test
@@ -26,7 +28,10 @@ internal class LogRecordProcessorMapperTest {
             LogRecordProcessor(simple = SimpleLogRecordProcessor(exporter = consoleExporter())),
         )
         assertEquals(
-            LogRecordProcessorBehavior(console = ConsoleExporterBehavior()),
+            LogRecordProcessorBehavior(
+                console = ConsoleExporterBehavior(),
+                simple = SimpleLogRecordProcessorBehavior(),
+            ),
             processors.toBehavior(),
         )
     }
@@ -37,7 +42,14 @@ internal class LogRecordProcessorMapperTest {
             LogRecordProcessor(simple = SimpleLogRecordProcessor(exporter = httpExporter())),
         )
         assertEquals(
-            LogRecordProcessorBehavior(http = OtlpHttpExporterBehavior()),
+            LogRecordProcessorBehavior(
+                http = OtlpHttpExporterBehavior(
+                    endpoint = "http://localhost:4317",
+                    timeout = 10_000,
+                    headers = mapOf("key" to "value")
+                ),
+                simple = SimpleLogRecordProcessorBehavior(),
+            ),
             processors.toBehavior(),
         )
     }
@@ -57,9 +69,51 @@ internal class LogRecordProcessorMapperTest {
     fun mapsHttpFromABatchProcessor() {
         val processors = listOf(LogRecordProcessor(batch = BatchLogRecordProcessor(exporter = httpExporter())))
         assertEquals(
-            LogRecordProcessorBehavior(http = OtlpHttpExporterBehavior()),
+            LogRecordProcessorBehavior(
+                http = OtlpHttpExporterBehavior(
+                    endpoint = "http://localhost:4317",
+                    timeout = 10_000,
+                    headers = mapOf("key" to "value")
+                )
+            ),
             processors.toBehavior(),
         )
+    }
+
+    @Test
+    fun httpExporterHeaderHaveHigherPriorityThanHeaderList() {
+        val processors = listOf(
+            LogRecordProcessor(
+                batch = BatchLogRecordProcessor(
+                    exporter = LogRecordExporter(
+                        otlpHttp = OtlpHttpExporter(
+                            endpoint = "http://localhost:4317",
+                            timeout = 10_000,
+                            headersList = "key=value2",
+                            headers = listOf(NameStringValuePair("key", "value"))
+                        )
+                    )
+                )
+            )
+        )
+        assertEquals(
+            LogRecordProcessorBehavior(
+                http = OtlpHttpExporterBehavior(
+                    endpoint = "http://localhost:4317",
+                    timeout = 10_000,
+                    headers = mapOf("key" to "value")
+                )
+            ),
+            processors.toBehavior(),
+        )
+    }
+
+    @Test
+    fun leavesSimpleUnsetForABatchProcessor() {
+        val processors = listOf(
+            LogRecordProcessor(batch = BatchLogRecordProcessor(exporter = consoleExporter())),
+        )
+        assertNull(processors.toBehavior()?.simple)
     }
 
     @Test
@@ -71,5 +125,11 @@ internal class LogRecordProcessorMapperTest {
     }
 
     private fun consoleExporter() = LogRecordExporter(console = ConsoleExporter())
-    private fun httpExporter() = LogRecordExporter(otlpHttp = OtlpHttpExporter())
+    private fun httpExporter() = LogRecordExporter(
+        otlpHttp = OtlpHttpExporter(
+            endpoint = "http://localhost:4317",
+            timeout = 10_000,
+            headersList = "key=value"
+        )
+    )
 }

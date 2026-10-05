@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
-import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanProcessor
@@ -17,9 +17,9 @@ internal class TracerProviderAdapterTest {
 
     private val adapter = TracerProviderAdapter(
         OtelJavaSdkTracerProvider.builder().build(),
-        FakeClock(),
         CompatSpanLimitsConfig(),
         CompatContextFactory(),
+        NoopSdkErrorHandler,
     )
 
     @Test
@@ -59,9 +59,9 @@ internal class TracerProviderAdapterTest {
             .build()
         val adapter = TracerProviderAdapter(
             provider,
-            FakeClock(),
             CompatSpanLimitsConfig(),
             CompatContextFactory(),
+            NoopSdkErrorHandler,
         )
 
         assertEquals(OperationResultCode.Success, adapter.forceFlush())

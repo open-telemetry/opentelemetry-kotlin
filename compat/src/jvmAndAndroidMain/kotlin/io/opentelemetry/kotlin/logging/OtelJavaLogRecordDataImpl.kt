@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordData
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
+import io.opentelemetry.kotlin.aliases.OtelJavaValue
 
 /**
  * Implementation of [io.opentelemetry.kotlin.aliases.OtelJavaLogRecordData] that we can construct new instances of. Required for
@@ -22,8 +23,9 @@ internal class OtelJavaLogRecordDataImpl(
     private val spanContextImpl: OtelJavaSpanContext,
     private val severityImpl: OtelJavaSeverity,
     private val severityTextImpl: String?,
-    private val bodyImpl: OtelJavaBody,
+    private val bodyValueImpl: OtelJavaValue<*>?,
     private val attributesImpl: OtelJavaAttributes,
+    private val totalAttributeCountImpl: Int,
     private val eventNameImpl: String?,
 ) : OtelJavaLogRecordData {
 
@@ -37,8 +39,11 @@ internal class OtelJavaLogRecordDataImpl(
     override fun getEventName(): String? = eventNameImpl
 
     @Deprecated("Deprecated in Java")
-    override fun getBody(): OtelJavaBody = bodyImpl
+    override fun getBody(): OtelJavaBody =
+        bodyValueImpl?.let { OtelJavaBody.string(it.asString()) } ?: OtelJavaBody.empty()
+
+    override fun getBodyValue(): OtelJavaValue<*>? = bodyValueImpl
 
     override fun getAttributes(): OtelJavaAttributes = attributesImpl
-    override fun getTotalAttributeCount(): Int = attributesImpl.size()
+    override fun getTotalAttributeCount(): Int = totalAttributeCountImpl
 }

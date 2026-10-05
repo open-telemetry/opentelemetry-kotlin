@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
+import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -13,7 +13,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class TraceStateMarshallerTest {
 
-    private val factory = TraceStateFactoryImpl()
+    private val factory = DefaultTraceStateFactory
 
     @Test
     fun `encode produces a single key=value list-member`() {
@@ -48,13 +48,13 @@ internal class TraceStateMarshallerTest {
 
     @Test
     fun `decode parses a single canonical list-member`() {
-        val ts = TraceStateMarshaller.decode("foo=bar", factory)
+        val ts = TraceStateMarshaller.decode("foo=bar")
         assertEquals("foo=bar", ts.encode())
     }
 
     @Test
     fun `decode parses multiple list-members preserving order`() {
-        val ts = TraceStateMarshaller.decode("foo=1,bar=2,baz=3", factory)
+        val ts = TraceStateMarshaller.decode("foo=1,bar=2,baz=3")
         // Decoding now preserves the order from the header directly
         assertEquals("foo=1,bar=2,baz=3", ts.encode())
     }
@@ -62,81 +62,81 @@ internal class TraceStateMarshallerTest {
     @Test
     fun `decode round-trips into encode without loss`() {
         val header = "foo=1,bar=2,baz=3"
-        val ts = TraceStateMarshaller.decode(header, factory)
+        val ts = TraceStateMarshaller.decode(header)
         assertEquals(header, ts.encode())
     }
 
     @Test
     fun `decode accepts multi-tenant keys`() {
-        val ts = TraceStateMarshaller.decode("tenant@vendor=value", factory)
+        val ts = TraceStateMarshaller.decode("tenant@vendor=value")
         assertEquals("tenant@vendor=value", ts.encode())
     }
 
     @Test
     fun `decode accepts the maximum 32 list-members`() {
         val header = (1..32).joinToString(",") { "k$it=v$it" }
-        val ts = TraceStateMarshaller.decode(header, factory)
+        val ts = TraceStateMarshaller.decode(header)
         assertEquals(header, ts.encode())
     }
 
     @Test
     fun `decode of an empty header returns an empty TraceState`() {
-        val ts = TraceStateMarshaller.decode("", factory)
+        val ts = TraceStateMarshaller.decode("")
         assertEquals("", ts.encode())
     }
 
     @Test
     fun `decode of a header containing only commas returns an empty TraceState`() {
-        val ts = TraceStateMarshaller.decode(",,,", factory)
+        val ts = TraceStateMarshaller.decode(",,,")
         assertEquals("", ts.encode())
     }
 
     @Test
     fun `decode of a header containing only whitespace returns an empty TraceState`() {
-        val ts = TraceStateMarshaller.decode("   \t  ", factory)
+        val ts = TraceStateMarshaller.decode("   \t  ")
         assertEquals("", ts.encode())
     }
 
     @Test
     fun `decode trims leading and trailing OWS around list-members`() {
-        val ts = TraceStateMarshaller.decode(" foo=bar ,\tbaz=qux\t", factory)
+        val ts = TraceStateMarshaller.decode(" foo=bar ,\tbaz=qux\t")
         assertEquals("foo=bar,baz=qux", ts.encode())
     }
 
     @Test
     fun `decode skips empty list-members between valid ones`() {
-        val ts = TraceStateMarshaller.decode("foo=bar,,baz=qux", factory)
+        val ts = TraceStateMarshaller.decode("foo=bar,,baz=qux")
         assertEquals("foo=bar,baz=qux", ts.encode())
     }
 
     @Test
     fun `decode skips members lacking an equals sign and keeps the rest`() {
-        val ts = TraceStateMarshaller.decode("foo=bar,nokey,baz=qux", factory)
+        val ts = TraceStateMarshaller.decode("foo=bar,nokey,baz=qux")
         assertEquals("foo=bar,baz=qux", ts.encode())
     }
 
     @Test
     fun `decode skips members with an empty key`() {
-        val ts = TraceStateMarshaller.decode("=value,foo=bar", factory)
+        val ts = TraceStateMarshaller.decode("=value,foo=bar")
         assertEquals("foo=bar", ts.encode())
     }
 
     @Test
     fun `decode skips members with an empty value`() {
-        val ts = TraceStateMarshaller.decode("foo=,bar=baz", factory)
+        val ts = TraceStateMarshaller.decode("foo=,bar=baz")
         assertEquals("bar=baz", ts.encode())
     }
 
     @Test
     fun `decode skips members with invalid keys and keeps the rest`() {
         // Uppercase keys are invalid per W3C spec
-        val ts = TraceStateMarshaller.decode("FOO=bad,baz=qux", factory)
+        val ts = TraceStateMarshaller.decode("FOO=bad,baz=qux")
         assertEquals("baz=qux", ts.encode())
     }
 
     @Test
     fun `decode skips multi-at-sign keys and keeps the rest`() {
-        val ts = TraceStateMarshaller.decode("a@b@c=bad,foo=bar", factory)
+        val ts = TraceStateMarshaller.decode("a@b@c=bad,foo=bar")
         assertEquals("foo=bar", ts.encode())
     }
 
@@ -144,13 +144,13 @@ internal class TraceStateMarshallerTest {
     fun `decode skips members whose value contains an equals sign`() {
         // Splitting at the first = treats the rest as the value; '=' is forbidden in values
         // so put rejects it. Other entries are kept.
-        val ts = TraceStateMarshaller.decode("foo=bar=baz,ok=yes", factory)
+        val ts = TraceStateMarshaller.decode("foo=bar=baz,ok=yes")
         assertEquals("ok=yes", ts.encode())
     }
 
     @Test
     fun `decode keeps the first occurrence of a duplicate key and drops later ones`() {
-        val ts = TraceStateMarshaller.decode("foo=first,foo=second", factory)
+        val ts = TraceStateMarshaller.decode("foo=first,foo=second")
         assertEquals("foo=first", ts.encode())
     }
 
@@ -158,7 +158,7 @@ internal class TraceStateMarshallerTest {
     fun `decode silently drops list-members beyond the 32-entry cap`() {
         val header = (1..33).joinToString(",") { "k$it=v$it" }
         val expected = (1..32).joinToString(",") { "k$it=v$it" }
-        val ts = TraceStateMarshaller.decode(header, factory)
+        val ts = TraceStateMarshaller.decode(header)
         assertEquals(expected, ts.encode())
     }
 
@@ -166,28 +166,28 @@ internal class TraceStateMarshallerTest {
     fun `decode keeps a combined header of exactly 512 characters`() {
         val header = exactly512Header()
         assertEquals(512, header.length)
-        val ts = TraceStateMarshaller.decode(header, factory)
+        val ts = TraceStateMarshaller.decode(header)
         assertEquals(header, ts.encode())
     }
 
     @Test
     fun `encode keeps a combined header of exactly 512 characters`() {
         val header = exactly512Header()
-        val ts = TraceStateMarshaller.decode(header, factory)
+        val ts = TraceStateMarshaller.decode(header)
         assertEquals(512, ts.encode().length)
         assertEquals(header, ts.encode())
     }
 
     @Test
     fun `decode drops members longer than 128 before dropping from the end`() {
-        val ts = TraceStateMarshaller.decode(oversizedHeaderWithTrailingLargeMember(), factory)
+        val ts = TraceStateMarshaller.decode(oversizedHeaderWithTrailingLargeMember())
         assertEquals(truncatedOversizedHeader(), ts.encode())
         assertTrue(ts.encode().length <= 512)
     }
 
     @Test
     fun `encode drops members longer than 128 before dropping from the end`() {
-        val ts = TraceStateMarshaller.decode(oversizedHeaderWithTrailingLargeMember(), factory)
+        val ts = TraceStateMarshaller.decode(oversizedHeaderWithTrailingLargeMember())
         assertEquals(truncatedOversizedHeader(), ts.encode())
     }
 
@@ -196,7 +196,7 @@ internal class TraceStateMarshallerTest {
         val members = (0 until 11).map { "a$it=" + "x".repeat(47) }
         val header = members.joinToString(",")
         assertTrue(header.length > 512)
-        val ts = TraceStateMarshaller.decode(header, factory)
+        val ts = TraceStateMarshaller.decode(header)
         val encoded = ts.encode()
         assertTrue(encoded.length <= 512)
         assertEquals(members.dropLast(1).joinToString(","), encoded)

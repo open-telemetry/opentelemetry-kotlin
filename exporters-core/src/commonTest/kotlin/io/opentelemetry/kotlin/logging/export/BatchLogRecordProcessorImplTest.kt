@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
@@ -10,6 +11,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,24 +23,35 @@ internal class BatchLogRecordProcessorImplTest {
 
     private lateinit var exporter: FakeLogRecordExporter
     private lateinit var processor: BatchLogRecordProcessorImpl
+    private val dispatcher = StandardTestDispatcher()
+    private val events = mutableListOf<String>()
+    private var shutdownResult: OperationResultCode = OperationResultCode.Success
+    private var shutdownError: Throwable? = null
+    private val errorHandler = FakeSdkErrorHandler()
 
     @BeforeTest
     fun setup() {
-        exporter = FakeLogRecordExporter()
+        exporter = FakeLogRecordExporter(
+            flushCode = { record("flush") },
+            shutdownCode = {
+                shutdownError?.let { throw it }
+                record("shutdown", shutdownResult)
+            },
+            action = { record("export ${it.size}") },
+        )
         processor = BatchLogRecordProcessorImpl(
             exporter = exporter,
             maxQueueSize = 100,
             scheduleDelayMs = 1,
             exportTimeoutMs = 1000,
             maxExportBatchSize = 10,
-            sdkErrorHandler = NoopSdkErrorHandler,
+            sdkErrorHandler = errorHandler,
+            dispatcher = dispatcher,
         )
     }
 
     @Test
-    fun testExportReceivesImmutableSnapshot() = runTest {
-        // the processor from setup() polls on a real dispatcher, so shut it down before
-        // running on virtual time - otherwise its pending timer never lets Node exit.
+    fun testExportReceivesImmutableSnapshot() = runTest(dispatcher) {
         processor.shutdown()
 
         val testProcessor = BatchLogRecordProcessorImpl(
@@ -65,7 +78,7 @@ internal class BatchLogRecordProcessorImplTest {
     }
 
     @Test
-    fun testOnEmitNoOpAfterShutdown() = runTest {
+    fun testOnEmitNoOpAfterShutdown() = runTest(dispatcher) {
         processor.shutdown()
         advanceUntilIdle()
 
@@ -77,22 +90,51 @@ internal class BatchLogRecordProcessorImplTest {
     }
 
     @Test
-    fun testShutdownReturnsSuccessOnSecondCall() = runTest {
+    fun testShutdownReturnsSuccessOnSecondCall() = runTest(dispatcher) {
         assertEquals(OperationResultCode.Success, processor.shutdown())
         assertEquals(OperationResultCode.Success, processor.shutdown())
     }
 
     @Test
-    fun testEnabledReturnsFalseAfterShutdown() = runTest {
+    fun testForceFlushAndShutdownExportBeforeDelegating() = runTest(dispatcher) {
+        shutdownResult = OperationResultCode.Failure
+        processor.onEmit(FakeReadWriteLogRecord(), FakeContext())
+        assertEquals(OperationResultCode.Success, processor.forceFlush())
+        processor.onEmit(FakeReadWriteLogRecord(), FakeContext())
+        assertEquals(OperationResultCode.Failure, processor.shutdown())
+        assertEquals(listOf("export 1", "flush", "export 1", "shutdown"), events)
+    }
+
+    @Test
+    fun testEnabledReturnsFalseAfterShutdown() = runTest(dispatcher) {
         assertTrue(processor.enabled(FakeContext(), FakeInstrumentationScopeInfo(), null, null))
         processor.shutdown()
         assertFalse(processor.enabled(FakeContext(), FakeInstrumentationScopeInfo(), null, null))
     }
 
     @Test
-    fun testForceFlushWorksAfterShutdown() = runTest {
+    fun testForceFlushWorksAfterShutdown() = runTest(dispatcher) {
         processor.shutdown()
         advanceUntilIdle()
         assertEquals(OperationResultCode.Success, processor.forceFlush())
+    }
+
+    @Test
+    fun testExporterShutdownThrowingIsReported() = runTest(dispatcher) {
+        shutdownError = IllegalStateException("boom")
+        assertEquals(OperationResultCode.Failure, processor.shutdown())
+        assertEquals(1, errorHandler.userCodeErrors.size)
+    }
+
+    @Test
+    fun testExporterShutdownCancellationDoesNotEscape() = runTest(dispatcher) {
+        shutdownError = CancellationException("exporter cancelled")
+        assertEquals(OperationResultCode.Failure, processor.shutdown())
+        assertEquals(1, errorHandler.userCodeErrors.size)
+    }
+
+    private fun record(event: String, result: OperationResultCode = OperationResultCode.Success): OperationResultCode {
+        events += event
+        return result
     }
 }

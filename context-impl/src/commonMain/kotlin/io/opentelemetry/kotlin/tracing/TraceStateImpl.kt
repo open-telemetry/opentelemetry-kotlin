@@ -1,22 +1,15 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.propagation.W3CTraceStateValidator
+import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateValidator
 
 @ExperimentalApi
-public class TraceStateImpl private constructor(
+public class TraceStateImpl internal constructor(
     private val data: LinkedHashMap<String, String>
 ) : TraceState {
 
-    companion object {
-        fun create(): TraceState = TraceStateImpl(linkedMapOf())
-
-        internal fun fromMap(map: Map<String, String>): TraceState {
-            // For decoding: preserve the order from the input map
-            val linkedMap = linkedMapOf<String, String>()
-            map.forEach { (k, v) -> linkedMap[k] = v }
-            return TraceStateImpl(linkedMap)
-        }
+    public companion object {
+        public val EMPTY: TraceState = TraceStateImpl(linkedMapOf())
     }
 
     override fun get(key: String): String? = data[key]
@@ -53,4 +46,22 @@ public class TraceStateImpl private constructor(
         }
         return TraceStateImpl(newData)
     }
+
+    // W3C tracestate order is significant, so compare ordered entries rather than map equality
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other !is TraceStateImpl) {
+            return false
+        }
+        return data.entries.toList() == other.data.entries.toList()
+    }
+
+    override fun hashCode(): Int = data.entries.toList().hashCode()
+
+    override fun toString(): String =
+        data.entries.joinToString(separator = ",", prefix = "TraceStateImpl(", postfix = ")") {
+            "${it.key}=${it.value}"
+        }
 }

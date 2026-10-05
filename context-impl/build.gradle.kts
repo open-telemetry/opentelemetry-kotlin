@@ -14,6 +14,7 @@ kotlin {
                 api(project(":api"))
                 api(project(":sdk-api"))
                 implementation(project(":sdk-common"))
+                implementation(project(":propagation-utils"))
                 implementation(project(":model"))
                 implementation(project(":platform-implementations"))
             }

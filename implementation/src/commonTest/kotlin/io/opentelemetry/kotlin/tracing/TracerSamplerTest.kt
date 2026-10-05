@@ -6,14 +6,12 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanContextFactory
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -43,9 +41,7 @@ internal class TracerSamplerTest {
         clock = FakeClock()
         processor = FakeSpanProcessor()
         idGenerator = IdGeneratorImpl()
-        val traceFlags = TraceFlagsFactoryImpl()
-        val traceState = TraceStateFactoryImpl()
-        spanContextFactory = SpanContextFactoryImpl(traceFlags, traceState)
+        spanContextFactory = DefaultSpanContextFactory
         spanFactory = SpanFactoryImpl(spanContextFactory)
         contextFactory = ContextFactoryImpl(spanFactory)
     }
@@ -58,7 +54,6 @@ internal class TracerSamplerTest {
         processor = processor,
         contextFactory = contextFactory,
         spanContextFactory = spanContextFactory,
-        traceFlagsFactory = TraceFlagsFactoryImpl(),
         scope = key,
         resource = FakeResource(),
         spanLimitConfig = limitsCfg,
@@ -121,13 +116,40 @@ internal class TracerSamplerTest {
     }
 
     @Test
-    fun testSpanAttrsOverrideSamplerAttrs() {
+    fun testSamplerAttrsOverrideSpanAttrs() {
         val sampler = FakeSampler(samplerAttributes = mapOf("shared.key" to "sampler.value"))
         val tracer = buildTracer(sampler)
         val span = tracer.startSpan("test") {
             setStringAttribute("shared.key", "span.value")
         }
-        assertEquals("span.value", span.toReadableSpan().attributes["shared.key"])
+        assertEquals("sampler.value", span.toReadableSpan().attributes["shared.key"])
+    }
+
+    @Test
+    fun testSamplerAttrsAtLimitOverrideButDoNotAdd() {
+        val cfg = fakeSpanLimitsConfig
+        val limitedConfig = SpanLimitConfig(
+            attributeCountLimit = 2,
+            attributeValueLengthLimit = cfg.attributeValueLengthLimit,
+            linkCountLimit = cfg.linkCountLimit,
+            eventCountLimit = cfg.eventCountLimit,
+            attributeCountPerEventLimit = cfg.attributeCountPerEventLimit,
+            attributeCountPerLinkLimit = cfg.attributeCountPerLinkLimit,
+        )
+        val sampler = FakeSampler(
+            samplerAttributes = mapOf(
+                "b" to "sampler",
+                "c" to "sampler",
+            )
+        )
+        val tracer = buildTracer(sampler, limitedConfig)
+        val span = tracer.startSpan("test") {
+            setStringAttribute("a", "user")
+            setStringAttribute("b", "user")
+        }
+        val readable = span.toReadableSpan()
+        assertEquals(mapOf("a" to "user", "b" to "sampler"), readable.attributes)
+        assertEquals(1, readable.droppedAttributesCount)
     }
 
     @Test

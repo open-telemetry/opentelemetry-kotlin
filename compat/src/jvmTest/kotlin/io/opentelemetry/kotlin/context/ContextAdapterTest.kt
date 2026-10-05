@@ -6,7 +6,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.test.assertSame
 
 internal class ContextAdapterTest {
 
@@ -19,24 +18,26 @@ internal class ContextAdapterTest {
     }
 
     @Test
-    fun `set with null value is a no-op`() {
+    fun `set with null value on an absent key`() {
         val key = ContextKeyAdapter<String>(OtelJavaContextKey.named("key"))
         val ctx = ContextAdapter(OtelJavaContext.root())
 
         val result = ctx.set(key, null)
 
-        assertSame(ctx, result)
         assertNull(result.get(key))
     }
 
     @Test
-    fun `set with null value retains the existing value`() {
-        val key = ContextKeyAdapter<String>(OtelJavaContextKey.named("key"))
+    fun `set with null value clears the existing value`() {
+        val javaKey = OtelJavaContextKey.named<String>("key")
+        val key = ContextKeyAdapter(javaKey)
         val ctx = ContextAdapter(OtelJavaContext.root()).set(key, "value")
+        assertEquals("value", ctx.get(key))
 
         val result = ctx.set(key, null)
 
-        assertSame(ctx, result)
-        assertEquals("value", result.get(key))
+        assertNull(result.get(key))
+        assertNull(result.toOtelJavaContext().get(javaKey))
+        assertEquals("value", ctx.get(key))
     }
 }

@@ -1,60 +1,55 @@
 package io.opentelemetry.kotlin.tracing.model
 
-import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaImplicitContextKeyed
 import io.opentelemetry.kotlin.aliases.OtelJavaScope
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
-import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
+import io.opentelemetry.kotlin.aliases.OtelJavaValue
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
-import io.opentelemetry.kotlin.attributes.setFlattenedAnyValueAttribute
+import io.opentelemetry.kotlin.attributes.toOtelJavaValue
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guard
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanCreationAction
-import io.opentelemetry.kotlin.tracing.SpanEventCompatImpl
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.SpanLinkCompatImpl
 import io.opentelemetry.kotlin.tracing.StatusData
-import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusData
+import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 
 internal class SpanAdapter(
     val impl: OtelJavaSpan,
-    private val clock: Clock,
     parentCtx: OtelJavaContext?,
     val spanKind: SpanKind,
-    val startTimestamp: Long,
     private val spanLimitsConfig: CompatSpanLimitsConfig,
+    private val sdkErrorHandler: SdkErrorHandler,
     creationState: CompatSpanCreationState? = null,
 ) : Span, AttributeContainer, SpanCreationAction, OtelJavaImplicitContextKeyed {
 
     private val attrs: MutableMap<String, Any> = ConcurrentHashMap(creationState?.attributes.orEmpty())
-    private val eventsImpl: ConcurrentLinkedQueue<SpanEventData> = ConcurrentLinkedQueue()
     private val linksImpl: ConcurrentLinkedQueue<SpanLink> =
         ConcurrentLinkedQueue(creationState?.links.orEmpty())
 
-    override val parent: SpanContext = SpanContextAdapter(
-        parentCtx?.let { OtelJavaSpan.fromContext(it) }?.spanContext
-            ?: OtelJavaSpanContext.getInvalid()
-    )
+    override val parent: SpanContext =
+        parentCtx?.let { OtelJavaSpan.fromContext(it) }?.spanContext?.toOtelKotlinSpanContext()
+            ?: DefaultSpanContextFactory.invalid
 
-    override val spanContext: SpanContext = SpanContextAdapter(impl.spanContext)
+    override val spanContext: SpanContext = impl.spanContext.toOtelKotlinSpanContext()
 
     override val attributes: Map<String, Any>
         get() = attrs.toMap()
-
-    val events: List<SpanEventData>
-        get() = eventsImpl.toList()
 
     val links: List<SpanLinkData>
         get() = linksImpl.toList()
@@ -70,11 +65,19 @@ internal class SpanAdapter(
     }
 
     override fun end() {
-        impl.end()
+        sdkErrorHandler.guard("Span.end failed") {
+            impl.end()
+        }
     }
 
     override fun end(timestamp: Long) {
-        impl.end(timestamp, TimeUnit.NANOSECONDS)
+        sdkErrorHandler.guard("Span.end failed") {
+            if (timestamp > 0) {
+                impl.end(timestamp, TimeUnit.NANOSECONDS)
+            } else {
+                impl.end()
+            }
+        }
     }
 
     override fun isRecording(): Boolean = impl.isRecording
@@ -82,7 +85,7 @@ internal class SpanAdapter(
     override fun addLink(
         spanContext: SpanContext,
         attributes: (AttributesMutator.() -> Unit)?
-    ) {
+    ) = sdkErrorHandler.guard("Span.addLink failed") {
         val container = CompatAttributesModel()
         if (attributes != null) {
             attributes(container)
@@ -97,16 +100,17 @@ internal class SpanAdapter(
         name: String,
         timestamp: Long?,
         attributes: (AttributesMutator.() -> Unit)?
-    ) {
+    ) = sdkErrorHandler.guard("Span.addEvent failed") {
         val container = CompatAttributesModel()
         if (attributes != null) {
             attributes(container)
         }
-        val time = timestamp ?: clock.now()
-        if (eventsImpl.size < spanLimitsConfig.effectiveEventCountLimit) {
-            eventsImpl.add(SpanEventCompatImpl(name, time, container))
+        // As with the span start: left unset, the SDK stamps the event with the clock it times the span by.
+        if (timestamp != null && timestamp > 0) {
+            impl.addEvent(name, container.otelJavaAttributes(), timestamp, TimeUnit.NANOSECONDS)
+        } else {
+            impl.addEvent(name, container.otelJavaAttributes())
         }
-        impl.addEvent(name, container.otelJavaAttributes(), time, TimeUnit.NANOSECONDS)
     }
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
@@ -166,11 +170,17 @@ internal class SpanAdapter(
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
-        // no java implementation available
+        impl.setAttribute(OtelJavaAttributeKey.valueKey(key), OtelJavaValue.of(value))
+        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
+            attrs[key] = value
+        }
     }
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
-        setFlattenedAnyValueAttribute(key, value)
+        impl.setAttribute(OtelJavaAttributeKey.valueKey(key), value.toOtelJavaValue())
+        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
+            attrs[key] = value
+        }
     }
 
     override fun storeInContext(context: OtelJavaContext): OtelJavaContext? {

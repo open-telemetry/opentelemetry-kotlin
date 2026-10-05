@@ -88,4 +88,39 @@ internal class LogRecordProcessorBehaviorTest {
             LogRecordProcessorBehavior(http = http).mergeWith(LogRecordProcessorBehavior()).http,
         )
     }
+
+    @Test
+    fun simpleStartsUnset() {
+        assertNull(LogRecordProcessorBehavior().simple)
+    }
+
+    @Test
+    fun simpleStaysUnsetWhenNeitherLayerConfigured() {
+        assertNull(LogRecordProcessorBehavior().mergeWith(LogRecordProcessorBehavior()).simple)
+    }
+
+    @Test
+    fun adoptsSimpleFromWhicheverLayerSuppliedIt() {
+        val simple = SimpleLogRecordProcessorBehavior()
+
+        assertEquals(
+            simple,
+            LogRecordProcessorBehavior().mergeWith(LogRecordProcessorBehavior(simple = simple)).simple,
+        )
+        assertEquals(
+            simple,
+            LogRecordProcessorBehavior(simple = simple).mergeWith(LogRecordProcessorBehavior()).simple,
+        )
+    }
+
+    @Test
+    fun keepsExporterConfigurationWhenSelectingSimple() {
+        val http = OtlpHttpExporterBehavior(endpoint = "https://example.com")
+        val merged = LogRecordProcessorBehavior(http = http).mergeWith(
+            LogRecordProcessorBehavior(simple = SimpleLogRecordProcessorBehavior()),
+        )
+
+        assertEquals(http, merged.http)
+        assertEquals(SimpleLogRecordProcessorBehavior(), merged.simple)
+    }
 }

@@ -65,9 +65,25 @@ internal class EnvVarReaderTest {
     }
 
     @Test
+    fun `should return invalid for a value that is not a long`() {
+        listOf("invalid", "64.0").forEach { rawValue ->
+            val result = EnvVarReader { rawValue }.readInt(name) as Invalid
+            assertEquals(name, result.warning.name)
+            assertContains(result.warning.message, rawValue)
+        }
+    }
+
+    @Test
     fun `should validate a non-negative int`() {
         assertEquals(Value(0), EnvVarReader { "0" }.readNonNegativeInt(name))
         val result = EnvVarReader { "-1" }.readNonNegativeInt(name) as Invalid
+        assertContains(result.warning.message, "-1")
+    }
+
+    @Test
+    fun `should validate a non-negative long`() {
+        assertEquals(Value(1L), EnvVarReader { "1" }.readNonNegativeLong(name))
+        val result = EnvVarReader { "-1" }.readNonNegativeLong(name) as Invalid
         assertContains(result.warning.message, "-1")
     }
 

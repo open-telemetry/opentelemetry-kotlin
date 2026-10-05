@@ -8,18 +8,17 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
-import io.opentelemetry.kotlin.init.SamplerConfigDsl
+import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeTraceState
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.SpanKind
-import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
 import io.opentelemetry.kotlin.tracing.TracerImpl
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.fakeSpanLimitsConfig
@@ -33,23 +32,19 @@ internal class BuiltInSamplersTest {
 
     private val clock = FakeClock()
     private val idGenerator = IdGeneratorImpl()
-    private val traceFlagsFactory = TraceFlagsFactoryImpl()
-    private val traceStateFactory = TraceStateFactoryImpl()
-    private val spanContextFactory = SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory)
+    private val traceStateFactory = DefaultTraceStateFactory
+    private val spanContextFactory = DefaultSpanContextFactory
     private val spanFactory = SpanFactoryImpl(spanContextFactory)
     private val contextFactory = ContextFactoryImpl(spanFactory)
     private val scope = InstrumentationScopeInfoImpl("test", null, null, emptyMap())
 
-    private val samplerDsl = object : SamplerConfigDsl {
-        override val spanFactory = this@BuiltInSamplersTest.spanFactory
-    }
+    private val samplerDsl = SamplerConfigImpl(spanFactory)
 
     private fun buildTracer(sampler: Sampler) = TracerImpl(
         clock = clock,
         processor = FakeSpanProcessor(),
         contextFactory = contextFactory,
         spanContextFactory = spanContextFactory,
-        traceFlagsFactory = traceFlagsFactory,
         scope = scope,
         resource = FakeResource(),
         spanLimitConfig = fakeSpanLimitsConfig,
@@ -61,8 +56,8 @@ internal class BuiltInSamplersTest {
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean): Context {
         val traceFlags = when {
-            sampled -> traceFlagsFactory.default
-            else -> TraceFlagsImpl(isSampled = false, isRandom = false)
+            sampled -> DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false)
+            else -> DefaultTraceFlagsFactory.default
         }
         val parentSpanContext = spanContextFactory.create(
             traceId = "12345678901234567890123456789012",

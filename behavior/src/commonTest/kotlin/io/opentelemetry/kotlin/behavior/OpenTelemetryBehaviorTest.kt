@@ -10,6 +10,11 @@ internal class OpenTelemetryBehaviorTest {
     fun everyFieldStartsUnset() {
         val behavior = OpenTelemetryBehavior()
 
+        assertNull(behavior.fileFormat)
+        assertNull(behavior.disabled)
+        assertNull(behavior.logLevel)
+        assertNull(behavior.distribution)
+        assertNull(behavior.entities)
         assertNull(behavior.resource)
         assertNull(behavior.attributeLimits)
         assertNull(behavior.tracerProvider)
@@ -19,6 +24,14 @@ internal class OpenTelemetryBehaviorTest {
     @Test
     fun mergingEmptyBehaviorChangesNothing() {
         val populated = OpenTelemetryBehavior(
+            fileFormat = "fileFormat",
+            disabled = true,
+            logLevel = SeverityLevel.ERROR,
+            distribution = mapOf("a" to 1),
+            entities = "entities",
+            resource = ResourceBehavior(attributes = mapOf("a" to 1L)),
+            attributeLimits = AttributeLimitsBehavior(attributeCountLimit = 1),
+            loggerProvider = LoggerProviderBehavior(logLimits = LogLimitsBehavior(attributeCountLimit = 1)),
             tracerProvider = TracerProviderBehavior(spanLimits = SpanLimitsBehavior(linkCountLimit = 3)),
         )
 
@@ -28,6 +41,14 @@ internal class OpenTelemetryBehaviorTest {
     @Test
     fun mergingIntoEmptyBehaviorAdoptsEverything() {
         val populated = OpenTelemetryBehavior(
+            fileFormat = "fileFormat",
+            disabled = true,
+            logLevel = SeverityLevel.ERROR,
+            distribution = mapOf("a" to 1),
+            entities = "entities",
+            resource = ResourceBehavior(attributes = mapOf("a" to 1L)),
+            attributeLimits = AttributeLimitsBehavior(attributeCountLimit = 1),
+            loggerProvider = LoggerProviderBehavior(logLimits = LogLimitsBehavior(attributeCountLimit = 1)),
             tracerProvider = TracerProviderBehavior(spanLimits = SpanLimitsBehavior(linkCountLimit = 3)),
         )
 

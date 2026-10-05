@@ -1,12 +1,11 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.propagation.FakeTextMapGetter
 import io.opentelemetry.kotlin.propagation.FakeTextMapSetter
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
@@ -19,9 +18,9 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class PropagatorConfigImplTest {
 
-    private val traceFlagsFactory = TraceFlagsFactoryImpl()
-    private val traceStateFactory = TraceStateFactoryImpl()
-    private val spanContextFactory = SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory)
+    private val traceFlagsFactory = DefaultTraceFlagsFactory
+    private val traceStateFactory = DefaultTraceStateFactory
+    private val spanContextFactory = DefaultSpanContextFactory
     private val spanFactory = SpanFactoryImpl(spanContextFactory)
     private val contextFactory = ContextFactoryImpl(spanFactory)
     private val contextWithSpan = contextFactory.root().storeSpan(spanFactory.fromSpanContext(FakeSpanContext.VALID))
@@ -46,7 +45,7 @@ internal class PropagatorConfigImplTest {
     @Test
     fun `w3cTraceContext routes through delegate once factories are installed`() {
         val config = PropagatorConfigImpl().apply { w3cTraceContext() }
-        config.installFactories(traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory, NoopSdkErrorHandler)
+        config.installFactories(traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory)
         val propagator = config.buildPropagator()
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
 

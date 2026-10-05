@@ -1,12 +1,11 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
+import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
 import io.opentelemetry.kotlin.init.B3Format
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -18,16 +17,16 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class B3PropagatorTest {
 
-    private val traceFlagsFactory = TraceFlagsFactoryImpl()
-    private val traceStateFactory = TraceStateFactoryImpl()
-    private val spanContextFactory = SpanContextFactoryImpl(traceFlagsFactory, traceStateFactory)
+    private val traceFlagsFactory = DefaultTraceFlagsFactory
+    private val traceStateFactory = DefaultTraceStateFactory
+    private val spanContextFactory = DefaultSpanContextFactory
     private val spanFactory = SpanFactoryImpl(spanContextFactory)
     private val contextFactory = ContextFactoryImpl(spanFactory)
 
     private val singlePropagator =
-        B3Propagator(B3Format.SINGLE, traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory, NoopSdkErrorHandler)
+        B3Propagator(B3Format.SINGLE, traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory)
     private val multiPropagator =
-        B3Propagator(B3Format.MULTI, traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory, NoopSdkErrorHandler)
+        B3Propagator(B3Format.MULTI, traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory)
 
     private val traceId = "0af7651916cd43dd8448eb211c80319c"
     private val spanId = "b7ad6b7169203331"
@@ -228,6 +227,32 @@ internal class B3PropagatorTest {
             multiPropagator.extract(
                 ctx,
                 mapOf("X-B3-TraceId" to traceId, "X-B3-SpanId" to "0".repeat(16), "X-B3-Sampled" to "1"),
+                FakeTextMapGetter,
+            )
+        )
+    }
+
+    @Test
+    fun `extract multi returns original context for invalid traceId`() {
+        val ctx = contextFactory.root()
+        assertSame(
+            ctx,
+            multiPropagator.extract(
+                ctx,
+                mapOf("X-B3-TraceId" to "not-a-valid-trace-id", "X-B3-SpanId" to spanId),
+                FakeTextMapGetter,
+            )
+        )
+    }
+
+    @Test
+    fun `extract multi returns original context for invalid spanId`() {
+        val ctx = contextFactory.root()
+        assertSame(
+            ctx,
+            multiPropagator.extract(
+                ctx,
+                mapOf("X-B3-TraceId" to traceId, "X-B3-SpanId" to "short"),
                 FakeTextMapGetter,
             )
         )

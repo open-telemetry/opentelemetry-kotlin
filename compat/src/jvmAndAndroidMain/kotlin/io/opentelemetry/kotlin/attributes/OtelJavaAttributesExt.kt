@@ -2,10 +2,16 @@ package io.opentelemetry.kotlin.attributes
 
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
+import io.opentelemetry.kotlin.aliases.OtelJavaValue
 import io.opentelemetry.kotlin.resource.Resource
 
 internal fun OtelJavaAttributes.convertToMap(): Map<String, Any> {
-    return this.asMap().mapKeys { it.key.key }
+    return this.asMap().entries.associate { (key, value) ->
+        key.key to when (value) {
+            is OtelJavaValue<*> -> value.toOtelKotlinAnyValue()
+            else -> value
+        }
+    }
 }
 
 /**
@@ -13,6 +19,12 @@ internal fun OtelJavaAttributes.convertToMap(): Map<String, Any> {
  */
 internal fun attrsFromMap(map: Map<String, Any>): OtelJavaAttributes =
     CompatAttributesModel().apply { setTypedAttributes(map) }.otelJavaAttributes()
+
+/**
+ * Converts any [AttributeContainer] to [OtelJavaAttributes], avoiding a copy when it is already compat-backed.
+ */
+internal fun AttributeContainer.toOtelJavaAttributes(): OtelJavaAttributes =
+    (this as? CompatAttributesModel)?.otelJavaAttributes() ?: attrsFromMap(attributes)
 
 internal fun resourceFromMap(resource: Resource): OtelJavaResource {
     val map = resource.attributes

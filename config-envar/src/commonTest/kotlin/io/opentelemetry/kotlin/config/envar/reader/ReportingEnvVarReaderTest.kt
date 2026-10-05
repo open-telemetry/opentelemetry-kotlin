@@ -17,6 +17,8 @@ internal class ReportingEnvVarReaderTest {
     fun `should return parsed values and apply unset defaults`() {
         val warnings = mutableListOf<EnvVarReadWarning>()
         assertEquals("value", reader("value").readString(name))
+        assertEquals(123, reader("123").readNonNegativeInt(name))
+        assertEquals(456L, reader("456").readNonNegativeLong(name))
         assertTrue(reader("true").readBoolean(name))
         assertNull(reader(null, warnings::add).readString(name))
         assertFalse(reader(null, warnings::add).readBoolean(name))
@@ -30,10 +32,21 @@ internal class ReportingEnvVarReaderTest {
         assertFalse(reader("invalid", warnings::add).readBoolean(name))
         assertNull(reader("invalid", warnings::add).readNonNegativeInt(name))
         assertNull(reader("-1", warnings::add).readNonNegativeInt(name))
+        assertNull(reader("-1", warnings::add).readNonNegativeLong(name))
 
-        assertEquals(3, warnings.size)
+        assertEquals(4, warnings.size)
         assertTrue(warnings.all { it.name == name })
         assertContains(warnings.first().message, "false")
+    }
+
+    @Test
+    fun `should allow zero by default and report it when disallowed`() {
+        val warnings = mutableListOf<EnvVarReadWarning>()
+        val reader = reader("0", warnings::add)
+
+        assertEquals(0, reader.readNonNegativeInt(name))
+        assertNull(reader.readNonNegativeInt(name, acceptZero = false))
+        assertEquals(name, warnings.single().name)
     }
 
     @Test

@@ -7,7 +7,6 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
-import io.opentelemetry.kotlin.factory.FakeTraceFlagsFactory
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
@@ -15,6 +14,7 @@ import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 internal class SpanEventTest {
 
@@ -42,7 +42,6 @@ internal class SpanEventTest {
             processor = processor,
             contextFactory = FakeContextFactory(),
             spanContextFactory = FakeSpanContextFactory(),
-            traceFlagsFactory = FakeTraceFlagsFactory(),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = spanLimitConfig,
@@ -118,6 +117,29 @@ internal class SpanEventTest {
     }
 
     @Test
+    fun testEventAttributesNotInvokedWhenNotRecording() {
+        var invoked = false
+        tracer.startSpan("test").apply {
+            end()
+            addEvent("event") { invoked = true }
+        }
+        assertFalse(invoked)
+    }
+
+    @Test
+    fun testEventAttributesNotInvokedWhenLimitReached() {
+        var invocations = 0
+        tracer.startSpan("test").apply {
+            repeat(eventLimit + 1) {
+                addEvent("event") { invocations++ }
+            }
+            end()
+        }
+        assertEquals(eventLimit, invocations)
+        assertEquals(1, processor.endCalls.single().droppedEventsCount)
+    }
+
+    @Test
     fun testSpanEventAttributesLimit() {
         val span = tracer.startSpan("test").apply {
             addEvent("event") {
@@ -143,6 +165,19 @@ internal class SpanEventTest {
         val event = (span.toReadableSpan()).events.single()
         assertEquals(fakeSpanLimitsConfig.attributeCountLimit, event.attributes.size)
         assertEquals(1, event.droppedAttributesCount)
+    }
+
+    @Test
+    fun testSpanEventWithInvalidTimestampUsesClock() {
+        clock.time = 2
+        tracer.startSpan("test").apply {
+            addEvent("event", 0)
+            addEvent("event2", -1)
+            end()
+        }
+        val events = retrieveEvents(2)
+        assertEventData(events[0], "event", clock.time, emptyMap())
+        assertEventData(events[1], "event2", clock.time, emptyMap())
     }
 
     private fun retrieveEvents(expected: Int): List<SpanEventData> {

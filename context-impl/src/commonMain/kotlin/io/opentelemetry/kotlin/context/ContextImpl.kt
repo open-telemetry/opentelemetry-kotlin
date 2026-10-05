@@ -1,13 +1,14 @@
 package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.baggage.Baggage
-import io.opentelemetry.kotlin.baggage.BaggageImpl
+import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.tracing.Span
 
 private val BAGGAGE_KEY: ContextKey<Baggage> = ContextKeyImpl("otel-kotlin-baggage")
 private val SPAN_KEY: ContextKey<Span> = ContextKeyImpl("otel-kotlin-span")
+private val EMPTY_BAGGAGE: Baggage = createBaggage()
 
 internal class ContextImpl(
     private val storage: ImplicitContextStorage,
@@ -44,7 +45,7 @@ internal class ContextImpl(
 
     override fun storeBaggage(baggage: Baggage): Context = set(BAGGAGE_KEY, baggage)
 
-    override fun extractBaggage(): Baggage = get(BAGGAGE_KEY) ?: BaggageImpl.EMPTY
+    override fun extractBaggage(): Baggage = get(BAGGAGE_KEY) ?: EMPTY_BAGGAGE
 
     override fun clearBaggage(): Context = set(BAGGAGE_KEY, null)
 }

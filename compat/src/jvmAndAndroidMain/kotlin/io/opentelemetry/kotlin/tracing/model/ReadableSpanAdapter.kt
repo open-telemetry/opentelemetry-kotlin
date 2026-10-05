@@ -15,6 +15,7 @@ import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanEventDataAdapter
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkDataAdapter
+import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
 
@@ -32,8 +33,8 @@ internal class ReadableSpanAdapter(
         get() = impl.name
     override val status: StatusData
         get() = impl.toSpanData().status.toOtelKotlinStatusData()
-    override val endTimestamp: Long
-        get() = impl.toSpanData().endEpochNanos
+    override val endTimestamp: Long?
+        get() = impl.toSpanData().let { data -> data.endEpochNanos.takeIf { data.hasEnded() } }
     override val attributes: Map<String, Any>
         get() = impl.attributes.convertToMap()
     override val events: List<SpanEventData>
@@ -53,8 +54,8 @@ internal class ReadableSpanAdapter(
 
     init {
         val initialState = impl.toSpanData()
-        spanContext = SpanContextAdapter(impl.spanContext)
-        parent = SpanContextAdapter(impl.parentSpanContext)
+        spanContext = impl.spanContext.toOtelKotlinSpanContext()
+        parent = impl.parentSpanContext.toOtelKotlinSpanContext()
         spanKind = impl.kind.toOtelKotlinSpanKind()
         startTimestamp = initialState.startEpochNanos
         resource = ResourceAdapter(initialState.resource)

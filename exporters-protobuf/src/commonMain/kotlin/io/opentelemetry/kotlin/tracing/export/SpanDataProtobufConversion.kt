@@ -17,6 +17,7 @@ import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.proto.trace.v1.Span
 import io.opentelemetry.proto.trace.v1.SpanFlags
 import io.opentelemetry.proto.trace.v1.Status
+import okio.ByteString
 import okio.ByteString.Companion.toByteString
 
 fun SpanData.toProtobuf() = Span(
@@ -25,7 +26,7 @@ fun SpanData.toProtobuf() = Span(
     span_id = spanContext.spanIdBytes.toByteString(),
     trace_state = spanContext.traceState.toW3CString(),
     flags = spanContext.toSpanFlagsInt(remoteContext = parent),
-    parent_span_id = parent.spanIdBytes.toByteString(),
+    parent_span_id = if (parent.isValid) parent.spanIdBytes.toByteString() else ByteString.EMPTY,
     kind = spanKind.toProtoSpanKind(),
     start_time_unix_nano = startTimestamp,
     end_time_unix_nano = endTimestamp ?: 0,

@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.attributes.AttributeContainer
@@ -103,7 +104,7 @@ internal class OtelJavaBackedComposableSamplerTest {
     }
 
     @Test
-    fun `non compat attribute containers are forwarded as empty attributes`() {
+    fun `non compat attribute containers are converted and forwarded`() {
         val impl = FakeOtelJavaComposableSampler()
         val wrapper = OtelJavaBackedComposableSampler(impl)
         val nonCompatAttributes = object : AttributeContainer {
@@ -112,7 +113,7 @@ internal class OtelJavaBackedComposableSamplerTest {
 
         wrapper.getSamplingIntent(FakeContext(), "span", SpanKind.CLIENT, nonCompatAttributes, emptyList())
 
-        assertTrue(impl.lastAttributes!!.isEmpty)
+        assertEquals("bar", impl.lastAttributes?.get(OtelJavaAttributeKey.stringKey("foo")))
     }
 
     @Test

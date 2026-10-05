@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.factory
 
 import kotlin.test.Test
 import kotlin.test.assertFalse
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 internal class TraceFlagsFactoryImplTest {
@@ -12,7 +13,7 @@ internal class TraceFlagsFactoryImplTest {
     fun testDefaultProperty() {
         val flags = factory.default
 
-        assertTrue(flags.isSampled)
+        assertFalse(flags.isSampled)
         assertFalse(flags.isRandom)
     }
 
@@ -84,5 +85,21 @@ internal class TraceFlagsFactoryImplTest {
         val notHex = factory.fromHex("2g")
         assertFalse(notHex.isSampled)
         assertFalse(notHex.isRandom)
+    }
+
+    @Test
+    fun testFromHexReturnsSharedInstances() {
+        assertSame(factory.default, factory.fromHex("00"))
+        assertSame(factory.default, factory.fromHex("zz"))
+        assertSame(factory.fromHex("01"), factory.fromHex("01"))
+        assertSame(factory.fromHex("03"), factory.fromHex("2f"))
+    }
+
+    @Test
+    fun testCreateReturnsSharedInstances() {
+        assertSame(factory.default, factory.create(isSampled = false, isRandom = false))
+        assertSame(factory.fromHex("01"), factory.create(isSampled = true, isRandom = false))
+        assertSame(factory.fromHex("02"), factory.create(isSampled = false, isRandom = true))
+        assertSame(factory.fromHex("03"), factory.create(isSampled = true, isRandom = true))
     }
 }
