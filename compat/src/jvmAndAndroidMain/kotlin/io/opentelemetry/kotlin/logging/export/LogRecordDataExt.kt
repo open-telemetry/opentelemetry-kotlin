@@ -11,11 +11,18 @@ import io.opentelemetry.kotlin.attributes.resourceFromMap
 import io.opentelemetry.kotlin.attributes.toOtelJavaValue
 import io.opentelemetry.kotlin.logging.OtelJavaLogRecordDataImpl
 import io.opentelemetry.kotlin.logging.data.LogRecordData
+import io.opentelemetry.kotlin.logging.data.LogRecordDataAdapter
 import io.opentelemetry.kotlin.logging.toOtelJavaSeverityNumber
 import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 
-internal fun LogRecordData.toOtelJavaLogRecordData(): OtelJavaLogRecordData {
+internal fun LogRecordData.toOtelJavaLogRecordData(): OtelJavaLogRecordData = when (this) {
+    is LogRecordDataAdapter -> impl
+    is ReadWriteLogRecordAdapter -> impl.toLogRecordData()
+    else -> convertToOtelJavaLogRecordData()
+}
+
+private fun LogRecordData.convertToOtelJavaLogRecordData(): OtelJavaLogRecordData {
     return OtelJavaLogRecordDataImpl(
         timestampNanos = timestamp ?: 0,
         observedTimestampNanos = observedTimestamp ?: 0,
