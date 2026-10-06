@@ -17,8 +17,15 @@ the long term as this use-case has less focused testing compared to using each m
 ## Context
 
 The Kotlin and Java APIs must agree on a single implicit context, otherwise spans and logs lose their
-parent or their trace/span IDs. For compatibility with the Java SDK's default behavior, set
-`storageMode = ImplicitContextStorageMode.THREAD_LOCAL`.
+parent or their trace/span IDs.
+
+`createCompatOpenTelemetry()` and `toOtelKotlinApi()` always store the implicit context in whichever
+`ContextStorage` is configured on opentelemetry-java (thread-local by default), so both APIs share it.
+Configuration supplied via `context { ... }` is ignored in compat mode and reported as a warning to the
+`SdkErrorHandler`. To customize storage, configure opentelemetry-java's `ContextStorage` instead.
+
+When using `implementation` together with `toOtelJavaApi()`, set
+`storageMode = ImplicitContextStorageMode.THREAD_LOCAL` for compatibility with the Java SDK's default behavior.
 
 When using `toOtelJavaApi()` you should not read or set the opentelemetry-java implicit context
 directly, as it is a separate store that the Kotlin SDK never sees. This includes:

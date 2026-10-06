@@ -77,8 +77,15 @@ internal class CompatOpenTelemetryConfig(
     internal fun buildDeclaredResource(): Resource =
         ResourceAdapter(OtelJavaResource.create(globalResourceAttrs.otelJavaAttributes(), globalResourceSchemaUrl))
 
+    /**
+     * Compat mode always stores the implicit context in
+     * opentelemetry-java's ContextStorage, so this configuration is ignored.
+     */
+    @Volatile internal var contextConfigured: Boolean = false
+        private set
+
     override fun context(action: ContextConfigDsl.() -> Unit) {
-        // no-op
+        contextConfigured = true
     }
 
     override fun tracerProvider(action: TracerProviderConfigDsl.() -> Unit) {
