@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
-import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeSpan
@@ -116,7 +115,6 @@ internal class LoggerEnabledTest {
             clock = clock,
             processor = processor,
             contextFactory = FakeContextFactory(),
-            spanContextFactory = FakeSpanContextFactory(),
             key = key,
             resource = FakeResource(),
             logLimits = fakeLogLimitsConfig,

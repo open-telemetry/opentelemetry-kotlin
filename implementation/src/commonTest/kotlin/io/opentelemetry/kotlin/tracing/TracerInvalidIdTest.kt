@@ -5,15 +5,13 @@ import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import io.opentelemetry.kotlin.tracing.implementation.createSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -28,7 +26,6 @@ import kotlin.test.assertTrue
 internal class TracerInvalidIdTest {
 
     private val key = InstrumentationScopeInfoImpl("key", null, null, emptyMap())
-    private val traceStateFactory = DefaultTraceStateFactory
     private val zeroTraceId = "0".repeat(32)
     private val zeroSpanId = "0".repeat(16)
 
@@ -118,7 +115,7 @@ internal class TracerInvalidIdTest {
     fun testDescendantOfRemoteParentIsNotRemote() {
         val idGenerator = IdGeneratorImpl()
         val tracer = buildTracer(idGenerator)
-        val spanFactory = SpanFactoryImpl(DefaultSpanContextFactory)
+        val spanFactory = SpanFactoryImpl()
         val contextFactory = ContextFactoryImpl(spanFactory)
 
         val child = tracer.startSpan(
@@ -144,28 +141,23 @@ internal class TracerInvalidIdTest {
     }
 
     private fun remoteParent(): SpanContext =
-        DefaultSpanContextFactory.create(
-            traceId = "12345678901234567890123456789012",
-            spanId = "1234567890123456",
-            traceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false),
-            traceState = traceStateFactory.default,
-            isRemote = true,
-        )
+        createSpanContext("12345678901234567890123456789012", "1234567890123456") {
+            isSampled = true
+            isRemote = true
+        }
 
     private fun startChildOf(parent: SpanContext, idGenerator: IdGenerator): Span {
-        val spanFactory = SpanFactoryImpl(DefaultSpanContextFactory)
+        val spanFactory = SpanFactoryImpl()
         val parentContext =
             ContextFactoryImpl(spanFactory).root().storeSpan(spanFactory.fromSpanContext(parent))
         return buildTracer(idGenerator).startSpan("test", parentContext = parentContext)
     }
 
     private fun buildTracer(idGenerator: IdGenerator): TracerImpl {
-        val spanContextFactory = DefaultSpanContextFactory
         return TracerImpl(
             clock = FakeClock(),
             processor = FakeSpanProcessor(),
-            contextFactory = ContextFactoryImpl(SpanFactoryImpl(spanContextFactory)),
-            spanContextFactory = spanContextFactory,
+            contextFactory = ContextFactoryImpl(SpanFactoryImpl()),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

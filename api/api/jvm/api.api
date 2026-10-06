@@ -7,9 +7,6 @@ public abstract interface class io/opentelemetry/kotlin/OpenTelemetry {
 	public abstract fun getMeterProvider ()Lio/opentelemetry/kotlin/metrics/MeterProvider;
 	public abstract fun getPropagator ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public abstract fun getSpan ()Lio/opentelemetry/kotlin/factory/SpanFactory;
-	public abstract fun getSpanContext ()Lio/opentelemetry/kotlin/factory/SpanContextFactory;
-	public abstract fun getTraceFlags ()Lio/opentelemetry/kotlin/factory/TraceFlagsFactory;
-	public abstract fun getTraceState ()Lio/opentelemetry/kotlin/factory/TraceStateFactory;
 	public abstract fun getTracerProvider ()Lio/opentelemetry/kotlin/tracing/TracerProvider;
 }
 
@@ -166,24 +163,9 @@ public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
 	public abstract fun root ()Lio/opentelemetry/kotlin/context/Context;
 }
 
-public abstract interface class io/opentelemetry/kotlin/factory/SpanContextFactory {
-	public abstract fun create (Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/tracing/TraceFlags;Lio/opentelemetry/kotlin/tracing/TraceState;Z)Lio/opentelemetry/kotlin/tracing/SpanContext;
-	public abstract fun create ([B[BLio/opentelemetry/kotlin/tracing/TraceFlags;Lio/opentelemetry/kotlin/tracing/TraceState;Z)Lio/opentelemetry/kotlin/tracing/SpanContext;
-	public abstract fun getInvalid ()Lio/opentelemetry/kotlin/tracing/SpanContext;
-}
-
 public abstract interface class io/opentelemetry/kotlin/factory/SpanFactory {
 	public abstract fun fromSpanContext (Lio/opentelemetry/kotlin/tracing/SpanContext;)Lio/opentelemetry/kotlin/tracing/Span;
 	public abstract fun getInvalid ()Lio/opentelemetry/kotlin/tracing/Span;
-}
-
-public abstract interface class io/opentelemetry/kotlin/factory/TraceFlagsFactory {
-	public abstract fun fromHex (Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/TraceFlags;
-	public abstract fun getDefault ()Lio/opentelemetry/kotlin/tracing/TraceFlags;
-}
-
-public abstract interface class io/opentelemetry/kotlin/factory/TraceStateFactory {
-	public abstract fun getDefault ()Lio/opentelemetry/kotlin/tracing/TraceState;
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/Logger {

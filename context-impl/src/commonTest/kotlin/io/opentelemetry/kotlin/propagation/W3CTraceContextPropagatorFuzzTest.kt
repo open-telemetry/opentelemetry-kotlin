@@ -7,10 +7,8 @@ import io.kotest.property.arbitrary.filter
 import io.kotest.property.checkAll
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
+import io.opentelemetry.kotlin.tracing.contextimpl.createSpanContext
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,18 +24,10 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class W3CTraceContextPropagatorFuzzTest {
 
-    private val traceFlagsFactory = DefaultTraceFlagsFactory
-    private val traceStateFactory = DefaultTraceStateFactory
-    private val spanContextFactory = DefaultSpanContextFactory
-    private val spanFactory = SpanFactoryImpl(spanContextFactory)
+    private val spanFactory = SpanFactoryImpl()
     private val contextFactory = ContextFactoryImpl(spanFactory)
 
-    private val propagator = W3CTraceContextPropagator(
-        traceFlagsFactory = traceFlagsFactory,
-        traceStateFactory = traceStateFactory,
-        spanContextFactory = spanContextFactory,
-        spanFactory = spanFactory,
-    )
+    private val propagator = W3CTraceContextPropagator(spanFactory = spanFactory)
 
     private val headerArb = arbitrary { rs ->
         val len = rs.random.nextInt(0, MAX_HEADER_LEN + 1)
@@ -119,16 +109,13 @@ internal class W3CTraceContextPropagatorFuzzTest {
             Arb.boolean(),
             traceStateEntriesArb,
         ) { traceId, spanId, isSampled, isRandom, entries ->
-            val flags = DefaultTraceFlagsFactory.create(isSampled = isSampled, isRandom = isRandom)
-            val state = entries.fold(traceStateFactory.default) { acc, (k, v) -> acc.put(k, v) }
-
-            val original = spanContextFactory.create(
-                traceId = traceId,
-                spanId = spanId,
-                traceFlags = flags,
-                traceState = state,
-                isRemote = false,
-            )
+            val original = createSpanContext(traceId, spanId) {
+                this.isSampled = isSampled
+                this.isRandom = isRandom
+                traceState {
+                    entries.forEach { (k, v) -> put(k, v) }
+                }
+            }
             val context = contextFactory.root().storeSpan(spanFactory.fromSpanContext(original))
 
             val carrier = mutableMapOf<String, String>()
@@ -139,8 +126,8 @@ internal class W3CTraceContextPropagatorFuzzTest {
 
             assertEquals(traceId, sc.traceId)
             assertEquals(spanId, sc.spanId)
-            assertEquals(flags.isSampled, sc.traceFlags.isSampled)
-            assertEquals(state.asMap(), sc.traceState.asMap())
+            assertEquals(isSampled, sc.traceFlags.isSampled)
+            assertEquals(original.traceState.asMap(), sc.traceState.asMap())
             assertTrue(sc.isRemote)
         }
     }

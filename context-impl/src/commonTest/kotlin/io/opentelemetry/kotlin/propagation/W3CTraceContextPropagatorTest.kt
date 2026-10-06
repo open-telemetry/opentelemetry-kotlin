@@ -3,14 +3,12 @@ package io.opentelemetry.kotlin.propagation
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateCodec
 import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.kotlin.tracing.TraceFlags
 import io.opentelemetry.kotlin.tracing.TraceState
+import io.opentelemetry.kotlin.tracing.contextimpl.createSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -25,18 +23,11 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class W3CTraceContextPropagatorTest {
 
-    private val traceFlagsFactory = DefaultTraceFlagsFactory
     private val traceStateFactory = DefaultTraceStateFactory
-    private val spanContextFactory = DefaultSpanContextFactory
-    private val spanFactory = SpanFactoryImpl(spanContextFactory)
+    private val spanFactory = SpanFactoryImpl()
     private val contextFactory = ContextFactoryImpl(spanFactory)
 
-    private val propagator = W3CTraceContextPropagator(
-        traceFlagsFactory = traceFlagsFactory,
-        traceStateFactory = traceStateFactory,
-        spanContextFactory = spanContextFactory,
-        spanFactory = spanFactory,
-    )
+    private val propagator = W3CTraceContextPropagator(spanFactory = spanFactory)
 
     private val traceId = "0af7651916cd43dd8448eb211c80319c"
     private val spanId = "b7ad6b7169203331"
@@ -65,7 +56,8 @@ internal class W3CTraceContextPropagatorTest {
     fun `inject writes canonical traceparent for a valid sampled span`() {
         val context = contextWithSpan(
             spanContext(
-                traceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false),
+                isSampled = true,
+                isRandom = false,
             ),
         )
         val carrier = injectInto(context)
@@ -76,7 +68,7 @@ internal class W3CTraceContextPropagatorTest {
     fun `inject writes flags 00 when not sampled`() {
         val context = contextWithSpan(
             spanContext(
-                traceFlags = DefaultTraceFlagsFactory.default,
+                isSampled = false,
             ),
         )
         val carrier = injectInto(context)
@@ -87,7 +79,8 @@ internal class W3CTraceContextPropagatorTest {
     fun `inject writes flags 03 when sampled and random bits set`() {
         val context = contextWithSpan(
             spanContext(
-                traceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = true),
+                isSampled = true,
+                isRandom = true,
             ),
         )
         val carrier = injectInto(context)
@@ -266,7 +259,8 @@ internal class W3CTraceContextPropagatorTest {
     fun `inject and extract round-trip preserves traceId spanId flags and tracestate`() {
         val state = traceStateFactory.default.put("vendor", "value")
         val original = spanContext(
-            traceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false),
+            isSampled = true,
+            isRandom = false,
             traceState = state,
         )
         val carrier = injectInto(contextWithSpan(original))
@@ -281,15 +275,16 @@ internal class W3CTraceContextPropagatorTest {
     }
 
     private fun spanContext(
-        traceFlags: TraceFlags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false),
+        isSampled: Boolean = true,
+        isRandom: Boolean = false,
         traceState: TraceState = traceStateFactory.default,
-    ): SpanContext = spanContextFactory.create(
-        traceId = traceId,
-        spanId = spanId,
-        traceFlags = traceFlags,
-        traceState = traceState,
-        isRemote = false,
-    )
+    ): SpanContext = createSpanContext(traceId, spanId) {
+        this.isSampled = isSampled
+        this.isRandom = isRandom
+        traceState {
+            traceState.asMap().forEach { (key, value) -> put(key, value) }
+        }
+    }
 
     private fun contextWithSpan(spanContext: SpanContext): Context =
         contextFactory.root().storeSpan(spanFactory.fromSpanContext(spanContext))

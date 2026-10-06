@@ -8,10 +8,7 @@ import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.FakeResourceFactory
-import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
-import io.opentelemetry.kotlin.factory.FakeTraceFlagsFactory
-import io.opentelemetry.kotlin.factory.FakeTraceStateFactory
 import io.opentelemetry.kotlin.logging.FakeLoggerProvider
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.FakeMeterProvider
@@ -185,9 +182,6 @@ internal class OpenTelemetryImplTest {
         loggerProvider = loggerProvider,
         meterProvider = FakeMeterProvider(),
         clock = FakeClock(),
-        spanContext = FakeSpanContextFactory(),
-        traceFlags = FakeTraceFlagsFactory(),
-        traceState = FakeTraceStateFactory(),
         context = FakeContextFactory(),
         span = FakeSpanFactory(),
         idGenerator = FakeIdGenerator(),

@@ -4,15 +4,13 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.context.ContextKeyImpl
-import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
-import io.opentelemetry.kotlin.factory.TraceFlagsFactory
-import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.init.B3Format
 import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_HEX_LENGTH
 import io.opentelemetry.kotlin.propagation.utils.isAllZerosHex
 import io.opentelemetry.kotlin.propagation.utils.isValidHex
 import io.opentelemetry.kotlin.tracing.SpanContext
+import io.opentelemetry.kotlin.tracing.contextimpl.createSpanContext
 
 /**
  * B3 trace context propagator supporting both single-header and multi-header formats.
@@ -25,9 +23,6 @@ import io.opentelemetry.kotlin.tracing.SpanContext
 @OptIn(ExperimentalApi::class)
 public class B3Propagator(
     private val format: B3Format,
-    private val traceFlagsFactory: TraceFlagsFactory,
-    private val traceStateFactory: TraceStateFactory,
-    private val spanContextFactory: SpanContextFactory,
     private val spanFactory: SpanFactory,
 ) : TextMapPropagator {
 
@@ -128,19 +123,9 @@ public class B3Propagator(
         sampled: String?,
         traceId: String,
         rawSpanId: String
-    ): SpanContext {
-        val traceFlags = if (debug || isSampledValue(sampled)) {
-            traceFlagsFactory.fromHex("01")
-        } else {
-            traceFlagsFactory.fromHex("00")
-        }
-        return spanContextFactory.create(
-            traceId = traceId,
-            spanId = rawSpanId,
-            traceFlags = traceFlags,
-            traceState = traceStateFactory.default,
-            isRemote = true,
-        )
+    ): SpanContext = createSpanContext(traceId, rawSpanId) {
+        isSampled = debug || isSampledValue(sampled)
+        isRemote = true
     }
 
     private fun normalizeTraceId(raw: String?): String? {

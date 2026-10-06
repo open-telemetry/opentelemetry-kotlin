@@ -6,17 +6,14 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import io.opentelemetry.kotlin.tracing.implementation.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.model.hex
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -33,7 +30,6 @@ internal class TracerSpanContextTest {
     private lateinit var clock: FakeClock
     private lateinit var processor: FakeSpanProcessor
     private lateinit var contextFactory: ContextFactory
-    private lateinit var spanContextFactory: SpanContextFactory
     private lateinit var spanFactory: SpanFactory
     private lateinit var idGenerator: IdGenerator
 
@@ -42,16 +38,12 @@ internal class TracerSpanContextTest {
         clock = FakeClock()
         processor = FakeSpanProcessor()
         idGenerator = IdGeneratorImpl()
-        val traceFlags = DefaultTraceFlagsFactory
-        val traceState = DefaultTraceStateFactory
-        spanContextFactory = DefaultSpanContextFactory
-        spanFactory = SpanFactoryImpl(spanContextFactory)
+        spanFactory = SpanFactoryImpl()
         contextFactory = ContextFactoryImpl(spanFactory)
         tracer = TracerImpl(
             clock = clock,
             processor = processor,
             contextFactory = contextFactory,
-            spanContextFactory = spanContextFactory,
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,
@@ -115,7 +107,7 @@ internal class TracerSpanContextTest {
         second.end()
 
         assertSame(span.spanContext, first.toReadableSpan().parent)
-        assertSame(spanContextFactory.invalid, second.toReadableSpan().parent)
+        assertSame(createInvalidSpanContext(), second.toReadableSpan().parent)
     }
 
     private fun assertValidSpanContext(spanContext: SpanContext) {

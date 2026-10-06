@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
+import io.opentelemetry.kotlin.tracing.compat.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.ext.storeInContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceFlags
@@ -190,7 +191,7 @@ internal class SpanExportTest {
 
     @Test
     fun `test invalid span context`() {
-        val invalidContext = harness.kotlinApi.spanContext.invalid
+        val invalidContext = createInvalidSpanContext()
 
         // Test invalid context properties
         assertFalse(invalidContext.isValid)

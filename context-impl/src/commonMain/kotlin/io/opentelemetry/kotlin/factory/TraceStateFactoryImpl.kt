@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateValidator
 import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.TraceStateImpl
+import io.opentelemetry.kotlin.tracing.TracingDsl
 
 @ExperimentalApi
 public class TraceStateFactoryImpl : TraceStateFactory {
@@ -23,17 +24,18 @@ internal fun buildTraceState(action: TraceStateCreationAction.() -> Unit): Trace
  * DSL receiver for [buildTraceState].
  */
 @OptIn(ExperimentalApi::class)
-internal class TraceStateCreationAction {
+@TracingDsl
+public class TraceStateCreationAction internal constructor() {
 
     private val entries = linkedMapOf<String, String>()
 
-    fun put(key: String, value: String) {
+    public fun put(key: String, value: String) {
         if (W3CTraceStateValidator.canPut(entries, key, value)) {
             entries[key] = value
         }
     }
 
-    fun build(): TraceState = if (entries.isEmpty()) {
+    internal fun build(): TraceState = if (entries.isEmpty()) {
         TraceStateImpl.EMPTY
     } else {
         TraceStateImpl(entries)

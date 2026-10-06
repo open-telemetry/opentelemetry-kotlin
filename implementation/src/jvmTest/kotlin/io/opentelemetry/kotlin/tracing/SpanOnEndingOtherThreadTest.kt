@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
-import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import java.util.concurrent.CountDownLatch
@@ -121,7 +120,6 @@ internal class SpanOnEndingOtherThreadTest {
         clock = FakeClock(),
         processor = processor,
         contextFactory = FakeContextFactory(),
-        spanContextFactory = FakeSpanContextFactory(),
         scope = InstrumentationScopeInfoImpl("key", null, null, emptyMap()),
         resource = FakeResource(),
         spanLimitConfig = fakeSpanLimitsConfig,

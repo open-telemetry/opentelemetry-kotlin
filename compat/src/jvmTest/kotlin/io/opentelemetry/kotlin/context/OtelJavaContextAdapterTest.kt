@@ -10,11 +10,10 @@ import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
+import io.opentelemetry.kotlin.tracing.compat.createInvalidSpanContext
+import io.opentelemetry.kotlin.tracing.compat.createSpanContext
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -27,16 +26,10 @@ import kotlin.test.assertTrue
 internal class OtelJavaContextAdapterTest {
 
     private val contextFactory = CompatContextFactory()
-    private val kotlinContextFactory = ContextFactoryImpl(SpanFactoryImpl(DefaultSpanContextFactory))
+    private val kotlinContextFactory = ContextFactoryImpl(SpanFactoryImpl())
     private val kotlinSpan = NonRecordingSpan(
-        DefaultSpanContextFactory.invalid,
-        DefaultSpanContextFactory.create(
-            traceId = "0af7651916cd43dd8448eb211c80319c",
-            spanId = "b7ad6b7169203331",
-            traceFlags = DefaultTraceFlagsFactory.default,
-            traceState = DefaultTraceStateFactory.default,
-            isRemote = false,
-        ),
+        createInvalidSpanContext(),
+        createSpanContext("0af7651916cd43dd8448eb211c80319c", "b7ad6b7169203331"),
     )
 
     @Test

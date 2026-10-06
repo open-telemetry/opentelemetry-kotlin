@@ -8,9 +8,6 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
@@ -22,6 +19,8 @@ import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.TracerImpl
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.fakeSpanLimitsConfig
+import io.opentelemetry.kotlin.tracing.implementation.createInvalidSpanContext
+import io.opentelemetry.kotlin.tracing.implementation.createSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -32,9 +31,7 @@ internal class BuiltInSamplersTest {
 
     private val clock = FakeClock()
     private val idGenerator = IdGeneratorImpl()
-    private val traceStateFactory = DefaultTraceStateFactory
-    private val spanContextFactory = DefaultSpanContextFactory
-    private val spanFactory = SpanFactoryImpl(spanContextFactory)
+    private val spanFactory = SpanFactoryImpl()
     private val contextFactory = ContextFactoryImpl(spanFactory)
     private val scope = InstrumentationScopeInfoImpl("test", null, null, emptyMap())
 
@@ -44,7 +41,6 @@ internal class BuiltInSamplersTest {
         clock = clock,
         processor = FakeSpanProcessor(),
         contextFactory = contextFactory,
-        spanContextFactory = spanContextFactory,
         scope = scope,
         resource = FakeResource(),
         spanLimitConfig = fakeSpanLimitsConfig,
@@ -55,18 +51,11 @@ internal class BuiltInSamplersTest {
     )
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean): Context {
-        val traceFlags = when {
-            sampled -> DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false)
-            else -> DefaultTraceFlagsFactory.default
+        val parentSpanContext = createSpanContext("12345678901234567890123456789012", "1234567890123456") {
+            isSampled = sampled
+            this.isRemote = isRemote
         }
-        val parentSpanContext = spanContextFactory.create(
-            traceId = "12345678901234567890123456789012",
-            spanId = "1234567890123456",
-            traceFlags = traceFlags,
-            traceState = traceStateFactory.default,
-            isRemote = isRemote,
-        )
-        val parentSpan = NonRecordingSpan(spanContextFactory.invalid, parentSpanContext)
+        val parentSpan = NonRecordingSpan(createInvalidSpanContext(), parentSpanContext)
         return contextFactory.root().storeSpan(parentSpan)
     }
 

@@ -24,7 +24,6 @@ import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.OtelJavaIdGeneratorAdapter
 import io.opentelemetry.kotlin.resource.Resource
@@ -120,7 +119,7 @@ internal class CompatTracerProviderConfig(
         }
     }
 
-    private val newSamplerDsl: SamplerConfigDsl = CompatSamplerConfig(CompatSpanFactory(DefaultSpanContextFactory))
+    private val newSamplerDsl: SamplerConfigDsl = CompatSamplerConfig(CompatSpanFactory())
 
     private val defaultSampler: Sampler = newSamplerDsl.parentBased(root = newSamplerDsl.alwaysOn())
 

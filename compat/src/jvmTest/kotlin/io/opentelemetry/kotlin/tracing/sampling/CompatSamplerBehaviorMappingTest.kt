@@ -5,40 +5,29 @@ import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.SpanKind
+import io.opentelemetry.kotlin.tracing.compat.createInvalidSpanContext
+import io.opentelemetry.kotlin.tracing.compat.createSpanContext
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 internal class CompatSamplerBehaviorMappingTest {
 
-    private val spanContextFactory = DefaultSpanContextFactory
-    private val traceStateFactory = DefaultTraceStateFactory
     private val contextFactory = CompatContextFactory()
-    private val spanFactory: SpanFactory = CompatSpanFactory(spanContextFactory)
+    private val spanFactory: SpanFactory = CompatSpanFactory()
 
     private val samplerDsl = CompatSamplerConfig(spanFactory)
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean): Context {
-        val traceFlags = if (sampled) {
-            DefaultTraceFlagsFactory.fromHex("01")
-        } else {
-            DefaultTraceFlagsFactory.default
+        val parentSpanContext = createSpanContext("12345678901234567890123456789012", "1234567890123456") {
+            isSampled = sampled
+            this.isRemote = isRemote
         }
-        val parentSpanContext = spanContextFactory.create(
-            traceId = "12345678901234567890123456789012",
-            spanId = "1234567890123456",
-            traceFlags = traceFlags,
-            traceState = traceStateFactory.default,
-            isRemote = isRemote,
-        )
-        val parentSpan = NonRecordingSpan(spanContextFactory.invalid, parentSpanContext)
+        val parentSpan = NonRecordingSpan(createInvalidSpanContext(), parentSpanContext)
         return contextFactory.root().storeSpan(parentSpan)
     }
 

@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.factory
 
+import io.opentelemetry.kotlin.tracing.compat.createSpanContext
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
@@ -7,15 +8,12 @@ import kotlin.test.assertTrue
 
 internal class SpanFactoryImplTest {
 
-    private val spanContextFactory = DefaultSpanContextFactory
-    private val traceStateFactory = DefaultTraceStateFactory
-    private val traceFlagsFactory = DefaultTraceFlagsFactory
     private val contextFactory = CompatContextFactory()
-    private val spanFactory = CompatSpanFactory(spanContextFactory)
+    private val spanFactory = CompatSpanFactory()
 
     @Test
     fun `test invalid is the same instance`() {
-        assertSame(spanContextFactory.invalid, spanContextFactory.invalid)
+        assertSame(spanFactory.invalid, spanFactory.invalid)
     }
 
     @Test
@@ -28,13 +26,7 @@ internal class SpanFactoryImplTest {
     @Test
     fun `test from span context`() {
         val generator = CompatIdGenerator()
-        val spanContext = spanContextFactory.create(
-            traceIdBytes = generator.generateTraceIdBytes(),
-            spanIdBytes = generator.generateSpanIdBytes(),
-            traceState = traceStateFactory.default,
-            traceFlags = traceFlagsFactory.default,
-            isRemote = false,
-        )
+        val spanContext = createSpanContext(generator.generateTraceIdBytes(), generator.generateSpanIdBytes())
         val span = spanFactory.fromSpanContext(spanContext)
         assertTrue(span.spanContext.isValid)
     }

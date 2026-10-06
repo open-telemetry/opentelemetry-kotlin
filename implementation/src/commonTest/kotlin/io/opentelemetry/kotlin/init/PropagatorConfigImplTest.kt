@@ -2,9 +2,6 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.propagation.FakeTextMapGetter
 import io.opentelemetry.kotlin.propagation.FakeTextMapSetter
@@ -18,10 +15,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class PropagatorConfigImplTest {
 
-    private val traceFlagsFactory = DefaultTraceFlagsFactory
-    private val traceStateFactory = DefaultTraceStateFactory
-    private val spanContextFactory = DefaultSpanContextFactory
-    private val spanFactory = SpanFactoryImpl(spanContextFactory)
+    private val spanFactory = SpanFactoryImpl()
     private val contextFactory = ContextFactoryImpl(spanFactory)
     private val contextWithSpan = contextFactory.root().storeSpan(spanFactory.fromSpanContext(FakeSpanContext.VALID))
 
@@ -45,7 +39,7 @@ internal class PropagatorConfigImplTest {
     @Test
     fun `w3cTraceContext routes through delegate once factories are installed`() {
         val config = PropagatorConfigImpl().apply { w3cTraceContext() }
-        config.installFactories(traceFlagsFactory, traceStateFactory, spanContextFactory, spanFactory)
+        config.installFactories(spanFactory)
         val propagator = config.buildPropagator()
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
 

@@ -7,7 +7,6 @@ import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -25,8 +24,7 @@ import kotlin.test.assertSame
 internal class ResolvedSamplerConfigTest {
 
     private val clock = FakeClock()
-    private val spanContextFactory = DefaultSpanContextFactory
-    private val spanFactory = SpanFactoryImpl(spanContextFactory)
+    private val spanFactory = SpanFactoryImpl()
     private val contextFactory = ContextFactoryImpl(spanFactory)
 
     private fun tracingConfig(
