@@ -6,3 +6,4 @@ public final class io/opentelemetry/kotlin/OpenTelemetryImplEntrypointKt {
 public final class io/opentelemetry/kotlin/resource/HostResourceDetectorKt {
 	public static final fun hostResourceDetector (Lio/opentelemetry/kotlin/init/ResourceDetectionConfigDsl;)Lio/opentelemetry/kotlin/resource/ResourceDetector;
 }
+
