@@ -33,7 +33,12 @@ internal class CompatImplicitContextIntegrationTest {
 
     @After
     fun resetImplicitContext() {
-        OtelJavaContext.root().makeCurrent()
+        try {
+            assertEquals(OtelJavaContext.root(), OtelJavaContext.current(), "Test leaked a scope")
+            assertFalse(errorHandler.hasErrors())
+        } finally {
+            OtelJavaContext.root().makeCurrent()
+        }
     }
 
     @Test
@@ -172,6 +177,5 @@ internal class CompatImplicitContextIntegrationTest {
         OtelJavaContext.current().with(key, "value").makeCurrent().use {
             assertEquals("value", sdk.context.implicit().toOtelJavaContext().get(key))
         }
-        assertFalse(errorHandler.hasErrors())
     }
 }

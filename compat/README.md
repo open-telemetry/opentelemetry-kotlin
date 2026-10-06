@@ -20,15 +20,15 @@ The Kotlin and Java APIs must agree on a single implicit context, otherwise span
 parent or their trace/span IDs.
 
 `createCompatOpenTelemetry()` and `toOtelKotlinApi()` always store the implicit context in whichever
-`ContextStorage` is configured on opentelemetry-java (thread-local by default), so both APIs share it.
-Configuration supplied via `context { ... }` is ignored in compat mode and reported as a warning to the
-`SdkErrorHandler`. To customize storage, configure opentelemetry-java's `ContextStorage` instead.
+`ContextStorage` is configured on opentelemetry-java (thread-local by default), so the Kotlin and Java
+Context APIs can be used interchangeably. Configuration supplied via `context { ... }` to
+`createCompatOpenTelemetry()` is ignored and reported as a warning to the `SdkErrorHandler`. To customize
+storage, configure opentelemetry-java's `ContextStorage` instead.
 
 When using `implementation` together with `toOtelJavaApi()`, set
-`storageMode = ImplicitContextStorageMode.THREAD_LOCAL` for compatibility with the Java SDK's default behavior.
-
-When using `toOtelJavaApi()` you should not read or set the opentelemetry-java implicit context
-directly, as it is a separate store that the Kotlin SDK never sees. This includes:
+`storageMode = ImplicitContextStorageMode.THREAD_LOCAL` for compatibility with the Java SDK's default
+behavior. In that setup you should not read or set the opentelemetry-java implicit context directly, as
+it is a separate store that the Kotlin SDK never sees. This includes:
 
 - `Context.current()` / `OtelJavaContext.current()`
 - `Context.makeCurrent()` (e.g. `Context.current().with(span).makeCurrent()`)
