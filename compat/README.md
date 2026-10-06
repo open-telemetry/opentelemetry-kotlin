@@ -17,18 +17,28 @@ the long term as this use-case has less focused testing compared to using each m
 ## Context
 
 The Kotlin and Java APIs must agree on a single implicit context, otherwise spans and logs lose their
-parent or their trace/span IDs. For compatibility with the Java SDK's default behavior, set
-`storageMode = ImplicitContextStorageMode.THREAD_LOCAL`.
+parent or their trace/span IDs.
 
-When using `toOtelJavaApi()` you should not read or set the opentelemetry-java implicit context
-directly, as it is a separate store that the Kotlin SDK never sees. This includes:
+When using `toOtelJavaApi()`, opt in to storing the implicit context in opentelemetry-java's
+`ContextStorage` when creating the SDK:
 
-- `Context.current()` / `OtelJavaContext.current()`
-- `Context.makeCurrent()` (e.g. `Context.current().with(span).makeCurrent()`)
-- `Span.current()` and `Baggage.current()`
-- `Baggage.makeCurrent()`
+```kotlin
+val otel = createOpenTelemetry {
+    context {
+        useOtelJavaContextStorage()
+    }
+}
+val javaApi = otel.toOtelJavaApi()
+```
 
-Use `OpenTelemetry.context.implicit()` and `Context.attach()` instead, or call `makeCurrent()` on a span
+This lets Java code use `Context.current()`, `Context.makeCurrent()`, `Span.current()`,
+`Baggage.current()` and similar APIs with the same implicit context as the Kotlin API. It also
+respects any `ContextStorage` wrappers that are installed (e.g. by the Java agent). If
+`toOtelJavaApi()` is called without this option, a warning is reported to the SDK's error handler.
+
+Without the option, do not read or set the opentelemetry-java implicit context directly through
+the APIs above. They use a separate store that the Kotlin SDK never sees. Use
+`OpenTelemetry.context.implicit()` and `Context.attach()` instead, or call `makeCurrent()` on a span
 obtained from the Java API.
 
 This module only ships a JVM artifact because it depends on the `opentelemetry-java` library.

@@ -10,10 +10,10 @@ private const val ALREADY_DETACHED_MSG = "Scope.detach() called on an already-de
 private const val OUT_OF_ORDER_MSG = "Scope.detach() called out of order — context has already changed"
 
 internal class ScopeImpl private constructor(
-    private val previousContext: Context,
     private val currentContext: Context,
     private val storage: ImplicitContextStorage,
     private val sdkErrorHandler: SdkErrorHandler,
+    private val restore: () -> Unit,
 ) : Scope {
 
     private val detached = AtomicBoolean(false)
@@ -31,7 +31,7 @@ internal class ScopeImpl private constructor(
             reportMisuse(ALREADY_DETACHED_MSG)
             return false
         }
-        storage.setImplicitContext(previousContext)
+        restore()
         return true
     }
 
@@ -51,6 +51,7 @@ internal class ScopeImpl private constructor(
             currentContext: Context,
             storage: ImplicitContextStorage,
             sdkErrorHandler: SdkErrorHandler,
+            restore: () -> Unit = { storage.setImplicitContext(previousContext) },
         ): Scope =
             if (previousContext == currentContext) {
                 sdkErrorHandler.reportError(
@@ -63,10 +64,10 @@ internal class ScopeImpl private constructor(
                 DetachedScope
             } else {
                 ScopeImpl(
-                    previousContext = previousContext,
                     currentContext = currentContext,
                     storage = storage,
                     sdkErrorHandler = sdkErrorHandler,
+                    restore = restore,
                 )
             }
     }

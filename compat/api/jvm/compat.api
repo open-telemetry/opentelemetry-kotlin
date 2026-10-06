@@ -28,6 +28,10 @@ public final class io/opentelemetry/kotlin/context/OtelJavaContextExtKt {
 	public static final fun toOtelKotlinContext (Lio/opentelemetry/context/Context;)Lio/opentelemetry/kotlin/context/Context;
 }
 
+public final class io/opentelemetry/kotlin/init/ContextConfigDslExtKt {
+	public static final fun useOtelJavaContextStorage (Lio/opentelemetry/kotlin/init/ContextConfigDsl;)V
+}
+
 public final class io/opentelemetry/kotlin/logging/export/LogRecordExporterExtKt {
 	public static final fun toOtelKotlinLogRecordExporter (Lio/opentelemetry/sdk/logs/export/LogRecordExporter;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
 }
