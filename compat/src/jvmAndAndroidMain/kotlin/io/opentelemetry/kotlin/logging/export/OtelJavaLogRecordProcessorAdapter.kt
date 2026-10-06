@@ -19,9 +19,9 @@ internal class OtelJavaLogRecordProcessorAdapter(
     private val sdkErrorHandler: SdkErrorHandler,
 ) : OtelJavaLogRecordProcessor {
 
-    private val scope = CoroutineScope(
-        SupervisorJob() + Dispatchers.Default + telemetryExceptionHandler("LogRecordProcessor", sdkErrorHandler)
-    )
+    private val scope by lazy {
+        CoroutineScope(SupervisorJob() + Dispatchers.Default + telemetryExceptionHandler("LogRecordProcessor", sdkErrorHandler))
+    }
 
     override fun onEmit(
         context: OtelJavaContext,

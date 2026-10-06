@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.runWithTimeout
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -26,8 +25,6 @@ internal suspend fun awaitOperationResultCode(
 ): OperationResultCode = runWithTimeout(timeoutMs) {
     val resultCode = try {
         action()
-    } catch (e: CancellationException) {
-        throw e
     } catch (ignored: Throwable) {
         return@runWithTimeout OperationResultCode.Failure
     }

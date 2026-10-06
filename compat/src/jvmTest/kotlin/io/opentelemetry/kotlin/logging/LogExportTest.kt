@@ -68,6 +68,28 @@ internal class LogExportTest {
     }
 
     @Test
+    fun `test complex attribute values export`() = runTest {
+        val list = AnyValue.ListValue(listOf(AnyValue.LongValue(1), AnyValue.StringValue("a")))
+        val map = AnyValue.MapValue(mapOf("k" to AnyValue.BoolValue(true)))
+        harness.logger.emit(
+            body = "complex",
+            attributes = {
+                setAnyValueAttribute("list", list)
+                setAnyValueAttribute("map", map)
+                setByteArrayAttribute("bytes", byteArrayOf(1, 2))
+            }
+        )
+        val expected = mapOf<String, Any>(
+            "list" to list,
+            "map" to map,
+            "bytes" to AnyValue.BytesValue(byteArrayOf(1, 2)),
+        )
+        harness.assertLogRecords(1, null) { logs ->
+            assertEquals(expected, logs[0].attributes)
+        }
+    }
+
+    @Test
     fun `test null AnyValue body leaves the body unset`() = runTest {
         harness.logger.emit(AnyValue.NullValue)
 

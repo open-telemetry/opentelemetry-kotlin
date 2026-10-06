@@ -22,7 +22,7 @@ internal class SpanDataAdapter(
     override val spanContext: SpanContext = impl.spanContext.toOtelKotlinSpanContext()
     override val spanKind: SpanKind = impl.kind.toOtelKotlinSpanKind()
     override val startTimestamp: Long = impl.startEpochNanos
-    override val endTimestamp: Long? = impl.endEpochNanos
+    override val endTimestamp: Long? = impl.endEpochNanos.takeIf { impl.hasEnded() }
     override val attributes: Map<String, Any> = impl.attributes.convertToMap()
     override val events: List<SpanEventData> = impl.events.map { SpanEventDataAdapter(it) }
     override val droppedEventsCount: Int = (impl.totalRecordedEvents - impl.events.size).coerceAtLeast(0)

@@ -4,6 +4,7 @@ import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.attributes.AnyValue
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -77,7 +78,7 @@ internal class ResourceAdapterTest {
 
         val result = base.asNewResource {
             attributes["any"] = AnyValue.LongValue(3)
-            attributes["unrepresentable"] = AnyValue.MapValue(mapOf("k" to AnyValue.LongValue(1)))
+            attributes["map"] = AnyValue.MapValue(mapOf("k" to AnyValue.LongValue(1)))
             attributes["bytes"] = byteArrayOf(1, 2)
         }
 
@@ -85,9 +86,29 @@ internal class ResourceAdapterTest {
         assertEquals("hello", attrs["str"])
         // Flattened to a long rather than serialized via AnyValue.toString().
         assertEquals(3L, attrs["any"])
-        // Variants Java OTel cannot represent are dropped, as is a ByteArray.
-        assertNull(attrs["unrepresentable"])
-        assertNull(attrs["bytes"])
+        assertEquals(AnyValue.MapValue(mapOf("k" to AnyValue.LongValue(1))), attrs["map"])
+        assertEquals(AnyValue.BytesValue(byteArrayOf(1, 2)), attrs["bytes"])
+    }
+
+    @Test
+    fun testEquality() {
+        fun create(value: String, schemaUrl: String? = "https://example.com") = ResourceAdapter(
+            OtelJavaResource.builder()
+                .put("key", value)
+                .put(AttributeKey.longArrayKey("list"), listOf(1L, 2L))
+                .apply { schemaUrl?.let(::setSchemaUrl) }
+                .build()
+        )
+
+        val resource = create("value")
+        assertEquals(resource, create("value"))
+        assertEquals(resource.hashCode(), create("value").hashCode())
+        assertNotEquals(resource, create("other"))
+        assertNotEquals(resource, create("value", schemaUrl = null))
+
+        // spans from the same provider must collapse into a single group for export
+        val groups = List(3) { create("value") }.groupBy { it }
+        assertEquals(1, groups.size)
     }
 
     @Test

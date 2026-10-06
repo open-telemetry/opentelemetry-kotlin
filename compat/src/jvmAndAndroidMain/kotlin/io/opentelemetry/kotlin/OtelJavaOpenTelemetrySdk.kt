@@ -10,10 +10,11 @@ internal class OtelJavaOpenTelemetrySdk(
     private val tracerProvider: OtelJavaTracerProvider,
     private val loggerProvider: OtelJavaLoggerProvider,
     private val meterProvider: OtelJavaMeterProvider,
+    private val propagators: OtelJavaContextPropagators,
 ) : OtelJavaOpenTelemetry {
 
     override fun getTracerProvider(): OtelJavaTracerProvider = tracerProvider
     override fun getLogsBridge(): OtelJavaLoggerProvider = loggerProvider
     override fun getMeterProvider(): OtelJavaMeterProvider = meterProvider
-    override fun getPropagators(): OtelJavaContextPropagators = OtelJavaContextPropagators.noop()
+    override fun getPropagators(): OtelJavaContextPropagators = propagators
 }

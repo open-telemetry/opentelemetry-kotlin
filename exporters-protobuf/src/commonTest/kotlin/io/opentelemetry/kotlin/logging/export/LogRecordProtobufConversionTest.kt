@@ -195,4 +195,33 @@ class LogRecordProtobufConversionTest {
         assertTrue(restored.body is Long, "expected Long, got ${restored.body?.let { it::class }}")
         assertEquals(99L, restored.body)
     }
+
+    @Test
+    fun testRawStructuredBodyRoundTripsAsAnyValue() {
+        val obj = FakeLogRecordData(
+            body = mapOf("bytes" to byteArrayOf(1, 2), "list" to listOf(1L, "a"))
+        )
+        val restored = obj.toProtobuf().toLogRecordData(obj.resource, obj.instrumentationScopeInfo)
+        val expected = AnyValue.MapValue(
+            mapOf(
+                "bytes" to AnyValue.BytesValue(byteArrayOf(1, 2)),
+                "list" to AnyValue.ListValue(listOf(AnyValue.LongValue(1), AnyValue.StringValue("a"))),
+            )
+        )
+        assertEquals(expected, restored.body)
+    }
+
+    @Test
+    fun testHostileBodyIsDroppedWithoutFailingBatch() {
+        val hostile = object {
+            override fun toString(): String = error("boom")
+        }
+        val logs = listOf(FakeLogRecordData(body = hostile), FakeLogRecordData(body = "ok"))
+        val records = logs.toExportLogsServiceRequest().resource_logs
+            .flatMap { it.scope_logs }
+            .flatMap { it.log_records }
+        assertEquals(2, records.size)
+        assertNull(records[0].body)
+        assertEquals("ok", records[1].body?.string_value)
+    }
 }

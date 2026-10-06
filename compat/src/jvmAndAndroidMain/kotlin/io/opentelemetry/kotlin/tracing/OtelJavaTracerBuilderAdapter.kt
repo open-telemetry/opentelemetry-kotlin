@@ -2,10 +2,12 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.aliases.OtelJavaTracer
 import io.opentelemetry.kotlin.aliases.OtelJavaTracerBuilder
+import io.opentelemetry.kotlin.factory.ContextFactory
 
 internal class OtelJavaTracerBuilderAdapter(
     private val tracerProvider: TracerProvider,
-    private val instrumentationScopeName: String
+    private val instrumentationScopeName: String,
+    private val contextFactory: ContextFactory,
 ) : OtelJavaTracerBuilder {
     private var instrumentationScopeVersion: String? = null
     private var schemaUrl: String? = null
@@ -26,6 +28,6 @@ internal class OtelJavaTracerBuilderAdapter(
             version = instrumentationScopeVersion,
             schemaUrl = schemaUrl
         )
-        return OtelJavaTracerAdapter(tracer)
+        return OtelJavaTracerAdapter(tracer, contextFactory)
     }
 }

@@ -1,12 +1,10 @@
 package io.opentelemetry.kotlin
 
-import io.opentelemetry.kotlin.baggage.NoopBaggage
 import io.opentelemetry.kotlin.config.NoopConfigProperties
 import io.opentelemetry.kotlin.config.NoopConfigProvider
 import io.opentelemetry.kotlin.context.NoopContext
 import io.opentelemetry.kotlin.context.NoopContextKey
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.factory.NoopBaggageFactory
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapSetter
@@ -255,18 +253,6 @@ internal class NoopTests {
     @Test
     fun testNoopOpenTelemetryPropagator() {
         assertSame(createNoopPropagator(), NoopOpenTelemetry.propagator)
-    }
-
-    @Test
-    fun testNoopBaggageFactory() {
-        assertSame(NoopBaggage, NoopBaggageFactory.empty())
-        assertSame(NoopBaggage, NoopBaggageFactory.create { })
-    }
-
-    @Test
-    fun testNoopOpenTelemetryBaggage() {
-        assertSame(NoopBaggageFactory, NoopOpenTelemetry.baggage)
-        assertSame(NoopBaggage, NoopOpenTelemetry.baggage.create { put("k", "v") })
     }
 
     @Test

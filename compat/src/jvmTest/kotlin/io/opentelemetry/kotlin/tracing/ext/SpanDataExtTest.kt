@@ -3,11 +3,18 @@
 package io.opentelemetry.kotlin.tracing.ext
 
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
+import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaReadWriteSpan
+import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaReadableSpan
+import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanData
 import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanEventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
+import io.opentelemetry.kotlin.tracing.data.SpanDataAdapter
+import io.opentelemetry.kotlin.tracing.model.ReadWriteSpanAdapter
+import io.opentelemetry.kotlin.tracing.model.ReadableSpanAdapter
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
 import org.junit.Test
 
 internal class SpanDataExtTest {
@@ -57,5 +64,24 @@ internal class SpanDataExtTest {
         assertEquals(scope.name, libraryInfo.name)
         assertEquals(scope.version, libraryInfo.version)
         assertEquals(scope.schemaUrl, libraryInfo.schemaUrl)
+    }
+
+    @Test
+    fun testSpanDataAdapterIsUnwrapped() {
+        val impl = FakeOtelJavaSpanData()
+        assertSame(impl, SpanDataAdapter(impl).toOtelJavaSpanData())
+    }
+
+    @Test
+    fun testReadableSpanAdapterIsUnwrapped() {
+        val impl = FakeOtelJavaSpanData()
+        assertSame(impl, ReadableSpanAdapter(FakeOtelJavaReadableSpan(impl)).toOtelJavaSpanData())
+    }
+
+    @Test
+    fun testReadWriteSpanAdapterIsUnwrapped() {
+        val impl = FakeOtelJavaSpanData()
+        val span = ReadWriteSpanAdapter(FakeOtelJavaReadWriteSpan(FakeOtelJavaReadableSpan(impl)))
+        assertSame(impl, span.toOtelJavaSpanData())
     }
 }

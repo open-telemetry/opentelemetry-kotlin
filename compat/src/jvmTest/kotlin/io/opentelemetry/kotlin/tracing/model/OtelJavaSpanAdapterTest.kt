@@ -1,7 +1,9 @@
 package io.opentelemetry.kotlin.tracing.model
 
 import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.common.Value
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.tracing.FakeSpan
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
@@ -43,6 +45,16 @@ internal class OtelJavaSpanAdapterTest {
         adapter.setAllAttributes(typedAttrs)
 
         assertTypesPreserved(span.attributes)
+    }
+
+    @Test
+    fun testSetValueAttributeKeepsShape() {
+        val span = FakeSpan()
+        val adapter = OtelJavaSpanAdapter(span)
+        adapter.setAttribute(AttributeKey.valueKey("list"), Value.of(listOf(Value.of(1L), Value.of(true))))
+
+        val expected = AnyValue.ListValue(listOf(AnyValue.LongValue(1L), AnyValue.BoolValue(true)))
+        assertEquals(expected, span.attributes["list"])
     }
 
     @Test

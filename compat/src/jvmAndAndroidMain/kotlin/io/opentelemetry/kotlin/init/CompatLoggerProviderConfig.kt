@@ -105,7 +105,8 @@ internal class CompatLoggerProviderConfig(
         logLimits: LogLimitsBehavior,
     ): LoggerProvider {
         this.logLimits = logLimits
-        builder.setLogLimits { this.logLimits.toOtelJavaLogLimits() }
+        val otelJavaLogLimits = logLimits.toOtelJavaLogLimits()
+        builder.setLogLimits { otelJavaLogLimits }
         loggerConfigurator?.let(::applyLoggerConfigurator)
         val resource = ResourceAdapter(
             OtelJavaResource.create(resourceAttrs.otelJavaAttributes(), resourceSchemaUrl)

@@ -27,7 +27,10 @@ internal class TracerAdapter(
         NonRecordingSpan(DefaultSpanContextFactory.invalid, DefaultSpanContextFactory.invalid)
     }
 
-    override fun enabled(): Boolean = true
+    override fun enabled(): Boolean =
+        sdkErrorHandler.guardOrDefault(false, "Tracer.enabled failed") {
+            tracer.isEnabled
+        }
 
     override fun startSpan(
         name: String,

@@ -20,12 +20,17 @@ internal class ContextAdapter(
 ) : Context {
 
     override fun <T> set(key: ContextKey<T>, value: T?): Context {
-        if (value == null) {
-            return this
-        }
-        val ctx = impl.with(repository.get(key), value)
+        val ctx = impl.with(repository.get(key), value.asJavaValue())
         return ContextAdapter(ctx, repository)
     }
+
+    /**
+     * opentelemetry-java stores null values (clearing the key), but K2 reads its unannotated
+     * parameter as non-null. Casting to a non-reified type parameter is erased and allows
+     * passing null.
+     */
+    @Suppress("UNCHECKED_CAST")
+    private fun <R> Any?.asJavaValue(): R = this as R
 
     override fun <T> get(key: ContextKey<T>): T? {
         return impl[repository.get(key)]
@@ -53,4 +58,8 @@ internal class ContextAdapter(
 
     override fun clearBaggage(): Context =
         ContextAdapter(OtelJavaBaggage.empty().storeInContext(impl), repository)
+
+    override fun equals(other: Any?): Boolean = other is ContextAdapter && other.impl == impl
+
+    override fun hashCode(): Int = impl.hashCode()
 }

@@ -23,6 +23,9 @@ kotlin {
         jvmTest {
             dependencies {
                 implementation(project(":compat"))
+                implementation(project(":java-typealiases"))
+                implementation(project.dependencies.platform(libs.opentelemetry.bom))
+                implementation(libs.opentelemetry.api)
             }
         }
     }

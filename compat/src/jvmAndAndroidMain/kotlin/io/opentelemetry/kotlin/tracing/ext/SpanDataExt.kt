@@ -9,8 +9,18 @@ import io.opentelemetry.kotlin.attributes.resourceFromMap
 import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
 import io.opentelemetry.kotlin.tracing.data.OtelJavaSpanDataImpl
 import io.opentelemetry.kotlin.tracing.data.SpanData
+import io.opentelemetry.kotlin.tracing.data.SpanDataAdapter
+import io.opentelemetry.kotlin.tracing.model.ReadWriteSpanAdapter
+import io.opentelemetry.kotlin.tracing.model.ReadableSpanAdapter
 
-internal fun SpanData.toOtelJavaSpanData(): OtelJavaSpanData {
+internal fun SpanData.toOtelJavaSpanData(): OtelJavaSpanData = when (this) {
+    is SpanDataAdapter -> impl
+    is ReadableSpanAdapter -> impl.toSpanData()
+    is ReadWriteSpanAdapter -> impl.toSpanData()
+    else -> convertToOtelJavaSpanData()
+}
+
+private fun SpanData.convertToOtelJavaSpanData(): OtelJavaSpanData {
     return OtelJavaSpanDataImpl(
         nameImpl = name,
         statusImpl = OtelJavaStatusData.create(status.statusCode.toOtelJavaStatusCode(), status.description),

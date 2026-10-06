@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.aliases.OtelJavaContextKey
-import java.util.Collections
 import java.util.WeakHashMap
 
 internal class ContextKeyRepository {
@@ -10,16 +9,17 @@ internal class ContextKeyRepository {
         val INSTANCE = ContextKeyRepository()
     }
 
-    private val impl =
-        Collections.synchronizedMap(WeakHashMap<ContextKey<*>, OtelJavaContextKey<*>>())
+    // only hold keys not created by the compat layer
+    private val foreignKeys = WeakHashMap<ContextKey<*>, OtelJavaContextKey<*>>()
 
     @Suppress("UNCHECKED_CAST")
     fun <T> get(key: ContextKey<T>): OtelJavaContextKey<T> {
-        return impl.getOrPut(key) {
-            if (key is ContextKeyAdapter) {
-                key.impl
-            } else {
-                OtelJavaContextKey.named(key.toString())
+        if (key is ContextKeyAdapter) {
+            return key.impl
+        }
+        return synchronized(foreignKeys) {
+            foreignKeys.getOrPut(key) {
+                OtelJavaContextKey.named<T>(key.toString())
             }
         } as OtelJavaContextKey<T>
     }

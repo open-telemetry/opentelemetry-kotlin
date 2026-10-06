@@ -11,6 +11,7 @@ kotlin {
         commonMain {
             dependencies {
                 api(project(":api"))
+                implementation(project(":propagation-utils"))
             }
         }
     }

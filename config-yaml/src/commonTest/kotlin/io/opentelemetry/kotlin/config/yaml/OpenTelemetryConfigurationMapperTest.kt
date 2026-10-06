@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.SimpleLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
@@ -105,7 +106,7 @@ internal class OpenTelemetryConfigurationMapperTest {
                     processor = SpanProcessorBehavior(console = console),
                 ),
                 loggerProvider = LoggerProviderBehavior(
-                    processor = LogRecordProcessorBehavior(console = console),
+                    processor = LogRecordProcessorBehavior(console = console, simple = SimpleLogRecordProcessorBehavior()),
                 ),
             ),
             config.toBehavior(),
@@ -156,7 +157,7 @@ internal class OpenTelemetryConfigurationMapperTest {
                     processor = SpanProcessorBehavior(http = http),
                 ),
                 loggerProvider = LoggerProviderBehavior(
-                    processor = LogRecordProcessorBehavior(http = http),
+                    processor = LogRecordProcessorBehavior(http = http, simple = SimpleLogRecordProcessorBehavior()),
                 ),
             ),
             config.toBehavior(),

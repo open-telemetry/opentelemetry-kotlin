@@ -9,6 +9,7 @@ internal class RecordingLogger(private val enabledResult: Boolean = true) : Logg
 
     val enabledCalls = mutableListOf<EnabledCall>()
     val emittedExceptions = mutableListOf<Throwable?>()
+    val emittedContexts = mutableListOf<Context?>()
 
     override fun enabled(
         context: Context?,
@@ -31,5 +32,6 @@ internal class RecordingLogger(private val enabledResult: Boolean = true) : Logg
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         emittedExceptions += exception
+        emittedContexts += context
     }
 }

@@ -2,6 +2,7 @@
 
 package io.opentelemetry.kotlin.tracing.model
 
+import io.opentelemetry.kotlin.ClockProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaClock
@@ -12,6 +13,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanData
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.attributes.attrsFromMap
+import io.opentelemetry.kotlin.attributes.getOtelJavaAttribute
 import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanData
@@ -41,13 +43,15 @@ internal class OtelJavaReadableSpanAdapter(
     override fun hasEnded(): Boolean = span.hasEnded
 
     override fun getLatencyNanos(): Long {
-        val end = span.endTimestamp ?: OtelJavaClock.getDefault().now()
+        val end = span.endTimestamp
+            ?: (span as? ClockProvider)?.clock?.now()
+            ?: OtelJavaClock.getDefault().now()
         return end - span.startTimestamp
     }
 
     override fun getKind(): OtelJavaSpanKind = span.spanKind.toOtelJavaSpanKind()
 
-    override fun <T> getAttribute(key: OtelJavaAttributeKey<T>): T? = attributes.get(key)
+    override fun <T> getAttribute(key: OtelJavaAttributeKey<T>): T? = span.attributes.getOtelJavaAttribute(key)
 
     override fun getAttributes(): OtelJavaAttributes = attrsFromMap(span.attributes)
 }
