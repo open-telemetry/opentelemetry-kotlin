@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProvider
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.awaitOperationResultCode
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.export.OperationResultCode
@@ -45,12 +46,22 @@ internal class LoggerProviderAdapter(
     }
 
     override suspend fun forceFlush(): OperationResultCode = when (impl) {
-        is OtelJavaSdkLoggerProvider -> awaitOperationResultCode { impl.forceFlush() }
+        is OtelJavaSdkLoggerProvider -> sdkErrorHandler.guardOrDefaultSuspend(
+            OperationResultCode.Failure,
+            "LoggerProvider.forceFlush failed",
+        ) {
+            awaitOperationResultCode { impl.forceFlush() }
+        }
         else -> OperationResultCode.Success
     }
 
     override suspend fun shutdown(): OperationResultCode = when (impl) {
-        is OtelJavaSdkLoggerProvider -> awaitOperationResultCode { impl.shutdown() }
+        is OtelJavaSdkLoggerProvider -> sdkErrorHandler.guardOrDefaultSuspend(
+            OperationResultCode.Failure,
+            "LoggerProvider.shutdown failed",
+        ) {
+            awaitOperationResultCode { impl.shutdown() }
+        }
         else -> OperationResultCode.Success
     }
 }

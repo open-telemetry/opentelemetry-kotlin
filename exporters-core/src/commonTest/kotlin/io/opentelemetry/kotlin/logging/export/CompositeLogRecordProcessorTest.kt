@@ -12,7 +12,6 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -247,15 +246,12 @@ internal class CompositeLogRecordProcessorTest {
     }
 
     @Test
-    fun testEnabledCancellationPropagates() {
+    fun testEnabledCancellationIsReportedAndDefaultsToEnabled() {
         val cancellation = CancellationException("cancelled")
         val delegate = FakeLogRecordProcessor(enabledResult = { throw cancellation })
         val processor = CompositeLogRecordProcessor(listOf(delegate), errorHandler)
 
-        val thrown = assertFailsWith<CancellationException> {
-            processor.enabled(fakeContext, scopeInfo, null, null)
-        }
-        assertSame(cancellation, thrown)
-        assertFalse(errorHandler.hasErrors())
+        assertTrue(processor.enabled(fakeContext, scopeInfo, null, null))
+        assertSame(cancellation, errorHandler.userCodeErrors.single().cause)
     }
 }
