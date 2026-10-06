@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -36,7 +37,6 @@ internal class TracerProviderImplTest {
 
     private val tracingConfig = TracingConfig(
         null,
-        fakeSpanLimitsConfig,
         ResourceImpl(AttributesModel(), null),
         NoopSdkErrorHandler,
     )
@@ -53,6 +53,7 @@ internal class TracerProviderImplTest {
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
+            spanLimits = SpanLimitsBehavior(),
         )
     }
 
@@ -66,7 +67,6 @@ internal class TracerProviderImplTest {
         val handler = FakeSdkErrorHandler()
         val config = TracingConfig(
             null,
-            fakeSpanLimitsConfig,
             ResourceImpl(AttributesModel(), null),
             handler,
         )
@@ -78,6 +78,7 @@ internal class TracerProviderImplTest {
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
+            spanLimits = SpanLimitsBehavior(),
         )
         provider.getTracer(name = "")
         assertEquals(1, handler.apiMisuses.size)
@@ -161,7 +162,6 @@ internal class TracerProviderImplTest {
         )
         val config = TracingConfig(
             processor,
-            fakeSpanLimitsConfig,
             FakeResource(),
             NoopSdkErrorHandler,
         )
@@ -173,6 +173,7 @@ internal class TracerProviderImplTest {
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
+            spanLimits = SpanLimitsBehavior(),
         )
         provider.getTracer(name = "test")
 
@@ -192,7 +193,6 @@ internal class TracerProviderImplTest {
         )
         val config = TracingConfig(
             processor,
-            fakeSpanLimitsConfig,
             FakeResource(),
             NoopSdkErrorHandler,
         )
@@ -204,6 +204,7 @@ internal class TracerProviderImplTest {
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
+            spanLimits = SpanLimitsBehavior(),
         )
         provider.getTracer(name = "test")
 
@@ -294,7 +295,6 @@ internal class TracerProviderImplTest {
         clock = FakeClock(),
         tracingConfig = TracingConfig(
             processor,
-            fakeSpanLimitsConfig,
             FakeResource(),
             errorHandler,
             samplerFactory = samplerFactory,
@@ -304,6 +304,7 @@ internal class TracerProviderImplTest {
         spanFactory = FakeSpanFactory(),
         idGenerator = FakeIdGenerator(),
         attributeLimits = AttributeLimitsBehavior(),
+        spanLimits = SpanLimitsBehavior(),
     )
 
     private class ThrowingSdkErrorHandler : SdkErrorHandler {
