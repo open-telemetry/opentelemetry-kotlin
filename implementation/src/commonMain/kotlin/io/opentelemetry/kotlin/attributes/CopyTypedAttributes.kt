@@ -12,9 +12,17 @@ internal fun AttributesMutator.copyTypedAttributes(attributes: Map<String, Any>)
     attributes.forEach { (key, value) ->
         when {
             value is Double -> setDoubleAttribute(key, value)
-            value is List<*> && value.isNotEmpty() && value.all { it is Double } ->
-                setDoubleListAttribute(key, value.filterIsInstance<Double>())
+            value is List<*> && value.firstOrNull() is Double -> copyDoubleList(key, value)
             else -> setAttributes(mapOf(key to value))
         }
+    }
+}
+
+private fun AttributesMutator.copyDoubleList(key: String, value: List<*>) {
+    val doubles = value.filterIsInstance<Double>()
+    if (doubles.size == value.size) {
+        setDoubleListAttribute(key, doubles)
+    } else {
+        setAttributes(mapOf(key to value))
     }
 }
