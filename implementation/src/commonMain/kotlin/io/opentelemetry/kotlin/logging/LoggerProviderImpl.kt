@@ -6,9 +6,10 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
-import io.opentelemetry.kotlin.error.guardOrDefault
-import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.error.reportError
+import io.opentelemetry.kotlin.error.sdkGuardOrDefault
+import io.opentelemetry.kotlin.error.sdkGuardOrDefaultSuspend
+import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -38,7 +39,7 @@ internal class LoggerProviderImpl(
 
     private val apiProvider by lazy {
         ApiProviderImpl { key ->
-            val loggerConfig = loggingConfig.loggerConfigurator.loggerConfig(key)
+            val loggerConfig = userCode { loggingConfig.loggerConfigurator.loggerConfig(key) }
             if (!loggerConfig.enabled) {
                 noopLogger
             } else {
@@ -64,7 +65,7 @@ internal class LoggerProviderImpl(
         schemaUrl: String?,
         attributes: (AttributesMutator.() -> Unit)?
     ): Logger =
-        sdkErrorHandler.guardOrDefault(noopLogger, "LoggerProvider.getLogger failed") {
+        sdkErrorHandler.sdkGuardOrDefault(noopLogger, "LoggerProvider.getLogger failed") {
             shutdownState.ifActiveOrElse(noopLogger) {
                 if (name.isEmpty()) {
                     sdkErrorHandler.reportError(
@@ -87,12 +88,12 @@ internal class LoggerProviderImpl(
         }
 
     override suspend fun forceFlush(): OperationResultCode =
-        sdkErrorHandler.guardOrDefaultSuspend(OperationResultCode.Failure, "LoggerProvider.forceFlush failed") {
+        sdkErrorHandler.sdkGuardOrDefaultSuspend(OperationResultCode.Failure, "LoggerProvider.forceFlush failed") {
             runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS, closeable::forceFlush)
         }
 
     override suspend fun shutdown(): OperationResultCode =
-        sdkErrorHandler.guardOrDefaultSuspend(OperationResultCode.Failure, "LoggerProvider.shutdown failed") {
+        sdkErrorHandler.sdkGuardOrDefaultSuspend(OperationResultCode.Failure, "LoggerProvider.shutdown failed") {
             shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS, closeable::shutdown)
         }
 }

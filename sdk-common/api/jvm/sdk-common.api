@@ -23,12 +23,25 @@ public final class io/opentelemetry/kotlin/error/GuardKt {
 	public static final fun guardOrDefaultSuspend (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun guardOrDefaultSuspend$default (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun reportError (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Lio/opentelemetry/kotlin/error/SdkError;)V
+	public static final fun reportSdkCodeError (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Throwable;Ljava/lang/String;)V
 	public static final fun reportUserCodeError (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Throwable;Ljava/lang/String;)V
+	public static final fun sdkGuard (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun sdkGuard$default (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static final fun sdkGuardOrDefault (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static synthetic fun sdkGuardOrDefault$default (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun sdkGuardOrDefaultSuspend (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun sdkGuardOrDefaultSuspend$default (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun userCode (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
 public final class io/opentelemetry/kotlin/error/GuardedSdkErrorHandler : io/opentelemetry/kotlin/error/SdkErrorHandler {
 	public fun <init> (Lio/opentelemetry/kotlin/error/SdkErrorHandler;)V
 	public fun onError (Lio/opentelemetry/kotlin/error/SdkError;)V
+}
+
+public final class io/opentelemetry/kotlin/error/UserCodeException : java/lang/RuntimeException {
+	public fun <init> (Ljava/lang/Throwable;)V
+	public fun getCause ()Ljava/lang/Throwable;
 }
 
 public final class io/opentelemetry/kotlin/export/BatchExportOperationKt {

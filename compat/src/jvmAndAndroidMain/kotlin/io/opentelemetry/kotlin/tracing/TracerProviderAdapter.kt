@@ -8,7 +8,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaTracerProvider
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.awaitOperationResultCode
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.error.guardOrDefault
+import io.opentelemetry.kotlin.error.sdkGuardOrDefault
+import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.factory.ContextFactory
@@ -32,8 +33,9 @@ internal class TracerProviderAdapter(
         version: String?,
         schemaUrl: String?,
         attributes: (AttributesMutator.() -> Unit)?
-    ): Tracer = sdkErrorHandler.guardOrDefault(noopTracer, "TracerProvider.getTracer failed") {
-        map.getOrPut(scopeCacheKey(name, version, schemaUrl, attributes)) {
+    ): Tracer = sdkErrorHandler.sdkGuardOrDefault(noopTracer, "TracerProvider.getTracer failed") {
+        val key = userCode { scopeCacheKey(name, version, schemaUrl, attributes) }
+        map.getOrPut(key) {
             val tracerBuilder = tracerProvider.tracerBuilder(name)
 
             schemaUrl?.let(tracerBuilder::setSchemaUrl)

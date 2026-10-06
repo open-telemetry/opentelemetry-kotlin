@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.error.reportUserCodeError
+import io.opentelemetry.kotlin.error.reportSdkCodeError
 import kotlinx.coroutines.CoroutineExceptionHandler
 
 /**
@@ -17,5 +17,5 @@ import kotlinx.coroutines.CoroutineExceptionHandler
  */
 public fun telemetryExceptionHandler(context: String, sdkErrorHandler: SdkErrorHandler): CoroutineExceptionHandler =
     CoroutineExceptionHandler { _, throwable ->
-        sdkErrorHandler.reportUserCodeError(throwable, "$context coroutine failed")
+        sdkErrorHandler.reportSdkCodeError(throwable, "$context coroutine failed")
     }
