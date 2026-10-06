@@ -1,10 +1,12 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.factory.toHexString
+import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.propagation.utils.encodeHex
 import io.opentelemetry.kotlin.propagation.utils.isValidSpanIdBytes
 import io.opentelemetry.kotlin.propagation.utils.isValidTraceIdBytes
 
-public class SpanContextImpl(
+@OptIn(ExperimentalApi::class)
+internal class SpanContextImpl(
     traceIdBytes: ByteArray,
     spanIdBytes: ByteArray,
     override val traceFlags: TraceFlags,
@@ -25,10 +27,10 @@ public class SpanContextImpl(
         traceIdData.isValidTraceIdBytes() && spanIdData.isValidSpanIdBytes()
 
     override val traceId: String by lazy {
-        traceIdData.toHexString()
+        traceIdData.encodeHex()
     }
     override val spanId: String by lazy {
-        spanIdData.toHexString()
+        spanIdData.encodeHex()
     }
 
     override fun equals(other: Any?): Boolean {

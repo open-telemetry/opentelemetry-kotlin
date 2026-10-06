@@ -1,8 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.factory.SpanContextFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
-import io.opentelemetry.kotlin.factory.TraceStateFactoryImpl
+import io.opentelemetry.kotlin.ExperimentalApi
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -10,10 +8,11 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalApi::class)
 internal class SpanContextImplTest {
 
-    private val traceFlags = TraceFlagsFactoryImpl().default
-    private val traceState = TraceStateFactoryImpl().default
+    private val traceFlags = TraceFlagsImpl(isSampled = false, isRandom = false)
+    private val traceState = TraceStateImpl.EMPTY
 
     @Test
     fun testValidIds() {
@@ -99,15 +98,14 @@ internal class SpanContextImplTest {
 
     @Test
     fun testInvalidContextCannotBeCorrupted() {
-        val factory = SpanContextFactoryImpl(TraceFlagsFactoryImpl(), TraceStateFactoryImpl())
-        factory.invalid.traceIdBytes.fill(1)
-        factory.invalid.spanIdBytes.fill(1)
+        createInvalidSpanContext().traceIdBytes.fill(1)
+        createInvalidSpanContext().spanIdBytes.fill(1)
 
-        val other = factory.create(ByteArray(16), ByteArray(8), traceFlags, traceState, false)
+        val other = createSpanContext(ByteArray(16), ByteArray(8))
         assertFalse(other.isValid)
         assertContentEquals(ByteArray(16), other.traceIdBytes)
         assertContentEquals(ByteArray(8), other.spanIdBytes)
-        assertEquals(factory.invalid, other)
+        assertEquals(createInvalidSpanContext(), other)
     }
 
     private fun create(
