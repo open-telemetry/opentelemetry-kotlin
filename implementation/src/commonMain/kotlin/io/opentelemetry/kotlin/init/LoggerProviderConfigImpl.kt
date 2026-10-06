@@ -4,7 +4,9 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
+import io.opentelemetry.kotlin.config.dsl.LogExportConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.LogLimitsConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.ResourceConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -20,8 +22,8 @@ import io.opentelemetry.kotlin.resource.Resource
 internal class LoggerProviderConfigImpl(
     private val clock: Clock,
     private val sdkErrorHandler: SdkErrorHandler,
-    private val resourceConfigImpl: ResourceConfigImpl = ResourceConfigImpl()
-) : LoggerProviderConfigDsl, ResourceConfigDsl by resourceConfigImpl {
+    private val resourceConfig: ResourceConfigDslImpl = ResourceConfigDslImpl()
+) : LoggerProviderConfigDsl, ResourceConfigDsl by resourceConfig {
 
     private var processor: LogRecordProcessor? = null
     private val logLimits = LogLimitsConfigDslImpl()
@@ -41,7 +43,7 @@ internal class LoggerProviderConfigImpl(
             )
             return
         }
-        processor = LogExportConfigImpl(clock, sdkErrorHandler).action()
+        processor = LogExportConfigDslImpl(clock, sdkErrorHandler).action()
     }
 
     override fun logLimits(action: LogLimitsConfigDsl.() -> Unit) {
@@ -59,7 +61,7 @@ internal class LoggerProviderConfigImpl(
     ): LoggingConfig = LoggingConfig(
         processor = processor ?: processorFromBehavior(processorBehavior),
         logLimits = logLimits,
-        resource = base.merge(resourceConfigImpl.generateResource()),
+        resource = base.merge(resourceConfig.toBehavior().toResource()),
         sdkErrorHandler = sdkErrorHandler,
         loggerConfigurator = loggerConfigurator,
     )
@@ -73,7 +75,7 @@ internal class LoggerProviderConfigImpl(
         if (processorBehavior?.console == null) {
             return null
         }
-        return LogExportConfigImpl(clock, sdkErrorHandler).run {
+        return LogExportConfigDslImpl(clock, sdkErrorHandler).run {
             simpleLogRecordProcessor(stdoutLogRecordExporter())
         }
     }

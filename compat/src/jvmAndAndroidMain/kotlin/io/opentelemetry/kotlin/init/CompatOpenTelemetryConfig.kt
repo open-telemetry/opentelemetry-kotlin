@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
+import io.opentelemetry.kotlin.config.dsl.ResourceDetectionConfigDslImpl
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -65,7 +66,7 @@ internal class CompatOpenTelemetryConfig(
         globalResourceAttrs.apply { setTypedAttributes(map) }
     }
 
-    internal val resourceDetectionConfig = CompatResourceDetectionConfig()
+    internal val resourceDetectionConfig = ResourceDetectionConfigDslImpl()
 
     override fun resourceDetection(action: ResourceDetectionConfigDsl.() -> Unit) {
         resourceDetectionConfig.action()
