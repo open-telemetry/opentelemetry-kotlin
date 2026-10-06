@@ -2,6 +2,11 @@ public abstract interface class io/opentelemetry/kotlin/ClockProvider {
 	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
 }
 
+public final class io/opentelemetry/kotlin/SdkBuildKonfig {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/SdkBuildKonfig;
+	public final fun getSDK_VERSION ()Ljava/lang/String;
+}
+
 public final class io/opentelemetry/kotlin/attributes/EmptyAttributeContainer : io/opentelemetry/kotlin/attributes/AttributeContainer {
 	public static final field INSTANCE Lio/opentelemetry/kotlin/attributes/EmptyAttributeContainer;
 	public fun getAttributes ()Ljava/util/Map;
@@ -79,5 +84,20 @@ public final class io/opentelemetry/kotlin/logging/LogBodyNormalizationKt {
 
 public final class io/opentelemetry/kotlin/resource/ResourceDetectionKt {
 	public static final fun detectResource (Ljava/util/List;Lio/opentelemetry/kotlin/factory/ResourceFactory;Lio/opentelemetry/kotlin/error/SdkErrorHandler;)Lio/opentelemetry/kotlin/resource/Resource;
+}
+
+public final class io/opentelemetry/kotlin/resource/SdkDefaultResourceKt {
+	public static final field SDK_DEFAULT_SERVICE_NAME Ljava/lang/String;
+	public static final field TELEMETRY_SDK_MODE Ljava/lang/String;
+	public static final fun sdkDefaultResource (Lio/opentelemetry/kotlin/factory/ResourceFactory;Lio/opentelemetry/kotlin/resource/SdkMode;)Lio/opentelemetry/kotlin/resource/Resource;
+}
+
+public final class io/opentelemetry/kotlin/resource/SdkMode : java/lang/Enum {
+	public static final field COMPAT Lio/opentelemetry/kotlin/resource/SdkMode;
+	public static final field REGULAR Lio/opentelemetry/kotlin/resource/SdkMode;
+	public final fun getAttributeValue ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/resource/SdkMode;
+	public static fun values ()[Lio/opentelemetry/kotlin/resource/SdkMode;
 }
 

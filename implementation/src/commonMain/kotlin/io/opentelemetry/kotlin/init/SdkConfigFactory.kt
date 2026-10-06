@@ -14,7 +14,9 @@ import io.opentelemetry.kotlin.factory.toIdGenerator
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.init.config.MetricsConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
+import io.opentelemetry.kotlin.resource.SdkMode
 import io.opentelemetry.kotlin.resource.detectResource
+import io.opentelemetry.kotlin.resource.sdkDefaultResource
 
 /**
  * [OpenTelemetryBehavior] should be preferred to using this class. This will be removed eventually.
@@ -41,7 +43,7 @@ internal class SdkConfigFactory(
 
     private val logProcessor: LogRecordProcessorBehavior? = behavior.loggerProvider?.processor
 
-    private val baseResource = sdkDefaultResource()
+    private val baseResource = resourceFactory.sdkDefaultResource(SdkMode.REGULAR)
         .merge(cfg.resourceDetectionConfig.detectors.detectResource(resourceFactory, cfg.sdkErrorHandler))
         .merge(cfg.globalResourceConfig.generateResource())
 

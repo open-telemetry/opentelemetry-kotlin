@@ -15,8 +15,11 @@ import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
+import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
+import io.opentelemetry.kotlin.resource.SdkMode
+import io.opentelemetry.kotlin.resource.sdkDefaultResource
 import io.opentelemetry.kotlin.sdkDefaultAttributes
 import io.opentelemetry.kotlin.sdkDefaultSchemaUrl
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
@@ -42,7 +45,7 @@ import kotlin.test.assertSame
 internal class TracerProviderConfigImplTest {
 
     private val clock = FakeClock()
-    private val base = sdkDefaultResource()
+    private val base = ResourceFactoryImpl().sdkDefaultResource(SdkMode.REGULAR)
     private val noSpanLimits = SpanLimitsBehavior()
 
     private val traceStateFactory = DefaultTraceStateFactory

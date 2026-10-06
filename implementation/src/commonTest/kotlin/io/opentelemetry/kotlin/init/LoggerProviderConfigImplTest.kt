@@ -7,11 +7,14 @@ import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.compositeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.stdoutLogRecordExporter
+import io.opentelemetry.kotlin.resource.SdkMode
+import io.opentelemetry.kotlin.resource.sdkDefaultResource
 import io.opentelemetry.kotlin.sdkDefaultAttributes
 import io.opentelemetry.kotlin.sdkDefaultSchemaUrl
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
@@ -26,7 +29,7 @@ import kotlin.test.assertSame
 internal class LoggerProviderConfigImplTest {
 
     private val clock = FakeClock()
-    private val base = sdkDefaultResource()
+    private val base = ResourceFactoryImpl().sdkDefaultResource(SdkMode.REGULAR)
     private val noLogLimits = LogLimitsBehavior()
 
     @Test
