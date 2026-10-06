@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSamplingIntent
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.attributes.toOtelJavaAttributes
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceState
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
@@ -37,8 +38,7 @@ internal class KotlinComposableSamplerAdapter(private val delegate: ComposableSa
         )
 
         val threshold = intent.threshold ?: NEVER_SAMPLE_THRESHOLD
-        val javaAttributes = (intent.attributesProvider?.invoke() as? CompatAttributesModel)
-            ?.otelJavaAttributes()
+        val javaAttributes = intent.attributesProvider?.invoke()?.toOtelJavaAttributes()
             ?: OtelJavaAttributes.empty()
         val traceStateProvider = intent.traceStateProvider
         val traceStateUpdater: Function<OtelJavaTraceState, OtelJavaTraceState> = if (traceStateProvider == null) {

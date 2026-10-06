@@ -20,6 +20,7 @@ import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
@@ -35,6 +36,7 @@ import io.opentelemetry.kotlin.tracing.TracerProvider
 import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
 import io.opentelemetry.kotlin.tracing.export.OtelJavaSpanProcessorAdapter
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
+import io.opentelemetry.kotlin.tracing.sampling.CompatSamplerConfig
 import io.opentelemetry.kotlin.tracing.sampling.OtelJavaSamplerAdapter
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplerAdapter
@@ -80,19 +82,24 @@ internal class CompatTracerProviderConfig(
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
         exportConfigured = true
         val processor = TraceExportConfigCompat(clock, sdkErrorHandler).action()
-        builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor))
+        builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor, sdkErrorHandler))
     }
 
     override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
-        sampler = newSamplerDsl.action()
+        sampler = buildSampler { action() }
     }
 
     internal fun applyResolvedSampler(behavior: SamplerBehavior?) {
         if (sampler != null || behavior == null) {
             return
         }
-        sampler = newSamplerDsl.toSampler(behavior)
+        sampler = buildSampler { toSampler(behavior) }
     }
+
+    private fun buildSampler(action: SamplerConfigDsl.() -> Sampler): Sampler =
+        sdkErrorHandler.guardOrDefault(defaultSampler, "Failed to create sampler, using default") {
+            newSamplerDsl.action()
+        }
 
     internal fun applyResolvedProcessor(behavior: SpanProcessorBehavior?) {
         if (exportConfigured || behavior?.console == null) {
@@ -113,9 +120,9 @@ internal class CompatTracerProviderConfig(
         }
     }
 
-    private val newSamplerDsl: SamplerConfigDsl = object : SamplerConfigDsl {
-        override val spanFactory = CompatSpanFactory(DefaultSpanContextFactory)
-    }
+    private val newSamplerDsl: SamplerConfigDsl = CompatSamplerConfig(CompatSpanFactory(DefaultSpanContextFactory))
+
+    private val defaultSampler: Sampler = newSamplerDsl.parentBased(root = newSamplerDsl.alwaysOn())
 
     private fun setSampler(sampler: Sampler) {
         val otelJavaSampler = when (sampler) {
@@ -171,7 +178,7 @@ internal class CompatTracerProviderConfig(
         }
         builder.setClock(clock.toOtelJavaClock())
         sampler?.let(::setSampler)
-        return TracerProviderAdapter(builder.build(), spanLimitsConfig, contextFactory)
+        return TracerProviderAdapter(builder.build(), spanLimitsConfig, contextFactory, sdkErrorHandler)
     }
 
     fun toBehavior(): TracerProviderBehavior =

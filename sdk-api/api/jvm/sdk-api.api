@@ -204,7 +204,22 @@ public abstract interface class io/opentelemetry/kotlin/init/ResourceDetectionCo
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/SamplerConfigDsl {
+	public abstract fun alwaysOff ()Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
+	public abstract fun alwaysOn ()Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
+	public abstract fun alwaysRecord (Lio/opentelemetry/kotlin/tracing/sampling/Sampler;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
+	public abstract fun composableAlwaysOff ()Lio/opentelemetry/kotlin/tracing/sampling/ComposableSampler;
+	public abstract fun composableAlwaysOn ()Lio/opentelemetry/kotlin/tracing/sampling/ComposableSampler;
+	public abstract fun composableAnnotating (Lio/opentelemetry/kotlin/tracing/sampling/ComposableSampler;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/sampling/ComposableSampler;
+	public abstract fun composableParentThreshold (Lio/opentelemetry/kotlin/tracing/sampling/ComposableSampler;)Lio/opentelemetry/kotlin/tracing/sampling/ComposableSampler;
+	public abstract fun composableProbability (D)Lio/opentelemetry/kotlin/tracing/sampling/ComposableSampler;
+	public abstract fun composableRuleBased (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/sampling/ComposableSampler;
+	public abstract fun composite (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
 	public abstract fun getSpanFactory ()Lio/opentelemetry/kotlin/factory/SpanFactory;
+	public abstract fun parentBased (Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
+}
+
+public final class io/opentelemetry/kotlin/init/SamplerConfigDsl$DefaultImpls {
+	public static synthetic fun parentBased$default (Lio/opentelemetry/kotlin/init/SamplerConfigDsl;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/SpanLimitsConfigDsl : io/opentelemetry/kotlin/init/AttributeLimitsConfigDsl {

@@ -10,7 +10,6 @@ import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.sampling.ParentBasedSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
-import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -39,7 +38,7 @@ internal class ResolvedSamplerConfigFileTest {
         val behavior = defaultBehaviorReader(
             envVarReader = EnvVarReader(getEnvVar),
             sdkErrorHandler = cfg.sdkErrorHandler,
-        ).read(cfg.configFilePath, cfg.toBehavior())
+        ).read(cfg.configFilePath, cfg::toBehavior)
         return SdkConfigFactory(cfg, behavior).generateTracingConfig().samplerFactory(spanFactory)
     }
 

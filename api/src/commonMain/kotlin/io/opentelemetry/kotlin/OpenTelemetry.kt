@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin
 
-import io.opentelemetry.kotlin.factory.BaggageFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
@@ -62,11 +61,6 @@ public interface OpenTelemetry {
      * Factory that constructs Span objects.
      */
     public val span: SpanFactory
-
-    /**
-     * Factory that constructs Baggage objects.
-     */
-    public val baggage: BaggageFactory
 
     /**
      * The [TextMapPropagator] used to inject and extract context across process boundaries.

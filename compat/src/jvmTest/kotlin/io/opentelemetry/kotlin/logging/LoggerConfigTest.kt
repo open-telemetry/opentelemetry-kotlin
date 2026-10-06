@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
-import io.opentelemetry.kotlin.tracing.sampling.alwaysOff
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

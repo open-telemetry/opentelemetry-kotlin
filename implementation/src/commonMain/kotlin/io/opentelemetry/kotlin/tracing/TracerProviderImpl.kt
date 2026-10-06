@@ -19,6 +19,7 @@ import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
+import io.opentelemetry.kotlin.init.config.DefaultSampler
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
 
@@ -40,7 +41,9 @@ internal class TracerProviderImpl(
     )
     private val noopTracer = NoopOpenTelemetry.tracerProvider.getTracer("")
 
-    private val sampler = tracingConfig.samplerFactory(spanFactory)
+    private val sampler = sdkErrorHandler.guardOrDefault(DefaultSampler, "Failed to create sampler, using default") {
+        tracingConfig.samplerFactory(spanFactory)
+    }
 
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
         val tracerConfig = tracingConfig.tracerConfigurator.tracerConfig(key)

@@ -1,9 +1,12 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.aliases.OtelJavaCompletableResultCode
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.runWithTimeout
-import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
@@ -22,8 +25,6 @@ internal suspend fun awaitOperationResultCode(
 ): OperationResultCode = runWithTimeout(timeoutMs) {
     val resultCode = try {
         action()
-    } catch (e: CancellationException) {
-        throw e
     } catch (ignored: Throwable) {
         return@runWithTimeout OperationResultCode.Failure
     }
@@ -44,3 +45,32 @@ internal suspend fun OtelJavaCompletableResultCode.toOperationResultCode(): Oper
             )
         }
     }
+
+/**
+ * Launches [action] in this scope and returns an [OtelJavaCompletableResultCode] that completes
+ * with its result. Failures thrown by [action] are reported to [sdkErrorHandler]. The result fails
+ * if [action] throws, exceeds [timeoutMs], or the scope is cancelled before it completes.
+ */
+internal fun CoroutineScope.launchAsCompletableResultCode(
+    sdkErrorHandler: SdkErrorHandler,
+    details: String,
+    timeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS,
+    action: suspend () -> OperationResultCode,
+): OtelJavaCompletableResultCode {
+    val result = OtelJavaCompletableResultCode()
+    val job = launch {
+        val code = sdkErrorHandler.guardOrDefaultSuspend(OperationResultCode.Failure, details) {
+            runWithTimeout(timeoutMs, action)
+        }
+        when (code) {
+            OperationResultCode.Success -> result.succeed()
+            else -> result.fail()
+        }
+    }
+    job.invokeOnCompletion {
+        if (!result.isDone) {
+            result.fail()
+        }
+    }
+    return result
+}

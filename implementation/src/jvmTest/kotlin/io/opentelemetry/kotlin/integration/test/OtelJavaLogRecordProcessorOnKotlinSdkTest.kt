@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.integration.test
 
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
+import io.opentelemetry.kotlin.aliases.OtelJavaBaggage
 import io.opentelemetry.kotlin.aliases.OtelJavaCompletableResultCode
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordData
@@ -8,8 +9,11 @@ import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordExporter
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordProcessor
 import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteLogRecord
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
+import io.opentelemetry.kotlin.aliases.OtelJavaSpan
+import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.logging.LoggerConfig
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.export.LogRecordExporter
@@ -26,6 +30,8 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class OtelJavaLogRecordProcessorOnKotlinSdkTest {
@@ -73,6 +79,42 @@ internal class OtelJavaLogRecordProcessorOnKotlinSdkTest {
         assertEquals("value", log.getAttribute(stringKey))
         assertEquals(OtelJavaSeverity.DEBUG2, log.severity)
         assertEquals("logger", log.instrumentationScopeInfo.name)
+    }
+
+    @Test
+    fun testJavaApiExceptionIsExported() = runTest {
+        val exception = IllegalStateException("boom")
+        harness.kotlinApi.toOtelJavaApi().logsBridge.get("logger")
+            .logRecordBuilder()
+            .setException(exception)
+            .emit()
+        val attrs = harness.exportedLog().attributes
+        assertEquals(IllegalStateException::class.qualifiedName, attrs["exception.type"])
+        assertEquals("boom", attrs["exception.message"])
+        assertTrue((attrs["exception.stacktrace"] as String).contains("boom"))
+    }
+
+    @Test
+    fun testJavaApiIsEnabledHonoursLoggerConfig() = runTest {
+        harness.config.loggerProvider = {
+            loggerConfigurator { scope ->
+                object : LoggerConfig {
+                    override val enabled = scope.name != "disabled"
+                    override val minimumSeverity = SeverityNumber.WARN
+                }
+            }
+        }
+        val logsBridge = harness.kotlinApi.toOtelJavaApi().logsBridge
+        val enabled = logsBridge.get("enabled")
+        val disabled = logsBridge.get("disabled")
+
+        assertTrue(enabled.isEnabled(OtelJavaSeverity.UNDEFINED_SEVERITY_NUMBER))
+        assertTrue(enabled.isEnabled(OtelJavaSeverity.WARN))
+        assertTrue(enabled.isEnabled(OtelJavaSeverity.ERROR, OtelJavaContext.root()))
+        assertFalse(enabled.isEnabled(OtelJavaSeverity.INFO))
+        assertFalse(enabled.isEnabled(OtelJavaSeverity.INFO, OtelJavaContext.root()))
+        assertFalse(disabled.isEnabled(OtelJavaSeverity.UNDEFINED_SEVERITY_NUMBER))
+        assertFalse(disabled.isEnabled(OtelJavaSeverity.ERROR))
     }
 
     @Test
@@ -124,6 +166,27 @@ internal class OtelJavaLogRecordProcessorOnKotlinSdkTest {
         assertEquals(expected.spanContext.traceId, observed.spanContext.traceId)
     }
 
+    @Test
+    fun testJavaProcessorReadsImplicitKotlinSpanAndBaggage() = runTest {
+        val processor = RecordingOtelJavaLogRecordProcessor()
+        harness.config.logRecordProcessors.add(processor.toOtelKotlinLogRecordProcessor())
+        val span = harness.tracer.startSpan("span")
+        val ctx = harness.kotlinApi.context.implicit()
+            .storeSpan(span)
+            .storeBaggage(createBaggage { put("key", "value") })
+        val scope = ctx.attach()
+        try {
+            harness.logger.emit(body = "my_log")
+        } finally {
+            scope.detach()
+        }
+        span.end()
+
+        val context = processor.emitContexts.single()
+        assertEquals(span.spanContext.spanId, OtelJavaSpan.fromContext(context).spanContext.spanId)
+        assertEquals("value", OtelJavaBaggage.fromContext(context).getEntryValue("key"))
+    }
+
     private fun IntegrationTestHarness.exportedLog(): LogRecordData {
         var log: LogRecordData? = null
         assertLogRecords(1) { log = it.single() }
@@ -135,9 +198,11 @@ internal class OtelJavaLogRecordProcessorOnKotlinSdkTest {
     ) : OtelJavaLogRecordProcessor {
 
         val emitCalls = mutableListOf<OtelJavaReadWriteLogRecord>()
+        val emitContexts = mutableListOf<OtelJavaContext>()
 
         override fun onEmit(context: OtelJavaContext, logRecord: OtelJavaReadWriteLogRecord) {
             emitCalls += logRecord
+            emitContexts += context
             emitAction(logRecord)
         }
     }

@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.DefaultBaggageFactory
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
@@ -14,8 +13,6 @@ import io.opentelemetry.kotlin.init.SdkConfigFactory
 import io.opentelemetry.kotlin.init.defaultBehaviorReader
 import io.opentelemetry.kotlin.logging.LoggerProviderImpl
 import io.opentelemetry.kotlin.metrics.MeterProviderImpl
-import io.opentelemetry.kotlin.propagation.Propagators
-import io.opentelemetry.kotlin.propagation.createPropagators
 import io.opentelemetry.kotlin.tracing.TracerProviderImpl
 
 /**
@@ -30,21 +27,14 @@ public fun createOpenTelemetry(
     clock: Clock = ClockImpl(),
 
     /**
-     * Defines the [Propagators] that OpenTelemetry constructs its propagators from. Pass an
-     * instance obtained from [createPropagators] to share it with code that ran before the SDK was
-     * initialized.
-     */
-    propagators: Propagators = createPropagators(),
-
-    /**
      * Defines configuration for OpenTelemetry.
      */
     config: OpenTelemetryConfigDsl.() -> Unit = {}
 ): OpenTelemetry {
     val resourceFactory = ResourceFactoryImpl()
-    val cfg = OpenTelemetryConfigImpl(clock, propagators).apply(config)
+    val cfg = OpenTelemetryConfigImpl(clock).apply(config)
     val behavior = defaultBehaviorReader(sdkErrorHandler = cfg.sdkErrorHandler)
-        .read(configFilePath = cfg.configFilePath, dsl = cfg.toBehavior())
+        .read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
 
     // configFactory is legacy - use behavior to control SDK functionality instead
     val configFactory = SdkConfigFactory(cfg, behavior, resourceFactory)
@@ -93,7 +83,6 @@ public fun createOpenTelemetry(
         traceState = traceState,
         context = contextFactory,
         span = span,
-        baggage = DefaultBaggageFactory,
         idGenerator = idGenerator,
         resource = resourceFactory,
         propagator = cfg.propagatorCfg.buildPropagator(),

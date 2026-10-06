@@ -12,19 +12,25 @@ import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
+import io.opentelemetry.kotlin.factory.SpanFactory
+import io.opentelemetry.kotlin.init.SamplerConfigImpl
+import io.opentelemetry.kotlin.init.config.DefaultSampler
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.ResourceImpl
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
+import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 internal class TracerProviderImplTest {
 
@@ -237,6 +243,28 @@ internal class TracerProviderImplTest {
     }
 
     @Test
+    fun testThrowingSamplerFactoryFallsBackToDefaultSampler() {
+        val errorHandler = FakeSdkErrorHandler()
+        val provider = createProvider(errorHandler = errorHandler, samplerFactory = { error("boom") })
+
+        assertTrue(provider.getTracer(name = "test").startSpan("test-span").isRecording())
+        val recorded = errorHandler.userCodeErrors.single()
+        assertEquals("Failed to create sampler, using default", recorded.message)
+        assertEquals("boom", recorded.cause.message)
+    }
+
+    @Test
+    fun testInvalidComposableProbabilityFallsBackToDefaultSampler() {
+        val errorHandler = FakeSdkErrorHandler()
+        val provider = createProvider(errorHandler = errorHandler, samplerFactory = { factory ->
+            SamplerConfigImpl(factory).composite { composableProbability(1.5) }
+        })
+
+        assertTrue(provider.getTracer(name = "test").startSpan("test-span").isRecording())
+        assertIs<IllegalArgumentException>(errorHandler.userCodeErrors.single().cause)
+    }
+
+    @Test
     fun testThrowingErrorHandlerDoesNotEscapeForceFlush() = runTest {
         val provider = createProvider(
             processor = FakeSpanProcessor(flushCode = { error("boom") }),
@@ -261,9 +289,16 @@ internal class TracerProviderImplTest {
     private fun createProvider(
         processor: SpanProcessor? = null,
         errorHandler: SdkErrorHandler,
+        samplerFactory: (SpanFactory) -> Sampler = { DefaultSampler },
     ) = TracerProviderImpl(
         clock = FakeClock(),
-        tracingConfig = TracingConfig(processor, fakeSpanLimitsConfig, FakeResource(), errorHandler),
+        tracingConfig = TracingConfig(
+            processor,
+            fakeSpanLimitsConfig,
+            FakeResource(),
+            errorHandler,
+            samplerFactory = samplerFactory,
+        ),
         contextFactory = FakeContextFactory(),
         spanContextFactory = FakeSpanContextFactory(),
         spanFactory = FakeSpanFactory(),

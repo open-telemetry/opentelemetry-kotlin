@@ -81,7 +81,7 @@ internal class KotlinComposableSamplerAdapterTest {
     }
 
     @Test
-    fun `non compat attribute container from provider yields empty java attributes`() {
+    fun `non compat attribute container from provider is converted to java attributes`() {
         val nonCompatAttributes = object : AttributeContainer {
             override val attributes: Map<String, Any> = mapOf("foo" to "bar")
         }
@@ -99,7 +99,7 @@ internal class KotlinComposableSamplerAdapterTest {
             emptyList(),
         )
 
-        assertTrue(intent.attributes.isEmpty)
+        assertEquals("bar", intent.attributes.get(OtelJavaAttributeKey.stringKey("foo")))
     }
 
     @Test

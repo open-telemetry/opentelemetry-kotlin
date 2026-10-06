@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaReadableSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanData
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanProcessor
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.toOtelKotlinApi
@@ -27,6 +28,7 @@ internal class TracerAdapterTimestampTest {
             .build(),
         CompatSpanLimitsConfig(),
         CompatContextFactory(),
+        NoopSdkErrorHandler,
     ).getTracer("test")
 
     @Test
@@ -47,6 +49,40 @@ internal class TracerAdapterTimestampTest {
         val data = ended.single()
         assertEquals(42, data.startEpochNanos)
         assertEquals(100, data.endEpochNanos)
+    }
+
+    @Test
+    fun `zero start timestamp is timed by the sdk clock`() {
+        tracer.startSpan("span", startTimestamp = 0).end()
+        assertEquals(1_000_000, ended.single().startEpochNanos)
+    }
+
+    @Test
+    fun `negative start timestamp is timed by the sdk clock`() {
+        tracer.startSpan("span", startTimestamp = -1).end()
+        assertEquals(1_000_000, ended.single().startEpochNanos)
+    }
+
+    @Test
+    fun `invalid end timestamp is timed by the sdk clock`() {
+        val zero = tracer.startSpan("zero")
+        val negative = tracer.startSpan("negative")
+        sdkClock.advance(500)
+        zero.end(0)
+        negative.end(-1)
+
+        assertEquals(listOf(1_000_500L, 1_000_500L), ended.map { it.endEpochNanos })
+    }
+
+    @Test
+    fun `invalid event timestamp is timed by the sdk clock`() {
+        val span = tracer.startSpan("span")
+        sdkClock.advance(200)
+        span.addEvent("zero", 0)
+        span.addEvent("negative", -1)
+        span.end()
+
+        assertEquals(listOf(1_000_200L, 1_000_200L), ended.single().events.map { it.epochNanos })
     }
 
     @Test

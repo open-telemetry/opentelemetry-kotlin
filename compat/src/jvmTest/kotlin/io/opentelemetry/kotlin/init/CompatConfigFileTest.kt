@@ -4,6 +4,7 @@ import io.opentelemetry.exporter.logging.LoggingSpanExporter
 import io.opentelemetry.kotlin.OpenTelemetrySdk
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -17,7 +18,6 @@ import java.util.logging.Level
 import java.util.logging.LogRecord
 import java.util.logging.Logger
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 internal class CompatConfigFileTest {
@@ -25,22 +25,24 @@ internal class CompatConfigFileTest {
     private val clock = FakeClock()
 
     @Test
-    fun `a config file that does not exist fails initialization`() {
-        assertFailsWith<Exception> {
-            createCompatOpenTelemetry {
-                configFile("does-not-exist.yaml")
-            }
+    fun `a config file that does not exist is reported`() {
+        val handler = FakeSdkErrorHandler()
+        createCompatOpenTelemetry {
+            errorHandler(handler)
+            configFile("does-not-exist.yaml")
         }
+        assertEquals(1, handler.sdkCodeErrors.size)
     }
 
     @Test
-    fun `a config file that is not valid fails initialization`() {
+    fun `a config file that is not valid is reported`() {
+        val handler = FakeSdkErrorHandler()
         val path = writeConfigFile("file_format: [not, a, string")
-        assertFailsWith<Exception> {
-            createCompatOpenTelemetry {
-                configFile(path)
-            }
+        createCompatOpenTelemetry {
+            errorHandler(handler)
+            configFile(path)
         }
+        assertEquals(1, handler.sdkCodeErrors.size)
     }
 
     @Test
@@ -48,7 +50,7 @@ internal class CompatConfigFileTest {
         val cfg = CompatOpenTelemetryConfig(clock).apply {
             configFile(writeConfigFile(CONFIG_FILE))
         }
-        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory())
         assertEquals(64, configFactory.spanLimits.attributeCountLimit)
         assertEquals(64, configFactory.logLimits.attributeCountLimit)
@@ -62,7 +64,7 @@ internal class CompatConfigFileTest {
                 attributeCountLimit = 32
             }
         }
-        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg.toBehavior())
+        val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory())
         assertEquals(32, configFactory.spanLimits.attributeCountLimit)
         assertEquals(32, configFactory.logLimits.attributeCountLimit)

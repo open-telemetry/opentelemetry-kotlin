@@ -12,7 +12,6 @@ import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
-import io.opentelemetry.kotlin.factory.DefaultBaggageFactory
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
@@ -47,8 +46,9 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
             unobfuscatedTracerProvider(),
             CompatSpanLimitsConfig(),
             contextFactory,
+            NoopSdkErrorHandler,
         ),
-        loggerProvider = LoggerProviderAdapter(unobfuscatedLoggerProvider()),
+        loggerProvider = LoggerProviderAdapter(unobfuscatedLoggerProvider(), NoopSdkErrorHandler),
         meterProvider = MeterProviderAdapter(unobfuscatedMeterProvider()),
         clock = clock,
         spanContext = spanContext,
@@ -56,7 +56,6 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
         traceState = traceState,
         context = contextFactory,
         span = span,
-        baggage = DefaultBaggageFactory,
         idGenerator = idGenerator,
         resource = CompatResourceFactory,
         propagator = TextMapPropagatorAdapter(propagators.textMapPropagator),

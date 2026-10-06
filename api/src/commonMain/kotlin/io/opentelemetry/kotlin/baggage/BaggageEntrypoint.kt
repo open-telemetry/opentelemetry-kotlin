@@ -1,10 +1,6 @@
 package io.opentelemetry.kotlin.baggage
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.factory.BaggageFactoryImpl
-
-@OptIn(ExperimentalApi::class)
-private val factory = BaggageFactoryImpl()
 
 /**
  * Creates a [Baggage] by configuring entries inside the [action] DSL block. Omitting [action]
@@ -16,4 +12,24 @@ private val factory = BaggageFactoryImpl()
  * https://opentelemetry.io/docs/specs/otel/baggage/api/
  */
 @ExperimentalApi
-public fun createBaggage(action: BaggageCreationAction.() -> Unit = {}): Baggage = factory.create(action)
+public fun createBaggage(action: BaggageCreationAction.() -> Unit = {}): Baggage {
+    val builder = BaggageCreationActionImpl()
+    builder.action()
+    return builder.build()
+}
+
+@OptIn(ExperimentalApi::class)
+private class BaggageCreationActionImpl : BaggageCreationAction {
+
+    private var baggage: Baggage = BaggageImpl.EMPTY
+
+    override fun put(name: String, value: String, metadata: String) {
+        baggage = baggage.set(name, value, BaggageEntryMetadataImpl(metadata))
+    }
+
+    override fun remove(name: String) {
+        baggage = baggage.remove(name)
+    }
+
+    fun build(): Baggage = baggage
+}

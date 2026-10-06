@@ -39,7 +39,12 @@ data class OtlpHttpExporterBehavior(
                 headerString.split(",").forEach { header ->
                     // Trailing and leading whitespaces are allowed but not considered part of key/value.
                     // See https://www.w3.org/TR/baggage/#key and https://www.w3.org/TR/baggage/#value
-                    val (key, value) = header.split("=", limit = 2).map(String::trim)
+                    val parts = header.split("=", limit = 2)
+                    if (parts.size != 2) {
+                        return@forEach
+                    }
+                    val key = parts[0].trim()
+                    val value = parts[1].trim()
                     if (key.isNotEmpty() && value.isNotEmpty()) {
                         put(key, value)
                     }

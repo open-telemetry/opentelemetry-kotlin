@@ -1,11 +1,15 @@
 package io.opentelemetry.kotlin.error
 
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -52,32 +56,43 @@ internal class GuardTest {
     }
 
     @Test
-    fun testGuardRethrowsCancellationException() {
+    fun testGuardReportsCancellationException() {
         val cancelled = CancellationException("cancelled")
-        val thrown = assertFailsWith<CancellationException> {
-            handler.guard("should not be used") { throw cancelled }
-        }
-        assertSame(cancelled, thrown)
-        assertFalse(handler.hasErrors())
+        handler.guard("SpanProcessor.onEnd failed") { throw cancelled }
+
+        val error = handler.userCodeErrors.single()
+        assertSame(cancelled, error.cause)
+        assertEquals("SpanProcessor.onEnd failed", error.message)
     }
 
     @Test
-    fun testGuardOrDefaultRethrowsCancellationException() {
+    fun testGuardOrDefaultReportsCancellationException() {
         val cancelled = CancellationException("cancelled")
-        val thrown = assertFailsWith<CancellationException> {
-            handler.guardOrDefault("default", "should not be used") { throw cancelled }
-        }
-        assertSame(cancelled, thrown)
-        assertFalse(handler.hasErrors())
+        val result = handler.guardOrDefault("default", "Tracer.startSpan failed") { throw cancelled }
+
+        assertEquals("default", result)
+        assertSame(cancelled, handler.userCodeErrors.single().cause)
     }
 
     @Test
-    fun testGuardOrDefaultSuspendRethrowsCancellationException() = runTest {
+    fun testGuardOrDefaultSuspendReportsCancellationExceptionWhenCallerActive() = runTest {
         val cancelled = CancellationException("cancelled")
-        val thrown = assertFailsWith<CancellationException> {
-            handler.guardOrDefaultSuspend("default", "should not be used") { throw cancelled }
+        val result = handler.guardOrDefaultSuspend("default", "Exporter.export failed") { throw cancelled }
+
+        assertEquals("default", result)
+        assertSame(cancelled, handler.userCodeErrors.single().cause)
+    }
+
+    @Test
+    fun testGuardOrDefaultSuspendRethrowsWhenCallerCancelled() = runTest {
+        var result: String? = null
+        val job = launch(start = CoroutineStart.UNDISPATCHED) {
+            result = handler.guardOrDefaultSuspend("default", "should not be used") { awaitCancellation() }
         }
-        assertSame(cancelled, thrown)
+        job.cancelAndJoin()
+
+        assertTrue(job.isCancelled)
+        assertNull(result)
         assertFalse(handler.hasErrors())
     }
 }

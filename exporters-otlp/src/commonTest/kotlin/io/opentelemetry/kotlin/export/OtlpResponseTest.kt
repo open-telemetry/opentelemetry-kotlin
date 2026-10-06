@@ -40,6 +40,20 @@ internal class OtlpResponseTest {
     }
 
     @Test
+    fun testUnexpectedStatusCode() {
+        val unexpected = OtlpResponse.UnexpectedStatus(301)
+        assertEquals(301, unexpected.statusCode)
+        assertEquals("UnexpectedStatus(statusCode=301)", unexpected.toString())
+    }
+
+    @Test
+    fun testResponseTooLargeCode() {
+        val tooLarge = OtlpResponse.ResponseTooLarge(503)
+        assertEquals(503, tooLarge.statusCode)
+        assertEquals("ResponseTooLarge(statusCode=503)", tooLarge.toString())
+    }
+
+    @Test
     fun testUnknownCode() {
         assertEquals(-1, OtlpResponse.Unknown.statusCode)
     }

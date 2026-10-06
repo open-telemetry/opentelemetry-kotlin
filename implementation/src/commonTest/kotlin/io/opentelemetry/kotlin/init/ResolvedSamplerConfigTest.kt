@@ -15,7 +15,6 @@ import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
 import io.opentelemetry.kotlin.tracing.sampling.ParentBasedSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
-import io.opentelemetry.kotlin.tracing.sampling.alwaysOn
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -44,7 +43,7 @@ internal class ResolvedSamplerConfigTest {
         val behavior = defaultBehaviorReader(
             envVarReader = EnvVarReader(getEnvVar),
             sdkErrorHandler = cfg.sdkErrorHandler,
-        ).read(cfg.configFilePath, cfg.toBehavior())
+        ).read(cfg.configFilePath, cfg::toBehavior)
         return SdkConfigFactory(cfg, behavior).generateTracingConfig()
     }
 

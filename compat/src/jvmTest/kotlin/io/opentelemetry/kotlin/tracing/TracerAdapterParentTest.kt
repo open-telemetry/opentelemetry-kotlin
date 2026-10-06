@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import kotlin.test.Test
@@ -17,6 +18,7 @@ internal class TracerAdapterParentTest {
         javaTracerProvider,
         CompatSpanLimitsConfig(),
         contextFactory,
+        NoopSdkErrorHandler,
     ).getTracer("test")
 
     @Test

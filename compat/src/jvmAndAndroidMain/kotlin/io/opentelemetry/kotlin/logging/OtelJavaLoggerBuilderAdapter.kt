@@ -2,10 +2,12 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.aliases.OtelJavaLogger
 import io.opentelemetry.kotlin.aliases.OtelJavaLoggerBuilder
+import io.opentelemetry.kotlin.factory.ContextFactory
 
 internal class OtelJavaLoggerBuilderAdapter(
     private val loggerProvider: LoggerProvider,
-    private val instrumentationScopeName: String
+    private val instrumentationScopeName: String,
+    private val contextFactory: ContextFactory,
 ) : OtelJavaLoggerBuilder {
 
     private var schemaUrl: String? = null
@@ -27,6 +29,6 @@ internal class OtelJavaLoggerBuilderAdapter(
             instrumentationScopeVersion,
             schemaUrl
         )
-        return OtelJavaLoggerAdapter(impl)
+        return OtelJavaLoggerAdapter(impl, contextFactory)
     }
 }

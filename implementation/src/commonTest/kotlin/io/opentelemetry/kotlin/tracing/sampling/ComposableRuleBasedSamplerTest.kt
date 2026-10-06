@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
-import io.opentelemetry.kotlin.init.SamplerConfigDsl
+import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.SpanLinkImpl
@@ -30,9 +30,7 @@ internal class ComposableRuleBasedSamplerTest {
     private val spanFactory = SpanFactoryImpl(spanContextFactory)
     private val contextFactory = ContextFactoryImpl(spanFactory)
 
-    private val samplerDsl = object : SamplerConfigDsl {
-        override val spanFactory = this@ComposableRuleBasedSamplerTest.spanFactory
-    }
+    private val samplerDsl = SamplerConfigImpl(spanFactory)
 
     private val traceId = "000000000000000000ffffffffffffff"
 

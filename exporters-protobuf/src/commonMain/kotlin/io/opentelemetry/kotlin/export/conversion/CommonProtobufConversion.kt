@@ -2,8 +2,13 @@ package io.opentelemetry.kotlin.export.conversion
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.factory.toHexString
-import io.opentelemetry.kotlin.propagation.W3CTraceStateCodec
-import io.opentelemetry.kotlin.propagation.W3CTraceStateValidator
+import io.opentelemetry.kotlin.propagation.utils.isAllZeroBytes
+import io.opentelemetry.kotlin.propagation.utils.isValidSpanIdBytes
+import io.opentelemetry.kotlin.propagation.utils.isValidTraceIdBytes
+import io.opentelemetry.kotlin.propagation.utils.SPAN_ID_BYTES
+import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_BYTES
+import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateCodec
+import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateValidator
 import io.opentelemetry.kotlin.resource.MutableResource
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
@@ -11,6 +16,14 @@ import io.opentelemetry.kotlin.tracing.TraceFlags
 import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.model.hex
 import io.opentelemetry.proto.common.v1.InstrumentationScope
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
+
+/**
+ * Omit invalid (all-zero) trace/span IDs
+ */
+internal fun ByteArray.toIdByteString(): ByteString =
+    if (isAllZeroBytes()) ByteString.EMPTY else toByteString()
 
 fun InstrumentationScopeInfo.toProtobuf(): InstrumentationScope = InstrumentationScope(
     name = name,
@@ -74,23 +87,22 @@ private class DeserializedMutableResource(
 ) : MutableResource
 
 internal class DeserializedSpanContext(
-    override val traceIdBytes: ByteArray,
-    override val spanIdBytes: ByteArray,
+    traceIdBytes: ByteArray,
+    spanIdBytes: ByteArray,
     flags: Int = 0,
     traceStateString: String = "",
     override val isRemote: Boolean = false,
 ) : SpanContext {
-    override val traceId: String by lazy { traceIdBytes.toHexString() }
-    override val spanId: String by lazy { spanIdBytes.toHexString() }
+    override val traceIdBytes: ByteArray = if (traceIdBytes.isEmpty()) ByteArray(TRACE_ID_BYTES) else traceIdBytes
+    override val spanIdBytes: ByteArray = if (spanIdBytes.isEmpty()) ByteArray(SPAN_ID_BYTES) else spanIdBytes
+    override val traceId: String by lazy { this.traceIdBytes.toHexString() }
+    override val spanId: String by lazy { this.spanIdBytes.toHexString() }
     override val traceFlags: TraceFlags = DeserializedTraceFlags(flags and 0xFF)
-    override val isValid: Boolean by lazy { traceId != INVALID_TRACE_ID && spanId != INVALID_SPAN_ID }
+    override val isValid: Boolean by lazy {
+        this.traceIdBytes.isValidTraceIdBytes() && this.spanIdBytes.isValidSpanIdBytes()
+    }
     override val traceState: TraceState by lazy {
         DeserializedTraceState(W3CTraceStateCodec.decode(traceStateString))
-    }
-
-    private companion object {
-        private const val INVALID_TRACE_ID = "00000000000000000000000000000000"
-        private const val INVALID_SPAN_ID = "0000000000000000"
     }
 }
 

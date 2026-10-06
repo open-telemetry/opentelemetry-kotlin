@@ -49,6 +49,11 @@ internal class OtelJavaReadWriteLogRecordAdapterTest {
     }
 
     @Test
+    fun testNullBodyValue() {
+        assertNull(OtelJavaReadWriteLogRecordAdapter(FakeReadWriteLogRecord(body = null)).bodyValue)
+    }
+
+    @Test
     fun testToLogRecordData() {
         val log = FakeReadWriteLogRecord(timestamp = 5, body = "my_log", attributes = mapOf("key" to "value"))
         val data = OtelJavaReadWriteLogRecordAdapter(log).toLogRecordData()

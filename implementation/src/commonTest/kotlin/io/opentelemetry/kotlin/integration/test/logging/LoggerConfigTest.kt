@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.integration.test.logging
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
 import io.opentelemetry.kotlin.logging.LoggerConfigImpl
 import io.opentelemetry.kotlin.logging.SeverityNumber
-import io.opentelemetry.kotlin.tracing.sampling.alwaysOff
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

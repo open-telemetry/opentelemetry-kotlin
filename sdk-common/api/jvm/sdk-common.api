@@ -1,3 +1,7 @@
+public abstract interface class io/opentelemetry/kotlin/ClockProvider {
+	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
+}
+
 public final class io/opentelemetry/kotlin/attributes/EmptyAttributeContainer : io/opentelemetry/kotlin/attributes/AttributeContainer {
 	public static final field INSTANCE Lio/opentelemetry/kotlin/attributes/EmptyAttributeContainer;
 	public fun getAttributes ()Ljava/util/Map;
@@ -69,17 +73,8 @@ public final class io/opentelemetry/kotlin/export/TimeoutOperationKt {
 	public static final fun runWithTimeout (JLkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class io/opentelemetry/kotlin/propagation/W3CTraceStateCodec {
-	public static final field INSTANCE Lio/opentelemetry/kotlin/propagation/W3CTraceStateCodec;
-	public final fun decode (Ljava/lang/String;)Ljava/util/Map;
-	public final fun encode (Ljava/util/Map;)Ljava/lang/String;
-}
-
-public final class io/opentelemetry/kotlin/propagation/W3CTraceStateValidator {
-	public static final field INSTANCE Lio/opentelemetry/kotlin/propagation/W3CTraceStateValidator;
-	public final fun canPut (Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;)Z
-	public final fun isValidKey (Ljava/lang/String;)Z
-	public final fun isValidValue (Ljava/lang/String;)Z
+public final class io/opentelemetry/kotlin/logging/LogBodyNormalizationKt {
+	public static final fun normalizeLogBody (Ljava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class io/opentelemetry/kotlin/resource/ResourceDetectionKt {

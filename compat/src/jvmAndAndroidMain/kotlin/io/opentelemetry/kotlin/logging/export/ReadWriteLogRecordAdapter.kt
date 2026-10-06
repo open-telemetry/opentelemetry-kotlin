@@ -3,12 +3,14 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteLogRecord
+import io.opentelemetry.kotlin.aliases.OtelJavaValue
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.convertToMap
-import io.opentelemetry.kotlin.attributes.setFlattenedAnyValueAttribute
-import io.opentelemetry.kotlin.logging.LogRecordDataImpl
+import io.opentelemetry.kotlin.attributes.toOtelJavaValue
+import io.opentelemetry.kotlin.attributes.toOtelKotlinBody
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.LogRecordData
+import io.opentelemetry.kotlin.logging.data.LogRecordDataAdapter
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import io.opentelemetry.kotlin.logging.toOtelKotlinSeverityNumber
 import io.opentelemetry.kotlin.resource.Resource
@@ -23,7 +25,7 @@ internal class ReadWriteLogRecordAdapter(
 ) : ReadWriteLogRecord {
 
     override var timestamp: Long?
-        get() = impl.timestampEpochNanos
+        get() = impl.timestampEpochNanos.takeIf { it > 0L }
         set(value) {
         }
 
@@ -42,7 +44,7 @@ internal class ReadWriteLogRecordAdapter(
         }
 
     override var body: Any?
-        get() = impl.bodyValue?.asString()
+        get() = impl.bodyValue?.toOtelKotlinBody()
         set(value) {
         }
 
@@ -89,11 +91,11 @@ internal class ReadWriteLogRecordAdapter(
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
-        // no java implementation available
+        impl.setAttribute(OtelJavaAttributeKey.valueKey(key), OtelJavaValue.of(value))
     }
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
-        setFlattenedAnyValueAttribute(key, value)
+        impl.setAttribute(OtelJavaAttributeKey.valueKey(key), value.toOtelJavaValue())
     }
 
     override val attributes: Map<String, Any>
@@ -108,17 +110,5 @@ internal class ReadWriteLogRecordAdapter(
     override val instrumentationScopeInfo: InstrumentationScopeInfo
         get() = impl.instrumentationScopeInfo.toOtelKotlinInstrumentationScopeInfo()
 
-    override fun toLogRecordData(): LogRecordData = LogRecordDataImpl(
-        timestamp,
-        observedTimestamp,
-        severityNumber,
-        severityText,
-        body,
-        eventName,
-        spanContext,
-        attributes,
-        resource,
-        instrumentationScopeInfo,
-        droppedAttributesCount
-    )
+    override fun toLogRecordData(): LogRecordData = LogRecordDataAdapter(impl.toLogRecordData())
 }

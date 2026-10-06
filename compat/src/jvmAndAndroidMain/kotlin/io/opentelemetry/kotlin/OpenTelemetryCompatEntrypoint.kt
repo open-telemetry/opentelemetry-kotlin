@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.clock.ClockAdapter
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
-import io.opentelemetry.kotlin.factory.DefaultBaggageFactory
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
@@ -35,7 +34,7 @@ public fun createCompatOpenTelemetry(
 
     val cfg = CompatOpenTelemetryConfig(clock).apply(config)
     val behavior = defaultCompatBehaviorReader(sdkErrorHandler = cfg.sdkErrorHandler)
-        .read(configFilePath = cfg.configFilePath, dsl = cfg.toBehavior())
+        .read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
 
     // configFactory is legacy - use behavior to control SDK functionality instead
     val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, contextFactory)
@@ -49,7 +48,6 @@ public fun createCompatOpenTelemetry(
         traceState = traceState,
         context = contextFactory,
         span = span,
-        baggage = DefaultBaggageFactory,
         idGenerator = configFactory.idGenerator,
         resource = CompatResourceFactory,
         propagator = cfg.propagatorCfg.buildPropagator(),

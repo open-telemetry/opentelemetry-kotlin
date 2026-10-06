@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.attributes
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributesBuilder
+import io.opentelemetry.kotlin.aliases.OtelJavaValue
 
 internal class CompatAttributesModel(
     internal val attrs: OtelJavaAttributesBuilder = OtelJavaAttributes.builder()
@@ -41,11 +42,11 @@ internal class CompatAttributesModel(
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
-        // no java implementation available
+        attrs.put(OtelJavaAttributeKey.valueKey(key), OtelJavaValue.of(value))
     }
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
-        setFlattenedAnyValueAttribute(key, value)
+        attrs.put(OtelJavaAttributeKey.valueKey(key), value.toOtelJavaValue())
     }
 
     override val attributes: Map<String, Any>

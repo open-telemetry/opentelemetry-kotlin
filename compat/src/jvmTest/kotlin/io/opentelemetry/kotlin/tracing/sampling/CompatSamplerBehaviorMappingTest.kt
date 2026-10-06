@@ -10,7 +10,6 @@ import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.factory.hexToByteArray
-import io.opentelemetry.kotlin.init.SamplerConfigDsl
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
@@ -24,9 +23,7 @@ internal class CompatSamplerBehaviorMappingTest {
     private val contextFactory = CompatContextFactory()
     private val spanFactory: SpanFactory = CompatSpanFactory(spanContextFactory)
 
-    private val samplerDsl = object : SamplerConfigDsl {
-        override val spanFactory = this@CompatSamplerBehaviorMappingTest.spanFactory
-    }
+    private val samplerDsl = CompatSamplerConfig(spanFactory)
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean): Context {
         val traceFlags = if (sampled) {

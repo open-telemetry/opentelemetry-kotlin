@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.config.yaml
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.SimpleLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.config.schema.model.BatchLogRecordProcessor
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
 import io.opentelemetry.kotlin.config.schema.model.LogRecordExporter
@@ -27,7 +28,10 @@ internal class LogRecordProcessorMapperTest {
             LogRecordProcessor(simple = SimpleLogRecordProcessor(exporter = consoleExporter())),
         )
         assertEquals(
-            LogRecordProcessorBehavior(console = ConsoleExporterBehavior()),
+            LogRecordProcessorBehavior(
+                console = ConsoleExporterBehavior(),
+                simple = SimpleLogRecordProcessorBehavior(),
+            ),
             processors.toBehavior(),
         )
     }
@@ -43,7 +47,8 @@ internal class LogRecordProcessorMapperTest {
                     endpoint = "http://localhost:4317",
                     timeout = 10_000,
                     headers = mapOf("key" to "value")
-                )
+                ),
+                simple = SimpleLogRecordProcessorBehavior(),
             ),
             processors.toBehavior(),
         )
@@ -101,6 +106,14 @@ internal class LogRecordProcessorMapperTest {
             ),
             processors.toBehavior(),
         )
+    }
+
+    @Test
+    fun leavesSimpleUnsetForABatchProcessor() {
+        val processors = listOf(
+            LogRecordProcessor(batch = BatchLogRecordProcessor(exporter = consoleExporter())),
+        )
+        assertNull(processors.toBehavior()?.simple)
     }
 
     @Test

@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
@@ -443,6 +444,32 @@ internal class SpanExportTest {
         // Verify context was captured and contains expected value
         val actualValue = contextCapturingProcessor.capturedContext?.get(contextKey)
         assertSame(testContextValue, actualValue)
+    }
+
+    @Test
+    fun `test complex attribute values export`() = runTest {
+        val list = AnyValue.ListValue(listOf(AnyValue.LongValue(1), AnyValue.StringValue("a")))
+        val map = AnyValue.MapValue(mapOf("k" to AnyValue.BoolValue(true)))
+        val bytes = byteArrayOf(1, 2)
+        val span = harness.tracer.startSpan("span", null, SpanKind.INTERNAL, null, {
+            setAnyValueAttribute("start_list", list)
+        })
+        span.setAnyValueAttribute("map", map)
+        span.setByteArrayAttribute("bytes", bytes)
+        span.addEvent("event") {
+            setAnyValueAttribute("event_map", map)
+        }
+        span.end()
+
+        val expected = mapOf<String, Any>(
+            "start_list" to list,
+            "map" to map,
+            "bytes" to AnyValue.BytesValue(bytes),
+        )
+        harness.assertSpans(1, null) { spans ->
+            assertEquals(expected, spans[0].attributes)
+            assertEquals(mapOf<String, Any>("event_map" to map), spans[0].events.single().attributes)
+        }
     }
 
     @Test

@@ -52,6 +52,7 @@ kotlin {
             dependencies {
                 implementation(project(":sdk-api"))
                 implementation(project(":sdk-common"))
+                implementation(project(":propagation-utils"))
                 implementation(project(":api-ext"))
                 implementation(libs.wire.runtime)
             }

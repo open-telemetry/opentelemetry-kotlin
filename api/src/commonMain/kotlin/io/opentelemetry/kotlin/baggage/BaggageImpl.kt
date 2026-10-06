@@ -1,6 +1,8 @@
 package io.opentelemetry.kotlin.baggage
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.propagation.utils.isValidBaggageKey
+import io.opentelemetry.kotlin.propagation.utils.isValidBaggageValue
 
 @OptIn(ExperimentalApi::class)
 internal class BaggageImpl private constructor(
@@ -23,11 +25,25 @@ internal class BaggageImpl private constructor(
             else -> BaggageImpl(entries - name)
         }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other !is BaggageImpl) {
+            return false
+        }
+        return entries == other.entries
+    }
+
+    override fun hashCode(): Int = entries.hashCode()
+
+    override fun toString(): String = "BaggageImpl(entries=$entries)"
+
     private fun setImpl(name: String, value: String, metadata: BaggageEntryMetadata): Baggage {
-        if (!isValidKey(name)) {
+        if (!isValidBaggageKey(name)) {
             return this
         }
-        if (!isValidValue(value)) {
+        if (!isValidBaggageValue(value)) {
             return this
         }
         if (entries.size >= MAX_ENTRIES && name !in entries) {
@@ -42,35 +58,5 @@ internal class BaggageImpl private constructor(
         val EMPTY: Baggage = BaggageImpl(emptyMap())
 
         private val EMPTY_METADATA = BaggageEntryMetadataImpl("")
-
-        private val TCHAR_SPECIALS = setOf(
-            '!', '#', '$', '%', '&', '\'', '*', '+', '-', '.', '^', '_', '`', '|', '~',
-        )
-
-        /**
-         * RFC 7230 token: 1*tchar.
-         * tchar = "!" / "#" / "$" / "%" / "&" / "'" / "*" / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~" / DIGIT / ALPHA
-         */
-        private fun isValidKey(name: String): Boolean {
-            if (name.isEmpty()) {
-                return false
-            }
-            return name.all(::isTChar)
-        }
-
-        /**
-         * Reject characters that would break the W3C wire format outright (CR, LF) or are
-         * meaningless inside a baggage value (NUL). Other non-octet characters are accepted
-         * and percent-encoded by the propagator at inject time.
-         */
-        private fun isValidValue(value: String): Boolean =
-            value.all { c -> c != '\r' && c != '\n' && c.code != 0 }
-
-        private fun isTChar(c: Char): Boolean {
-            if (c in 'a'..'z' || c in 'A'..'Z' || c in '0'..'9') {
-                return true
-            }
-            return c in TCHAR_SPECIALS
-        }
     }
 }
