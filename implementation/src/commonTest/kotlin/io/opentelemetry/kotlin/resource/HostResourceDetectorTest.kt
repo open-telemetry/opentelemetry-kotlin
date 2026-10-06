@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.FakeAttributesMutator
 import io.opentelemetry.kotlin.factory.ResourceFactory
+import io.opentelemetry.kotlin.init.ResourceDetectionConfigImpl
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 import io.opentelemetry.kotlin.semconv.OsAttributes
 import io.opentelemetry.kotlin.semconv.SemconvBuildKonfig
@@ -15,11 +16,13 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class, IncubatingApi::class)
 internal class HostResourceDetectorTest {
 
-    private val detector = HostResourceDetector()
+    private val detector = HostResourceDetector
 
     @Test
     internal fun `has the reserved host name`() {
-        assertEquals("host", detector.name)
+        val configuredDetector = ResourceDetectionConfigImpl().hostResourceDetector()
+
+        assertEquals("host", configuredDetector.name)
     }
 
     @Test

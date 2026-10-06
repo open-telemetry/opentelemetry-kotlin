@@ -2,19 +2,19 @@ package io.opentelemetry.kotlin.resource
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.ResourceFactory
+import io.opentelemetry.kotlin.init.ResourceDetectionConfigDsl
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 import io.opentelemetry.kotlin.semconv.OsAttributes
 import io.opentelemetry.kotlin.semconv.SemconvBuildKonfig
 
 /**
- * Detects operating system resource attributes for the host running the SDK.
- *
- * This detector is not enabled by default. Register it using
- * [io.opentelemetry.kotlin.init.ResourceDetectionConfigDsl.detector].
+ * Returns a detector for operating system resource attributes of the host running the SDK.
  */
 @ExperimentalApi
-@OptIn(IncubatingApi::class)
-public class HostResourceDetector : ResourceDetector {
+public fun ResourceDetectionConfigDsl.hostResourceDetector(): ResourceDetector = HostResourceDetector
+
+@OptIn(ExperimentalApi::class, IncubatingApi::class)
+internal object HostResourceDetector : ResourceDetector {
 
     override val name: String = "host"
 

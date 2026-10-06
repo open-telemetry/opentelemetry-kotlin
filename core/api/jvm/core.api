@@ -1,6 +1,0 @@
-public final class io/opentelemetry/kotlin/resource/HostResourceDetector : io/opentelemetry/kotlin/resource/ResourceDetector {
-	public fun <init> ()V
-	public fun detect (Lio/opentelemetry/kotlin/factory/ResourceFactory;)Lio/opentelemetry/kotlin/resource/Resource;
-	public fun getName ()Ljava/lang/String;
-}
-
