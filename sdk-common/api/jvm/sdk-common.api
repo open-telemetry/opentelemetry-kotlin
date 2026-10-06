@@ -31,6 +31,11 @@ public final class io/opentelemetry/kotlin/error/GuardedSdkErrorHandler : io/ope
 	public fun onError (Lio/opentelemetry/kotlin/error/SdkError;)V
 }
 
+public final class io/opentelemetry/kotlin/error/PlatformSdkErrorHandler : io/opentelemetry/kotlin/error/SdkErrorHandler {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/error/PlatformSdkErrorHandler;
+	public fun onError (Lio/opentelemetry/kotlin/error/SdkError;)V
+}
+
 public final class io/opentelemetry/kotlin/export/BatchExportOperationKt {
 	public static final fun batchExportOperation (Ljava/util/List;Lio/opentelemetry/kotlin/error/SdkErrorHandler;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/export/OperationResultCode;
 	public static final fun batchExportOperationSuspend (Ljava/util/List;Lio/opentelemetry/kotlin/error/SdkErrorHandler;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

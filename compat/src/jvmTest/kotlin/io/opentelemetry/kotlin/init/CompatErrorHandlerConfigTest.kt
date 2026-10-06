@@ -35,7 +35,7 @@ internal class CompatErrorHandlerConfigTest {
     }
 
     @Test
-    fun `reports are discarded when no error handler is configured`() {
+    fun `reports do not throw when no error handler is configured`() {
         val captured = captureExportErrorHandler { }
         captured.onError(sdkError())
     }

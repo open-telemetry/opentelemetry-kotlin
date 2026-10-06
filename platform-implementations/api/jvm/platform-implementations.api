@@ -41,7 +41,8 @@ public final class io/opentelemetry/kotlin/IoDispatcher_jvmKt {
 }
 
 public final class io/opentelemetry/kotlin/PlatformLogger_jvmKt {
-	public static final fun platformLog (Ljava/lang/String;)V
+	public static final fun platformLog (Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;Ljava/lang/Throwable;)V
+	public static synthetic fun platformLog$default (Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;Ljava/lang/Throwable;ILjava/lang/Object;)V
 }
 
 public final class io/opentelemetry/kotlin/ReentrantReadWriteLock {
