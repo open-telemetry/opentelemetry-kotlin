@@ -155,7 +155,7 @@ internal class OpenTelemetryConfigurationMapperTest {
                         http = OtlpHttpSpanExporterBehavior(
                             endpoint = "http://localhost:4317",
                             timeout = 10_000,
-                        )
+                        ),
                     ),
                 ),
                 loggerProvider = LoggerProviderBehavior(
@@ -163,8 +163,10 @@ internal class OpenTelemetryConfigurationMapperTest {
                         http = OtlpHttpLogsExporterBehavior(
                             endpoint = "http://localhost:4317",
                             timeout = 10_000,
-                        )
+                        ),
+                        simple = SimpleLogRecordProcessorBehavior(),
                     ),
+
                 ),
             ),
             config.toBehavior(),
