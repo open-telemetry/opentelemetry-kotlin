@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.SimpleSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.config.schema.model.SpanProcessor
 
@@ -15,6 +16,7 @@ fun List<SpanProcessor>.toBehavior(): SpanProcessorBehavior? {
     // TODO: Add support to multiple exporters being in use simultaneously once we have the SpanProcessor
     //  fully implemented.
     for (processor in this) {
+        val simple = processor.simple?.let { SimpleSpanProcessorBehavior() }
         val batch = processor.batch?.let {
             BatchSpanProcessorBehavior(
                 scheduleDelay = it.scheduleDelay?.takeIf { value -> value >= 0 },
@@ -26,7 +28,11 @@ fun List<SpanProcessor>.toBehavior(): SpanProcessorBehavior? {
         }
         val consoleExporter = processor.simple?.exporter?.console ?: processor.batch?.exporter?.console
         if (consoleExporter != null) {
-            return SpanProcessorBehavior(console = ConsoleExporterBehavior(), batch = batch)
+            return SpanProcessorBehavior(
+                console = ConsoleExporterBehavior(),
+                simple = simple,
+                batch = batch,
+            )
         }
 
         val httpExporter = processor.simple?.exporter?.otlpHttp ?: processor.batch?.exporter?.otlpHttp
@@ -46,7 +52,11 @@ fun List<SpanProcessor>.toBehavior(): SpanProcessorBehavior? {
                 timeout = httpExporter.timeout,
                 headers = headers.ifEmpty { null }
             )
-            return SpanProcessorBehavior(http = httpExporterBehavior, batch = batch)
+            return SpanProcessorBehavior(
+                http = httpExporterBehavior,
+                simple = simple,
+                batch = batch,
+            )
         }
     }
 
