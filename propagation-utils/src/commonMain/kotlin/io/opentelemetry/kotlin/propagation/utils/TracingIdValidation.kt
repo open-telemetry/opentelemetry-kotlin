@@ -34,3 +34,34 @@ public fun ByteArray.isValidSpanIdBytes(): Boolean = size == SPAN_ID_BYTES && !i
  * Returns true if every byte is zero. An empty [ByteArray] is considered all zeros.
  */
 public fun ByteArray.isAllZeroBytes(): Boolean = all { it == 0.toByte() }
+
+/**
+ * The trace flags bit that marks a trace as sampled.
+ */
+public const val TRACE_FLAG_SAMPLED: Int = 0b01
+
+/**
+ * The trace flags bit that marks a trace ID as random.
+ */
+public const val TRACE_FLAG_RANDOM: Int = 0b10
+
+/**
+ * Decodes 2 hex chars into trace flags, keeping only the [TRACE_FLAG_SAMPLED] and
+ * [TRACE_FLAG_RANDOM] bits. Returns 0 if the input is not 2 hex chars.
+ */
+public fun String.decodeTraceFlagsOrZero(): Int {
+    if (length != 2 || !isValidHex()) {
+        return 0
+    }
+    return toInt(16) and (TRACE_FLAG_SAMPLED or TRACE_FLAG_RANDOM)
+}
+
+/**
+ * Encodes trace flags as 2 lowercase hex chars.
+ */
+public fun encodeTraceFlags(isSampled: Boolean, isRandom: Boolean): String = when {
+    isSampled && isRandom -> "03"
+    isRandom -> "02"
+    isSampled -> "01"
+    else -> "00"
+}

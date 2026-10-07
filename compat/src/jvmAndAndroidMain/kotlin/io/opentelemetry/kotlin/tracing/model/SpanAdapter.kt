@@ -13,7 +13,6 @@ import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.toOtelJavaValue
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
@@ -21,6 +20,7 @@ import io.opentelemetry.kotlin.tracing.SpanCreationAction
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.SpanLinkCompatImpl
 import io.opentelemetry.kotlin.tracing.StatusData
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusData
@@ -44,7 +44,7 @@ internal class SpanAdapter(
 
     override val parent: SpanContext =
         parentCtx?.let { OtelJavaSpan.fromContext(it) }?.spanContext?.toOtelKotlinSpanContext()
-            ?: DefaultSpanContextFactory.invalid
+            ?: createInvalidSpanContext()
 
     override val spanContext: SpanContext = impl.spanContext.toOtelKotlinSpanContext()
 

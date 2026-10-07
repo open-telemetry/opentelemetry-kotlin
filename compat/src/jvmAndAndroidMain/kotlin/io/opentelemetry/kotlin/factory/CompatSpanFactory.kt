@@ -1,12 +1,15 @@
 package io.opentelemetry.kotlin.factory
 
+import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 
-internal class CompatSpanFactory(spanContextFactory: SpanContextFactory) : SpanFactory {
+@OptIn(ExperimentalApi::class)
+internal class CompatSpanFactory : SpanFactory {
 
-    private val invalidSpanContext by lazy { spanContextFactory.invalid }
+    private val invalidSpanContext = createInvalidSpanContext()
 
     override val invalid: Span by lazy { NonRecordingSpan(invalidSpanContext, invalidSpanContext) }
 

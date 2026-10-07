@@ -1,8 +1,8 @@
 package io.opentelemetry.kotlin.tracing.ext
 
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
-import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.tracing.TraceState
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 
 internal fun TraceState.toOtelJavaTraceState(): OtelJavaTraceState {
     return OtelJavaTraceState.builder().apply {
@@ -21,7 +21,7 @@ internal fun OtelJavaTraceState.toOtelKotlinTraceState(): TraceState {
     forEach { key, value -> entries.add(key to value) }
 
     // reverse to preserve original order
-    return entries.asReversed().fold(DefaultTraceStateFactory.default) { state, (key, value) ->
+    return entries.asReversed().fold(createInvalidSpanContext().traceState) { state, (key, value) ->
         state.put(key, value)
     }
 }

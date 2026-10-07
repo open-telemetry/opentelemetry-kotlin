@@ -1,23 +1,24 @@
 package io.opentelemetry.kotlin.propagation
 
-import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.factory.TraceFlagsFactory
 import io.opentelemetry.kotlin.propagation.utils.SPAN_ID_HEX_LENGTH
+import io.opentelemetry.kotlin.propagation.utils.TRACE_FLAG_RANDOM
+import io.opentelemetry.kotlin.propagation.utils.TRACE_FLAG_SAMPLED
 import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_HEX_LENGTH
+import io.opentelemetry.kotlin.propagation.utils.decodeTraceFlagsOrZero
+import io.opentelemetry.kotlin.propagation.utils.encodeTraceFlags
 import io.opentelemetry.kotlin.propagation.utils.isValidLowercaseHex
-import io.opentelemetry.kotlin.tracing.TraceFlags
 
 /**
  * Implementation of a W3C `traceparent` header.
  *
  * https://www.w3.org/TR/trace-context/#traceparent-header
  */
-@OptIn(ExperimentalApi::class)
 public class TraceParent private constructor(
     val version: String,
     val traceId: String,
     val spanId: String,
-    val traceFlags: TraceFlags,
+    val isSampled: Boolean,
+    val isRandom: Boolean,
 ) {
 
     fun encode(): String = buildString {
@@ -27,7 +28,7 @@ public class TraceParent private constructor(
         append(FIELD_SEPARATOR)
         append(spanId)
         append(FIELD_SEPARATOR)
-        append(encodeFlags(traceFlags))
+        append(encodeTraceFlags(isSampled, isRandom))
     }
 
     companion object {
@@ -39,9 +40,6 @@ public class TraceParent private constructor(
         private const val LEN_V00 = 55
         private const val EXPECTED_FIELD_COUNT = 4
         private const val FIELD_SEPARATOR = '-'
-        private const val FLAG_SAMPLED = 0b0000_0001
-        private const val FLAG_RANDOM = 0b0000_0010
-        private const val HEX_RADIX = 16
 
         /**
          * Create a [TraceParent] if the given inputs are valid.
@@ -51,22 +49,20 @@ public class TraceParent private constructor(
             version: String,
             traceId: String,
             spanId: String,
-            traceFlags: TraceFlags,
+            isSampled: Boolean,
+            isRandom: Boolean,
         ): TraceParent? {
             val valid = version.length == VERSION_LEN && version.isValidLowercaseHex() && version != FORBIDDEN_VERSION &&
                 traceId.length == TRACE_ID_HEX_LENGTH && traceId.isValidLowercaseHex() &&
                 spanId.length == SPAN_ID_HEX_LENGTH && spanId.isValidLowercaseHex()
             return if (valid) {
-                TraceParent(version, traceId, spanId, traceFlags)
+                TraceParent(version, traceId, spanId, isSampled, isRandom)
             } else {
                 null
             }
         }
 
-        fun decode(
-            header: String,
-            traceFlagsFactory: TraceFlagsFactory,
-        ): TraceParent? {
+        fun decode(header: String): TraceParent? {
             if (header.length < LEN_V00) {
                 return null
             }
@@ -90,23 +86,14 @@ public class TraceParent private constructor(
                 return null
             }
 
+            val flags = flagsStr.decodeTraceFlagsOrZero()
             return create(
                 version = version,
                 traceId = parts[1],
                 spanId = parts[2],
-                traceFlags = traceFlagsFactory.fromHex(flagsStr),
+                isSampled = (flags and TRACE_FLAG_SAMPLED) != 0,
+                isRandom = (flags and TRACE_FLAG_RANDOM) != 0,
             )
-        }
-
-        private fun encodeFlags(flags: TraceFlags): String {
-            var byte = 0
-            if (flags.isSampled) {
-                byte = byte or FLAG_SAMPLED
-            }
-            if (flags.isRandom) {
-                byte = byte or FLAG_RANDOM
-            }
-            return byte.toString(HEX_RADIX).padStart(FLAGS_LEN, '0')
         }
     }
 }

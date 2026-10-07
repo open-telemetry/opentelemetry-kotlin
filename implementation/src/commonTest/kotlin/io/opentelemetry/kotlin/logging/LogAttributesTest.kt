@@ -7,7 +7,6 @@ import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeContextFactory
-import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
@@ -39,7 +38,6 @@ internal class LogAttributesTest {
             clock = FakeClock(),
             processor = processor,
             contextFactory = FakeContextFactory(),
-            spanContextFactory = FakeSpanContextFactory(),
             key = key,
             resource = FakeResource(),
             logLimits = AttributeLimitsBehavior(
@@ -149,7 +147,6 @@ internal class LogAttributesTest {
         clock = FakeClock(),
         processor = processor,
         contextFactory = FakeContextFactory(),
-        spanContextFactory = FakeSpanContextFactory(),
         key = key,
         resource = FakeResource(),
         logLimits = AttributeLimitsBehavior(

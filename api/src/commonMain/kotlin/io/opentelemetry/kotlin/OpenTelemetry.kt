@@ -1,10 +1,7 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
-import io.opentelemetry.kotlin.factory.TraceFlagsFactory
-import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.Meter
@@ -36,21 +33,6 @@ public interface OpenTelemetry {
      * The [MeterProvider] for creating [Meter] instances.
      */
     public val meterProvider: MeterProvider
-
-    /**
-     * Factory that constructs SpanContext objects.
-     */
-    public val spanContext: SpanContextFactory
-
-    /**
-     * Factory that constructs TraceFlags objects.
-     */
-    public val traceFlags: TraceFlagsFactory
-
-    /**
-     * Factory that constructs TraceState objects.
-     */
-    public val traceState: TraceStateFactory
 
     /**
      * Factory that constructs Context objects.
