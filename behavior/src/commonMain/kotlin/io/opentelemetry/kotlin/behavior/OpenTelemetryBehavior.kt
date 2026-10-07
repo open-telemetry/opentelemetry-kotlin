@@ -38,7 +38,7 @@ data class OpenTelemetryBehavior(
      *
      * Note: Only supported by the environment variable spec, has no node in the declarative schema
      */
-    val entities: String? = null, // TODO: Add entities validation logic
+    val entities: String? = null,
     /**
      * The service producing telemetry.
      */
