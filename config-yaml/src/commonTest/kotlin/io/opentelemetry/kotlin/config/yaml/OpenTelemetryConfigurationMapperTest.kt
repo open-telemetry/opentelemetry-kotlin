@@ -166,7 +166,7 @@ internal class OpenTelemetryConfigurationMapperTest {
                             endpoint = "http://localhost:4317",
                             timeout = 10_000,
                         ),
-                        simple = SimpleLogRecordProcessorBehavior()
+                        simple = SimpleLogRecordProcessorBehavior(),
                     ),
                 ),
             ),
