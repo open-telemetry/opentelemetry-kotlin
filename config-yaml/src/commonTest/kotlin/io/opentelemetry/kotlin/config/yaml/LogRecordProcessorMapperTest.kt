@@ -44,7 +44,7 @@ internal class LogRecordProcessorMapperTest {
             ),
         )
         assertEquals(
-            LogRecordProcessorBehavior(http = OtlpHttpLogsExporterBehavior()),
+            LogRecordProcessorBehavior(http = OtlpHttpLogsExporterBehavior(), simple = SimpleLogRecordProcessorBehavior()),
             processors.toBehavior(),
         )
     }
