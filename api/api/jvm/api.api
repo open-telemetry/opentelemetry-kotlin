@@ -355,6 +355,24 @@ public abstract interface class io/opentelemetry/kotlin/tracing/SpanContext {
 	public abstract fun isValid ()Z
 }
 
+public abstract interface class io/opentelemetry/kotlin/tracing/SpanContextCreationAction {
+	public abstract fun isRandom ()Z
+	public abstract fun isRemote ()Z
+	public abstract fun isSampled ()Z
+	public abstract fun setRandom (Z)V
+	public abstract fun setRemote (Z)V
+	public abstract fun setSampled (Z)V
+	public abstract fun traceState (Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/opentelemetry/kotlin/tracing/SpanContextEntrypointKt {
+	public static final fun createInvalidSpanContext ()Lio/opentelemetry/kotlin/tracing/SpanContext;
+	public static final fun createSpanContext (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/SpanContext;
+	public static final fun createSpanContext ([B[BLkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/SpanContext;
+	public static synthetic fun createSpanContext$default (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/SpanContext;
+	public static synthetic fun createSpanContext$default ([B[BLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/SpanContext;
+}
+
 public abstract interface class io/opentelemetry/kotlin/tracing/SpanCreationAction : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/SpanLinkCreator {
 }
 
@@ -422,6 +440,10 @@ public abstract interface class io/opentelemetry/kotlin/tracing/TraceState {
 	public abstract fun get (Ljava/lang/String;)Ljava/lang/String;
 	public abstract fun put (Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/TraceState;
 	public abstract fun remove (Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/TraceState;
+}
+
+public abstract interface class io/opentelemetry/kotlin/tracing/TraceStateCreationAction {
+	public abstract fun put (Ljava/lang/String;Ljava/lang/String;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/Tracer {

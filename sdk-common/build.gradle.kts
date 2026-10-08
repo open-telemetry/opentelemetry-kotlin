@@ -1,3 +1,5 @@
+import com.codingfeline.buildkonfig.compiler.FieldSpec
+
 plugins {
     kotlin("multiplatform")
     id("com.android.kotlin.multiplatform.library")
@@ -5,6 +7,16 @@ plugins {
     id("signing")
     id("com.vanniktech.maven.publish")
     id("org.jetbrains.kotlinx.kover")
+    alias(libs.plugins.buildKonfig)
+}
+
+buildkonfig {
+    packageName = "io.opentelemetry.kotlin"
+    exposeObjectWithName = "SdkBuildKonfig"
+
+    defaultConfigs {
+        buildConfigField(FieldSpec.Type.STRING, "SDK_VERSION", project.version.toString())
+    }
 }
 
 kotlin {
@@ -30,4 +42,8 @@ kotlin {
             }
         }
     }
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    exclude { it.file.path.contains("buildkonfig") }
 }

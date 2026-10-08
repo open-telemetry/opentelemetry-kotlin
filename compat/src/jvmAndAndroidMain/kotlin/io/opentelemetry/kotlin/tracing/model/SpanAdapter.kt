@@ -12,7 +12,8 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.toOtelJavaValue
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.error.guard
+import io.opentelemetry.kotlin.error.sdkGuard
+import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.Span
@@ -65,13 +66,13 @@ internal class SpanAdapter(
     }
 
     override fun end() {
-        sdkErrorHandler.guard("Span.end failed") {
+        sdkErrorHandler.sdkGuard("Span.end failed") {
             impl.end()
         }
     }
 
     override fun end(timestamp: Long) {
-        sdkErrorHandler.guard("Span.end failed") {
+        sdkErrorHandler.sdkGuard("Span.end failed") {
             if (timestamp > 0) {
                 impl.end(timestamp, TimeUnit.NANOSECONDS)
             } else {
@@ -85,10 +86,10 @@ internal class SpanAdapter(
     override fun addLink(
         spanContext: SpanContext,
         attributes: (AttributesMutator.() -> Unit)?
-    ) = sdkErrorHandler.guard("Span.addLink failed") {
+    ) = sdkErrorHandler.sdkGuard("Span.addLink failed") {
         val container = CompatAttributesModel()
         if (attributes != null) {
-            attributes(container)
+            userCode { attributes(container) }
         }
         if (linksImpl.size < spanLimitsConfig.effectiveLinkCountLimit) {
             linksImpl.add(SpanLinkCompatImpl(spanContext, container))
@@ -100,10 +101,10 @@ internal class SpanAdapter(
         name: String,
         timestamp: Long?,
         attributes: (AttributesMutator.() -> Unit)?
-    ) = sdkErrorHandler.guard("Span.addEvent failed") {
+    ) = sdkErrorHandler.sdkGuard("Span.addEvent failed") {
         val container = CompatAttributesModel()
         if (attributes != null) {
-            attributes(container)
+            userCode { attributes(container) }
         }
         // As with the span start: left unset, the SDK stamps the event with the clock it times the span by.
         if (timestamp != null && timestamp > 0) {

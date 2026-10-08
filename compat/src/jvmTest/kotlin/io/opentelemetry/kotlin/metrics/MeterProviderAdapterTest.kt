@@ -1,6 +1,8 @@
 package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkMeterProvider
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaMetricReader
 import kotlinx.coroutines.test.runTest
@@ -13,7 +15,7 @@ import kotlin.test.assertSame
 
 internal class MeterProviderAdapterTest {
 
-    private val adapter = MeterProviderAdapter(OtelJavaSdkMeterProvider.builder().build())
+    private val adapter = MeterProviderAdapter(OtelJavaSdkMeterProvider.builder().build(), NoopSdkErrorHandler)
 
     @Test
     fun testMinimalMeterProvider() {
@@ -82,11 +84,29 @@ internal class MeterProviderAdapterTest {
         val provider = OtelJavaSdkMeterProvider.builder()
             .registerMetricReader(reader)
             .build()
-        val adapter = MeterProviderAdapter(provider)
+        val adapter = MeterProviderAdapter(provider, NoopSdkErrorHandler)
 
         assertEquals(OperationResultCode.Success, adapter.forceFlush())
         assertEquals(1, reader.flushCount)
         assertEquals(OperationResultCode.Success, adapter.shutdown())
         assertEquals(1, reader.shutdownCount)
+    }
+
+    @Test
+    fun testForceFlushAndShutdownReportExceptions() = runTest {
+        val reader = FakeOtelJavaMetricReader()
+        reader.nextResult = { throw IllegalStateException("boom") }
+        val errorHandler = FakeSdkErrorHandler()
+        val adapter = MeterProviderAdapter(
+            OtelJavaSdkMeterProvider.builder().registerMetricReader(reader).build(),
+            errorHandler,
+        )
+
+        assertEquals(OperationResultCode.Failure, adapter.forceFlush())
+        assertEquals(OperationResultCode.Failure, adapter.shutdown())
+        assertEquals(
+            listOf("MeterProvider.forceFlush failed", "MeterProvider.shutdown failed"),
+            errorHandler.userCodeErrors.map { it.message },
+        )
     }
 }

@@ -45,6 +45,7 @@ import io.opentelemetry.api.trace.TracerBuilder
 import io.opentelemetry.api.trace.TracerProvider
 import io.opentelemetry.context.Context
 import io.opentelemetry.context.ContextKey
+import io.opentelemetry.context.ContextStorage
 import io.opentelemetry.context.ImplicitContextKeyed
 import io.opentelemetry.context.Scope
 import io.opentelemetry.context.propagation.ContextPropagators
@@ -107,6 +108,7 @@ typealias OtelJavaTraceState = TraceState
 typealias OtelJavaSpanKind = SpanKind
 typealias OtelJavaStatusCode = StatusCode
 typealias OtelJavaContext = Context
+typealias OtelJavaContextStorage = ContextStorage
 typealias OtelJavaContextKey<T> = ContextKey<T>
 typealias OtelJavaTracer = Tracer
 typealias OtelJavaTracerProvider = TracerProvider

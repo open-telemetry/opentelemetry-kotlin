@@ -1,6 +1,9 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.clock.ClockAdapter
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.factory.CompatSpanFactory
@@ -33,6 +36,16 @@ public fun createCompatOpenTelemetry(
     val span = CompatSpanFactory(spanContext)
 
     val cfg = CompatOpenTelemetryConfig(clock).apply(config)
+    if (cfg.contextConfigured) {
+        cfg.sdkErrorHandler.reportError(
+            SdkError.ApiMisuse(
+                api = "OpenTelemetryConfigDsl.context",
+                message = "Context configuration is ignored in compat mode. The implicit context is stored in " +
+                    "opentelemetry-java's ContextStorage.",
+                severity = SdkErrorSeverity.WARNING,
+            )
+        )
+    }
     val behavior = defaultCompatBehaviorReader(sdkErrorHandler = cfg.sdkErrorHandler)
         .read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
 
