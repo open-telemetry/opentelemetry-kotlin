@@ -10,6 +10,8 @@ import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.guardOrDefault
+import io.opentelemetry.kotlin.error.sdkGuard
+import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.logging.LogRecordDataImpl
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.LogRecordData
@@ -53,7 +55,7 @@ internal class LogRecordModel(
      * a public API method, so a failure is reported and swallowed.
      */
     private inline fun mutate(details: String, action: () -> Unit) {
-        sdkErrorHandler.guard(details) {
+        sdkErrorHandler.sdkGuard(details) {
             lock.write {
                 action()
             }
@@ -153,7 +155,7 @@ internal class LogRecordModel(
         value: List<Boolean>
     ) {
         mutate("LogRecord.setBooleanListAttribute failed") {
-            attrs.setBooleanListAttribute(key, value)
+            userCode { attrs.setBooleanListAttribute(key, value) }
         }
     }
 
@@ -162,7 +164,7 @@ internal class LogRecordModel(
         value: List<String>
     ) {
         mutate("LogRecord.setStringListAttribute failed") {
-            attrs.setStringListAttribute(key, value)
+            userCode { attrs.setStringListAttribute(key, value) }
         }
     }
 
@@ -171,7 +173,7 @@ internal class LogRecordModel(
         value: List<Long>
     ) {
         mutate("LogRecord.setLongListAttribute failed") {
-            attrs.setLongListAttribute(key, value)
+            userCode { attrs.setLongListAttribute(key, value) }
         }
     }
 
@@ -180,7 +182,7 @@ internal class LogRecordModel(
         value: List<Double>
     ) {
         mutate("LogRecord.setDoubleListAttribute failed") {
-            attrs.setDoubleListAttribute(key, value)
+            userCode { attrs.setDoubleListAttribute(key, value) }
         }
     }
 
@@ -192,7 +194,7 @@ internal class LogRecordModel(
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
         mutate("LogRecord.setAnyValueAttribute failed") {
-            attrs.setAnyValueAttribute(key, value)
+            userCode { attrs.setAnyValueAttribute(key, value) }
         }
     }
 

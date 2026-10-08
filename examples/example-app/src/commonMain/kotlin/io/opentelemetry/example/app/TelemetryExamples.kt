@@ -3,6 +3,7 @@
 package io.opentelemetry.example.app
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.semconv.DbAttributes
@@ -34,17 +35,18 @@ suspend fun runAllExamples(platform: String) {
 
     demonstrateBasicSpan(tracer)
     demonstrateComplexSpan(tracer)
-    demonstrateSpanNesting(tracer)
+    demonstrateSpanNesting(tracer, otel.context)
     demonstrateBasicLogging(logger)
     demonstrateComplexLogging(logger)
 
     // flush all pending telemetry before terminating
     AppConfig.forceFlush()
-    AppConfig.shutdown()
 
     // give HTTP client time to complete requests before process exits.
     // in future the SDK needs to be updated to handle this automatically.
     delay(500)
+
+    AppConfig.shutdown()
 }
 
 /**
@@ -87,18 +89,20 @@ private fun demonstrateComplexSpan(tracer: Tracer) {
 /**
  * Creates nested spans that represent parent-child relationships.
  */
-private fun demonstrateSpanNesting(tracer: Tracer) {
+private fun demonstrateSpanNesting(tracer: Tracer, contextFactory: ContextFactory) {
     val parentSpan = tracer.startSpan(
         "parent-operation",
         null,
         SpanKind.INTERNAL,
         null
     ) { setStringAttribute("operation.type", "database-transaction") }
+    val parentContext = contextFactory.implicit().storeSpan(parentSpan)
 
     // Create first child span (database query)
     val childSpan1 =
         tracer.startSpan(
             name = "database-query",
+            parentContext = parentContext,
             spanKind = SpanKind.INTERNAL,
             action = {
                 setStringAttribute(DbAttributes.DB_SYSTEM_NAME, "postgresql")
@@ -110,7 +114,7 @@ private fun demonstrateSpanNesting(tracer: Tracer) {
     // Create second child span (cache lookup)
     val childSpan2 = tracer.startSpan(
         "cache-lookup",
-        null,
+        parentContext,
         SpanKind.INTERNAL,
         null
     ) { setStringAttribute("cache.type", "redis") }

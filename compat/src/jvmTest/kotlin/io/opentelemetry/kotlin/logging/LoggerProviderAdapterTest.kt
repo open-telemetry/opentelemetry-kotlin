@@ -1,12 +1,15 @@
 package io.opentelemetry.kotlin.logging
 
+import io.opentelemetry.kotlin.aliases.OtelJavaCompletableResultCode
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProvider
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordProcessor
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotSame
 import kotlin.test.assertSame
@@ -56,5 +59,37 @@ internal class LoggerProviderAdapterTest {
         assertEquals(1, processor.flushCount)
         assertEquals(OperationResultCode.Success, adapter.shutdown())
         assertEquals(1, processor.shutdownCount)
+    }
+
+    @Test
+    fun testForceFlushAndShutdownReportExceptions() = runTest {
+        val processor = FakeOtelJavaLogRecordProcessor()
+        processor.nextResult = { throw IllegalStateException("boom") }
+        val errorHandler = FakeSdkErrorHandler()
+        val adapter = LoggerProviderAdapter(
+            OtelJavaSdkLoggerProvider.builder().addLogRecordProcessor(processor).build(),
+            errorHandler,
+        )
+
+        assertEquals(OperationResultCode.Failure, adapter.forceFlush())
+        assertEquals(OperationResultCode.Failure, adapter.shutdown())
+        assertEquals(
+            listOf("LoggerProvider.forceFlush failed", "LoggerProvider.shutdown failed"),
+            errorHandler.userCodeErrors.map { it.message },
+        )
+    }
+
+    @Test
+    fun testForceFlushReportsExceptionalFailure() = runTest {
+        val processor = FakeOtelJavaLogRecordProcessor()
+        processor.nextResult = { OtelJavaCompletableResultCode.ofExceptionalFailure(IllegalStateException("boom")) }
+        val errorHandler = FakeSdkErrorHandler()
+        val adapter = LoggerProviderAdapter(
+            OtelJavaSdkLoggerProvider.builder().addLogRecordProcessor(processor).build(),
+            errorHandler,
+        )
+
+        assertEquals(OperationResultCode.Failure, adapter.forceFlush())
+        assertIs<IllegalStateException>(errorHandler.userCodeErrors.single().cause)
     }
 }

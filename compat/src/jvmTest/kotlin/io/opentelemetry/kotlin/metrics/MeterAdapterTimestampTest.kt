@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkMeterProvider
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaClock
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaMetricReader
 import kotlin.test.Test
@@ -17,7 +18,8 @@ internal class MeterAdapterTimestampTest {
         OtelJavaSdkMeterProvider.builder()
             .setClock(sdkClock)
             .registerMetricReader(reader)
-            .build()
+            .build(),
+        NoopSdkErrorHandler,
     ).getMeter("test")
 
     @Test

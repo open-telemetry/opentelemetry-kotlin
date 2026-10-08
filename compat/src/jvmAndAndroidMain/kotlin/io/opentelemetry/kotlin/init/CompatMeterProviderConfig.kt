@@ -5,12 +5,15 @@ import io.opentelemetry.kotlin.aliases.OtelJavaMeterProvider
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.metrics.MeterProvider
 import io.opentelemetry.kotlin.metrics.MeterProviderAdapter
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 
 @ExperimentalApi
-internal class CompatMeterProviderConfig : MeterProviderConfigDsl {
+internal class CompatMeterProviderConfig(
+    private val sdkErrorHandler: SdkErrorHandler,
+) : MeterProviderConfigDsl {
 
     override var serviceName: String? = null
         set(value) {
@@ -33,5 +36,5 @@ internal class CompatMeterProviderConfig : MeterProviderConfigDsl {
     /**
      * Return a noop provider for now.
      */
-    fun build(): MeterProvider = MeterProviderAdapter(OtelJavaMeterProvider.noop())
+    fun build(): MeterProvider = MeterProviderAdapter(OtelJavaMeterProvider.noop(), sdkErrorHandler)
 }

@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing.model
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanLinkImpl
@@ -24,7 +25,7 @@ internal fun buildSpanLink(
         attributeLimit = spanLimitConfig.attributeCountPerLinkLimit,
         attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
     )
-    attributes?.invoke(container)
+    userCode { attributes?.invoke(container) }
     if (!spanContext.isValid && container.attributes.isEmpty() && spanContext.traceState.asMap().isEmpty()) {
         return null
     }

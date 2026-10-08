@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.TraceFlags
 import io.opentelemetry.kotlin.tracing.TraceState
+import io.opentelemetry.kotlin.tracing.TraceStateCreationAction
 import io.opentelemetry.kotlin.tracing.TracingDsl
 
 /**

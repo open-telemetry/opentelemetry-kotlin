@@ -1,6 +1,9 @@
 package io.opentelemetry.kotlin.tracing
 
-public class TraceFlagsImpl(
+import io.opentelemetry.kotlin.ExperimentalApi
+
+@OptIn(ExperimentalApi::class)
+internal class TraceFlagsImpl(
     override val isSampled: Boolean,
     override val isRandom: Boolean
 ) : TraceFlags {

@@ -14,10 +14,12 @@ import io.opentelemetry.kotlin.tracing.OtelJavaTracerProviderAdapter
  * End-users should generally not use this function and should call [createCompatOpenTelemetry]
  * or [toOtelKotlinApi] instead.
  *
- * Avoid reading or setting the opentelemetry-java implicit context directly through
- * `Context.current()`, `Context.makeCurrent()`, `Span.current()`, `Baggage.current()`, etc. These
- * APIs use separate stores that is not possible to wrap, and therefore trace context will not work
- * correctly. See the compat README for details.
+ * If the receiver was created by `implementation`, avoid reading or setting the opentelemetry-java
+ * implicit context directly through `Context.current()`, `Context.makeCurrent()`, `Span.current()`,
+ * `Baggage.current()`, etc. These APIs use a separate store that it is not possible to wrap, and
+ * therefore trace context will not work correctly. Instances created by [createCompatOpenTelemetry]
+ * or [toOtelKotlinApi] share opentelemetry-java's ContextStorage, so these APIs work as expected.
+ * See the compat README for details.
  */
 @ExperimentalApi
 public fun OpenTelemetry.toOtelJavaApi(): OtelJavaOpenTelemetry {
