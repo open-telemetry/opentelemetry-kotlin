@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.context
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
 
 /**
@@ -13,6 +12,5 @@ import io.opentelemetry.kotlin.ThreadSafe
  *
  * In practice, this means you MUST retain the [ContextKey] instance and use it as a shared constant.
  */
-@ExperimentalApi
 @ThreadSafe
 public interface ContextKey<T>
