@@ -4,7 +4,9 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.config.dsl.ResourceConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.TraceExportConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -24,8 +26,8 @@ import io.opentelemetry.kotlin.tracing.sampling.toSampler
 internal class TracerProviderConfigImpl(
     private val clock: Clock,
     private val sdkErrorHandler: SdkErrorHandler,
-    private val resourceConfigImpl: ResourceConfigImpl = ResourceConfigImpl()
-) : TracerProviderConfigDsl, ResourceConfigDsl by resourceConfigImpl {
+    private val resourceConfig: ResourceConfigDslImpl = ResourceConfigDslImpl()
+) : TracerProviderConfigDsl, ResourceConfigDsl by resourceConfig {
 
     private var processor: SpanProcessor? = null
     private var samplerAction: (SamplerConfigDsl.() -> Sampler)? = null
@@ -50,7 +52,7 @@ internal class TracerProviderConfigImpl(
             )
             return
         }
-        processor = TraceExportConfigImpl(clock, sdkErrorHandler).action()
+        processor = TraceExportConfigDslImpl(clock, sdkErrorHandler).action()
     }
 
     override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
@@ -68,7 +70,7 @@ internal class TracerProviderConfigImpl(
         val action = samplerAction ?: { parentBased(root = alwaysOn()) }
         return TracingConfig(
             processor = processor ?: processorFromBehavior(processorBehavior),
-            resource = base.merge(resourceConfigImpl.generateResource()),
+            resource = base.merge(resourceConfig.toBehavior().toResource()),
             sdkErrorHandler = sdkErrorHandler,
             samplerFactory = { spanFactory -> SamplerConfigImpl(spanFactory).action() },
             tracerConfigurator = tracerConfigurator,
@@ -91,7 +93,7 @@ internal class TracerProviderConfigImpl(
         if (processorBehavior?.console == null) {
             return null
         }
-        return TraceExportConfigImpl(clock, sdkErrorHandler).run {
+        return TraceExportConfigDslImpl(clock, sdkErrorHandler).run {
             val exporter = stdoutSpanExporter()
             val batch = processorBehavior.batch
             if (batch == null) {

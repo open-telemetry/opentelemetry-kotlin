@@ -60,7 +60,7 @@ public interface OpenTelemetryConfigDsl : ResourceConfigDsl, ConfigFileDsl {
 
     /**
      * Configures the [SdkErrorHandler] that is notified of errors and misuse detected by the SDK.
-     * If this is not set the SDK discards these reports silently.
+     * If this is not set the SDK writes these reports to the platform log (e.g. Logcat).
      * https://opentelemetry.io/docs/specs/otel/error-handling/#configuring-error-handlers
      */
     public fun errorHandler(handler: SdkErrorHandler)

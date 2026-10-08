@@ -44,6 +44,11 @@ public final class io/opentelemetry/kotlin/error/GuardedSdkErrorHandler : io/ope
 	public fun onError (Lio/opentelemetry/kotlin/error/SdkError;)V
 }
 
+public final class io/opentelemetry/kotlin/error/PlatformSdkErrorHandler : io/opentelemetry/kotlin/error/SdkErrorHandler {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/error/PlatformSdkErrorHandler;
+	public fun onError (Lio/opentelemetry/kotlin/error/SdkError;)V
+}
+
 public final class io/opentelemetry/kotlin/error/UserCodeException : java/lang/RuntimeException {
 	public fun <init> (Ljava/lang/Throwable;)V
 	public fun getCause ()Ljava/lang/Throwable;

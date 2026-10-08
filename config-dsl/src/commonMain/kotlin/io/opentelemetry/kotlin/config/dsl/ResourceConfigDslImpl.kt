@@ -62,6 +62,8 @@ private class ResourceAttributesMutator : AttributesMutator {
     }
 
     private fun set(key: String, value: Any) {
-        attributes[key] = value
+        if (key.isNotEmpty()) {
+            attributes[key] = value
+        }
     }
 }
