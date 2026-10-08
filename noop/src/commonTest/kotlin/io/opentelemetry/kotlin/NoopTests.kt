@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.context.NoopContext
 import io.opentelemetry.kotlin.context.NoopContextKey
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.SeverityNumber
+import io.opentelemetry.kotlin.metrics.NoopObservableDoubleMeasurement
 import io.opentelemetry.kotlin.metrics.NoopObservableLongMeasurement
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapSetter
@@ -310,6 +311,21 @@ internal class NoopTests {
 
         noopObservableLongMeasurement.record(1)
         noopObservableLongMeasurement.record(1) {
+            attributesCalled = true
+            setStringAttribute("account.type", "commercial")
+        }
+
+        assertFalse(attributesCalled)
+    }
+
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testNoopObservableDoubleMeasurement() {
+        val noopObservableDoubleMeasurement = NoopObservableDoubleMeasurement()
+        var attributesCalled = false
+
+        noopObservableDoubleMeasurement.record(1.5)
+        noopObservableDoubleMeasurement.record(1.5) {
             attributesCalled = true
             setStringAttribute("account.type", "commercial")
         }
