@@ -1,13 +1,14 @@
 package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateValidator
 import io.opentelemetry.kotlin.tracing.TraceState
-import io.opentelemetry.kotlin.tracing.TraceStateImpl
+import io.opentelemetry.kotlin.tracing.TraceStateCreationAction
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
+import io.opentelemetry.kotlin.tracing.createSpanContext
 
 @ExperimentalApi
 public class TraceStateFactoryImpl : TraceStateFactory {
-    override val default: TraceState = TraceStateImpl.EMPTY
+    override val default: TraceState = createInvalidSpanContext().traceState
 }
 
 /**
@@ -17,25 +18,6 @@ public class TraceStateFactoryImpl : TraceStateFactory {
  */
 @OptIn(ExperimentalApi::class)
 internal fun buildTraceState(action: TraceStateCreationAction.() -> Unit): TraceState =
-    TraceStateCreationAction().apply(action).build()
-
-/**
- * DSL receiver for [buildTraceState].
- */
-@OptIn(ExperimentalApi::class)
-internal class TraceStateCreationAction {
-
-    private val entries = linkedMapOf<String, String>()
-
-    fun put(key: String, value: String) {
-        if (W3CTraceStateValidator.canPut(entries, key, value)) {
-            entries[key] = value
-        }
-    }
-
-    fun build(): TraceState = if (entries.isEmpty()) {
-        TraceStateImpl.EMPTY
-    } else {
-        TraceStateImpl(entries)
-    }
-}
+    createSpanContext(ByteArray(0), ByteArray(0)) {
+        traceState(action)
+    }.traceState

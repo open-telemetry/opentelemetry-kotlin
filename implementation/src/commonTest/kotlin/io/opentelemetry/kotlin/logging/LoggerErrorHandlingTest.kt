@@ -21,6 +21,7 @@ import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -30,7 +31,7 @@ internal class LoggerErrorHandlingTest {
 
     private val hostileCases = listOf(
         Case("clock throws", clock = Clock { boom() }),
-        Case("context factory throws", contextFactory = HostileContextFactory()),
+        Case("context factory throws", contextFactory = HostileContextFactory(), userCode = false),
         Case("attributes lambda throws", attributes = { boom() }),
         Case("exception message throws", exception = HostileThrowable()),
     )
@@ -45,11 +46,14 @@ internal class LoggerErrorHandlingTest {
             logger.emit("message", exception = case.exception, attributes = case.attributes)
 
             assertTrue(processor.logs.isEmpty(), case.name)
-            assertEquals(1, errorHandler.errors.size, case.name)
-            val error = errorHandler.userCodeErrors.first()
+            val error = errorHandler.errors.single()
+            val cause = when (case.userCode) {
+                true -> assertIs<SdkError.UserCodeError>(error, case.name).cause
+                false -> assertIs<SdkError.SdkCodeError>(error, case.name).cause
+            }
             assertEquals("Logger.emit failed", error.message, case.name)
             assertEquals(SdkErrorSeverity.WARNING, error.severity, case.name)
-            assertEquals("boom", error.cause.message, case.name)
+            assertEquals("boom", cause.message, case.name)
         }
     }
 
@@ -64,7 +68,7 @@ internal class LoggerErrorHandlingTest {
 
         assertFalse(logger.enabled())
 
-        val error = errorHandler.userCodeErrors.single()
+        val error = errorHandler.sdkCodeErrors.single()
         assertEquals("Logger.enabled failed", error.message)
         assertEquals("boom", error.cause.message)
     }
@@ -135,6 +139,7 @@ internal class LoggerErrorHandlingTest {
         val contextFactory: ContextFactory = FakeContextFactory(),
         val attributes: (AttributesMutator.() -> Unit)? = null,
         val exception: Throwable? = null,
+        val userCode: Boolean = true,
     )
 
     private class HostileContextFactory : ContextFactory {

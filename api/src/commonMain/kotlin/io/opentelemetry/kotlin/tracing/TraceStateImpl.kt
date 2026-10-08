@@ -3,13 +3,13 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateValidator
 
-@ExperimentalApi
-public class TraceStateImpl internal constructor(
+@OptIn(ExperimentalApi::class)
+internal class TraceStateImpl(
     private val data: LinkedHashMap<String, String>
 ) : TraceState {
 
-    public companion object {
-        public val EMPTY: TraceState = TraceStateImpl(linkedMapOf())
+    companion object {
+        val EMPTY: TraceState = TraceStateImpl(linkedMapOf())
     }
 
     override fun get(key: String): String? = data[key]

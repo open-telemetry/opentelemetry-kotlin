@@ -116,6 +116,19 @@ internal class TracerSamplerTest {
     }
 
     @Test
+    fun testSamplerWholeDoubleAttrsPreserved() {
+        val sampler = FakeSampler(
+            samplerAttributes = mapOf("double" to 2.0, "double_list" to listOf(1.0, 2.0))
+        )
+        val tracer = buildTracer(sampler)
+        val span = tracer.startSpan("test")
+        assertEquals(
+            mapOf("double" to 2.0, "double_list" to listOf(1.0, 2.0)),
+            span.toReadableSpan().attributes
+        )
+    }
+
+    @Test
     fun testSamplerAttrsOverrideSpanAttrs() {
         val sampler = FakeSampler(samplerAttributes = mapOf("shared.key" to "sampler.value"))
         val tracer = buildTracer(sampler)

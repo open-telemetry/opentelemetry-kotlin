@@ -11,6 +11,12 @@ import io.opentelemetry.kotlin.ExperimentalApi
 data class OpenTelemetryBehavior(
     /**
      * The file format version.
+     *
+     * Represented as a string including the semver major, minor version numbers (and optionally the meta tag).
+     * For example, "0.4", "1.0-rc.2", "1.0" (after stable release).
+     *
+     * See [VERSIONING.md](https://github.com/open-telemetry/opentelemetry-configuration/blob/main/VERSIONING.md) for
+     * more details.
      */
     val fileFormat: String? = null,
     /**
@@ -50,6 +56,44 @@ data class OpenTelemetryBehavior(
      */
     val loggerProvider: LoggerProviderBehavior? = null,
 ) : Behavior<OpenTelemetryBehavior> {
+    init {
+        fileFormat?.let {
+            require(FILE_FORMAT_REGEX.matches(fileFormat)) {
+                "Invalid file format version: '$fileFormat'. Expected '<major>.<minor>' with an optional pre-release tag."
+            }
+            val defaultVersion = parseVersion(DEFAULT_FILE_FORMAT_VERSION)
+            require(isSupportedVersion(fileFormat)) {
+                "Unsupported file format version: '$fileFormat'.\n" +
+                    "Supported versions are major=${defaultVersion.major}, minor<=${defaultVersion.minor}."
+            }
+        }
+    }
+
+    private fun isSupportedVersion(version: String): Boolean {
+        val version = parseVersion(version)
+        val expected = parseVersion(DEFAULT_FILE_FORMAT_VERSION)
+        return expected.major == version.major && expected.minor >= version.minor
+    }
+
+    private data class Version(
+        val major: Int,
+        val minor: Int,
+        val tag: String?,
+    )
+
+    private fun parseVersion(version: String): Version {
+        val (numbers, tag) = version.split("-", limit = 2).let {
+            it[0] to it.getOrNull(1)
+        }
+
+        val (major, minor) = numbers.split(".", limit = 2).map(String::toInt)
+
+        return Version(
+            major = major,
+            minor = minor,
+            tag = tag,
+        )
+    }
 
     override fun mergeWith(higher: OpenTelemetryBehavior): OpenTelemetryBehavior = copy(
         fileFormat = higher.fileFormat ?: fileFormat,
@@ -62,6 +106,15 @@ data class OpenTelemetryBehavior(
         tracerProvider = mergeNode(tracerProvider, higher.tracerProvider),
         loggerProvider = mergeNode(loggerProvider, higher.loggerProvider),
     )
+
+    companion object {
+        internal const val DEFAULT_FILE_FORMAT_VERSION = "1.2"
+        val DEFAULT_LOG_LEVEL = SeverityLevel.INFO
+
+        private val FILE_FORMAT_REGEX = Regex(
+            """^(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$"""
+        )
+    }
 }
 
 /**
@@ -70,33 +123,9 @@ data class OpenTelemetryBehavior(
  */
 @ExperimentalApi
 fun mergeBehaviors(layers: List<OpenTelemetryBehavior>): OpenTelemetryBehavior =
-    layers.fold(OpenTelemetryBehavior()) { merged, layer -> merged.mergeWith(layer) }
+    layers.fold(OpenTelemetryBehavior(fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION)) {
+            merged, layer ->
+        merged.mergeWith(layer)
+    }
 
 typealias Distribution = Map<String, Any?>
-
-enum class SeverityLevel {
-    TRACE,
-    TRACE2,
-    TRACE3,
-    TRACE4,
-    DEBUG,
-    DEBUG2,
-    DEBUG3,
-    DEBUG4,
-    INFO,
-    INFO2,
-    INFO3,
-    INFO4,
-    WARN,
-    WARN2,
-    WARN3,
-    WARN4,
-    ERROR,
-    ERROR2,
-    ERROR3,
-    ERROR4,
-    FATAL,
-    FATAL2,
-    FATAL3,
-    FATAL4,
-}

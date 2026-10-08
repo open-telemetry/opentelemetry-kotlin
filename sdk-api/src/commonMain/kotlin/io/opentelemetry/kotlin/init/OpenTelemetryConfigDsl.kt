@@ -41,7 +41,7 @@ public interface OpenTelemetryConfigDsl : ResourceConfigDsl, ConfigFileDsl {
     public fun resourceDetection(action: ResourceDetectionConfigDsl.() -> Unit)
 
     /**
-     * Defines configuration for how Context behaves.
+     * Defines configuration for how Context behaves. Ignored in compat mode, which reports a warning.
      */
     public fun context(action: ContextConfigDsl.() -> Unit)
 

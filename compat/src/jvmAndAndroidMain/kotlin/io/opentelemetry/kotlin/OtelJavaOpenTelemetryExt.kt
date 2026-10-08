@@ -7,7 +7,9 @@ import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
 import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetrySdk
 import io.opentelemetry.kotlin.aliases.OtelJavaTracerProvider
 import io.opentelemetry.kotlin.clock.ClockAdapter
+import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
@@ -30,11 +32,17 @@ import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
  * to/can't rewrite, but still wish to use the Kotlin API for new code. It is permitted to call
  * both the Kotlin and Java APIs throughout the lifecycle of your application, although it would
  * generally be encouraged to migrate to [createCompatOpenTelemetry] as a long-term goal.
+ *
+ * @param clock the clock used to timestamp telemetry created via the Kotlin API.
+ * @param sdkErrorHandler receives errors raised while delegating to the Java SDK, such as
+ * exceptions thrown when flushing or shutting down its providers. Defaults to a no-op handler.
  */
 @ExperimentalApi
 public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
-    clock: Clock = ClockAdapter(OtelJavaClock.getDefault())
+    clock: Clock = ClockAdapter(OtelJavaClock.getDefault()),
+    sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
 ): OpenTelemetry {
+    val errorHandler = GuardedSdkErrorHandler(sdkErrorHandler)
     val idGenerator = CompatIdGenerator()
     val traceFlags = DefaultTraceFlagsFactory
     val traceState = DefaultTraceStateFactory
@@ -46,10 +54,10 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
             unobfuscatedTracerProvider(),
             CompatSpanLimitsConfig(),
             contextFactory,
-            NoopSdkErrorHandler,
+            errorHandler,
         ),
-        loggerProvider = LoggerProviderAdapter(unobfuscatedLoggerProvider(), NoopSdkErrorHandler),
-        meterProvider = MeterProviderAdapter(unobfuscatedMeterProvider()),
+        loggerProvider = LoggerProviderAdapter(unobfuscatedLoggerProvider(), errorHandler),
+        meterProvider = MeterProviderAdapter(unobfuscatedMeterProvider(), errorHandler),
         clock = clock,
         spanContext = spanContext,
         traceFlags = traceFlags,
@@ -59,7 +67,7 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
         idGenerator = idGenerator,
         resource = CompatResourceFactory,
         propagator = TextMapPropagatorAdapter(propagators.textMapPropagator),
-        sdkErrorHandler = NoopSdkErrorHandler,
+        sdkErrorHandler = errorHandler,
     )
 }
 

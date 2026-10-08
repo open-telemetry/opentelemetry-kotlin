@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.createOpenTelemetry
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.framework.OtelKotlinTestRule
+import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlin.random.Random
 
@@ -11,7 +12,10 @@ import kotlin.random.Random
  * Configures opentelemetry-kotlin to run for integration tests so that exported logs/traces
  * can be verified against expected output.
  */
-internal class IntegrationTestHarness(scheduler: TestCoroutineScheduler) : OtelKotlinTestRule(scheduler) {
+internal class IntegrationTestHarness(
+    scheduler: TestCoroutineScheduler,
+    private val extraConfig: OpenTelemetryConfigDsl.() -> Unit = {},
+) : OtelKotlinTestRule(scheduler) {
     override val kotlinApi: OpenTelemetry by lazy {
         createOpenTelemetry(
             clock = fakeClock,
@@ -19,6 +23,7 @@ internal class IntegrationTestHarness(scheduler: TestCoroutineScheduler) : OtelK
                 idGenerator { IdGeneratorImpl(Random(0)) }
                 tracerProvider { tracerProviderConfig() }
                 loggerProvider { loggerProviderConfig() }
+                extraConfig()
             },
         )
     }
