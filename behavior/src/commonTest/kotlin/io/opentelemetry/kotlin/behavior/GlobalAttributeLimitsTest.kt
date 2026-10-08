@@ -23,6 +23,7 @@ internal class GlobalAttributeLimitsTest {
             envars = null,
             declarativeFile = null,
             dsl = OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 attributeLimits = AttributeLimitsBehavior(attributeCountLimit = 64),
                 tracerProvider = TracerProviderBehavior(
                     spanLimits = SpanLimitsBehavior(attributeCountLimit = 32),
@@ -42,6 +43,7 @@ internal class GlobalAttributeLimitsTest {
             envars = null,
             declarativeFile = null,
             dsl = OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 attributeLimits = AttributeLimitsBehavior(attributeCountLimit = 64),
                 tracerProvider = TracerProviderBehavior(
                     spanLimits = SpanLimitsBehavior(linkCountLimit = 5),
@@ -59,10 +61,12 @@ internal class GlobalAttributeLimitsTest {
     fun theWinningGlobalBlockIsTheOneThatApplies() {
         val resolved = resolver.resolve(
             envars = OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 attributeLimits = AttributeLimitsBehavior(attributeCountLimit = 5),
             ),
             declarativeFile = null,
             dsl = OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 attributeLimits = AttributeLimitsBehavior(attributeCountLimit = 50),
             ),
         )
@@ -80,6 +84,9 @@ internal class GlobalAttributeLimitsTest {
     private fun resolve(attributeLimits: AttributeLimitsBehavior) = resolver.resolve(
         envars = null,
         declarativeFile = null,
-        dsl = OpenTelemetryBehavior(attributeLimits = attributeLimits),
+        dsl = OpenTelemetryBehavior(
+            fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
+            attributeLimits = attributeLimits
+        ),
     )
 }

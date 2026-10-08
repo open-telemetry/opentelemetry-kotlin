@@ -11,11 +11,11 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 
 public class ContextFactoryImpl(
     private val spanFactory: SpanFactory,
-    private val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
+    public val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
     storageFactory: (supplier: () -> Context) -> ImplicitContextStorage = ::DefaultImplicitContextStorage,
 ) : ContextFactory {
 
-    private val storage: ImplicitContextStorage = storageFactory { root }
+    public val storage: ImplicitContextStorage = storageFactory { root }
     private val root by lazy { ContextImpl(storage, spanFactory, sdkErrorHandler) }
 
     override fun root(): Context = root

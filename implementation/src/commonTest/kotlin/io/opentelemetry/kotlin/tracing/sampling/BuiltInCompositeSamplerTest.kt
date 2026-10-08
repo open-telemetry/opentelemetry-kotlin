@@ -234,4 +234,25 @@ internal class BuiltInCompositeSamplerTest {
         )
         assertSame(traceStateProvider, annotating.intent().traceStateProvider)
     }
+
+    @Test
+    fun `preserves whole doubles when merging via composableAnnotating`() {
+        val delegate = fakeComposableSampler(
+            SamplingIntentImpl(
+                threshold = 0,
+                adjustedCountReliable = true,
+                attributesProvider = {
+                    AttributesModel().apply { setDoubleAttribute("delegate.double", 2.0) }
+                },
+            )
+        )
+        val annotating = ComposableAnnotatingSampler(delegate) {
+            setDoubleListAttribute("annotation.doubles", listOf(1.0, 2.0))
+        }
+        val result = CompositeSampler(annotating).sample()
+        assertEquals(
+            mapOf("delegate.double" to 2.0, "annotation.doubles" to listOf(1.0, 2.0)),
+            result.attributes.attributes,
+        )
+    }
 }

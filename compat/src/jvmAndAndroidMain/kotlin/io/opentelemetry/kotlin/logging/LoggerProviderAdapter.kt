@@ -8,7 +8,9 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProvider
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.awaitOperationResultCode
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.error.guardOrDefault
+import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
+import io.opentelemetry.kotlin.error.sdkGuardOrDefault
+import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.scope.scopeCacheKey
@@ -28,8 +30,9 @@ internal class LoggerProviderAdapter(
         version: String?,
         schemaUrl: String?,
         attributes: (AttributesMutator.() -> Unit)?
-    ): Logger = sdkErrorHandler.guardOrDefault(noopLogger, "LoggerProvider.getLogger failed") {
-        map.getOrPut(scopeCacheKey(name, version, schemaUrl, attributes)) {
+    ): Logger = sdkErrorHandler.sdkGuardOrDefault(noopLogger, "LoggerProvider.getLogger failed") {
+        val key = userCode { scopeCacheKey(name, version, schemaUrl, attributes) }
+        map.getOrPut(key) {
             val builder = impl.loggerBuilder(name)
 
             if (schemaUrl != null) {
@@ -43,12 +46,22 @@ internal class LoggerProviderAdapter(
     }
 
     override suspend fun forceFlush(): OperationResultCode = when (impl) {
-        is OtelJavaSdkLoggerProvider -> awaitOperationResultCode { impl.forceFlush() }
+        is OtelJavaSdkLoggerProvider -> sdkErrorHandler.guardOrDefaultSuspend(
+            OperationResultCode.Failure,
+            "LoggerProvider.forceFlush failed",
+        ) {
+            awaitOperationResultCode { impl.forceFlush() }
+        }
         else -> OperationResultCode.Success
     }
 
     override suspend fun shutdown(): OperationResultCode = when (impl) {
-        is OtelJavaSdkLoggerProvider -> awaitOperationResultCode { impl.shutdown() }
+        is OtelJavaSdkLoggerProvider -> sdkErrorHandler.guardOrDefaultSuspend(
+            OperationResultCode.Failure,
+            "LoggerProvider.shutdown failed",
+        ) {
+            awaitOperationResultCode { impl.shutdown() }
+        }
         else -> OperationResultCode.Success
     }
 }

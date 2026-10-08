@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetrySdk
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkMeterProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordProcessor
@@ -81,6 +82,30 @@ internal class OtelJavaOpenTelemetryExtTest {
 
         assertEquals(OperationResultCode.Success, closeable.forceFlush())
         assertEquals(OperationResultCode.Success, closeable.shutdown())
+    }
+
+    @Test
+    fun testLifecycleExceptionsAreReportedToSuppliedErrorHandler() = runTest {
+        val fixture = createJavaSdkFixture()
+        fixture.spanProcessor.nextResult = { throw IllegalStateException("boom") }
+        val errorHandler = FakeSdkErrorHandler()
+        val closeable = assertIs<TelemetryCloseable>(
+            fixture.sdk.toOtelKotlinApi(sdkErrorHandler = errorHandler)
+        )
+
+        assertEquals(OperationResultCode.Failure, closeable.forceFlush())
+        assertEquals("TracerProvider.forceFlush failed", errorHandler.userCodeErrors.single().message)
+    }
+
+    @Test
+    fun testThrowingErrorHandlerDoesNotPropagate() = runTest {
+        val fixture = createJavaSdkFixture()
+        fixture.spanProcessor.nextResult = { throw IllegalStateException("boom") }
+        val closeable = assertIs<TelemetryCloseable>(
+            fixture.sdk.toOtelKotlinApi(sdkErrorHandler = { error("handler boom") })
+        )
+
+        assertEquals(OperationResultCode.Failure, closeable.forceFlush())
     }
 
     private fun createJavaSdkFixture(): JavaSdkFixture {

@@ -8,8 +8,10 @@ import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guardOrDefault
-import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.error.reportError
+import io.opentelemetry.kotlin.error.sdkGuardOrDefault
+import io.opentelemetry.kotlin.error.sdkGuardOrDefaultSuspend
+import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -50,7 +52,7 @@ internal class TracerProviderImpl(
     }
 
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
-        val tracerConfig = tracingConfig.tracerConfigurator.tracerConfig(key)
+        val tracerConfig = userCode { tracingConfig.tracerConfigurator.tracerConfig(key) }
         if (!tracerConfig.enabled) {
             noopTracer
         } else {
@@ -76,7 +78,7 @@ internal class TracerProviderImpl(
         schemaUrl: String?,
         attributes: (AttributesMutator.() -> Unit)?
     ): Tracer =
-        sdkErrorHandler.guardOrDefault(noopTracer, "TracerProvider.getTracer failed") {
+        sdkErrorHandler.sdkGuardOrDefault(noopTracer, "TracerProvider.getTracer failed") {
             shutdownState.ifActiveOrElse(noopTracer) {
                 if (name.isEmpty()) {
                     sdkErrorHandler.reportError(
@@ -99,12 +101,12 @@ internal class TracerProviderImpl(
         }
 
     override suspend fun forceFlush(): OperationResultCode =
-        sdkErrorHandler.guardOrDefaultSuspend(OperationResultCode.Failure, "TracerProvider.forceFlush failed") {
+        sdkErrorHandler.sdkGuardOrDefaultSuspend(OperationResultCode.Failure, "TracerProvider.forceFlush failed") {
             runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS, closeable::forceFlush)
         }
 
     override suspend fun shutdown(): OperationResultCode =
-        sdkErrorHandler.guardOrDefaultSuspend(OperationResultCode.Failure, "TracerProvider.shutdown failed") {
+        sdkErrorHandler.sdkGuardOrDefaultSuspend(OperationResultCode.Failure, "TracerProvider.shutdown failed") {
             shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS, closeable::shutdown)
         }
 }

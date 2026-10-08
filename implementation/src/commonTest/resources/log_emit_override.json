@@ -3,10 +3,11 @@
     "resource": {
       "schemaUrl": "https://example.com/foo",
       "attributes": {
-        "service.name": "unknown_service",
+        "service.name": "unknown_service:kotlin",
         "telemetry.sdk.name": "opentelemetry",
         "telemetry.sdk.language": "kotlin",
         "telemetry.sdk.version": "UNKNOWN",
+        "telemetry.sdk.mode": "regular",
         "resource.foo": "bar"
       }
     },
