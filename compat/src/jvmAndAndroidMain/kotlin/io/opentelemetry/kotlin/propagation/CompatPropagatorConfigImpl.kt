@@ -39,7 +39,4 @@ internal class CompatPropagatorConfigImpl : PropagatorConfigDsl {
     }
 
     internal fun buildPropagator(): TextMapPropagator = configured
-
-    private fun TextMapPropagator.toOtelJavaTextMapPropagator(): OtelJavaTextMapPropagator =
-        (this as? TextMapPropagatorAdapter)?.impl ?: OtelJavaTextMapPropagatorAdapter(this)
 }

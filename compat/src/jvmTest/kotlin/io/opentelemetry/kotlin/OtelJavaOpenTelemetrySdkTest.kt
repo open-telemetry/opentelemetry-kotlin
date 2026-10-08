@@ -16,13 +16,15 @@ internal class OtelJavaOpenTelemetrySdkTest {
     @Test
     fun `test entrypoint`() {
         val tracerProvider = OtelJavaTracerProviderAdapter(FakeTracerProvider(), CompatContextFactory())
-        val loggerProvider = OtelJavaLoggerProviderAdapter(FakeLoggerProvider())
+        val loggerProvider = OtelJavaLoggerProviderAdapter(FakeLoggerProvider(), CompatContextFactory())
         val meterProvider = OtelJavaMeterProviderAdapter(FakeMeterProvider())
 
-        val otel = OtelJavaOpenTelemetrySdk(tracerProvider, loggerProvider, meterProvider)
+        val propagators = OtelJavaContextPropagators.noop()
+
+        val otel = OtelJavaOpenTelemetrySdk(tracerProvider, loggerProvider, meterProvider, propagators)
         assertSame(tracerProvider, otel.tracerProvider)
         assertSame(loggerProvider, otel.logsBridge)
         assertSame(meterProvider, otel.meterProvider)
-        assertSame(otel.propagators, OtelJavaContextPropagators.noop())
+        assertSame(propagators, otel.propagators)
     }
 }

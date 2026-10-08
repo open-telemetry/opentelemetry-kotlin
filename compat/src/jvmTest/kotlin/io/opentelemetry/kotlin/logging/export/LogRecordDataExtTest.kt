@@ -1,12 +1,21 @@
 package io.opentelemetry.kotlin.logging.export
 
+import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
 import io.opentelemetry.kotlin.aliases.OtelJavaValueType
 import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordData
+import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordProcessor
+import io.opentelemetry.kotlin.logging.LoggerProviderAdapter
+import io.opentelemetry.kotlin.logging.OtelJavaLogRecordDataImpl
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
+import io.opentelemetry.kotlin.logging.data.LogRecordDataAdapter
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 
 internal class LogRecordDataExtTest {
 
@@ -111,5 +120,26 @@ internal class LogRecordDataExtTest {
         assertNull(observed.severityText)
         assertNull(observed.bodyValue?.asString())
         assertNull(observed.eventName)
+    }
+
+    @Test
+    fun testLogRecordDataAdapterIsUnwrapped() {
+        val impl = FakeOtelJavaLogRecordData()
+        assertSame(impl, LogRecordDataAdapter(impl).toOtelJavaLogRecordData())
+    }
+
+    @Test
+    fun testReadWriteLogRecordAdapterIsUnwrapped() {
+        val processor = FakeOtelJavaLogRecordProcessor()
+        LoggerProviderAdapter(
+            OtelJavaSdkLoggerProvider.builder().addLogRecordProcessor(processor).build(),
+            NoopSdkErrorHandler,
+        ).getLogger("test").emit(body = "log", timestamp = 42)
+
+        val impl = processor.exports.single()
+        val observed = ReadWriteLogRecordAdapter(impl).toOtelJavaLogRecordData()
+        assertFalse(observed is OtelJavaLogRecordDataImpl)
+        assertEquals(impl.toLogRecordData().timestampEpochNanos, observed.timestampEpochNanos)
+        assertEquals("log", observed.bodyValue?.asString())
     }
 }

@@ -37,3 +37,7 @@ internal class OtelJavaTextMapPropagatorAdapter(
         return result.toOtelJavaContext()
     }
 }
+
+@OptIn(ExperimentalApi::class)
+internal fun TextMapPropagator.toOtelJavaTextMapPropagator(): OtelJavaTextMapPropagator =
+    (this as? TextMapPropagatorAdapter)?.impl ?: OtelJavaTextMapPropagatorAdapter(this)

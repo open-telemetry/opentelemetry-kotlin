@@ -74,6 +74,18 @@ internal class SpanAttributesTest {
     }
 
     @Test
+    fun testWholeDoubleAttributesPreservedDuringCreation() {
+        val span = tracer.startSpan("test") {
+            setDoubleAttribute("double", 2.0)
+            setDoubleListAttribute("double_list", listOf(1.0, 2.0))
+        }
+        assertEquals(
+            mapOf("double" to 2.0, "double_list" to listOf(1.0, 2.0)),
+            span.toReadableSpan().attributes
+        )
+    }
+
+    @Test
     fun testSpanAddAttributesAfterCreation() {
         val span = tracer.startSpan("test")
         span.addTestAttributes()

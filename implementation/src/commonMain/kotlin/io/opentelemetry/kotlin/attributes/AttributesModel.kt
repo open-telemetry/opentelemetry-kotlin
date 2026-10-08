@@ -82,7 +82,7 @@ internal class AttributesModel(
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
         ifPreconditionsOk(key) {
-            attrs[key] = truncateByteArray(value)
+            attrs[key] = value.copyOf(minOf(value.size, attributeValueLengthLimit))
         }
     }
 

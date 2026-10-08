@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.resource.FakeResource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Test
 
 internal class OtelJavaAttributesExtTest {
@@ -165,5 +166,30 @@ internal class OtelJavaAttributesExtTest {
         assertEquals(42L, resource.attributes.get(AttributeKey.longKey("long")))
         assertEquals("hello", resource.attributes.get(AttributeKey.stringKey("any")))
         assertEquals("https://example.com/schema", resource.schemaUrl)
+    }
+
+    @Test
+    fun testResourceFromMapReusesConversionForSameInstance() {
+        val resource = FakeResource()
+        assertSame(resourceFromMap(resource), resourceFromMap(resource))
+    }
+
+    @Test
+    fun testResourceFromMapConvertsDifferentInstances() {
+        val first = FakeResource(attributes = mapOf("k" to "first"))
+        val second = FakeResource(attributes = mapOf("k" to "second"))
+        assertEquals("first", resourceFromMap(first).attributes.get(AttributeKey.stringKey("k")))
+        assertEquals("second", resourceFromMap(second).attributes.get(AttributeKey.stringKey("k")))
+        assertEquals("first", resourceFromMap(first).attributes.get(AttributeKey.stringKey("k")))
+    }
+
+    @Test
+    fun testGetOtelJavaAttribute() {
+        val attrs = mapOf("str" to "value", "long" to 5L, "list" to listOf("a", "b"))
+        assertEquals("value", attrs.getOtelJavaAttribute(AttributeKey.stringKey("str")))
+        assertEquals(5L, attrs.getOtelJavaAttribute(AttributeKey.longKey("long")))
+        assertEquals(listOf("a", "b"), attrs.getOtelJavaAttribute(AttributeKey.stringArrayKey("list")))
+        assertNull(attrs.getOtelJavaAttribute(AttributeKey.stringKey("long")))
+        assertNull(attrs.getOtelJavaAttribute(AttributeKey.stringKey("missing")))
     }
 }

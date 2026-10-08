@@ -1,5 +1,7 @@
 package io.opentelemetry.kotlin.attributes
 
+import io.opentelemetry.kotlin.aliases.OtelJavaValue
+
 /**
  * Copies an attribute map onto an [AttributesMutator], preserving the double-ness of its values.
  *
@@ -14,6 +16,7 @@ internal fun AttributesMutator.setTypedAttributes(attributes: Map<String, Any>) 
 
 internal fun AttributesMutator.setTypedAttribute(key: String, value: Any) {
     when {
+        value is OtelJavaValue<*> -> setAnyValueAttribute(key, value.toOtelKotlinAnyValue())
         value is Double -> setDoubleAttribute(key, value)
         value is List<*> && value.isNotEmpty() && value.all { it is Double } ->
             setDoubleListAttribute(key, value.filterIsInstance<Double>())

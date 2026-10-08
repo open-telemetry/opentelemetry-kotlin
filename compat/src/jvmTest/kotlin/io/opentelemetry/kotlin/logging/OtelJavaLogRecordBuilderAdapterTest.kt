@@ -1,8 +1,14 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.common.Value
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaContextKey
+import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.context.toOtelJavaContext
+import io.opentelemetry.kotlin.context.toOtelKotlinContext
+import io.opentelemetry.kotlin.factory.CompatContextFactory
+import io.opentelemetry.kotlin.factory.ContextFactory
 import org.junit.Test
 import java.time.Instant
 import kotlin.test.assertEquals
@@ -14,7 +20,7 @@ internal class OtelJavaLogRecordBuilderAdapterTest {
     @Test
     fun `test log record builder adapter`() {
         val impl = FakeLogger("logger")
-        val adapter = OtelJavaLogRecordBuilderAdapter(impl)
+        val adapter = OtelJavaLogRecordBuilderAdapter(impl, CompatContextFactory())
 
         val now = Instant.now()
         adapter.setObservedTimestamp(now)
@@ -39,7 +45,7 @@ internal class OtelJavaLogRecordBuilderAdapterTest {
     @Test
     fun `test event name is forwarded`() {
         val impl = FakeLogger("logger")
-        val adapter = OtelJavaLogRecordBuilderAdapter(impl)
+        val adapter = OtelJavaLogRecordBuilderAdapter(impl, CompatContextFactory())
 
         adapter.setEventName("my.event")
         adapter.emit()
@@ -50,7 +56,7 @@ internal class OtelJavaLogRecordBuilderAdapterTest {
     @Test
     fun `test exception is forwarded`() {
         val impl = RecordingLogger()
-        val adapter = OtelJavaLogRecordBuilderAdapter(impl)
+        val adapter = OtelJavaLogRecordBuilderAdapter(impl, CompatContextFactory())
         val exception = IllegalStateException("boom")
         adapter.setException(exception)
         adapter.emit()
@@ -60,7 +66,7 @@ internal class OtelJavaLogRecordBuilderAdapterTest {
     @Test
     fun `test attributes preserve their types`() {
         val impl = FakeLogger("logger")
-        val adapter = OtelJavaLogRecordBuilderAdapter(impl)
+        val adapter = OtelJavaLogRecordBuilderAdapter(impl, CompatContextFactory())
 
         adapter.setAttribute(AttributeKey.stringKey("str"), "hello")
         adapter.setAttribute(AttributeKey.longKey("long"), 42L)
@@ -81,12 +87,68 @@ internal class OtelJavaLogRecordBuilderAdapterTest {
     @Test
     fun `test null attribute is dropped`() {
         val impl = FakeLogger("logger")
-        val adapter = OtelJavaLogRecordBuilderAdapter(impl)
+        val adapter = OtelJavaLogRecordBuilderAdapter(impl, CompatContextFactory())
 
         // Must not throw: attrs is a ConcurrentHashMap, which forbids null values.
         adapter.setAttribute(AttributeKey.stringKey("nullable"), null)
         adapter.emit()
 
         assertFalse(impl.logs.single().attributes.containsKey("nullable"))
+    }
+
+    @Test
+    fun `test structured body keeps its shape`() {
+        val impl = FakeLogger("logger")
+        val adapter = OtelJavaLogRecordBuilderAdapter(impl, CompatContextFactory())
+        adapter.setBody(Value.of(mapOf("k" to Value.of(listOf(Value.of(1L), Value.of("v"))))))
+        adapter.emit()
+
+        val expected = AnyValue.MapValue(
+            mapOf("k" to AnyValue.ListValue(listOf(AnyValue.LongValue(1L), AnyValue.StringValue("v"))))
+        )
+        assertEquals(expected, impl.logs.single().body)
+    }
+
+    @Test
+    fun `test primitive value body is unwrapped`() {
+        val impl = FakeLogger("logger")
+        val adapter = OtelJavaLogRecordBuilderAdapter(impl, CompatContextFactory())
+        adapter.setBody(Value.of(42L))
+        adapter.emit()
+
+        assertEquals(42L, impl.logs.single().body)
+    }
+
+    @Test
+    fun `test value attribute keeps its shape`() {
+        val impl = FakeLogger("logger")
+        val adapter = OtelJavaLogRecordBuilderAdapter(impl, CompatContextFactory())
+        adapter.setAttribute(AttributeKey.valueKey("map"), Value.of(mapOf("k" to Value.of("v"))))
+        adapter.emit()
+
+        val expected = AnyValue.MapValue(mapOf("k" to AnyValue.StringValue("v")))
+        assertEquals(expected, impl.logs.single().attributes["map"])
+    }
+
+    @Test
+    fun `test explicit context is forwarded`() {
+        val impl = RecordingLogger()
+        val adapter = OtelJavaLogRecordBuilderAdapter(impl, CompatContextFactory())
+        val ctx = OtelJavaContext.root().with(OtelJavaContextKey.named<String>("key"), "value")
+        adapter.setContext(ctx)
+        adapter.emit()
+        assertSame(ctx, impl.emittedContexts.single()?.toOtelJavaContext())
+    }
+
+    @Test
+    fun `test implicit context from factory is used when context is unset`() {
+        val impl = RecordingLogger()
+        val ctx = OtelJavaContext.root().with(OtelJavaContextKey.named<String>("key"), "value").toOtelKotlinContext()
+        val contextFactory = object : ContextFactory by CompatContextFactory() {
+            override fun implicit() = ctx
+        }
+        val adapter = OtelJavaLogRecordBuilderAdapter(impl, contextFactory)
+        adapter.emit()
+        assertSame(ctx, impl.emittedContexts.single())
     }
 }

@@ -1,15 +1,18 @@
 package io.opentelemetry.kotlin.integration.test
 
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
+import io.opentelemetry.kotlin.aliases.OtelJavaBaggage
 import io.opentelemetry.kotlin.aliases.OtelJavaCompletableResultCode
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaExtendedSpanProcessor
 import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaReadableSpan
+import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanData
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanExporter
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.aliases.OtelJavaStatusCode
+import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.toOtelJavaApi
@@ -94,6 +97,25 @@ internal class OtelJavaSpanProcessorOnKotlinSdkTest {
     }
 
     @Test
+    fun testJavaProcessorReadsKotlinParentAndBaggage() = runTest {
+        val processor = RecordingOtelJavaSpanProcessor()
+        harness.config.spanProcessors.add(processor.toOtelKotlinSpanProcessor())
+        val parent = harness.tracer.startSpan("parent")
+        val parentContext = harness.kotlinApi.context.root()
+            .storeSpan(parent)
+            .storeBaggage(createBaggage { put("key", "value") })
+        harness.tracer.startSpan("child", parentContext = parentContext).end()
+        parent.end()
+
+        val childParentContext = processor.startContexts[1]
+        val javaParent = OtelJavaSpan.fromContext(childParentContext)
+        assertEquals(parent.spanContext.spanId, javaParent.spanContext.spanId)
+        assertEquals(parent.spanContext.traceId, javaParent.spanContext.traceId)
+        assertEquals("value", OtelJavaBaggage.fromContext(childParentContext).getEntryValue("key"))
+        assertFalse(OtelJavaSpan.fromContext(processor.startContexts[0]).spanContext.isValid)
+    }
+
+    @Test
     fun testInFlightLatencyUsesSdkClock() = runTest {
         val processor = RecordingOtelJavaSpanProcessor()
         harness.config.spanProcessors.add(processor.toOtelKotlinSpanProcessor())
@@ -170,11 +192,13 @@ internal class OtelJavaSpanProcessorOnKotlinSdkTest {
     ) : OtelJavaExtendedSpanProcessor {
 
         val startCalls = mutableListOf<OtelJavaReadWriteSpan>()
+        val startContexts = mutableListOf<OtelJavaContext>()
         val endingCalls = mutableListOf<OtelJavaReadWriteSpan>()
         val endCalls = mutableListOf<OtelJavaReadableSpan>()
 
         override fun onStart(parentContext: OtelJavaContext, span: OtelJavaReadWriteSpan) {
             startCalls += span
+            startContexts += parentContext
             startAction(span)
         }
 

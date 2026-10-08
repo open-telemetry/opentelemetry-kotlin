@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.export.EXPORT_INITIAL_DELAY_MS
 import io.opentelemetry.kotlin.export.EXPORT_MAX_ATTEMPTS
 import io.opentelemetry.kotlin.export.EXPORT_MAX_ATTEMPT_INTERVAL_MS
 import io.opentelemetry.kotlin.export.OtlpFileExporterConfigDsl
+import io.opentelemetry.kotlin.export.OtlpEndpoint
 import io.opentelemetry.kotlin.export.OtlpHttpExporterConfigDsl
 import io.opentelemetry.kotlin.export.createOtlpFileExporter
 import io.opentelemetry.kotlin.export.createOtlpHttpClient
@@ -18,7 +19,7 @@ public fun LogExportConfigDsl.otlpHttpLogRecordExporter(
     block: OtlpHttpExporterConfigDsl.() -> Unit = {},
 ): LogRecordExporter =
     OtlpHttpLogRecordExporter(
-        createOtlpHttpClient(sdkErrorHandler, block),
+        createOtlpHttpClient(sdkErrorHandler, OtlpEndpoint.Logs, block = block),
         EXPORT_INITIAL_DELAY_MS,
         EXPORT_MAX_ATTEMPT_INTERVAL_MS,
         EXPORT_MAX_ATTEMPTS,
