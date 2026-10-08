@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.context.NoopContext
 import io.opentelemetry.kotlin.context.NoopContextKey
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.SeverityNumber
+import io.opentelemetry.kotlin.metrics.NoopObservableLongMeasurement
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapSetter
 import io.opentelemetry.kotlin.propagation.createNoopPropagator
@@ -299,6 +300,21 @@ internal class NoopTests {
         assertFalse(doubleCounter.enabled())
         doubleCounter.add(1.0)
         doubleCounter.add(-1.0) { setStringAttribute("account.type", "commercial") }
+    }
+
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testNoopObservableLongMeasurement() {
+        val noopObservableLongMeasurement = NoopObservableLongMeasurement()
+        var attributesCalled = false
+
+        noopObservableLongMeasurement.record(1)
+        noopObservableLongMeasurement.record(1) {
+            attributesCalled = true
+            setStringAttribute("account.type", "commercial")
+        }
+
+        assertFalse(attributesCalled)
     }
 
     private fun verifySpanOperationsAreNoop(span: NoopSpan) {
