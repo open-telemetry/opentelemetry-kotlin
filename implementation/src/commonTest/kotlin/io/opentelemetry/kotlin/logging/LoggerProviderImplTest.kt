@@ -29,13 +29,13 @@ internal class LoggerProviderImplTest {
     private val loggerConfigurator = LoggerConfigurator { LoggerConfigImpl(true) }
     private val loggingConfig = LoggingConfig(
         null,
-        AttributeLimitsBehavior(100, 100),
         ResourceImpl(AttributesModel(), null),
         NoopSdkErrorHandler,
         loggerConfigurator,
     )
     private val contextFactory = FakeContextFactory()
     private val attributeLimits = AttributeLimitsBehavior()
+    private val logLimits = AttributeLimitsBehavior(100, 100)
     private lateinit var impl: LoggerProviderImpl
 
     @BeforeTest
@@ -45,6 +45,7 @@ internal class LoggerProviderImplTest {
             loggingConfig,
             contextFactory,
             attributeLimits,
+            logLimits,
         )
     }
 
@@ -58,7 +59,6 @@ internal class LoggerProviderImplTest {
         val handler = FakeSdkErrorHandler()
         val config = LoggingConfig(
             null,
-            AttributeLimitsBehavior(100, 100),
             ResourceImpl(AttributesModel(), null),
             handler,
             loggerConfigurator,
@@ -68,6 +68,7 @@ internal class LoggerProviderImplTest {
             config,
             contextFactory,
             attributeLimits,
+            logLimits,
         )
         provider.getLogger(name = "")
         assertEquals(1, handler.apiMisuses.size)
@@ -151,7 +152,6 @@ internal class LoggerProviderImplTest {
         )
         val config = LoggingConfig(
             processor,
-            AttributeLimitsBehavior(100, 100),
             FakeResource(),
             NoopSdkErrorHandler,
             loggerConfigurator,
@@ -161,6 +161,7 @@ internal class LoggerProviderImplTest {
             config,
             contextFactory,
             attributeLimits,
+            logLimits,
         )
         impl.getLogger(name = "test")
 
@@ -180,7 +181,6 @@ internal class LoggerProviderImplTest {
         )
         val config = LoggingConfig(
             processor,
-            AttributeLimitsBehavior(100, 100),
             FakeResource(),
             NoopSdkErrorHandler,
             loggerConfigurator,
@@ -190,6 +190,7 @@ internal class LoggerProviderImplTest {
             config,
             contextFactory,
             attributeLimits,
+            logLimits,
         )
         impl.getLogger(name = "test")
 
@@ -210,7 +211,6 @@ internal class LoggerProviderImplTest {
         val processor = FakeLogRecordProcessor()
         val config = LoggingConfig(
             processor,
-            AttributeLimitsBehavior(100, 100),
             FakeResource(),
             NoopSdkErrorHandler,
             loggerConfigurator,
@@ -220,6 +220,7 @@ internal class LoggerProviderImplTest {
             config,
             contextFactory,
             attributeLimits,
+            logLimits,
         )
         val logger = impl.getLogger(name = "test")
         impl.shutdown()
@@ -267,9 +268,10 @@ internal class LoggerProviderImplTest {
         errorHandler: SdkErrorHandler,
     ) = LoggerProviderImpl(
         clock,
-        LoggingConfig(processor, AttributeLimitsBehavior(100, 100), FakeResource(), errorHandler, loggerConfigurator),
+        LoggingConfig(processor, FakeResource(), errorHandler, loggerConfigurator),
         contextFactory,
-        attributeLimits
+        attributeLimits,
+        logLimits,
     )
 
     private class ThrowingSdkErrorHandler : SdkErrorHandler {

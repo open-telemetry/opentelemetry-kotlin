@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.assertHasSdkDefaultAttributes
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
@@ -45,13 +44,12 @@ internal class TracerProviderConfigImplTest {
 
     private val clock = FakeClock()
     private val base = ResourceFactoryImpl().sdkDefaultResource(SdkMode.REGULAR)
-    private val noSpanLimits = SpanLimitsBehavior()
 
     private val contextFactory = ContextFactoryImpl(SpanFactoryImpl())
 
     @Test
     fun testDefaultSamplerParentBased() {
-        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).generateTracingConfig(base, noSpanLimits)
+        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).generateTracingConfig(base)
         val sampler = assertIs<ParentBasedSampler>(cfg.samplerFactory(FakeSpanFactory()))
         assertContains(sampler.description, "root:AlwaysOnSampler")
     }
@@ -89,7 +87,7 @@ internal class TracerProviderConfigImplTest {
     fun testBuiltInSamplerConfig() {
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             sampler { alwaysOn() }
-        }.generateTracingConfig(base, noSpanLimits)
+        }.generateTracingConfig(base)
         assertNotNull(cfg.samplerFactory(FakeSpanFactory()))
     }
 
@@ -100,32 +98,22 @@ internal class TracerProviderConfigImplTest {
             sampler {
                 sampler
             }
-        }.generateTracingConfig(base, noSpanLimits)
+        }.generateTracingConfig(base)
         assertSame(sampler, cfg.samplerFactory(FakeSpanFactory()))
     }
 
     @Test
     fun testDefaultTracingConfig() {
-        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).generateTracingConfig(base, noSpanLimits)
+        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).generateTracingConfig(base)
         assertNull(cfg.processor)
         assertEquals(sdkDefaultAttributes, cfg.resource.attributes)
         assertEquals(sdkDefaultSchemaUrl, cfg.resource.schemaUrl)
-
-        with(cfg.spanLimits) {
-            assertEquals(128, linkCountLimit)
-            assertEquals(128, eventCountLimit)
-            assertEquals(128, attributeCountLimit)
-            assertEquals(128, attributeCountPerLinkLimit)
-            assertEquals(128, attributeCountPerEventLimit)
-            assertEquals(Int.MAX_VALUE, attributeValueLengthLimit)
-        }
     }
 
     @Test
     fun testConsoleBehaviorInstallsProcessor() {
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).generateTracingConfig(
             base,
-            noSpanLimits,
             SpanProcessorBehavior(console = ConsoleExporterBehavior()),
         )
         assertNotNull(cfg.processor)
@@ -138,7 +126,6 @@ internal class TracerProviderConfigImplTest {
             export { dslProcessor }
         }.generateTracingConfig(
             base,
-            noSpanLimits,
             SpanProcessorBehavior(console = ConsoleExporterBehavior()),
         )
         assertSame(dslProcessor, cfg.processor)
@@ -146,7 +133,7 @@ internal class TracerProviderConfigImplTest {
 
     @Test
     fun testSdkDefaultAttributes() {
-        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).generateTracingConfig(base, noSpanLimits)
+        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).generateTracingConfig(base)
         assertHasSdkDefaultAttributes(cfg.resource.attributes)
     }
 
@@ -154,12 +141,6 @@ internal class TracerProviderConfigImplTest {
     fun testOverrideTracingConfig() {
         val firstProcessor = FakeSpanProcessor()
         val secondProcessor = FakeSpanProcessor()
-        val linkCount = 100
-        val eventCount = 200
-        val attrCount = 300
-        val attrCountPerLink = 400
-        val attrCountPerEvent = 500
-        val attrValueLength = 600
         val schemaUrl = "https://example.com/schema"
 
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
@@ -168,30 +149,11 @@ internal class TracerProviderConfigImplTest {
             resource(schemaUrl) {
                 setStringAttribute("key", "value")
             }
-        }.generateTracingConfig(
-            base,
-            SpanLimitsBehavior(
-                linkCountLimit = linkCount,
-                eventCountLimit = eventCount,
-                attributeCountLimit = attrCount,
-                attributeCountPerLinkLimit = attrCountPerLink,
-                attributeCountPerEventLimit = attrCountPerEvent,
-                attributeValueLengthLimit = attrValueLength,
-            )
-        )
+        }.generateTracingConfig(base)
 
         assertNotNull(cfg.processor)
         assertEquals(schemaUrl, cfg.resource.schemaUrl)
         assertEquals(sdkDefaultAttributes + mapOf("key" to "value"), cfg.resource.attributes)
-
-        with(cfg.spanLimits) {
-            assertEquals(linkCount, linkCountLimit)
-            assertEquals(eventCount, eventCountLimit)
-            assertEquals(attrCount, attributeCountLimit)
-            assertEquals(attrCountPerLink, attributeCountPerLinkLimit)
-            assertEquals(attrCountPerEvent, attributeCountPerEventLimit)
-            assertEquals(attrValueLength, attributeValueLengthLimit)
-        }
     }
 
     @Test
@@ -209,7 +171,7 @@ internal class TracerProviderConfigImplTest {
                     second = this
                 }
             }
-        }.generateTracingConfig(base, noSpanLimits)
+        }.generateTracingConfig(base)
         assertSame(first, cfg.processor)
         assertNotSame(second, cfg.processor)
     }
@@ -220,7 +182,7 @@ internal class TracerProviderConfigImplTest {
         TracerProviderConfigImpl(clock, handler).apply {
             export { compositeSpanProcessor(FakeSpanProcessor()) }
             export { compositeSpanProcessor(FakeSpanProcessor()) }
-        }.generateTracingConfig(base, noSpanLimits)
+        }.generateTracingConfig(base)
         assertEquals(1, handler.apiMisuses.size)
         assertEquals("TracerProviderConfigDsl.export", handler.apiMisuses.single().api)
         assertEquals("export() should only be called once.", handler.apiMisuses.single().message)
@@ -230,7 +192,7 @@ internal class TracerProviderConfigImplTest {
     fun testResourceOverride() {
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             resource(mapOf("extra" to true))
-        }.generateTracingConfig(base, noSpanLimits)
+        }.generateTracingConfig(base)
         assertEquals(sdkDefaultAttributes + mapOf("extra" to true), cfg.resource.attributes)
     }
 
@@ -238,7 +200,7 @@ internal class TracerProviderConfigImplTest {
     fun testSimpleResourceConfig() {
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             resource(mapOf("key" to "value"))
-        }.generateTracingConfig(base, noSpanLimits)
+        }.generateTracingConfig(base)
         assertEquals(sdkDefaultAttributes + mapOf("key" to "value"), cfg.resource.attributes)
     }
 
@@ -248,7 +210,7 @@ internal class TracerProviderConfigImplTest {
         val attrs = (0 until count).associate { "key$it" to "value$it" }
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             resource(attrs)
-        }.generateTracingConfig(base, noSpanLimits)
+        }.generateTracingConfig(base)
         assertEquals(count + sdkDefaultAttributes.size, cfg.resource.attributes.size)
     }
 
@@ -257,7 +219,7 @@ internal class TracerProviderConfigImplTest {
         val value = "my-custom-sdk"
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to value))
-        }.generateTracingConfig(base, noSpanLimits)
+        }.generateTracingConfig(base)
         assertEquals(value, cfg.resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME])
     }
 
@@ -266,7 +228,7 @@ internal class TracerProviderConfigImplTest {
         val value = "my-service"
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             resource(mapOf(ServiceAttributes.SERVICE_NAME to value))
-        }.generateTracingConfig(base, noSpanLimits)
+        }.generateTracingConfig(base)
         assertEquals(value, cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
     }
 
@@ -275,7 +237,7 @@ internal class TracerProviderConfigImplTest {
         val value = "my-service"
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             serviceName = value
-        }.generateTracingConfig(base, noSpanLimits)
+        }.generateTracingConfig(base)
         assertEquals(value, cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
     }
 
@@ -285,7 +247,7 @@ internal class TracerProviderConfigImplTest {
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             resource(mapOf(ServiceAttributes.SERVICE_NAME to "res"))
             serviceName = value
-        }.generateTracingConfig(base, noSpanLimits)
+        }.generateTracingConfig(base)
         assertEquals(value, cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
     }
 
@@ -293,7 +255,7 @@ internal class TracerProviderConfigImplTest {
         TracerProviderConfigImpl(
             clock,
             NoopSdkErrorHandler
-        ).generateTracingConfig(base, noSpanLimits).samplerFactory(FakeSpanFactory())
+        ).generateTracingConfig(base).samplerFactory(FakeSpanFactory())
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean): Context {
         val parentSpanContext = createSpanContext("12345678901234567890123456789012", "1234567890123456") {

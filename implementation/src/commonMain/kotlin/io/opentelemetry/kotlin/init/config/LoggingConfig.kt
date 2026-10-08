@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.init.config
 
 import io.opentelemetry.kotlin.ThreadSafe
-import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.logging.LoggerConfigurator
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
@@ -17,11 +16,6 @@ internal class LoggingConfig(
      * The processor to use for log record data.
      */
     val processor: LogRecordProcessor?,
-
-    /**
-     * Limits on log data capture.
-     */
-    val logLimits: AttributeLimitsBehavior,
 
     /**
      * A resource to append to spans.

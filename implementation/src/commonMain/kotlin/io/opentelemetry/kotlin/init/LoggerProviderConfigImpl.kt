@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.LogExportConfigDslImpl
@@ -56,11 +55,9 @@ internal class LoggerProviderConfigImpl(
 
     fun generateLoggingConfig(
         base: Resource,
-        logLimits: LogLimitsBehavior,
         processorBehavior: LogRecordProcessorBehavior? = null,
     ): LoggingConfig = LoggingConfig(
         processor = processor ?: processorFromBehavior(processorBehavior),
-        logLimits = logLimits,
         resource = base.merge(resourceConfig.toBehavior().toResource()),
         sdkErrorHandler = sdkErrorHandler,
         loggerConfigurator = loggerConfigurator,

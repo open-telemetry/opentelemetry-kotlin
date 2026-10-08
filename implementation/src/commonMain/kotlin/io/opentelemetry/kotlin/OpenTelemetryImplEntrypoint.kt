@@ -1,6 +1,8 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
@@ -51,13 +53,15 @@ public fun createOpenTelemetry(
             contextFactory = contextFactory,
             spanFactory = span,
             idGenerator = idGenerator,
-            attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior()
+            attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior(),
+            spanLimits = behavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior(),
         ),
         loggerProvider = LoggerProviderImpl(
             clock = clock,
             loggingConfig = loggingConfig,
             contextFactory = contextFactory,
-            attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior()
+            attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior(),
+            logLimits = behavior.loggerProvider?.logLimits ?: LogLimitsBehavior(),
         ),
         meterProvider = MeterProviderImpl(
             metricsConfig = metricsConfig,
