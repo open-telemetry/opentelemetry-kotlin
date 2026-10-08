@@ -31,7 +31,7 @@ internal class CompatOpenTelemetryConfig(
 
     internal val tracerProviderConfig = CompatTracerProviderConfig(clock, sdkErrorHandler)
     internal val loggerProviderConfig = CompatLoggerProviderConfig(clock, sdkErrorHandler)
-    internal val meterProviderConfig = CompatMeterProviderConfig()
+    internal val meterProviderConfig = CompatMeterProviderConfig(sdkErrorHandler)
     private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
     internal val propagatorCfg = CompatPropagatorConfigImpl()
 

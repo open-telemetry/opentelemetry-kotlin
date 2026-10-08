@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.init
 
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -10,13 +11,13 @@ internal class CompatMeterProviderConfigTest {
 
     @Test
     fun `service name is unset by default`() {
-        val cfg = CompatMeterProviderConfig()
+        val cfg = CompatMeterProviderConfig(NoopSdkErrorHandler)
         assertNull(cfg.serviceName)
     }
 
     @Test
     fun `serviceName setter updates getter`() {
-        val cfg = CompatMeterProviderConfig().apply {
+        val cfg = CompatMeterProviderConfig(NoopSdkErrorHandler).apply {
             serviceName = "my-service"
         }
         assertEquals("my-service", cfg.serviceName)
@@ -24,7 +25,7 @@ internal class CompatMeterProviderConfigTest {
 
     @Test
     fun `built MeterProvider caches meters by scope name`() {
-        val provider = CompatMeterProviderConfig().build()
+        val provider = CompatMeterProviderConfig(NoopSdkErrorHandler).build()
         val first = provider.getMeter("name")
         val second = provider.getMeter("name")
         val third = provider.getMeter("other")
@@ -34,7 +35,7 @@ internal class CompatMeterProviderConfigTest {
 
     @Test
     fun `built MeterProvider caches meters by version`() {
-        val provider = CompatMeterProviderConfig().build()
+        val provider = CompatMeterProviderConfig(NoopSdkErrorHandler).build()
         val first = provider.getMeter(name = "name", version = "0.1.0")
         val second = provider.getMeter(name = "name", version = "0.1.0")
         val third = provider.getMeter(name = "name", version = "0.2.0")
@@ -44,7 +45,7 @@ internal class CompatMeterProviderConfigTest {
 
     @Test
     fun `built MeterProvider caches meters by schemaUrl`() {
-        val provider = CompatMeterProviderConfig().build()
+        val provider = CompatMeterProviderConfig(NoopSdkErrorHandler).build()
         val first = provider.getMeter(name = "name", schemaUrl = "https://example.com/foo")
         val second = provider.getMeter(name = "name", schemaUrl = "https://example.com/foo")
         val third = provider.getMeter(name = "name", schemaUrl = "https://example.com/bar")

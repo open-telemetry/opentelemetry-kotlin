@@ -26,7 +26,8 @@ internal class CreateOpenTelemetryConfigFileTest {
             errorHandler(handler)
             configFile("does-not-exist.yaml")
         }
-        assertEquals(1, handler.sdkCodeErrors.size)
+        assertEquals(1, handler.errors.size)
+        assertEquals("OTEL_CONFIG_FILE", handler.apiMisuses.single().api)
     }
 
     @Test
@@ -37,7 +38,8 @@ internal class CreateOpenTelemetryConfigFileTest {
             errorHandler(handler)
             configFile(path)
         }
-        assertEquals(1, handler.sdkCodeErrors.size)
+        assertEquals(1, handler.errors.size)
+        assertEquals("OTEL_CONFIG_FILE", handler.apiMisuses.single().api)
     }
 
     @Test
