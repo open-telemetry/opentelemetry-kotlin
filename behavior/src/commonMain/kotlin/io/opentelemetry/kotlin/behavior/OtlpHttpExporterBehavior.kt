@@ -17,7 +17,7 @@ abstract class OtlpHttpExporterBehavior(
      * When used as the generic OTLP endpoint, the exporter appends the
      * signal-specific path (`/v1/traces`, `/v1/metrics`, or `/v1/logs`).
      */
-    open val endpoint: String, // TODO: Add endpoint validation.
+    open val endpoint: String,
     /**
      * Maximum time (in milliseconds) to wait for each export.
      */
