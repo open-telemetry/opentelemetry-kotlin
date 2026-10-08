@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.tracing.TraceStateImpl
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -20,7 +20,7 @@ internal class TraceStateFactoryImplTest {
 
     @Test
     fun testBuildWithNoEntriesReturnsSharedEmpty() {
-        assertSame(TraceStateImpl.EMPTY, buildTraceState {})
+        assertSame(createInvalidSpanContext().traceState, buildTraceState {})
     }
 
     @Test

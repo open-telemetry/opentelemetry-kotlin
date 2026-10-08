@@ -22,11 +22,14 @@ import java.util.WeakHashMap
  * End-users should generally not use this function and should call [createCompatOpenTelemetry]
  * or [toOtelKotlinApi] instead.
  *
- * Opt in to `context { useOtelJavaContextStorage() }` when creating the SDK so that the Kotlin
- * and Java APIs share one implicit context. Otherwise, avoid reading or setting the
- * opentelemetry-java implicit context directly through `Context.current()`,
+ * Instances created by [createCompatOpenTelemetry] or [toOtelKotlinApi] share opentelemetry-java's
+ * ContextStorage, so the Kotlin and Java APIs share one implicit context.
+ *
+ * If the receiver was created by `implementation`, opt in to `context { useOtelJavaContextStorage() }`
+ * when creating the SDK so that the Kotlin and Java APIs share one implicit context. Otherwise, avoid
+ * reading or setting the opentelemetry-java implicit context directly through `Context.current()`,
  * `Context.makeCurrent()`, `Span.current()`, `Baggage.current()`, etc., as these use a separate
- * store and trace context will not propagate correctly.
+ * store and trace context will not propagate correctly. See the compat README for details.
  */
 @ExperimentalApi
 public fun OpenTelemetry.toOtelJavaApi(): OtelJavaOpenTelemetry {

@@ -4,17 +4,21 @@ import io.opentelemetry.kotlin.ExperimentalApi
 
 /**
  * Unbuffered processing for the logger provider's processor: each log record is exported as it is
- * emitted. The exporter is configured on [LogRecordProcessorBehavior]. This type has no fields;
- * selecting it is the whole configuration.
+ * emitted.
  *
  * https://opentelemetry.io/docs/specs/otel/logs/sdk/#simple-processor
  */
 @ExperimentalApi
-class SimpleLogRecordProcessorBehavior : Behavior<SimpleLogRecordProcessorBehavior> {
+data class SimpleLogRecordProcessorBehavior(
 
-    override fun mergeWith(higher: SimpleLogRecordProcessorBehavior): SimpleLogRecordProcessorBehavior = higher
+    /**
+     * Exporter that receives each log record.
+     * */
+    val exporter: LogRecordExporterBehavior? = null,
 
-    override fun equals(other: Any?): Boolean = other is SimpleLogRecordProcessorBehavior
+) : Behavior<SimpleLogRecordProcessorBehavior> {
 
-    override fun hashCode(): Int = 0
+    override fun mergeWith(higher: SimpleLogRecordProcessorBehavior): SimpleLogRecordProcessorBehavior = copy(
+        exporter = mergeNode(exporter, higher.exporter),
+    )
 }

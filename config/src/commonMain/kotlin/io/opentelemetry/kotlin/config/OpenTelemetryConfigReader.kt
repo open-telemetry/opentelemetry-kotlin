@@ -49,7 +49,7 @@ class OpenTelemetryConfigReader(
         dsl: () -> OpenTelemetryBehavior?,
         configFilePath: String? = null,
     ): OpenTelemetryBehavior {
-        val dslBehavior = guard("read the DSL", fallback = null, block = dsl)
+        val dslBehavior = guard("read the DSL", fallback = null, toError = ::userCodeError, block = dsl)
         return try {
             behaviorResolver.resolve(
                 envars = guard("read environment variables", fallback = null) {
@@ -73,30 +73,46 @@ class OpenTelemetryConfigReader(
         val path = guard("read $CONFIG_FILE", fallback = null) {
             configFilePath ?: reportingEnvVarReader.readString(CONFIG_FILE)
         } ?: return null
-        return guard("read declarative config file '$path'", fallback = OpenTelemetryBehavior()) {
+        return guard(
+            "read declarative config file '$path'",
+            fallback = OpenTelemetryBehavior(),
+            toError = ::configFileError,
+        ) {
             reader.read(path)
         }
     }
 
-    private inline fun <T> guard(action: String, fallback: T, block: () -> T): T = try {
+    private inline fun <T> guard(
+        action: String,
+        fallback: T,
+        toError: (Throwable, String) -> SdkError = ::sdkCodeError,
+        block: () -> T,
+    ): T = try {
         block()
     } catch (e: Throwable) {
-        report(e, action)
+        reportError(toError(e, "Failed to $action; falling back"))
         fallback
     }
 
     private fun report(e: Throwable, action: String) {
+        reportError(sdkCodeError(e, "Failed to $action; falling back"))
+    }
+
+    private fun reportError(error: SdkError) {
         try {
-            sdkErrorHandler.onError(
-                SdkError.SdkCodeError(
-                    cause = e,
-                    message = "Failed to $action; falling back",
-                    severity = SdkErrorSeverity.ERROR,
-                )
-            )
+            sdkErrorHandler.onError(error)
         } catch (_: Throwable) {
         }
     }
+
+    private fun sdkCodeError(e: Throwable, message: String): SdkError =
+        SdkError.SdkCodeError(cause = e, message = message, severity = SdkErrorSeverity.ERROR)
+
+    private fun userCodeError(e: Throwable, message: String): SdkError =
+        SdkError.UserCodeError(cause = e, message = message, severity = SdkErrorSeverity.ERROR)
+
+    private fun configFileError(e: Throwable, message: String): SdkError =
+        SdkError.ApiMisuse(api = CONFIG_FILE, message = "$message: $e", severity = SdkErrorSeverity.ERROR)
 
     private fun reportEnvironmentWarning(warning: EnvVarReadWarning) {
         sdkErrorHandler.onError(

@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.threadSafeMap
 
 /**
@@ -44,7 +45,7 @@ internal class ApiProviderImpl<T>(
             attrs = mutableMapOf(),
         )
         if (attributes != null) {
-            attributes(container)
+            userCode { attributes(container) }
         }
         return InstrumentationScopeInfoImpl(name, version, schemaUrl, container.attributes)
     }

@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.config.yaml
 import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.SimpleSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.config.schema.model.BatchSpanProcessor
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
@@ -27,7 +28,13 @@ internal class SpanProcessorMapperTest {
         val processors = listOf(
             SpanProcessor(simple = SimpleSpanProcessor(exporter = consoleExporter())),
         )
-        assertEquals(SpanProcessorBehavior(console = ConsoleExporterBehavior()), processors.toBehavior())
+        assertEquals(
+            SpanProcessorBehavior(
+                console = ConsoleExporterBehavior(),
+                simple = SimpleSpanProcessorBehavior(),
+            ),
+            processors.toBehavior(),
+        )
     }
 
     @Test
@@ -41,7 +48,8 @@ internal class SpanProcessorMapperTest {
                     endpoint = "http://localhost:4317",
                     timeout = 10_000,
                     headers = mapOf("key" to "value")
-                )
+                ),
+                simple = SimpleSpanProcessorBehavior(),
             ),
             processors.toBehavior(),
         )
@@ -120,6 +128,14 @@ internal class SpanProcessorMapperTest {
             BatchSpanProcessorBehavior(100, 200, 40, 20),
             processors.toBehavior()?.batch,
         )
+    }
+
+    @Test
+    fun leavesSimpleUnsetForABatchProcessor() {
+        val processors = listOf(
+            SpanProcessor(batch = BatchSpanProcessor(exporter = consoleExporter())),
+        )
+        assertNull(processors.toBehavior()?.simple)
     }
 
     @Test

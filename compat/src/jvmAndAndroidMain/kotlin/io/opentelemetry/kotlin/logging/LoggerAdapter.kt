@@ -10,8 +10,10 @@ import io.opentelemetry.kotlin.attributes.toOtelJavaValue
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.guardOrDefault
+import io.opentelemetry.kotlin.error.sdkGuard
+import io.opentelemetry.kotlin.error.sdkGuardOrDefault
+import io.opentelemetry.kotlin.error.userCode
 import java.util.concurrent.TimeUnit
 
 @ExperimentalApi
@@ -24,7 +26,7 @@ internal class LoggerAdapter(
         context: Context?,
         severityNumber: SeverityNumber?,
         eventName: String?,
-    ): Boolean = sdkErrorHandler.guardOrDefault(false, "Logger.enabled failed") {
+    ): Boolean = sdkErrorHandler.sdkGuardOrDefault(false, "Logger.enabled failed") {
         // eventName has no equivalent in opentelemetry-java, so it is not taken into account
         val severity = (severityNumber ?: SeverityNumber.UNKNOWN).toOtelJavaSeverityNumber()
         when (context) {
@@ -44,7 +46,7 @@ internal class LoggerAdapter(
         exception: Throwable?,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
-        sdkErrorHandler.guard("Logger.emit failed") {
+        sdkErrorHandler.sdkGuard("Logger.emit failed") {
             processTelemetry(
                 eventName = eventName,
                 body = body,
@@ -99,10 +101,10 @@ internal class LoggerAdapter(
 
         val container = CompatAttributesModel()
         if (exception != null) {
-            container.setExceptionAttributes(exception)
+            userCode { container.setExceptionAttributes(exception) }
         }
         if (attributes != null) {
-            attributes(container)
+            userCode { attributes(container) }
         }
         if (exception != null || attributes != null) {
             builder.setAllAttributes(container.otelJavaAttributes())

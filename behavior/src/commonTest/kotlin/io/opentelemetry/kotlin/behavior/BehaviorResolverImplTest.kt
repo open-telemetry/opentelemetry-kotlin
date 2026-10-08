@@ -14,6 +14,7 @@ internal class BehaviorResolverImplTest {
         val http = OtlpHttpExporterBehavior(endpoint = "https://example.com")
         val resolved = resolver.resolve(
             envars = OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 loggerProvider = LoggerProviderBehavior(
                     processor = LogRecordProcessorBehavior(
                         batch = BatchLogRecordProcessorBehavior(exportTimeout = 60_000),
@@ -21,6 +22,7 @@ internal class BehaviorResolverImplTest {
                 ),
             ),
             declarativeFile = OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 loggerProvider = LoggerProviderBehavior(
                     processor = LogRecordProcessorBehavior(
                         http = http,
@@ -29,6 +31,7 @@ internal class BehaviorResolverImplTest {
                 ),
             ),
             dsl = OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 loggerProvider = LoggerProviderBehavior(
                     processor = LogRecordProcessorBehavior(
                         batch = BatchLogRecordProcessorBehavior(scheduleDelay = 0),
@@ -48,11 +51,13 @@ internal class BehaviorResolverImplTest {
         val resolved = resolver.resolve(
             envars = null,
             declarativeFile = OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 loggerProvider = LoggerProviderBehavior(
                     processor = LogRecordProcessorBehavior(http = http),
                 ),
             ),
             dsl = OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 loggerProvider = LoggerProviderBehavior(
                     processor = LogRecordProcessorBehavior(simple = SimpleLogRecordProcessorBehavior()),
                 ),
@@ -70,11 +75,13 @@ internal class BehaviorResolverImplTest {
         val resolved = resolver.resolve(
             envars = null,
             declarativeFile = OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 tracerProvider = TracerProviderBehavior(
                     processor = SpanProcessorBehavior(http = http),
                 ),
             ),
             dsl = OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 tracerProvider = TracerProviderBehavior(
                     processor = SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior()),
                 ),
@@ -90,7 +97,7 @@ internal class BehaviorResolverImplTest {
     fun leavesEverythingUnsetWhenNoLayerConfiguresAnything() {
         val resolved = resolver.resolve(envars = null, declarativeFile = null, dsl = null)
 
-        assertEquals(OpenTelemetryBehavior(), resolved)
+        assertEquals(OpenTelemetryBehavior(fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION), resolved)
         assertNull(resolved.resource)
         assertNull(resolved.attributeLimits)
         assertNull(resolved.tracerProvider)
@@ -159,11 +166,14 @@ internal class BehaviorResolverImplTest {
     fun emptyDeclarativeFileStillReplacesEnvars() {
         val resolved = resolver.resolve(
             envars = configWithSpanLimits(SpanLimitsBehavior(linkCountLimit = 5)),
-            declarativeFile = OpenTelemetryBehavior(),
+            declarativeFile = OpenTelemetryBehavior(fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION),
             dsl = null,
         )
 
-        assertEquals(OpenTelemetryBehavior(), resolved)
+        assertEquals(
+            OpenTelemetryBehavior(fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION),
+            resolved
+        )
     }
 
     @Test
@@ -229,9 +239,11 @@ internal class BehaviorResolverImplTest {
     fun declarativeFileReplacesEnvarSampler() {
         val resolved = resolver.resolve(
             envars = OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 tracerProvider = TracerProviderBehavior(sampler = SamplerBehavior.AlwaysOn),
             ),
             declarativeFile = OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 tracerProvider = TracerProviderBehavior(
                     sampler = SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOff),
                 ),
@@ -253,9 +265,11 @@ internal class BehaviorResolverImplTest {
         val resolved = resolver.resolve(
             envars = null,
             declarativeFile = OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 tracerProvider = TracerProviderBehavior(idGenerator = IdGeneratorBehavior.Random),
             ),
             dsl = OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 tracerProvider = TracerProviderBehavior(idGenerator = custom),
             ),
         )
@@ -270,14 +284,26 @@ internal class BehaviorResolverImplTest {
     ) = resolver.resolve(envars, declarativeFile, dsl).tracerProvider?.spanLimits
 
     private fun configWithSpanLimits(spanLimits: SpanLimitsBehavior) =
-        OpenTelemetryBehavior(tracerProvider = TracerProviderBehavior(spanLimits = spanLimits))
+        OpenTelemetryBehavior(
+            fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
+            tracerProvider = TracerProviderBehavior(spanLimits = spanLimits)
+        )
 
     private fun configWithResource(resource: ResourceBehavior) =
-        OpenTelemetryBehavior(resource = resource)
+        OpenTelemetryBehavior(
+            fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
+            resource = resource
+        )
 
     private fun configWithAttributeLimits(attributeLimits: AttributeLimitsBehavior) =
-        OpenTelemetryBehavior(attributeLimits = attributeLimits)
+        OpenTelemetryBehavior(
+            fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
+            attributeLimits = attributeLimits
+        )
 
     private fun configWithLogLimits(logLimits: LogLimitsBehavior) =
-        OpenTelemetryBehavior(loggerProvider = LoggerProviderBehavior(logLimits = logLimits))
+        OpenTelemetryBehavior(
+            fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
+            loggerProvider = LoggerProviderBehavior(logLimits = logLimits)
+        )
 }

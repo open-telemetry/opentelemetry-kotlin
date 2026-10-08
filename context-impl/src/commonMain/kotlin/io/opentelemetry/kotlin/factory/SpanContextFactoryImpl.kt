@@ -1,29 +1,24 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.propagation.utils.SPAN_ID_BYTES
-import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_BYTES
-import io.opentelemetry.kotlin.propagation.utils.isValidSpanIdBytes
-import io.opentelemetry.kotlin.propagation.utils.isValidTraceIdBytes
+import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.kotlin.tracing.SpanContextImpl
 import io.opentelemetry.kotlin.tracing.TraceFlags
 import io.opentelemetry.kotlin.tracing.TraceState
+import io.opentelemetry.kotlin.tracing.createSpanContext
 
-private val INVALID_TRACE_ID_BYTES = ByteArray(TRACE_ID_BYTES)
-private val INVALID_SPAN_ID_BYTES = ByteArray(SPAN_ID_BYTES)
-
+@OptIn(ExperimentalApi::class)
 public class SpanContextFactoryImpl(
     traceFlagsFactory: TraceFlagsFactory,
     traceStateFactory: TraceStateFactory,
 ) : SpanContextFactory {
 
     override val invalid: SpanContext by lazy {
-        SpanContextImpl(
-            traceIdBytes = INVALID_TRACE_ID_BYTES,
-            spanIdBytes = INVALID_SPAN_ID_BYTES,
+        create(
+            traceIdBytes = ByteArray(0),
+            spanIdBytes = ByteArray(0),
             traceFlags = traceFlagsFactory.default,
+            traceState = traceStateFactory.default,
             isRemote = false,
-            traceState = traceStateFactory.default
         )
     }
 
@@ -47,19 +42,15 @@ public class SpanContextFactoryImpl(
         traceFlags: TraceFlags,
         traceState: TraceState,
         isRemote: Boolean,
-    ): SpanContext = SpanContextImpl(
-        traceIdBytes = if (traceIdBytes.isValidTraceIdBytes()) {
-            traceIdBytes
-        } else {
-            INVALID_TRACE_ID_BYTES
-        },
-        spanIdBytes = if (spanIdBytes.isValidSpanIdBytes()) {
-            spanIdBytes
-        } else {
-            INVALID_SPAN_ID_BYTES
-        },
-        traceFlags = traceFlags,
-        isRemote = isRemote,
-        traceState = traceState,
-    )
+    ): SpanContext {
+        val entries = traceState.asMap()
+        return createSpanContext(traceIdBytes, spanIdBytes) {
+            isSampled = traceFlags.isSampled
+            isRandom = traceFlags.isRandom
+            this.isRemote = isRemote
+            traceState {
+                entries.forEach { (key, value) -> put(key, value) }
+            }
+        }
+    }
 }
