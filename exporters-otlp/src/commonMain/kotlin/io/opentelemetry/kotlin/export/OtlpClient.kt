@@ -40,7 +40,16 @@ internal class OtlpClient(
     private val sdkErrorHandler: SdkErrorHandler,
     internal val signalEndpoint: String? = null,
     private val headers: suspend () -> Map<String, String> = { emptyMap() },
+    private val httpClientLease: HttpClientLease? = null,
 ) {
+    /**
+     * Releases the shared client when this exporter created it. A caller-supplied client has no
+     * lease and is left open. A second call does nothing.
+     */
+    fun release() {
+        httpClientLease?.release()
+    }
+
 
     private val contentType = ContentType.parse("application/x-protobuf")
     private val userAgent = "OTel-OTLP-Exporter-Kotlin/${BuildKonfig.VERSION}"
