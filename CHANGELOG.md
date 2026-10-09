@@ -1,6 +1,6 @@
 # opentelemetry-kotlin changelog
 
-## Unreleased
+## Version 0.9.0 (2026-10-09)
 
 ### Migration notes
 
