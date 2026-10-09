@@ -171,7 +171,9 @@ public class B3Propagator(
         private const val SINGLE_HEADER_SIZE = 51 // 32 + 1 + 16 + 1 + 1
 
         private val SINGLE_FIELDS = listOf(COMBINED_HEADER)
-        private val MULTI_FIELDS = listOf(TRACE_ID_HEADER, SPAN_ID_HEADER, SAMPLED_HEADER)
+        // X-B3-Flags is injected when the context is in debug mode, so callers that copy
+        // only fields() must see it or the debug bit is dropped on the way out.
+        private val MULTI_FIELDS = listOf(TRACE_ID_HEADER, SPAN_ID_HEADER, SAMPLED_HEADER, DEBUG_HEADER)
 
         private object FLAGS {
             const val DEBUG = 'd'

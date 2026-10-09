@@ -38,7 +38,10 @@ internal class B3PropagatorTest {
 
     @Test
     fun `multi format fields returns X-B3 headers`() {
-        assertEquals(listOf("X-B3-TraceId", "X-B3-SpanId", "X-B3-Sampled"), multiPropagator.fields().toList())
+        assertEquals(
+            listOf("X-B3-TraceId", "X-B3-SpanId", "X-B3-Sampled", "X-B3-Flags"),
+            multiPropagator.fields().toList(),
+        )
     }
 
     @Test
