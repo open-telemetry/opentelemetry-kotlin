@@ -473,6 +473,20 @@ internal class SpanExportTest {
     }
 
     @Test
+    fun `updating an attribute at the count limit replaces the stored value`() = runTest {
+        harness.config.spanLimits = {
+            attributeCountLimit = 1
+        }
+        val span = harness.tracer.startSpan("span")
+        span.setStringAttribute("key", "first")
+        span.setStringAttribute("key", "second")
+        span.setStringAttribute("other", "dropped")
+
+        assertEquals(mapOf("key" to "second"), (span as AttributeContainer).attributes)
+        span.end()
+    }
+
+    @Test
     fun `test span limit export`() = runTest {
         harness.config.spanLimits = {
             attributeCountLimit = 1

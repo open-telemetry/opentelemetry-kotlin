@@ -116,70 +116,61 @@ internal class SpanAdapter(
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
         impl.setAttribute(key, value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        rememberAttribute(key, value)
     }
 
     override fun setStringAttribute(key: String, value: String) {
         impl.setAttribute(key, value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        rememberAttribute(key, value)
     }
 
     override fun setLongAttribute(key: String, value: Long) {
         impl.setAttribute(key, value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        rememberAttribute(key, value)
     }
 
     override fun setDoubleAttribute(key: String, value: Double) {
         impl.setAttribute(key, value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        rememberAttribute(key, value)
     }
 
     override fun setBooleanListAttribute(key: String, value: List<Boolean>) {
         impl.setAttribute(OtelJavaAttributeKey.booleanArrayKey(key), value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        rememberAttribute(key, value)
     }
 
     override fun setStringListAttribute(key: String, value: List<String>) {
         impl.setAttribute(OtelJavaAttributeKey.stringArrayKey(key), value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        rememberAttribute(key, value)
     }
 
     override fun setLongListAttribute(key: String, value: List<Long>) {
         impl.setAttribute(OtelJavaAttributeKey.longArrayKey(key), value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        rememberAttribute(key, value)
     }
 
     override fun setDoubleListAttribute(key: String, value: List<Double>) {
         impl.setAttribute(OtelJavaAttributeKey.doubleArrayKey(key), value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        rememberAttribute(key, value)
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
         impl.setAttribute(OtelJavaAttributeKey.valueKey(key), OtelJavaValue.of(value))
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        rememberAttribute(key, value)
     }
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
         impl.setAttribute(OtelJavaAttributeKey.valueKey(key), value.toOtelJavaValue())
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
+        rememberAttribute(key, value)
+    }
+
+    /**
+     * Keeps the Kotlin view of span attributes within [CompatSpanLimitsConfig.effectiveAttributeCountLimit].
+     * Replacing a key that is already stored does not use another slot; a size check alone drops that update
+     * once the span is at the limit.
+     */
+    private fun rememberAttribute(key: String, value: Any) {
+        if (attrs.containsKey(key) || attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
             attrs[key] = value
         }
     }
