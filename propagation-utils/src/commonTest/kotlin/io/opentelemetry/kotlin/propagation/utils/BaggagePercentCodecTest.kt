@@ -32,6 +32,15 @@ internal class BaggagePercentCodecTest {
     }
 
     @Test
+    fun testDecodeRejectsRawCharactersOutsideBaggageOctet() {
+        assertNull(percentDecodeBaggageValue("a b"))
+        assertNull(percentDecodeBaggageValue("a,b"))
+        assertNull(percentDecodeBaggageValue("café"))
+        assertEquals("a b", percentDecodeBaggageValue("a%20b"))
+        assertEquals("café", percentDecodeBaggageValue("caf%C3%A9"))
+    }
+
+    @Test
     fun testRoundTrip() {
         val value = "100% ünïcödé, with; delimiters=and\\slashes"
         assertEquals(value, percentDecodeBaggageValue(percentEncodeBaggageValue(value)))
