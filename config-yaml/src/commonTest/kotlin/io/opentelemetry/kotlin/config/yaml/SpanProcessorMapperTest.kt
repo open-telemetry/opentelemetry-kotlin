@@ -45,6 +45,7 @@ internal class SpanProcessorMapperTest {
         assertEquals(
             SpanProcessorBehavior(
                 http = OtlpHttpSpanExporterBehavior(),
+                simple = SimpleSpanProcessorBehavior(),
             ),
             processors.toBehavior(),
         )

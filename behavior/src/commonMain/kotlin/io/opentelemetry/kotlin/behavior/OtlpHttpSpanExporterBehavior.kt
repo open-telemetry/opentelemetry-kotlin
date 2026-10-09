@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.behavior
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.OtlpExporter.Companion.DEFAULT_TIMEOUT
 
 /**
  * Selecting the OTLP HTTP span exporter.
@@ -9,15 +10,29 @@ import io.opentelemetry.kotlin.ExperimentalApi
  */
 @ExperimentalApi
 data class OtlpHttpSpanExporterBehavior(
-    override val endpoint: String = DEFAULT_ENDPOINT,
-    override val timeout: Long = DEFAULT_TIMEOUT,
-    override val headers: Map<String, String?>? = null
-) : OtlpHttpExporterBehavior(endpoint, timeout, headers) {
-    override fun mergeWith(higher: OtlpHttpExporterBehavior): OtlpHttpSpanExporterBehavior {
+    val delegate: OtlpHttpExporter = OtlpHttpExporter(
+        endpoint = DEFAULT_ENDPOINT,
+    ),
+) : Behavior<OtlpHttpSpanExporterBehavior>, OtlpExporter by delegate {
+    constructor(
+        endpoint: String = DEFAULT_ENDPOINT,
+        timeout: Long = DEFAULT_TIMEOUT,
+        headers: Map<String, String?>? = null,
+    ) : this(
+        delegate = OtlpHttpExporter(
+            endpoint = endpoint,
+            timeout = timeout,
+            headers = headers,
+        )
+    )
+
+    override fun mergeWith(higher: OtlpHttpSpanExporterBehavior): OtlpHttpSpanExporterBehavior {
         return copy(
-            endpoint = higher.endpoint,
-            timeout = higher.timeout,
-            headers = mergeMap(headers, higher.headers),
+            delegate = OtlpHttpExporter(
+                endpoint = higher.endpoint,
+                timeout = higher.timeout,
+                headers = mergeMap(headers, higher.headers),
+            )
         )
     }
 

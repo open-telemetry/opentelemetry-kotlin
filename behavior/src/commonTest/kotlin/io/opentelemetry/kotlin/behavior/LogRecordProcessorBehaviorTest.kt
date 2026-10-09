@@ -26,7 +26,7 @@ internal class LogRecordProcessorBehaviorTest {
 
     @Test
     fun mergesBatchSettingsWithoutDroppingExporterConfiguration() {
-        val http = OtlpHttpSpanExporterBehavior(endpoint = "https://example.com")
+        val http = OtlpHttpLogsExporterBehavior(endpoint = "https://example.com")
         val merged = LogRecordProcessorBehavior(
             http = http,
             batch = BatchLogRecordProcessorBehavior(scheduleDelay = 1_000, maxQueueSize = 2_048),
@@ -74,7 +74,7 @@ internal class LogRecordProcessorBehaviorTest {
 
     @Test
     fun adoptsHttpFromWhicheverLayerSuppliedIt() {
-        val http = OtlpHttpSpanExporterBehavior(endpoint = "https://example.com")
+        val http = OtlpHttpLogsExporterBehavior(endpoint = "https://example.com")
 
         assertEquals(
             http,
@@ -112,7 +112,7 @@ internal class LogRecordProcessorBehaviorTest {
 
     @Test
     fun keepsExporterConfigurationWhenSelectingSimple() {
-        val http = OtlpHttpSpanExporterBehavior(endpoint = "https://example.com")
+        val http = OtlpHttpLogsExporterBehavior(endpoint = "https://example.com")
         val merged = LogRecordProcessorBehavior(http = http).mergeWith(
             LogRecordProcessorBehavior(simple = SimpleLogRecordProcessorBehavior()),
         )
