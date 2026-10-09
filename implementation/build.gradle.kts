@@ -26,6 +26,7 @@ kotlin {
                 implementation(project(":noop"))
                 implementation(project(":semconv"))
                 implementation(libs.kotlinx.coroutines)
+                implementation(libs.kotlin.serialization)
             }
         }
         commonTest {
