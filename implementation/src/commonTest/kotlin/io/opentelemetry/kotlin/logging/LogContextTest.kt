@@ -12,10 +12,10 @@ import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.TracerImpl
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
 import io.opentelemetry.kotlin.tracing.fakeSpanLimitsConfig
-import io.opentelemetry.kotlin.tracing.implementation.createInvalidSpanContext
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -64,8 +64,7 @@ internal class LogContextTest {
     fun testDefaultContext() {
         logger.emit()
         val log = processor.logs.single()
-        val root = contextFactory.root().extractSpan().spanContext
-        assertSame(root, log.spanContext)
+        assertSame(createInvalidSpanContext(), log.spanContext)
     }
 
     @Test

@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.tracing.compat.createSpanContext
+import io.opentelemetry.kotlin.tracing.createSpanContext
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertSame

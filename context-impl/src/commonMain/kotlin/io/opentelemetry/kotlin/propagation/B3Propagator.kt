@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_HEX_LENGTH
 import io.opentelemetry.kotlin.propagation.utils.isAllZerosHex
 import io.opentelemetry.kotlin.propagation.utils.isValidHex
 import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.kotlin.tracing.contextimpl.createSpanContext
+import io.opentelemetry.kotlin.tracing.createSpanContext
 
 /**
  * B3 trace context propagator supporting both single-header and multi-header formats.

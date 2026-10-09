@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -13,17 +13,17 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class TraceStateMarshallerTest {
 
-    private val factory = DefaultTraceStateFactory
+    private val emptyTraceState = createInvalidSpanContext().traceState
 
     @Test
     fun `encode produces a single key=value list-member`() {
-        val ts = TraceStateMarshaller(factory.default.put("foo", "bar"))
+        val ts = TraceStateMarshaller(emptyTraceState.put("foo", "bar"))
         assertEquals("foo=bar", ts.encode())
     }
 
     @Test
     fun `encode joins multiple list-members with comma and preserves insertion order`() {
-        val state = factory.default
+        val state = emptyTraceState
             .put("foo", "1")
             .put("bar", "2")
             .put("baz", "3")
@@ -35,13 +35,13 @@ internal class TraceStateMarshallerTest {
 
     @Test
     fun `encode of an empty state returns an empty string`() {
-        val ts = TraceStateMarshaller(factory.default)
+        val ts = TraceStateMarshaller(emptyTraceState)
         assertEquals("", ts.encode())
     }
 
     @Test
     fun `encode supports multi-tenant keys`() {
-        val state = factory.default.put("tenant@vendor", "value")
+        val state = emptyTraceState.put("tenant@vendor", "value")
         val ts = TraceStateMarshaller(state)
         assertEquals("tenant@vendor=value", ts.encode())
     }

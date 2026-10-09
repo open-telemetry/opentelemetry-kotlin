@@ -16,8 +16,6 @@ import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.propagation.utils.isValidTraceIdBytes
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
-import io.opentelemetry.kotlin.tracing.implementation.createInvalidSpanContext
-import io.opentelemetry.kotlin.tracing.implementation.createSpanContext
 import io.opentelemetry.kotlin.tracing.model.CreatedSpan
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpanImpl
 import io.opentelemetry.kotlin.tracing.model.SpanCreationCollector

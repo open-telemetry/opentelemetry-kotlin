@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.factory
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.kotlin.tracing.contextimpl.createInvalidSpanContext
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 
 public class SpanFactoryImpl : SpanFactory {
 

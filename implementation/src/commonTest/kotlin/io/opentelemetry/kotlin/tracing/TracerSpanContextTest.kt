@@ -13,7 +13,6 @@ import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
-import io.opentelemetry.kotlin.tracing.implementation.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.model.hex
 import kotlin.test.BeforeTest
 import kotlin.test.Test

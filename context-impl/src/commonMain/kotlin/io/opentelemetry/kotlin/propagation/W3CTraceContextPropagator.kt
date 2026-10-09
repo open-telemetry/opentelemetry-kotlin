@@ -2,10 +2,9 @@ package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateCodec
-import io.opentelemetry.kotlin.tracing.contextimpl.createSpanContext
+import io.opentelemetry.kotlin.tracing.createSpanContext
 
 /**
  * W3C Trace Context HTTP header propagator.
@@ -42,7 +41,7 @@ public class W3CTraceContextPropagator(
 
     override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context {
         val rawTraceparent = getter.get(carrier, TRACEPARENT) ?: return context
-        val parsed = TraceParent.decode(rawTraceparent, DefaultTraceFlagsFactory) ?: return context
+        val parsed = TraceParent.decode(rawTraceparent) ?: return context
         val rawTracestate = getter.get(carrier, TRACESTATE)
 
         val spanContext = createSpanContext(parsed.traceId, parsed.spanId) {

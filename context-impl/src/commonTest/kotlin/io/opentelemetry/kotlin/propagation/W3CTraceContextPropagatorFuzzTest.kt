@@ -8,7 +8,7 @@ import io.kotest.property.checkAll
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
-import io.opentelemetry.kotlin.tracing.contextimpl.createSpanContext
+import io.opentelemetry.kotlin.tracing.createSpanContext
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

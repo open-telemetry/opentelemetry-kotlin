@@ -3,12 +3,12 @@ package io.opentelemetry.kotlin.propagation
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateCodec
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.TraceState
-import io.opentelemetry.kotlin.tracing.contextimpl.createSpanContext
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
+import io.opentelemetry.kotlin.tracing.createSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -23,7 +23,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class W3CTraceContextPropagatorTest {
 
-    private val traceStateFactory = DefaultTraceStateFactory
+    private val emptyTraceState = createInvalidSpanContext().traceState
     private val spanFactory = SpanFactoryImpl()
     private val contextFactory = ContextFactoryImpl(spanFactory)
 
@@ -96,7 +96,7 @@ internal class W3CTraceContextPropagatorTest {
 
     @Test
     fun `inject writes tracestate when state has entries`() {
-        val state = traceStateFactory.default.put("foo", "bar")
+        val state = emptyTraceState.put("foo", "bar")
         val context = contextWithSpan(spanContext(traceState = state))
         val carrier = injectInto(context)
         assertEquals("foo=bar", carrier["tracestate"])
@@ -104,7 +104,7 @@ internal class W3CTraceContextPropagatorTest {
 
     @Test
     fun `inject preserves multiple tracestate entries in insertion order`() {
-        val state = traceStateFactory.default
+        val state = emptyTraceState
             .put("foo", "1")
             .put("bar", "2")
             .put("baz", "3")
@@ -257,7 +257,7 @@ internal class W3CTraceContextPropagatorTest {
 
     @Test
     fun `inject and extract round-trip preserves traceId spanId flags and tracestate`() {
-        val state = traceStateFactory.default.put("vendor", "value")
+        val state = emptyTraceState.put("vendor", "value")
         val original = spanContext(
             isSampled = true,
             isRandom = false,
@@ -277,7 +277,7 @@ internal class W3CTraceContextPropagatorTest {
     private fun spanContext(
         isSampled: Boolean = true,
         isRandom: Boolean = false,
-        traceState: TraceState = traceStateFactory.default,
+        traceState: TraceState = emptyTraceState,
     ): SpanContext = createSpanContext(traceId, spanId) {
         this.isSampled = isSampled
         this.isRandom = isRandom

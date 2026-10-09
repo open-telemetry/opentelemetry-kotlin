@@ -19,7 +19,7 @@ import io.opentelemetry.kotlin.logging.model.LogRecordModel
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecordImpl
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.kotlin.tracing.implementation.createInvalidSpanContext
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 
 internal class LoggerImpl(
     private val clock: Clock,

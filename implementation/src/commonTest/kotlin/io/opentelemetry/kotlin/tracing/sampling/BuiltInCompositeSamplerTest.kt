@@ -11,8 +11,8 @@ import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.TraceState
-import io.opentelemetry.kotlin.tracing.implementation.createInvalidSpanContext
-import io.opentelemetry.kotlin.tracing.implementation.createSpanContext
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
+import io.opentelemetry.kotlin.tracing.createSpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import kotlin.random.Random
 import kotlin.test.Test

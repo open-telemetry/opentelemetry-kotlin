@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.factory.buildTraceState
 import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateCodec
 import io.opentelemetry.kotlin.tracing.TraceState
+import io.opentelemetry.kotlin.tracing.createSpanContext
 
 /**
  * Implementation of a W3C `tracestate` header.
@@ -23,9 +23,11 @@ public class TraceStateMarshaller(public val traceState: TraceState) {
         fun decode(header: String): TraceStateMarshaller {
             val decodedMap = W3CTraceStateCodec.decode(header)
             // preserves header order and drops invalid entries
-            val traceState = buildTraceState {
-                decodedMap.forEach { (key, value) -> put(key, value) }
-            }
+            val traceState = createSpanContext(ByteArray(0), ByteArray(0)) {
+                traceState {
+                    decodedMap.forEach { (key, value) -> put(key, value) }
+                }
+            }.traceState
             return TraceStateMarshaller(traceState)
         }
     }
