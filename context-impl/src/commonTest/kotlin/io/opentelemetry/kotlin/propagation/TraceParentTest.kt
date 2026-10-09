@@ -145,6 +145,17 @@ internal class TraceParentTest {
     }
 
     @Test
+    fun `decode ignores uppercase in the extra suffix of a higher version`() {
+        val header = "01-$traceId-$spanId-01-Extra"
+        val tp = TraceParent.decode(header, flagsFactory)
+        assertNotNull(tp)
+        assertEquals("01", tp.version)
+        assertEquals(traceId, tp.traceId)
+        assertEquals(spanId, tp.spanId)
+        assertTrue(tp.traceFlags.isSampled)
+    }
+
+    @Test
     fun `decode rejects an empty header`() {
         assertNull(TraceParent.decode("", flagsFactory))
     }
