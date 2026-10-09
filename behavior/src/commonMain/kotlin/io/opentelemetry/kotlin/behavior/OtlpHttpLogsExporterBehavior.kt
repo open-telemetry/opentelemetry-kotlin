@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.behavior.OtlpExporter.Companion.DEFAULT_TIMEOUT
 /**
  * Selecting the OTLP HTTP logs exporter.
  *
- *
  * https://opentelemetry.io/docs/specs/otel/protocol/exporter/
  */
 @ExperimentalApi
