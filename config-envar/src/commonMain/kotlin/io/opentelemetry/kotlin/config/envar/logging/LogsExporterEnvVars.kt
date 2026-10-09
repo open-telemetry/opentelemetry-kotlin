@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.config.envar.logging
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpExporter
 import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
 import io.opentelemetry.kotlin.config.envar.Exporter
 import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
@@ -35,8 +35,8 @@ class LogsExporterEnvVars(
                             ?: OtlpHttpLogsExporterBehavior.DEFAULT_ENDPOINT,
                         timeout = reader.readNonNegativeLong(OTLP_LOGS_TIMEOUT)
                             ?: reader.readNonNegativeLong(OpenTelemetryEnvVars.OTLP_TIMEOUT)
-                            ?: OtlpHttpExporterBehavior.DEFAULT_TIMEOUT,
-                        headers = OtlpHttpExporterBehavior.buildHeaderMap(
+                            ?: OtlpExporter.DEFAULT_TIMEOUT,
+                        headers = OtlpExporter.buildHeaderMap(
                             reader.readString(OTLP_LOGS_HEADERS)
                                 ?: reader.readString(OpenTelemetryEnvVars.OTLP_HEADERS)
                         )

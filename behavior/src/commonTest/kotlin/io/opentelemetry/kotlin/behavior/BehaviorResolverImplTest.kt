@@ -71,7 +71,7 @@ internal class BehaviorResolverImplTest {
 
     @Test
     fun dslSelectsSimpleSpanProcessorAndPreservesDeclarativeExporter() {
-        val http = OtlpHttpLogsExporterBehavior()
+        val http = OtlpHttpSpanExporterBehavior(delegate = OtlpHttpExporter(endpoint = ""))
         val resolved = resolver.resolve(
             envars = null,
             declarativeFile = OpenTelemetryBehavior(

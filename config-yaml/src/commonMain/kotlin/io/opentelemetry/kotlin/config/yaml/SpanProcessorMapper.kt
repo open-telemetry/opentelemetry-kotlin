@@ -3,9 +3,9 @@ package io.opentelemetry.kotlin.config.yaml
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
-import io.opentelemetry.kotlin.behavior.SimpleSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.OtlpExporter
 import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.SimpleSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.config.schema.model.SpanProcessor
 
@@ -41,8 +41,8 @@ fun List<SpanProcessor>.toBehavior(): SpanProcessorBehavior? {
             // if there are duplicate keys, the last one wins.
             // The spec says that in the case of duplicate keys, [headers] have a higher precedence.
             val headers =
-                OtlpHttpExporterBehavior.buildHeaderMap(httpExporter.headersList).orEmpty() +
-                    OtlpHttpExporterBehavior.buildHeaderMap(
+                OtlpExporter.buildHeaderMap(httpExporter.headersList).orEmpty() +
+                    OtlpExporter.buildHeaderMap(
                         httpExporter.headers?.joinToString(separator = ",") {
                                 pair ->
                             "${pair.name}=${pair.value}"
@@ -50,7 +50,7 @@ fun List<SpanProcessor>.toBehavior(): SpanProcessorBehavior? {
                     ).orEmpty()
             val httpExporterBehavior = OtlpHttpSpanExporterBehavior(
                 endpoint = httpExporter.endpoint ?: OtlpHttpSpanExporterBehavior.DEFAULT_ENDPOINT,
-                timeout = httpExporter.timeout ?: OtlpHttpExporterBehavior.DEFAULT_TIMEOUT,
+                timeout = httpExporter.timeout ?: OtlpExporter.DEFAULT_TIMEOUT,
                 headers = headers.ifEmpty { null }
             )
             return SpanProcessorBehavior(

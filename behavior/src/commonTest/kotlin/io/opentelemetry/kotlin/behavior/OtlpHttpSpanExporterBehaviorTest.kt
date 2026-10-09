@@ -7,9 +7,39 @@ import kotlin.test.assertNull
 internal class OtlpHttpSpanExporterBehaviorTest {
     @Test
     fun startsWithDefaultValues() {
-        val httpExporter = OtlpHttpSpanExporterBehavior()
-        assertEquals(OtlpHttpSpanExporterBehavior.DEFAULT_ENDPOINT, httpExporter.endpoint)
-        assertEquals(OtlpHttpExporterBehavior.DEFAULT_TIMEOUT, httpExporter.timeout)
-        assertNull(httpExporter.headers)
+        // primary constructor
+        var exporter = OtlpHttpSpanExporterBehavior(delegate = OtlpHttpExporter("endpoint"))
+        assertEquals(OtlpExporter.DEFAULT_TIMEOUT, exporter.timeout)
+        assertNull(exporter.headers)
+        // secondary constructor
+        exporter = OtlpHttpSpanExporterBehavior()
+        assertEquals(OtlpHttpSpanExporterBehavior.DEFAULT_ENDPOINT, exporter.endpoint)
+        assertEquals(OtlpExporter.DEFAULT_TIMEOUT, exporter.timeout)
+        assertNull(exporter.headers)
+    }
+
+    @Test
+    fun adoptsEverythingWhenLowerIsUnset() {
+        val higher = OtlpHttpSpanExporterBehavior(
+            endpoint = "https://example.com",
+            timeout = 10_000,
+            headers = mapOf("a" to "b"),
+        )
+        assertEquals(higher, OtlpHttpSpanExporterBehavior().mergeWith(higher))
+    }
+
+    @Test
+    fun prefersHigherLayerForEveryField() {
+        val lower = OtlpHttpSpanExporterBehavior(
+            endpoint = "https://example.com",
+            timeout = 10_000,
+            headers = mapOf("a" to "b"),
+        )
+        val higher = OtlpHttpSpanExporterBehavior(
+            endpoint = "https://example.com/2",
+            timeout = 20_000,
+            headers = mapOf("a" to "c", "c" to "d"),
+        )
+        assertEquals(higher, lower.mergeWith(higher))
     }
 }
