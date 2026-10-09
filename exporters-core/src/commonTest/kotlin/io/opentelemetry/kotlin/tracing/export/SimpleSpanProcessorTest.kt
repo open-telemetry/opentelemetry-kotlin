@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.FakeTraceExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
@@ -107,6 +108,37 @@ internal class SimpleSpanProcessorTest {
 
         assertFalse(exporter.observedConcurrentExport)
         assertEquals(List(5) { "span_$it" }, exporter.exports)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testExportFailureIsReportedAndDoesNotStopLaterExports() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val exported = mutableListOf<String>()
+        var calls = 0
+        val exporter = object : SpanExporter {
+            override suspend fun export(telemetry: List<SpanData>): OperationResultCode {
+                if (calls++ == 0) {
+                    error("boom")
+                }
+                exported += telemetry.map(SpanData::name)
+                return OperationResultCode.Success
+            }
+
+            override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
+            override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
+        }
+        val processor = SimpleSpanProcessor(
+            exporter,
+            CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
+            errorHandler,
+        )
+
+        processor.onEnd(FakeReadWriteSpan(name = "first"))
+        processor.onEnd(FakeReadWriteSpan(name = "second"))
+
+        assertEquals(listOf("second"), exported)
+        assertEquals(1, errorHandler.userCodeErrors.size)
     }
 
     private class SuspendingSpanExporter : SpanExporter {

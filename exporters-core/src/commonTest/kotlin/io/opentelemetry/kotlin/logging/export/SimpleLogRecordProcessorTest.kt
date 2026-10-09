@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.FakeLogExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.data.LogRecordData
@@ -123,6 +124,36 @@ internal class SimpleLogRecordProcessorTest {
 
         assertFalse(exporter.observedConcurrentExport)
         assertEquals(List(5) { "log_$it" }, exporter.exports)
+    }
+
+    @Test
+    fun testExportFailureIsReportedAndDoesNotStopLaterExports() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val exported = mutableListOf<String>()
+        var calls = 0
+        val exporter = object : LogRecordExporter {
+            override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode {
+                if (calls++ == 0) {
+                    error("boom")
+                }
+                exported += telemetry.map { it.body.toString() }
+                return OperationResultCode.Success
+            }
+
+            override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
+            override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
+        }
+        val processor = SimpleLogRecordProcessor(
+            exporter,
+            CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
+            errorHandler,
+        )
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "first"), FakeContext())
+        processor.onEmit(FakeReadWriteLogRecord(body = "second"), FakeContext())
+
+        assertEquals(listOf("second"), exported)
+        assertEquals(1, errorHandler.userCodeErrors.size)
     }
 
     private class SuspendingLogRecordExporter : LogRecordExporter {

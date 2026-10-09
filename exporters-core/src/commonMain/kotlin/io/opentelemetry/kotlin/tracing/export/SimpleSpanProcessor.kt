@@ -1,9 +1,12 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.export.guardExporterCode
 import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
@@ -20,6 +23,7 @@ import kotlinx.coroutines.sync.withLock
 internal class SimpleSpanProcessor(
     private val exporter: SpanExporter,
     private val scope: CoroutineScope,
+    private val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
 ) : SpanProcessor {
 
     private val exportMutex = Mutex()
@@ -41,7 +45,9 @@ internal class SimpleSpanProcessor(
         shutdownState.execute {
             scope.launch {
                 exportMutex.withLock {
-                    exporter.export(listOf(span))
+                    sdkErrorHandler.guardExporterCode("Simple span export failed") {
+                        exporter.export(listOf(span))
+                    }
                 }
             }
         }
