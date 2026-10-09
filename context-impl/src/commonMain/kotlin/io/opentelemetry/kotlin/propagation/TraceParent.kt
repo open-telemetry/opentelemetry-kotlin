@@ -70,10 +70,8 @@ public class TraceParent private constructor(
             if (header.length < LEN_V00) {
                 return null
             }
-            if (header.any { it.isUpperCase() }) {
-                return null
-            }
-
+            // Only the defined fields must be lowercase. A higher version may carry an extra
+            // suffix, and uppercase there must not drop an otherwise valid traceparent.
             val parts = header.split(FIELD_SEPARATOR)
             if (parts.size < EXPECTED_FIELD_COUNT) {
                 return null
