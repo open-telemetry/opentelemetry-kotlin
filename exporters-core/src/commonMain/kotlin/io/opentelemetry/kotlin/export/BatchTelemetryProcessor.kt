@@ -31,6 +31,19 @@ internal class BatchTelemetryProcessor<T>(
 
     private val queue = Channel<T>(capacity = config.maxQueueSize)
     private val flushRequests = Channel<CompletableDeferred<OperationResultCode>>(Channel.UNLIMITED)
+    private val workerResult = CompletableDeferred<OperationResultCode>()
+
+    /**
+     * Items already pulled into a batch when the queue closes. The worker exports them as part of
+     * shutdown instead of dropping them on the way out.
+     */
+    private var closedPending: List<T> = emptyList()
+
+    /**
+     * Export results observed once shutdown has started. A full batch can be exported before the
+     * worker notices that the queue is closed, and that result still belongs to shutdown.
+     */
+    private var drainResult: OperationResultCode = OperationResultCode.Success
     private val worker = scope.launch { runWorker() }
 
     fun processTelemetry(telemetry: T) {
@@ -54,19 +67,22 @@ internal class BatchTelemetryProcessor<T>(
         return runWithTimeout(config.forceFlushTimeoutMs) { request.await() }
     }
 
+    /**
+     * Exports anything still queued, then flushes the exporter. The result is the combined result
+     * of those two steps, so a failed export or flush is visible to the caller.
+     */
     override suspend fun shutdown(): OperationResultCode =
         shutdownState.shutdown(config.forceFlushTimeoutMs) {
             try {
                 queue.close()
-                worker.join()
-                OperationResultCode.Success
+                workerResult.await()
             } finally {
                 scope.cancel()
             }
         }
 
     private suspend fun runWorker() {
-        var exitedNormally = false
+        var result: OperationResultCode = OperationResultCode.Failure
         try {
             while (true) {
                 val closed = select {
@@ -79,16 +95,15 @@ internal class BatchTelemetryProcessor<T>(
                     }
                 }
                 if (closed) {
-                    exitedNormally = true
+                    val pending = closedPending
+                    closedPending = emptyList()
+                    result = drainResult and flush(pending)
                     return
                 }
             }
         } finally {
+            workerResult.complete(result)
             flushRequests.close()
-            val result = when {
-                exitedNormally -> OperationResultCode.Success
-                else -> OperationResultCode.Failure
-            }
             generateSequence { flushRequests.tryReceive().getOrNull() }.forEach { it.complete(result) }
         }
     }
@@ -115,7 +130,7 @@ internal class BatchTelemetryProcessor<T>(
                     }
                     queue.onReceiveCatching { next ->
                         if (next.isClosed) {
-                            exportBatch(batch)
+                            closedPending = batch.toList()
                             true
                         } else {
                             batch += next.getOrThrow()
@@ -172,8 +187,13 @@ internal class BatchTelemetryProcessor<T>(
         }
     }
 
-    private suspend fun exportBatch(batch: List<T>): OperationResultCode =
-        guardUserCode("Batch export failed", config.exportTimeoutMs) { exportAction(batch) }
+    private suspend fun exportBatch(batch: List<T>): OperationResultCode {
+        val exported = guardUserCode("Batch export failed", config.exportTimeoutMs) { exportAction(batch) }
+        if (shutdownState.isShutdown) {
+            drainResult = drainResult and exported
+        }
+        return exported
+    }
 
     private suspend fun guardUserCode(
         details: String,

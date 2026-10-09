@@ -272,6 +272,73 @@ internal class BatchTelemetryProcessorTest {
     }
 
     @Test
+    fun testShutdownFlushesExporterWhenQueueIsEmpty() = runTest {
+        var flushes = 0
+        val processor = createProcessor(
+            flushAction = {
+                flushes += 1
+                OperationResultCode.Success
+            },
+        ) { OperationResultCode.Success }
+
+        assertEquals(OperationResultCode.Success, processor.shutdown())
+        assertEquals(1, flushes)
+    }
+
+    @Test
+    fun testShutdownExportsPendingBatchThenFlushes() = runTest {
+        val events = mutableListOf<String>()
+        val processor = createProcessor(
+            flushAction = {
+                events += "flush"
+                OperationResultCode.Success
+            },
+        ) {
+            events += "export $it"
+            OperationResultCode.Success
+        }
+        processor.processTelemetry(1)
+
+        assertEquals(OperationResultCode.Success, processor.shutdown())
+        assertEquals(listOf("export [1]", "flush"), events)
+    }
+
+    @Test
+    fun testShutdownReturnsFailureWhenPendingExportFails() = runTest {
+        var flushes = 0
+        val processor = createProcessor(
+            flushAction = {
+                flushes += 1
+                OperationResultCode.Success
+            },
+        ) { OperationResultCode.Failure }
+        processor.processTelemetry(1)
+
+        assertEquals(OperationResultCode.Failure, processor.shutdown())
+        assertEquals(1, flushes)
+    }
+
+    @Test
+    fun testShutdownReturnsFailureWhenFullBatchExportFails() = runTest {
+        val processor = createProcessor(
+            batchSize = 1,
+            flushAction = { OperationResultCode.Success },
+        ) { OperationResultCode.Failure }
+        processor.processTelemetry(1)
+
+        assertEquals(OperationResultCode.Failure, processor.shutdown())
+    }
+
+    @Test
+    fun testShutdownReturnsFailureWhenExporterFlushFails() = runTest {
+        val processor = createProcessor(
+            flushAction = { OperationResultCode.Failure },
+        ) { OperationResultCode.Success }
+
+        assertEquals(OperationResultCode.Failure, processor.shutdown())
+    }
+
+    @Test
     fun testExporterFlushCancellationDoesNotStopWorker() = runTest {
         val errorHandler = FakeSdkErrorHandler()
         var flushes = 0
