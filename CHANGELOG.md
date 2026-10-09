@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 0.9.0 (2026-10-09)
+
 ### Migration notes
 
 - `Baggage` and `SpanContext` are now created from the `api` module with `createBaggage { }`,
