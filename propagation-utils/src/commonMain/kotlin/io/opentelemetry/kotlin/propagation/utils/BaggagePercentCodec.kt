@@ -47,7 +47,7 @@ public fun percentEncodeBaggageValue(value: String): String {
  */
 public fun percentDecodeBaggageValue(value: String): String? {
     if (!value.contains(PERCENT_CHAR)) {
-        return value
+        return value.takeIf { it.all(::isRawBaggageOctet) }
     }
     val bytes = ByteArray(value.length)
     var pos = 0
@@ -59,6 +59,9 @@ public fun percentDecodeBaggageValue(value: String): String? {
             bytes[pos++] = decoded.toByte()
             i += PERCENT_SEQUENCE_LENGTH
         } else {
+            if (!isRawBaggageOctet(c)) {
+                return null
+            }
             bytes[pos++] = c.code.toByte()
             i++
         }
@@ -76,6 +79,11 @@ private fun decodeHexPair(value: String, start: Int): Int? {
         return null
     }
     return (hi shl HEX_SHIFT) or lo
+}
+
+private fun isRawBaggageOctet(c: Char): Boolean {
+    val code = c.code
+    return code <= BYTE_MASK && isBaggageOctet(code)
 }
 
 private fun isBaggageOctet(b: Int): Boolean = when (b) {
