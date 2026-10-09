@@ -92,12 +92,25 @@ internal class AttributesModel(
         }
     }
 
-    private fun truncateString(value: String): String =
-        if (value.length > attributeValueLengthLimit) {
-            value.take(attributeValueLengthLimit)
-        } else {
-            value
+    /**
+     * Truncates [value] to [attributeValueLengthLimit] UTF-16 code units without splitting a
+     * surrogate pair. [String.take] can leave a dangling high surrogate, which is not a valid
+     * attribute value.
+     */
+    private fun truncateString(value: String): String {
+        if (truncationDisabled || value.length <= attributeValueLengthLimit) {
+            return value
         }
+        var end = attributeValueLengthLimit
+        if (end > 0 && value.isHighSurrogateAt(end - 1) && end < value.length && value[end].isLowSurrogate()) {
+            end -= 1
+        }
+        return value.substring(0, end)
+    }
+
+    private fun String.isHighSurrogateAt(index: Int): Boolean = this[index] in HIGH_SURROGATE_RANGE
+
+    private fun Char.isLowSurrogate(): Boolean = this in LOW_SURROGATE_RANGE
 
     private fun truncateByteArray(value: ByteArray): ByteArray =
         if (value.size > attributeValueLengthLimit) {
@@ -252,6 +265,9 @@ internal class AttributesModel(
         return value.hashCode()
     }
 }
+
+private val HIGH_SURROGATE_RANGE = '\uD800'..'\uDBFF'
+private val LOW_SURROGATE_RANGE = '\uDC00'..'\uDFFF'
 
 internal const val DEFAULT_ATTRIBUTE_LIMIT: Int = 128
 internal const val DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT: Int = Int.MAX_VALUE

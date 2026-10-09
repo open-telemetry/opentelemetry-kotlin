@@ -46,6 +46,33 @@ internal class AttributesMutatorImplTest {
     }
 
     @Test
+    fun testStringTruncationDoesNotSplitSurrogatePair() {
+        // U+1F600 GRINNING FACE is one code point and two UTF-16 code units.
+        val emoji = "\uD83D\uDE00"
+        val cutInsidePair = AttributesModel(
+            attributeLimit = attributeLimit,
+            attributeValueLengthLimit = 1,
+        ).apply {
+            setStringAttribute("key", emoji)
+            setStringListAttribute("list", listOf(emoji))
+            setAnyValueAttribute("any", AnyValue.StringValue(emoji))
+        }.attributes
+        assertEquals("", cutInsidePair["key"])
+        @Suppress("UNCHECKED_CAST")
+        assertEquals(listOf(""), cutInsidePair["list"] as List<String>)
+        assertEquals("", (cutInsidePair["any"] as AnyValue.StringValue).value)
+
+        val wholePair = AttributesModel(
+            attributeLimit = attributeLimit,
+            attributeValueLengthLimit = 2,
+        ).apply {
+            setStringAttribute("key", "a$emoji")
+        }.attributes
+        // 'a' uses the only complete code unit that fits; the following pair would be split.
+        assertEquals("a", wholePair["key"])
+    }
+
+    @Test
     fun testStringValueAtLimit() {
         val attrs = AttributesModel(attributeLimit = attributeLimit, attributeValueLengthLimit = 5).apply {
             setStringAttribute("key", "hello")
