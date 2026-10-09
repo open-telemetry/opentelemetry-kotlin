@@ -12,6 +12,9 @@ import io.opentelemetry.kotlin.logging.export.toLogRecordDataList
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.export.toSpanDataList
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlin.concurrent.Volatile
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -22,8 +25,14 @@ import kotlin.time.TimeSource
  */
 class FakeOtlpServer {
 
-    private val spans = mutableListOf<SpanData>()
-    private val logs = mutableListOf<LogRecordData>()
+    // the exporter writes on a background thread while tests read, so publish immutable snapshots
+    private val writeLock = Mutex()
+
+    @Volatile
+    private var spans: List<SpanData> = emptyList()
+
+    @Volatile
+    private var logs: List<LogRecordData> = emptyList()
     private val timeSource = TimeSource.Monotonic
 
     /**
@@ -35,10 +44,12 @@ class FakeOtlpServer {
             .toByteArray()
         val path = request.url.encodedPath
 
-        when {
-            path.contains("/v1/traces") -> spans.addAll(body.toSpanDataList())
-            path.contains("/v1/logs") -> logs.addAll(body.toLogRecordDataList())
-            else -> error("Unsupported path: $path")
+        writeLock.withLock {
+            when {
+                path.contains("/v1/traces") -> spans = spans + body.toSpanDataList()
+                path.contains("/v1/logs") -> logs = logs + body.toLogRecordDataList()
+                else -> error("Unsupported path: $path")
+            }
         }
 
         respond(
@@ -60,7 +71,7 @@ class FakeOtlpServer {
      * Waits for telemetry by polling until the predicate matches or the timeout is met.
      */
     private suspend fun <T> awaitTelemetry(
-        collection: List<T>,
+        collection: () -> List<T>,
         timeout: Duration,
         predicate: (T) -> Boolean,
     ): T {
@@ -68,13 +79,13 @@ class FakeOtlpServer {
         val interval = 1.milliseconds
 
         while (start.elapsedNow() < timeout) {
-            val element = collection.firstOrNull(predicate)
+            val element = collection().firstOrNull(predicate)
             if (element != null) {
                 return element
             }
             delay(interval)
         }
-        error("No telemetry matching predicate received within $timeout. Received ${collection.size}.")
+        error("No telemetry matching predicate received within $timeout. Received ${collection().size}.")
     }
 
     /**
@@ -84,7 +95,7 @@ class FakeOtlpServer {
         timeout: Duration = 5.seconds,
         predicate: (SpanData) -> Boolean
     ): SpanData = awaitTelemetry(
-        collection = spans,
+        collection = { spans },
         timeout = timeout,
         predicate = predicate,
     )
@@ -96,7 +107,7 @@ class FakeOtlpServer {
         timeout: Duration = 5.seconds,
         predicate: (LogRecordData) -> Boolean
     ): LogRecordData = awaitTelemetry(
-        collection = logs,
+        collection = { logs },
         timeout = timeout,
         predicate = predicate,
     )
@@ -104,10 +115,10 @@ class FakeOtlpServer {
     /**
      * Returns all collected spans.
      */
-    fun getSpans(): List<SpanData> = spans.toList()
+    fun getSpans(): List<SpanData> = spans
 
     /**
      * Returns all collected log records.
      */
-    fun getLogs(): List<LogRecordData> = logs.toList()
+    fun getLogs(): List<LogRecordData> = logs
 }
