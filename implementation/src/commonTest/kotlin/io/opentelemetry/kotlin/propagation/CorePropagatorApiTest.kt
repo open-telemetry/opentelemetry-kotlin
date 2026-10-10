@@ -69,7 +69,10 @@ internal class CorePropagatorApiTest {
     fun `b3 multi returns propagator with X-B3 fields`() {
         val propagator = dsl.b3(B3Format.MULTI)
         installFactories()
-        assertEquals(listOf("X-B3-TraceId", "X-B3-SpanId", "X-B3-Sampled"), propagator.fields().toList())
+        assertEquals(
+            listOf("X-B3-TraceId", "X-B3-SpanId", "X-B3-Sampled", "X-B3-Flags"),
+            propagator.fields().toList(),
+        )
     }
 
     @Test
