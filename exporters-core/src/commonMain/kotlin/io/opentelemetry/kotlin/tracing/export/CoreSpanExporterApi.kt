@@ -39,7 +39,7 @@ public fun TraceExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): Spa
     val scope = CoroutineScope(
         SupervisorJob() + ioDispatcher + telemetryExceptionHandler("Simple span processor", sdkErrorHandler)
     )
-    return SimpleSpanProcessor(exporter, scope)
+    return SimpleSpanProcessor(exporter, scope, sdkErrorHandler)
 }
 
 /**
