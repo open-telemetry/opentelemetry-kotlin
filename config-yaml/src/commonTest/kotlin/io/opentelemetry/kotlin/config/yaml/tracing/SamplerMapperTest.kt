@@ -1,4 +1,4 @@
-package io.opentelemetry.kotlin.config.yaml
+package io.opentelemetry.kotlin.config.yaml.tracing
 
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.config.schema.model.AlwaysOffSampler

@@ -1,4 +1,4 @@
-package io.opentelemetry.kotlin.config.yaml
+package io.opentelemetry.kotlin.config.yaml.logging
 
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.config.schema.model.LogRecordLimits

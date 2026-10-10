@@ -5,6 +5,8 @@ import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.schema.model.OpenTelemetryConfiguration
+import io.opentelemetry.kotlin.config.yaml.logging.toBehavior
+import io.opentelemetry.kotlin.config.yaml.tracing.toBehavior
 
 /**
  * Maps a declarative config file onto the behavior it supplies, as one layer.

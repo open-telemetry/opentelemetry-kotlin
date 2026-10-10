@@ -1,4 +1,4 @@
-package io.opentelemetry.kotlin.config.yaml
+package io.opentelemetry.kotlin.config.yaml.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
@@ -47,7 +47,7 @@ fun Sampler.toBehavior(): SamplerBehavior? {
  * from one the mapper gave up on. Checking first keeps the answer all or nothing.
  *
  * This walks no further than [limit] levels, so it stays within the stack on the files
- * [toBehavior] needs it to reject.
+ * [io.opentelemetry.kotlin.config.yaml.logging.toBehavior] needs it to reject.
  */
 private fun Sampler.nestsDeeperThan(limit: Int): Boolean {
     val nested = parentBased ?: return false
