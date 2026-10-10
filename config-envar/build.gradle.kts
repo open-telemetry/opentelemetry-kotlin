@@ -13,6 +13,7 @@ kotlin {
             dependencies {
                 api(project(":api"))
                 api(project(":behavior"))
+                implementation(project(":propagation-utils"))
             }
         }
         commonTest {
