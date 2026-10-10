@@ -1,3 +1,7 @@
+public abstract interface class io/opentelemetry/kotlin/export/OtlpFileExporterConfigDsl {
+	public abstract fun getSink ()Lokio/Sink;
+}
+
 public abstract interface class io/opentelemetry/kotlin/export/OtlpHttpExporterConfigDsl {
 	public abstract fun getEndpoint ()Ljava/lang/String;
 	public abstract fun getHeaders ()Lkotlin/jvm/functions/Function1;
@@ -12,11 +16,14 @@ public abstract interface class io/opentelemetry/kotlin/export/OtlpHttpExporterC
 }
 
 public final class io/opentelemetry/kotlin/logging/export/OtlpLogRecordExporterApiKt {
+	public static final fun otlpFileLogRecordExporter (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
 	public static final fun otlpHttpLogRecordExporter (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
 	public static synthetic fun otlpHttpLogRecordExporter$default (Lio/opentelemetry/kotlin/init/LogExportConfigDsl;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
 }
 
 public final class io/opentelemetry/kotlin/tracing/export/OtlpSpanExporterApiKt {
+	public static final fun otlpFileSpanExporter (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
+	public static synthetic fun otlpFileSpanExporter$default (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
 	public static final fun otlpHttpSpanExporter (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
 	public static synthetic fun otlpHttpSpanExporter$default (Lio/opentelemetry/kotlin/init/TraceExportConfigDsl;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
 }

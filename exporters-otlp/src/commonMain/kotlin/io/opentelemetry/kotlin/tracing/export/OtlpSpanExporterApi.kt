@@ -5,7 +5,9 @@ import io.opentelemetry.kotlin.export.EXPORT_INITIAL_DELAY_MS
 import io.opentelemetry.kotlin.export.EXPORT_MAX_ATTEMPTS
 import io.opentelemetry.kotlin.export.EXPORT_MAX_ATTEMPT_INTERVAL_MS
 import io.opentelemetry.kotlin.export.OtlpEndpoint
+import io.opentelemetry.kotlin.export.OtlpFileExporterConfigDsl
 import io.opentelemetry.kotlin.export.OtlpHttpExporterConfigDsl
+import io.opentelemetry.kotlin.export.createOtlpFileExporter
 import io.opentelemetry.kotlin.export.createOtlpHttpClient
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 
@@ -22,3 +24,18 @@ public fun TraceExportConfigDsl.otlpHttpSpanExporter(
     EXPORT_MAX_ATTEMPTS,
     sdkErrorHandler,
 )
+
+/**
+ * Creates a span exporter that writes telemetry to a file.
+ */
+@ExperimentalApi
+public fun TraceExportConfigDsl.otlpFileSpanExporter(
+    block: OtlpFileExporterConfigDsl.() -> Unit = {},
+): SpanExporter =
+    OtlpFileSpanExporter(
+        fileExporter = createOtlpFileExporter(block),
+        initialDelayMs = EXPORT_INITIAL_DELAY_MS,
+        maxAttemptIntervalMs = EXPORT_MAX_ATTEMPT_INTERVAL_MS,
+        maxAttempts = EXPORT_MAX_ATTEMPTS,
+        sdkErrorHandler = sdkErrorHandler
+    )
