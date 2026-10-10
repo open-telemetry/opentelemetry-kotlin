@@ -20,7 +20,9 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpClient
 import io.opentelemetry.kotlin.export.createDefaultHttpClient
 import io.opentelemetry.kotlin.export.createHttpEngine
+import io.opentelemetry.kotlin.init.LogExportConfigDsl
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.logging.export.otlpHttpLogRecordExporter
 import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -28,6 +30,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -35,6 +38,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -218,6 +223,40 @@ internal class OtlpHttpSpanExporterTest {
         HttpClientRegistry.clear()
     }
 
+    @Test
+    fun testOwnedHttpClientClosesWhenLastExporterShutsDown() = runTest {
+        HttpClientRegistry.clear()
+        val spanExporter = fakeConfig().otlpHttpSpanExporter { endpoint = baseUrl }
+        val logExporter = fakeLogConfig().otlpHttpLogRecordExporter { endpoint = baseUrl }
+        val client = HttpClientRegistry.peek(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
+        assertNotNull(client)
+        assertTrue(client.isActive)
+
+        assertEquals(OperationResultCode.Success, spanExporter.shutdown())
+        assertEquals(OperationResultCode.Success, spanExporter.shutdown())
+        assertTrue(client.isActive)
+
+        assertEquals(OperationResultCode.Success, logExporter.shutdown())
+        assertFalse(client.isActive)
+        HttpClientRegistry.clear()
+    }
+
+    @Test
+    fun testShutdownDoesNotCloseCallerSuppliedHttpClient() = runTest {
+        val customServer = MockEngine {
+            respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
+        }
+        val customClient = HttpClient(customServer)
+        val customExporter = fakeConfig().otlpHttpSpanExporter {
+            endpoint = baseUrl
+            httpClient = customClient
+        }
+
+        assertEquals(OperationResultCode.Success, customExporter.shutdown())
+        assertTrue(customClient.isActive)
+        customClient.close()
+    }
+
     private suspend fun waitAndAssertExportedTelemetry(
         telemetry: List<SpanData>,
         timeoutMs: Long = 1000
@@ -240,6 +279,11 @@ internal class OtlpHttpSpanExporterTest {
     }
 
     private fun fakeConfig(): TraceExportConfigDsl = object : TraceExportConfigDsl {
+        override val clock: Clock = FakeClock()
+        override val sdkErrorHandler = NoopSdkErrorHandler
+    }
+
+    private fun fakeLogConfig(): LogExportConfigDsl = object : LogExportConfigDsl {
         override val clock: Clock = FakeClock()
         override val sdkErrorHandler = NoopSdkErrorHandler
     }

@@ -104,16 +104,22 @@ internal fun createOtlpHttpClient(
         value = config.timeoutMs,
         default = EXPORT_REQUEST_TIMEOUT_MS,
     ) { it > 0 }
-    val httpClient = config.httpClient ?: HttpClientRegistry.getOrCreate(
-        engine = config.httpClientEngine,
-        requestTimeoutMs = timeoutMs,
-    )
+    val suppliedClient = config.httpClient
+    val httpClientLease = if (suppliedClient == null) {
+        HttpClientRegistry.lease(
+            engine = config.httpClientEngine,
+            requestTimeoutMs = timeoutMs,
+        )
+    } else {
+        null
+    }
     return OtlpClient(
         baseUrl = endpoint,
-        httpClient = httpClient,
+        httpClient = suppliedClient ?: checkNotNull(httpClientLease).client,
         sdkErrorHandler = sdkErrorHandler,
         signalEndpoint = signalEndpoint,
         headers = config.headers,
+        httpClientLease = httpClientLease,
     )
 }
 

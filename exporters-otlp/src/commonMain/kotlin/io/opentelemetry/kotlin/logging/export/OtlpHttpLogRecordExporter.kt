@@ -28,5 +28,10 @@ internal class OtlpHttpLogRecordExporter(
     }
 
     override suspend fun forceFlush(): OperationResultCode = exporter.forceFlush()
-    override suspend fun shutdown(): OperationResultCode = exporter.shutdown()
+
+    override suspend fun shutdown(): OperationResultCode = try {
+        exporter.shutdown()
+    } finally {
+        otlpClient.release()
+    }
 }
