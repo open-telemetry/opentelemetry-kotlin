@@ -24,6 +24,7 @@ class OpenTelemetryEnvVars(
 ) {
 
     fun toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
+        resource = ResourceEnvVars(reader).toBehavior(),
         attributeLimits = AttributeLimitsEnvVars(reader).toBehavior(),
         tracerProvider = TracerProviderBehavior(
             spanLimits = SpanLimitsEnvVars(reader).toBehavior(),
