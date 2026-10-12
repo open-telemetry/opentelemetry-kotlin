@@ -96,40 +96,44 @@ internal class TracerProviderImplTest {
 
     @Test
     fun testTracerProviderSameName() {
-        val first = impl.getTracer(name = "name")
-        val second = impl.getTracer(name = "name")
-        val third = impl.getTracer(name = "other")
+        val provider = createProvider()
+        val first = provider.getTracer(name = "name")
+        val second = provider.getTracer(name = "name")
+        val third = provider.getTracer(name = "other")
         assertSame(first, second)
         assertNotEquals(first, third)
     }
 
     @Test
     fun testTracerProviderSameVersion() {
-        val first = impl.getTracer(name = "name", version = "0.1.0")
-        val second = impl.getTracer(name = "name", version = "0.1.0")
-        val third = impl.getTracer(name = "name", version = "0.2.0")
+        val provider = createProvider()
+        val first = provider.getTracer(name = "name", version = "0.1.0")
+        val second = provider.getTracer(name = "name", version = "0.1.0")
+        val third = provider.getTracer(name = "name", version = "0.2.0")
         assertSame(first, second)
         assertNotEquals(first, third)
     }
 
     @Test
     fun testTracerProviderSameSchemaUrl() {
-        val first = impl.getTracer(name = "name", schemaUrl = "https://example.com/foo")
-        val second = impl.getTracer(name = "name", schemaUrl = "https://example.com/foo")
-        val third = impl.getTracer(name = "name", schemaUrl = "https://example.com/bar")
+        val provider = createProvider()
+        val first = provider.getTracer(name = "name", schemaUrl = "https://example.com/foo")
+        val second = provider.getTracer(name = "name", schemaUrl = "https://example.com/foo")
+        val third = provider.getTracer(name = "name", schemaUrl = "https://example.com/bar")
         assertSame(first, second)
         assertNotEquals(first, third)
     }
 
     @Test
     fun testTracerProviderSameAttributes() {
-        val first = impl.getTracer(name = "name") {
+        val provider = createProvider()
+        val first = provider.getTracer(name = "name") {
             setStringAttribute("key", "value")
         }
-        val second = impl.getTracer(name = "name") {
+        val second = provider.getTracer(name = "name") {
             setStringAttribute("key", "value")
         }
-        val third = impl.getTracer(name = "name") {
+        val third = provider.getTracer(name = "name") {
             setStringAttribute("foo", "bar")
         }
         assertSame(first, second)
@@ -226,6 +230,15 @@ internal class TracerProviderImplTest {
     }
 
     @Test
+    fun testNoProcessorReturnsPropagatingNoopTracer() {
+        val provider = createProvider(processor = null)
+        val tracer = provider.getTracer(name = "test")
+        assertIs<PropagatingNoopTracer>(tracer)
+        assertFalse(tracer.enabled())
+        assertFalse(tracer.startSpan("test-span").isRecording())
+    }
+
+    @Test
     fun testThrowingAttributesReturnsNoopTracer() {
         val errorHandler = FakeSdkErrorHandler()
         val provider = createProvider(errorHandler = errorHandler)
@@ -283,8 +296,8 @@ internal class TracerProviderImplTest {
     }
 
     private fun createProvider(
-        processor: SpanProcessor? = null,
-        errorHandler: SdkErrorHandler,
+        processor: SpanProcessor? = FakeSpanProcessor(),
+        errorHandler: SdkErrorHandler = NoopSdkErrorHandler,
         samplerFactory: (SpanFactory) -> Sampler = { DefaultSampler },
     ) = TracerProviderImpl(
         clock = FakeClock(),

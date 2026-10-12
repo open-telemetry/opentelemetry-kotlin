@@ -39,6 +39,9 @@ internal class LoggerProviderImpl(
 
     private val apiProvider by lazy {
         ApiProviderImpl { key ->
+            if (loggingConfig.processor == null) {
+                return@ApiProviderImpl noopLogger
+            }
             val loggerConfig = userCode { loggingConfig.loggerConfigurator.loggerConfig(key) }
             if (!loggerConfig.enabled) {
                 noopLogger

@@ -52,7 +52,10 @@ internal class CompatTracerErrorHandlingTest {
     fun `throwing sampler degrades to a non-recording span`() {
         val otel = createCompatOpenTelemetry {
             errorHandler(errorHandler)
-            tracerProvider { sampler { HostileSampler() } }
+            tracerProvider {
+                sampler { HostileSampler() }
+                export { FakeSpanProcessor() }
+            }
         }
         val span = otel.tracerProvider.getTracer("test").startSpan("span")
 

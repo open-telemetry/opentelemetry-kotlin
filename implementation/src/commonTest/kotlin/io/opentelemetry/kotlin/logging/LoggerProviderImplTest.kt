@@ -89,40 +89,44 @@ internal class LoggerProviderImplTest {
 
     @Test
     fun testDupeLoggerProviderName() {
-        val first = impl.getLogger(name = "name")
-        val second = impl.getLogger(name = "name")
-        val third = impl.getLogger(name = "other")
+        val provider = createProvider()
+        val first = provider.getLogger(name = "name")
+        val second = provider.getLogger(name = "name")
+        val third = provider.getLogger(name = "other")
         assertSame(first, second)
         assertNotEquals(first, third)
     }
 
     @Test
     fun testDupeLoggerProviderVersion() {
-        val first = impl.getLogger(name = "name", version = "0.1.0")
-        val second = impl.getLogger(name = "name", version = "0.1.0")
-        val third = impl.getLogger(name = "name", version = "0.2.0")
+        val provider = createProvider()
+        val first = provider.getLogger(name = "name", version = "0.1.0")
+        val second = provider.getLogger(name = "name", version = "0.1.0")
+        val third = provider.getLogger(name = "name", version = "0.2.0")
         assertSame(first, second)
         assertNotEquals(first, third)
     }
 
     @Test
     fun testDupeLoggerProviderSchemaUrl() {
-        val first = impl.getLogger(name = "name", schemaUrl = "https://example.com/foo")
-        val second = impl.getLogger(name = "name", schemaUrl = "https://example.com/foo")
-        val third = impl.getLogger(name = "name", schemaUrl = "https://example.com/bar")
+        val provider = createProvider()
+        val first = provider.getLogger(name = "name", schemaUrl = "https://example.com/foo")
+        val second = provider.getLogger(name = "name", schemaUrl = "https://example.com/foo")
+        val third = provider.getLogger(name = "name", schemaUrl = "https://example.com/bar")
         assertSame(first, second)
         assertNotEquals(first, third)
     }
 
     @Test
     fun testDupeLoggerProviderAttributes() {
-        val first = impl.getLogger(name = "name") {
+        val provider = createProvider()
+        val first = provider.getLogger(name = "name") {
             setStringAttribute("key", "value")
         }
-        val second = impl.getLogger(name = "name") {
+        val second = provider.getLogger(name = "name") {
             setStringAttribute("key", "value")
         }
-        val third = impl.getLogger(name = "name") {
+        val third = provider.getLogger(name = "name") {
             setStringAttribute("foo", "bar")
         }
         assertSame(first, second)
@@ -229,6 +233,14 @@ internal class LoggerProviderImplTest {
     }
 
     @Test
+    fun testNoProcessorReturnsNoopLogger() {
+        val provider = createProvider(processor = null)
+        val logger = provider.getLogger(name = "test")
+        assertFalse(logger.enabled())
+        assertSame(logger, provider.getLogger(name = "other"))
+    }
+
+    @Test
     fun testThrowingAttributesReturnsNoopLogger() {
         val errorHandler = FakeSdkErrorHandler()
         val provider = createProvider(errorHandler = errorHandler)
@@ -264,8 +276,8 @@ internal class LoggerProviderImplTest {
     }
 
     private fun createProvider(
-        processor: LogRecordProcessor? = null,
-        errorHandler: SdkErrorHandler,
+        processor: LogRecordProcessor? = FakeLogRecordProcessor(),
+        errorHandler: SdkErrorHandler = NoopSdkErrorHandler,
     ) = LoggerProviderImpl(
         clock,
         LoggingConfig(processor, FakeResource(), errorHandler, loggerConfigurator),

@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.tracing.Tracer
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -27,7 +28,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `default sampler records and samples spans`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler)
+        val config = createConfig(clock)
         val provider = config.build(clock, idGenerator, spanLimits = noSpanLimits)
         val span = provider.getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
@@ -37,7 +38,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `builtin ALWAYS_ON sampler records and samples spans`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler { alwaysOn() }
         }
         val span = config.build(
@@ -52,7 +53,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `custom sampler DROP produces non-recording span`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler { FakeSampler(SamplingResult.Decision.DROP) }
         }
         val span = config.build(
@@ -66,7 +67,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `custom sampler RECORD_AND_SAMPLE produces recording and sampled span`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler { FakeSampler(SamplingResult.Decision.RECORD_AND_SAMPLE) }
         }
         val span = config.build(
@@ -81,7 +82,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `builtin ALWAYS_OFF sampler drops spans`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler { alwaysOff() }
         }
         val span = config.build(
@@ -109,7 +110,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `parentBased samples root spans with alwaysOn`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler { parentBased(root = alwaysOn()) }
         }
         val span = config.build(
@@ -124,7 +125,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `parentBased drops root spans with alwaysOff`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler { parentBased(root = alwaysOff()) }
         }
         val span = config.build(
@@ -154,7 +155,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `composite with composableAlwaysOn samples spans`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler { composite { composableAlwaysOn() } }
         }
         val span = config.build(
@@ -169,7 +170,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `composite with composableAlwaysOff drops spans`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler { composite { composableAlwaysOff() } }
         }
         val span = config.build(
@@ -184,7 +185,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `composite with composableProbability 1_0 samples spans`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler { composite { composableProbability(1.0) } }
         }
         val span = config.build(
@@ -199,7 +200,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `composite with composableProbability 0_0 drops spans`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler { composite { composableProbability(0.0) } }
         }
         val span = config.build(
@@ -215,7 +216,7 @@ internal class CompatTracerProviderSamplerTest {
     fun `invalid composableProbability falls back to default sampler`() {
         val clock = FakeClock()
         val errorHandler = FakeSdkErrorHandler()
-        val config = CompatTracerProviderConfig(clock, errorHandler).apply {
+        val config = createConfig(clock, errorHandler).apply {
             sampler { composite { composableProbability(1.5) } }
         }
         val span = config.build(
@@ -232,7 +233,7 @@ internal class CompatTracerProviderSamplerTest {
     fun `throwing sampler action falls back to default sampler`() {
         val clock = FakeClock()
         val errorHandler = FakeSdkErrorHandler()
-        val config = CompatTracerProviderConfig(clock, errorHandler).apply {
+        val config = createConfig(clock, errorHandler).apply {
             sampler { error("boom") }
         }
         val span = config.build(
@@ -247,7 +248,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `composite with composableParentThreshold falls back to root on root spans`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler { composite { composableParentThreshold(root = composableAlwaysOn()) } }
         }
         val span = config.build(
@@ -262,7 +263,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `composite with composableParentThreshold drops root spans when root is composableAlwaysOff`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler { composite { composableParentThreshold(root = composableAlwaysOff()) } }
         }
         val span = config.build(
@@ -333,7 +334,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `composite with composableRuleBased samples when a rule matches`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler {
                 composite {
                     composableRuleBased {
@@ -354,7 +355,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `composite with composableRuleBased drops when no rule matches`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler {
                 composite {
                     composableRuleBased {
@@ -375,7 +376,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `composite with composableRuleBased drops when there are no rules`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler { composite { composableRuleBased { } } }
         }
         val span = config.build(
@@ -390,7 +391,7 @@ internal class CompatTracerProviderSamplerTest {
     @Test
     fun `composite with composableRuleBased first matching rule wins`() {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler {
                 composite {
                     composableRuleBased {
@@ -465,9 +466,16 @@ internal class CompatTracerProviderSamplerTest {
         assertEquals("sampler.value", processor.endCalls.single().attributes["sampler.key"])
     }
 
+    private fun createConfig(
+        clock: FakeClock,
+        errorHandler: SdkErrorHandler = NoopSdkErrorHandler,
+    ): CompatTracerProviderConfig = CompatTracerProviderConfig(clock, errorHandler).apply {
+        export { FakeSpanProcessor() }
+    }
+
     private fun tracerWith(action: SamplerConfigDsl.() -> Sampler): Tracer {
         val clock = FakeClock()
-        val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
+        val config = createConfig(clock).apply {
             sampler(action)
         }
         return config.build(

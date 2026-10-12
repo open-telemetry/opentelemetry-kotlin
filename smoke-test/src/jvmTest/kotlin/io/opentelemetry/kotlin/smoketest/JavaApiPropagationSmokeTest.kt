@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaTextMapSetter
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.createOpenTelemetry
 import io.opentelemetry.kotlin.toOtelJavaApi
+import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -35,12 +36,22 @@ internal class JavaApiPropagationSmokeTest {
 
     @Test
     fun `impl java api propagates remote parent to child span`() {
-        assertChildSpanPropagated(createOpenTelemetry { propagator { w3cTraceContext() } })
+        assertChildSpanPropagated(
+            createOpenTelemetry {
+                propagator { w3cTraceContext() }
+                tracerProvider { export { FakeSpanProcessor() } }
+            }
+        )
     }
 
     @Test
     fun `compat java api propagates remote parent to child span`() {
-        assertChildSpanPropagated(createCompatOpenTelemetry { propagator { w3cTraceContext() } })
+        assertChildSpanPropagated(
+            createCompatOpenTelemetry {
+                propagator { w3cTraceContext() }
+                tracerProvider { export { FakeSpanProcessor() } }
+            }
+        )
     }
 
     @Test
@@ -94,7 +105,6 @@ internal class JavaApiPropagationSmokeTest {
     }
 
     private object MapGetter : OtelJavaTextMapGetter<Map<String, String>> {
-        override fun keys(carrier: Map<String, String>): Iterable<String> = carrier.keys
         override fun get(carrier: Map<String, String>?, key: String): String? = carrier?.get(key)
     }
 

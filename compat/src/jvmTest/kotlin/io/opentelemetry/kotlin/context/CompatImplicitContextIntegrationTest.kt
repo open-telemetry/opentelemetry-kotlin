@@ -12,6 +12,7 @@ import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.toOtelJavaApi
 import io.opentelemetry.kotlin.toOtelKotlinApi
+import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
 import org.junit.After
 import org.junit.Test
@@ -27,6 +28,7 @@ internal class CompatImplicitContextIntegrationTest {
     private val errorHandler = FakeSdkErrorHandler()
     private val otel = createCompatOpenTelemetry {
         errorHandler(errorHandler)
+        tracerProvider { export { FakeSpanProcessor() } }
     }
     private val tracer = otel.tracerProvider.getTracer("kotlin")
     private val javaTracer = otel.toOtelJavaApi().tracerProvider.get("java")
