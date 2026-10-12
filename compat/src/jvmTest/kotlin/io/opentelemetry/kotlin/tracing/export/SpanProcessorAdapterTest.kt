@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
 internal class SpanProcessorAdapterTest {
@@ -55,10 +56,17 @@ internal class SpanProcessorAdapterTest {
     }
 
     @Test
-    fun `test exception thrown by wrapped processor does not propagate`() = runTest {
+    fun `test exception thrown by wrapped processor propagates`() = runTest {
         impl.nextResult = { throw IllegalStateException("boom") }
 
-        assertEquals(OperationResultCode.Failure, wrapper.forceFlush())
-        assertEquals(OperationResultCode.Failure, wrapper.shutdown())
+        assertFailsWith<IllegalStateException> { wrapper.forceFlush() }
+        assertFailsWith<IllegalStateException> { wrapper.shutdown() }
+    }
+
+    @Test
+    fun `test exceptional failure from wrapped processor propagates`() = runTest {
+        impl.nextResult = { OtelJavaCompletableResultCode.ofExceptionalFailure(IllegalStateException("boom")) }
+        assertFailsWith<IllegalStateException> { wrapper.forceFlush() }
+        assertFailsWith<IllegalStateException> { wrapper.shutdown() }
     }
 }

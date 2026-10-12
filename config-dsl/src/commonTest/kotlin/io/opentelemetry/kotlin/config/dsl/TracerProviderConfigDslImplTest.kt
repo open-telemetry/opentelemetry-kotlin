@@ -1,6 +1,8 @@
 package io.opentelemetry.kotlin.config.dsl
 
+import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.SimpleSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -55,5 +57,53 @@ internal class TracerProviderConfigDslImplTest {
             SpanProcessorBehavior(),
             dsl.toBehavior().processor,
         )
+    }
+
+    @Test
+    fun processorCallSetsSimple() {
+        val dsl = TracerProviderConfigDslImpl()
+        dsl.processor { simple() }
+
+        assertEquals(
+            SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior()),
+            dsl.toBehavior().processor,
+        )
+    }
+
+    @Test
+    fun processorCallSetsBatch() {
+        val dsl = TracerProviderConfigDslImpl()
+        dsl.processor { batch() }
+
+        assertEquals(
+            SpanProcessorBehavior(batch = BatchSpanProcessorBehavior()),
+            dsl.toBehavior().processor,
+        )
+    }
+
+    @Test
+    fun exportKeepsProcessorAlreadyChosen() {
+        val dsl = TracerProviderConfigDslImpl()
+        dsl.processor { simple() }
+        dsl.export { error("behavior mapping does not run the export lambda") }
+
+        assertEquals(
+            SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior()),
+            dsl.toBehavior().processor,
+        )
+    }
+
+    @Test
+    fun processorDoesNotDropSampler() {
+        val dsl = TracerProviderConfigDslImpl()
+        dsl.processor { simple() }
+        dsl.sampler { alwaysOff() }
+
+        val behavior = dsl.toBehavior()
+        assertEquals(
+            SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior()),
+            behavior.processor,
+        )
+        assertEquals(SamplerBehavior.AlwaysOff, behavior.sampler)
     }
 }

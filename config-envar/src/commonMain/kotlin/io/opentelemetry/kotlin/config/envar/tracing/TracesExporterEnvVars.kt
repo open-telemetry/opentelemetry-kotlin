@@ -2,7 +2,8 @@ package io.opentelemetry.kotlin.config.envar.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpExporter
+import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.config.envar.Exporter
 import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
@@ -28,12 +29,12 @@ class TracesExporterEnvVars(
             Exporter.CONSOLE -> Value(SpanProcessorBehavior(console = ConsoleExporterBehavior()))
             Exporter.OTLP -> Value(
                 SpanProcessorBehavior(
-                    http = OtlpHttpExporterBehavior(
+                    http = OtlpHttpSpanExporterBehavior(
                         endpoint = reader.readString(OTLP_TRACES_ENDPOINT)
                             ?: reader.readString(OpenTelemetryEnvVars.OTLP_ENDPOINT),
                         timeout = reader.readNonNegativeLong(OTLP_TRACES_TIMEOUT)
                             ?: reader.readNonNegativeLong(OpenTelemetryEnvVars.OTLP_TIMEOUT),
-                        headers = OtlpHttpExporterBehavior.buildHeaderMap(
+                        headers = OtlpExporter.buildHeaderMap(
                             reader.readString(OTLP_TRACES_HEADERS)
                                 ?: reader.readString(OpenTelemetryEnvVars.OTLP_HEADERS)
                         )

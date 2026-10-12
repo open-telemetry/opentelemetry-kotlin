@@ -88,4 +88,12 @@ internal class ResourceConfigDslImplTest {
         assertEquals("from-property", dsl.toBehavior().serviceName)
         assertEquals("from-attributes", dsl.toBehavior().attributes?.get("service.name"))
     }
+
+    @Test
+    fun emptyKeysAreIgnored() {
+        val dsl = ResourceConfigDslImpl().apply {
+            resource(mapOf("" to "ignored", "key" to "value"))
+        }
+        assertEquals(mapOf("key" to "value"), dsl.toBehavior().attributes)
+    }
 }

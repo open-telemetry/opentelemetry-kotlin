@@ -5,9 +5,9 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
-import io.opentelemetry.kotlin.error.guardOrDefault
-import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.error.reportError
+import io.opentelemetry.kotlin.error.sdkGuardOrDefault
+import io.opentelemetry.kotlin.error.sdkGuardOrDefaultSuspend
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -43,7 +43,7 @@ internal class MeterProviderImpl(
         schemaUrl: String?,
         attributes: (AttributesMutator.() -> Unit)?,
     ): Meter =
-        sdkErrorHandler.guardOrDefault(noopMeter, "MeterProvider.getMeter failed") {
+        sdkErrorHandler.sdkGuardOrDefault(noopMeter, "MeterProvider.getMeter failed") {
             shutdownState.ifActiveOrElse(noopMeter) {
                 if (name.isEmpty()) {
                     sdkErrorHandler.reportError(
@@ -66,12 +66,12 @@ internal class MeterProviderImpl(
         }
 
     override suspend fun forceFlush(): OperationResultCode =
-        sdkErrorHandler.guardOrDefaultSuspend(OperationResultCode.Failure, "MeterProvider.forceFlush failed") {
+        sdkErrorHandler.sdkGuardOrDefaultSuspend(OperationResultCode.Failure, "MeterProvider.forceFlush failed") {
             runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS, closeable::forceFlush)
         }
 
     override suspend fun shutdown(): OperationResultCode =
-        sdkErrorHandler.guardOrDefaultSuspend(OperationResultCode.Failure, "MeterProvider.shutdown failed") {
+        sdkErrorHandler.sdkGuardOrDefaultSuspend(OperationResultCode.Failure, "MeterProvider.shutdown failed") {
             shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS, closeable::shutdown)
         }
 }

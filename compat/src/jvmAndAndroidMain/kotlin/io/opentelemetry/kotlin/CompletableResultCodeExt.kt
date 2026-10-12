@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * Default time to wait for an operation on a wrapped opentelemetry-java component to complete.
@@ -23,26 +24,22 @@ internal suspend fun awaitOperationResultCode(
     timeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS,
     action: () -> OtelJavaCompletableResultCode,
 ): OperationResultCode = runWithTimeout(timeoutMs) {
-    val resultCode = try {
-        action()
-    } catch (ignored: Throwable) {
-        return@runWithTimeout OperationResultCode.Failure
-    }
-    resultCode.toOperationResultCode()
+    action().toOperationResultCode()
 }
 
 /**
- * Suspends until this result completes, then maps it to an [OperationResultCode].
+ * Suspends until this result completes, then maps it to an [OperationResultCode]. If the result
+ * failed exceptionally, its failure throwable is thrown instead.
  */
 internal suspend fun OtelJavaCompletableResultCode.toOperationResultCode(): OperationResultCode =
     suspendCancellableCoroutine { continuation ->
         whenComplete {
-            continuation.resume(
-                when {
-                    isSuccess -> OperationResultCode.Success
-                    else -> OperationResultCode.Failure
-                }
-            )
+            val failure = failureThrowable
+            when {
+                isSuccess -> continuation.resume(OperationResultCode.Success)
+                failure != null -> continuation.resumeWithException(failure)
+                else -> continuation.resume(OperationResultCode.Failure)
+            }
         }
     }
 

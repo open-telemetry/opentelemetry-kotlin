@@ -24,11 +24,6 @@ internal class TracingConfig(
     val processor: SpanProcessor?,
 
     /**
-     * Limits on span data capture.
-     */
-    val spanLimits: SpanLimitConfig,
-
-    /**
      * A resource to append to spans.
      */
     val resource: Resource,

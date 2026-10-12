@@ -12,14 +12,6 @@ import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 fun initializeOtelSdk(): OpenTelemetry {
     val config: OpenTelemetryConfigDsl.() -> Unit = {
         tracerProvider {
-            sampler {
-                // Sample 10% of root spans; propagate the parent's sampling threshold for child spans.
-                composite {
-                    composableParentThreshold(
-                        root = composableProbability(0.1)
-                    )
-                }
-            }
             export { createSpanProcessor(AppConfig.url).also { AppConfig.spanProcessor = it } }
         }
         loggerProvider {

@@ -10,7 +10,7 @@ public enum class ImplicitContextStorageMode {
 
     /**
      * Implicit context is stored via an in-memory property. Any thread/coroutine can
-     * set the context for any others. This is the default storage mechanism.
+     * set the context for any others. This is the default storage mechanism outside of compat mode.
      */
     GLOBAL,
 

@@ -10,9 +10,9 @@ import io.opentelemetry.kotlin.aliases.OtelJavaScope
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.baggage.toOtelJavaBaggage
 import io.opentelemetry.kotlin.baggage.toOtelKotlinBaggage
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.Span
+import io.opentelemetry.kotlin.tracing.compat.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpan
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
@@ -70,8 +70,8 @@ internal class OtelJavaContextAdapter(
 
     private fun OtelJavaSpan?.toOtelKotlinSpan(): Span = when (this) {
         is OtelJavaSpanAdapter -> span
-        null -> NonRecordingSpan(DefaultSpanContextFactory.invalid, DefaultSpanContextFactory.invalid)
-        else -> NonRecordingSpan(DefaultSpanContextFactory.invalid, spanContext.toOtelKotlinSpanContext())
+        null -> NonRecordingSpan(createInvalidSpanContext(), createInvalidSpanContext())
+        else -> NonRecordingSpan(createInvalidSpanContext(), spanContext.toOtelKotlinSpanContext())
     }
 
     override fun equals(other: Any?): Boolean = other is OtelJavaContextAdapter && other.impl == impl

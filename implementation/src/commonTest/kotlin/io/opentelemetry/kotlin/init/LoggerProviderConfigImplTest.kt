@@ -2,16 +2,18 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.compositeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.stdoutLogRecordExporter
+import io.opentelemetry.kotlin.resource.SdkMode
+import io.opentelemetry.kotlin.resource.sdkDefaultResource
 import io.opentelemetry.kotlin.sdkDefaultAttributes
 import io.opentelemetry.kotlin.sdkDefaultSchemaUrl
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
@@ -26,27 +28,20 @@ import kotlin.test.assertSame
 internal class LoggerProviderConfigImplTest {
 
     private val clock = FakeClock()
-    private val base = sdkDefaultResource()
-    private val noLogLimits = LogLimitsBehavior()
+    private val base = ResourceFactoryImpl().sdkDefaultResource(SdkMode.REGULAR)
 
     @Test
     fun testDefaultLoggingConfig() {
-        val cfg = LoggerProviderConfigImpl(clock, NoopSdkErrorHandler).generateLoggingConfig(base, noLogLimits)
+        val cfg = LoggerProviderConfigImpl(clock, NoopSdkErrorHandler).generateLoggingConfig(base)
         assertNull(cfg.processor)
         assertEquals(sdkDefaultAttributes, cfg.resource.attributes)
         assertEquals(sdkDefaultSchemaUrl, cfg.resource.schemaUrl)
-
-        with(cfg.logLimits) {
-            assertNull(attributeCountLimit)
-            assertNull(attributeValueLengthLimit)
-        }
     }
 
     @Test
     fun testConsoleBehaviorInstallsProcessor() {
         val cfg = LoggerProviderConfigImpl(clock, NoopSdkErrorHandler).generateLoggingConfig(
             base,
-            noLogLimits,
             LogRecordProcessorBehavior(console = ConsoleExporterBehavior()),
         )
         assertNotNull(cfg.processor)
@@ -59,7 +54,6 @@ internal class LoggerProviderConfigImplTest {
             export { dslProcessor }
         }.generateLoggingConfig(
             base,
-            noLogLimits,
             LogRecordProcessorBehavior(console = ConsoleExporterBehavior()),
         )
         assertSame(dslProcessor, cfg.processor)
@@ -69,13 +63,7 @@ internal class LoggerProviderConfigImplTest {
     fun testOverrideLoggingConfig() {
         val firstProcessor = FakeLogRecordProcessor()
         val secondProcessor = FakeLogRecordProcessor()
-        val attrCount = 100
-        val attrValueCount = 200
         val schemaUrl = "https://example.com/schema"
-        val logLimits = LogLimitsBehavior(
-            attributeCountLimit = attrCount,
-            attributeValueLengthLimit = attrValueCount,
-        )
 
         val cfg = LoggerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             export { compositeLogRecordProcessor(firstProcessor, secondProcessor) }
@@ -83,16 +71,11 @@ internal class LoggerProviderConfigImplTest {
             resource(schemaUrl) {
                 setStringAttribute("key", "value")
             }
-        }.generateLoggingConfig(base, logLimits)
+        }.generateLoggingConfig(base)
 
         assertNotNull(cfg.processor)
         assertEquals(schemaUrl, cfg.resource.schemaUrl)
         assertEquals(sdkDefaultAttributes + mapOf("key" to "value"), cfg.resource.attributes)
-
-        with(cfg.logLimits) {
-            assertEquals(attrCount, attributeCountLimit)
-            assertEquals(attrValueCount, attributeValueLengthLimit)
-        }
     }
 
     @Test
@@ -110,7 +93,7 @@ internal class LoggerProviderConfigImplTest {
                     second = this
                 }
             }
-        }.generateLoggingConfig(base, noLogLimits)
+        }.generateLoggingConfig(base)
         assertSame(first, cfg.processor)
         assertNotSame(second, cfg.processor)
     }
@@ -121,7 +104,7 @@ internal class LoggerProviderConfigImplTest {
         LoggerProviderConfigImpl(clock, handler).apply {
             export { simpleLogRecordProcessor(stdoutLogRecordExporter()) }
             export { simpleLogRecordProcessor(stdoutLogRecordExporter()) }
-        }.generateLoggingConfig(base, noLogLimits)
+        }.generateLoggingConfig(base)
         assertEquals(1, handler.apiMisuses.size)
         assertEquals("LoggerProviderConfigDsl.export", handler.apiMisuses.single().api)
         assertEquals("export() should only be called once.", handler.apiMisuses.single().message)
@@ -131,7 +114,7 @@ internal class LoggerProviderConfigImplTest {
     fun testResourceOverride() {
         val cfg = LoggerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             resource(mapOf("extra" to true))
-        }.generateLoggingConfig(base, noLogLimits)
+        }.generateLoggingConfig(base)
         assertEquals(sdkDefaultAttributes + mapOf("extra" to true), cfg.resource.attributes)
     }
 
@@ -139,7 +122,7 @@ internal class LoggerProviderConfigImplTest {
     fun testSimpleResourceConfig() {
         val cfg = LoggerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             resource(mapOf("key" to "value"))
-        }.generateLoggingConfig(base, noLogLimits)
+        }.generateLoggingConfig(base)
         assertEquals(sdkDefaultAttributes + mapOf("key" to "value"), cfg.resource.attributes)
     }
 
@@ -148,7 +131,7 @@ internal class LoggerProviderConfigImplTest {
         val value = "my-custom-sdk"
         val cfg = LoggerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to value))
-        }.generateLoggingConfig(base, noLogLimits)
+        }.generateLoggingConfig(base)
         assertEquals(value, cfg.resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME])
     }
 
@@ -157,7 +140,7 @@ internal class LoggerProviderConfigImplTest {
         val value = "my-service"
         val cfg = LoggerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             resource(mapOf(ServiceAttributes.SERVICE_NAME to value))
-        }.generateLoggingConfig(base, noLogLimits)
+        }.generateLoggingConfig(base)
         assertEquals(value, cfg.resource.attributes[ServiceAttributes.SERVICE_NAME])
     }
 
@@ -167,7 +150,7 @@ internal class LoggerProviderConfigImplTest {
         val attrs = (0 until count).associate { "key$it" to "value$it" }
         val cfg = LoggerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             resource(attrs)
-        }.generateLoggingConfig(base, noLogLimits)
+        }.generateLoggingConfig(base)
         assertEquals(count + sdkDefaultAttributes.size, cfg.resource.attributes.size)
     }
 }

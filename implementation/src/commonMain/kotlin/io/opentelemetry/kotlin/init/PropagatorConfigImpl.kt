@@ -2,10 +2,7 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
-import io.opentelemetry.kotlin.factory.TraceFlagsFactory
-import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.propagation.B3Propagator
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
@@ -55,32 +52,10 @@ internal class PropagatorConfigImpl : PropagatorConfigDsl {
     }
 
     // Factories are constructed after user config is applied, so we install them once available.
-    internal fun installFactories(
-        traceFlagsFactory: TraceFlagsFactory,
-        traceStateFactory: TraceStateFactory,
-        spanContextFactory: SpanContextFactory,
-        spanFactory: SpanFactory,
-    ) {
-        w3cTraceContextImpl = W3CTraceContextPropagator(
-            traceFlagsFactory = traceFlagsFactory,
-            traceStateFactory = traceStateFactory,
-            spanContextFactory = spanContextFactory,
-            spanFactory = spanFactory,
-        )
-        b3SingleImpl = B3Propagator(
-            B3Format.SINGLE,
-            traceFlagsFactory,
-            traceStateFactory,
-            spanContextFactory,
-            spanFactory,
-        )
-        b3MultiImpl = B3Propagator(
-            B3Format.MULTI,
-            traceFlagsFactory,
-            traceStateFactory,
-            spanContextFactory,
-            spanFactory,
-        )
+    internal fun installFactories(spanFactory: SpanFactory) {
+        w3cTraceContextImpl = W3CTraceContextPropagator(spanFactory = spanFactory)
+        b3SingleImpl = B3Propagator(B3Format.SINGLE, spanFactory)
+        b3MultiImpl = B3Propagator(B3Format.MULTI, spanFactory)
     }
 
     internal fun buildPropagator(): TextMapPropagator = configured

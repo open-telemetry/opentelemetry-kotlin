@@ -3,20 +3,21 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.NoopOpenTelemetry
-import io.opentelemetry.kotlin.attributes.setAttributes
+import io.opentelemetry.kotlin.attributes.copyTypedAttributes
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
-import io.opentelemetry.kotlin.error.guardOrDefault
+import io.opentelemetry.kotlin.error.sdkGuardOrDefault
+import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
-import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.propagation.utils.isValidTraceIdBytes
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
+import io.opentelemetry.kotlin.tracing.implementation.createInvalidSpanContext
+import io.opentelemetry.kotlin.tracing.implementation.createSpanContext
 import io.opentelemetry.kotlin.tracing.model.CreatedSpan
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpanImpl
 import io.opentelemetry.kotlin.tracing.model.SpanCreationCollector
@@ -29,7 +30,6 @@ internal class TracerImpl(
     private val clock: Clock,
     private val processor: SpanProcessor?,
     private val contextFactory: ContextFactory,
-    private val spanContextFactory: SpanContextFactory,
     private val idGenerator: IdGenerator,
     private val scope: InstrumentationScopeInfo,
     private val resource: Resource,
@@ -41,11 +41,11 @@ internal class TracerImpl(
 
     private val noopSpan = NoopOpenTelemetry.tracerProvider.getTracer("").startSpan("")
     private val root = contextFactory.root()
-    private val invalidSpanContext = spanContextFactory.invalid
+    private val invalidSpanContext = createInvalidSpanContext()
     private val invalidSpan = NonRecordingSpan(invalidSpanContext, invalidSpanContext)
 
     override fun enabled(): Boolean =
-        sdkErrorHandler.guardOrDefault(false, "Tracer.enabled failed") {
+        sdkErrorHandler.sdkGuardOrDefault(false, "Tracer.enabled failed") {
             !shutdownState.isShutdown && processor != null
         }
 
@@ -56,7 +56,7 @@ internal class TracerImpl(
         startTimestamp: Long?,
         action: (SpanCreationAction.() -> Unit)?
     ): Span =
-        sdkErrorHandler.guardOrDefault(invalidSpan, "Tracer.startSpan failed") {
+        sdkErrorHandler.sdkGuardOrDefault(invalidSpan, "Tracer.startSpan failed") {
             shutdownState.ifActiveOrElse(noopSpan) {
                 if (name.isBlank()) {
                     return@ifActiveOrElse invalidSpan
@@ -74,36 +74,39 @@ internal class TracerImpl(
 
                 val traceIdBytes = when {
                     inheritTraceId -> parentTraceIdBytes
-                    else -> idGenerator.generateTraceIdBytes()
+                    else -> userCode { idGenerator.generateTraceIdBytes() }
                 }
                 val randomTraceId = when {
                     inheritTraceId -> parentSpanContext.traceFlags.isRandom
-                    else -> idGenerator.generatesRandomTraceIds
+                    else -> userCode { idGenerator.generatesRandomTraceIds }
                 }
-                val spanIdBytes = idGenerator.generateSpanIdBytes()
+                val spanIdBytes = userCode { idGenerator.generateSpanIdBytes() }
 
                 val collector = SpanCreationCollector(spanLimitConfig)
-                action?.invoke(collector)
+                userCode { action?.invoke(collector) }
 
-                val result = sampler.shouldSample(
-                    context = ctx,
-                    traceIdBytes = traceIdBytes,
-                    name = name,
-                    spanKind = spanKind,
-                    attributes = collector.attributes,
-                    links = collector.links
-                )
+                val result = userCode {
+                    sampler.shouldSample(
+                        context = ctx,
+                        traceIdBytes = traceIdBytes,
+                        name = name,
+                        spanKind = spanKind,
+                        attributes = collector.attributes,
+                        links = collector.links
+                    )
+                }
 
-                val sampled = result.decision == SamplingResult.Decision.RECORD_AND_SAMPLE
+                val decision = userCode { result.decision }
+                val sampled = decision == SamplingResult.Decision.RECORD_AND_SAMPLE
                 val spanContext = calculateSpanContext(
                     traceIdBytes = traceIdBytes,
                     spanIdBytes = spanIdBytes,
                     sampled = sampled,
                     randomTraceId = randomTraceId,
-                    traceState = result.traceState,
+                    samplerTraceState = userCode { result.traceState },
                 )
 
-                if (result.decision == SamplingResult.Decision.DROP) {
+                if (decision == SamplingResult.Decision.DROP) {
                     return@ifActiveOrElse NonRecordingSpan(parentSpanContext, spanContext)
                 }
 
@@ -112,7 +115,7 @@ internal class TracerImpl(
                     processor = processor,
                     name = name,
                     spanKind = spanKind,
-                    startTimestamp = startTimestamp?.takeIf { it > 0 } ?: clock.now(),
+                    startTimestamp = startTimestamp?.takeIf { it > 0 } ?: userCode { clock.now() },
                     instrumentationScopeInfo = scope,
                     resource = resource,
                     parent = parentSpanContext,
@@ -123,8 +126,8 @@ internal class TracerImpl(
                     initialDroppedLinksCount = collector.droppedLinksCount,
                     sdkErrorHandler = sdkErrorHandler
                 )
-                spanModel.setAttributes(collector.attributes.attributes)
-                spanModel.setAttributes(result.attributes.attributes)
+                spanModel.copyTypedAttributes(collector.attributes.attributes)
+                spanModel.copyTypedAttributes(userCode { result.attributes.attributes })
                 sdkErrorHandler.guard {
                     processor?.takeIf(SpanProcessor::isStartRequired)
                         ?.onStart(ReadWriteSpanImpl(spanModel), ctx)
@@ -138,15 +141,18 @@ internal class TracerImpl(
         spanIdBytes: ByteArray,
         sampled: Boolean,
         randomTraceId: Boolean,
-        traceState: TraceState,
+        samplerTraceState: TraceState,
     ): SpanContext {
         // invalid IDs are replaced with all zeros
-        return spanContextFactory.create(
-            traceIdBytes = traceIdBytes,
-            spanIdBytes = spanIdBytes,
-            traceFlags = DefaultTraceFlagsFactory.create(isSampled = sampled, isRandom = randomTraceId),
-            isRemote = false,
-            traceState = traceState,
-        )
+        return createSpanContext(traceIdBytes, spanIdBytes) {
+            isSampled = sampled
+            isRandom = randomTraceId
+            val entries = samplerTraceState.asMap()
+            if (entries.isNotEmpty()) {
+                traceState {
+                    entries.forEach { (key, value) -> put(key, value) }
+                }
+            }
+        }
     }
 }

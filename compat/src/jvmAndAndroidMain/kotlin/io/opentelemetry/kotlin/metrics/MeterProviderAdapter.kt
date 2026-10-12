@@ -7,6 +7,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaMeterProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkMeterProvider
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.awaitOperationResultCode
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.scope.scopeCacheKey
@@ -15,7 +17,8 @@ import java.util.concurrent.ConcurrentHashMap
 @ThreadSafe
 @ExperimentalApi
 internal class MeterProviderAdapter(
-    private val impl: OtelJavaMeterProvider
+    private val impl: OtelJavaMeterProvider,
+    private val sdkErrorHandler: SdkErrorHandler,
 ) : MeterProvider, TelemetryCloseable {
 
     private val map = ConcurrentHashMap<InstrumentationScopeInfo, MeterAdapter>()
@@ -35,12 +38,22 @@ internal class MeterProviderAdapter(
     }
 
     override suspend fun forceFlush(): OperationResultCode = when (impl) {
-        is OtelJavaSdkMeterProvider -> awaitOperationResultCode { impl.forceFlush() }
+        is OtelJavaSdkMeterProvider -> sdkErrorHandler.guardOrDefaultSuspend(
+            OperationResultCode.Failure,
+            "MeterProvider.forceFlush failed",
+        ) {
+            awaitOperationResultCode { impl.forceFlush() }
+        }
         else -> OperationResultCode.Success
     }
 
     override suspend fun shutdown(): OperationResultCode = when (impl) {
-        is OtelJavaSdkMeterProvider -> awaitOperationResultCode { impl.shutdown() }
+        is OtelJavaSdkMeterProvider -> sdkErrorHandler.guardOrDefaultSuspend(
+            OperationResultCode.Failure,
+            "MeterProvider.shutdown failed",
+        ) {
+            awaitOperationResultCode { impl.shutdown() }
+        }
         else -> OperationResultCode.Success
     }
 }

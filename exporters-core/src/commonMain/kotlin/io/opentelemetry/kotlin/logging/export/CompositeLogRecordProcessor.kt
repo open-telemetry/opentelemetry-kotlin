@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
@@ -36,6 +37,11 @@ internal class CompositeLogRecordProcessor(
         eventName: String?,
     ): Boolean {
         // returns true if _any_ of the processors are enabled.
-        return processors.any { it.enabled(context, instrumentationScopeInfo, severityNumber, eventName) }
+        return processors.any {
+            // A failed check must not suppress a log that a processor might accept.
+            sdkErrorHandler.guardOrDefault(true, "LogRecordProcessor.enabled failed") {
+                it.enabled(context, instrumentationScopeInfo, severityNumber, eventName)
+            }
+        }
     }
 }

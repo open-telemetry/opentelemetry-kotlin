@@ -13,6 +13,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
@@ -64,10 +65,16 @@ internal class LogRecordProcessorAdapterTest {
     }
 
     @Test
-    fun `test exception thrown by wrapped processor does not propagate`() = runTest {
+    fun `test exception thrown by wrapped processor propagates`() = runTest {
         impl.nextResult = { throw IllegalStateException("boom") }
+        assertFailsWith<IllegalStateException> { wrapper.forceFlush() }
+        assertFailsWith<IllegalStateException> { wrapper.shutdown() }
+    }
 
-        assertEquals(OperationResultCode.Failure, wrapper.forceFlush())
-        assertEquals(OperationResultCode.Failure, wrapper.shutdown())
+    @Test
+    fun `test exceptional failure from wrapped processor propagates`() = runTest {
+        impl.nextResult = { OtelJavaCompletableResultCode.ofExceptionalFailure(IllegalStateException("boom")) }
+        assertFailsWith<IllegalStateException> { wrapper.forceFlush() }
+        assertFailsWith<IllegalStateException> { wrapper.shutdown() }
     }
 }

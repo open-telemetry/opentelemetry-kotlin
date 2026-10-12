@@ -95,4 +95,94 @@ internal class GuardTest {
         assertNull(result)
         assertFalse(handler.hasErrors())
     }
+
+    @Test
+    fun testSdkGuardReportsSdkCodeError() {
+        val cause = IllegalStateException("boom")
+        handler.sdkGuard("Span.end failed") { throw cause }
+
+        val error = handler.sdkCodeErrors.single()
+        assertSame(cause, error.cause)
+        assertEquals("Span.end failed", error.message)
+        assertEquals(SdkErrorSeverity.WARNING, error.severity)
+        assertEquals(1, handler.errors.size)
+    }
+
+    @Test
+    fun testSdkGuardReportsUserCodeAsUserCodeError() {
+        val cause = IllegalStateException("boom")
+        var reachedAfterUserCode = false
+        handler.sdkGuard("Tracer.startSpan failed") {
+            userCode { throw cause }
+            reachedAfterUserCode = true
+        }
+        assertFalse(reachedAfterUserCode)
+        val error = handler.userCodeErrors.single()
+        assertSame(cause, error.cause)
+        assertEquals("Tracer.startSpan failed", error.message)
+        assertEquals(1, handler.errors.size)
+    }
+
+    @Test
+    fun testNestedUserCodeIsReportedOnce() {
+        val cause = IllegalStateException("boom")
+        handler.sdkGuard("Tracer.startSpan failed") {
+            userCode { userCode { throw cause } }
+        }
+        assertSame(cause, handler.userCodeErrors.single().cause)
+        assertEquals(1, handler.errors.size)
+    }
+
+    @Test
+    fun testUserCodeReturnsValue() {
+        val result = handler.sdkGuardOrDefault("default", "should not be used") { userCode { "value" } }
+        assertEquals("value", result)
+        assertFalse(handler.hasErrors())
+    }
+
+    @Test
+    fun testSdkGuardOrDefaultReportsUserCodeAsUserCodeError() {
+        val cause = IllegalStateException("boom")
+        val result = handler.sdkGuardOrDefault("default", "Logger.emit failed") { userCode { throw cause } }
+        assertEquals("default", result)
+        assertSame(cause, handler.userCodeErrors.single().cause)
+    }
+
+    @Test
+    fun testGuardUnwrapsUserCode() {
+        val cause = IllegalStateException("boom")
+        handler.guard("SpanProcessor.onStart failed") { userCode { throw cause } }
+        assertSame(cause, handler.userCodeErrors.single().cause)
+    }
+
+    @Test
+    fun testSdkGuardOrDefaultSuspendReportsSdkCodeError() = runTest {
+        val cause = IllegalStateException("boom")
+        val result = handler.sdkGuardOrDefaultSuspend("default", "TracerProvider.shutdown failed") { throw cause }
+        assertEquals("default", result)
+        assertSame(cause, handler.sdkCodeErrors.single().cause)
+    }
+
+    @Test
+    fun testSdkGuardOrDefaultSuspendReportsUserCodeAsUserCodeError() = runTest {
+        val cause = IllegalStateException("boom")
+        val result = handler.sdkGuardOrDefaultSuspend("default", "TracerProvider.shutdown failed") {
+            userCode { throw cause }
+        }
+        assertEquals("default", result)
+        assertSame(cause, handler.userCodeErrors.single().cause)
+    }
+
+    @Test
+    fun testSdkGuardOrDefaultSuspendRethrowsWhenCallerCancelled() = runTest {
+        var result: String? = null
+        val job = launch(start = CoroutineStart.UNDISPATCHED) {
+            result = handler.sdkGuardOrDefaultSuspend("default", "should not be used") { awaitCancellation() }
+        }
+        job.cancelAndJoin()
+
+        assertTrue(job.isCancelled)
+        assertNull(result)
+        assertFalse(handler.hasErrors())
+    }
 }

@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
+import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceState
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
@@ -33,15 +34,15 @@ internal class OtelJavaSamplerAdapter(private val delegate: Sampler) : OtelJavaS
         val kind = spanKind.toOtelKotlinSpanKind()
         val attrs = CompatAttributesModel(attributes.toBuilder())
         val links = parentLinks.map { it.toOtelKotlinSpanLink() }
-        val result = delegate.shouldSample(ctx, traceId.hexToByteArray(), name, kind, attrs, links)
+        val result = userCode { delegate.shouldSample(ctx, traceId.hexToByteArray(), name, kind, attrs, links) }
 
-        val decision = when (result.decision) {
+        val decision = when (userCode { result.decision }) {
             DROP -> OtelJavaSamplingDecision.DROP
             RECORD_ONLY -> OtelJavaSamplingDecision.RECORD_ONLY
             RECORD_AND_SAMPLE -> OtelJavaSamplingDecision.RECORD_AND_SAMPLE
         }
-        val javaAttributes = attrsFromMap(result.attributes.attributes)
-        val javaTraceState = result.traceState.toOtelJavaTraceState()
+        val javaAttributes = attrsFromMap(userCode { result.attributes.attributes })
+        val javaTraceState = userCode { result.traceState }.toOtelJavaTraceState()
         return object : OtelJavaSamplingResult {
             override fun getDecision(): OtelJavaSamplingDecision = decision
             override fun getAttributes(): OtelJavaAttributes = javaAttributes

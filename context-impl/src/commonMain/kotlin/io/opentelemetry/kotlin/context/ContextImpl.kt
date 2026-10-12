@@ -35,6 +35,10 @@ internal class ContextImpl(
             return DetachedScope
         }
         val current = storage.implicitContext()
+        if (storage is ScopedImplicitContextStorage) {
+            val scope = storage.attach(this)
+            return ScopeImpl.create(current, this, storage, sdkErrorHandler) { scope.detach() }
+        }
         storage.setImplicitContext(this)
         return ScopeImpl.create(current, this, storage, sdkErrorHandler)
     }

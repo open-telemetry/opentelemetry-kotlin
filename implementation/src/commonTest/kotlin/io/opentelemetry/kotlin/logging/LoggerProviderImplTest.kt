@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.FakeContextFactory
-import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
@@ -30,14 +29,13 @@ internal class LoggerProviderImplTest {
     private val loggerConfigurator = LoggerConfigurator { LoggerConfigImpl(true) }
     private val loggingConfig = LoggingConfig(
         null,
-        AttributeLimitsBehavior(100, 100),
         ResourceImpl(AttributesModel(), null),
         NoopSdkErrorHandler,
         loggerConfigurator,
     )
     private val contextFactory = FakeContextFactory()
-    private val spanContextFactory = FakeSpanContextFactory()
     private val attributeLimits = AttributeLimitsBehavior()
+    private val logLimits = AttributeLimitsBehavior(100, 100)
     private lateinit var impl: LoggerProviderImpl
 
     @BeforeTest
@@ -46,8 +44,8 @@ internal class LoggerProviderImplTest {
             clock,
             loggingConfig,
             contextFactory,
-            spanContextFactory,
             attributeLimits,
+            logLimits,
         )
     }
 
@@ -61,7 +59,6 @@ internal class LoggerProviderImplTest {
         val handler = FakeSdkErrorHandler()
         val config = LoggingConfig(
             null,
-            AttributeLimitsBehavior(100, 100),
             ResourceImpl(AttributesModel(), null),
             handler,
             loggerConfigurator,
@@ -70,8 +67,8 @@ internal class LoggerProviderImplTest {
             clock,
             config,
             contextFactory,
-            spanContextFactory,
             attributeLimits,
+            logLimits,
         )
         provider.getLogger(name = "")
         assertEquals(1, handler.apiMisuses.size)
@@ -155,7 +152,6 @@ internal class LoggerProviderImplTest {
         )
         val config = LoggingConfig(
             processor,
-            AttributeLimitsBehavior(100, 100),
             FakeResource(),
             NoopSdkErrorHandler,
             loggerConfigurator,
@@ -164,8 +160,8 @@ internal class LoggerProviderImplTest {
             clock,
             config,
             contextFactory,
-            spanContextFactory,
             attributeLimits,
+            logLimits,
         )
         impl.getLogger(name = "test")
 
@@ -185,7 +181,6 @@ internal class LoggerProviderImplTest {
         )
         val config = LoggingConfig(
             processor,
-            AttributeLimitsBehavior(100, 100),
             FakeResource(),
             NoopSdkErrorHandler,
             loggerConfigurator,
@@ -194,8 +189,8 @@ internal class LoggerProviderImplTest {
             clock,
             config,
             contextFactory,
-            spanContextFactory,
             attributeLimits,
+            logLimits,
         )
         impl.getLogger(name = "test")
 
@@ -216,7 +211,6 @@ internal class LoggerProviderImplTest {
         val processor = FakeLogRecordProcessor()
         val config = LoggingConfig(
             processor,
-            AttributeLimitsBehavior(100, 100),
             FakeResource(),
             NoopSdkErrorHandler,
             loggerConfigurator,
@@ -225,8 +219,8 @@ internal class LoggerProviderImplTest {
             clock,
             config,
             contextFactory,
-            spanContextFactory,
             attributeLimits,
+            logLimits,
         )
         val logger = impl.getLogger(name = "test")
         impl.shutdown()
@@ -274,10 +268,10 @@ internal class LoggerProviderImplTest {
         errorHandler: SdkErrorHandler,
     ) = LoggerProviderImpl(
         clock,
-        LoggingConfig(processor, AttributeLimitsBehavior(100, 100), FakeResource(), errorHandler, loggerConfigurator),
+        LoggingConfig(processor, FakeResource(), errorHandler, loggerConfigurator),
         contextFactory,
-        spanContextFactory,
-        attributeLimits
+        attributeLimits,
+        logLimits,
     )
 
     private class ThrowingSdkErrorHandler : SdkErrorHandler {

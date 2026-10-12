@@ -15,7 +15,9 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Test
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -32,11 +34,25 @@ internal class CompletableResultCodeExtTest {
             OperationResultCode.Failure,
             OtelJavaCompletableResultCode.ofFailure().toOperationResultCode()
         )
-        assertEquals(
-            OperationResultCode.Failure,
-            OtelJavaCompletableResultCode.ofExceptionalFailure(RuntimeException())
+    }
+
+    @Test
+    fun `test exceptional failure rethrows its throwable`() = runTest {
+        val thrown = assertFailsWith<IllegalStateException> {
+            OtelJavaCompletableResultCode.ofExceptionalFailure(IllegalStateException("boom"))
                 .toOperationResultCode()
-        )
+        }
+        assertEquals("boom", thrown.message)
+    }
+
+    @Test
+    fun `test result that fails exceptionally asynchronously`() = runTest {
+        val pending = OtelJavaCompletableResultCode()
+        val result = async { runCatching { pending.toOperationResultCode() } }
+        runCurrent()
+
+        pending.failExceptionally(IllegalStateException("boom"))
+        assertIs<IllegalStateException>(result.await().exceptionOrNull())
     }
 
     @Test
@@ -80,11 +96,10 @@ internal class CompletableResultCodeExtTest {
     }
 
     @Test
-    fun `test exception thrown by wrapped component`() = runTest {
-        assertEquals(
-            OperationResultCode.Failure,
+    fun `test exception thrown by wrapped component propagates`() = runTest {
+        assertFailsWith<IllegalStateException> {
             awaitOperationResultCode { throw IllegalStateException("boom") }
-        )
+        }
     }
 
     @Test

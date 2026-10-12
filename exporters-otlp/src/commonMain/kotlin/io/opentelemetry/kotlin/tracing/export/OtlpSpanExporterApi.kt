@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.export.EXPORT_INITIAL_DELAY_MS
 import io.opentelemetry.kotlin.export.EXPORT_MAX_ATTEMPTS
 import io.opentelemetry.kotlin.export.EXPORT_MAX_ATTEMPT_INTERVAL_MS
+import io.opentelemetry.kotlin.export.OtlpEndpoint
 import io.opentelemetry.kotlin.export.OtlpHttpExporterConfigDsl
 import io.opentelemetry.kotlin.export.createOtlpHttpClient
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
@@ -15,7 +16,7 @@ import io.opentelemetry.kotlin.init.TraceExportConfigDsl
 public fun TraceExportConfigDsl.otlpHttpSpanExporter(
     block: OtlpHttpExporterConfigDsl.() -> Unit = {},
 ): SpanExporter = OtlpHttpSpanExporter(
-    createOtlpHttpClient(sdkErrorHandler, block),
+    createOtlpHttpClient(sdkErrorHandler, OtlpEndpoint.Traces, block = block),
     EXPORT_INITIAL_DELAY_MS,
     EXPORT_MAX_ATTEMPT_INTERVAL_MS,
     EXPORT_MAX_ATTEMPTS,

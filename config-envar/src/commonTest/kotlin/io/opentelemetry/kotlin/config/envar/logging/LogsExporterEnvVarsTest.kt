@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.config.envar.logging
 
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
 import io.opentelemetry.kotlin.config.envar.Exporter
 import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
@@ -37,7 +37,7 @@ internal class LogsExporterEnvVarsTest {
         )
         assertEquals(
             LogRecordProcessorBehavior(
-                http = OtlpHttpExporterBehavior(
+                http = OtlpHttpLogsExporterBehavior(
                     endpoint = "http://localhost:4317",
                     timeout = 1,
                     headers = mapOf("key1" to "value1", "key2" to "value2")
@@ -99,7 +99,7 @@ internal class LogsExporterEnvVarsTest {
         )
         assertEquals(
             LogRecordProcessorBehavior(
-                http = OtlpHttpExporterBehavior(
+                http = OtlpHttpLogsExporterBehavior(
                     endpoint = "http://localhost:4317",
                     timeout = 1,
                     headers = mapOf("key1" to "value1", "key2" to "value2")
@@ -116,7 +116,7 @@ internal class LogsExporterEnvVarsTest {
         )
         assertEquals(
             LogRecordProcessorBehavior(
-                http = OtlpHttpExporterBehavior(
+                http = OtlpHttpLogsExporterBehavior(
                     endpoint = "http://localhost:4317/logs",
                     timeout = 2,
                     headers = mapOf("key3" to "value3", "key4" to "value4")
@@ -134,7 +134,7 @@ internal class LogsExporterEnvVarsTest {
         )
         assertEquals(
             LogRecordProcessorBehavior(
-                http = OtlpHttpExporterBehavior(
+                http = OtlpHttpLogsExporterBehavior(
                     headers = mapOf("key1" to "value1", "key2" to "value2")
                 )
             ),

@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.factory
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.propagation.utils.isValidHex
 import io.opentelemetry.kotlin.tracing.TraceFlags
-import io.opentelemetry.kotlin.tracing.TraceFlagsImpl
+import io.opentelemetry.kotlin.tracing.createSpanContext
 
 private const val SAMPLED_BIT = 0b00000001
 private const val RANDOM_BIT = 0b00000010
@@ -14,7 +14,10 @@ public class TraceFlagsFactoryImpl : TraceFlagsFactory {
     // index by the sampled & random bits, as there can only ever be 4 permutations of this
     // immutable object
     private val flags: Array<TraceFlags> = Array(4) {
-        TraceFlagsImpl(isSampled = (it and SAMPLED_BIT) != 0, isRandom = (it and RANDOM_BIT) != 0)
+        createSpanContext(ByteArray(0), ByteArray(0)) {
+            isSampled = (it and SAMPLED_BIT) != 0
+            isRandom = (it and RANDOM_BIT) != 0
+        }.traceFlags
     }
 
     /**

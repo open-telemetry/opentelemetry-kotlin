@@ -13,6 +13,8 @@ internal class FakeOtelJavaMetricReader : MetricReader {
     var shutdownCount: Int = 0
     private var registration: CollectionRegistration? = null
 
+    var nextResult: () -> OtelJavaCompletableResultCode = { OtelJavaCompletableResultCode.ofSuccess() }
+
     fun collect(): Collection<MetricData> = registration?.collectAllMetrics().orEmpty()
 
     override fun register(registration: CollectionRegistration) {
@@ -25,11 +27,11 @@ internal class FakeOtelJavaMetricReader : MetricReader {
 
     override fun forceFlush(): OtelJavaCompletableResultCode {
         flushCount += 1
-        return OtelJavaCompletableResultCode.ofSuccess()
+        return nextResult()
     }
 
     override fun shutdown(): OtelJavaCompletableResultCode {
         shutdownCount += 1
-        return OtelJavaCompletableResultCode.ofSuccess()
+        return nextResult()
     }
 }

@@ -2,10 +2,10 @@ package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.factory.SpanContextFactory
+import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
-import io.opentelemetry.kotlin.factory.TraceFlagsFactory
-import io.opentelemetry.kotlin.factory.TraceStateFactory
+import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateCodec
+import io.opentelemetry.kotlin.tracing.contextimpl.createSpanContext
 
 /**
  * W3C Trace Context HTTP header propagator.
@@ -14,9 +14,6 @@ import io.opentelemetry.kotlin.factory.TraceStateFactory
  */
 @OptIn(ExperimentalApi::class)
 public class W3CTraceContextPropagator(
-    private val traceFlagsFactory: TraceFlagsFactory,
-    private val traceStateFactory: TraceStateFactory,
-    private val spanContextFactory: SpanContextFactory,
     private val spanFactory: SpanFactory,
 ) : TextMapPropagator {
 
@@ -45,21 +42,19 @@ public class W3CTraceContextPropagator(
 
     override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context {
         val rawTraceparent = getter.get(carrier, TRACEPARENT) ?: return context
-        val parsed = TraceParent.decode(rawTraceparent, traceFlagsFactory) ?: return context
-
+        val parsed = TraceParent.decode(rawTraceparent, DefaultTraceFlagsFactory) ?: return context
         val rawTracestate = getter.get(carrier, TRACESTATE)
-        val traceState = when (rawTracestate) {
-            null -> traceStateFactory.default
-            else -> TraceStateMarshaller.decode(rawTracestate).traceState
-        }
 
-        val spanContext = spanContextFactory.create(
-            traceId = parsed.traceId,
-            spanId = parsed.spanId,
-            traceFlags = parsed.traceFlags,
-            traceState = traceState,
-            isRemote = true,
-        )
+        val spanContext = createSpanContext(parsed.traceId, parsed.spanId) {
+            isSampled = parsed.traceFlags.isSampled
+            isRandom = parsed.traceFlags.isRandom
+            isRemote = true
+            if (rawTracestate != null) {
+                traceState {
+                    W3CTraceStateCodec.decode(rawTracestate).forEach { (key, value) -> put(key, value) }
+                }
+            }
+        }
         if (!spanContext.isValid) {
             return context
         }

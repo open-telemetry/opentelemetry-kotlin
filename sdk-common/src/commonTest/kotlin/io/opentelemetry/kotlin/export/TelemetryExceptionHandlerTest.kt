@@ -10,15 +10,15 @@ import kotlin.test.assertIs
 internal class TelemetryExceptionHandlerTest {
 
     @Test
-    fun testCoroutineFailureReportsUserCodeError() {
+    fun testCoroutineFailureReportsSdkCodeError() {
         val handler = FakeSdkErrorHandler()
         val cause = IllegalStateException("boom")
 
         telemetryExceptionHandler("Test context", handler)
             .handleException(EmptyCoroutineContext, cause)
 
-        assertEquals(1, handler.userCodeErrors.size)
-        val error = handler.userCodeErrors.single()
+        assertEquals(1, handler.sdkCodeErrors.size)
+        val error = handler.sdkCodeErrors.single()
         assertEquals("Test context coroutine failed", error.message)
         assertEquals(SdkErrorSeverity.WARNING, error.severity)
         assertIs<IllegalStateException>(error.cause)

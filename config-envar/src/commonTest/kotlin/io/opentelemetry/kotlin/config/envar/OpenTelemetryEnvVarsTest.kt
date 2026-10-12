@@ -6,7 +6,9 @@ import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
@@ -27,6 +29,7 @@ internal class OpenTelemetryEnvVarsTest {
     @Test
     fun emptyEnv() {
         val behavior = behaviorFrom(emptyMap())
+        assertNull(behavior.resource)
         assertEquals(AttributeLimitsBehavior(), behavior.attributeLimits)
         assertEquals(LogLimitsBehavior(), behavior.loggerProvider?.logLimits)
     }
@@ -66,11 +69,17 @@ internal class OpenTelemetryEnvVarsTest {
             SpanLimitsEnvVars.LINK_ATTRIBUTE_COUNT_LIMIT to "8",
             LogLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT to "9",
             LogLimitsEnvVars.ATTRIBUTE_VALUE_LENGTH_LIMIT to "10",
+            ResourceEnvVars.RESOURCE_ATTRIBUTES to "region=eu",
+            ResourceEnvVars.SERVICE_NAME to "checkout",
             TracesExporterEnvVars.TRACES_EXPORTER to Exporter.CONSOLE.value,
             LogsExporterEnvVars.LOGS_EXPORTER to Exporter.CONSOLE.value,
         )
 
         val expected = OpenTelemetryBehavior(
+            resource = ResourceBehavior(
+                serviceName = "checkout",
+                attributes = mapOf("region" to "eu"),
+            ),
             attributeLimits = AttributeLimitsBehavior(
                 attributeCountLimit = 1,
                 attributeValueLengthLimit = 2,
@@ -147,13 +156,18 @@ internal class OpenTelemetryEnvVarsTest {
             "OTEL_EXPORTER_OTLP_HEADERS" to "key1=value1,key2=value2",
         )
         val behavior = toBehavior(env::get)
-        val http = OtlpHttpExporterBehavior(
+        val spanExporter = OtlpHttpSpanExporterBehavior(
             endpoint = "http://localhost:4317",
             timeout = 1,
             headers = mapOf("key1" to "value1", "key2" to "value2")
         )
-        assertEquals(SpanProcessorBehavior(http = http), behavior.tracerProvider?.processor)
-        assertEquals(LogRecordProcessorBehavior(http = http), behavior.loggerProvider?.processor)
+        val logExporter = OtlpHttpLogsExporterBehavior(
+            endpoint = "http://localhost:4317",
+            timeout = 1,
+            headers = mapOf("key1" to "value1", "key2" to "value2")
+        )
+        assertEquals(SpanProcessorBehavior(http = spanExporter), behavior.tracerProvider?.processor)
+        assertEquals(LogRecordProcessorBehavior(http = logExporter), behavior.loggerProvider?.processor)
     }
 
     @Test
@@ -167,6 +181,7 @@ internal class OpenTelemetryEnvVarsTest {
     fun `should forward warnings from invalid env vars`() {
         val env = mapOf(
             AttributeLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT to "invalid",
+            ResourceEnvVars.RESOURCE_ATTRIBUTES to "invalid",
             SamplerEnvVars.SAMPLER to "not_a_sampler",
             TracesExporterEnvVars.TRACES_EXPORTER to "not_an_exporter",
             LogsExporterEnvVars.LOGS_EXPORTER to "not_an_exporter",
@@ -177,6 +192,7 @@ internal class OpenTelemetryEnvVarsTest {
         assertEquals(
             setOf(
                 AttributeLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT,
+                ResourceEnvVars.RESOURCE_ATTRIBUTES,
                 SamplerEnvVars.SAMPLER,
                 TracesExporterEnvVars.TRACES_EXPORTER,
                 LogsExporterEnvVars.LOGS_EXPORTER,

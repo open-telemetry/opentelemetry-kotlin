@@ -5,14 +5,11 @@ import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.tracing.SpanKind
-import io.opentelemetry.kotlin.tracing.TraceFlags
+import io.opentelemetry.kotlin.tracing.implementation.createSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -21,21 +18,16 @@ import kotlin.test.assertFailsWith
 internal class ProbabilitySamplerTest {
 
     private val idGenerator = IdGeneratorImpl()
-    private val traceStateFactory = DefaultTraceStateFactory
-    private val spanContextFactory = DefaultSpanContextFactory
-    private val spanFactory = SpanFactoryImpl(spanContextFactory)
+    private val spanFactory = SpanFactoryImpl()
     private val contextFactory = ContextFactoryImpl(spanFactory)
     private val sdkErrorHandler = NoopSdkErrorHandler
 
-    private fun createParentContext(traceId: String, otTraceStateValue: String, flags: TraceFlags): Context {
-        val traceState = traceStateFactory.default.put("ot", otTraceStateValue)
-        val parentSpanContext = spanContextFactory.create(
-            traceIdBytes = traceId.hexToByteArray(),
-            spanIdBytes = idGenerator.generateSpanIdBytes(),
-            traceFlags = flags,
-            traceState = traceState,
-            isRemote = true,
-        )
+    private fun createParentContext(traceId: String, otTraceStateValue: String): Context {
+        val parentSpanContext = createSpanContext(traceId.hexToByteArray(), idGenerator.generateSpanIdBytes()) {
+            isSampled = true
+            isRemote = true
+            traceState { put("ot", otTraceStateValue) }
+        }
         return contextFactory.root().storeSpan(spanFactory.fromSpanContext(parentSpanContext))
     }
 
@@ -112,7 +104,6 @@ internal class ProbabilitySamplerTest {
         val context = createParentContext(
             traceId = traceId,
             otTraceStateValue = "rv:$aboveThreshold",
-            flags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false)
         )
         val result = ProbabilitySampler(ratio, sdkErrorHandler).shouldSample(
             context = context,
@@ -131,7 +122,6 @@ internal class ProbabilitySamplerTest {
         val context = createParentContext(
             traceId = traceId,
             otTraceStateValue = "rv:garbage",
-            flags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false)
         )
         val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
             context = context,
@@ -150,7 +140,6 @@ internal class ProbabilitySamplerTest {
         val context = createParentContext(
             traceId = traceId,
             otTraceStateValue = "th:123",
-            flags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false)
         )
         val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
             context = context,
@@ -169,7 +158,6 @@ internal class ProbabilitySamplerTest {
         val context = createParentContext(
             traceId = traceId,
             otTraceStateValue = "rv:a0000000000000;th:c", // rv < th
-            flags = DefaultTraceFlagsFactory.create(isSampled = true, isRandom = false),
         )
         val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
             context = context,

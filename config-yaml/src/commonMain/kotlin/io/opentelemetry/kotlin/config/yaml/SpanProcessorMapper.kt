@@ -3,7 +3,9 @@ package io.opentelemetry.kotlin.config.yaml
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpExporter
+import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.SimpleSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.config.schema.model.SpanProcessor
 
@@ -15,6 +17,7 @@ fun List<SpanProcessor>.toBehavior(): SpanProcessorBehavior? {
     // TODO: Add support to multiple exporters being in use simultaneously once we have the SpanProcessor
     //  fully implemented.
     for (processor in this) {
+        val simple = processor.simple?.let { SimpleSpanProcessorBehavior() }
         val batch = processor.batch?.let {
             BatchSpanProcessorBehavior(
                 scheduleDelay = it.scheduleDelay?.takeIf { value -> value >= 0 },
@@ -26,7 +29,11 @@ fun List<SpanProcessor>.toBehavior(): SpanProcessorBehavior? {
         }
         val consoleExporter = processor.simple?.exporter?.console ?: processor.batch?.exporter?.console
         if (consoleExporter != null) {
-            return SpanProcessorBehavior(console = ConsoleExporterBehavior(), batch = batch)
+            return SpanProcessorBehavior(
+                console = ConsoleExporterBehavior(),
+                simple = simple,
+                batch = batch,
+            )
         }
 
         val httpExporter = processor.simple?.exporter?.otlpHttp ?: processor.batch?.exporter?.otlpHttp
@@ -34,19 +41,23 @@ fun List<SpanProcessor>.toBehavior(): SpanProcessorBehavior? {
             // if there are duplicate keys, the last one wins.
             // The spec says that in the case of duplicate keys, [headers] have a higher precedence.
             val headers =
-                OtlpHttpExporterBehavior.buildHeaderMap(httpExporter.headersList).orEmpty() +
-                    OtlpHttpExporterBehavior.buildHeaderMap(
+                OtlpExporter.buildHeaderMap(httpExporter.headersList).orEmpty() +
+                    OtlpExporter.buildHeaderMap(
                         httpExporter.headers?.joinToString(separator = ",") {
                                 pair ->
                             "${pair.name}=${pair.value}"
                         }
                     ).orEmpty()
-            val httpExporterBehavior = OtlpHttpExporterBehavior(
+            val httpExporterBehavior = OtlpHttpSpanExporterBehavior(
                 endpoint = httpExporter.endpoint,
                 timeout = httpExporter.timeout,
                 headers = headers.ifEmpty { null }
             )
-            return SpanProcessorBehavior(http = httpExporterBehavior, batch = batch)
+            return SpanProcessorBehavior(
+                http = httpExporterBehavior,
+                simple = simple,
+                batch = batch,
+            )
         }
     }
 

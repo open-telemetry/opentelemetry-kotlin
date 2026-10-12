@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -10,7 +11,6 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
-import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
@@ -36,7 +36,6 @@ internal class TracerProviderImplTest {
 
     private val tracingConfig = TracingConfig(
         null,
-        fakeSpanLimitsConfig,
         ResourceImpl(AttributesModel(), null),
         NoopSdkErrorHandler,
     )
@@ -49,10 +48,10 @@ internal class TracerProviderImplTest {
             clock = FakeClock(),
             tracingConfig = tracingConfig,
             contextFactory = FakeContextFactory(),
-            spanContextFactory = FakeSpanContextFactory(),
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
+            spanLimits = SpanLimitsBehavior(),
         )
     }
 
@@ -66,7 +65,6 @@ internal class TracerProviderImplTest {
         val handler = FakeSdkErrorHandler()
         val config = TracingConfig(
             null,
-            fakeSpanLimitsConfig,
             ResourceImpl(AttributesModel(), null),
             handler,
         )
@@ -74,10 +72,10 @@ internal class TracerProviderImplTest {
             clock = FakeClock(),
             tracingConfig = config,
             contextFactory = FakeContextFactory(),
-            spanContextFactory = FakeSpanContextFactory(),
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
+            spanLimits = SpanLimitsBehavior(),
         )
         provider.getTracer(name = "")
         assertEquals(1, handler.apiMisuses.size)
@@ -161,7 +159,6 @@ internal class TracerProviderImplTest {
         )
         val config = TracingConfig(
             processor,
-            fakeSpanLimitsConfig,
             FakeResource(),
             NoopSdkErrorHandler,
         )
@@ -169,10 +166,10 @@ internal class TracerProviderImplTest {
             clock = FakeClock(),
             tracingConfig = config,
             contextFactory = FakeContextFactory(),
-            spanContextFactory = FakeSpanContextFactory(),
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
+            spanLimits = SpanLimitsBehavior(),
         )
         provider.getTracer(name = "test")
 
@@ -192,7 +189,6 @@ internal class TracerProviderImplTest {
         )
         val config = TracingConfig(
             processor,
-            fakeSpanLimitsConfig,
             FakeResource(),
             NoopSdkErrorHandler,
         )
@@ -200,10 +196,10 @@ internal class TracerProviderImplTest {
             clock = FakeClock(),
             tracingConfig = config,
             contextFactory = FakeContextFactory(),
-            spanContextFactory = FakeSpanContextFactory(),
             spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
+            spanLimits = SpanLimitsBehavior(),
         )
         provider.getTracer(name = "test")
 
@@ -294,16 +290,15 @@ internal class TracerProviderImplTest {
         clock = FakeClock(),
         tracingConfig = TracingConfig(
             processor,
-            fakeSpanLimitsConfig,
             FakeResource(),
             errorHandler,
             samplerFactory = samplerFactory,
         ),
         contextFactory = FakeContextFactory(),
-        spanContextFactory = FakeSpanContextFactory(),
         spanFactory = FakeSpanFactory(),
         idGenerator = FakeIdGenerator(),
         attributeLimits = AttributeLimitsBehavior(),
+        spanLimits = SpanLimitsBehavior(),
     )
 
     private class ThrowingSdkErrorHandler : SdkErrorHandler {

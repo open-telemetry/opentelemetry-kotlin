@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -118,11 +119,19 @@ internal class LogRecordExporterAdapterTest {
     }
 
     @Test
-    fun `test exception thrown by wrapped exporter does not propagate`() = runTest {
+    fun `test exception thrown by wrapped exporter propagates`() = runTest {
         impl.nextResult = { throw IllegalStateException("boom") }
 
-        assertEquals(OperationResultCode.Failure, wrapper.forceFlush())
-        assertEquals(OperationResultCode.Failure, wrapper.export(listOf(FakeLogRecordData())))
-        assertEquals(OperationResultCode.Failure, wrapper.shutdown())
+        assertFailsWith<IllegalStateException> { wrapper.forceFlush() }
+        assertFailsWith<IllegalStateException> { wrapper.export(listOf(FakeLogRecordData())) }
+        assertFailsWith<IllegalStateException> { wrapper.shutdown() }
+    }
+
+    @Test
+    fun `test exceptional failure from wrapped exporter propagates`() = runTest {
+        impl.nextResult = { OtelJavaCompletableResultCode.ofExceptionalFailure(IllegalStateException("boom")) }
+        assertFailsWith<IllegalStateException> { wrapper.forceFlush() }
+        assertFailsWith<IllegalStateException> { wrapper.export(listOf(FakeLogRecordData())) }
+        assertFailsWith<IllegalStateException> { wrapper.shutdown() }
     }
 }

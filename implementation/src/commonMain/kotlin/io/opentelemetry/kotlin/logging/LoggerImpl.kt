@@ -9,20 +9,22 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.guardOrDefault
+import io.opentelemetry.kotlin.error.sdkGuard
+import io.opentelemetry.kotlin.error.sdkGuardOrDefault
+import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.LogRecordModel
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecordImpl
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
+import io.opentelemetry.kotlin.tracing.implementation.createInvalidSpanContext
 
 internal class LoggerImpl(
     private val clock: Clock,
     private val processor: LogRecordProcessor?,
     private val contextFactory: ContextFactory,
-    spanContextFactory: SpanContextFactory,
     private val key: InstrumentationScopeInfo,
     private val resource: Resource,
     private val logLimits: AttributeLimitsBehavior,
@@ -32,14 +34,14 @@ internal class LoggerImpl(
 ) : Logger {
 
     private val root = contextFactory.root()
-    private val invalidSpanContext = spanContextFactory.invalid
+    private val invalidSpanContext = createInvalidSpanContext()
 
     override fun enabled(
         context: Context?,
         severityNumber: SeverityNumber?,
         eventName: String?,
     ): Boolean =
-        sdkErrorHandler.guardOrDefault(false, "Logger.enabled failed") {
+        sdkErrorHandler.sdkGuardOrDefault(false, "Logger.enabled failed") {
             if (shutdownState.isShutdown || processor == null) {
                 false
             } else {
@@ -88,7 +90,7 @@ internal class LoggerImpl(
         exception: Throwable?,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
-        sdkErrorHandler.guard("Logger.emit failed") {
+        sdkErrorHandler.sdkGuard("Logger.emit failed") {
             shutdownState.execute {
                 val ctx = context ?: contextFactory.implicit()
                 val spanContext = spanContextFrom(ctx)
@@ -102,7 +104,7 @@ internal class LoggerImpl(
                     instrumentationScopeInfo = key,
                     // the spec leaves timestamp unset when unknown, but fills in observedTimestamp
                     timestamp = timestamp?.takeIf { it > 0 },
-                    observedTimestamp = observedTimestamp?.takeIf { it > 0 } ?: clock.now(),
+                    observedTimestamp = observedTimestamp?.takeIf { it > 0 } ?: userCode { clock.now() },
                     body = body,
                     severityText = severityText,
                     severityNumber = severityNumber ?: SeverityNumber.UNKNOWN,
@@ -112,10 +114,10 @@ internal class LoggerImpl(
                     sdkErrorHandler = sdkErrorHandler,
                 )
                 if (exception != null) {
-                    log.setExceptionAttributes(exception)
+                    userCode { log.setExceptionAttributes(exception) }
                 }
                 if (attributes != null) {
-                    attributes(log)
+                    userCode { attributes(log) }
                 }
                 sdkErrorHandler.guard {
                     processor?.onEmit(ReadWriteLogRecordImpl(log), ctx)

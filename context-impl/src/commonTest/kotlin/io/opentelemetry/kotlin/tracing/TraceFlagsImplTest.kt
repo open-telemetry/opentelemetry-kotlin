@@ -2,9 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.factory.TraceFlagsFactoryImpl
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 internal class TraceFlagsImplTest {
@@ -42,15 +40,5 @@ internal class TraceFlagsImplTest {
         val sampledAndRandom = factory.fromHex("03")
         assertTrue(sampledAndRandom.isRandom)
         assertTrue(sampledAndRandom.isSampled)
-    }
-
-    @Test
-    fun testEquality() {
-        val sampled = TraceFlagsImpl(isSampled = true, isRandom = false)
-        assertEquals(sampled, TraceFlagsImpl(isSampled = true, isRandom = false))
-        assertEquals(sampled.hashCode(), TraceFlagsImpl(isSampled = true, isRandom = false).hashCode())
-        assertEquals(sampled, factory.fromHex("01"))
-        assertNotEquals(sampled, TraceFlagsImpl(isSampled = true, isRandom = true))
-        assertNotEquals(sampled, TraceFlagsImpl(isSampled = false, isRandom = false))
     }
 }

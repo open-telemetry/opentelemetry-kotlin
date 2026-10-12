@@ -140,8 +140,11 @@ internal class OpenTelemetryConfigReaderTest {
         )
         assertNull(behavior.logRecordAttributeCountLimit())
         assertEquals(256, behavior.logRecordAttributeValueLengthLimit())
-        assertEquals(1, handler.sdkCodeErrors.size)
-        assertEquals(SdkErrorSeverity.ERROR, handler.sdkCodeErrors.single().severity)
+        val misuse = handler.apiMisuses.single()
+        assertEquals("OTEL_CONFIG_FILE", misuse.api)
+        assertTrue(misuse.message.contains("cannot read $PATH"))
+        assertEquals(SdkErrorSeverity.ERROR, misuse.severity)
+        assertEquals(1, handler.errors.size)
     }
 
     @Test
@@ -167,7 +170,10 @@ internal class OpenTelemetryConfigReaderTest {
             handler = handler,
         )
         assertEquals(64, behavior.logRecordAttributeCountLimit())
-        assertEquals(1, handler.sdkCodeErrors.size)
+        val error = handler.userCodeErrors.single()
+        assertEquals("dsl failed", error.cause.message)
+        assertEquals(SdkErrorSeverity.ERROR, error.severity)
+        assertEquals(1, handler.errors.size)
     }
 
     @Test
