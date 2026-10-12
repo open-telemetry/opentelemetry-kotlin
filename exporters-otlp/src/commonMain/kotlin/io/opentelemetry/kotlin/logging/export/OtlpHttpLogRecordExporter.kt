@@ -4,7 +4,9 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpClient
 import io.opentelemetry.kotlin.export.TelemetryExporter
+import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.logging.data.LogRecordData
+import kotlin.coroutines.CoroutineContext
 
 internal class OtlpHttpLogRecordExporter(
     private val otlpClient: OtlpClient,
@@ -12,6 +14,7 @@ internal class OtlpHttpLogRecordExporter(
     maxAttemptIntervalMs: Long,
     maxAttempts: Int,
     sdkErrorHandler: SdkErrorHandler,
+    coroutineContext: CoroutineContext = ioDispatcher,
 ) : LogRecordExporter {
 
     private val exporter = TelemetryExporter(
@@ -19,6 +22,7 @@ internal class OtlpHttpLogRecordExporter(
         maxAttemptIntervalMs,
         maxAttempts,
         sdkErrorHandler,
+        coroutineContext,
     ) {
         otlpClient.exportLogs(it)
     }

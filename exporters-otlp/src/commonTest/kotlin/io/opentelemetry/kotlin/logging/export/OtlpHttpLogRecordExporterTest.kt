@@ -4,7 +4,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.toByteArray
+import io.ktor.client.plugins.HttpTimeoutConfig.Companion.INFINITE_TIMEOUT_MS
 import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.HttpRequestData
 import io.ktor.client.request.header
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.GZipEncoder
@@ -19,14 +21,17 @@ import io.opentelemetry.kotlin.export.HttpClientRegistry
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpClient
 import io.opentelemetry.kotlin.export.createDefaultHttpClient
+import io.opentelemetry.kotlin.export.testMockEngine
 import io.opentelemetry.kotlin.init.LogExportConfigDsl
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import io.opentelemetry.kotlin.logging.data.LogRecordData
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -34,6 +39,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class OtlpHttpLogRecordExporterTest {
 
     private val logRecords = listOf(FakeLogRecordData())
@@ -44,21 +50,23 @@ internal class OtlpHttpLogRecordExporterTest {
     private lateinit var mockResponseStatus: HttpStatusCode
     private lateinit var exporter: OtlpHttpLogRecordExporter
     private var serverDelayMs: Long = 0
-    private var compressedRequestBody: ByteArray = ByteArray(0)
+    private val compressedRequestBody = CompletableDeferred<ByteArray>()
+
+    private val dispatcher = StandardTestDispatcher()
 
     @BeforeTest
     fun setUp() {
-        server = MockEngine {
+        server = testMockEngine(dispatcher) {
             // gzip compression is lazy and tied to the request context, so capture the body here;
             // reading it later fails after the request completes.
-            compressedRequestBody = it.body.toByteArray()
+            compressedRequestBody.complete(it.body.toByteArray())
             delay(serverDelayMs)
             respond(
                 content = ByteReadChannel(""),
                 status = mockResponseStatus
             )
         }
-        val httpClient = createDefaultHttpClient(engine = server, requestTimeoutMs = 10_000)
+        val httpClient = createDefaultHttpClient(engine = server, requestTimeoutMs = INFINITE_TIMEOUT_MS)
         client = OtlpClient(baseUrl, httpClient = httpClient, sdkErrorHandler = NoopSdkErrorHandler)
         exporter = OtlpHttpLogRecordExporter(
             client,
@@ -66,11 +74,12 @@ internal class OtlpHttpLogRecordExporterTest {
             maxAttemptIntervalMs = 5,
             maxAttempts = 3,
             sdkErrorHandler = NoopSdkErrorHandler,
+            coroutineContext = dispatcher,
         )
     }
 
     @Test
-    fun testExportInitialSuccess() = runTest {
+    fun testExportInitialSuccess() = runTest(dispatcher) {
         mockResponseStatus = HttpStatusCode.OK
         val code = exporter.export(logRecords)
         assertEquals(OperationResultCode.Success, code)
@@ -84,22 +93,21 @@ internal class OtlpHttpLogRecordExporterTest {
     }
 
     @Test
-    fun testExportShutdown() = runTest {
+    fun testExportShutdown() = runTest(dispatcher) {
         mockResponseStatus = HttpStatusCode.OK
         serverDelayMs = 1000
         val code = exporter.export(logRecords)
         assertEquals(OperationResultCode.Success, code)
+        compressedRequestBody.await()
 
         val shutdownCode = exporter.shutdown()
         assertEquals(OperationResultCode.Success, shutdownCode)
-
-        withTimeout(10) {
-            assertTrue(server.requestHistory.isEmpty())
-        }
+        advanceUntilIdle()
+        assertTrue(server.requestHistory.isEmpty())
     }
 
     @Test
-    fun testExportRetryAttempts() = runTest {
+    fun testExportRetryAttempts() = runTest(dispatcher) {
         mockResponseStatus = HttpStatusCode.OK
         serverDelayMs = 2
         val code = exporter.export(logRecords)
@@ -116,7 +124,9 @@ internal class OtlpHttpLogRecordExporterTest {
 
     @Test
     fun testCustomHttpClientIsUsed() = runTest {
+        val request = CompletableDeferred<HttpRequestData>()
         val customServer = MockEngine {
+            request.complete(it)
             respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
         }
         val customClient = HttpClient(customServer) {
@@ -128,15 +138,7 @@ internal class OtlpHttpLogRecordExporterTest {
         }
         customExporter.export(logRecords)
 
-        // use real time because the exporter runs on Dispatchers.Default.
-        withContext(Dispatchers.Default.limitedParallelism(1)) {
-            withTimeout(1000) {
-                while (customServer.requestHistory.isEmpty()) {
-                    delay(1L)
-                }
-            }
-        }
-        val headers = customServer.requestHistory.single().headers.toMap().mapValues { it.value.joinToString() }
+        val headers = request.await().headers.toMap().mapValues { it.value.joinToString() }
         assertEquals("Bearer test-token", headers["Authorization"])
     }
 
@@ -159,7 +161,9 @@ internal class OtlpHttpLogRecordExporterTest {
 
     @Test
     fun testFactoryWithCustomEngineExports() = runTest {
+        val request = CompletableDeferred<HttpRequestData>()
         val mockServer = MockEngine {
+            request.complete(it)
             respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
         }
         val factoryExporter = fakeConfig().otlpHttpLogRecordExporter {
@@ -169,32 +173,18 @@ internal class OtlpHttpLogRecordExporterTest {
         val code = factoryExporter.export(logRecords)
         assertEquals(OperationResultCode.Success, code)
 
-        withTimeout(1000) {
-            while (mockServer.requestHistory.isEmpty()) {
-                delay(1L)
-            }
-        }
-        assertEquals(1, mockServer.requestHistory.size)
+        request.await()
         HttpClientRegistry.clear()
     }
 
-    private suspend fun waitAndAssertExportedTelemetry(
-        telemetry: List<LogRecordData>,
-        timeoutMs: Long = 1000
-    ) {
-        // use real time because the exporter runs on Dispatchers.Default.
-        withContext(Dispatchers.Default.limitedParallelism(1)) {
-            withTimeout(timeoutMs) {
-                while (server.requestHistory.isEmpty()) {
-                    delay(1L)
-                }
-            }
-        }
+    private suspend fun TestScope.waitAndAssertExportedTelemetry(telemetry: List<LogRecordData>) {
+        val body = compressedRequestBody.await()
+        advanceUntilIdle()
         val requests = server.requestHistory
         check(server.requestHistory.size == 1) {
             "Expected 1 request, got ${requests.size}"
         }
-        val bytes = GZipEncoder.decode(ByteReadChannel(compressedRequestBody))
+        val bytes = GZipEncoder.decode(ByteReadChannel(body))
             .toByteArray()
         assertContentEquals(telemetry.toProtobufByteArray(), bytes)
     }
