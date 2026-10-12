@@ -30,6 +30,11 @@ would be accepted.
    to confirm the project builds
 4. Open an issue or update these docs if there was a step missing from these instructions!
 
+### Verifying a changeset
+
+`./gradlew verify` runs static analysis and tests for every module except `gradle-integration-test`.
+This should be sufficient for most changesets.
+
 ### Running the full build including the integration test
 
 The `gradle-integration-test` module verifies that the library's published artifacts are consumable

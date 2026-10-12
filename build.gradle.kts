@@ -55,6 +55,16 @@ tasks.named("check") {
     dependsOn(checkDuplicatePublicApi)
 }
 
+tasks.register("verify") {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = "Runs static analysis and tests, excluding the Gradle integration tests."
+    val gradleIntegrationTest = ":gradle-integration-test"
+    dependsOn(checkDuplicatePublicApi)
+    subprojects.filter { it.path != gradleIntegrationTest }.forEach { project ->
+        dependsOn(project.tasks.matching { it.name == LifecycleBasePlugin.CHECK_TASK_NAME })
+    }
+}
+
 kover {
     merge {
         subprojects { project ->
