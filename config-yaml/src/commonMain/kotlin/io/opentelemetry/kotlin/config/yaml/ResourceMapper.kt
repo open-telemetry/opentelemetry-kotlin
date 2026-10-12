@@ -26,7 +26,9 @@ private fun Resource.toAttributeMap(): Map<String, Any> = buildMap {
 }
 
 private fun AttributeNameValue.toAttribute(): Pair<String, Any>? {
-    if (name.isEmpty()) return null
+    if (name.isEmpty()) {
+        return null
+    }
     val attributeValue = value ?: return null
     val mappedValue = when (type ?: AttributeType.STRING) {
         AttributeType.STRING -> attributeValue as? String
