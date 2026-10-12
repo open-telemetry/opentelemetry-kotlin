@@ -5,7 +5,6 @@ import org.gradle.kotlin.dsl.exclude
 import org.jetbrains.kotlin.gradle.dsl.KotlinCommonCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 private val KOTLIN_VERSION = KotlinVersion.KOTLIN_2_0
 private const val JDK_VERSION = 11
@@ -29,24 +28,13 @@ fun Project.configureKotlin(
                         enabled = false
                     }
                 }
-                binaries.library()
             }
 
-            val frameworkName = createAppleFrameworkName(project.name)
-            val framework = XCFramework(frameworkName)
-
-            listOf(
-                iosArm64(),
-                iosSimulatorArm64(),
-                tvosArm64(),
-                tvosSimulatorArm64(),
-            ).forEach { target ->
-                compilerOptions.configureCompiler()
-                target.binaries.framework {
-                    baseName = frameworkName
-                }
-                framework.add(target.binaries.getFramework("RELEASE"))
-            }
+            // assume that consumers depend on the published klibs and link their own frameworks
+            iosArm64()
+            iosSimulatorArm64()
+            tvosArm64()
+            tvosSimulatorArm64()
         }
 
         sourceSets.apply {
@@ -92,17 +80,4 @@ fun KotlinCommonCompilerOptions.configureCompiler() {
     apiVersion.set(KOTLIN_VERSION)
     languageVersion.set(KOTLIN_VERSION)
     freeCompilerArgs.addAll("-Xexpect-actual-classes", "-Xsuppress-version-warnings")
-}
-
-private fun createAppleFrameworkName(input: String): String {
-    return input
-        .split("-")
-        .mapIndexed { _, part ->
-            val normalized = when {
-                part.equals("opentelemetry") -> "Otel"
-                else -> part.replaceFirstChar { it.uppercase() }
-            }
-            normalized
-        }
-        .joinToString("")
 }

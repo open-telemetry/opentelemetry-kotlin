@@ -25,6 +25,8 @@ would be accepted.
       If your Xcode version is newer than the supported range, iOS simulator tests will fail; either
       install a supported iOS platform runtime via **Xcode → Settings → Platforms**, or exclude the
       tests temporarily with `-x iosSimulatorArm64Test -x iosArm64Test`.
+      tvOS simulator tests are skipped by default. To run them, install a tvOS platform runtime and
+      pass `-Pio.opentelemetry.kotlin.enableTvosTests=true`.
    4. Android Studio or IntelliJ IDEA are recommended
 3. Follow [Running the full build including the integration test](#running-the-full-build-including-the-integration-test)
    to confirm the project builds

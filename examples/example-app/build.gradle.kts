@@ -1,5 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
+import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 
 plugins {
     kotlin("multiplatform")
@@ -24,13 +25,11 @@ kotlin {
         binaries.executable()
     }
 
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { target ->
-        target.binaries.framework {
-            baseName = "SharedExampleApp"
-        }
+    iosArm64()
+
+    // avoid building the slow release variants
+    iosSimulatorArm64().binaries.framework(listOf(NativeBuildType.DEBUG)) {
+        baseName = "SharedExampleApp"
     }
 
     applyDefaultHierarchyTemplate()
