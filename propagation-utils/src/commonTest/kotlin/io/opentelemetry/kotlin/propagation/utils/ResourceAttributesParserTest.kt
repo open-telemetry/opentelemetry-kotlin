@@ -27,6 +27,7 @@ internal class ResourceAttributesParserTest {
             "missing-value",
             "missing-key=value,=value",
             "too=many=separators",
+            "invalid%=value",
             "invalid-percent=%",
         ).forEach { value ->
             assertNull(parseResourceAttributes(value))

@@ -110,10 +110,17 @@ internal class ResourceMapperTest {
             attributes = listOf(
                 attribute("", "empty-name"),
                 attribute("null-value", null),
+                attribute("wrong-string-type", 123, AttributeType.STRING),
                 attribute("wrong-type", "true", AttributeType.BOOL),
+                attribute("wrong-int-type", "42", AttributeType.INT),
                 attribute("fractional-int", 1.5, AttributeType.INT),
+                attribute("non-finite-int", Double.NaN, AttributeType.INT),
+                attribute("wrong-double-type", "4.2", AttributeType.DOUBLE),
+                attribute("non-list-array", "one", AttributeType.STRING_ARRAY),
                 attribute("mixed-array", listOf("one", 2), AttributeType.STRING_ARRAY),
                 attribute("fractional-ints", listOf(1, 2.5), AttributeType.INT_ARRAY),
+                attribute("mixed-ints", listOf(1, "2"), AttributeType.INT_ARRAY),
+                attribute("mixed-doubles", listOf(1.2, "3.4"), AttributeType.DOUBLE_ARRAY),
                 attribute("valid", true, AttributeType.BOOL),
             ),
         ).toBehavior()
