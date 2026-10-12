@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
 import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SimpleLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.SimpleSpanProcessorBehavior
@@ -46,6 +47,14 @@ internal class OpenTelemetryConfigurationMapperTest {
             attributeLimits = AttributeLimitsBehavior(
                 attributeCountLimit = 128,
                 attributeValueLengthLimit = 4096,
+            ),
+            resource = ResourceBehavior(
+                schemaUrl = "https://opentelemetry.io/schemas/1.37.0",
+                attributes = mapOf(
+                    "service.namespace" to "demo",
+                    "service.version" to "1.0.0",
+                    "service.name" to "unknown_service",
+                ),
             ),
             tracerProvider = TracerProviderBehavior(
                 spanLimits = SpanLimitsBehavior(
