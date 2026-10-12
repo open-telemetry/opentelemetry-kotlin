@@ -148,6 +148,7 @@ public abstract interface class io/opentelemetry/kotlin/context/Context {
 	public abstract fun set (Lio/opentelemetry/kotlin/context/ContextKey;Ljava/lang/Object;)Lio/opentelemetry/kotlin/context/Context;
 	public abstract fun storeBaggage (Lio/opentelemetry/kotlin/baggage/Baggage;)Lio/opentelemetry/kotlin/context/Context;
 	public abstract fun storeSpan (Lio/opentelemetry/kotlin/tracing/Span;)Lio/opentelemetry/kotlin/context/Context;
+	public abstract fun storeSpanContext (Lio/opentelemetry/kotlin/tracing/SpanContext;)Lio/opentelemetry/kotlin/context/Context;
 }
 
 public abstract interface class io/opentelemetry/kotlin/context/ContextKey {

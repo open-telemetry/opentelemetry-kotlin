@@ -49,7 +49,7 @@ internal class ResolvedSamplerConfigTest {
         getEnvVar: (String) -> String? = { null },
         errorHandler: SdkErrorHandler? = null,
         configure: TracerProviderConfigDsl.() -> Unit = {},
-    ) = tracingConfig(getEnvVar, errorHandler, configure).samplerFactory(spanFactory)
+    ) = tracingConfig(getEnvVar, errorHandler, configure).samplerFactory()
 
     private fun env(sampler: String): (String) -> String? {
         val values = buildMap {

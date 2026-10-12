@@ -41,7 +41,6 @@ public fun createOpenTelemetry(
 
     val span = SpanFactoryImpl()
     val contextFactory = ContextFactoryImpl(span, cfg.sdkErrorHandler, cfg.contextConfig::generateStorage)
-    cfg.propagatorCfg.installFactories(spanFactory = span)
 
     val tracingConfig = configFactory.generateTracingConfig()
     val loggingConfig = configFactory.generateLoggingConfig()
@@ -51,7 +50,6 @@ public fun createOpenTelemetry(
             clock = clock,
             tracingConfig = tracingConfig,
             contextFactory = contextFactory,
-            spanFactory = span,
             idGenerator = idGenerator,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior(),
             spanLimits = behavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior(),

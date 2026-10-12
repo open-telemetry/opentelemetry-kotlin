@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOffSampler
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysRecordSampler
@@ -15,7 +14,7 @@ import io.opentelemetry.kotlin.tracing.sampling.CompositeSampler
 import io.opentelemetry.kotlin.tracing.sampling.ParentBasedSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 
-internal class SamplerConfigImpl(override val spanFactory: SpanFactory) : SamplerConfigDsl {
+internal class SamplerConfigImpl : SamplerConfigDsl {
 
     override fun alwaysOn(): Sampler = AlwaysOnSampler
 

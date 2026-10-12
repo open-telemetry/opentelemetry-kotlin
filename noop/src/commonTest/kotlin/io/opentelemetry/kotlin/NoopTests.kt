@@ -167,6 +167,12 @@ internal class NoopTests {
     }
 
     @Test
+    fun testStoreSpanContext() {
+        val root = NoopOpenTelemetry.context.root()
+        assertSame(root, root.storeSpanContext(NoopSpanContext))
+    }
+
+    @Test
     fun testNoopSpan() {
         val otel = NoopOpenTelemetry
 

@@ -2,14 +2,19 @@ package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.FakeSpanFactory
+import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.tracing.FakeSpan
+import io.opentelemetry.kotlin.tracing.contextimpl.createInvalidSpanContext
+import io.opentelemetry.kotlin.tracing.contextimpl.createSpanContext
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotSame
 import kotlin.test.assertNull
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 internal class ContextImplTest {
 
@@ -127,5 +132,29 @@ internal class ContextImplTest {
         val derived = root.storeSpan(span)
         assertNotSame(root, derived)
         assertSame(spanFactory.invalid, root.extractSpan())
+    }
+
+    @Test
+    fun testStoreSpanContextRoundTrip() {
+        val ctxFactory = ContextFactoryImpl(SpanFactoryImpl())
+        val spanContext = createSpanContext("0af7651916cd43dd8448eb211c80319c", "b7ad6b7169203331") {
+            isSampled = true
+            isRemote = true
+        }
+        val root = ctxFactory.root()
+        val ctx = root.storeSpanContext(spanContext)
+
+        assertNotSame(root, ctx)
+        assertSame(spanContext, ctx.extractSpan().spanContext)
+        assertTrue(ctx.extractSpan().spanContext.isRemote)
+        assertFalse(root.extractSpan().spanContext.isValid)
+    }
+
+    @Test
+    fun testStoreSpanContextInvalidStoresInvalidSpan() {
+        val ctxFactory = ContextFactoryImpl(SpanFactoryImpl())
+        val span = FakeSpan()
+        val ctx = ctxFactory.root().storeSpan(span).storeSpanContext(createInvalidSpanContext())
+        assertFalse(ctx.extractSpan().spanContext.isValid)
     }
 }
