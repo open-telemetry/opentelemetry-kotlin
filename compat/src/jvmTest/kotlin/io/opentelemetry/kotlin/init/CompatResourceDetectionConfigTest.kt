@@ -1,7 +1,9 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.SdkBuildKonfig
+import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
@@ -63,6 +65,39 @@ internal class CompatResourceDetectionConfigTest {
     }
 
     @Test
+    fun `resolved behavior resource overrides detected attributes`() {
+        val cfg = CompatOpenTelemetryConfig(clock)
+        cfg.resourceDetection {
+            detector(FakeResourceDetector(attributes = mapOf(testKey to "detected")))
+        }
+        val behavior = OpenTelemetryBehavior(
+            resource = ResourceBehavior(attributes = mapOf(testKey to "configured")),
+        )
+
+        val resource = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory()).baseResource
+
+        assertEquals("configured", resource.attributes[testKey])
+    }
+
+    @Test
+    fun `dsl service name attribute overrides environment service name`() {
+        val cfg = CompatOpenTelemetryConfig(clock).apply {
+            resource(mapOf(ServiceAttributes.SERVICE_NAME to "dsl-service"))
+        }
+        val behavior = BehaviorResolverImpl().resolve(
+            envars = OpenTelemetryBehavior(
+                resource = ResourceBehavior(serviceName = "environment-service"),
+            ),
+            declarativeFile = null,
+            dsl = cfg.toBehavior(),
+        )
+
+        val resource = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory()).baseResource
+
+        assertEquals("dsl-service", resource.attributes[ServiceAttributes.SERVICE_NAME])
+    }
+
+    @Test
     fun `later detector wins on conflict`() {
         val cfg = CompatOpenTelemetryConfig(clock)
         cfg.resourceDetection {
@@ -109,5 +144,5 @@ internal class CompatResourceDetectionConfigTest {
     }
 
     private fun baseResource(cfg: CompatOpenTelemetryConfig) =
-        CompatSdkConfigFactory(cfg, OpenTelemetryBehavior(), clock, CompatContextFactory()).baseResource
+        CompatSdkConfigFactory(cfg, cfg.toBehavior(), clock, CompatContextFactory()).baseResource
 }
