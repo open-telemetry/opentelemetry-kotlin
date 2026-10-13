@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.otlpHttpSpanExporter
 import io.opentelemetry.kotlin.tracing.export.simpleSpanProcessor
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -56,7 +55,7 @@ class ShutdownComplianceSmokeTest {
     }
 
     @Test
-    fun telemetryNotExportedAfterShutdown() = runTest {
+    fun telemetryNotExportedAfterShutdown() = runSmokeTest(otel) {
         val tracer = otel.tracerProvider.getTracer("test")
         val logger = otel.loggerProvider.getLogger("test")
 
@@ -81,7 +80,7 @@ class ShutdownComplianceSmokeTest {
     }
 
     @Test
-    fun tracerAndLoggerObtainedBeforeShutdownDoNothingAfterShutdown() = runTest {
+    fun tracerAndLoggerObtainedBeforeShutdownDoNothingAfterShutdown() = runSmokeTest(otel) {
         val tracer = otel.tracerProvider.getTracer("test")
         val logger = otel.loggerProvider.getLogger("test")
 
@@ -106,7 +105,7 @@ class ShutdownComplianceSmokeTest {
     }
 
     @Test
-    fun getTracerAndGetLoggerReturnNoopsAfterShutdown() = runTest {
+    fun getTracerAndGetLoggerReturnNoopsAfterShutdown() = runSmokeTest(otel) {
         val closeable = otel as TelemetryCloseable
         closeable.shutdown()
 
@@ -124,14 +123,14 @@ class ShutdownComplianceSmokeTest {
     }
 
     @Test
-    fun shutdownCanBeCalledMultipleTimes() = runTest {
+    fun shutdownCanBeCalledMultipleTimes() = runSmokeTest(otel) {
         val closeable = otel as TelemetryCloseable
         assertEquals(Success, closeable.shutdown())
         assertEquals(Success, closeable.shutdown())
     }
 
     @Test
-    fun forceFlushIndependentOfShutdown() = runTest {
+    fun forceFlushIndependentOfShutdown() = runSmokeTest(otel) {
         val closeable = otel as TelemetryCloseable
         assertEquals(Success, closeable.shutdown())
         assertEquals(Success, closeable.forceFlush())
