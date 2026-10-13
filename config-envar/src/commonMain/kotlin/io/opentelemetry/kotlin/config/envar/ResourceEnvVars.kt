@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Invalid
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Value
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
-import io.opentelemetry.kotlin.propagation.utils.percentDecodeBaggageValue
+import io.opentelemetry.kotlin.propagation.utils.parseResourceAttributes
 
 /**
  * Maps resource environment variables onto [ResourceBehavior].
@@ -34,26 +34,7 @@ class ResourceEnvVars(
     }
 
     private fun parseAttributes(value: String): EnvVarReadResult<Map<String, String>?> {
-        val attributes = mutableMapOf<String, String>()
-        for (rawEntry in value.split(ENTRY_DELIMITER)) {
-            val entry = rawEntry.trim(SPACE, HORIZONTAL_TAB)
-            val separatorIndex = entry.indexOf(KEY_VALUE_DELIMITER)
-            if (separatorIndex <= 0 || separatorIndex != entry.lastIndexOf(KEY_VALUE_DELIMITER)) {
-                return invalidAttributes()
-            }
-
-            val key = percentDecodeBaggageValue(
-                entry.substring(0, separatorIndex).trim(SPACE, HORIZONTAL_TAB),
-            )
-            val attributeValue = percentDecodeBaggageValue(
-                entry.substring(separatorIndex + 1).trim(SPACE, HORIZONTAL_TAB),
-            )
-            if (key.isNullOrEmpty() || attributeValue == null) {
-                return invalidAttributes()
-            }
-
-            attributes[key] = attributeValue
-        }
+        val attributes = parseResourceAttributes(value) ?: return invalidAttributes()
         return Value(attributes)
     }
 
@@ -67,10 +48,5 @@ class ResourceEnvVars(
     internal companion object {
         const val RESOURCE_ATTRIBUTES = "OTEL_RESOURCE_ATTRIBUTES"
         const val SERVICE_NAME = "OTEL_SERVICE_NAME"
-
-        private const val ENTRY_DELIMITER = ','
-        private const val KEY_VALUE_DELIMITER = '='
-        private const val SPACE = ' '
-        private const val HORIZONTAL_TAB = '\t'
     }
 }
