@@ -18,6 +18,7 @@ fun Project.configureDetekt() {
     detekt.apply {
         buildUponDefaultConfig = true
         autoCorrect = true
+        parallel = true
         config.from(project.files("${project.rootDir}/config/detekt/detekt.yml")) // overwrite default behaviour here
         baseline =
             project.file("${project.projectDir}/config/detekt/baseline.xml") // suppress pre-existing issues
@@ -34,9 +35,10 @@ fun Project.configureDetekt() {
     project.tasks.withType(Detekt::class.java).configureEach {
         jvmTarget = "11"
         reports {
-            html.required.set(true)
+            // set explicit report name to avoid tasks invalidating each others outputs
+            html.outputLocation.set(layout.buildDirectory.file("reports/detekt/$name.html"))
             xml.required.set(false)
-            txt.required.set(true)
+            txt.required.set(false)
             sarif.required.set(false)
             md.required.set(false)
         }
@@ -46,6 +48,7 @@ fun Project.configureDetekt() {
     }
 
     project.tasks.named("check").configure {
-        dependsOn(project.tasks.withType(Detekt::class.java))
+        // detektMetadataMain analyses the same sources as detektMetadataCommonMain
+        dependsOn(project.tasks.withType(Detekt::class.java).matching { it.name != "detektMetadataMain" })
     }
 }

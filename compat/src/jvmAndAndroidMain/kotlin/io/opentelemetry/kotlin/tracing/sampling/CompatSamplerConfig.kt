@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSampler
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.ComposableRuleBasedConfigDsl
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
@@ -18,7 +17,7 @@ import io.opentelemetry.sdk.extension.incubator.trace.samplers.SamplingPredicate
  * Provides the built-in samplers backed by opentelemetry-java.
  */
 @ExperimentalApi
-internal class CompatSamplerConfig(override val spanFactory: SpanFactory) : SamplerConfigDsl {
+internal class CompatSamplerConfig : SamplerConfigDsl {
 
     override fun alwaysOn(): Sampler = SamplerAdapter(OtelJavaSampler.alwaysOn())
 

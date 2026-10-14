@@ -27,7 +27,7 @@ internal class W3CTraceContextPropagatorFuzzTest {
     private val spanFactory = SpanFactoryImpl()
     private val contextFactory = ContextFactoryImpl(spanFactory)
 
-    private val propagator = W3CTraceContextPropagator(spanFactory = spanFactory)
+    private val propagator = W3CTraceContextPropagator()
 
     private val headerArb = arbitrary { rs ->
         val len = rs.random.nextInt(0, MAX_HEADER_LEN + 1)

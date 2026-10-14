@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateCodec
 import io.opentelemetry.kotlin.tracing.createSpanContext
 
@@ -12,9 +11,7 @@ import io.opentelemetry.kotlin.tracing.createSpanContext
  * https://www.w3.org/TR/trace-context/
  */
 @OptIn(ExperimentalApi::class)
-public class W3CTraceContextPropagator(
-    private val spanFactory: SpanFactory,
-) : TextMapPropagator {
+public class W3CTraceContextPropagator : TextMapPropagator {
 
     override fun fields(): Collection<String> = FIELDS
 
@@ -57,7 +54,7 @@ public class W3CTraceContextPropagator(
         if (!spanContext.isValid) {
             return context
         }
-        return context.storeSpan(spanFactory.fromSpanContext(spanContext))
+        return context.storeSpanContext(spanContext)
     }
 
     private companion object {

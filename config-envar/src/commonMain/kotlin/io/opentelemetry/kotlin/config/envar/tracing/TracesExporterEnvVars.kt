@@ -2,10 +2,8 @@ package io.opentelemetry.kotlin.config.envar.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.config.envar.Exporter
-import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Invalid
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Value
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
@@ -26,20 +24,7 @@ class TracesExporterEnvVars(
         //  fully implemented.
         when (Exporter.fromValue(name.lowercase())) {
             Exporter.CONSOLE -> Value(SpanProcessorBehavior(console = ConsoleExporterBehavior()))
-            Exporter.OTLP -> Value(
-                SpanProcessorBehavior(
-                    http = OtlpHttpExporterBehavior(
-                        endpoint = reader.readString(OTLP_TRACES_ENDPOINT)
-                            ?: reader.readString(OpenTelemetryEnvVars.OTLP_ENDPOINT),
-                        timeout = reader.readNonNegativeLong(OTLP_TRACES_TIMEOUT)
-                            ?: reader.readNonNegativeLong(OpenTelemetryEnvVars.OTLP_TIMEOUT),
-                        headers = OtlpHttpExporterBehavior.buildHeaderMap(
-                            reader.readString(OTLP_TRACES_HEADERS)
-                                ?: reader.readString(OpenTelemetryEnvVars.OTLP_HEADERS)
-                        )
-                    )
-                )
-            )
+            Exporter.OTLP -> Value(SpanProcessorBehavior(http = OtlpHttpSpanExporterEnvVars(reader).toBehavior()))
             null -> Invalid(EnvVarReadWarning(TRACES_EXPORTER, "Unknown value '$name'; ignoring"))
             else -> Value(null) // Known exporter, but not yet supported.
         }

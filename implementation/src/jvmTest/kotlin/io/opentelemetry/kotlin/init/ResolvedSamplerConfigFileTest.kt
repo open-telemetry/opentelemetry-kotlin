@@ -37,7 +37,7 @@ internal class ResolvedSamplerConfigFileTest {
             envVarReader = EnvVarReader(getEnvVar),
             sdkErrorHandler = cfg.sdkErrorHandler,
         ).read(cfg.configFilePath, cfg::toBehavior)
-        return SdkConfigFactory(cfg, behavior).generateTracingConfig().samplerFactory(spanFactory)
+        return SdkConfigFactory(cfg, behavior).generateTracingConfig().samplerFactory()
     }
 
     private fun Sampler.shouldSampleRoot(): Decision = shouldSample(

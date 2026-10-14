@@ -1,8 +1,9 @@
-package io.opentelemetry.kotlin.config.yaml
+package io.opentelemetry.kotlin.config.yaml.logging
 
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
+import io.opentelemetry.kotlin.behavior.LogRecordExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
 import io.opentelemetry.kotlin.behavior.SimpleLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.config.schema.model.BatchLogRecordProcessor
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
@@ -30,7 +31,9 @@ internal class LogRecordProcessorMapperTest {
         assertEquals(
             LogRecordProcessorBehavior(
                 console = ConsoleExporterBehavior(),
-                simple = SimpleLogRecordProcessorBehavior(),
+                simple = SimpleLogRecordProcessorBehavior(
+                    exporter = LogRecordExporterBehavior(console = ConsoleExporterBehavior())
+                ),
             ),
             processors.toBehavior(),
         )
@@ -43,7 +46,7 @@ internal class LogRecordProcessorMapperTest {
         )
         assertEquals(
             LogRecordProcessorBehavior(
-                http = OtlpHttpExporterBehavior(
+                http = OtlpHttpLogsExporterBehavior(
                     endpoint = "http://localhost:4317",
                     timeout = 10_000,
                     headers = mapOf("key" to "value")
@@ -70,7 +73,7 @@ internal class LogRecordProcessorMapperTest {
         val processors = listOf(LogRecordProcessor(batch = BatchLogRecordProcessor(exporter = httpExporter())))
         assertEquals(
             LogRecordProcessorBehavior(
-                http = OtlpHttpExporterBehavior(
+                http = OtlpHttpLogsExporterBehavior(
                     endpoint = "http://localhost:4317",
                     timeout = 10_000,
                     headers = mapOf("key" to "value")
@@ -98,7 +101,7 @@ internal class LogRecordProcessorMapperTest {
         )
         assertEquals(
             LogRecordProcessorBehavior(
-                http = OtlpHttpExporterBehavior(
+                http = OtlpHttpLogsExporterBehavior(
                     endpoint = "http://localhost:4317",
                     timeout = 10_000,
                     headers = mapOf("key" to "value")

@@ -10,7 +10,6 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
@@ -50,7 +49,7 @@ internal class TracerProviderConfigImplTest {
     @Test
     fun testDefaultSamplerParentBased() {
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).generateTracingConfig(base)
-        val sampler = assertIs<ParentBasedSampler>(cfg.samplerFactory(FakeSpanFactory()))
+        val sampler = assertIs<ParentBasedSampler>(cfg.samplerFactory())
         assertContains(sampler.description, "root:AlwaysOnSampler")
     }
 
@@ -88,7 +87,7 @@ internal class TracerProviderConfigImplTest {
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             sampler { alwaysOn() }
         }.generateTracingConfig(base)
-        assertNotNull(cfg.samplerFactory(FakeSpanFactory()))
+        assertNotNull(cfg.samplerFactory())
     }
 
     @Test
@@ -99,7 +98,7 @@ internal class TracerProviderConfigImplTest {
                 sampler
             }
         }.generateTracingConfig(base)
-        assertSame(sampler, cfg.samplerFactory(FakeSpanFactory()))
+        assertSame(sampler, cfg.samplerFactory())
     }
 
     @Test
@@ -255,7 +254,7 @@ internal class TracerProviderConfigImplTest {
         TracerProviderConfigImpl(
             clock,
             NoopSdkErrorHandler
-        ).generateTracingConfig(base).samplerFactory(FakeSpanFactory())
+        ).generateTracingConfig(base).samplerFactory()
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean): Context {
         val parentSpanContext = createSpanContext("12345678901234567890123456789012", "1234567890123456") {

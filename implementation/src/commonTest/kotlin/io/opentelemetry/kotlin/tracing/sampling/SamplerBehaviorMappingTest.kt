@@ -20,7 +20,7 @@ internal class SamplerBehaviorMappingTest {
     private val spanFactory = SpanFactoryImpl()
     private val contextFactory = ContextFactoryImpl(spanFactory)
 
-    private val samplerDsl = SamplerConfigImpl(spanFactory)
+    private val samplerDsl = SamplerConfigImpl()
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean): Context {
         val parentSpanContext = createSpanContext("12345678901234567890123456789012", "1234567890123456") {

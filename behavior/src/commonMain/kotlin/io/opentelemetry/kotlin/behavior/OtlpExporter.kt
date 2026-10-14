@@ -2,35 +2,29 @@ package io.opentelemetry.kotlin.behavior
 
 import io.opentelemetry.kotlin.ExperimentalApi
 
-@ExperimentalApi
 /**
- * Selecting the OTLP HTTP exporter.
+ * OTLP exporter.
  *
  * https://opentelemetry.io/docs/specs/otel/protocol/exporter/
  */
-data class OtlpHttpExporterBehavior(
+@ExperimentalApi
+interface OtlpExporter {
     // TODO: Add all fields supported by the spec.
     //  Blocked by #974. (OTLP exporter configuration surface)
     /**
      * Target to which the exporter is going to send spans, metrics, or logs.
      */
-    val endpoint: String? = null,
+    val endpoint: String?
+
     /**
      * Maximum time (in milliseconds) to wait for each export.
      */
-    val timeout: Long? = null,
+    val timeout: Long?
+
     /**
      * Configure headers.
      */
-    val headers: Map<String, String?>? = null,
-) : Behavior<OtlpHttpExporterBehavior> {
-    override fun mergeWith(higher: OtlpHttpExporterBehavior): OtlpHttpExporterBehavior {
-        return copy(
-            endpoint = higher.endpoint ?: endpoint,
-            timeout = higher.timeout ?: timeout,
-            headers = mergeMap(headers, higher.headers),
-        )
-    }
+    val headers: Map<String, String?>?
 
     companion object {
         fun buildHeaderMap(headerString: String?): Map<String, String>? {

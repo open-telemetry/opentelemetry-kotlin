@@ -4,10 +4,13 @@ import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.LogRecordExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
+import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SimpleLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.SimpleSpanProcessorBehavior
@@ -45,6 +48,14 @@ internal class OpenTelemetryConfigurationMapperTest {
             attributeLimits = AttributeLimitsBehavior(
                 attributeCountLimit = 128,
                 attributeValueLengthLimit = 4096,
+            ),
+            resource = ResourceBehavior(
+                schemaUrl = "https://opentelemetry.io/schemas/1.37.0",
+                attributes = mapOf(
+                    "service.namespace" to "demo",
+                    "service.version" to "1.0.0",
+                    "service.name" to "unknown_service",
+                ),
             ),
             tracerProvider = TracerProviderBehavior(
                 spanLimits = SpanLimitsBehavior(
@@ -107,7 +118,10 @@ internal class OpenTelemetryConfigurationMapperTest {
                     processor = SpanProcessorBehavior(console = console, simple = SimpleSpanProcessorBehavior()),
                 ),
                 loggerProvider = LoggerProviderBehavior(
-                    processor = LogRecordProcessorBehavior(console = console, simple = SimpleLogRecordProcessorBehavior()),
+                    processor = LogRecordProcessorBehavior(
+                        console = console,
+                        simple = SimpleLogRecordProcessorBehavior(exporter = LogRecordExporterBehavior(console = console)),
+                    ),
                 ),
             ),
             config.toBehavior(),
@@ -116,7 +130,11 @@ internal class OpenTelemetryConfigurationMapperTest {
 
     @Test
     fun mapsHttpExportersOntoProcessorBehavior() {
-        val http = OtlpHttpExporterBehavior(
+        val spanExporter = OtlpHttpSpanExporterBehavior(
+            endpoint = "http://localhost:4317",
+            timeout = 10_000,
+        )
+        val logsExporter = OtlpHttpLogsExporterBehavior(
             endpoint = "http://localhost:4317",
             timeout = 10_000,
         )
@@ -155,10 +173,10 @@ internal class OpenTelemetryConfigurationMapperTest {
         assertEquals(
             OpenTelemetryBehavior(
                 tracerProvider = TracerProviderBehavior(
-                    processor = SpanProcessorBehavior(http = http, simple = SimpleSpanProcessorBehavior()),
+                    processor = SpanProcessorBehavior(http = spanExporter, simple = SimpleSpanProcessorBehavior()),
                 ),
                 loggerProvider = LoggerProviderBehavior(
-                    processor = LogRecordProcessorBehavior(http = http, simple = SimpleLogRecordProcessorBehavior()),
+                    processor = LogRecordProcessorBehavior(http = logsExporter, simple = SimpleLogRecordProcessorBehavior()),
                 ),
             ),
             config.toBehavior(),

@@ -16,7 +16,7 @@ data class LogRecordProcessorBehavior(
     /**
      * HTTP log exporter.
      */
-    val http: OtlpHttpExporterBehavior? = null,
+    val http: OtlpHttpLogsExporterBehavior? = null,
 
     /**
      * Simple processor, which exports each log record as it is emitted.

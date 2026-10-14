@@ -37,7 +37,7 @@ internal class SdkConfigFactory(
 
     private val baseResource = resourceFactory.sdkDefaultResource(SdkMode.REGULAR)
         .merge(cfg.resourceDetectionConfig.detectors.detectResource(resourceFactory, cfg.sdkErrorHandler))
-        .merge(cfg.globalResourceConfig.toBehavior().toResource())
+        .merge(behavior.resource?.toResource() ?: resourceFactory.empty)
 
     fun generateTracingConfig(): TracingConfig {
         cfg.tracingConfig.applyResolvedSampler(sampler)

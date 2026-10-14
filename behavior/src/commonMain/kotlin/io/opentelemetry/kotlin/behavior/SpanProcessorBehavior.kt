@@ -16,7 +16,7 @@ data class SpanProcessorBehavior(
     /**
      * HTTP log exporter.
      */
-    val http: OtlpHttpExporterBehavior? = null,
+    val http: OtlpHttpSpanExporterBehavior? = null,
 
     /**
      * Simple processor, which exports each span as it ends.

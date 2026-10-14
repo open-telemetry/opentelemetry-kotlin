@@ -72,7 +72,7 @@ internal class TracerProviderConfigImpl(
             processor = processor ?: processorFromBehavior(processorBehavior),
             resource = base.merge(resourceConfig.toBehavior().toResource()),
             sdkErrorHandler = sdkErrorHandler,
-            samplerFactory = { spanFactory -> SamplerConfigImpl(spanFactory).action() },
+            samplerFactory = { SamplerConfigImpl().action() },
             tracerConfigurator = tracerConfigurator,
         )
     }

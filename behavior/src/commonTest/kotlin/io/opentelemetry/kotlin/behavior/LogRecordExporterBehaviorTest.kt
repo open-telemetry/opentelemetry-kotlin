@@ -8,7 +8,7 @@ internal class LogRecordExporterBehaviorTest {
     @Test
     fun mergesExportersFieldByFieldAcrossLayers() {
         val console = ConsoleExporterBehavior()
-        val http = OtlpHttpExporterBehavior(endpoint = "https://example.com")
+        val http = OtlpHttpLogsExporterBehavior(endpoint = "https://example.com")
 
         val merged = LogRecordExporterBehavior(console = console)
             .mergeWith(LogRecordExporterBehavior(http = http))
@@ -18,8 +18,8 @@ internal class LogRecordExporterBehaviorTest {
 
     @Test
     fun higherLayerWinsPerExporter() {
-        val low = OtlpHttpExporterBehavior(endpoint = "https://low.example.com")
-        val high = OtlpHttpExporterBehavior(endpoint = "https://high.example.com")
+        val low = OtlpHttpLogsExporterBehavior(endpoint = "https://low.example.com")
+        val high = OtlpHttpLogsExporterBehavior(endpoint = "https://high.example.com")
 
         val merged = LogRecordExporterBehavior(http = low).mergeWith(LogRecordExporterBehavior(http = high))
 

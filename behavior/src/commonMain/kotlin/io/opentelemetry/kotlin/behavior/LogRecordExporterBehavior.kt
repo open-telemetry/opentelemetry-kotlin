@@ -19,7 +19,7 @@ data class LogRecordExporterBehavior(
     /**
      * HTTP log exporter.
      * */
-    val http: OtlpHttpExporterBehavior? = null,
+    val http: OtlpHttpLogsExporterBehavior? = null,
 
 ) : Behavior<LogRecordExporterBehavior> {
 

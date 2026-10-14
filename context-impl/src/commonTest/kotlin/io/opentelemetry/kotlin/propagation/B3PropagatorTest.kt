@@ -19,9 +19,9 @@ internal class B3PropagatorTest {
     private val contextFactory = ContextFactoryImpl(spanFactory)
 
     private val singlePropagator =
-        B3Propagator(B3Format.SINGLE, spanFactory)
+        B3Propagator(B3Format.SINGLE)
     private val multiPropagator =
-        B3Propagator(B3Format.MULTI, spanFactory)
+        B3Propagator(B3Format.MULTI)
 
     private val traceId = "0af7651916cd43dd8448eb211c80319c"
     private val spanId = "b7ad6b7169203331"

@@ -72,4 +72,18 @@ internal class SpanExtTest {
         val retrievedSpan = ctx.extractSpan()
         assertSpanContextsMatch(spanContext.toOtelKotlinSpanContext(), retrievedSpan.spanContext)
     }
+
+    @Test
+    fun `test store span context round trip`() {
+        val root = contextFactory.root()
+        val ctx = root.storeSpanContext(validSpanContext)
+        assertSpanContextsMatch(validSpanContext, ctx.extractSpan().spanContext)
+        assertSpanContextsMatch(createInvalidSpanContext(), root.extractSpan().spanContext)
+    }
+
+    @Test
+    fun `test store invalid span context`() {
+        val ctx = contextFactory.root().storeSpanContext(createInvalidSpanContext())
+        assertSpanContextsMatch(createInvalidSpanContext(), ctx.extractSpan().spanContext)
+    }
 }

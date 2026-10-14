@@ -31,7 +31,7 @@ internal class SimpleLogRecordProcessorBehaviorTest {
     @Test
     fun mergesExporterAcrossLayers() {
         val console = ConsoleExporterBehavior()
-        val http = OtlpHttpExporterBehavior(endpoint = "https://example.com")
+        val http = OtlpHttpLogsExporterBehavior(endpoint = "https://example.com")
 
         val merged = SimpleLogRecordProcessorBehavior(LogRecordExporterBehavior(console = console))
             .mergeWith(SimpleLogRecordProcessorBehavior(LogRecordExporterBehavior(http = http)))

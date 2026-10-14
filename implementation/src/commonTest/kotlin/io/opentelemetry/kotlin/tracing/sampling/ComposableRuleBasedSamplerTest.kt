@@ -27,7 +27,7 @@ internal class ComposableRuleBasedSamplerTest {
     private val spanFactory = SpanFactoryImpl()
     private val contextFactory = ContextFactoryImpl(spanFactory)
 
-    private val samplerDsl = SamplerConfigImpl(spanFactory)
+    private val samplerDsl = SamplerConfigImpl()
 
     private val traceId = "000000000000000000ffffffffffffff"
 
