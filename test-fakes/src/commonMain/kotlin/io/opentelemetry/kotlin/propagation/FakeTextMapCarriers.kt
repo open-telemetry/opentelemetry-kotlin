@@ -16,3 +16,17 @@ object FakeTextMapSetter : TextMapSetter<MutableMap<String, String>> {
         carrier?.set(key, value)
     }
 }
+
+@OptIn(ExperimentalApi::class)
+object ThrowingTextMapGetter : TextMapGetter<Map<String, String>> {
+    override fun keys(carrier: Map<String, String>): Collection<String> = error("keys failed")
+    override fun get(carrier: Map<String, String>?, key: String): String = error("get failed")
+    override fun getAll(carrier: Map<String, String>?, key: String): List<String> = error("getAll failed")
+}
+
+@OptIn(ExperimentalApi::class)
+object ThrowingTextMapSetter : TextMapSetter<MutableMap<String, String>> {
+    override fun set(carrier: MutableMap<String, String>?, key: String, value: String) {
+        error("set failed")
+    }
+}

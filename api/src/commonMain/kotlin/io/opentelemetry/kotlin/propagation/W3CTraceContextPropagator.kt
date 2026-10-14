@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.propagation
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateCodec
+import io.opentelemetry.kotlin.propagation.utils.safely
 import io.opentelemetry.kotlin.tracing.createSpanContext
 
 /**
@@ -20,6 +21,13 @@ internal object W3CTraceContextPropagator : TextMapPropagator {
     override fun fields(): Collection<String> = FIELDS
 
     override fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>) {
+        safely { injectUnguarded(context, carrier, setter) }
+    }
+
+    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context =
+        safely(context) { extractUnguarded(context, carrier, getter) }
+
+    private fun <T> injectUnguarded(context: Context, carrier: T?, setter: TextMapSetter<T>) {
         val spanContext = context.extractSpan().spanContext
         if (!spanContext.isValid) {
             return
@@ -40,7 +48,7 @@ internal object W3CTraceContextPropagator : TextMapPropagator {
         }
     }
 
-    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context {
+    private fun <T> extractUnguarded(context: Context, carrier: T?, getter: TextMapGetter<T>): Context {
         val rawTraceparent = getter.get(carrier, TRACEPARENT) ?: return context
         val parsed = TraceParent.decode(rawTraceparent) ?: return context
         val rawTracestate = getter.get(carrier, TRACESTATE)

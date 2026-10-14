@@ -159,6 +159,31 @@ internal class TextMapPropagatorAdapterTest {
         assertNull(adapter.get(null, "k"))
     }
 
+    @Test
+    fun `inject swallows a throwing Kotlin setter`() {
+        val javaCtx = OtelJavaBaggage.builder()
+            .put("k", "v")
+            .build()
+            .storeInContext(OtelJavaContext.root())
+        TextMapPropagatorAdapter(impl).inject(ContextAdapter(javaCtx), mutableMapOf(), ThrowingTextMapSetter)
+    }
+
+    @Test
+    fun `extract returns input context when the Kotlin getter throws`() {
+        val input = ContextAdapter(OtelJavaContext.root())
+        val extracted = TextMapPropagatorAdapter(impl).extract(input, mapOf("baggage" to "k=v"), ThrowingTextMapGetter)
+        assertSame(input, extracted)
+    }
+
+    @Test
+    fun `Kotlin propagator exposed to Java swallows anything it throws`() {
+        val adapter = OtelJavaTextMapPropagatorAdapter(ThrowingTextMapPropagator)
+        val javaCtx = OtelJavaContext.root()
+        assertTrue(adapter.fields().isEmpty())
+        adapter.inject(javaCtx, mutableMapOf<String, String>()) { _, _, _ -> }
+        assertSame(javaCtx, adapter.extract(javaCtx, emptyMap<String, String>(), JavaMapGetter))
+    }
+
     private object MapSetter : TextMapSetter<MutableMap<String, String>> {
         override fun set(carrier: MutableMap<String, String>?, key: String, value: String) {
             carrier?.set(key, value)

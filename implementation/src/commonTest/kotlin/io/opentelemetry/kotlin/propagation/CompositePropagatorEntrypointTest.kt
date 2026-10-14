@@ -78,4 +78,38 @@ internal class CompositePropagatorEntrypointTest {
         composite.extract(FakeContext(), emptyMap(), FakeTextMapGetter)
         assertEquals("first", observed)
     }
+
+    @Test
+    fun `fields skips a delegate whose fields throws`() {
+        val composite = createCompositePropagator(
+            ThrowingTextMapPropagator,
+            FakeTextMapPropagator(listOf("b")),
+        )
+        assertEquals(listOf("b"), composite.fields().toList())
+    }
+
+    @Test
+    fun `inject continues past a throwing delegate`() {
+        val b = FakeTextMapPropagator(listOf("b"))
+        val composite = createCompositePropagator(ThrowingTextMapPropagator, b)
+        val carrier = mutableMapOf<String, String>()
+        composite.inject(FakeContext(), carrier, FakeTextMapSetter)
+
+        assertEquals(listOf("b"), carrier.keys.toList())
+        assertTrue(b.injectCalled)
+    }
+
+    @Test
+    fun `extract skips a throwing delegate and keeps the context extracted so far`() {
+        val keyA = FakeContextKey<String>("a")
+        val keyC = FakeContextKey<String>("c")
+        val composite = createCompositePropagator(
+            FakeTextMapPropagator(onExtract = { it.set(keyA, "alpha") }),
+            ThrowingTextMapPropagator,
+            FakeTextMapPropagator(onExtract = { it.set(keyC, "gamma") }),
+        )
+        val result = composite.extract(FakeContext(), emptyMap(), FakeTextMapGetter)
+        assertIs<FakeContext>(result)
+        assertEquals<Map<ContextKey<*>, Any?>>(mapOf(keyA to "alpha", keyC to "gamma"), result.attrs)
+    }
 }

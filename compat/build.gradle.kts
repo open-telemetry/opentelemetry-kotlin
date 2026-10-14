@@ -20,6 +20,7 @@ kotlin {
                 implementation(project(":model"))
                 implementation(project(":java-typealiases"))
                 implementation(project(":platform-implementations"))
+                implementation(project(":propagation-utils"))
                 implementation(libs.kotlinx.coroutines)
                 implementation(project.dependencies.platform(libs.opentelemetry.bom))
                 implementation(project.dependencies.platform(libs.opentelemetry.bom.alpha))

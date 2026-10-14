@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.propagation.utils.percentDecodeBaggageValue
 import io.opentelemetry.kotlin.propagation.utils.percentEncodeBaggageValue
+import io.opentelemetry.kotlin.propagation.utils.safely
 
 /**
  * W3C Baggage HTTP header propagator.
@@ -30,6 +31,13 @@ internal object W3CBaggagePropagator : TextMapPropagator {
     override fun fields(): Collection<String> = FIELDS
 
     override fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>) {
+        safely { injectUnguarded(context, carrier, setter) }
+    }
+
+    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context =
+        safely(context) { extractUnguarded(context, carrier, getter) }
+
+    private fun <T> injectUnguarded(context: Context, carrier: T?, setter: TextMapSetter<T>) {
         val entries = context.extractBaggage().asMap()
         if (entries.isEmpty()) {
             return
@@ -38,7 +46,7 @@ internal object W3CBaggagePropagator : TextMapPropagator {
         setter.set(carrier, FIELD, header)
     }
 
-    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context {
+    private fun <T> extractUnguarded(context: Context, carrier: T?, getter: TextMapGetter<T>): Context {
         val combined = getter.getAll(carrier, FIELD).joinToString(ENTRY_DELIMITER.toString())
         if (combined.isEmpty()) {
             return context

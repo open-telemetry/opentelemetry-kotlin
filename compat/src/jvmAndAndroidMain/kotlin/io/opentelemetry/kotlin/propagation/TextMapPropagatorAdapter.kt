@@ -8,24 +8,25 @@ import io.opentelemetry.kotlin.aliases.OtelJavaTextMapSetter
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextAdapter
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
+import io.opentelemetry.kotlin.propagation.utils.safely
 
 @OptIn(ExperimentalApi::class)
 internal class TextMapPropagatorAdapter(
     internal val impl: OtelJavaTextMapPropagator,
 ) : TextMapPropagator {
 
-    override fun fields(): Collection<String> = impl.fields()
+    override fun fields(): Collection<String> = safely(emptyList()) { impl.fields() }
 
     override fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>) {
         val javaCtx = context.toOtelJavaContext() ?: return
         val javaSetter = setter.toOtelJavaTextMapSetter() ?: return
-        impl.inject(javaCtx, carrier, javaSetter)
+        safely { impl.inject(javaCtx, carrier, javaSetter) }
     }
 
     override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context {
         val javaCtx = context.toOtelJavaContext() ?: return context
         val javaGetter = getter.toOtelJavaTextMapGetter() ?: return context
-        return impl.extract(javaCtx, carrier, javaGetter).toOtelKotlinContext()
+        return safely(context) { impl.extract(javaCtx, carrier, javaGetter).toOtelKotlinContext() }
     }
 
     private fun Context.toOtelJavaContext(): OtelJavaContext? = (this as? ContextAdapter)?.impl

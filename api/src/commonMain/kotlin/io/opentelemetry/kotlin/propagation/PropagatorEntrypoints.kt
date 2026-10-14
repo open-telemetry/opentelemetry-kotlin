@@ -6,7 +6,8 @@ import io.opentelemetry.kotlin.init.B3Format
 /**
  * Returns a [TextMapPropagator] that sequentially delegates to each of [propagators]. Injection
  * invokes every delegate in order, extraction threads the context through each delegate in order,
- * and the declared fields are the de-duplicated union of each delegate's fields.
+ * and the declared fields are the de-duplicated union of each delegate's fields. A delegate that
+ * throws is skipped, and the remaining delegates still run.
  *
  * This does not require an [io.opentelemetry.kotlin.OpenTelemetry] instance.
  *

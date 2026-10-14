@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.init.B3Format
 import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_HEX_LENGTH
 import io.opentelemetry.kotlin.propagation.utils.isAllZerosHex
 import io.opentelemetry.kotlin.propagation.utils.isValidHex
+import io.opentelemetry.kotlin.propagation.utils.safely
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.createSpanContext
 
@@ -29,6 +30,17 @@ internal class B3Propagator private constructor(
     }
 
     override fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>) {
+        safely { injectUnguarded(context, carrier, setter) }
+    }
+
+    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context =
+        safely(context) {
+            extractSingle(context, carrier, getter)
+                ?: extractMulti(context, carrier, getter)
+                ?: context
+        }
+
+    private fun <T> injectUnguarded(context: Context, carrier: T?, setter: TextMapSetter<T>) {
         val spanContext = context.extractSpan().spanContext
         if (!spanContext.isValid) { return }
         val debug = context.isB3Debug()
@@ -37,11 +49,6 @@ internal class B3Propagator private constructor(
             B3Format.MULTI -> injectMulti(spanContext, debug, carrier, setter)
         }
     }
-
-    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context =
-        extractSingle(context, carrier, getter)
-            ?: extractMulti(context, carrier, getter)
-            ?: context
 
     private fun <T> injectSingle(
         spanContext: SpanContext,
