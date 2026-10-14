@@ -28,8 +28,16 @@ data class ResourceBehavior(
 ) : Behavior<ResourceBehavior> {
 
     override fun mergeWith(higher: ResourceBehavior): ResourceBehavior = copy(
-        serviceName = higher.serviceName ?: serviceName,
+        serviceName = when {
+            higher.serviceName != null -> higher.serviceName
+            higher.attributes?.containsKey(SERVICE_NAME) == true -> null
+            else -> serviceName
+        },
         schemaUrl = higher.schemaUrl ?: schemaUrl,
         attributes = mergeMap(attributes, higher.attributes),
     )
+
+    private companion object {
+        const val SERVICE_NAME = "service.name"
+    }
 }

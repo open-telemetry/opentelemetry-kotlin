@@ -33,8 +33,6 @@ kotlin {
         commonTest {
             dependencies {
                 implementation(project(":test-fakes"))
-                implementation(libs.kotlin.test.common)
-                implementation(libs.kotlin.test.common.annotations)
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.ktor.client.mock)
             }

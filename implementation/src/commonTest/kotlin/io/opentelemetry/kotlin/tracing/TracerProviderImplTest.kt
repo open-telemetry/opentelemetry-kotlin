@@ -11,8 +11,6 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
-import io.opentelemetry.kotlin.factory.FakeSpanFactory
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.init.config.DefaultSampler
 import io.opentelemetry.kotlin.init.config.TracingConfig
@@ -48,7 +46,6 @@ internal class TracerProviderImplTest {
             clock = FakeClock(),
             tracingConfig = tracingConfig,
             contextFactory = FakeContextFactory(),
-            spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
             spanLimits = SpanLimitsBehavior(),
@@ -72,7 +69,6 @@ internal class TracerProviderImplTest {
             clock = FakeClock(),
             tracingConfig = config,
             contextFactory = FakeContextFactory(),
-            spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
             spanLimits = SpanLimitsBehavior(),
@@ -170,7 +166,6 @@ internal class TracerProviderImplTest {
             clock = FakeClock(),
             tracingConfig = config,
             contextFactory = FakeContextFactory(),
-            spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
             spanLimits = SpanLimitsBehavior(),
@@ -200,7 +195,6 @@ internal class TracerProviderImplTest {
             clock = FakeClock(),
             tracingConfig = config,
             contextFactory = FakeContextFactory(),
-            spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
             spanLimits = SpanLimitsBehavior(),
@@ -265,8 +259,8 @@ internal class TracerProviderImplTest {
     @Test
     fun testInvalidComposableProbabilityFallsBackToDefaultSampler() {
         val errorHandler = FakeSdkErrorHandler()
-        val provider = createProvider(errorHandler = errorHandler, samplerFactory = { factory ->
-            SamplerConfigImpl(factory).composite { composableProbability(1.5) }
+        val provider = createProvider(errorHandler = errorHandler, samplerFactory = {
+            SamplerConfigImpl().composite { composableProbability(1.5) }
         })
 
         assertTrue(provider.getTracer(name = "test").startSpan("test-span").isRecording())
@@ -298,7 +292,7 @@ internal class TracerProviderImplTest {
     private fun createProvider(
         processor: SpanProcessor? = FakeSpanProcessor(),
         errorHandler: SdkErrorHandler = NoopSdkErrorHandler,
-        samplerFactory: (SpanFactory) -> Sampler = { DefaultSampler },
+        samplerFactory: () -> Sampler = { DefaultSampler },
     ) = TracerProviderImpl(
         clock = FakeClock(),
         tracingConfig = TracingConfig(
@@ -308,7 +302,6 @@ internal class TracerProviderImplTest {
             samplerFactory = samplerFactory,
         ),
         contextFactory = FakeContextFactory(),
-        spanFactory = FakeSpanFactory(),
         idGenerator = FakeIdGenerator(),
         attributeLimits = AttributeLimitsBehavior(),
         spanLimits = SpanLimitsBehavior(),

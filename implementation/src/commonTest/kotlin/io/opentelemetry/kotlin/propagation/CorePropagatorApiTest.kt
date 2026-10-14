@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.FakeContext
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.init.B3Format
 import io.opentelemetry.kotlin.init.PropagatorConfigImpl
 import kotlin.test.Test
@@ -14,7 +13,6 @@ import kotlin.test.assertTrue
 internal class CorePropagatorApiTest {
 
     private val dsl = PropagatorConfigImpl()
-    private val spanFactory = SpanFactoryImpl()
 
     @Test
     fun `composite with single propagator delegates to it`() {
@@ -48,7 +46,6 @@ internal class CorePropagatorApiTest {
     @Test
     fun `w3cTraceContext returns a propagator for traceparent and tracestate fields`() {
         val propagator = dsl.w3cTraceContext()
-        installFactories()
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
     }
 
@@ -61,21 +58,18 @@ internal class CorePropagatorApiTest {
     @Test
     fun `b3 single returns propagator with b3 field`() {
         val propagator = dsl.b3(B3Format.SINGLE)
-        installFactories()
         assertEquals(listOf("b3"), propagator.fields().toList())
     }
 
     @Test
     fun `b3 multi returns propagator with X-B3 fields`() {
         val propagator = dsl.b3(B3Format.MULTI)
-        installFactories()
         assertEquals(listOf("X-B3-TraceId", "X-B3-SpanId", "X-B3-Sampled"), propagator.fields().toList())
     }
 
     @Test
     fun `b3 default format is SINGLE`() {
         val propagator = dsl.b3()
-        installFactories()
         assertEquals(listOf("b3"), propagator.fields().toList())
     }
 
@@ -83,9 +77,5 @@ internal class CorePropagatorApiTest {
     fun `b3 call captures result and buildPropagator returns it`() {
         val captured = dsl.b3(B3Format.SINGLE)
         assertSame(captured, dsl.buildPropagator())
-    }
-
-    private fun installFactories() {
-        dsl.installFactories(spanFactory = spanFactory)
     }
 }

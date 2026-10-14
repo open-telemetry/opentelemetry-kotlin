@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.context.ContextKeyImpl
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.B3Format
 import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_HEX_LENGTH
 import io.opentelemetry.kotlin.propagation.utils.isAllZerosHex
@@ -23,7 +22,6 @@ import io.opentelemetry.kotlin.tracing.contextimpl.createSpanContext
 @OptIn(ExperimentalApi::class)
 public class B3Propagator(
     private val format: B3Format,
-    private val spanFactory: SpanFactory,
 ) : TextMapPropagator {
 
     override fun fields(): Collection<String> = when (format) {
@@ -98,7 +96,7 @@ public class B3Propagator(
         if (!spanContext.isValid) {
             return null
         }
-        return context.storeSpan(spanFactory.fromSpanContext(spanContext)).let {
+        return context.storeSpanContext(spanContext).let {
             if (debug) { it.withB3Debug() } else { it }
         }
     }
@@ -113,7 +111,7 @@ public class B3Propagator(
         if (!spanContext.isValid) {
             return null
         }
-        return context.storeSpan(spanFactory.fromSpanContext(spanContext)).let {
+        return context.storeSpanContext(spanContext).let {
             if (debug) { it.withB3Debug() } else { it }
         }
     }

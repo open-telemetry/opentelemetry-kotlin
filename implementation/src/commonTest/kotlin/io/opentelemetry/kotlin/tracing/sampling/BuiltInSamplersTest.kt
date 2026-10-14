@@ -35,7 +35,7 @@ internal class BuiltInSamplersTest {
     private val contextFactory = ContextFactoryImpl(spanFactory)
     private val scope = InstrumentationScopeInfoImpl("test", null, null, emptyMap())
 
-    private val samplerDsl = SamplerConfigImpl(spanFactory)
+    private val samplerDsl = SamplerConfigImpl()
 
     private fun buildTracer(sampler: Sampler) = TracerImpl(
         clock = clock,

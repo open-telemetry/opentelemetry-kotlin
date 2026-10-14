@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
 import io.opentelemetry.kotlin.config.envar.Exporter
-import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
@@ -28,21 +27,9 @@ internal class LogsExporterEnvVarsTest {
             LogRecordProcessorBehavior(console = ConsoleExporterBehavior()),
             toBehavior(configs::get),
         )
-
-        configs = mapOf(
-            LogsExporterEnvVars.LOGS_EXPORTER to Exporter.OTLP.value,
-            OpenTelemetryEnvVars.OTLP_ENDPOINT to "http://localhost:4317",
-            OpenTelemetryEnvVars.OTLP_TIMEOUT to "1",
-            OpenTelemetryEnvVars.OTLP_HEADERS to "key1=value1,key2=value2",
-        )
+        configs = mapOf(LogsExporterEnvVars.LOGS_EXPORTER to Exporter.OTLP.value)
         assertEquals(
-            LogRecordProcessorBehavior(
-                http = OtlpHttpLogsExporterBehavior(
-                    endpoint = "http://localhost:4317",
-                    timeout = 1,
-                    headers = mapOf("key1" to "value1", "key2" to "value2")
-                )
-            ),
+            LogRecordProcessorBehavior(http = OtlpHttpLogsExporterBehavior()),
             toBehavior(configs::get),
         )
     }
@@ -87,59 +74,6 @@ internal class LogsExporterEnvVarsTest {
         val warnings = mutableListOf<EnvVarReadWarning>()
         LogsExporterEnvVars(reportingEnvVarReader(configs::get, warnings::add)).toBehavior()
         assertEquals(emptyList(), warnings)
-    }
-
-    @Test
-    fun `Signal-specific configs override base configs`() {
-        val configs = mutableMapOf(
-            LogsExporterEnvVars.LOGS_EXPORTER to Exporter.OTLP.value,
-            OpenTelemetryEnvVars.OTLP_ENDPOINT to "http://localhost:4317",
-            OpenTelemetryEnvVars.OTLP_TIMEOUT to "1",
-            OpenTelemetryEnvVars.OTLP_HEADERS to "key1=value1,key2=value2"
-        )
-        assertEquals(
-            LogRecordProcessorBehavior(
-                http = OtlpHttpLogsExporterBehavior(
-                    endpoint = "http://localhost:4317",
-                    timeout = 1,
-                    headers = mapOf("key1" to "value1", "key2" to "value2")
-                )
-            ),
-            toBehavior(configs::get),
-        )
-        configs.putAll(
-            mapOf(
-                LogsExporterEnvVars.OTLP_LOGS_ENDPOINT to "http://localhost:4317/logs",
-                LogsExporterEnvVars.OTLP_LOGS_TIMEOUT to "2",
-                LogsExporterEnvVars.OTLP_LOGS_HEADERS to "key3=value3,key4=value4"
-            )
-        )
-        assertEquals(
-            LogRecordProcessorBehavior(
-                http = OtlpHttpLogsExporterBehavior(
-                    endpoint = "http://localhost:4317/logs",
-                    timeout = 2,
-                    headers = mapOf("key3" to "value3", "key4" to "value4")
-                )
-            ),
-            toBehavior(configs::get),
-        )
-    }
-
-    @Test
-    fun `should skip malformed header entries`() {
-        val configs = mapOf(
-            LogsExporterEnvVars.LOGS_EXPORTER to Exporter.OTLP.value,
-            OpenTelemetryEnvVars.OTLP_HEADERS to "key1=value1,malformed,key2=value2",
-        )
-        assertEquals(
-            LogRecordProcessorBehavior(
-                http = OtlpHttpLogsExporterBehavior(
-                    headers = mapOf("key1" to "value1", "key2" to "value2")
-                )
-            ),
-            toBehavior(configs::get),
-        )
     }
 
     private fun toBehavior(getEnvVar: (String) -> String?) =

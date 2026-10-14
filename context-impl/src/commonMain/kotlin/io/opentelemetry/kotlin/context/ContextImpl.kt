@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.tracing.Span
+import io.opentelemetry.kotlin.tracing.SpanContext
 
 private val BAGGAGE_KEY: ContextKey<Baggage> = ContextKeyImpl("otel-kotlin-baggage")
 private val SPAN_KEY: ContextKey<Span> = ContextKeyImpl("otel-kotlin-span")
@@ -44,6 +45,9 @@ internal class ContextImpl(
     }
 
     override fun storeSpan(span: Span): Context = set(SPAN_KEY, span)
+
+    override fun storeSpanContext(spanContext: SpanContext): Context =
+        storeSpan(spanFactory.fromSpanContext(spanContext))
 
     override fun extractSpan(): Span = get(SPAN_KEY) ?: spanFactory.invalid
 

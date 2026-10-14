@@ -62,7 +62,7 @@ internal class TracerRandomTraceIdFlagTest {
     fun testRandomFlagIsPropagatedInTraceParentHeader() {
         val idGenerator = IdGeneratorImpl()
         val spanFactory = SpanFactoryImpl()
-        val propagator = W3CTraceContextPropagator(spanFactory = spanFactory)
+        val propagator = W3CTraceContextPropagator()
         val span = buildTracer(idGenerator).startSpan("test")
         val carrier = mutableMapOf<String, String>()
         propagator.inject(ContextFactoryImpl(spanFactory).root().storeSpan(span), carrier, FakeTextMapSetter)

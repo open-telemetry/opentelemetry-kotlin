@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotSame
-import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
@@ -20,27 +19,8 @@ internal class PropagatorConfigImplTest {
     private val contextWithSpan = contextFactory.root().storeSpan(spanFactory.fromSpanContext(FakeSpanContext.VALID))
 
     @Test
-    fun `w3cTraceContext does nothing if factories are not installed`() {
+    fun `w3cTraceContext injects and extracts`() {
         val propagator = PropagatorConfigImpl().apply { w3cTraceContext() }.buildPropagator()
-        assertEquals(emptyList(), propagator.fields().toList())
-
-        val carrier = mutableMapOf<String, String>()
-        propagator.inject(contextWithSpan, carrier, FakeTextMapSetter)
-        assertTrue(carrier.isEmpty())
-
-        val result = propagator.extract(
-            context = contextFactory.root(),
-            carrier = mapOf("traceparent" to "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"),
-            getter = FakeTextMapGetter
-        )
-        assertSame(contextFactory.root(), result)
-    }
-
-    @Test
-    fun `w3cTraceContext routes through delegate once factories are installed`() {
-        val config = PropagatorConfigImpl().apply { w3cTraceContext() }
-        config.installFactories(spanFactory)
-        val propagator = config.buildPropagator()
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
 
         val carrier = mutableMapOf<String, String>()
