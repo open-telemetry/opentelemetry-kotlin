@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin
 import io.opentelemetry.kotlin.config.NoopConfigProperties
 import io.opentelemetry.kotlin.config.NoopConfigProvider
 import io.opentelemetry.kotlin.context.NoopContext
-import io.opentelemetry.kotlin.context.NoopContextKey
+import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.metrics.NoopObservableDoubleMeasurement
@@ -137,8 +137,7 @@ internal class NoopTests {
     fun testNoopExplicitContext() {
         val otel = NoopOpenTelemetry
 
-        val key = otel.context.createKey<String>("key")
-        assertTrue(key is NoopContextKey)
+        val key = createContextKey<String>("key")
 
         val ctx = otel.context.root()
 

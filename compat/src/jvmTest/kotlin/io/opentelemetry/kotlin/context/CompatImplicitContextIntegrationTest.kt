@@ -45,7 +45,7 @@ internal class CompatImplicitContextIntegrationTest {
 
     @Test
     fun `kotlin context value is visible to java`() {
-        val key = otel.context.createKey<String>("key")
+        val key = createContextKey<String>("key")
         val scope = otel.context.current().set(key, "value").attach()
         try {
             assertEquals("value", OtelJavaContext.current().get(key.toOtelJavaContextKey()))
@@ -131,7 +131,7 @@ internal class CompatImplicitContextIntegrationTest {
 
     @Test
     fun `nested scopes restore across apis`() {
-        val kotlinKey = otel.context.createKey<String>("kotlin")
+        val kotlinKey = createContextKey<String>("kotlin")
         val javaKey = OtelJavaContextKey.named<String>("java")
 
         val outer = otel.context.current().set(kotlinKey, "outer").attach()

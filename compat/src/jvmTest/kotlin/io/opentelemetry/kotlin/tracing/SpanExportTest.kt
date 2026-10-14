@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
@@ -433,7 +434,7 @@ internal class SpanExportTest {
 
         // Create a context key and add a test value
         val currentContext = harness.kotlinApi.context.current()
-        val contextKey = harness.kotlinApi.context.createKey<String>("best_team")
+        val contextKey = createContextKey<String>("best_team")
         val testContextValue = "independiente"
         val testContext = currentContext.set(contextKey, testContextValue)
 

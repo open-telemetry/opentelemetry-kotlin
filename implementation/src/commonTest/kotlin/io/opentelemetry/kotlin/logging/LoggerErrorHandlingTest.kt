@@ -5,8 +5,6 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.ContextKey
-import io.opentelemetry.kotlin.context.FakeContextKey
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -180,8 +178,6 @@ internal class LoggerErrorHandlingTest {
         override fun root(): Context = delegate.root()
 
         override fun current(): Context = boom()
-
-        override fun <T> createKey(name: String): ContextKey<T> = FakeContextKey(name)
     }
 
     private class HostileThrowable : Throwable() {

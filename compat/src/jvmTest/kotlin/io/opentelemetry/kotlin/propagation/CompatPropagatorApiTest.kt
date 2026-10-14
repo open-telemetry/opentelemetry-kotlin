@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.config.dsl.PropagatorConfigImpl
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
+import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -18,7 +19,7 @@ internal class CompatPropagatorApiTest {
 
     @Test
     fun `composite of zero propagators returns a working noop`() {
-        val key: ContextKey<String> = contextFactory.createKey("k")
+        val key: ContextKey<String> = createContextKey("k")
         val composite = dsl.composite()
         assertTrue(composite.fields().isEmpty())
 
@@ -61,8 +62,8 @@ internal class CompatPropagatorApiTest {
 
     @Test
     fun `composite threads context through extract delegates left-to-right`() {
-        val keyA: ContextKey<String> = contextFactory.createKey("a")
-        val keyB: ContextKey<String> = contextFactory.createKey("b")
+        val keyA: ContextKey<String> = createContextKey("a")
+        val keyB: ContextKey<String> = createContextKey("b")
         val composite = dsl.composite(
             ContextWritingPropagator(keyA, "alpha"),
             ContextWritingPropagator(keyB, "beta"),

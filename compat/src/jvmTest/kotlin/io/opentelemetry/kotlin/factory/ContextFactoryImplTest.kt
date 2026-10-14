@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
+import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import org.junit.Test
@@ -29,8 +30,8 @@ internal class ContextFactoryImplTest {
 
     @Test
     fun `test same named keys are not interchangeable`() {
-        val key = contextFactory.createKey<String>("my_key")
-        val sameName = contextFactory.createKey<String>("my_key")
+        val key = createContextKey<String>("my_key")
+        val sameName = createContextKey<String>("my_key")
         val ctx = contextFactory.root().set(key, "my_value")
 
         assertEquals("my_value", ctx.get(key))

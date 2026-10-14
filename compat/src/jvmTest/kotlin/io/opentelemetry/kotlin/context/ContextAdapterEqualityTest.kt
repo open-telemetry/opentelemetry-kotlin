@@ -9,7 +9,7 @@ import kotlin.test.assertNotEquals
 internal class ContextAdapterEqualityTest {
 
     private val factory = CompatContextFactory()
-    private val key = factory.createKey<String>("key")
+    private val key = createContextKey<String>("key")
 
     @Test
     fun `root and current are equal across calls`() {

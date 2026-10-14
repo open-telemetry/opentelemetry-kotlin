@@ -3,6 +3,7 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.context.ImplicitContextStorageMode
+import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.export.InMemoryLogRecordExporter
@@ -48,16 +49,16 @@ internal class LinuxSdkSmokeTest {
             }
         } as OpenTelemetrySdk
         val tracer = api.tracerProvider.getTracer("linux-test")
-        val key = api.context.createKey<String>("thread-isolation")
+        val key = createContextKey<String>("thread-isolation")
         try {
             val parent = tracer.startSpan("parent")
-            val scope = api.context.implicit().storeSpan(parent).set(key, "attached").attach()
+            val scope = api.context.current().storeSpan(parent).set(key, "attached").attach()
             try {
-                assertEquals("attached", api.context.implicit().get(key))
+                assertEquals("attached", api.context.current().get(key))
                 val worker = Worker.start()
                 try {
                     val otherThread = worker.execute(TransferMode.SAFE, { api.context to key }) { (contexts, key) ->
-                        contexts.implicit().get(key)
+                        contexts.current().get(key)
                     }.result
                     assertNull(otherThread)
                 } finally {
@@ -69,7 +70,7 @@ internal class LinuxSdkSmokeTest {
                 scope.detach()
                 parent.end()
             }
-            assertNull(api.context.implicit().get(key))
+            assertNull(api.context.current().get(key))
             assertEquals(OperationResultCode.Success, api.forceFlush())
             val exported = spans.exportedSpans
             assertEquals(setOf("parent", "child"), exported.map { it.name }.toSet())

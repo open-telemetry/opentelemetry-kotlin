@@ -64,7 +64,7 @@ A code sample makes this easier to understand:
 ```kotlin
 // Declare keys once and share the instance with whatever needs to read the value back.
 // A key with a matching name is a different key - see the ContextKey docs.
-private val USER_ID: ContextKey<String> = api.context.createKey("user.id")
+private val USER_ID: ContextKey<String> = createContextKey("user.id")
 
 internal fun exampleUsage(api: OpenTelemetry) {
     // 1. obtain the current context. Defaults to root() if no implicit context is available.
