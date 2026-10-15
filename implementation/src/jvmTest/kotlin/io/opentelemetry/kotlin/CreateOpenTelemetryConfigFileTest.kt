@@ -54,6 +54,24 @@ internal class CreateOpenTelemetryConfigFileTest {
     }
 
     @Test
+    fun `a config file with an instrumentation node surfaces it on the configProvider`() {
+        val path = writeConfigFile(INSTRUMENTATION_CONFIG_FILE)
+        val otel = createOpenTelemetry { configFile(path) }
+        val instrumentationConfig = otel.configProvider.instrumentationConfig
+        assertEquals("bar", instrumentationConfig.getString("foo"))
+        assertEquals(42L, instrumentationConfig.getStructured("nested")?.getLong("count"))
+    }
+
+    @Test
+    fun `a config file without an instrumentation node yields an empty configProvider`() {
+        val path = writeConfigFile(CONFIG_FILE)
+        val otel = createOpenTelemetry { configFile(path) }
+        val instrumentationConfig = otel.configProvider.instrumentationConfig
+        assertNotNull(instrumentationConfig)
+        assertEquals(emptySet(), instrumentationConfig.propertyKeys)
+    }
+
+    @Test
     fun `a config file supplies the global attribute limits`() {
         val cfg = OpenTelemetryConfigImpl(FakeClock()).apply {
             configFile(writeConfigFile(CONFIG_FILE))
@@ -139,6 +157,14 @@ internal class CreateOpenTelemetryConfigFileTest {
             file_format: "1.0"
             attribute_limits:
               attribute_count_limit: 64
+        """.trimIndent()
+
+        val INSTRUMENTATION_CONFIG_FILE = """
+            file_format: "1.0"
+            instrumentation:
+              foo: bar
+              nested:
+                count: 42
         """.trimIndent()
 
         val CONSOLE_CONFIG_FILE = """

@@ -273,6 +273,20 @@ internal class BehaviorResolverImplTest {
         assertSame(custom, resolved.tracerProvider?.idGenerator)
     }
 
+    @Test
+    fun declarativeFileInstrumentationSurvivesResolutionAlongsideDsl() {
+        val resolved = resolver.resolve(
+            envars = null,
+            declarativeFile = OpenTelemetryBehavior(
+                instrumentation = mapOf("http" to mapOf("enabled" to true)),
+            ),
+            dsl = configWithSpanLimits(SpanLimitsBehavior(linkCountLimit = 5)),
+        )
+
+        assertEquals(mapOf("http" to mapOf("enabled" to true)), resolved.instrumentation)
+        assertEquals(5, resolved.tracerProvider?.spanLimits?.linkCountLimit)
+    }
+
     private fun resolveSpanLimits(
         envars: OpenTelemetryBehavior? = null,
         declarativeFile: OpenTelemetryBehavior? = null,
