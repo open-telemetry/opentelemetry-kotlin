@@ -36,7 +36,7 @@ fun Project.configureKotlin(
             tvosArm64()
             tvosSimulatorArm64()
 
-            // Roll out Linux module by module until the complete SDK supports it.
+            // modules need to opt in to the Linux targets
             if (project.findProperty("io.opentelemetry.kotlin.linux")?.toString()?.toBoolean() == true) {
                 linuxX64()
                 linuxArm64()

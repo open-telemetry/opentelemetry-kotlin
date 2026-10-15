@@ -42,6 +42,11 @@ kotlin {
                 implementation(libs.ktor.client.okhttp)
             }
         }
+        linuxTest {
+            dependencies {
+                implementation(libs.ktor.network)
+            }
+        }
     }
 }
 

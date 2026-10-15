@@ -49,8 +49,7 @@ jobs:
       - name: Linux ARM64 tests
         timeout-minutes: 10
         run: |
-          shopt -s nullglob
-          binaries=("$PWD"/*/build/bin/linuxArm64/debugTest/test.kexe)
+          mapfile -d '' binaries < <(find "$PWD" -path '*/build/bin/linuxArm64/debugTest/test.kexe' -print0)
           test "${#binaries[@]}" -gt 0
           for binary in "${binaries[@]}"; do
             docker run --rm --platform linux/arm64 --network none \
