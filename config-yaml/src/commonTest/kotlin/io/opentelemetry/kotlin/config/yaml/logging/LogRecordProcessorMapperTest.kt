@@ -78,7 +78,10 @@ internal class LogRecordProcessorMapperTest {
                     scheduleDelay = BatchLogRecordProcessorBehavior.DEFAULT_SCHEDULE_DELAY,
                     exportTimeout = BatchLogRecordProcessorBehavior.DEFAULT_EXPORT_TIMEOUT,
                     maxQueueSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE,
-                    maxExportBatchSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE
+                    maxExportBatchSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE,
+                    exporter = LogRecordExporterBehavior(
+                        console = ConsoleExporterBehavior()
+                    )
                 )
             ),
             processors.toBehavior(),
@@ -99,7 +102,14 @@ internal class LogRecordProcessorMapperTest {
                     scheduleDelay = BatchLogRecordProcessorBehavior.DEFAULT_SCHEDULE_DELAY,
                     exportTimeout = BatchLogRecordProcessorBehavior.DEFAULT_EXPORT_TIMEOUT,
                     maxQueueSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE,
-                    maxExportBatchSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE
+                    maxExportBatchSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE,
+                    exporter = LogRecordExporterBehavior(
+                        http = OtlpHttpLogsExporterBehavior(
+                            endpoint = "http://localhost:4317",
+                            timeout = 10_000,
+                            headers = mapOf("key" to "value")
+                        )
+                    )
                 )
             ),
             processors.toBehavior(),
@@ -133,6 +143,9 @@ internal class LogRecordProcessorMapperTest {
                     exportTimeout = BatchLogRecordProcessorBehavior.DEFAULT_EXPORT_TIMEOUT,
                     maxQueueSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE,
                     maxExportBatchSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE,
+                    exporter = LogRecordExporterBehavior(
+                        console = ConsoleExporterBehavior()
+                    )
                 )
             ),
             processors.toBehavior(),
@@ -167,6 +180,13 @@ internal class LogRecordProcessorMapperTest {
                     exportTimeout = BatchLogRecordProcessorBehavior.DEFAULT_EXPORT_TIMEOUT,
                     maxQueueSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE,
                     maxExportBatchSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE,
+                    exporter = LogRecordExporterBehavior(
+                        http = OtlpHttpLogsExporterBehavior(
+                            endpoint = "http://localhost:4317",
+                            timeout = 10_000,
+                            headers = mapOf("key" to "value")
+                        )
+                    )
                 )
             ),
             processors.toBehavior(),

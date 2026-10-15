@@ -22,5 +22,6 @@ fun BatchLogRecordProcessor.toBehavior(): BatchLogRecordProcessorBehavior {
         exportTimeout = exportTimeout,
         maxQueueSize = maxQueueSize,
         maxExportBatchSize = maxExportBatchSize,
+        exporter = exporter.toBehavior(),
     )
 }
