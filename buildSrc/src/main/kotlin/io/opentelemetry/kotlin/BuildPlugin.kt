@@ -18,6 +18,7 @@ class BuildPlugin : Plugin<Project> {
             project.configureOptIn(kotlin)
             project.configureTest()
             project.configureAppleTests(kotlin)
+            project.configureLinuxTests(kotlin)
 
             project.pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
                 val androidTarget = kotlin.extensions.getByType(KotlinMultiplatformAndroidLibraryTarget::class.java)

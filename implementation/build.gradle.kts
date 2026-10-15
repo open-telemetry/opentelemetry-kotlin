@@ -38,6 +38,11 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
             }
         }
+        getByName("linuxTest") {
+            dependencies {
+                implementation(project(":exporters-in-memory"))
+            }
+        }
         jvmTest {
             dependencies {
                 implementation(project(":compat"))
