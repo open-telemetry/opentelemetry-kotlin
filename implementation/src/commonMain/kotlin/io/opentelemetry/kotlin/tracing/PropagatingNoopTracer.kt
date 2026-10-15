@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.tracing.implementation.createInvalidSpanContext
 
 internal class PropagatingNoopTracer(
     private val contextFactory: ContextFactory,
