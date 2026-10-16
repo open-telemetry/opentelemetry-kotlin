@@ -105,9 +105,9 @@ internal class CompatPropagatorApiTest {
     }
 
     @Test
-    fun `w3cTraceContext returns an adapter for traceparent and tracestate fields`() {
+    fun `w3cTraceContext returns the api W3C trace context propagator`() {
         val propagator = dsl.w3cTraceContext()
-        assertTrue(propagator is TextMapPropagatorAdapter)
+        assertSame(createW3CTraceContextPropagator(), propagator)
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
     }
 

@@ -11,7 +11,11 @@ import io.opentelemetry.kotlin.tracing.createSpanContext
  * https://www.w3.org/TR/trace-context/
  */
 @OptIn(ExperimentalApi::class)
-public class W3CTraceContextPropagator : TextMapPropagator {
+internal object W3CTraceContextPropagator : TextMapPropagator {
+
+    private const val TRACEPARENT = "traceparent"
+    private const val TRACESTATE = "tracestate"
+    private val FIELDS = listOf(TRACEPARENT, TRACESTATE)
 
     override fun fields(): Collection<String> = FIELDS
 
@@ -55,11 +59,5 @@ public class W3CTraceContextPropagator : TextMapPropagator {
             return context
         }
         return context.storeSpanContext(spanContext)
-    }
-
-    private companion object {
-        const val TRACEPARENT = "traceparent"
-        const val TRACESTATE = "tracestate"
-        val FIELDS = listOf(TRACEPARENT, TRACESTATE)
     }
 }

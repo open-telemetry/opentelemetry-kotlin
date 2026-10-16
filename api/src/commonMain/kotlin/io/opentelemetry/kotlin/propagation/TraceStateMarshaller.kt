@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.tracing.createSpanContext
  * https://www.w3.org/TR/trace-context-2/#tracestate-header
  */
 @OptIn(ExperimentalApi::class)
-public class TraceStateMarshaller(public val traceState: TraceState) {
+internal class TraceStateMarshaller(val traceState: TraceState) {
 
     private val state by lazy {
         traceState.asMap()

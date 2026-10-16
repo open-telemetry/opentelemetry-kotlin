@@ -3,10 +3,10 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.propagation.B3Propagator
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
-import io.opentelemetry.kotlin.propagation.W3CTraceContextPropagator
 import io.opentelemetry.kotlin.propagation.createCompositePropagator
 import io.opentelemetry.kotlin.propagation.createNoopPropagator
 import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
+import io.opentelemetry.kotlin.propagation.createW3CTraceContextPropagator
 
 @OptIn(ExperimentalApi::class)
 internal class PropagatorConfigImpl : PropagatorConfigDsl {
@@ -24,7 +24,7 @@ internal class PropagatorConfigImpl : PropagatorConfigDsl {
     }
 
     override fun w3cTraceContext(): TextMapPropagator {
-        configured = W3CTraceContextPropagator()
+        configured = createW3CTraceContextPropagator()
         return configured
     }
 

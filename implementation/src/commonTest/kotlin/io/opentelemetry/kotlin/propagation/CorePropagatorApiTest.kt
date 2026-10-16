@@ -44,8 +44,9 @@ internal class CorePropagatorApiTest {
     }
 
     @Test
-    fun `w3cTraceContext returns a propagator for traceparent and tracestate fields`() {
+    fun `w3cTraceContext returns the W3C trace context propagator singleton`() {
         val propagator = dsl.w3cTraceContext()
+        assertSame(createW3CTraceContextPropagator(), propagator)
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
     }
 

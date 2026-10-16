@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.propagation.FakeTextMapSetter
-import io.opentelemetry.kotlin.propagation.W3CTraceContextPropagator
+import io.opentelemetry.kotlin.propagation.createW3CTraceContextPropagator
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.model.hex
@@ -59,7 +59,7 @@ internal class TracerRandomTraceIdFlagTest {
     @Test
     fun testRandomFlagIsPropagatedInTraceParentHeader() {
         val idGenerator = IdGeneratorImpl()
-        val propagator = W3CTraceContextPropagator()
+        val propagator = createW3CTraceContextPropagator()
         val span = buildTracer(idGenerator).startSpan("test")
         val carrier = mutableMapOf<String, String>()
         propagator.inject(ContextFactoryImpl().root().storeSpan(span), carrier, FakeTextMapSetter)

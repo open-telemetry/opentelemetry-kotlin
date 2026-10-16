@@ -27,6 +27,18 @@ public fun createCompositePropagator(vararg propagators: TextMapPropagator): Tex
 public fun createW3CBaggagePropagator(): TextMapPropagator = W3CBaggagePropagator
 
 /**
+ * Returns a [TextMapPropagator] that injects and extracts the
+ * [io.opentelemetry.kotlin.tracing.SpanContext] of the current span using the W3C Trace Context
+ * `traceparent` and `tracestate` headers.
+ *
+ * This does not require an [io.opentelemetry.kotlin.OpenTelemetry] instance.
+ *
+ * https://www.w3.org/TR/trace-context/
+ */
+@ExperimentalApi
+public fun createW3CTraceContextPropagator(): TextMapPropagator = W3CTraceContextPropagator
+
+/**
  * Returns a [TextMapPropagator] that injects nothing, extracts nothing (returning the supplied
  * context unchanged) and declares no fields.
  *

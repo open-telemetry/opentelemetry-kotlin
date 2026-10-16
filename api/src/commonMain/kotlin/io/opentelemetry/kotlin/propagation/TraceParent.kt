@@ -13,7 +13,7 @@ import io.opentelemetry.kotlin.tracing.createSpanContext
  * https://www.w3.org/TR/trace-context/#traceparent-header
  */
 @OptIn(ExperimentalApi::class)
-public class TraceParent private constructor(
+internal class TraceParent private constructor(
     val version: String,
     val traceId: String,
     val spanId: String,

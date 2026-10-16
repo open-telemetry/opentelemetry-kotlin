@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.propagation
 
-import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator
 import io.opentelemetry.context.propagation.TextMapPropagator.composite
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapPropagator
@@ -25,7 +24,7 @@ internal class CompatPropagatorConfigImpl : PropagatorConfigDsl {
     }
 
     override fun w3cTraceContext(): TextMapPropagator {
-        configured = TextMapPropagatorAdapter(W3CTraceContextPropagator.getInstance())
+        configured = createW3CTraceContextPropagator()
         return configured
     }
 

@@ -25,7 +25,7 @@ internal class W3CTraceContextPropagatorTest {
     private val emptyTraceState = createInvalidSpanContext().traceState
     private val contextFactory = ContextFactoryImpl()
 
-    private val propagator = W3CTraceContextPropagator()
+    private val propagator = createW3CTraceContextPropagator()
 
     private val traceId = "0af7651916cd43dd8448eb211c80319c"
     private val spanId = "b7ad6b7169203331"

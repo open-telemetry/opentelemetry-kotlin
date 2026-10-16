@@ -15,7 +15,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Property-based fuzz tests for [W3CTraceContextPropagator] using Kotest's
+ * Property-based fuzz tests for [createW3CTraceContextPropagator] using Kotest's
  * [io.kotest.property.Arb] generators with [checkAll]. Runs across every KMP target
  * (JVM, Android host, iOS, JS). Kotest's seed reporting + automatic shrinking surface
  * a minimal failing input on regression.
@@ -25,7 +25,7 @@ internal class W3CTraceContextPropagatorFuzzTest {
 
     private val contextFactory = ContextFactoryImpl()
 
-    private val propagator = W3CTraceContextPropagator()
+    private val propagator = createW3CTraceContextPropagator()
 
     private val headerArb = arbitrary { rs ->
         val len = rs.random.nextInt(0, MAX_HEADER_LEN + 1)
