@@ -39,7 +39,24 @@ jobs:
           cache-disabled: true
 
       - name: Gradle Build
-        run: ./gradlew build :benchmark-android:assemble :benchmark-android:compileReleaseAndroidTestKotlin :benchmark-jvm:assemble :examples:example-app-android:assembleRelease koverXmlReport -x :gradle-integration-test:test --stacktrace
+        run: ./gradlew build linuxX64Test linkDebugTestLinuxArm64 :benchmark-android:assemble :benchmark-android:compileReleaseAndroidTestKotlin :benchmark-jvm:assemble :examples:example-app-android:assembleRelease koverXmlReport -x :gradle-integration-test:test --stacktrace
+
+      - name: Set up ARM64 emulation
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
+        with:
+          platforms: arm64
+
+      - name: Linux ARM64 tests
+        timeout-minutes: 10
+        run: |
+          shopt -s nullglob
+          binaries=("$PWD"/*/build/bin/linuxArm64/debugTest/test.kexe)
+          test "${#binaries[@]}" -gt 0
+          for binary in "${binaries[@]}"; do
+            docker run --rm --platform linux/arm64 --network none \
+              --mount "type=bind,source=$(dirname "$binary"),target=/tests,readonly" \
+              --workdir /tests ubuntu:24.04 /tests/test.kexe
+          done
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
