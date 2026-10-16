@@ -35,6 +35,12 @@ fun Project.configureKotlin(
             iosSimulatorArm64()
             tvosArm64()
             tvosSimulatorArm64()
+
+            // modules need to opt in to the Linux targets
+            if (project.findProperty("io.opentelemetry.kotlin.linux")?.toString()?.toBoolean() == true) {
+                linuxX64()
+                linuxArm64()
+            }
         }
 
         sourceSets.apply {

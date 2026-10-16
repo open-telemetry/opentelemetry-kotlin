@@ -48,7 +48,8 @@ public interface OtlpHttpExporterConfigDsl {
      * It's strongly recommended that the supplied [HttpClient] installs the
      * [io.ktor.client.plugins.HttpTimeout],
      * [io.ktor.client.plugins.contentnegotiation.ContentNegotiation] and
-     * [io.ktor.client.plugins.compression.ContentEncoding] plugins and that gzip compression is enabled.
+     * [io.ktor.client.plugins.compression.ContentEncoding] plugins. Native sends uncompressed
+     * requests and should only advertise identity encoding.
      */
     public var httpClient: HttpClient?
 }

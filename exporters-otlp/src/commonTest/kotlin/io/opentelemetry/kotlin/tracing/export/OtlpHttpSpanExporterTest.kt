@@ -9,10 +9,8 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.HttpRequestData
 import io.ktor.client.request.header
 import io.ktor.http.HttpStatusCode
-import io.ktor.util.GZipEncoder
 import io.ktor.util.toMap
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.toByteArray
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -22,6 +20,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpClient
 import io.opentelemetry.kotlin.export.createDefaultHttpClient
 import io.opentelemetry.kotlin.export.createHttpEngine
+import io.opentelemetry.kotlin.export.decodeOtlpRequestBody
 import io.opentelemetry.kotlin.export.testMockEngine
 import io.opentelemetry.kotlin.export.withShutdown
 import io.opentelemetry.kotlin.init.TraceExportConfigDsl
@@ -57,16 +56,16 @@ internal class OtlpHttpSpanExporterTest {
     private lateinit var server: MockEngine
     private lateinit var mockResponseStatus: HttpStatusCode
     private var serverDelayMs: Long = 0
-    private val compressedRequestBody = CompletableDeferred<ByteArray>()
+    private val requestBody = CompletableDeferred<ByteArray>()
 
     private val dispatcher = StandardTestDispatcher()
 
     @BeforeTest
     fun setUp() {
         server = testMockEngine(dispatcher) {
-            // gzip compression is lazy and tied to the request context, so capture the body here;
+            // Body transformations are tied to the request context, so capture the body here;
             // reading it later fails after the request completes.
-            compressedRequestBody.complete(it.body.toByteArray())
+            requestBody.complete(it.body.toByteArray())
             delay(serverDelayMs)
             respond(
                 content = ByteReadChannel(""),
@@ -111,7 +110,7 @@ internal class OtlpHttpSpanExporterTest {
             serverDelayMs = 1000
             val code = exporter.export(spans)
             assertEquals(OperationResultCode.Success, code)
-            compressedRequestBody.await()
+            requestBody.await()
 
             val shutdownCode = exporter.shutdown()
             assertEquals(OperationResultCode.Success, shutdownCode)
@@ -250,14 +249,13 @@ internal class OtlpHttpSpanExporterTest {
     }
 
     private suspend fun TestScope.waitAndAssertExportedTelemetry(telemetry: List<SpanData>) {
-        val body = compressedRequestBody.await()
+        val body = requestBody.await()
         advanceUntilIdle()
         val requests = server.requestHistory
         check(server.requestHistory.size == 1) {
             "Expected 1 request, got ${requests.size}"
         }
-        val bytes = GZipEncoder.decode(ByteReadChannel(body))
-            .toByteArray()
+        val bytes = decodeOtlpRequestBody(requests.single(), body)
         assertContentEquals(telemetry.toProtobufByteArray(), bytes)
     }
 

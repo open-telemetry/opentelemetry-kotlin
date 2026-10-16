@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
+
 plugins {
     alias(libs.plugins.test.kotlin.multiplatform.klib)
 }
@@ -13,6 +15,16 @@ kotlin {
     js {
         nodejs()
         binaries.library()
+    }
+    linuxX64 {
+        binaries.executable(listOf(NativeBuildType.DEBUG)) {
+            entryPoint = "io.opentelemetry.kotlin.minversion.main"
+        }
+    }
+    linuxArm64 {
+        binaries.executable(listOf(NativeBuildType.DEBUG)) {
+            entryPoint = "io.opentelemetry.kotlin.minversion.main"
+        }
     }
     iosArm64()
     iosSimulatorArm64()

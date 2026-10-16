@@ -40,9 +40,16 @@ internal fun createDefaultHttpClient(
     install(ContentNegotiation)
     install(ContentEncoding) {
         mode = ContentEncodingConfig.Mode.All
-        gzip()
-        deflate()
+        if (supportsHttpCompression) {
+            gzip()
+            deflate()
+        } else {
+            identity()
+        }
     }
 }
 
 internal expect fun createHttpEngine(): HttpClientEngine
+
+// Ktor's gzip/deflate encoders on native targets are a no-op
+internal expect val supportsHttpCompression: Boolean

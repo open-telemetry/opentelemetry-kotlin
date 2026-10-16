@@ -10,11 +10,9 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.http.toHttpDate
-import io.ktor.util.GZipEncoder
 import io.ktor.util.date.GMTDate
 import io.ktor.util.toMap
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.toByteArray
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
@@ -55,7 +53,7 @@ internal class OtlpClientTest {
     private var mockResponseBody: ByteArray = ByteArray(0)
     private var serverDelayMs: Long = 0
     private var serverThrows: Boolean = false
-    private var compressedRequestBody: ByteArray = ByteArray(0)
+    private var requestBody: ByteArray = ByteArray(0)
 
     @BeforeTest
     fun setUp() {
@@ -64,9 +62,9 @@ internal class OtlpClientTest {
             if (serverThrows) {
                 error("network unreachable")
             }
-            // gzip compression is lazy and tied to the request context, so capture the body here;
+            // Body transformations are tied to the request context, so capture the body here;
             // reading it later fails after the request completes.
-            compressedRequestBody = it.body.toByteArray()
+            requestBody = it.body.toByteArray()
             if (serverDelayMs > 0) {
                 delay(serverDelayMs.milliseconds)
             }
@@ -611,13 +609,7 @@ internal class OtlpClientTest {
         val contentType = checkNotNull(request.body.contentType)
         assertEquals("application/x-protobuf", contentType.toString())
 
-        assertEquals("gzip,deflate", request.headers[HttpHeaders.AcceptEncoding])
-
-        assertEquals("gzip", request.body.headers[HttpHeaders.ContentEncoding])
-
-        val uncompressedBytes = GZipEncoder.decode(ByteReadChannel(compressedRequestBody))
-            .toByteArray()
-        return uncompressedBytes
+        return decodeOtlpRequestBody(request, requestBody)
     }
 
     private fun useRequestTimeout() {

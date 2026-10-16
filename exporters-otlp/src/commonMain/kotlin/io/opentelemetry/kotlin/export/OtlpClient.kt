@@ -17,7 +17,6 @@ import io.ktor.utils.io.readRemaining
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.error.reportUserCodeError
-import io.opentelemetry.kotlin.export.OtlpClient.Companion.MAX_RESPONSE_BODY_BYTES
 import io.opentelemetry.kotlin.export.OtlpResponse.ClientError
 import io.opentelemetry.kotlin.export.OtlpResponse.PartialSuccess
 import io.opentelemetry.kotlin.export.OtlpResponse.ResponseTooLarge
@@ -75,7 +74,9 @@ internal class OtlpClient(
         }
         val requestHeaders = headers()
         val response = httpClient.post(url) {
-            compress("gzip")
+            if (supportsHttpCompression) {
+                compress("gzip")
+            }
             contentType(contentType)
             header(HttpHeaders.UserAgent, userAgent)
             requestHeaders.forEach { (name, value) -> header(name, value) }
