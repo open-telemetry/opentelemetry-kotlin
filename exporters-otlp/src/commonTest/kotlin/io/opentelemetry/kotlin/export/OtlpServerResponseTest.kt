@@ -39,7 +39,7 @@ internal class OtlpServerResponseTest {
     }
 
     @Test
-    fun testGzipEncodedSuccessIsSentOnce() = runTest {
+    fun testNegotiatedCompressionSuccessIsSentOnce() = runTest {
         val (server, responses) = export(traceSuccess(gzip = true))
         assertEquals(1, server.requestCount)
         assertIs<OtlpResponse.Success>(responses.single())
@@ -84,7 +84,7 @@ internal class OtlpServerResponseTest {
     }
 
     @Test
-    fun testGzipEncodedPartialSuccessIsNotRetried() = runTest {
+    fun testNegotiatedCompressionPartialSuccessIsNotRetried() = runTest {
         val (server, responses) = export(tracePartialSuccess(rejected = 1, message = "span rejected", gzip = true))
         assertEquals(1, server.requestCount)
         assertEquals(1, assertIs<OtlpResponse.PartialSuccess>(responses.single()).rejectedCount)
@@ -309,7 +309,7 @@ internal class OtlpServerResponseTest {
     }
 
     @Test
-    fun testGzipEncodedOversizedResponseIsNotRetried() = runTest {
+    fun testNegotiatedCompressionOversizedResponseIsNotRetried() = runTest {
         val (server, responses) = export(
             FakeOtlpServer.Respond(HttpStatusCode.OK, ByteArray(MAX_RESPONSE_BYTES + 1), gzip = true),
             traceSuccess(),

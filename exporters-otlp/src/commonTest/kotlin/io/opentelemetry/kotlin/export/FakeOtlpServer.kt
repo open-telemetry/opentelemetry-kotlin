@@ -72,12 +72,14 @@ internal class FakeOtlpServer(
                     }
 
                     is Respond -> {
-                        val body = if (reply.gzip) {
+                        val gzipAccepted = reply.gzip &&
+                            request.headers[HttpHeaders.AcceptEncoding]?.contains("gzip") == true
+                        val body = if (gzipAccepted) {
                             gzip(reply.body)
                         } else {
                             reply.body
                         }
-                        val headers = if (reply.gzip) {
+                        val headers = if (gzipAccepted) {
                             Headers.build {
                                 appendAll(reply.headers)
                                 append(HttpHeaders.ContentEncoding, "gzip")

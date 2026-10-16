@@ -1,11 +1,16 @@
 package io.opentelemetry.kotlin.export
 
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 import okio.Buffer
 import okio.Path.Companion.toPath
 import okio.buffer
 import okio.fakefilesystem.FakeFileSystem
 import okio.use
-import kotlin.test.*
 
 internal class TelemetryFileSystemImplGzipTest {
 
