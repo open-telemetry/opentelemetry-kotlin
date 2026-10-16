@@ -7,7 +7,6 @@ import io.kotest.property.arbitrary.filter
 import io.kotest.property.checkAll
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.tracing.createSpanContext
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -24,8 +23,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class W3CTraceContextPropagatorFuzzTest {
 
-    private val spanFactory = SpanFactoryImpl()
-    private val contextFactory = ContextFactoryImpl(spanFactory)
+    private val contextFactory = ContextFactoryImpl()
 
     private val propagator = W3CTraceContextPropagator()
 
@@ -116,7 +114,7 @@ internal class W3CTraceContextPropagatorFuzzTest {
                     entries.forEach { (k, v) -> put(k, v) }
                 }
             }
-            val context = contextFactory.root().storeSpan(spanFactory.fromSpanContext(original))
+            val context = contextFactory.root().storeSpanContext(original)
 
             val carrier = mutableMapOf<String, String>()
             propagator.inject(context, carrier, FakeTextMapSetter)

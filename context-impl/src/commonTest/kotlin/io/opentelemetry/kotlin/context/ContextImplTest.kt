@@ -1,8 +1,6 @@
 package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.FakeSpanFactory
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.tracing.FakeSpan
 import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.createSpanContext
@@ -19,12 +17,10 @@ import kotlin.test.assertTrue
 internal class ContextImplTest {
 
     private lateinit var factory: ContextFactoryImpl
-    private lateinit var spanFactory: FakeSpanFactory
 
     @BeforeTest
     fun setUp() {
-        spanFactory = FakeSpanFactory()
-        factory = ContextFactoryImpl(spanFactory)
+        factory = ContextFactoryImpl()
     }
 
     @Test
@@ -115,7 +111,7 @@ internal class ContextImplTest {
 
     @Test
     fun testExtractSpanFromRootReturnsInvalid() {
-        assertSame(spanFactory.invalid, factory.root().extractSpan())
+        assertEquals(createInvalidSpanContext(), factory.root().extractSpan().spanContext)
     }
 
     @Test
@@ -131,12 +127,12 @@ internal class ContextImplTest {
         val root = factory.root()
         val derived = root.storeSpan(span)
         assertNotSame(root, derived)
-        assertSame(spanFactory.invalid, root.extractSpan())
+        assertEquals(createInvalidSpanContext(), root.extractSpan().spanContext)
     }
 
     @Test
     fun testStoreSpanContextRoundTrip() {
-        val ctxFactory = ContextFactoryImpl(SpanFactoryImpl())
+        val ctxFactory = ContextFactoryImpl()
         val spanContext = createSpanContext("0af7651916cd43dd8448eb211c80319c", "b7ad6b7169203331") {
             isSampled = true
             isRemote = true
@@ -152,7 +148,7 @@ internal class ContextImplTest {
 
     @Test
     fun testStoreSpanContextInvalidStoresInvalidSpan() {
-        val ctxFactory = ContextFactoryImpl(SpanFactoryImpl())
+        val ctxFactory = ContextFactoryImpl()
         val span = FakeSpan()
         val ctx = ctxFactory.root().storeSpan(span).storeSpanContext(createInvalidSpanContext())
         assertFalse(ctx.extractSpan().spanContext.isValid)

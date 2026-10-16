@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -12,11 +11,10 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class PropagatingNoopTracerTest {
 
-    private val spanFactory = SpanFactoryImpl()
-    private val contextFactory = ContextFactoryImpl(spanFactory)
+    private val contextFactory = ContextFactoryImpl()
     private val errorHandler = FakeSdkErrorHandler()
     private val tracer = PropagatingNoopTracer(contextFactory, errorHandler)
-    private val contextWithSpan = contextFactory.root().storeSpan(spanFactory.fromSpanContext(FakeSpanContext.VALID))
+    private val contextWithSpan = contextFactory.root().storeSpanContext(FakeSpanContext.VALID)
 
     @Test
     fun `tracer is not enabled`() {

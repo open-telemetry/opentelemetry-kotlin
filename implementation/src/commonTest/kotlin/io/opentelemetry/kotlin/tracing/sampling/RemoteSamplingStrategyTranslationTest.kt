@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.tracing.SpanKind
 import kotlin.test.Test
@@ -17,7 +16,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class RemoteSamplingStrategyTranslationTest {
 
-    private val contextFactory = ContextFactoryImpl(SpanFactoryImpl())
+    private val contextFactory = ContextFactoryImpl()
 
     private fun Sampler.sample(name: String): SamplingResult.Decision =
         shouldSample(

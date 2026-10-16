@@ -8,8 +8,6 @@ import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.SpanFactory
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -30,7 +28,6 @@ internal class TracerSamplerTest {
     private lateinit var clock: FakeClock
     private lateinit var processor: FakeSpanProcessor
     private lateinit var contextFactory: ContextFactory
-    private lateinit var spanFactory: SpanFactory
     private lateinit var idGenerator: IdGenerator
 
     @BeforeTest
@@ -38,8 +35,7 @@ internal class TracerSamplerTest {
         clock = FakeClock()
         processor = FakeSpanProcessor()
         idGenerator = IdGeneratorImpl()
-        spanFactory = SpanFactoryImpl()
-        contextFactory = ContextFactoryImpl(spanFactory)
+        contextFactory = ContextFactoryImpl()
     }
 
     private fun buildTracer(

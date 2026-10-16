@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.ResourceFactory
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.MeterProvider
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
@@ -21,7 +20,6 @@ internal class OpenTelemetryImpl(
     override val meterProvider: MeterProvider,
     override val clock: Clock,
     override val context: ContextFactory,
-    override val span: SpanFactory,
     override val idGenerator: IdGenerator,
     override val resource: ResourceFactory,
     override val propagator: TextMapPropagator,

@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
@@ -28,7 +27,7 @@ internal class TracerEnabledTest {
     fun setUp() {
         clock = FakeClock()
         idGenerator = IdGeneratorImpl()
-        contextFactory = ContextFactoryImpl(SpanFactoryImpl())
+        contextFactory = ContextFactoryImpl()
     }
 
     @Test

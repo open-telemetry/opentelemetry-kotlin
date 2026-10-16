@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,7 +18,7 @@ internal class ScopedImplicitContextStorageTest {
     @BeforeTest
     fun setUp() {
         handler = FakeSdkErrorHandler()
-        factory = ContextFactoryImpl(FakeSpanFactory(), handler) { rootSupplier ->
+        factory = ContextFactoryImpl(handler) { rootSupplier ->
             FakeScopedImplicitContextStorage(rootSupplier).also { storage = it }
         }
     }

@@ -8,8 +8,6 @@ import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.SpanFactory
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -29,7 +27,6 @@ internal class TracerSpanContextTest {
     private lateinit var clock: FakeClock
     private lateinit var processor: FakeSpanProcessor
     private lateinit var contextFactory: ContextFactory
-    private lateinit var spanFactory: SpanFactory
     private lateinit var idGenerator: IdGenerator
 
     @BeforeTest
@@ -37,8 +34,7 @@ internal class TracerSpanContextTest {
         clock = FakeClock()
         processor = FakeSpanProcessor()
         idGenerator = IdGeneratorImpl()
-        spanFactory = SpanFactoryImpl()
-        contextFactory = ContextFactoryImpl(spanFactory)
+        contextFactory = ContextFactoryImpl()
         tracer = TracerImpl(
             clock = clock,
             processor = processor,
@@ -62,9 +58,7 @@ internal class TracerSpanContextTest {
 
     @Test
     fun testExplicitParentContextOfInvalidSpan() {
-        val invalidSpan = spanFactory.invalid
-        assertFalse(invalidSpan.spanContext.isValid)
-        val parentCtx = contextFactory.root().storeSpan(invalidSpan)
+        val parentCtx = contextFactory.root().storeSpanContext(createInvalidSpanContext())
         val span = tracer.startSpan(
             "test",
             parentContext = parentCtx,

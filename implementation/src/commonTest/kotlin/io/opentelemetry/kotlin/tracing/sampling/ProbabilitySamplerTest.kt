@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.createSpanContext
@@ -18,8 +17,7 @@ import kotlin.test.assertFailsWith
 internal class ProbabilitySamplerTest {
 
     private val idGenerator = IdGeneratorImpl()
-    private val spanFactory = SpanFactoryImpl()
-    private val contextFactory = ContextFactoryImpl(spanFactory)
+    private val contextFactory = ContextFactoryImpl()
     private val sdkErrorHandler = NoopSdkErrorHandler
 
     private fun createParentContext(traceId: String, otTraceStateValue: String): Context {
@@ -28,7 +26,7 @@ internal class ProbabilitySamplerTest {
             isRemote = true
             traceState { put("ot", otTraceStateValue) }
         }
-        return contextFactory.root().storeSpan(spanFactory.fromSpanContext(parentSpanContext))
+        return contextFactory.root().storeSpanContext(parentSpanContext)
     }
 
     @Test

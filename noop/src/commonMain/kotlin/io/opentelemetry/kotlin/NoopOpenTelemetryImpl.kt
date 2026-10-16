@@ -6,9 +6,7 @@ import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.NoopContextFactory
 import io.opentelemetry.kotlin.factory.NoopIdGenerator
 import io.opentelemetry.kotlin.factory.NoopResourceFactory
-import io.opentelemetry.kotlin.factory.NoopSpanFactory
 import io.opentelemetry.kotlin.factory.ResourceFactory
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.logging.NoopLoggerProvider
 import io.opentelemetry.kotlin.metrics.MeterProvider
@@ -25,7 +23,6 @@ internal object NoopOpenTelemetryImpl : OpenTelemetrySdk {
     override val meterProvider: MeterProvider = NoopMeterProvider
     override val clock: Clock = NoopClock
     override val context: ContextFactory = NoopContextFactory
-    override val span: SpanFactory = NoopSpanFactory
     override val idGenerator: IdGenerator = NoopIdGenerator
     override val resource: ResourceFactory = NoopResourceFactory
     override val propagator: TextMapPropagator = createNoopPropagator()

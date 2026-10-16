@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.context
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.FakeSpanFactory
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -16,7 +15,7 @@ internal class ImplicitContextTest {
 
     @BeforeTest
     fun setUp() {
-        factory = ContextFactoryImpl(FakeSpanFactory())
+        factory = ContextFactoryImpl()
     }
 
     @Test

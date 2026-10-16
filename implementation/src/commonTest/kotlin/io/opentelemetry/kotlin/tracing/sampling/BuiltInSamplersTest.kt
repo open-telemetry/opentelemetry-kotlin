@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -31,8 +30,7 @@ internal class BuiltInSamplersTest {
 
     private val clock = FakeClock()
     private val idGenerator = IdGeneratorImpl()
-    private val spanFactory = SpanFactoryImpl()
-    private val contextFactory = ContextFactoryImpl(spanFactory)
+    private val contextFactory = ContextFactoryImpl()
     private val scope = InstrumentationScopeInfoImpl("test", null, null, emptyMap())
 
     private val samplerDsl = SamplerConfigImpl()

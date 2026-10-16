@@ -7,7 +7,6 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -114,13 +113,12 @@ internal class TracerInvalidIdTest {
     fun testDescendantOfRemoteParentIsNotRemote() {
         val idGenerator = IdGeneratorImpl()
         val tracer = buildTracer(idGenerator)
-        val spanFactory = SpanFactoryImpl()
-        val contextFactory = ContextFactoryImpl(spanFactory)
+        val contextFactory = ContextFactoryImpl()
 
         val child = tracer.startSpan(
             "child",
             parentContext = contextFactory.root()
-                .storeSpan(spanFactory.fromSpanContext(remoteParent())),
+                .storeSpanContext(remoteParent()),
         )
         val grandchild = tracer.startSpan(
             "grandchild",
@@ -146,9 +144,8 @@ internal class TracerInvalidIdTest {
         }
 
     private fun startChildOf(parent: SpanContext, idGenerator: IdGenerator): Span {
-        val spanFactory = SpanFactoryImpl()
         val parentContext =
-            ContextFactoryImpl(spanFactory).root().storeSpan(spanFactory.fromSpanContext(parent))
+            ContextFactoryImpl().root().storeSpanContext(parent)
         return buildTracer(idGenerator).startSpan("test", parentContext = parentContext)
     }
 
@@ -156,7 +153,7 @@ internal class TracerInvalidIdTest {
         return TracerImpl(
             clock = FakeClock(),
             processor = FakeSpanProcessor(),
-            contextFactory = ContextFactoryImpl(SpanFactoryImpl()),
+            contextFactory = ContextFactoryImpl(),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

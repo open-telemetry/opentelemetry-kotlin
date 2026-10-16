@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatResourceFactory
-import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.init.CompatOpenTelemetryConfig
 import io.opentelemetry.kotlin.init.CompatSdkConfigFactory
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
@@ -27,7 +26,6 @@ public fun createCompatOpenTelemetry(
     config: OpenTelemetryConfigDsl.() -> Unit = {}
 ): OpenTelemetry {
     val contextFactory = CompatContextFactory()
-    val span = CompatSpanFactory()
 
     val cfg = CompatOpenTelemetryConfig(clock).apply(config)
     if (cfg.contextConfigured) {
@@ -51,7 +49,6 @@ public fun createCompatOpenTelemetry(
         meterProvider = configFactory.buildMeterProvider(),
         clock = clock,
         context = contextFactory,
-        span = span,
         idGenerator = configFactory.idGenerator,
         resource = CompatResourceFactory,
         propagator = cfg.propagatorCfg.buildPropagator(),

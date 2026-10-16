@@ -174,17 +174,9 @@ internal class NoopTests {
 
     @Test
     fun testNoopSpan() {
-        val otel = NoopOpenTelemetry
-
-        val first = otel.span.invalid
-        assertTrue(first is NoopSpan)
-        assertFalse(first.isRecording())
-
-        val second = otel.span.fromSpanContext(NoopSpanContext)
-        assertTrue(second is NoopSpan)
-
-        val third = otel.context.root().extractSpan()
-        assertTrue(third is NoopSpan)
+        val span = NoopOpenTelemetry.context.root().extractSpan()
+        assertTrue(span is NoopSpan)
+        assertFalse(span.isRecording())
     }
 
     @Test

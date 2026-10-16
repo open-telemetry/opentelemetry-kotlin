@@ -6,7 +6,6 @@ public abstract interface class io/opentelemetry/kotlin/OpenTelemetry {
 	public abstract fun getLoggerProvider ()Lio/opentelemetry/kotlin/logging/LoggerProvider;
 	public abstract fun getMeterProvider ()Lio/opentelemetry/kotlin/metrics/MeterProvider;
 	public abstract fun getPropagator ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
-	public abstract fun getSpan ()Lio/opentelemetry/kotlin/factory/SpanFactory;
 	public abstract fun getTracerProvider ()Lio/opentelemetry/kotlin/tracing/TracerProvider;
 }
 
@@ -162,11 +161,6 @@ public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
 	public abstract fun createKey (Ljava/lang/String;)Lio/opentelemetry/kotlin/context/ContextKey;
 	public abstract fun implicit ()Lio/opentelemetry/kotlin/context/Context;
 	public abstract fun root ()Lio/opentelemetry/kotlin/context/Context;
-}
-
-public abstract interface class io/opentelemetry/kotlin/factory/SpanFactory {
-	public abstract fun fromSpanContext (Lio/opentelemetry/kotlin/tracing/SpanContext;)Lio/opentelemetry/kotlin/tracing/Span;
-	public abstract fun getInvalid ()Lio/opentelemetry/kotlin/tracing/Span;
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/Logger {

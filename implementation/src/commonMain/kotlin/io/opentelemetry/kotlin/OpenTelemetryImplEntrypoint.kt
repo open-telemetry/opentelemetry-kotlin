@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
 import io.opentelemetry.kotlin.init.SdkConfigFactory
@@ -39,8 +38,7 @@ public fun createOpenTelemetry(
     val configFactory = SdkConfigFactory(cfg, behavior, resourceFactory)
     val idGenerator = configFactory.idGenerator
 
-    val span = SpanFactoryImpl()
-    val contextFactory = ContextFactoryImpl(span, cfg.sdkErrorHandler, cfg.contextConfig::generateStorage)
+    val contextFactory = ContextFactoryImpl(cfg.sdkErrorHandler, cfg.contextConfig::generateStorage)
 
     val tracingConfig = configFactory.generateTracingConfig()
     val loggingConfig = configFactory.generateLoggingConfig()
@@ -67,7 +65,6 @@ public fun createOpenTelemetry(
         ),
         clock = clock,
         context = contextFactory,
-        span = span,
         idGenerator = idGenerator,
         resource = resourceFactory,
         propagator = cfg.propagatorCfg.buildPropagator(),

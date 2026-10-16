@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.Meter
@@ -38,11 +37,6 @@ public interface OpenTelemetry {
      * Factory that constructs Context objects.
      */
     public val context: ContextFactory
-
-    /**
-     * Factory that constructs Span objects.
-     */
-    public val span: SpanFactory
 
     /**
      * The [TextMapPropagator] used to inject and extract context across process boundaries.

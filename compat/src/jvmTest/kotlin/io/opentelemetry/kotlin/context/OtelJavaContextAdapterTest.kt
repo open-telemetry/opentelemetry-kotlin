@@ -10,7 +10,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.createSpanContext
@@ -26,7 +25,7 @@ import kotlin.test.assertTrue
 internal class OtelJavaContextAdapterTest {
 
     private val contextFactory = CompatContextFactory()
-    private val kotlinContextFactory = ContextFactoryImpl(SpanFactoryImpl())
+    private val kotlinContextFactory = ContextFactoryImpl()
     private val kotlinSpan = NonRecordingSpan(
         createInvalidSpanContext(),
         createSpanContext("0af7651916cd43dd8448eb211c80319c", "b7ad6b7169203331"),

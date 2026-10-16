@@ -7,7 +7,6 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.propagation.FakeTextMapSetter
 import io.opentelemetry.kotlin.propagation.W3CTraceContextPropagator
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -60,11 +59,10 @@ internal class TracerRandomTraceIdFlagTest {
     @Test
     fun testRandomFlagIsPropagatedInTraceParentHeader() {
         val idGenerator = IdGeneratorImpl()
-        val spanFactory = SpanFactoryImpl()
         val propagator = W3CTraceContextPropagator()
         val span = buildTracer(idGenerator).startSpan("test")
         val carrier = mutableMapOf<String, String>()
-        propagator.inject(ContextFactoryImpl(spanFactory).root().storeSpan(span), carrier, FakeTextMapSetter)
+        propagator.inject(ContextFactoryImpl().root().storeSpan(span), carrier, FakeTextMapSetter)
 
         val spanContext = span.spanContext
         assertEquals("00-${spanContext.traceId}-${spanContext.spanId}-03", carrier["traceparent"])
@@ -85,13 +83,12 @@ internal class TracerRandomTraceIdFlagTest {
     }
 
     private fun startChildOfRemoteParent(idGenerator: IdGenerator, parentIsRandom: Boolean): Span {
-        val spanFactory = SpanFactoryImpl()
         val parent = createSpanContext("12345678901234567890123456789012", "1234567890123456") {
             isSampled = true
             isRandom = parentIsRandom
             isRemote = true
         }
-        val parentContext = ContextFactoryImpl(spanFactory).root().storeSpan(spanFactory.fromSpanContext(parent))
+        val parentContext = ContextFactoryImpl().root().storeSpanContext(parent)
         return buildTracer(idGenerator).startSpan("test", parentContext = parentContext)
     }
 
@@ -102,7 +99,7 @@ internal class TracerRandomTraceIdFlagTest {
         return TracerImpl(
             clock = FakeClock(),
             processor = FakeSpanProcessor(),
-            contextFactory = ContextFactoryImpl(SpanFactoryImpl()),
+            contextFactory = ContextFactoryImpl(),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

@@ -3,17 +3,18 @@ package io.opentelemetry.kotlin.context
 import io.opentelemetry.kotlin.baggage.Baggage
 import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.factory.SpanFactory
+import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 
 private val BAGGAGE_KEY: ContextKey<Baggage> = ContextKeyImpl("otel-kotlin-baggage")
 private val SPAN_KEY: ContextKey<Span> = ContextKeyImpl("otel-kotlin-span")
 private val EMPTY_BAGGAGE: Baggage = createBaggage()
+private val INVALID_SPAN: Span = NonRecordingSpan(createInvalidSpanContext(), createInvalidSpanContext())
 
 internal class ContextImpl(
     private val storage: ImplicitContextStorage,
-    private val spanFactory: SpanFactory,
     private val sdkErrorHandler: SdkErrorHandler,
     private val impl: Map<ContextKey<*>, Any?> = emptyMap()
 ) : Context {
@@ -23,7 +24,7 @@ internal class ContextImpl(
         value: T?
     ): Context {
         val newValues = impl.plus(Pair(key, value))
-        return ContextImpl(storage, spanFactory, sdkErrorHandler, newValues)
+        return ContextImpl(storage, sdkErrorHandler, newValues)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -47,9 +48,9 @@ internal class ContextImpl(
     override fun storeSpan(span: Span): Context = set(SPAN_KEY, span)
 
     override fun storeSpanContext(spanContext: SpanContext): Context =
-        storeSpan(spanFactory.fromSpanContext(spanContext))
+        storeSpan(NonRecordingSpan(createInvalidSpanContext(), spanContext))
 
-    override fun extractSpan(): Span = get(SPAN_KEY) ?: spanFactory.invalid
+    override fun extractSpan(): Span = get(SPAN_KEY) ?: INVALID_SPAN
 
     override fun storeBaggage(baggage: Baggage): Context = set(BAGGAGE_KEY, baggage)
 

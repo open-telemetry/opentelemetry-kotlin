@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.propagation
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateCodec
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.TraceState
@@ -24,8 +23,7 @@ import kotlin.test.assertTrue
 internal class W3CTraceContextPropagatorTest {
 
     private val emptyTraceState = createInvalidSpanContext().traceState
-    private val spanFactory = SpanFactoryImpl()
-    private val contextFactory = ContextFactoryImpl(spanFactory)
+    private val contextFactory = ContextFactoryImpl()
 
     private val propagator = W3CTraceContextPropagator()
 
@@ -47,7 +45,7 @@ internal class W3CTraceContextPropagatorTest {
     @Test
     fun `inject does nothing when current span is invalid`() {
         val carrier = mutableMapOf<String, String>()
-        val context = contextFactory.root().storeSpan(spanFactory.invalid)
+        val context = contextFactory.root().storeSpanContext(createInvalidSpanContext())
         propagator.inject(context, carrier, FakeTextMapSetter)
         assertTrue(carrier.isEmpty())
     }
@@ -287,7 +285,7 @@ internal class W3CTraceContextPropagatorTest {
     }
 
     private fun contextWithSpan(spanContext: SpanContext): Context =
-        contextFactory.root().storeSpan(spanFactory.fromSpanContext(spanContext))
+        contextFactory.root().storeSpanContext(spanContext)
 
     private fun injectInto(context: Context): MutableMap<String, String> {
         val carrier = mutableMapOf<String, String>()
