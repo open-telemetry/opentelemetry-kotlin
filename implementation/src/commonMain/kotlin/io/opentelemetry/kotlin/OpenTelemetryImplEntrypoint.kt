@@ -67,6 +67,6 @@ public fun createOpenTelemetry(
         context = contextFactory,
         idGenerator = idGenerator,
         resource = resourceFactory,
-        propagator = cfg.propagatorCfg.buildPropagator(),
+        propagator = cfg.propagator,
     )
 }

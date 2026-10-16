@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.config.dsl.PropagatorConfigImpl
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.propagation.FakeTextMapGetter
 import io.opentelemetry.kotlin.propagation.FakeTextMapSetter
@@ -11,14 +12,14 @@ import kotlin.test.assertNotSame
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
-internal class PropagatorConfigImplTest {
+internal class W3CTraceContextRoundTripTest {
 
     private val contextFactory = ContextFactoryImpl()
     private val contextWithSpan = contextFactory.root().storeSpanContext(FakeSpanContext.VALID)
 
     @Test
     fun `w3cTraceContext injects and extracts`() {
-        val propagator = PropagatorConfigImpl().apply { w3cTraceContext() }.buildPropagator()
+        val propagator = PropagatorConfigImpl().w3cTraceContext()
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
 
         val carrier = mutableMapOf<String, String>()

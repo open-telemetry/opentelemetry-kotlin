@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.aliases.OtelJavaTextMapPropagator
+import io.opentelemetry.kotlin.config.dsl.PropagatorConfigImpl
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.factory.CompatContextFactory
@@ -13,7 +13,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class CompatPropagatorApiTest {
 
-    private val dsl = CompatPropagatorConfigImpl()
+    private val dsl = PropagatorConfigImpl()
     private val contextFactory = CompatContextFactory()
 
     @Test
@@ -75,33 +75,10 @@ internal class CompatPropagatorApiTest {
     }
 
     @Test
-    fun `composite unwraps adapters before delegating to Java`() {
-        val javaPropagator: OtelJavaTextMapPropagator = OtelJavaTextMapPropagator.noop()
-        val adapter = TextMapPropagatorAdapter(javaPropagator)
-
-        val composite = dsl.composite(adapter)
-
-        assertTrue(composite is TextMapPropagatorAdapter)
-        assertSame(javaPropagator, composite.impl)
-    }
-
-    @Test
     fun `w3cBaggage returns the api W3C baggage propagator`() {
         val propagator = dsl.w3cBaggage()
         assertSame(createW3CBaggagePropagator(), propagator)
         assertEquals(listOf("baggage"), propagator.fields().toList())
-    }
-
-    @Test
-    fun `composite call captures the result and buildPropagator returns it`() {
-        val captured = dsl.composite(RecordingPropagator(listOf("foo")))
-        assertSame(captured, dsl.buildPropagator())
-    }
-
-    @Test
-    fun `w3cBaggage call captures the result and buildPropagator returns it`() {
-        val captured = dsl.w3cBaggage()
-        assertSame(captured, dsl.buildPropagator())
     }
 
     @Test
@@ -125,12 +102,6 @@ internal class CompatPropagatorApiTest {
 
         assertEquals(incoming["traceparent"], outgoing["traceparent"])
         assertEquals(incoming["tracestate"], outgoing["tracestate"])
-    }
-
-    @Test
-    fun `w3cTraceContext call captures the result and buildPropagator returns it`() {
-        val captured = dsl.w3cTraceContext()
-        assertSame(captured, dsl.buildPropagator())
     }
 }
 

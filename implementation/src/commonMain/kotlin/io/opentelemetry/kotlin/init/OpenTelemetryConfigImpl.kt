@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
+import io.opentelemetry.kotlin.config.dsl.PropagatorConfigImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceDetectionConfigDslImpl
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
@@ -12,6 +13,7 @@ import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
+import io.opentelemetry.kotlin.propagation.createNoopPropagator
 import kotlin.concurrent.Volatile
 
 internal class OpenTelemetryConfigImpl(
@@ -33,9 +35,12 @@ internal class OpenTelemetryConfigImpl(
     internal val loggingConfig: LoggerProviderConfigImpl = LoggerProviderConfigImpl(clock, sdkErrorHandler)
     internal val metricsConfig: MeterProviderConfigImpl = MeterProviderConfigImpl(sdkErrorHandler)
     internal val contextConfig: ContextConfigImpl = ContextConfigImpl()
-    internal val propagatorCfg: PropagatorConfigImpl = PropagatorConfigImpl()
+    private val propagatorCfg: PropagatorConfigImpl = PropagatorConfigImpl()
     private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
     internal val resourceDetectionConfig = ResourceDetectionConfigDslImpl()
+
+    @Volatile internal var propagator: TextMapPropagator = createNoopPropagator()
+        private set
 
     @Volatile private var idGeneratorBehavior: IdGeneratorBehavior? = null
 
@@ -71,7 +76,7 @@ internal class OpenTelemetryConfigImpl(
     }
 
     override fun propagator(action: PropagatorConfigDsl.() -> TextMapPropagator) {
-        propagatorCfg.action()
+        propagator = propagatorCfg.action()
     }
 
     override fun idGenerator(action: () -> IdGenerator) {

@@ -1,16 +1,20 @@
-package io.opentelemetry.kotlin.propagation
+package io.opentelemetry.kotlin.config.dsl
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.init.B3Format
-import io.opentelemetry.kotlin.init.PropagatorConfigImpl
+import io.opentelemetry.kotlin.propagation.FakeTextMapPropagator
+import io.opentelemetry.kotlin.propagation.FakeTextMapSetter
+import io.opentelemetry.kotlin.propagation.createB3Propagator
+import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
+import io.opentelemetry.kotlin.propagation.createW3CTraceContextPropagator
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
-internal class CorePropagatorApiTest {
+internal class PropagatorConfigImplTest {
 
     private val dsl = PropagatorConfigImpl()
 
@@ -32,28 +36,10 @@ internal class CorePropagatorApiTest {
     }
 
     @Test
-    fun `w3cBaggage call captures the result and buildPropagator returns it`() {
-        dsl.w3cBaggage()
-        assertSame(createW3CBaggagePropagator(), dsl.buildPropagator())
-    }
-
-    @Test
-    fun `composite call captures the result and buildPropagator returns it`() {
-        val captured = dsl.composite(FakeTextMapPropagator(listOf("foo")))
-        assertSame(captured, dsl.buildPropagator())
-    }
-
-    @Test
     fun `w3cTraceContext returns the W3C trace context propagator singleton`() {
         val propagator = dsl.w3cTraceContext()
         assertSame(createW3CTraceContextPropagator(), propagator)
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
-    }
-
-    @Test
-    fun `w3cTraceContext call captures the result and buildPropagator returns it`() {
-        val captured = dsl.w3cTraceContext()
-        assertSame(captured, dsl.buildPropagator())
     }
 
     @Test
@@ -74,11 +60,5 @@ internal class CorePropagatorApiTest {
     fun `b3 default format is SINGLE`() {
         val propagator = dsl.b3()
         assertEquals(listOf("b3"), propagator.fields().toList())
-    }
-
-    @Test
-    fun `b3 call captures result and buildPropagator returns it`() {
-        val captured = dsl.b3(B3Format.SINGLE)
-        assertSame(captured, dsl.buildPropagator())
     }
 }

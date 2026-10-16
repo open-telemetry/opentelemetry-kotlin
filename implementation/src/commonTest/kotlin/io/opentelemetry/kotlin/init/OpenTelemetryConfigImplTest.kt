@@ -23,7 +23,9 @@ import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
+import io.opentelemetry.kotlin.propagation.FakeTextMapPropagator
 import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
+import io.opentelemetry.kotlin.propagation.createW3CTraceContextPropagator
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -45,7 +47,7 @@ internal class OpenTelemetryConfigImplTest {
         assertNull(resolver.generateTracingConfig().processor)
         assertNull(resolver.generateLoggingConfig().processor)
         assertNull(cfg.contextConfig.storageMode)
-        assertSame(NoopOpenTelemetry.propagator, cfg.propagatorCfg.buildPropagator())
+        assertSame(NoopOpenTelemetry.propagator, cfg.propagator)
     }
 
     @Test
@@ -53,7 +55,7 @@ internal class OpenTelemetryConfigImplTest {
         val cfg = OpenTelemetryConfigImpl(clock).apply {
             propagator { w3cBaggage() }
         }
-        assertSame(createW3CBaggagePropagator(), cfg.propagatorCfg.buildPropagator())
+        assertSame(createW3CBaggagePropagator(), cfg.propagator)
     }
 
     @Test
@@ -61,8 +63,29 @@ internal class OpenTelemetryConfigImplTest {
         val cfg = OpenTelemetryConfigImpl(clock).apply {
             propagator { composite(w3cBaggage()) }
         }
-        val composite = cfg.propagatorCfg.buildPropagator()
+        val composite = cfg.propagator
         assertEquals(listOf("baggage"), composite.fields().toList())
+    }
+
+    @Test
+    fun testCustomPropagatorOverride() {
+        val custom = FakeTextMapPropagator()
+        val cfg = OpenTelemetryConfigImpl(clock).apply {
+            propagator { custom }
+        }
+        assertSame(custom, cfg.propagator)
+    }
+
+    @Test
+    fun testPropagatorUsesReturnValueNotLastBuilderCall() {
+        val cfg = OpenTelemetryConfigImpl(clock).apply {
+            propagator {
+                val traceContext = w3cTraceContext()
+                w3cBaggage()
+                traceContext
+            }
+        }
+        assertSame(createW3CTraceContextPropagator(), cfg.propagator)
     }
 
     @Test

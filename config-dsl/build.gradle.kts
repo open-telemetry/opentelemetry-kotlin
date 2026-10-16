@@ -19,6 +19,7 @@ kotlin {
         commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
+                implementation(project(":test-fakes"))
             }
         }
         jvmTest {

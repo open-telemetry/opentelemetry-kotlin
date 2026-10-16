@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.aliases.OtelJavaTextMapPropagator
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
@@ -10,13 +11,14 @@ import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
+import io.opentelemetry.kotlin.config.dsl.PropagatorConfigImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceDetectionConfigDslImpl
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.IdGenerator
-import io.opentelemetry.kotlin.propagation.CompatPropagatorConfigImpl
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
+import io.opentelemetry.kotlin.propagation.TextMapPropagatorAdapter
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import kotlin.concurrent.Volatile
 
@@ -32,7 +34,10 @@ internal class CompatOpenTelemetryConfig(
     internal val loggerProviderConfig = CompatLoggerProviderConfig(clock, sdkErrorHandler)
     internal val meterProviderConfig = CompatMeterProviderConfig(sdkErrorHandler)
     private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
-    internal val propagatorCfg = CompatPropagatorConfigImpl()
+    private val propagatorCfg = PropagatorConfigImpl()
+
+    @Volatile internal var propagator: TextMapPropagator = TextMapPropagatorAdapter(OtelJavaTextMapPropagator.noop())
+        private set
 
     @Volatile private var idGeneratorBehavior: IdGeneratorBehavior? = null
 
@@ -94,7 +99,7 @@ internal class CompatOpenTelemetryConfig(
     }
 
     override fun propagator(action: PropagatorConfigDsl.() -> TextMapPropagator) {
-        propagatorCfg.action()
+        propagator = propagatorCfg.action()
     }
 
     override fun idGenerator(action: () -> IdGenerator) {
