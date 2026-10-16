@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.config.ConfigProvider
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -26,6 +27,9 @@ internal class CompatOpenTelemetryImpl(
     override val propagator: TextMapPropagator,
     sdkErrorHandler: SdkErrorHandler,
 ) : OpenTelemetrySdk {
+
+    // TODO: delegate to opentelemetry-java once it ships the Instrumentation Configuration API.
+    override val configProvider: ConfigProvider = NoopOpenTelemetry.configProvider
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
 
