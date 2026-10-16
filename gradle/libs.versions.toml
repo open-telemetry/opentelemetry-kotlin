@@ -70,7 +70,6 @@ opentelemetry-api = { group = "io.opentelemetry", name = "opentelemetry-api"}
 opentelemetry-sdk = { group = "io.opentelemetry", name = "opentelemetry-sdk"}
 opentelemetry-exporter-logging = { group = "io.opentelemetry", name = "opentelemetry-exporter-logging"}
 opentelemetry-sdk-extension-incubator = { group = "io.opentelemetry", name = "opentelemetry-sdk-extension-incubator"}
-opentelemetry-extension-trace-propagators = { group = "io.opentelemetry", name = "opentelemetry-extension-trace-propagators" }
 kotlin-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 mavenPublish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version.ref = "mavenPublish" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }

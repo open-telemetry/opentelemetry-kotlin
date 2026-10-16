@@ -27,7 +27,6 @@ kotlin {
                 implementation(libs.opentelemetry.sdk)
                 implementation(libs.opentelemetry.exporter.logging)
                 implementation(libs.opentelemetry.sdk.extension.incubator)
-                implementation(libs.opentelemetry.extension.trace.propagators)
             }
         }
         jvmTest {

@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.propagation
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
-import io.opentelemetry.kotlin.context.ContextKeyImpl
 import io.opentelemetry.kotlin.init.B3Format
 import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_HEX_LENGTH
 import io.opentelemetry.kotlin.propagation.utils.isAllZerosHex
@@ -20,7 +19,7 @@ import io.opentelemetry.kotlin.tracing.createSpanContext
  * https://github.com/openzipkin/b3-propagation
  */
 @OptIn(ExperimentalApi::class)
-public class B3Propagator(
+internal class B3Propagator private constructor(
     private val format: B3Format,
 ) : TextMapPropagator {
 
@@ -142,8 +141,11 @@ public class B3Propagator(
     private fun Context.withB3Debug(): Context = set(DEBUG_CONTEXT_KEY, true)
     private fun Context.isB3Debug(): Boolean = get(DEBUG_CONTEXT_KEY) == true
 
-    public companion object {
-        internal val DEBUG_CONTEXT_KEY: ContextKey<Boolean> = ContextKeyImpl("b3-debug")
+    companion object {
+        val SINGLE_HEADER: B3Propagator = B3Propagator(B3Format.SINGLE)
+        val MULTI_HEADER: B3Propagator = B3Propagator(B3Format.MULTI)
+
+        private val DEBUG_CONTEXT_KEY: ContextKey<Boolean> = object : ContextKey<Boolean> {}
 
         private const val TRACE_ID_HEADER = "X-B3-TraceId"
         private const val SPAN_ID_HEADER = "X-B3-SpanId"

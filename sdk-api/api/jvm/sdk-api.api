@@ -123,14 +123,6 @@ public abstract interface class io/opentelemetry/kotlin/init/AttributeLimitsConf
 	public abstract fun setAttributeValueLengthLimit (Ljava/lang/Integer;)V
 }
 
-public final class io/opentelemetry/kotlin/init/B3Format : java/lang/Enum {
-	public static final field MULTI Lio/opentelemetry/kotlin/init/B3Format;
-	public static final field SINGLE Lio/opentelemetry/kotlin/init/B3Format;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/init/B3Format;
-	public static fun values ()[Lio/opentelemetry/kotlin/init/B3Format;
-}
-
 public abstract interface class io/opentelemetry/kotlin/init/ComposableRuleBasedConfigDsl : io/opentelemetry/kotlin/init/SamplerConfigDsl {
 	public abstract fun rule (Lio/opentelemetry/kotlin/tracing/sampling/SamplingPredicate;Lkotlin/jvm/functions/Function1;)V
 }

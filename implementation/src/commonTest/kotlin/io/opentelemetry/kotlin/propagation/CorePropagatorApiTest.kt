@@ -59,12 +59,14 @@ internal class CorePropagatorApiTest {
     @Test
     fun `b3 single returns propagator with b3 field`() {
         val propagator = dsl.b3(B3Format.SINGLE)
+        assertSame(createB3Propagator(B3Format.SINGLE), propagator)
         assertEquals(listOf("b3"), propagator.fields().toList())
     }
 
     @Test
     fun `b3 multi returns propagator with X-B3 fields`() {
         val propagator = dsl.b3(B3Format.MULTI)
+        assertSame(createB3Propagator(B3Format.MULTI), propagator)
         assertEquals(listOf("X-B3-TraceId", "X-B3-SpanId", "X-B3-Sampled"), propagator.fields().toList())
     }
 

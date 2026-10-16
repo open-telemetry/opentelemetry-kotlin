@@ -1,8 +1,8 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.propagation.B3Propagator
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
+import io.opentelemetry.kotlin.propagation.createB3Propagator
 import io.opentelemetry.kotlin.propagation.createCompositePropagator
 import io.opentelemetry.kotlin.propagation.createNoopPropagator
 import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
@@ -29,7 +29,7 @@ internal class PropagatorConfigImpl : PropagatorConfigDsl {
     }
 
     override fun b3(format: B3Format): TextMapPropagator {
-        configured = B3Propagator(format)
+        configured = createB3Propagator(format)
         return configured
     }
 

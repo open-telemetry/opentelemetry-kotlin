@@ -163,6 +163,14 @@ public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
 	public abstract fun root ()Lio/opentelemetry/kotlin/context/Context;
 }
 
+public final class io/opentelemetry/kotlin/init/B3Format : java/lang/Enum {
+	public static final field MULTI Lio/opentelemetry/kotlin/init/B3Format;
+	public static final field SINGLE Lio/opentelemetry/kotlin/init/B3Format;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/init/B3Format;
+	public static fun values ()[Lio/opentelemetry/kotlin/init/B3Format;
+}
+
 public abstract interface class io/opentelemetry/kotlin/logging/Logger {
 	public abstract fun emit (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/SeverityNumber;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun enabled (Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/SeverityNumber;Ljava/lang/String;)Z
@@ -290,6 +298,8 @@ public abstract interface class io/opentelemetry/kotlin/metrics/SynchronousInstr
 }
 
 public final class io/opentelemetry/kotlin/propagation/PropagatorEntrypointsKt {
+	public static final fun createB3Propagator (Lio/opentelemetry/kotlin/init/B3Format;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
+	public static synthetic fun createB3Propagator$default (Lio/opentelemetry/kotlin/init/B3Format;ILjava/lang/Object;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public static final fun createCompositePropagator ([Lio/opentelemetry/kotlin/propagation/TextMapPropagator;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public static final fun createNoopPropagator ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public static final fun createW3CBaggagePropagator ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;

@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapPropagator
 import io.opentelemetry.kotlin.init.B3Format
 import io.opentelemetry.kotlin.init.PropagatorConfigDsl
-import io.opentelemetry.extension.trace.propagation.B3Propagator as JavaB3Propagator
 
 @OptIn(ExperimentalApi::class)
 internal class CompatPropagatorConfigImpl : PropagatorConfigDsl {
@@ -29,11 +28,7 @@ internal class CompatPropagatorConfigImpl : PropagatorConfigDsl {
     }
 
     override fun b3(format: B3Format): TextMapPropagator {
-        val javaPropagator = when (format) {
-            B3Format.SINGLE -> JavaB3Propagator.injectingSingleHeader()
-            B3Format.MULTI -> JavaB3Propagator.injectingMultiHeaders()
-        }
-        configured = TextMapPropagatorAdapter(javaPropagator)
+        configured = createB3Propagator(format)
         return configured
     }
 

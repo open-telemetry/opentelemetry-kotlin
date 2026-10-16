@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.init.B3Format
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
-import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
 internal class CompatB3PropagatorApiTest {
@@ -74,8 +73,19 @@ internal class CompatB3PropagatorApiTest {
     }
 
     @Test
-    fun `b3 returns an adapter wrapping the Java B3Propagator`() {
+    fun `b3 returns the api B3 propagator`() {
         val dsl = CompatPropagatorConfigImpl()
-        assertTrue(dsl.b3(B3Format.SINGLE) is TextMapPropagatorAdapter)
+        assertSame(createB3Propagator(B3Format.SINGLE), dsl.b3(B3Format.SINGLE))
+        assertSame(createB3Propagator(B3Format.MULTI), dsl.b3(B3Format.MULTI))
+    }
+
+    @Test
+    fun `b3 debug flag round-trips through a compat context`() {
+        val propagator = CompatPropagatorConfigImpl().b3(B3Format.SINGLE)
+        val incoming = mapOf("b3" to "0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-d")
+        val extracted = propagator.extract(CompatContextFactory().root(), incoming, FakeTextMapGetter)
+        val outgoing = mutableMapOf<String, String>()
+        propagator.inject(extracted, outgoing, FakeTextMapSetter)
+        assertEquals(incoming["b3"], outgoing["b3"])
     }
 }
