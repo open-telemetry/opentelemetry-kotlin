@@ -17,6 +17,9 @@ fun Project.configureAppleTests(kotlin: KotlinMultiplatformExtension) {
     val tvosTestsEnabled = findProperty("io.opentelemetry.kotlin.enableTvosTests")?.toString()?.toBoolean() ?: false
 
     kotlin.targets.withType(KotlinNativeTarget::class.java).configureEach {
+        if (!konanTarget.family.isAppleFamily) {
+            return@configureEach
+        }
         val runnable = HostManager.hostIsMac && when (konanTarget) {
             KonanTarget.IOS_SIMULATOR_ARM64 -> true
             KonanTarget.TVOS_SIMULATOR_ARM64 -> tvosTestsEnabled

@@ -69,3 +69,10 @@ naming:
   ClassNaming:
     active: true
     classPattern: '^(?!.*Utils)[A-Z][A-Za-z0-9]*$'
+  MatchingDeclarationName:
+    multiplatformTargets:
+      - apple
+      - js
+      - jvm
+      - linux
+      - native

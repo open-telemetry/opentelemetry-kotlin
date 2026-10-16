@@ -20,5 +20,10 @@ kotlin {
             dependencies {
             }
         }
+        linuxMain {
+            dependencies {
+                implementation(libs.kotlinx.atomicfu)
+            }
+        }
     }
 }
