@@ -3,8 +3,8 @@ package io.opentelemetry.kotlin.resource
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.FakeAttributesMutator
+import io.opentelemetry.kotlin.config.dsl.ResourceDetectionConfigDslImpl
 import io.opentelemetry.kotlin.factory.ResourceFactory
-import io.opentelemetry.kotlin.init.ResourceDetectionConfigImpl
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 import io.opentelemetry.kotlin.semconv.OsAttributes
 import io.opentelemetry.kotlin.semconv.SemconvBuildKonfig
@@ -20,7 +20,7 @@ internal class HostResourceDetectorTest {
 
     @Test
     internal fun `has the reserved host name`() {
-        val configuredDetector = ResourceDetectionConfigImpl().hostResourceDetector()
+        val configuredDetector = ResourceDetectionConfigDslImpl().hostResourceDetector()
 
         assertEquals("host", configuredDetector.name)
     }

@@ -2,29 +2,28 @@ package io.opentelemetry.kotlin.behavior
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 internal class SimpleSpanProcessorBehaviorTest {
+    @Test
+    fun everyFieldStartsUnset() {
+        val processor = SimpleSpanProcessorBehavior()
+        assertEquals(null, processor.exporter)
+    }
 
     @Test
-    fun anyTwoInstancesAreEquivalent() {
-        assertEquals(SimpleSpanProcessorBehavior(), SimpleSpanProcessorBehavior())
-        assertEquals(
-            SimpleSpanProcessorBehavior().hashCode(),
-            SimpleSpanProcessorBehavior().hashCode(),
+    fun adoptsEverythingWhenLowerIsUnset() {
+        val higher = SimpleSpanProcessorBehavior(exporter = SpanExporterBehavior())
+        assertEquals(higher, SimpleSpanProcessorBehavior().mergeWith(higher))
+    }
+
+    @Test
+    fun prefersHigherLayerForEveryField() {
+        val lower = SimpleSpanProcessorBehavior(
+            exporter = SpanExporterBehavior(http = OtlpHttpSpanExporterBehavior(endpoint = "www.example1.com"))
         )
-    }
-
-    @Test
-    fun isNotEquivalentToOtherBehaviors() {
-        assertNotEquals<Any?>(SimpleSpanProcessorBehavior(), ConsoleExporterBehavior())
-        assertNotEquals<Any?>(SimpleSpanProcessorBehavior(), null)
-    }
-
-    @Test
-    fun mergingKeepsTheSelection() {
-        val behavior = SimpleSpanProcessorBehavior()
-
-        assertEquals(behavior, behavior.mergeWith(SimpleSpanProcessorBehavior()))
+        val higher = SimpleSpanProcessorBehavior(
+            exporter = SpanExporterBehavior(http = OtlpHttpSpanExporterBehavior(endpoint = "www.example2.com"))
+        )
+        assertEquals(higher, lower.mergeWith(higher))
     }
 }

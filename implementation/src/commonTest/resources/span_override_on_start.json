@@ -69,10 +69,11 @@
     "resource": {
       "schemaUrl": "SEMCONV_SCHEMA_URL",
       "attributes": {
-        "service.name": "unknown_service",
+        "service.name": "unknown_service:kotlin",
         "telemetry.sdk.name": "opentelemetry",
         "telemetry.sdk.language": "kotlin",
-        "telemetry.sdk.version": "UNKNOWN"
+        "telemetry.sdk.version": "UNKNOWN",
+        "telemetry.sdk.mode": "regular"
       }
     },
     "instrumentationScopeInfo": {

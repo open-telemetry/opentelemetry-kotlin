@@ -1,10 +1,9 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceFlagsFactory
-import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.factory.SpanFactoryImpl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
@@ -40,18 +39,8 @@ public fun createOpenTelemetry(
     val configFactory = SdkConfigFactory(cfg, behavior, resourceFactory)
     val idGenerator = configFactory.idGenerator
 
-    val traceFlags = DefaultTraceFlagsFactory
-    val traceState = DefaultTraceStateFactory
-    val spanContext = DefaultSpanContextFactory
-
-    val span = SpanFactoryImpl(spanContext)
+    val span = SpanFactoryImpl()
     val contextFactory = ContextFactoryImpl(span, cfg.sdkErrorHandler, cfg.contextConfig::generateStorage)
-    cfg.propagatorCfg.installFactories(
-        traceFlagsFactory = traceFlags,
-        traceStateFactory = traceState,
-        spanContextFactory = spanContext,
-        spanFactory = span,
-    )
 
     val tracingConfig = configFactory.generateTracingConfig()
     val loggingConfig = configFactory.generateLoggingConfig()
@@ -61,26 +50,22 @@ public fun createOpenTelemetry(
             clock = clock,
             tracingConfig = tracingConfig,
             contextFactory = contextFactory,
-            spanContextFactory = spanContext,
-            spanFactory = span,
             idGenerator = idGenerator,
-            attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior()
+            attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior(),
+            spanLimits = behavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior(),
         ),
         loggerProvider = LoggerProviderImpl(
             clock = clock,
             loggingConfig = loggingConfig,
             contextFactory = contextFactory,
-            spanContextFactory = spanContext,
-            attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior()
+            attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior(),
+            logLimits = behavior.loggerProvider?.logLimits ?: LogLimitsBehavior(),
         ),
         meterProvider = MeterProviderImpl(
             metricsConfig = metricsConfig,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior()
         ),
         clock = clock,
-        spanContext = spanContext,
-        traceFlags = traceFlags,
-        traceState = traceState,
         context = contextFactory,
         span = span,
         idGenerator = idGenerator,

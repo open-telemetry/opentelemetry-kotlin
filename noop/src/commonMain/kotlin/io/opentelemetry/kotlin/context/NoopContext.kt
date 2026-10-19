@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.baggage.Baggage
 import io.opentelemetry.kotlin.baggage.NoopBaggage
 import io.opentelemetry.kotlin.tracing.NoopSpan
 import io.opentelemetry.kotlin.tracing.Span
+import io.opentelemetry.kotlin.tracing.SpanContext
 
 internal object NoopContext : Context {
 
@@ -18,6 +19,8 @@ internal object NoopContext : Context {
     override fun attach(): Scope = NoopScope
 
     override fun storeSpan(span: Span): Context = this
+
+    override fun storeSpanContext(spanContext: SpanContext): Context = this
 
     override fun extractSpan(): Span = NoopSpan
 

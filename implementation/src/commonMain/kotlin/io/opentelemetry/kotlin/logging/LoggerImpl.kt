@@ -14,18 +14,17 @@ import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.export.ShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.LogRecordModel
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecordImpl
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 
 internal class LoggerImpl(
     private val clock: Clock,
     private val processor: LogRecordProcessor?,
     private val contextFactory: ContextFactory,
-    spanContextFactory: SpanContextFactory,
     private val key: InstrumentationScopeInfo,
     private val resource: Resource,
     private val logLimits: AttributeLimitsBehavior,
@@ -35,7 +34,7 @@ internal class LoggerImpl(
 ) : Logger {
 
     private val root = contextFactory.root()
-    private val invalidSpanContext = spanContextFactory.invalid
+    private val invalidSpanContext = createInvalidSpanContext()
 
     override fun enabled(
         context: Context?,

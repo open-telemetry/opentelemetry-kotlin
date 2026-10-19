@@ -2,22 +2,21 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
+import io.opentelemetry.kotlin.config.dsl.ResourceDetectionConfigDslImpl
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.propagation.CompatPropagatorConfigImpl
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
-import io.opentelemetry.kotlin.resource.Resource
-import io.opentelemetry.kotlin.resource.ResourceAdapter
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import kotlin.concurrent.Volatile
 
@@ -26,7 +25,7 @@ internal class CompatOpenTelemetryConfig(
     clock: Clock,
 ) : OpenTelemetryConfigDsl, BehaviorSupplier<OpenTelemetryBehavior> {
 
-    @Volatile private var configuredErrorHandler: SdkErrorHandler = NoopSdkErrorHandler
+    @Volatile private var configuredErrorHandler: SdkErrorHandler = PlatformSdkErrorHandler
     internal val sdkErrorHandler = GuardedSdkErrorHandler { configuredErrorHandler.onError(it) }
 
     internal val tracerProviderConfig = CompatTracerProviderConfig(clock, sdkErrorHandler)
@@ -65,20 +64,21 @@ internal class CompatOpenTelemetryConfig(
         globalResourceAttrs.apply { setTypedAttributes(map) }
     }
 
-    internal val resourceDetectionConfig = CompatResourceDetectionConfig()
+    internal val resourceDetectionConfig = ResourceDetectionConfigDslImpl()
 
     override fun resourceDetection(action: ResourceDetectionConfigDsl.() -> Unit) {
         resourceDetectionConfig.action()
     }
 
     /**
-     * The resource declared via the DSL, before any detected attributes are merged in.
+     * Compat mode always stores the implicit context in
+     * opentelemetry-java's ContextStorage, so this configuration is ignored.
      */
-    internal fun buildDeclaredResource(): Resource =
-        ResourceAdapter(OtelJavaResource.create(globalResourceAttrs.otelJavaAttributes(), globalResourceSchemaUrl))
+    @Volatile internal var contextConfigured: Boolean = false
+        private set
 
     override fun context(action: ContextConfigDsl.() -> Unit) {
-        // no-op
+        contextConfigured = true
     }
 
     override fun tracerProvider(action: TracerProviderConfigDsl.() -> Unit) {
@@ -106,6 +106,11 @@ internal class CompatOpenTelemetryConfig(
     }
 
     override fun toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
+        resource = ResourceBehavior(
+            serviceName = serviceName,
+            schemaUrl = globalResourceSchemaUrl,
+            attributes = globalResourceAttrs.attributes.takeUnless { it.isEmpty() },
+        ),
         attributeLimits = globalAttributeLimits.toBehavior(),
         tracerProvider = tracerProviderConfig.toBehavior().copy(idGenerator = idGeneratorBehavior),
         loggerProvider = loggerProviderConfig.toBehavior(),

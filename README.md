@@ -6,6 +6,13 @@ Multiplatform Library.
 
 Please read [the docs](https://opentelemetry.io/docs/languages/kotlin/getting-started/) to get started.
 
+### Supported targets
+
+| Tier | Targets | Notes |
+|------|---------|-------|
+| 1 | JVM, Android (API 21+) | Heavily tested and supported for production use. |
+| 2 | iOS, JS, tvOS | Compiles and passes shared tests, but has received limited real-world testing. |
+
 ### Example Apps
 
 Example usage of the library can be found [here](examples).

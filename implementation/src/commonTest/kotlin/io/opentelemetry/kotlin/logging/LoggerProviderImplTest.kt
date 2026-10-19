@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.FakeContextFactory
-import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
@@ -30,14 +29,13 @@ internal class LoggerProviderImplTest {
     private val loggerConfigurator = LoggerConfigurator { LoggerConfigImpl(true) }
     private val loggingConfig = LoggingConfig(
         null,
-        AttributeLimitsBehavior(100, 100),
         ResourceImpl(AttributesModel(), null),
         NoopSdkErrorHandler,
         loggerConfigurator,
     )
     private val contextFactory = FakeContextFactory()
-    private val spanContextFactory = FakeSpanContextFactory()
     private val attributeLimits = AttributeLimitsBehavior()
+    private val logLimits = AttributeLimitsBehavior(100, 100)
     private lateinit var impl: LoggerProviderImpl
 
     @BeforeTest
@@ -46,8 +44,8 @@ internal class LoggerProviderImplTest {
             clock,
             loggingConfig,
             contextFactory,
-            spanContextFactory,
             attributeLimits,
+            logLimits,
         )
     }
 
@@ -61,7 +59,6 @@ internal class LoggerProviderImplTest {
         val handler = FakeSdkErrorHandler()
         val config = LoggingConfig(
             null,
-            AttributeLimitsBehavior(100, 100),
             ResourceImpl(AttributesModel(), null),
             handler,
             loggerConfigurator,
@@ -70,8 +67,8 @@ internal class LoggerProviderImplTest {
             clock,
             config,
             contextFactory,
-            spanContextFactory,
             attributeLimits,
+            logLimits,
         )
         provider.getLogger(name = "")
         assertEquals(1, handler.apiMisuses.size)
@@ -92,40 +89,44 @@ internal class LoggerProviderImplTest {
 
     @Test
     fun testDupeLoggerProviderName() {
-        val first = impl.getLogger(name = "name")
-        val second = impl.getLogger(name = "name")
-        val third = impl.getLogger(name = "other")
+        val provider = createProvider()
+        val first = provider.getLogger(name = "name")
+        val second = provider.getLogger(name = "name")
+        val third = provider.getLogger(name = "other")
         assertSame(first, second)
         assertNotEquals(first, third)
     }
 
     @Test
     fun testDupeLoggerProviderVersion() {
-        val first = impl.getLogger(name = "name", version = "0.1.0")
-        val second = impl.getLogger(name = "name", version = "0.1.0")
-        val third = impl.getLogger(name = "name", version = "0.2.0")
+        val provider = createProvider()
+        val first = provider.getLogger(name = "name", version = "0.1.0")
+        val second = provider.getLogger(name = "name", version = "0.1.0")
+        val third = provider.getLogger(name = "name", version = "0.2.0")
         assertSame(first, second)
         assertNotEquals(first, third)
     }
 
     @Test
     fun testDupeLoggerProviderSchemaUrl() {
-        val first = impl.getLogger(name = "name", schemaUrl = "https://example.com/foo")
-        val second = impl.getLogger(name = "name", schemaUrl = "https://example.com/foo")
-        val third = impl.getLogger(name = "name", schemaUrl = "https://example.com/bar")
+        val provider = createProvider()
+        val first = provider.getLogger(name = "name", schemaUrl = "https://example.com/foo")
+        val second = provider.getLogger(name = "name", schemaUrl = "https://example.com/foo")
+        val third = provider.getLogger(name = "name", schemaUrl = "https://example.com/bar")
         assertSame(first, second)
         assertNotEquals(first, third)
     }
 
     @Test
     fun testDupeLoggerProviderAttributes() {
-        val first = impl.getLogger(name = "name") {
+        val provider = createProvider()
+        val first = provider.getLogger(name = "name") {
             setStringAttribute("key", "value")
         }
-        val second = impl.getLogger(name = "name") {
+        val second = provider.getLogger(name = "name") {
             setStringAttribute("key", "value")
         }
-        val third = impl.getLogger(name = "name") {
+        val third = provider.getLogger(name = "name") {
             setStringAttribute("foo", "bar")
         }
         assertSame(first, second)
@@ -155,7 +156,6 @@ internal class LoggerProviderImplTest {
         )
         val config = LoggingConfig(
             processor,
-            AttributeLimitsBehavior(100, 100),
             FakeResource(),
             NoopSdkErrorHandler,
             loggerConfigurator,
@@ -164,8 +164,8 @@ internal class LoggerProviderImplTest {
             clock,
             config,
             contextFactory,
-            spanContextFactory,
             attributeLimits,
+            logLimits,
         )
         impl.getLogger(name = "test")
 
@@ -185,7 +185,6 @@ internal class LoggerProviderImplTest {
         )
         val config = LoggingConfig(
             processor,
-            AttributeLimitsBehavior(100, 100),
             FakeResource(),
             NoopSdkErrorHandler,
             loggerConfigurator,
@@ -194,8 +193,8 @@ internal class LoggerProviderImplTest {
             clock,
             config,
             contextFactory,
-            spanContextFactory,
             attributeLimits,
+            logLimits,
         )
         impl.getLogger(name = "test")
 
@@ -216,7 +215,6 @@ internal class LoggerProviderImplTest {
         val processor = FakeLogRecordProcessor()
         val config = LoggingConfig(
             processor,
-            AttributeLimitsBehavior(100, 100),
             FakeResource(),
             NoopSdkErrorHandler,
             loggerConfigurator,
@@ -225,13 +223,21 @@ internal class LoggerProviderImplTest {
             clock,
             config,
             contextFactory,
-            spanContextFactory,
             attributeLimits,
+            logLimits,
         )
         val logger = impl.getLogger(name = "test")
         impl.shutdown()
         logger.emit(body = "should not emit")
         assertEquals(0, processor.logs.size)
+    }
+
+    @Test
+    fun testNoProcessorReturnsNoopLogger() {
+        val provider = createProvider(processor = null)
+        val logger = provider.getLogger(name = "test")
+        assertFalse(logger.enabled())
+        assertSame(logger, provider.getLogger(name = "other"))
     }
 
     @Test
@@ -270,14 +276,14 @@ internal class LoggerProviderImplTest {
     }
 
     private fun createProvider(
-        processor: LogRecordProcessor? = null,
-        errorHandler: SdkErrorHandler,
+        processor: LogRecordProcessor? = FakeLogRecordProcessor(),
+        errorHandler: SdkErrorHandler = NoopSdkErrorHandler,
     ) = LoggerProviderImpl(
         clock,
-        LoggingConfig(processor, AttributeLimitsBehavior(100, 100), FakeResource(), errorHandler, loggerConfigurator),
+        LoggingConfig(processor, FakeResource(), errorHandler, loggerConfigurator),
         contextFactory,
-        spanContextFactory,
-        attributeLimits
+        attributeLimits,
+        logLimits,
     )
 
     private class ThrowingSdkErrorHandler : SdkErrorHandler {

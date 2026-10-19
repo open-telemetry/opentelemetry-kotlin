@@ -20,7 +20,9 @@ Targets: JVM, Android (API 21+), iOS, JS.
 
 ## Workflow
 
-- **Build & verify**: `./gradlew build` — runs tests + Detekt (static analysis).
+- **Build & verify**: `./gradlew verify` — runs tests + static analysis (Detekt, API checks). Use it for most changesets.
+  `./gradlew build` additionally assembles everything and runs `gradle-integration-test`, which needs
+  `./gradlew publishToMavenLocal -PsnapshotPublish=true` first (see `CONTRIBUTING.md`).
 - **Android tests**: skip running locally, but verify compilation with `./gradlew assembleAndroidTest`
 - **API changes**: run `./gradlew apiDump` to update dump files before opening a PR.
 - **PR size**: keep diffs under 500 lines.

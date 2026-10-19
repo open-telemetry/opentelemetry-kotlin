@@ -2,8 +2,8 @@ package io.opentelemetry.kotlin.tracing.ext
 
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceStateBuilder
-import io.opentelemetry.kotlin.factory.DefaultTraceStateFactory
 import io.opentelemetry.kotlin.tracing.FakeTraceState
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import org.junit.Test
 import java.util.function.BiConsumer
 import kotlin.test.assertEquals
@@ -42,12 +42,12 @@ internal class TraceStateExtTest {
 
     @Test
     fun `empty java trace state converts to the shared empty trace state`() {
-        assertSame(DefaultTraceStateFactory.default, OtelJavaTraceState.getDefault().toOtelKotlinTraceState())
+        assertSame(createInvalidSpanContext().traceState, OtelJavaTraceState.getDefault().toOtelKotlinTraceState())
     }
 
     @Test
     fun `round trip preserves entries`() {
-        val kotlinState = DefaultTraceStateFactory.default
+        val kotlinState = createInvalidSpanContext().traceState
             .put("vendor", "value")
             .put("tenant@system", "other")
         val observed = kotlinState.toOtelJavaTraceState().toOtelKotlinTraceState()

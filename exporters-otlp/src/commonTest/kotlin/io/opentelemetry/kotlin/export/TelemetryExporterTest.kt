@@ -8,7 +8,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.random.Random
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -16,58 +15,65 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
 internal class TelemetryExporterTest {
 
-    private lateinit var exporter: TelemetryExporter<String>
-
-    @BeforeTest
-    fun setup() {
-        exporter = TelemetryExporter(
-            initialDelayMs = 100,
-            maxAttemptIntervalMs = 1000,
-            maxAttempts = 3,
-            sdkErrorHandler = NoopSdkErrorHandler,
-            exportAction = { OtlpResponse.Success },
-        )
-    }
+    private fun TestScope.initTelemetryExporter(
+        initialDelayMs: Long = 100,
+        maxAttemptIntervalMs: Long = 1000,
+        maxAttempts: Int = 3,
+        random: Random = Random.Default,
+        exportAction: suspend (List<String>) -> OtlpResponse = { OtlpResponse.Success },
+    ) = TelemetryExporter(
+        initialDelayMs = initialDelayMs,
+        maxAttemptIntervalMs = maxAttemptIntervalMs,
+        maxAttempts = maxAttempts,
+        sdkErrorHandler = NoopSdkErrorHandler,
+        coroutineContext = StandardTestDispatcher(testScheduler),
+        random = random,
+        exportAction = exportAction,
+    )
 
     @Test
     fun testExportReturnsFailureAfterShutdown() = runTest {
-        assertEquals(OperationResultCode.Success, exporter.shutdown())
-        assertEquals(OperationResultCode.Failure, exporter.export(listOf("data")))
+        initTelemetryExporter().withShutdown { exporter ->
+            assertEquals(OperationResultCode.Success, exporter.shutdown())
+            assertEquals(OperationResultCode.Failure, exporter.export(listOf("data")))
+        }
     }
 
     @Test
     fun testShutdownReturnsSuccessOnSecondCall() = runTest {
-        assertEquals(OperationResultCode.Success, exporter.shutdown())
-        assertEquals(OperationResultCode.Success, exporter.shutdown())
+        initTelemetryExporter().withShutdown { exporter ->
+            assertEquals(OperationResultCode.Success, exporter.shutdown())
+            assertEquals(OperationResultCode.Success, exporter.shutdown())
+        }
     }
 
     @Test
     fun testForceFlushWorksAfterShutdown() = runTest {
-        assertEquals(OperationResultCode.Success, exporter.shutdown())
-        assertEquals(OperationResultCode.Success, exporter.forceFlush())
+        initTelemetryExporter().withShutdown { exporter ->
+            assertEquals(OperationResultCode.Success, exporter.shutdown())
+            assertEquals(OperationResultCode.Success, exporter.forceFlush())
+        }
     }
 
     @Test
-    fun testExportSucceedsBeforeShutdown() {
-        assertEquals(OperationResultCode.Success, exporter.export(listOf("data")))
+    fun testExportSucceedsBeforeShutdown() = runTest {
+        initTelemetryExporter().withShutdown { exporter ->
+            assertEquals(OperationResultCode.Success, exporter.export(listOf("data")))
+        }
     }
 
     @Test
     fun testClientErrorIsNotRetried() = runTest {
         var attempts = 0
-        val exporter = TelemetryExporter<String>(
-            initialDelayMs = 100,
-            maxAttemptIntervalMs = 1000,
-            maxAttempts = 3,
-            sdkErrorHandler = NoopSdkErrorHandler,
-            coroutineContext = StandardTestDispatcher(testScheduler),
-        ) {
+        val exporter = initTelemetryExporter {
             attempts++
             OtlpResponse.ClientError(400, null)
         }
-        exporter.export(listOf("data"))
-        advanceUntilIdle()
-        assertEquals(1, attempts)
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            advanceUntilIdle()
+            assertEquals(1, attempts)
+        }
     }
 
     @Test
@@ -79,56 +85,44 @@ internal class TelemetryExporterTest {
             OtlpResponse.PartialSuccess(1, null),
         ).forEach { response ->
             var attempts = 0
-            val exporter = TelemetryExporter<String>(
-                initialDelayMs = 100,
-                maxAttemptIntervalMs = 1000,
-                maxAttempts = 3,
-                sdkErrorHandler = NoopSdkErrorHandler,
-                coroutineContext = StandardTestDispatcher(testScheduler),
-            ) {
+            val exporter = initTelemetryExporter {
                 attempts++
                 response
             }
-            exporter.export(listOf("data"))
-            advanceUntilIdle()
-            assertEquals(1, attempts, "$response")
+            exporter.withShutdown {
+                exporter.export(listOf("data"))
+                advanceUntilIdle()
+                assertEquals(1, attempts, "$response")
+            }
         }
     }
 
     @Test
     fun testUnknownIsRetried() = runTest {
         var attempts = 0
-        val exporter = TelemetryExporter<String>(
-            initialDelayMs = 100,
-            maxAttemptIntervalMs = 1000,
-            maxAttempts = 3,
-            sdkErrorHandler = NoopSdkErrorHandler,
-            coroutineContext = StandardTestDispatcher(testScheduler),
-        ) {
+        val exporter = initTelemetryExporter {
             attempts++
             OtlpResponse.Unknown
         }
-        exporter.export(listOf("data"))
-        advanceUntilIdle()
-        assertEquals(3, attempts)
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            advanceUntilIdle()
+            assertEquals(3, attempts)
+        }
     }
 
     @Test
     fun testSuccessIsNotRetried() = runTest {
         var attempts = 0
-        val exporter = TelemetryExporter<String>(
-            initialDelayMs = 100,
-            maxAttemptIntervalMs = 1000,
-            maxAttempts = 3,
-            sdkErrorHandler = NoopSdkErrorHandler,
-            coroutineContext = StandardTestDispatcher(testScheduler),
-        ) {
+        val exporter = initTelemetryExporter {
             attempts++
             OtlpResponse.Success
         }
-        exporter.export(listOf("data"))
-        advanceUntilIdle()
-        assertEquals(1, attempts)
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            advanceUntilIdle()
+            assertEquals(1, attempts)
+        }
     }
 
     @Test
@@ -137,30 +131,30 @@ internal class TelemetryExporterTest {
         val maxAttempts = 4
         val initialDelayMs = 100L
         val maxIntervalMs = 1000L
-        val exporter = TelemetryExporter<String>(
+        val exporter = initTelemetryExporter(
             initialDelayMs = initialDelayMs,
             maxAttemptIntervalMs = maxIntervalMs,
             maxAttempts = maxAttempts,
-            sdkErrorHandler = NoopSdkErrorHandler,
-            coroutineContext = StandardTestDispatcher(testScheduler),
             random = Random(0),
         ) {
             timestamps += testScheduler.currentTime
             OtlpResponse.RetryableError(503, retryAfterMs = null, errorMessage = null)
         }
-        exporter.export(listOf("data"))
-        advanceUntilIdle()
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            advanceUntilIdle()
 
-        assertEquals(maxAttempts, timestamps.size)
+            assertEquals(maxAttempts, timestamps.size)
 
-        var base = initialDelayMs
-        timestamps.zipWithNext { a, b -> b - a }.forEach { delta ->
-            val cappedBase = base.coerceAtMost(maxIntervalMs)
-            assertTrue(
-                delta in (cappedBase / 2)..cappedBase,
-                "backoff delta $delta outside [${cappedBase / 2}, $cappedBase]",
-            )
-            base = (base * 2).coerceAtMost(maxIntervalMs)
+            var base = initialDelayMs
+            timestamps.zipWithNext { a, b -> b - a }.forEach { delta ->
+                val cappedBase = base.coerceAtMost(maxIntervalMs)
+                assertTrue(
+                    delta in (cappedBase / 2)..cappedBase,
+                    "backoff delta $delta outside [${cappedBase / 2}, $cappedBase]",
+                )
+                base = (base * 2).coerceAtMost(maxIntervalMs)
+            }
         }
     }
 
@@ -180,19 +174,15 @@ internal class TelemetryExporterTest {
         assertEquals(maxAttemptIntervalMs, timestamps[1] - timestamps[0])
     }
 
-    private fun TestScope.recordRetryAfterAttempts(
+    private suspend fun TestScope.recordRetryAfterAttempts(
         retryAfterMs: Long,
         maxAttemptIntervalMs: Long,
     ): List<Long> {
         val timestamps = mutableListOf<Long>()
         var attempts = 0
-        val exporter = TelemetryExporter<String>(
-            initialDelayMs = 100,
+        val exporter = initTelemetryExporter(
             maxAttemptIntervalMs = maxAttemptIntervalMs,
-            maxAttempts = 3,
-            coroutineContext = StandardTestDispatcher(testScheduler),
             random = Random(0),
-            sdkErrorHandler = NoopSdkErrorHandler,
         ) {
             timestamps += testScheduler.currentTime
             if (attempts++ == 0) {
@@ -201,21 +191,24 @@ internal class TelemetryExporterTest {
                 OtlpResponse.Success
             }
         }
-        exporter.export(listOf("data"))
-        advanceUntilIdle()
-        return timestamps
+        return exporter.withShutdown {
+            exporter.export(listOf("data"))
+            advanceUntilIdle()
+            timestamps
+        }
     }
 
-    fun testExportDoesNotPropagateExportActionFailure() {
-        val throwingExporter = TelemetryExporter<String>(
+    fun testExportDoesNotPropagateExportActionFailure() = runTest {
+        val throwingExporter = initTelemetryExporter(
             initialDelayMs = 1,
             maxAttemptIntervalMs = 1,
             maxAttempts = 1,
-            sdkErrorHandler = NoopSdkErrorHandler,
             exportAction = { error("network unreachable") },
         )
-        // The failure occurs on a background coroutine whose scope has a CoroutineExceptionHandler,
-        // so it must not propagate to the caller nor crash the process.
-        assertEquals(OperationResultCode.Success, throwingExporter.export(listOf("data")))
+        throwingExporter.withShutdown {
+            // The failure occurs on a background coroutine whose scope has a CoroutineExceptionHandler,
+            // so it must not propagate to the caller nor crash the process.
+            assertEquals(OperationResultCode.Success, throwingExporter.export(listOf("data")))
+        }
     }
 }

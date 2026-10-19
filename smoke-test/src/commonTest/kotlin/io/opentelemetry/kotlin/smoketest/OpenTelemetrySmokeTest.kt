@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.logging.export.otlpHttpLogRecordExporter
 import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.otlpHttpSpanExporter
 import io.opentelemetry.kotlin.tracing.export.simpleSpanProcessor
-import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -50,7 +49,7 @@ class OpenTelemetrySmokeTest {
     }
 
     @Test
-    fun exportsSpansAndLogs() = runTest {
+    fun exportsSpansAndLogs() = runSmokeTest(otel) {
         val spanName = "test-span"
         val tracer = otel.tracerProvider.getTracer("test-tracer")
         val span = tracer.startSpan(spanName)

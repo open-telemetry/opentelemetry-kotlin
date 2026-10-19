@@ -190,7 +190,7 @@ internal class SpanExportTest {
 
     @Test
     fun `test invalid span context`() {
-        val invalidContext = harness.kotlinApi.spanContext.invalid
+        val invalidContext = createInvalidSpanContext()
 
         // Test invalid context properties
         assertFalse(invalidContext.isValid)

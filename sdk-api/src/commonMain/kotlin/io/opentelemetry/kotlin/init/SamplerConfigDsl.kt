@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.tracing.sampling.ComposableSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 
@@ -12,11 +11,6 @@ import io.opentelemetry.kotlin.tracing.sampling.Sampler
 @ExperimentalApi
 @ConfigDsl
 public interface SamplerConfigDsl {
-
-    /**
-     * The [SpanFactory] implementation that will be used by the OpenTelemetry implementation.
-     */
-    public val spanFactory: SpanFactory
 
     /**
      * Configures sampling so that spans are always recorded and sampled.

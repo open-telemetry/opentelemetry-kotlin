@@ -3,6 +3,9 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.assertHasSdkDefaultAttributes
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
+import io.opentelemetry.kotlin.resource.SdkMode
+import io.opentelemetry.kotlin.resource.sdkDefaultResource
 import io.opentelemetry.kotlin.sdkDefaultAttributes
 import io.opentelemetry.kotlin.sdkDefaultSchemaUrl
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
@@ -12,7 +15,7 @@ import kotlin.test.assertEquals
 
 internal class MeterProviderConfigImplTest {
 
-    private val base = sdkDefaultResource()
+    private val base = ResourceFactoryImpl().sdkDefaultResource(SdkMode.REGULAR)
 
     @Test
     fun testDefaultMetricsConfig() {

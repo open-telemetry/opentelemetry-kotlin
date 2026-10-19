@@ -40,6 +40,8 @@ tasks.test {
     systemProperty("fixtureSrcDir", layout.projectDirectory.dir("src/test/resources/fixtures").asFile.absolutePath)
     systemProperty("jvmAndroidModules", publishedModules.names())
     systemProperty("klibModules", publishedModules.filterNot { it.isJvmAndroidModule() }.names())
+    // use persistent home so that Gradle distribution + dependencies can be cached rather than downloaded on every run
+    systemProperty("testKitDir", gradle.gradleUserHomeDir.resolve("testkit").absolutePath)
 
     // if version catalog changes, invalidate the build so that the test case reruns
     inputs.dir(layout.projectDirectory.dir("src/test/resources/fixtures"))

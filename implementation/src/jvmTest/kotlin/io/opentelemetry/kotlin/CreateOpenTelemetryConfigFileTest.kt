@@ -1,9 +1,13 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
 import io.opentelemetry.kotlin.init.SdkConfigFactory
+import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.init.defaultBehaviorReader
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -48,9 +52,8 @@ internal class CreateOpenTelemetryConfigFileTest {
             configFile(writeConfigFile(CONFIG_FILE))
         }
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
-        val resolver = SdkConfigFactory(cfg, behavior)
-        assertEquals(64, resolver.generateTracingConfig().spanLimits.attributeCountLimit)
-        assertEquals(64, resolver.generateLoggingConfig().logLimits.attributeCountLimit)
+        assertEquals(64, behavior.spanLimitConfig().attributeCountLimit)
+        assertEquals(64, behavior.logLimits().attributeCountLimit)
     }
 
     @Test
@@ -62,9 +65,8 @@ internal class CreateOpenTelemetryConfigFileTest {
             }
         }
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
-        val resolver = SdkConfigFactory(cfg, behavior)
-        assertEquals(32, resolver.generateTracingConfig().spanLimits.attributeCountLimit)
-        assertEquals(32, resolver.generateLoggingConfig().logLimits.attributeCountLimit)
+        assertEquals(32, behavior.spanLimitConfig().attributeCountLimit)
+        assertEquals(32, behavior.logLimits().attributeCountLimit)
     }
 
     @Test
@@ -120,6 +122,10 @@ internal class CreateOpenTelemetryConfigFileTest {
         file.writeText(contents)
         return file.absolutePath
     }
+
+    private fun OpenTelemetryBehavior.spanLimitConfig() = SpanLimitConfig(tracerProvider?.spanLimits ?: SpanLimitsBehavior())
+
+    private fun OpenTelemetryBehavior.logLimits() = loggerProvider?.logLimits ?: LogLimitsBehavior()
 
     private companion object {
         val CONFIG_FILE = """

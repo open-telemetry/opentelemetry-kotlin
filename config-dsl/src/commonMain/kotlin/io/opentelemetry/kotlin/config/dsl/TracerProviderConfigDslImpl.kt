@@ -18,7 +18,15 @@ class TracerProviderConfigDslImpl : BehaviorSupplier<TracerProviderBehavior> {
 
     @Suppress("UnusedParameter")
     fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
-        processor = SpanProcessorBehavior()
+        if (processor == null) {
+            processor = SpanProcessorBehavior()
+        }
+    }
+
+    fun processor(action: SpanProcessorConfigDslImpl.() -> Unit) {
+        val impl = SpanProcessorConfigDslImpl()
+        impl.action()
+        processor = impl.toBehavior()
     }
 
     fun sampler(action: SamplerConfigDslImpl.() -> Unit) {
