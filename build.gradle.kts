@@ -7,15 +7,15 @@ plugins {
     id("com.android.kotlin.multiplatform.library") apply false
     id("org.jetbrains.kotlin.multiplatform") apply false
     id("com.vanniktech.maven.publish") apply false
-    id("org.jetbrains.kotlinx.kover") version "0.9.9"
+    id("org.jetbrains.kotlinx.kover") version "0.9.11"
 }
 
 plugins.withType<YarnPlugin> {
     extensions.configure<YarnRootExtension> {
-        resolution("brace-expansion", ">=5.0.8")
+        resolution("brace-expansion", ">=5.0.12")
         resolution("diff", ">=8.0.3")
         resolution("glob", ">=10.5.0")
-        resolution("js-yaml", ">=5.2.2")
+        resolution("js-yaml", ">=5.4.1")
         resolution("minimatch", ">=9.0.7")
         resolution("serialize-javascript", ">=7.0.5")
         resolution("**/ws", "8.21.0")
@@ -53,6 +53,16 @@ val checkDuplicatePublicApi by tasks.registering(CheckDuplicatePublicApiTask::cl
 
 tasks.named("check") {
     dependsOn(checkDuplicatePublicApi)
+}
+
+tasks.register("verify") {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = "Runs static analysis and tests, excluding the Gradle integration tests."
+    val gradleIntegrationTest = ":gradle-integration-test"
+    dependsOn(checkDuplicatePublicApi)
+    subprojects.filter { it.path != gradleIntegrationTest }.forEach { project ->
+        dependsOn(project.tasks.matching { it.name == LifecycleBasePlugin.CHECK_TASK_NAME })
+    }
 }
 
 kover {

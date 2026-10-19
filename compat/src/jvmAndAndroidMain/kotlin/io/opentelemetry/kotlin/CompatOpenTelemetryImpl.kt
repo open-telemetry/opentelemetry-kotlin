@@ -8,10 +8,7 @@ import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.ResourceFactory
-import io.opentelemetry.kotlin.factory.SpanContextFactory
 import io.opentelemetry.kotlin.factory.SpanFactory
-import io.opentelemetry.kotlin.factory.TraceFlagsFactory
-import io.opentelemetry.kotlin.factory.TraceStateFactory
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.MeterProvider
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
@@ -22,9 +19,6 @@ internal class CompatOpenTelemetryImpl(
     override val loggerProvider: LoggerProvider,
     override val meterProvider: MeterProvider,
     override val clock: Clock,
-    override val spanContext: SpanContextFactory,
-    override val traceFlags: TraceFlagsFactory,
-    override val traceState: TraceStateFactory,
     override val context: ContextFactory,
     override val span: SpanFactory,
     override val idGenerator: IdGenerator,

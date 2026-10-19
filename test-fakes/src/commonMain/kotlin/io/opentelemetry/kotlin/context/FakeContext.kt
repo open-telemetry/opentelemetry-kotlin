@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.baggage.Baggage
 import io.opentelemetry.kotlin.baggage.FakeBaggage
 import io.opentelemetry.kotlin.tracing.FakeSpan
 import io.opentelemetry.kotlin.tracing.Span
+import io.opentelemetry.kotlin.tracing.SpanContext
 
 class FakeContext(
     val attrs: Map<ContextKey<*>, Any?> = emptyMap(),
@@ -26,6 +27,9 @@ class FakeContext(
     }
 
     override fun storeSpan(span: Span): Context = FakeContext(attrs, onAttach, onDetach, span)
+
+    override fun storeSpanContext(spanContext: SpanContext): Context =
+        storeSpan(FakeSpan(spanContext = spanContext))
 
     override fun extractSpan(): Span = span
 

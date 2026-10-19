@@ -10,11 +10,11 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#simple-processor
  */
 @ExperimentalApi
-class SimpleSpanProcessorBehavior : Behavior<SimpleSpanProcessorBehavior> {
-
-    override fun mergeWith(higher: SimpleSpanProcessorBehavior): SimpleSpanProcessorBehavior = higher
-
-    override fun equals(other: Any?): Boolean = other is SimpleSpanProcessorBehavior
-
-    override fun hashCode(): Int = 0
+data class SimpleSpanProcessorBehavior(
+    /** Span exporter. */
+    val exporter: SpanExporterBehavior? = null
+) : Behavior<SimpleSpanProcessorBehavior> {
+    override fun mergeWith(higher: SimpleSpanProcessorBehavior): SimpleSpanProcessorBehavior = copy(
+        exporter = mergeNode(exporter, higher.exporter)
+    )
 }

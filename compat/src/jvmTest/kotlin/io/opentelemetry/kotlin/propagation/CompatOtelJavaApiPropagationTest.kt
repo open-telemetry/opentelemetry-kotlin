@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaTextMapGetter
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapSetter
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.toOtelJavaApi
+import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -35,7 +36,10 @@ internal class CompatOtelJavaApiPropagationTest {
 
     @Test
     fun `java api propagates remote parent to child span`() {
-        val otel = createCompatOpenTelemetry { propagator { w3cTraceContext() } }
+        val otel = createCompatOpenTelemetry {
+            propagator { w3cTraceContext() }
+            tracerProvider { export { FakeSpanProcessor() } }
+        }
         val javaApi = otel.toOtelJavaApi()
         val propagator = javaApi.propagators.textMapPropagator
         val extracted = propagator.extract(OtelJavaContext.root(), seed, MapGetter)
@@ -66,7 +70,6 @@ internal class CompatOtelJavaApiPropagationTest {
     }
 
     private object MapGetter : OtelJavaTextMapGetter<Map<String, String>> {
-        override fun keys(carrier: Map<String, String>): Iterable<String> = carrier.keys
         override fun get(carrier: Map<String, String>?, key: String): String? = carrier?.get(key)
     }
 

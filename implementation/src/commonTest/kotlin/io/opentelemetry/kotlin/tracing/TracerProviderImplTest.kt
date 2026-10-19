@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -10,9 +11,6 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
-import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
-import io.opentelemetry.kotlin.factory.FakeSpanFactory
-import io.opentelemetry.kotlin.factory.SpanFactory
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.init.config.DefaultSampler
 import io.opentelemetry.kotlin.init.config.TracingConfig
@@ -36,7 +34,6 @@ internal class TracerProviderImplTest {
 
     private val tracingConfig = TracingConfig(
         null,
-        fakeSpanLimitsConfig,
         ResourceImpl(AttributesModel(), null),
         NoopSdkErrorHandler,
     )
@@ -49,10 +46,9 @@ internal class TracerProviderImplTest {
             clock = FakeClock(),
             tracingConfig = tracingConfig,
             contextFactory = FakeContextFactory(),
-            spanContextFactory = FakeSpanContextFactory(),
-            spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
+            spanLimits = SpanLimitsBehavior(),
         )
     }
 
@@ -66,7 +62,6 @@ internal class TracerProviderImplTest {
         val handler = FakeSdkErrorHandler()
         val config = TracingConfig(
             null,
-            fakeSpanLimitsConfig,
             ResourceImpl(AttributesModel(), null),
             handler,
         )
@@ -74,10 +69,9 @@ internal class TracerProviderImplTest {
             clock = FakeClock(),
             tracingConfig = config,
             contextFactory = FakeContextFactory(),
-            spanContextFactory = FakeSpanContextFactory(),
-            spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
+            spanLimits = SpanLimitsBehavior(),
         )
         provider.getTracer(name = "")
         assertEquals(1, handler.apiMisuses.size)
@@ -98,40 +92,44 @@ internal class TracerProviderImplTest {
 
     @Test
     fun testTracerProviderSameName() {
-        val first = impl.getTracer(name = "name")
-        val second = impl.getTracer(name = "name")
-        val third = impl.getTracer(name = "other")
+        val provider = createProvider()
+        val first = provider.getTracer(name = "name")
+        val second = provider.getTracer(name = "name")
+        val third = provider.getTracer(name = "other")
         assertSame(first, second)
         assertNotEquals(first, third)
     }
 
     @Test
     fun testTracerProviderSameVersion() {
-        val first = impl.getTracer(name = "name", version = "0.1.0")
-        val second = impl.getTracer(name = "name", version = "0.1.0")
-        val third = impl.getTracer(name = "name", version = "0.2.0")
+        val provider = createProvider()
+        val first = provider.getTracer(name = "name", version = "0.1.0")
+        val second = provider.getTracer(name = "name", version = "0.1.0")
+        val third = provider.getTracer(name = "name", version = "0.2.0")
         assertSame(first, second)
         assertNotEquals(first, third)
     }
 
     @Test
     fun testTracerProviderSameSchemaUrl() {
-        val first = impl.getTracer(name = "name", schemaUrl = "https://example.com/foo")
-        val second = impl.getTracer(name = "name", schemaUrl = "https://example.com/foo")
-        val third = impl.getTracer(name = "name", schemaUrl = "https://example.com/bar")
+        val provider = createProvider()
+        val first = provider.getTracer(name = "name", schemaUrl = "https://example.com/foo")
+        val second = provider.getTracer(name = "name", schemaUrl = "https://example.com/foo")
+        val third = provider.getTracer(name = "name", schemaUrl = "https://example.com/bar")
         assertSame(first, second)
         assertNotEquals(first, third)
     }
 
     @Test
     fun testTracerProviderSameAttributes() {
-        val first = impl.getTracer(name = "name") {
+        val provider = createProvider()
+        val first = provider.getTracer(name = "name") {
             setStringAttribute("key", "value")
         }
-        val second = impl.getTracer(name = "name") {
+        val second = provider.getTracer(name = "name") {
             setStringAttribute("key", "value")
         }
-        val third = impl.getTracer(name = "name") {
+        val third = provider.getTracer(name = "name") {
             setStringAttribute("foo", "bar")
         }
         assertSame(first, second)
@@ -161,7 +159,6 @@ internal class TracerProviderImplTest {
         )
         val config = TracingConfig(
             processor,
-            fakeSpanLimitsConfig,
             FakeResource(),
             NoopSdkErrorHandler,
         )
@@ -169,10 +166,9 @@ internal class TracerProviderImplTest {
             clock = FakeClock(),
             tracingConfig = config,
             contextFactory = FakeContextFactory(),
-            spanContextFactory = FakeSpanContextFactory(),
-            spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
+            spanLimits = SpanLimitsBehavior(),
         )
         provider.getTracer(name = "test")
 
@@ -192,7 +188,6 @@ internal class TracerProviderImplTest {
         )
         val config = TracingConfig(
             processor,
-            fakeSpanLimitsConfig,
             FakeResource(),
             NoopSdkErrorHandler,
         )
@@ -200,10 +195,9 @@ internal class TracerProviderImplTest {
             clock = FakeClock(),
             tracingConfig = config,
             contextFactory = FakeContextFactory(),
-            spanContextFactory = FakeSpanContextFactory(),
-            spanFactory = FakeSpanFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
+            spanLimits = SpanLimitsBehavior(),
         )
         provider.getTracer(name = "test")
 
@@ -227,6 +221,15 @@ internal class TracerProviderImplTest {
         val span = tracer.startSpan("test-span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.isValid)
+    }
+
+    @Test
+    fun testNoProcessorReturnsPropagatingNoopTracer() {
+        val provider = createProvider(processor = null)
+        val tracer = provider.getTracer(name = "test")
+        assertIs<PropagatingNoopTracer>(tracer)
+        assertFalse(tracer.enabled())
+        assertFalse(tracer.startSpan("test-span").isRecording())
     }
 
     @Test
@@ -256,8 +259,8 @@ internal class TracerProviderImplTest {
     @Test
     fun testInvalidComposableProbabilityFallsBackToDefaultSampler() {
         val errorHandler = FakeSdkErrorHandler()
-        val provider = createProvider(errorHandler = errorHandler, samplerFactory = { factory ->
-            SamplerConfigImpl(factory).composite { composableProbability(1.5) }
+        val provider = createProvider(errorHandler = errorHandler, samplerFactory = {
+            SamplerConfigImpl().composite { composableProbability(1.5) }
         })
 
         assertTrue(provider.getTracer(name = "test").startSpan("test-span").isRecording())
@@ -287,23 +290,21 @@ internal class TracerProviderImplTest {
     }
 
     private fun createProvider(
-        processor: SpanProcessor? = null,
-        errorHandler: SdkErrorHandler,
-        samplerFactory: (SpanFactory) -> Sampler = { DefaultSampler },
+        processor: SpanProcessor? = FakeSpanProcessor(),
+        errorHandler: SdkErrorHandler = NoopSdkErrorHandler,
+        samplerFactory: () -> Sampler = { DefaultSampler },
     ) = TracerProviderImpl(
         clock = FakeClock(),
         tracingConfig = TracingConfig(
             processor,
-            fakeSpanLimitsConfig,
             FakeResource(),
             errorHandler,
             samplerFactory = samplerFactory,
         ),
         contextFactory = FakeContextFactory(),
-        spanContextFactory = FakeSpanContextFactory(),
-        spanFactory = FakeSpanFactory(),
         idGenerator = FakeIdGenerator(),
         attributeLimits = AttributeLimitsBehavior(),
+        spanLimits = SpanLimitsBehavior(),
     )
 
     private class ThrowingSdkErrorHandler : SdkErrorHandler {

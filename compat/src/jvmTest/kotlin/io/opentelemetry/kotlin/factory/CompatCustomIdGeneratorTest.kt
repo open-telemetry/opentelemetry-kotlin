@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
+import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -23,6 +24,7 @@ internal class CompatCustomIdGeneratorTest {
     fun `custom kotlin id generator is honored via the java adapter`() {
         val sdk = createCompatOpenTelemetry {
             idGenerator { custom }
+            tracerProvider { export { FakeSpanProcessor() } }
         }
         val span = sdk.tracerProvider.getTracer("test").startSpan("span")
         assertEquals(traceId, span.spanContext.traceId)

@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.baggage.Baggage
 import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.tracing.Span
+import io.opentelemetry.kotlin.tracing.SpanContext
 
 /**
  * Minimal immutable [Context] that only supports storing values and baggage.
@@ -23,6 +24,8 @@ internal class FakeBaggageContext(
     override fun attach(): Scope = error("Not supported")
 
     override fun storeSpan(span: Span): Context = error("Not supported")
+
+    override fun storeSpanContext(spanContext: SpanContext): Context = error("Not supported")
 
     override fun extractSpan(): Span = error("Not supported")
 

@@ -25,10 +25,17 @@ would be accepted.
       If your Xcode version is newer than the supported range, iOS simulator tests will fail; either
       install a supported iOS platform runtime via **Xcode → Settings → Platforms**, or exclude the
       tests temporarily with `-x iosSimulatorArm64Test -x iosArm64Test`.
+      tvOS simulator tests are skipped by default. To run them, install a tvOS platform runtime and
+      pass `-Pio.opentelemetry.kotlin.enableTvosTests=true`.
    4. Android Studio or IntelliJ IDEA are recommended
 3. Follow [Running the full build including the integration test](#running-the-full-build-including-the-integration-test)
    to confirm the project builds
 4. Open an issue or update these docs if there was a step missing from these instructions!
+
+### Verifying a changeset
+
+`./gradlew verify` runs static analysis and tests for every module except `gradle-integration-test`.
+This should be sufficient for most changesets.
 
 ### Running the full build including the integration test
 

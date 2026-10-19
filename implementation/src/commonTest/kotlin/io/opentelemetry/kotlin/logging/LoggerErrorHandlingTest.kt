@@ -14,7 +14,6 @@ import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.FakeContextFactory
-import io.opentelemetry.kotlin.factory.FakeSpanContextFactory
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
@@ -125,7 +124,6 @@ internal class LoggerErrorHandlingTest {
         clock = case.clock,
         processor = processor,
         contextFactory = case.contextFactory,
-        spanContextFactory = FakeSpanContextFactory(),
         key = key,
         resource = FakeResource(),
         logLimits = fakeLogLimitsConfig,

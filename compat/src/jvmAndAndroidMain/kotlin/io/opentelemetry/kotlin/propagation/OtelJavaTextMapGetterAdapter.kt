@@ -8,6 +8,7 @@ internal class OtelJavaTextMapGetterAdapter<C : Any>(
     private val delegate: TextMapGetter<C>,
 ) : OtelJavaTextMapGetter<C> {
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun keys(carrier: C): Iterable<String> = delegate.keys(carrier)
 
     override fun get(carrier: C?, key: String): String? {

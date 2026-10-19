@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
@@ -25,7 +24,7 @@ internal class TracerAdapter(
 ) : Tracer {
 
     private val invalidSpan: Span by lazy {
-        NonRecordingSpan(DefaultSpanContextFactory.invalid, DefaultSpanContextFactory.invalid)
+        NonRecordingSpan(createInvalidSpanContext(), createInvalidSpanContext())
     }
 
     override fun enabled(): Boolean =

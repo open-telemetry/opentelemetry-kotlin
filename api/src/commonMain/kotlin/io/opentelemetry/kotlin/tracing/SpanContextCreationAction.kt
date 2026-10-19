@@ -5,28 +5,28 @@ import io.opentelemetry.kotlin.ExperimentalApi
 /**
  * Configures the optional properties of a [SpanContext] created via [createSpanContext].
  */
-@OptIn(ExperimentalApi::class)
+@ExperimentalApi
 @TracingDsl
-internal interface SpanContextCreationAction {
+public interface SpanContextCreationAction {
 
     /**
      * Whether the trace is sampled. Defaults to false.
      */
-    var isSampled: Boolean
+    public var isSampled: Boolean
 
     /**
      * Whether the trace ID is random. Defaults to false.
      */
-    var isRandom: Boolean
+    public var isRandom: Boolean
 
     /**
      * Whether the SpanContext was propagated from a remote parent. Defaults to false.
      */
-    var isRemote: Boolean
+    public var isRemote: Boolean
 
     /**
      * Configures the [TraceState] entries inside the [action] DSL block. Omitting this
      * results in an empty [TraceState].
      */
-    fun traceState(action: TraceStateCreationAction.() -> Unit)
+    public fun traceState(action: TraceStateCreationAction.() -> Unit)
 }

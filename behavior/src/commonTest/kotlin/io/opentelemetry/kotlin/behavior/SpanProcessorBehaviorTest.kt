@@ -42,7 +42,7 @@ internal class SpanProcessorBehaviorTest {
 
     @Test
     fun adoptsHttpFromWhicheverLayerSuppliedIt() {
-        val http = OtlpHttpExporterBehavior(
+        val http = OtlpHttpSpanExporterBehavior(
             endpoint = "https://example.com",
             timeout = 10_000,
         )
@@ -83,7 +83,7 @@ internal class SpanProcessorBehaviorTest {
 
     @Test
     fun keepsExporterConfigurationWhenSelectingSimple() {
-        val http = OtlpHttpExporterBehavior(endpoint = "https://example.com")
+        val http = OtlpHttpSpanExporterBehavior(endpoint = "https://example.com")
         val merged = SpanProcessorBehavior(http = http).mergeWith(
             SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior()),
         )

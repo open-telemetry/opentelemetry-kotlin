@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.toHexString
+import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -22,6 +23,7 @@ internal class CreateOpenTelemetryIdGeneratorTest {
         val custom = FakeIdGenerator()
         val api = createOpenTelemetry {
             idGenerator { custom }
+            tracerProvider { export { FakeSpanProcessor() } }
         } as OpenTelemetrySdk
 
         assertSame(custom, api.idGenerator)

@@ -11,6 +11,11 @@ internal class BatchLogRecordProcessorBehaviorTest {
         exportTimeout = 30_000,
         maxQueueSize = 2_048,
         maxExportBatchSize = 512,
+        exporter = LogRecordExporterBehavior(
+            http = OtlpHttpLogsExporterBehavior(
+                endpoint = "http://example.com/logs"
+            )
+        )
     )
 
     @Test
@@ -21,6 +26,7 @@ internal class BatchLogRecordProcessorBehaviorTest {
         assertNull(behavior.exportTimeout)
         assertNull(behavior.maxQueueSize)
         assertNull(behavior.maxExportBatchSize)
+        assertNull(behavior.exporter)
     }
 
     @Test
@@ -45,6 +51,11 @@ internal class BatchLogRecordProcessorBehaviorTest {
             exportTimeout = 60_000,
             maxQueueSize = 4_096,
             maxExportBatchSize = 1_024,
+            exporter = LogRecordExporterBehavior(
+                http = OtlpHttpLogsExporterBehavior(
+                    endpoint = "http://example.com/logs/higher"
+                )
+            )
         )
 
         assertEquals(higher, configured.mergeWith(higher))

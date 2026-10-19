@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.context.ImplicitContextStorage
 import io.opentelemetry.kotlin.context.ImplicitContextStorageMode
 
 /**
- * Defines configuration for Context.
+ * Defines configuration for Context. This is ignored in compat mode.
  */
 @ExperimentalApi
 @ConfigDsl

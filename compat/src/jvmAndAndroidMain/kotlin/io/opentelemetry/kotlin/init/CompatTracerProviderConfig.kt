@@ -19,12 +19,11 @@ import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.TraceExportConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.factory.CompatContextFactory
-import io.opentelemetry.kotlin.factory.CompatSpanFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.factory.DefaultSpanContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.OtelJavaIdGeneratorAdapter
 import io.opentelemetry.kotlin.resource.Resource
@@ -81,7 +80,7 @@ internal class CompatTracerProviderConfig(
 
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
         exportConfigured = true
-        val processor = TraceExportConfigCompat(clock, sdkErrorHandler).action()
+        val processor = TraceExportConfigDslImpl(clock, sdkErrorHandler).action()
         builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor, sdkErrorHandler))
     }
 
@@ -102,12 +101,14 @@ internal class CompatTracerProviderConfig(
         }
 
     internal fun applyResolvedProcessor(behavior: SpanProcessorBehavior?) {
-        if (exportConfigured || behavior?.console == null) {
+        val simple = behavior?.simple
+        val batch = behavior?.batch
+        val console = behavior?.console ?: batch?.exporter?.console ?: simple?.exporter?.console
+        if (exportConfigured || console == null) {
             return
         }
         exportConfigured = true
         val exporter = LoggingSpanExporter.create()
-        val batch = behavior.batch
         if (batch == null) {
             builder.addSpanProcessor(OtelJavaSimpleSpanProcessor.create(exporter))
         } else {
@@ -120,7 +121,7 @@ internal class CompatTracerProviderConfig(
         }
     }
 
-    private val newSamplerDsl: SamplerConfigDsl = CompatSamplerConfig(CompatSpanFactory(DefaultSpanContextFactory))
+    private val newSamplerDsl: SamplerConfigDsl = CompatSamplerConfig()
 
     private val defaultSampler: Sampler = newSamplerDsl.parentBased(root = newSamplerDsl.alwaysOn())
 
@@ -185,9 +186,4 @@ internal class CompatTracerProviderConfig(
         TracerProviderBehavior(
             spanLimits = spanLimitsDsl.toBehavior()
         )
-
-    private class TraceExportConfigCompat(
-        override val clock: Clock,
-        override val sdkErrorHandler: SdkErrorHandler,
-    ) : TraceExportConfigDsl
 }

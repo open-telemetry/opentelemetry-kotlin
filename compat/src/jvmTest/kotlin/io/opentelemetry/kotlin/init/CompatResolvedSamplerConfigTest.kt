@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.tracing.Span
+import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
 import kotlin.test.Test
@@ -33,7 +34,10 @@ internal class CompatResolvedSamplerConfigTest {
             if (errorHandler != null) {
                 errorHandler(errorHandler)
             }
-            tracerProvider(configure)
+            tracerProvider {
+                export { FakeSpanProcessor() }
+                configure()
+            }
         }
         val behavior = resolved ?: defaultCompatBehaviorReader(
             envVarReader = EnvVarReader(getEnvVar),

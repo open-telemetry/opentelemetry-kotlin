@@ -3,20 +3,35 @@ package io.opentelemetry.kotlin.init.config
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
+import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.limitOrUnset
 
 /**
- * Limits on span data capture.
+ * Limits on span data capture. A limit that is unset or invalid falls back to the default this SDK
+ * applies.
  */
 @ThreadSafe
 internal class SpanLimitConfig(
-    attributeCountLimit: Int,
-    attributeValueLengthLimit: Int,
-    linkCountLimit: Int,
-    eventCountLimit: Int,
-    attributeCountPerEventLimit: Int,
-    attributeCountPerLinkLimit: Int,
+    attributeCountLimit: Int? = null,
+    attributeValueLengthLimit: Int? = null,
+    linkCountLimit: Int? = null,
+    eventCountLimit: Int? = null,
+    attributeCountPerEventLimit: Int? = null,
+    attributeCountPerLinkLimit: Int? = null,
 ) {
+
+    /**
+     * The global attribute limits have already been folded into [behavior] by the behavior resolver.
+     */
+    constructor(behavior: SpanLimitsBehavior) : this(
+        attributeCountLimit = behavior.attributeCountLimit,
+        attributeValueLengthLimit = behavior.attributeValueLengthLimit,
+        linkCountLimit = behavior.linkCountLimit,
+        eventCountLimit = behavior.eventCountLimit,
+        attributeCountPerEventLimit = behavior.attributeCountPerEventLimit,
+        attributeCountPerLinkLimit = behavior.attributeCountPerLinkLimit,
+    )
+
     /**
      * Max attribute count.
      */

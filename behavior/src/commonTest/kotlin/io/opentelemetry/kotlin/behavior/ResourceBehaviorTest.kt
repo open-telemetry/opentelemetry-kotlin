@@ -55,6 +55,15 @@ internal class ResourceBehaviorTest {
     }
 
     @Test
+    fun higherServiceNameAttributeOverridesLowerServiceName() {
+        val merged = ResourceBehavior(serviceName = "lower")
+            .mergeWith(ResourceBehavior(attributes = mapOf("service.name" to "higher")))
+
+        assertNull(merged.serviceName)
+        assertEquals("higher", merged.attributes?.get("service.name"))
+    }
+
+    @Test
     fun treatsEmptyValuesAsConfigured() {
         val merged = ResourceBehavior(serviceName = "checkout", attributes = mapOf("a" to 1L))
             .mergeWith(ResourceBehavior(serviceName = "", attributes = emptyMap()))

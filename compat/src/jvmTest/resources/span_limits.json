@@ -28,12 +28,13 @@
     "totalRecordedLinks": 0,
     "totalAttributeCount": 0,
     "resource": {
-      "schemaUrl": "null",
+      "schemaUrl": "SEMCONV_SCHEMA_URL",
       "attributes": {
-        "service.name": "unknown_service:java",
-        "telemetry.sdk.language": "java",
+        "service.name": "unknown_service:kotlin",
+        "telemetry.sdk.language": "kotlin",
         "telemetry.sdk.name": "opentelemetry",
-        "telemetry.sdk.version": "UNKNOWN"
+        "telemetry.sdk.version": "UNKNOWN",
+        "telemetry.sdk.mode": "compat"
       }
     },
     "instrumentationScopeInfo": {
@@ -72,12 +73,13 @@
     "totalRecordedLinks": 0,
     "totalAttributeCount": 0,
     "resource": {
-      "schemaUrl": "null",
+      "schemaUrl": "SEMCONV_SCHEMA_URL",
       "attributes": {
-        "service.name": "unknown_service:java",
-        "telemetry.sdk.language": "java",
+        "service.name": "unknown_service:kotlin",
+        "telemetry.sdk.language": "kotlin",
         "telemetry.sdk.name": "opentelemetry",
-        "telemetry.sdk.version": "UNKNOWN"
+        "telemetry.sdk.version": "UNKNOWN",
+        "telemetry.sdk.mode": "compat"
       }
     },
     "instrumentationScopeInfo": {
@@ -141,12 +143,13 @@
     "totalRecordedLinks": 2,
     "totalAttributeCount": 1,
     "resource": {
-      "schemaUrl": "null",
+      "schemaUrl": "SEMCONV_SCHEMA_URL",
       "attributes": {
-        "service.name": "unknown_service:java",
-        "telemetry.sdk.language": "java",
+        "service.name": "unknown_service:kotlin",
+        "telemetry.sdk.language": "kotlin",
         "telemetry.sdk.name": "opentelemetry",
-        "telemetry.sdk.version": "UNKNOWN"
+        "telemetry.sdk.version": "UNKNOWN",
+        "telemetry.sdk.mode": "compat"
       }
     },
     "instrumentationScopeInfo": {
