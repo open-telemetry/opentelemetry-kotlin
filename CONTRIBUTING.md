@@ -66,3 +66,20 @@ The following guidelines should be followed during development:
 8. Default values for parameters is permissible. Default values for lambda parameters should be non-complex
 9. Annotate new APIs with `@ExperimentalApi` until they are considered stable
 10. Platform-specific code that isn't specific to a module (e.g. getting the current time) should go in `platform-implementations` to promote reuse
+
+## Adding a new target
+
+Each Kotlin Multiplatform target adds an ongoing maintenance cost, so please [open an issue](https://github.com/open-telemetry/opentelemetry-kotlin/issues)
+to discuss new targets before opening a PR. The issue should ideally explain who will use the target
+and the level of ongoing maintenance you're able to give.
+
+A new target should meet the following requirements:
+
+1. The target should be supported on all modules or document/track what it doesn't support yet
+2. Shared tests in `commonTest` should pass on the target
+3. Shared tests should run in CI, or an issue should be created if the GitHub runner doesn't support the target
+4. The [supported targets](README.md#supported-targets) table in the README should be updated
+5. An example app should be added to [examples](examples)
+
+New targets start at Tier 2. A target can be promoted to Tier 1 once it has had substantial
+real-world testing and production usage.

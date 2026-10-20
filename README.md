@@ -8,10 +8,20 @@ Please read [the docs](https://opentelemetry.io/docs/languages/kotlin/getting-st
 
 ### Supported targets
 
-| Tier | Targets | Notes |
-|------|---------|-------|
-| 1 | JVM, Android (API 21+) | Heavily tested and supported for production use. |
-| 2 | iOS, JS, tvOS | Compiles and passes shared tests, but has received limited real-world testing. |
+| Platform          | Tier | Tests run in CI | Example app | Production use | Notes                                            |
+|-------------------|------|-----------------|-------------|----------------|--------------------------------------------------|
+| JVM               | 1    | ✅               | ✅           | ✅              | Heavily tested and supported for production use. |
+| Android (API 21+) | 1    | ✅               | ✅           | ✅              | Heavily tested and supported for production use. |
+| iOS               | 2    | ❌               | ✅           | ❌              | Compiles.                                        |
+| tvOS              | 2    | ❌               | ❌           | ❌              | Compiles.                                        |
+| JS                | 2    | ✅               | ✅           | ❌              | Compiles.                                        |
+
+Tier 1 targets are best-supported for production use. Tier 2 targets compile and pass shared tests, but
+have received limited real-world testing. Support may be dropped for targets if their
+maintenance burden becomes too great.
+
+Interested in adding support for another platform?
+See [adding a new target](CONTRIBUTING.md#adding-a-new-target).
 
 ### Example Apps
 
