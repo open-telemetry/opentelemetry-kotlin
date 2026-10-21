@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.ioDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -23,7 +24,6 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
 
 private const val EXPORT_WORKER_COUNT = 5
-private const val WORKER_POLL_INTERVAL_MS = 100L
 private const val SHUTDOWN_TIMEOUT_MS = 5000L
 private const val CANCELLATION_TIMEOUT_MS = 500L
 
@@ -37,10 +37,7 @@ private data class EndpointRetryState(
     var epoch: Long = 0,
     var nextBackoffMs: Long,
     var isBackedOff: Boolean = false
-) {
-    val isEndpointAvailable: Boolean
-        get() = blockedUntil?.hasPassedNow() ?: true
-}
+)
 
 private enum class QueuedTelemetryState {
     Pending,
@@ -52,6 +49,21 @@ private class QueuedTelemetry<T>(
     var attempts: Int = 0,
     var state: QueuedTelemetryState = QueuedTelemetryState.Pending
 )
+
+private sealed interface WorkerAction<out T> {
+    data class Export<T>(
+        val entry: QueuedTelemetry<T>,
+        val epoch: Long,
+        val applyJitter: Boolean,
+    ) : WorkerAction<T>
+
+    data class WaitUntil(
+        val deadline: ComparableTimeMark,
+    ) : WorkerAction<Nothing>
+
+    data object WaitForWorkAvailable : WorkerAction<Nothing>
+    data object Shutdown : WorkerAction<Nothing>
+}
 
 internal class TelemetryExporter<T>(
     private val initialDelayMs: Long,
@@ -65,100 +77,137 @@ internal class TelemetryExporter<T>(
 ) : TelemetryCloseable {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
+
+    // Parent job used to await or cancel all export workers.
     private val exportJob = SupervisorJob()
     private val scope: CoroutineScope =
         CoroutineScope(ioDispatcher + coroutineContext + exportJob + telemetryExceptionHandler("OTLP exporter", sdkErrorHandler))
+
+    // Shared endpoint backoff state.
     private val state: EndpointRetryState = EndpointRetryState(nextBackoffMs = initialDelayMs)
+
+    // Retains entries until success, terminal failure, or retry exhaustion.
     private val queue = mutableListOf<QueuedTelemetry<T>>()
+
+    // Limits queued entries, including those currently in flight.
     private val semaphore = Semaphore(MAX_QUEUE_ENTRIES)
+
+    // Wakes idle workers; redundant signals are skipped when the buffer is full.
+    private val workAvailable = Channel<Unit>(EXPORT_WORKER_COUNT)
+
+    // Protects queue mutations, endpoint state, and shutdown transitions.
     private val mutex = Mutex()
 
     init {
         repeat(EXPORT_WORKER_COUNT) {
             scope.launch {
                 while (isActive) {
-                    val shouldStop = mutex.withLock {
-                        shutdownState.isShutdown && queue.isEmpty()
-                    }
-                    if (shouldStop) {
-                        break
-                    }
-                    val attempted = tryExportNext()
-                    if (!attempted) {
-                        delay(WORKER_POLL_INTERVAL_MS)
+                    when (val action = nextAction()) {
+                        is WorkerAction.Export<T> -> {
+                            attemptExportEntry(action)
+                        }
+
+                        is WorkerAction.WaitUntil -> {
+                            // Another request may extend the endpoint cooldown while this worker sleeps.
+                            // Recheck the endpoint state on the next iteration.
+                            delay(action.deadline - timeSource.markNow())
+                        }
+
+                        WorkerAction.WaitForWorkAvailable -> {
+                            if (workAvailable.receiveCatching().isClosed) {
+                                return@launch
+                            }
+                        }
+
+                        WorkerAction.Shutdown -> {
+                            return@launch
+                        }
                     }
                 }
             }
         }
     }
 
-    private suspend fun tryExportNext(): Boolean {
-        // Reserve the first pending entry and capture the endpoint state under the same lock.
-        val (inFlight, isBackedOff, epoch) = mutex.withLock {
-            if (!state.isEndpointAvailable) {
-                return false
+    private suspend fun nextAction(): WorkerAction<T> {
+        mutex.withLock {
+            if (shutdownState.isShutdown && queue.isEmpty()) {
+                // The queue has drained during shutdown. Close the channel so waiting workers can exit too.
+                workAvailable.close()
+                return WorkerAction.Shutdown
             }
 
             val nextPending = queue.find { it.state == QueuedTelemetryState.Pending }
             if (nextPending == null) {
-                return false
+                return WorkerAction.WaitForWorkAvailable
             }
 
-            nextPending.state = QueuedTelemetryState.InFlight
-            Triple(nextPending, state.isBackedOff, state.epoch)
-        }
+            val blockedUntil = state.blockedUntil
+            if (blockedUntil != null && blockedUntil.hasNotPassedNow()) {
+                return WorkerAction.WaitUntil(blockedUntil)
+            }
 
+            // Reserve the entry and capture the retry state atomically.
+            // Other workers skip in-flight entries, so the export can run outside the mutex.
+            nextPending.state = QueuedTelemetryState.InFlight
+            return WorkerAction.Export(nextPending, state.epoch, state.isBackedOff)
+        }
+    }
+
+    private suspend fun attemptExportEntry(action: WorkerAction.Export<T>) {
+        val entry = action.entry
+        val epoch = action.epoch
         var resultHandled = false
         try {
             // Spread requests out after an endpoint backoff.
-            if (isBackedOff) {
+            if (action.applyJitter) {
                 delay(random.nextLong(0, MAX_JITTER_MS))
             }
 
             mutex.withLock {
-                inFlight.attempts++
+                entry.attempts++
             }
 
             val response = sdkErrorHandler.guardOrDefaultSuspend(
                 OtlpResponse.Unknown,
                 "OTLP export failed"
             ) {
-                exportAction(inFlight.telemetry)
+                exportAction(entry.telemetry)
             }
             when (response) {
                 is OtlpResponse.Success -> {
-                    onExportComplete(inFlight, epoch, resetBackoff = true)
+                    onExportComplete(entry, epoch, resetBackoff = true)
                 }
 
                 // The server accepted the request; retrying would only re-send the rejected
                 // portion, so treat a partial success as terminal.
                 is OtlpResponse.PartialSuccess -> {
-                    onExportComplete(inFlight, epoch, resetBackoff = true)
+                    onExportComplete(entry, epoch, resetBackoff = true)
                 }
 
                 is OtlpResponse.UnretryableError -> {
-                    onExportComplete(inFlight, epoch, resetBackoff = false)
+                    onExportComplete(entry, epoch, resetBackoff = false)
                 }
 
                 is OtlpResponse.RetryableError -> {
-                    onExportError(inFlight, epoch, response.retryAfterMs?.coerceAtMost(maxAttemptIntervalMs))
+                    onExportError(entry, epoch, response.retryAfterMs?.coerceAtMost(maxAttemptIntervalMs))
                 }
 
                 is OtlpResponse.Unknown -> {
-                    onExportError(inFlight, epoch, null)
+                    onExportError(entry, epoch, null)
                 }
             }
             resultHandled = true
-            return true
         } finally {
             if (!resultHandled) {
-                // Do not leave an interrupted attempt marked as in flight.
+                // Cancellation may interrupt jitter, export, or result handling.
+                // Restore or remove the reserved entry so it cannot remain in flight indefinitely.
                 withContext(NonCancellable) {
                     mutex.withLock {
-                        val item = queue.find { it == inFlight }
+                        val item = queue.find { it == entry }
                         if (item != null && item.state == QueuedTelemetryState.InFlight) {
                             if (item.attempts < maxAttempts) {
                                 item.state = QueuedTelemetryState.Pending
+                                workAvailable.trySend(Unit)
                             } else {
                                 val removed = queue.remove(item)
                                 if (removed) {
@@ -208,6 +257,7 @@ internal class TelemetryExporter<T>(
                 return
             }
             telemetry.state = QueuedTelemetryState.Pending
+            workAvailable.trySend(Unit)
         }
     }
 
@@ -236,6 +286,7 @@ internal class TelemetryExporter<T>(
                 }
                 queue.add(QueuedTelemetry(telemetry))
                 enqueued = true
+                workAvailable.trySend(Unit)
                 return Success
             }
         } finally {
@@ -248,7 +299,13 @@ internal class TelemetryExporter<T>(
     override suspend fun forceFlush(): OperationResultCode = Success
 
     override suspend fun shutdown(): OperationResultCode = withContext(NonCancellable) {
-        mutex.withLock { shutdownState.shutdownNow() }
+        mutex.withLock {
+            shutdownState.shutdownNow()
+            if (queue.isEmpty()) {
+                // If the queue is already empty, close the channel to wake idle workers so they can exit.
+                workAvailable.close()
+            }
+        }
         // Let workers drain the queue and exit before the shutdown deadline.
         val completed = withTimeoutOrNull(SHUTDOWN_TIMEOUT_MS) {
             exportJob.complete()
