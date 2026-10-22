@@ -11,7 +11,6 @@ import io.opentelemetry.kotlin.tracing.SpanContext
  *
  * https://opentelemetry.io/docs/specs/otel/context/
  */
-@ExperimentalApi
 @ThreadSafe
 public interface Context {
 
@@ -51,6 +50,7 @@ public interface Context {
      *
      * https://opentelemetry.io/docs/specs/otel/trace/api/#context-interaction
      */
+    @OptIn(ExperimentalApi::class)
     @ThreadSafe
     public fun storeSpan(span: Span): Context
 
@@ -68,6 +68,7 @@ public interface Context {
      *
      * https://opentelemetry.io/docs/specs/otel/trace/api/#context-interaction
      */
+    @OptIn(ExperimentalApi::class)
     @ThreadSafe
     public fun extractSpan(): Span
 
@@ -76,6 +77,7 @@ public interface Context {
      *
      * https://opentelemetry.io/docs/specs/otel/baggage/api/#context-interaction
      */
+    @OptIn(ExperimentalApi::class)
     @ThreadSafe
     public fun storeBaggage(baggage: Baggage): Context
 
@@ -84,6 +86,7 @@ public interface Context {
      *
      * https://opentelemetry.io/docs/specs/otel/baggage/api/#context-interaction
      */
+    @OptIn(ExperimentalApi::class)
     @ThreadSafe
     public fun extractBaggage(): Baggage
 
