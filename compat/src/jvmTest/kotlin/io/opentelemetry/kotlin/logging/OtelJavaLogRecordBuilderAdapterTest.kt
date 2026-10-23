@@ -145,7 +145,7 @@ internal class OtelJavaLogRecordBuilderAdapterTest {
         val impl = RecordingLogger()
         val ctx = OtelJavaContext.root().with(OtelJavaContextKey.named<String>("key"), "value").toOtelKotlinContext()
         val contextFactory = object : ContextFactory by CompatContextFactory() {
-            override fun implicit() = ctx
+            override fun current() = ctx
         }
         val adapter = OtelJavaLogRecordBuilderAdapter(impl, contextFactory)
         adapter.emit()

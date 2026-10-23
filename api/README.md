@@ -52,7 +52,7 @@ essentially it composes of these parts:
 3. When a context object no longer needs to be the implicit context, there needs to be a way to
    reset the implicit context to its previous state. A `Scope` object is a token that achieves this
    goal by calling `detach()`
-4. A means of determining what the implicit context is at any one time. `ContextFactory.implicit()`
+4. A means of determining what the implicit context is at any one time. `ContextFactory.current()`
    solves this.
 5. The library users calls `attach()` for contexts at appropriate units of execution in their
    application (e.g. spanning a function, or a particular workflow). Nested calls are allowed
@@ -68,7 +68,7 @@ private val USER_ID: ContextKey<String> = api.context.createKey("user.id")
 
 internal fun exampleUsage(api: OpenTelemetry) {
     // 1. obtain the current context. Defaults to root() if no implicit context is available.
-    val ctx = api.context.implicit()
+    val ctx = api.context.current()
 
     // 2. create a new context but don't set it as the implicit context.
     val newContext = ctx.set(USER_ID, "abc123")
@@ -76,7 +76,7 @@ internal fun exampleUsage(api: OpenTelemetry) {
     // 3. set the new context as the implicit context.
     val scope = newContext.attach()
 
-    // 4. perform tracing/logging here. tracers/loggers should call implicit()
+    // 4. perform tracing/logging here. tracers/loggers should call current()
     // internally so the appropriate context is set automatically.
     api.tracerProvider.getTracer("tracer").startSpan("my_span")
 

@@ -44,7 +44,7 @@ respects any `ContextStorage` wrappers that are installed (e.g. by the Java agen
 
 Without the option, do not read or set the opentelemetry-java implicit context directly through
 the APIs above. They use a separate store that the Kotlin SDK never sees. Use
-`OpenTelemetry.context.implicit()` and `Context.attach()` instead, or call `makeCurrent()` on a span
+`OpenTelemetry.context.current()` and `Context.attach()` instead, or call `makeCurrent()` on a span
 obtained from the Java API.
 
 This module only ships a JVM artifact because it depends on the `opentelemetry-java` library.

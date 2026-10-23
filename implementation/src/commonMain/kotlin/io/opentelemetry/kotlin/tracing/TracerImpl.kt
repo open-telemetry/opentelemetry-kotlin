@@ -60,7 +60,7 @@ internal class TracerImpl(
                     return@ifActiveOrElse invalidSpan
                 }
 
-                val ctx = parentContext ?: contextFactory.implicit()
+                val ctx = parentContext ?: contextFactory.current()
 
                 val parentSpanContext = when (ctx) {
                     root -> invalidSpanContext

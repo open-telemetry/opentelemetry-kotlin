@@ -155,7 +155,7 @@ internal class NoopTests {
 
         // implicit context
         ctx.attach().detach()
-        assertNotNull(otel.context.implicit())
+        assertNotNull(otel.context.current())
     }
 
     @Test

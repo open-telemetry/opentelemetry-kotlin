@@ -11,7 +11,7 @@ internal class CompatContextFactory : ContextFactory {
 
     override fun root(): Context = OtelJavaContext.root().toOtelKotlinContext()
 
-    override fun implicit(): Context = OtelJavaContext.current().toOtelKotlinContext()
+    override fun current(): Context = OtelJavaContext.current().toOtelKotlinContext()
 
     override fun <T> createKey(name: String): ContextKey<T> = ContextKeyAdapter(OtelJavaContextKey.named(name))
 }

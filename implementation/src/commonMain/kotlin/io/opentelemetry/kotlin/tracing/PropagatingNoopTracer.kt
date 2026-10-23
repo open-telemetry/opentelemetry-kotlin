@@ -24,7 +24,7 @@ internal class PropagatingNoopTracer(
         action: (SpanCreationAction.() -> Unit)?
     ): Span =
         sdkErrorHandler.sdkGuardOrDefault(invalidSpan, "Tracer.startSpan failed") {
-            val ctx = parentContext ?: contextFactory.implicit()
+            val ctx = parentContext ?: contextFactory.current()
             if (ctx == root) {
                 return@sdkGuardOrDefault invalidSpan
             }

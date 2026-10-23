@@ -40,7 +40,7 @@ internal class TracerAdapter(
         action: (SpanCreationAction.() -> Unit)?
     ): Span {
         val parentCtx = sdkErrorHandler.sdkGuardOrDefault(null, "Tracer.startSpan failed") {
-            (parentContext ?: contextFactory.implicit()).toOtelJavaContext()
+            (parentContext ?: contextFactory.current()).toOtelJavaContext()
         } ?: return invalidSpan
 
         return sdkErrorHandler.sdkGuardOrDefault(null, "Tracer.startSpan failed") {

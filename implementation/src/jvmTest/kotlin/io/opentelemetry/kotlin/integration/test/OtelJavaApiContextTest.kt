@@ -100,20 +100,20 @@ internal class OtelJavaApiContextTest {
 
     @Test
     fun testJavaScopeCloseRestoresKotlinContext() = runTest {
-        val before = harness.kotlinApi.context.implicit()
+        val before = harness.kotlinApi.context.current()
         val javaSpan = startJavaSpan("java_span")
         javaSpan.makeCurrent().use {
-            assertEquals(javaSpan.spanContext.spanId, harness.kotlinApi.context.implicit().extractSpan().spanContext.spanId)
+            assertEquals(javaSpan.spanContext.spanId, harness.kotlinApi.context.current().extractSpan().spanContext.spanId)
         }
         javaSpan.end()
-        assertSame(before, harness.kotlinApi.context.implicit())
+        assertSame(before, harness.kotlinApi.context.current())
     }
 
     private fun startJavaSpan(name: String): OtelJavaSpan =
         javaApi.tracerProvider.get("tracer").spanBuilder(name).startSpan()
 
     private fun withAttached(span: Span, action: () -> Unit) {
-        val scope = harness.kotlinApi.context.implicit().storeSpan(span).attach()
+        val scope = harness.kotlinApi.context.current().storeSpan(span).attach()
         try {
             action()
         } finally {

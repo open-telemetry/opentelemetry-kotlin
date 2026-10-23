@@ -23,7 +23,7 @@ internal class OtelJavaLoggerAdapter(
 
     override fun isEnabled(severity: OtelJavaSeverity): Boolean =
         impl.enabled(
-            context = contextFactory.implicit(),
+            context = contextFactory.current(),
             severityNumber = severity.toOtelKotlinSeverityNumber(),
         )
 }

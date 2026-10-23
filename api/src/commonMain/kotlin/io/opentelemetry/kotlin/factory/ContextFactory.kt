@@ -18,7 +18,7 @@ public interface ContextFactory {
     /**
      * Retrieves the implicit Context, or [root] if none is currently set.
      */
-    public fun implicit(): Context
+    public fun current(): Context
 
     /**
      * Creates a new [ContextKey] with the given name. The name is used for debugging and does NOT

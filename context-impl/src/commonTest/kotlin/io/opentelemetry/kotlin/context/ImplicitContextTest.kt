@@ -33,28 +33,28 @@ internal class ImplicitContextTest {
     fun testDupeAttach() {
         val newCtx = newContext()
         newCtx.attach()
-        assertSame(newCtx, factory.implicit())
+        assertSame(newCtx, factory.current())
 
         val next = newCtx.attach()
-        assertSame(newCtx, factory.implicit())
+        assertSame(newCtx, factory.current())
 
         next.detach()
-        assertSame(newCtx, factory.implicit())
+        assertSame(newCtx, factory.current())
     }
 
     @Test
     fun testDupeDetach() {
-        assertSame(factory.root(), factory.implicit())
+        assertSame(factory.root(), factory.current())
 
         val newCtx = newContext()
         val scope = newCtx.attach()
-        assertSame(newCtx, factory.implicit())
+        assertSame(newCtx, factory.current())
 
         scope.detach()
-        assertSame(factory.root(), factory.implicit())
+        assertSame(factory.root(), factory.current())
 
         scope.detach()
-        assertSame(factory.root(), factory.implicit())
+        assertSame(factory.root(), factory.current())
     }
 
     @Test
@@ -90,29 +90,29 @@ internal class ImplicitContextTest {
     fun testImplicitContext() {
         // assert default is root
         val root = factory.root()
-        assertSame(root, factory.implicit())
+        assertSame(root, factory.current())
 
         // set first scope
         val ctx1 = newContext()
         val scope1 = ctx1.attach()
-        assertSame(ctx1, factory.implicit())
+        assertSame(ctx1, factory.current())
 
         // set second scope
         val ctx2 = newContext()
         val scope2 = ctx2.attach()
-        assertSame(ctx2, factory.implicit())
+        assertSame(ctx2, factory.current())
 
         // invalid call as not current implicit context, ignore.
         scope1.detach()
-        assertSame(ctx2, factory.implicit())
+        assertSame(ctx2, factory.current())
 
         // detach current implicit context
         scope2.detach()
-        assertSame(ctx1, factory.implicit())
+        assertSame(ctx1, factory.current())
 
         // detach current implicit context
         scope1.detach()
-        assertSame(root, factory.implicit())
+        assertSame(root, factory.current())
     }
 
     private fun newContext(): Context =

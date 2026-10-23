@@ -145,7 +145,7 @@ internal class LoggerErrorHandlingTest {
 
         override fun root(): Context = delegate.root()
 
-        override fun implicit(): Context = boom()
+        override fun current(): Context = boom()
 
         override fun <T> createKey(name: String): ContextKey<T> = FakeContextKey(name)
     }

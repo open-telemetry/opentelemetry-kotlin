@@ -9,7 +9,7 @@ internal object NoopContextFactory : ContextFactory {
 
     override fun root(): Context = NoopContext
 
-    override fun implicit(): Context = NoopContext
+    override fun current(): Context = NoopContext
 
     override fun <T> createKey(name: String): ContextKey<T> = NoopContextKey(name)
 }

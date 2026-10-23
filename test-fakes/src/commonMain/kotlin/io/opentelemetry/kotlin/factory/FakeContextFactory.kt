@@ -9,7 +9,7 @@ class FakeContextFactory : ContextFactory {
 
     override fun root(): Context = FakeContext()
 
-    override fun implicit(): Context = FakeContext()
+    override fun current(): Context = FakeContext()
 
     override fun <T> createKey(name: String): ContextKey<T> = FakeContextKey(name)
 }

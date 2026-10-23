@@ -45,7 +45,7 @@ internal class LoggerImpl(
             if (shutdownState.isShutdown || processor == null) {
                 false
             } else {
-                val ctx = context ?: contextFactory.implicit()
+                val ctx = context ?: contextFactory.current()
                 when {
                     !allowedByConfig(severityNumber, spanContextFrom(ctx)) -> false
                     else -> sdkErrorHandler.guardOrDefault(true) {
@@ -92,7 +92,7 @@ internal class LoggerImpl(
     ) {
         sdkErrorHandler.sdkGuard("Logger.emit failed") {
             shutdownState.execute {
-                val ctx = context ?: contextFactory.implicit()
+                val ctx = context ?: contextFactory.current()
                 val spanContext = spanContextFrom(ctx)
 
                 if (!allowedByConfig(severityNumber, spanContext)) {

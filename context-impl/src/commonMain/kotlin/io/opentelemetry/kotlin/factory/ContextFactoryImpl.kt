@@ -19,7 +19,7 @@ public class ContextFactoryImpl(
 
     override fun root(): Context = root
 
-    override fun implicit(): Context = storage.implicitContext()
+    override fun current(): Context = storage.implicitContext()
 
     override fun <T> createKey(name: String): ContextKey<T> = ContextKeyImpl(name)
 }

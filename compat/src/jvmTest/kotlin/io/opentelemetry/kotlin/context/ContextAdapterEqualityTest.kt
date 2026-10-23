@@ -12,15 +12,15 @@ internal class ContextAdapterEqualityTest {
     private val key = factory.createKey<String>("key")
 
     @Test
-    fun `root and implicit are equal across calls`() {
+    fun `root and current are equal across calls`() {
         assertEquals(factory.root(), factory.root())
         assertEquals(factory.root().hashCode(), factory.root().hashCode())
-        assertEquals(factory.root(), factory.implicit())
+        assertEquals(factory.root(), factory.current())
 
         val ctx = factory.root().set(key, "value")
         val scope = ctx.attach()
-        assertEquals(ctx, factory.implicit())
-        assertEquals(factory.implicit(), factory.implicit())
+        assertEquals(ctx, factory.current())
+        assertEquals(factory.current(), factory.current())
         scope.detach()
     }
 
