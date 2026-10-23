@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin
 import io.opentelemetry.kotlin.config.NoopConfigProperties
 import io.opentelemetry.kotlin.config.NoopConfigProvider
 import io.opentelemetry.kotlin.context.NoopContext
-import io.opentelemetry.kotlin.context.NoopContextKey
+import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.metrics.NoopObservableDoubleMeasurement
@@ -137,8 +137,7 @@ internal class NoopTests {
     fun testNoopExplicitContext() {
         val otel = NoopOpenTelemetry
 
-        val key = otel.context.createKey<String>("key")
-        assertTrue(key is NoopContextKey)
+        val key = createContextKey<String>("key")
 
         val ctx = otel.context.root()
 
@@ -215,9 +214,9 @@ internal class NoopTests {
         // extract returns the original context unchanged
         val getter = object : TextMapGetter<MutableMap<String, String>> {
             override fun keys(carrier: MutableMap<String, String>) = carrier.keys
-            override fun get(carrier: MutableMap<String, String>?, key: String) = carrier?.get(key)
-            override fun getAll(carrier: MutableMap<String, String>?, key: String): List<String> =
-                carrier?.get(key)?.let { listOf(it) } ?: emptyList()
+            override fun get(carrier: MutableMap<String, String>, key: String) = carrier[key]
+            override fun getAll(carrier: MutableMap<String, String>, key: String): List<String> =
+                carrier[key]?.let { listOf(it) } ?: emptyList()
         }
         assertSame(ctx, createNoopPropagator().extract(ctx, carrier, getter))
     }

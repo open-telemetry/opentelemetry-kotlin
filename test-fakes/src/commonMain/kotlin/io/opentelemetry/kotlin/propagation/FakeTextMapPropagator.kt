@@ -17,12 +17,12 @@ class FakeTextMapPropagator(
 
     override fun fields(): Collection<String> = fields
 
-    override fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>) {
+    override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {
         injectCalled = true
         fields.forEach { field -> setter.set(carrier, field, "set-by-$field") }
     }
 
-    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context {
+    override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context {
         extractCalled = true
         return onExtract(context)
     }
