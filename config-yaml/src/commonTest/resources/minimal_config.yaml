@@ -1,6 +1,8 @@
 file_format: "1.0"
 disabled: false
 log_level: info
+distribution:
+  key: "value"
 resource:
   schema_url: "https://opentelemetry.io/schemas/1.37.0"
   attributes_list: "service.namespace=demo,service.version=1.0.0"
