@@ -12,10 +12,12 @@ kotlin {
         commonMain {
             dependencies {
                 api(project(":sdk-api"))
+                implementation(project(":model"))
             }
         }
         commonTest {
             dependencies {
+                implementation(project(":test-fakes"))
                 implementation(libs.kotlinx.coroutines.test)
             }
         }
