@@ -114,10 +114,14 @@ internal class LoggerImpl(
                     sdkErrorHandler = sdkErrorHandler,
                 )
                 if (exception != null) {
-                    userCode { log.setExceptionAttributes(exception) }
+                    sdkErrorHandler.guard("LogRecord.exception attributes failed") {
+                        log.setExceptionAttributes(exception)
+                    }
                 }
                 if (attributes != null) {
-                    userCode { attributes(log) }
+                    sdkErrorHandler.guard("Logger.emit attributes failed") {
+                        attributes(log)
+                    }
                 }
                 sdkErrorHandler.guard {
                     processor?.onEmit(ReadWriteLogRecordImpl(log), ctx)
