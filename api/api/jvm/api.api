@@ -322,6 +322,11 @@ public abstract interface class io/opentelemetry/kotlin/propagation/TextMapSette
 	public abstract fun set (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V
 }
 
+public final class io/opentelemetry/kotlin/tracing/NonRecordingSpanEntrypointKt {
+	public static final fun createNonRecordingSpan (Lio/opentelemetry/kotlin/tracing/SpanContext;Lio/opentelemetry/kotlin/tracing/SpanContext;)Lio/opentelemetry/kotlin/tracing/Span;
+	public static synthetic fun createNonRecordingSpan$default (Lio/opentelemetry/kotlin/tracing/SpanContext;Lio/opentelemetry/kotlin/tracing/SpanContext;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/Span;
+}
+
 public abstract interface class io/opentelemetry/kotlin/tracing/Span : io/opentelemetry/kotlin/attributes/AttributesMutator, io/opentelemetry/kotlin/tracing/SpanEventCreator, io/opentelemetry/kotlin/tracing/SpanLinkCreator {
 	public abstract fun end ()V
 	public abstract fun end (J)V

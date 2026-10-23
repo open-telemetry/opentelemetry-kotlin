@@ -8,10 +8,9 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.baggage.Baggage
 import io.opentelemetry.kotlin.baggage.toOtelJavaBaggage
 import io.opentelemetry.kotlin.baggage.toOtelKotlinBaggage
-import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
+import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
 import io.opentelemetry.kotlin.tracing.ext.storeInContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
@@ -45,17 +44,14 @@ internal class ContextAdapter(
     override fun storeSpan(span: Span): Context = span.storeInContext(this)
 
     override fun storeSpanContext(spanContext: SpanContext): Context =
-        storeSpan(NonRecordingSpan(createInvalidSpanContext(), spanContext))
+        storeSpan(createNonRecordingSpan(spanContext))
 
     override fun extractSpan(): Span {
         val javaSpan = OtelJavaSpan.fromContext(impl)
         if (javaSpan is OtelJavaSpanAdapter) {
             return javaSpan.span
         }
-        return NonRecordingSpan(
-            createInvalidSpanContext(),
-            javaSpan.spanContext.toOtelKotlinSpanContext(),
-        )
+        return createNonRecordingSpan(javaSpan.spanContext.toOtelKotlinSpanContext())
     }
 
     override fun storeBaggage(baggage: Baggage): Context {
