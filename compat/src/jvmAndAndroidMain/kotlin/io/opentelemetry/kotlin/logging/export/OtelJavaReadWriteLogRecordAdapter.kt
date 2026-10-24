@@ -21,7 +21,7 @@ internal class OtelJavaReadWriteLogRecordAdapter(
 ) : OtelJavaReadWriteLogRecord {
 
     override fun <T> setAttribute(key: OtelJavaAttributeKey<T>, value: T?): OtelJavaReadWriteLogRecord {
-        value?.let { log.setTypedAttribute(key.key, it) }
+        value?.let { log.setTypedAttribute(key, it) }
         return this
     }
 
