@@ -43,13 +43,13 @@ internal object W3CTraceContextPropagator : TextMapPropagator {
     override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context {
         val rawTraceparent = getter.get(carrier, TRACEPARENT) ?: return context
         val parsed = TraceParent.decode(rawTraceparent) ?: return context
-        val rawTracestate = getter.get(carrier, TRACESTATE)
+        val rawTracestate = getter.getAll(carrier, TRACESTATE).joinToString(",")
 
         val spanContext = createSpanContext(parsed.traceId, parsed.spanId) {
             isSampled = parsed.traceFlags.isSampled
             isRandom = parsed.traceFlags.isRandom
             isRemote = true
-            if (rawTracestate != null) {
+            if (rawTracestate.isNotEmpty()) {
                 traceState {
                     W3CTraceStateCodec.decode(rawTracestate).forEach { (key, value) -> put(key, value) }
                 }
