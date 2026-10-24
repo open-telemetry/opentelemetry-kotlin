@@ -53,7 +53,7 @@ internal class TracerProviderAdapter(
         ) {
             awaitOperationResultCode { tracerProvider.forceFlush() }
         }
-        else -> OperationResultCode.Success
+        else -> OperationResultCode.Failure
     }
 
     override suspend fun shutdown(): OperationResultCode = when (tracerProvider) {
@@ -63,6 +63,6 @@ internal class TracerProviderAdapter(
         ) {
             awaitOperationResultCode { tracerProvider.shutdown() }
         }
-        else -> OperationResultCode.Success
+        else -> OperationResultCode.Failure
     }
 }

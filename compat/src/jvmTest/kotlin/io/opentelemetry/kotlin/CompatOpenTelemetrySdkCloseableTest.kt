@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
 import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetrySdk
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
+import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordExporter
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanExporter
@@ -84,10 +85,10 @@ internal class CompatOpenTelemetrySdkCloseableTest {
     }
 
     @Test
-    fun `flush and shutdown succeed when the wrapped providers are not sdk instances`() = runBlocking {
+    fun `flush and shutdown fail when the wrapped providers are not sdk instances`() = runBlocking {
         val sdk = OtelJavaOpenTelemetry.noop().toOtelKotlinApi() as OpenTelemetrySdk
-        assertEquals(Success, sdk.forceFlush())
-        assertEquals(Success, sdk.shutdown())
+        assertEquals(OperationResultCode.Failure, sdk.forceFlush())
+        assertEquals(OperationResultCode.Failure, sdk.shutdown())
     }
 
     @Test
