@@ -50,7 +50,7 @@ internal class OtlpHttpTlsTest {
         }
 
         try {
-            val client = createOtlpHttpClient(NoopSdkErrorHandler) {
+            val client = createOtlpHttpClient(NoopSdkErrorHandler, OtlpEndpoint.Traces) {
                 endpoint = "https://localhost:${server.address.port}"
                 configureTls(certificateFile, keyFile, certificateFile)
             }

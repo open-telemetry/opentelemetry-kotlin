@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import kotlin.random.Random
 import kotlin.test.Test
@@ -27,6 +27,7 @@ internal class TelemetryExporterTest {
         maxAttempts = maxAttempts,
         sdkErrorHandler = NoopSdkErrorHandler,
         coroutineContext = StandardTestDispatcher(testScheduler),
+        timeSource = testScheduler.timeSource,
         random = random,
         exportAction = exportAction,
     )
@@ -71,7 +72,7 @@ internal class TelemetryExporterTest {
         }
         exporter.withShutdown {
             exporter.export(listOf("data"))
-            advanceUntilIdle()
+            advanceTimeBy(5_000)
             assertEquals(1, attempts)
         }
     }
@@ -91,7 +92,7 @@ internal class TelemetryExporterTest {
             }
             exporter.withShutdown {
                 exporter.export(listOf("data"))
-                advanceUntilIdle()
+                advanceTimeBy(5_000)
                 assertEquals(1, attempts, "$response")
             }
         }
@@ -106,7 +107,7 @@ internal class TelemetryExporterTest {
         }
         exporter.withShutdown {
             exporter.export(listOf("data"))
-            advanceUntilIdle()
+            advanceTimeBy(5_000)
             assertEquals(3, attempts)
         }
     }
@@ -120,7 +121,7 @@ internal class TelemetryExporterTest {
         }
         exporter.withShutdown {
             exporter.export(listOf("data"))
-            advanceUntilIdle()
+            advanceTimeBy(5_000)
             assertEquals(1, attempts)
         }
     }
@@ -142,18 +143,20 @@ internal class TelemetryExporterTest {
         }
         exporter.withShutdown {
             exporter.export(listOf("data"))
-            advanceUntilIdle()
+            advanceTimeBy(5_000)
 
             assertEquals(maxAttempts, timestamps.size)
 
-            var base = initialDelayMs
-            timestamps.zipWithNext { a, b -> b - a }.forEach { delta ->
-                val cappedBase = base.coerceAtMost(maxIntervalMs)
+            val pollingIntervalMs = 100L
+            val maxJitterMs = 100L
+            var expectedBackoffMs = initialDelayMs
+            timestamps.zipWithNext { previous, next -> next - previous }.forEach { delta ->
+                val upperExclusive = expectedBackoffMs + pollingIntervalMs + maxJitterMs
                 assertTrue(
-                    delta in (cappedBase / 2)..cappedBase,
-                    "backoff delta $delta outside [${cappedBase / 2}, $cappedBase]",
+                    delta in expectedBackoffMs..<upperExclusive,
+                    "backoff delta $delta outside [$expectedBackoffMs, $upperExclusive)",
                 )
-                base = (base * 2).coerceAtMost(maxIntervalMs)
+                expectedBackoffMs = (expectedBackoffMs * 2).coerceAtMost(maxIntervalMs)
             }
         }
     }
@@ -163,7 +166,7 @@ internal class TelemetryExporterTest {
         val retryAfterMs = 5000L
         val timestamps = recordRetryAfterAttempts(retryAfterMs, maxAttemptIntervalMs = 10_000)
         assertEquals(2, timestamps.size)
-        assertEquals(retryAfterMs, timestamps[1] - timestamps[0])
+        assertTrue(timestamps[1] - timestamps[0] in retryAfterMs..<(retryAfterMs + 200))
     }
 
     @Test
@@ -171,7 +174,7 @@ internal class TelemetryExporterTest {
         val maxAttemptIntervalMs = 1000L
         val timestamps = recordRetryAfterAttempts(Long.MAX_VALUE, maxAttemptIntervalMs)
         assertEquals(2, timestamps.size)
-        assertEquals(maxAttemptIntervalMs, timestamps[1] - timestamps[0])
+        assertTrue(timestamps[1] - timestamps[0] in maxAttemptIntervalMs..<(maxAttemptIntervalMs + 200))
     }
 
     private suspend fun TestScope.recordRetryAfterAttempts(
@@ -193,7 +196,7 @@ internal class TelemetryExporterTest {
         }
         return exporter.withShutdown {
             exporter.export(listOf("data"))
-            advanceUntilIdle()
+            advanceTimeBy(10_000)
             timestamps
         }
     }
