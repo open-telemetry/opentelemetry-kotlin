@@ -63,6 +63,19 @@ internal class TelemetryExporterTest {
     }
 
     @Test
+    fun testExportEmptyTelemetrySucceedsWithoutCallingExportAction() = runTest {
+        var called = false
+        val exporter = initTelemetryExporter {
+            called = true
+            OtlpResponse.Success
+        }
+        exporter.withShutdown {
+            assertEquals(OperationResultCode.Success, exporter.export(emptyList()))
+            assertEquals(false, called)
+        }
+    }
+
+    @Test
     fun testClientErrorIsNotRetried() = runTest {
         var attempts = 0
         val exporter = initTelemetryExporter {
@@ -70,8 +83,7 @@ internal class TelemetryExporterTest {
             OtlpResponse.ClientError(400, null)
         }
         exporter.withShutdown {
-            exporter.export(listOf("data"))
-            advanceUntilIdle()
+            assertEquals(OperationResultCode.Failure, exporter.export(listOf("data")))
             assertEquals(1, attempts)
         }
     }
@@ -198,7 +210,8 @@ internal class TelemetryExporterTest {
         }
     }
 
-    fun testExportDoesNotPropagateExportActionFailure() = runTest {
+    @Test
+    fun testExportReturnsFailureWhenExportActionThrows() = runTest {
         val throwingExporter = initTelemetryExporter(
             initialDelayMs = 1,
             maxAttemptIntervalMs = 1,
@@ -206,9 +219,7 @@ internal class TelemetryExporterTest {
             exportAction = { error("network unreachable") },
         )
         throwingExporter.withShutdown {
-            // The failure occurs on a background coroutine whose scope has a CoroutineExceptionHandler,
-            // so it must not propagate to the caller nor crash the process.
-            assertEquals(OperationResultCode.Success, throwingExporter.export(listOf("data")))
+            assertEquals(OperationResultCode.Failure, throwingExporter.export(listOf("data")))
         }
     }
 }
