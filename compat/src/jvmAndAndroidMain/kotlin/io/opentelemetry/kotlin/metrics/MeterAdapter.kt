@@ -28,4 +28,11 @@ internal class MeterAdapter(
         description?.let(builder::setDescription)
         return LongUpDownCounterAdapter(builder.build(), name, unit, description)
     }
+
+    override fun createObservableDoubleCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
+    ): ObservableDoubleCounter = ObservableDoubleCounterAdapter(impl, name, unit, description, callbacks)
 }

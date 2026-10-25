@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.metrics.NoopObservableDoubleMeasurement
 import io.opentelemetry.kotlin.metrics.NoopObservableLongMeasurement
+import io.opentelemetry.kotlin.metrics.ObservableDoubleMeasurement
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapSetter
 import io.opentelemetry.kotlin.propagation.createNoopPropagator
@@ -271,6 +272,22 @@ internal class NoopTests {
         assertFalse(doubleCounter.enabled())
         doubleCounter.add(1.0)
         doubleCounter.add(-1.0) { setStringAttribute("account.type", "commercial") }
+
+        var callbackInvoked = false
+        val creationCallback: (ObservableDoubleMeasurement) -> Unit = { measurement ->
+            callbackInvoked = true
+            measurement.record(1.5)
+        }
+        val observableCounter = meter.createObservableDoubleCounter(
+            name = "process.cpu.time",
+            callbacks = *arrayOf(creationCallback),
+        )
+        observableCounter.registerCallback {
+            callbackInvoked = true
+            it.record(2.5)
+        }.close()
+        observableCounter.close()
+        assertFalse(callbackInvoked)
     }
 
     @OptIn(ExperimentalApi::class)

@@ -15,6 +15,19 @@ import io.opentelemetry.kotlin.ThreadSafe
  */
 @ExperimentalApi
 @ThreadSafe
-public interface AsynchronousInstrument : Instrument, AutoCloseable {
-    // TODO after-creation registerCallback method to be added
+public interface AsynchronousInstrument<out M : ObservableMeasurement> : Instrument, AutoCloseable {
+
+    /**
+     * Registers a callback that reports measurements for this instrument.
+     *
+     * The callback is invoked when metrics are collected. It should be reentrant-safe and should
+     * not take an indefinite amount of time.
+     *
+     * Closing the returned handle unregisters this callback. Closing this instrument unregisters
+     * all callbacks registered with it.
+     *
+     * @param callback callback used to report measurements for this instrument
+     * @return a handle that unregisters this callback when closed
+     */
+    public fun registerCallback(callback: (M) -> Unit): AutoCloseable
 }
