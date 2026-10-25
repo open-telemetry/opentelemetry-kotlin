@@ -280,7 +280,7 @@ internal class NoopTests {
         }
         val observableCounter = meter.createObservableDoubleCounter(
             name = "process.cpu.time",
-            callbacks = *arrayOf(creationCallback),
+            callbacks = arrayOf(creationCallback),
         )
         observableCounter.registerCallback {
             callbackInvoked = true

@@ -19,7 +19,7 @@ internal class FakeObservableDoubleCounterTest {
             name = "process.cpu.time",
             unit = "s",
             description = "CPU time",
-            callbacks = *arrayOf(creationCallback),
+            callbacks = arrayOf(creationCallback),
         ) as FakeObservableDoubleCounter
         val measurement = FakeObservableDoubleMeasurement()
         val handle = counter.registerCallback {
