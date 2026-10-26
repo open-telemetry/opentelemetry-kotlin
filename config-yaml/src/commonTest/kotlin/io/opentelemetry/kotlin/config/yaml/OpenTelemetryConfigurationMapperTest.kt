@@ -7,13 +7,16 @@ import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.SeverityLevel
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.behavior.toSeverityLevel
 import io.opentelemetry.kotlin.config.schema.model.AlwaysOffSampler
 import io.opentelemetry.kotlin.config.schema.model.IdGenerator
 import io.opentelemetry.kotlin.config.schema.model.OpenTelemetryConfiguration
 import io.opentelemetry.kotlin.config.schema.model.RandomIdGenerator
 import io.opentelemetry.kotlin.config.schema.model.Sampler
+import io.opentelemetry.kotlin.config.schema.model.SeverityNumber
 import io.opentelemetry.kotlin.config.schema.model.SpanLimits
 import io.opentelemetry.kotlin.config.schema.model.TracerProvider
 import io.opentelemetry.kotlin.framework.loadTestFixture
@@ -28,6 +31,10 @@ internal class OpenTelemetryConfigurationMapperTest {
         val config = OpenTelemetryConfigurationParser().parse(loadTestFixture(GOLDEN_FILE))
 
         val expected = OpenTelemetryBehavior(
+            fileFormat = "1.0",
+            disabled = false,
+            logLevel = SeverityLevel.INFO,
+            distribution = mapOf("key" to "value"),
             attributeLimits = AttributeLimitsBehavior(
                 attributeCountLimit = 128,
                 attributeValueLengthLimit = 4096,
@@ -59,7 +66,7 @@ internal class OpenTelemetryConfigurationMapperTest {
     @Test
     fun leavesOmittedSectionsUnset() {
         val config = OpenTelemetryConfiguration(fileFormat = FILE_FORMAT)
-        assertEquals(OpenTelemetryBehavior(), config.toBehavior())
+        assertEquals(OpenTelemetryBehavior(fileFormat = FILE_FORMAT), config.toBehavior())
     }
 
     @Test
@@ -114,6 +121,13 @@ internal class OpenTelemetryConfigurationMapperTest {
             IdGeneratorBehavior.Random,
             config.toBehavior().tracerProvider?.idGenerator,
         )
+    }
+
+    @Test
+    fun mapsSeverityNumberToSeverityLevel() {
+        SeverityNumber.entries.forEach {
+            assertEquals(it.name, it.toString().toSeverityLevel()?.name)
+        }
     }
 
     private companion object {
