@@ -25,7 +25,7 @@ internal object NoopReadableSpan : ReadableSpan {
     override val droppedLinksCount: Int = 0
     override val attributes: Map<String, Any> = emptyMap()
     override val droppedAttributesCount: Int = 0
-    override val hasEnded: Boolean = false
+    override val hasEnded: Boolean = true
 
     override val resource: Resource = object : Resource {
         override val attributes: Map<String, Any> = emptyMap()
