@@ -10,7 +10,9 @@ internal class FakeAsynchronousCallbackRegistry<M : ObservableMeasurement> {
         get() = registrations.map { it.callback }
 
     fun register(callback: (M) -> Unit): AutoCloseable {
-        if (closed) return NoopHandle
+        if (closed) {
+            return NoopHandle
+        }
 
         val registration = Registration(callback)
         registrations.add(registration)
@@ -18,7 +20,9 @@ internal class FakeAsynchronousCallbackRegistry<M : ObservableMeasurement> {
             private var unregistered = false
 
             override fun close() {
-                if (unregistered) return
+                if (unregistered) {
+                    return
+                }
                 unregistered = true
                 registrations.remove(registration)
             }
@@ -26,11 +30,15 @@ internal class FakeAsynchronousCallbackRegistry<M : ObservableMeasurement> {
     }
 
     fun registerPermanently(callback: (M) -> Unit) {
-        if (!closed) registrations.add(Registration(callback))
+        if (!closed) {
+            registrations.add(Registration(callback))
+        }
     }
 
     fun invoke(measurement: M) {
-        if (!closed) registrations.toList().forEach { it.callback(measurement) }
+        if (!closed) {
+            registrations.toList().forEach { it.callback(measurement) }
+        }
     }
 
     fun close() {
