@@ -7,6 +7,11 @@ public final class io/opentelemetry/kotlin/SdkBuildKonfig {
 	public final fun getSDK_VERSION ()Ljava/lang/String;
 }
 
+public final class io/opentelemetry/kotlin/attributes/AnyValueTransformKt {
+	public static final fun transform (Lio/opentelemetry/kotlin/attributes/AnyValue;ILkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/attributes/AnyValue;
+	public static synthetic fun transform$default (Lio/opentelemetry/kotlin/attributes/AnyValue;ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/attributes/AnyValue;
+}
+
 public final class io/opentelemetry/kotlin/attributes/EmptyAttributeContainer : io/opentelemetry/kotlin/attributes/AttributeContainer {
 	public static final field INSTANCE Lio/opentelemetry/kotlin/attributes/EmptyAttributeContainer;
 	public fun getAttributes ()Ljava/util/Map;

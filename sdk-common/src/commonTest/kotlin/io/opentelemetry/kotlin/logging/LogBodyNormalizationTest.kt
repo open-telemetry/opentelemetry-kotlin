@@ -110,6 +110,22 @@ internal class LogBodyNormalizationTest {
     }
 
     @Test
+    fun testDeepNestingAcrossCollectionsAndAnyValueIsTruncated() {
+        var value: AnyValue = AnyValue.StringValue("leaf")
+        repeat(50) { value = AnyValue.ListValue(listOf(value)) }
+        var body: Any = value
+        repeat(10) { body = listOf(body) }
+        var observed = normalizeLogBody(body)
+        var depth = 0
+        while (observed is AnyValue.ListValue) {
+            observed = observed.values.single()
+            depth++
+        }
+        assertEquals(16, depth)
+        assertSame(AnyValue.NullValue, observed)
+    }
+
+    @Test
     fun testThrowingToStringPropagates() {
         val body = object {
             override fun toString(): String = error("boom")
