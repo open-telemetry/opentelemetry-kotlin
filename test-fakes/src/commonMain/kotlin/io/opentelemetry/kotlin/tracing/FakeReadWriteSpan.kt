@@ -2,8 +2,8 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
-import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.attributes.FakeAttributesMutator
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -11,24 +11,62 @@ import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 
-class FakeReadWriteSpan(
-    name: String = "fake_span",
-    status: StatusData = StatusData.Unset,
-    override val parent: SpanContext = FakeSpanContext.INVALID,
-    spanContext: SpanContext = FakeSpanContext.INVALID,
-    override val spanKind: SpanKind = SpanKind.INTERNAL,
-    override val startTimestamp: Long = 0,
-    override val events: List<SpanEventData> = emptyList(),
-    override val droppedEventsCount: Int = 0,
-    override val links: List<SpanLinkData> = emptyList(),
-    override val droppedLinksCount: Int = 0,
-    override val attributes: Map<String, Any> = emptyMap(),
-    override val endTimestamp: Long? = 0,
-    override val resource: Resource = FakeResource(),
-    override val instrumentationScopeInfo: InstrumentationScopeInfo = FakeInstrumentationScopeInfo(),
-    override val hasEnded: Boolean = false,
-    override val droppedAttributesCount: Int = 0
-) : ReadWriteSpan {
+class FakeReadWriteSpan private constructor(
+    name: String,
+    status: StatusData,
+    override val parent: SpanContext,
+    spanContext: SpanContext,
+    override val spanKind: SpanKind,
+    override val startTimestamp: Long,
+    override val events: List<SpanEventData>,
+    override val droppedEventsCount: Int,
+    override val links: List<SpanLinkData>,
+    override val droppedLinksCount: Int,
+    private val attrs: FakeAttributesMutator,
+    override val endTimestamp: Long?,
+    override val resource: Resource,
+    override val instrumentationScopeInfo: InstrumentationScopeInfo,
+    override val hasEnded: Boolean,
+    override val droppedAttributesCount: Int,
+) : ReadWriteSpan, AttributesMutator by attrs {
+
+    constructor(
+        name: String = "fake_span",
+        status: StatusData = StatusData.Unset,
+        parent: SpanContext = FakeSpanContext.INVALID,
+        spanContext: SpanContext = FakeSpanContext.INVALID,
+        spanKind: SpanKind = SpanKind.INTERNAL,
+        startTimestamp: Long = 0,
+        events: List<SpanEventData> = emptyList(),
+        droppedEventsCount: Int = 0,
+        links: List<SpanLinkData> = emptyList(),
+        droppedLinksCount: Int = 0,
+        attributes: Map<String, Any> = emptyMap(),
+        endTimestamp: Long? = 0,
+        resource: Resource = FakeResource(),
+        instrumentationScopeInfo: InstrumentationScopeInfo = FakeInstrumentationScopeInfo(),
+        hasEnded: Boolean = false,
+        droppedAttributesCount: Int = 0
+    ) : this(
+        name,
+        status,
+        parent,
+        spanContext,
+        spanKind,
+        startTimestamp,
+        events,
+        droppedEventsCount,
+        links,
+        droppedLinksCount,
+        FakeAttributesMutator(attributes.toMutableMap()),
+        endTimestamp,
+        resource,
+        instrumentationScopeInfo,
+        hasEnded,
+        droppedAttributesCount
+    )
+
+    override val attributes: Map<String, Any> get() = attrs.attributes
 
     override var spanContext: SpanContext = spanContext
 
@@ -66,58 +104,6 @@ class FakeReadWriteSpan(
         timestamp: Long?,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
-        throw UnsupportedOperationException()
-    }
-
-    override fun setBooleanAttribute(key: String, value: Boolean) {
-        throw UnsupportedOperationException()
-    }
-
-    override fun setStringAttribute(key: String, value: String) {
-        throw UnsupportedOperationException()
-    }
-
-    override fun setLongAttribute(key: String, value: Long) {
-        throw UnsupportedOperationException()
-    }
-
-    override fun setDoubleAttribute(key: String, value: Double) {
-        throw UnsupportedOperationException()
-    }
-
-    override fun setBooleanListAttribute(
-        key: String,
-        value: List<Boolean>
-    ) {
-        throw UnsupportedOperationException()
-    }
-
-    override fun setStringListAttribute(
-        key: String,
-        value: List<String>
-    ) {
-        throw UnsupportedOperationException()
-    }
-
-    override fun setLongListAttribute(
-        key: String,
-        value: List<Long>
-    ) {
-        throw UnsupportedOperationException()
-    }
-
-    override fun setDoubleListAttribute(
-        key: String,
-        value: List<Double>
-    ) {
-        throw UnsupportedOperationException()
-    }
-
-    override fun setByteArrayAttribute(key: String, value: ByteArray) {
-        throw UnsupportedOperationException()
-    }
-
-    override fun setAnyValueAttribute(key: String, value: AnyValue) {
         throw UnsupportedOperationException()
     }
 
