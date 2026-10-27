@@ -9,17 +9,17 @@ import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-internal class ScopedImplicitContextStorageTest {
+internal class ScopedCurrentContextStorageTest {
 
     private lateinit var handler: FakeSdkErrorHandler
-    private lateinit var storage: FakeScopedImplicitContextStorage
+    private lateinit var storage: FakeScopedCurrentContextStorage
     private lateinit var factory: ContextFactoryImpl
 
     @BeforeTest
     fun setUp() {
         handler = FakeSdkErrorHandler()
         factory = ContextFactoryImpl(handler) { rootSupplier ->
-            FakeScopedImplicitContextStorage(rootSupplier).also { storage = it }
+            FakeScopedCurrentContextStorage(rootSupplier).also { storage = it }
         }
     }
 
@@ -70,9 +70,9 @@ internal class ScopedImplicitContextStorageTest {
     private fun newContext(): Context =
         factory.root().set(createContextKey("key"), Any())
 
-    private class FakeScopedImplicitContextStorage(
+    private class FakeScopedCurrentContextStorage(
         rootSupplier: () -> Context,
-    ) : ScopedImplicitContextStorage {
+    ) : ScopedCurrentContextStorage {
 
         private val root by lazy { rootSupplier() }
         private val stack = ArrayDeque<Context>()
@@ -93,10 +93,10 @@ internal class ScopedImplicitContextStorageTest {
             }
         }
 
-        override fun setImplicitContext(context: Context) {
+        override fun setCurrent(context: Context) {
             setCount++
         }
 
-        override fun implicitContext(): Context = stack.lastOrNull() ?: root
+        override fun current(): Context = stack.lastOrNull() ?: root
     }
 }

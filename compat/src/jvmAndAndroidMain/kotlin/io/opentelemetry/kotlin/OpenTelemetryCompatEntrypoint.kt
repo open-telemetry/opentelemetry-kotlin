@@ -32,7 +32,7 @@ public fun createCompatOpenTelemetry(
         cfg.sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
                 api = "OpenTelemetryConfigDsl.context",
-                message = "Context configuration is ignored in compat mode. The implicit context is stored in " +
+                message = "Context configuration is ignored in compat mode. The current context is stored in " +
                     "opentelemetry-java's ContextStorage.",
                 severity = SdkErrorSeverity.WARNING,
             )

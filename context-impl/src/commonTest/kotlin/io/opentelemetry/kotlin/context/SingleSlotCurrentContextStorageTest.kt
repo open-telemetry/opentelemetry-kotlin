@@ -5,22 +5,22 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertSame
 
-internal class DefaultImplicitContextStorageImplTest {
+internal class SingleSlotCurrentContextStorageTest {
 
     private lateinit var factory: ContextFactoryImpl
-    private lateinit var storage: DefaultImplicitContextStorage
+    private lateinit var storage: SingleSlotCurrentContextStorage
 
     @BeforeTest
     fun setUp() {
         factory = ContextFactoryImpl()
-        storage = DefaultImplicitContextStorage(factory::root)
+        storage = SingleSlotCurrentContextStorage(factory::root)
     }
 
     @Test
     fun testStorage() {
-        assertSame(factory.root(), storage.implicitContext())
+        assertSame(factory.root(), storage.current())
         val other = FakeContext()
-        storage.setImplicitContext(other)
-        assertSame(other, storage.implicitContext())
+        storage.setCurrent(other)
+        assertSame(other, storage.current())
     }
 }

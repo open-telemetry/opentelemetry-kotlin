@@ -76,7 +76,7 @@ internal class CompatOpenTelemetryConfig(
     }
 
     /**
-     * Compat mode always stores the implicit context in
+     * Compat mode always stores the current context in
      * opentelemetry-java's ContextStorage, so this configuration is ignored.
      */
     @Volatile internal var contextConfigured: Boolean = false

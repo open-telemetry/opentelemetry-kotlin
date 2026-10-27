@@ -33,23 +33,23 @@ internal class CoroutineContextElementTest {
     fun testContextVisibleInsideCoroutine() = runBlocking {
         val ctx = TestContext("ctx", storage)
         withContext(ctx.asCoroutineContextElement()) {
-            assertSame(ctx, storage.implicitContext())
+            assertSame(ctx, storage.current())
         }
     }
 
     @Test
     fun testRootVisibleWhenNoElementPresent() = runBlocking {
-        assertSame(storage.root, storage.implicitContext())
-        launch { assertSame(storage.root, storage.implicitContext()) }.join()
+        assertSame(storage.root, storage.current())
+        launch { assertSame(storage.root, storage.current()) }.join()
     }
 
     @Test
     fun testContextSurvivesSuspension() = runTest {
         val ctx = TestContext("ctx", storage)
         withContext(ctx.asCoroutineContextElement()) {
-            assertSame(ctx, storage.implicitContext())
+            assertSame(ctx, storage.current())
             yield()
-            assertSame(ctx, storage.implicitContext())
+            assertSame(ctx, storage.current())
         }
     }
 
@@ -63,12 +63,12 @@ internal class CoroutineContextElementTest {
                 val threads = mutableSetOf<String>()
                 withContext(first + ctx.asCoroutineContextElement()) {
                     threads += Thread.currentThread().name
-                    assertSame(ctx, storage.implicitContext())
+                    assertSame(ctx, storage.current())
                     withContext(second) {
                         threads += Thread.currentThread().name
-                        assertSame(ctx, storage.implicitContext())
+                        assertSame(ctx, storage.current())
                     }
-                    assertSame(ctx, storage.implicitContext())
+                    assertSame(ctx, storage.current())
                 }
                 assertEquals(2, threads.size)
             }
@@ -82,8 +82,8 @@ internal class CoroutineContextElementTest {
     fun testChildCoroutinesInheritance() = runBlocking {
         val ctx = TestContext("ctx", storage)
         withContext(ctx.asCoroutineContextElement()) {
-            launch { assertSame(ctx, storage.implicitContext()) }.join()
-            val result = async { storage.implicitContext() }.await()
+            launch { assertSame(ctx, storage.current()) }.join()
+            val result = async { storage.current() }.await()
             assertSame(ctx, result)
         }
     }
@@ -93,13 +93,13 @@ internal class CoroutineContextElementTest {
         val outer = TestContext("outer", storage)
         val inner = TestContext("inner", storage)
         withContext(outer.asCoroutineContextElement()) {
-            assertSame(outer, storage.implicitContext())
+            assertSame(outer, storage.current())
             withContext(inner.asCoroutineContextElement()) {
-                assertSame(inner, storage.implicitContext())
+                assertSame(inner, storage.current())
             }
-            assertSame(outer, storage.implicitContext())
+            assertSame(outer, storage.current())
         }
-        assertSame(storage.root, storage.implicitContext())
+        assertSame(storage.root, storage.current())
     }
 
     @Test
@@ -112,13 +112,13 @@ internal class CoroutineContextElementTest {
             runBlocking(dispatcher) {
                 val a = launch(ctxA.asCoroutineContextElement()) {
                     repeat(5) {
-                        assertSame(ctxA, storage.implicitContext())
+                        assertSame(ctxA, storage.current())
                         yield()
                     }
                 }
                 val b = launch(ctxB.asCoroutineContextElement()) {
                     repeat(5) {
-                        assertSame(ctxB, storage.implicitContext())
+                        assertSame(ctxB, storage.current())
                         yield()
                     }
                 }
@@ -134,11 +134,11 @@ internal class CoroutineContextElementTest {
         val dispatcher = singleThreadDispatcher("otel-worker")
         dispatcher.use {
             runBlocking {
-                assertSame(storage.root, storage.implicitContext())
+                assertSame(storage.root, storage.current())
                 withContext(dispatcher + ctx.asCoroutineContextElement()) {
-                    assertSame(ctx, storage.implicitContext())
+                    assertSame(ctx, storage.current())
                 }
-                assertSame(storage.root, storage.implicitContext())
+                assertSame(storage.root, storage.current())
             }
         }
     }
@@ -148,11 +148,11 @@ internal class CoroutineContextElementTest {
         val ctx = TestContext("ctx", storage)
         assertFailsWith<IllegalStateException> {
             withContext(ctx.asCoroutineContextElement()) {
-                assertSame(ctx, storage.implicitContext())
+                assertSame(ctx, storage.current())
                 error("boom")
             }
         }
-        assertSame(storage.root, storage.implicitContext())
+        assertSame(storage.root, storage.current())
     }
 
     @Test
@@ -164,7 +164,7 @@ internal class CoroutineContextElementTest {
         }
         assertTrue(ctx.attachCount.get() > 1, "expected repeated attaches, got ${ctx.attachCount.get()}")
         assertEquals(ctx.attachCount.get(), ctx.detachCount.get())
-        assertSame(storage.root, storage.implicitContext())
+        assertSame(storage.root, storage.current())
     }
 
     private fun singleThreadDispatcher(name: String): ExecutorCoroutineDispatcher =
@@ -172,13 +172,13 @@ internal class CoroutineContextElementTest {
 }
 
 @OptIn(ExperimentalApi::class)
-private class TestStorage : ImplicitContextStorage {
+private class TestStorage : CurrentContextStorage {
     val root: Context = FakeContext()
     private val current = ThreadLocal<Context>()
 
-    override fun implicitContext(): Context = current.get() ?: root
+    override fun current(): Context = current.get() ?: root
 
-    override fun setImplicitContext(context: Context) {
+    override fun setCurrent(context: Context) {
         current.set(context)
     }
 }
@@ -195,8 +195,8 @@ private class TestContext(
 
     override fun attach(): Scope {
         attachCount.incrementAndGet()
-        val previous = storage.implicitContext()
-        storage.setImplicitContext(this)
+        val previous = storage.current()
+        storage.setCurrent(this)
         var detached = false
         return FakeScope {
             if (detached) {
@@ -204,7 +204,7 @@ private class TestContext(
             } else {
                 detached = true
                 detachCount.incrementAndGet()
-                storage.setImplicitContext(previous)
+                storage.setCurrent(previous)
                 true
             }
         }

@@ -14,7 +14,7 @@ private val EMPTY_BAGGAGE: Baggage = createBaggage()
 private val INVALID_SPAN: Span = createNonRecordingSpan(createInvalidSpanContext())
 
 internal class ContextImpl(
-    private val storage: ImplicitContextStorage,
+    private val storage: CurrentContextStorage,
     private val sdkErrorHandler: SdkErrorHandler,
     private val impl: Map<ContextKey<*>, Any?> = emptyMap()
 ) : Context {
@@ -33,15 +33,15 @@ internal class ContextImpl(
     }
 
     override fun attach(): Scope {
-        if (storage.implicitContext() == this) {
+        if (storage.current() == this) {
             return DetachedScope
         }
-        val current = storage.implicitContext()
-        if (storage is ScopedImplicitContextStorage) {
+        val current = storage.current()
+        if (storage is ScopedCurrentContextStorage) {
             val scope = storage.attach(this)
             return ScopeImpl.create(current, this, storage, sdkErrorHandler) { scope.detach() }
         }
-        storage.setImplicitContext(this)
+        storage.setCurrent(this)
         return ScopeImpl.create(current, this, storage, sdkErrorHandler)
     }
 

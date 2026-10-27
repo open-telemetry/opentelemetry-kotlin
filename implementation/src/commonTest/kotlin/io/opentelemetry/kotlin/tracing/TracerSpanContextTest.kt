@@ -86,7 +86,7 @@ internal class TracerSpanContextTest {
     }
 
     @Test
-    fun testImplicitContext() {
+    fun testCurrentContext() {
         val span = tracer.startSpan("span")
         val ctx = contextFactory.root().storeSpan(span)
         val scope = ctx.attach()

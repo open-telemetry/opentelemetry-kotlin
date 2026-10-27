@@ -6,28 +6,28 @@ import kotlin.test.Test
 import kotlin.test.assertNotSame
 import kotlin.test.assertSame
 
-internal class JvmThreadLocalImplicitContextStorageTest {
+internal class JvmThreadLocalCurrentContextStorageTest {
 
     @Test
     fun testContextIsIsolatedPerThread() {
         val factory = ContextFactoryImpl()
-        val storage = ThreadLocalImplicitContextStorage(factory::root)
+        val storage = ThreadLocalCurrentContextStorage(factory::root)
 
         val mainContext = FakeContext()
-        storage.setImplicitContext(mainContext)
+        storage.setCurrent(mainContext)
 
         val observedFromOtherThread = AtomicReference<Context>()
         val otherContext = FakeContext()
 
         val thread = Thread {
-            observedFromOtherThread.set(storage.implicitContext())
-            storage.setImplicitContext(otherContext)
+            observedFromOtherThread.set(storage.current())
+            storage.setCurrent(otherContext)
         }
         thread.start()
         thread.join()
 
         assertSame(factory.root(), observedFromOtherThread.get())
         assertNotSame(mainContext, observedFromOtherThread.get())
-        assertSame(mainContext, storage.implicitContext())
+        assertSame(mainContext, storage.current())
     }
 }

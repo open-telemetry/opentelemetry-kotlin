@@ -11,10 +11,10 @@ import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.DefaultImplicitContextStorage
+import io.opentelemetry.kotlin.context.CurrentContextStorageMode
 import io.opentelemetry.kotlin.context.FakeContext
-import io.opentelemetry.kotlin.context.FakeImplicitContextStorage
-import io.opentelemetry.kotlin.context.ImplicitContextStorageMode
+import io.opentelemetry.kotlin.context.FakeCurrentContextStorage
+import io.opentelemetry.kotlin.context.SingleSlotCurrentContextStorage
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -292,26 +292,26 @@ internal class OpenTelemetryConfigImplTest {
         val cfg = OpenTelemetryConfigImpl(clock)
         val rootContext = FakeContext()
         val storage = cfg.contextConfig.generateStorage { rootContext }
-        assertTrue(storage is DefaultImplicitContextStorage)
+        assertTrue(storage is SingleSlotCurrentContextStorage)
     }
 
     @Test
     fun testThreadLocalStorage() {
         val cfg = OpenTelemetryConfigImpl(clock).apply {
             context {
-                storageMode = ImplicitContextStorageMode.THREAD_LOCAL
+                storageMode = CurrentContextStorageMode.THREAD_LOCAL
             }
         }
         val storage = cfg.contextConfig.generateStorage(::FakeContext)
         val root = FakeContext()
         val rootStorage = cfg.contextConfig.generateStorage { root }
         assertNotNull(storage)
-        assertSame(root, rootStorage.implicitContext())
+        assertSame(root, rootStorage.current())
     }
 
     @Test
     fun testCustomStorage() {
-        val custom = FakeImplicitContextStorage()
+        val custom = FakeCurrentContextStorage()
         val cfg = OpenTelemetryConfigImpl(clock).apply {
             context {
                 storage { custom }
@@ -322,10 +322,10 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testCustomStorageOverridesStorageMode() {
-        val custom = FakeImplicitContextStorage()
+        val custom = FakeCurrentContextStorage()
         val cfg = OpenTelemetryConfigImpl(clock).apply {
             context {
-                storageMode = ImplicitContextStorageMode.GLOBAL
+                storageMode = CurrentContextStorageMode.SINGLE_SLOT
                 storage { custom }
             }
         }
@@ -340,13 +340,13 @@ internal class OpenTelemetryConfigImplTest {
             context {
                 storage { rootSupplier ->
                     captured = rootSupplier
-                    DefaultImplicitContextStorage(rootSupplier)
+                    SingleSlotCurrentContextStorage(rootSupplier)
                 }
             }
         }
         val storage = cfg.contextConfig.generateStorage { root }
         assertSame(root, captured?.invoke())
-        assertSame(root, storage.implicitContext())
+        assertSame(root, storage.current())
     }
 
     @Test

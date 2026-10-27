@@ -20,7 +20,7 @@ public interface Logger {
      * returning false if a log shouldn't be created. This should be invoked each time before
      * calling [emit] to ensure an up-to-date response.
      *
-     * @param context The context associated with the log record. If null, the implicit context is used.
+     * @param context The context associated with the log record. If null, the current context is used.
      * @param severityNumber The severity of the log record (optional)
      * @param eventName The event name of the log record (optional)
      * @return true if a log record should be emitted

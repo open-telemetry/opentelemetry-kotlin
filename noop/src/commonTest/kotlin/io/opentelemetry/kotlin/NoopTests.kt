@@ -171,11 +171,11 @@ internal class NoopTests {
     }
 
     @Test
-    fun testNoopImplicitContext() {
+    fun testNoopCurrentContext() {
         val otel = NoopOpenTelemetry
         val ctx = otel.context.root()
 
-        // implicit context
+        // current context
         ctx.attach().detach()
         assertNotNull(otel.context.current())
     }

@@ -19,17 +19,17 @@ public abstract interface class io/opentelemetry/kotlin/attributes/AttributeCont
 	public abstract fun getAttributes ()Ljava/util/Map;
 }
 
-public abstract interface class io/opentelemetry/kotlin/context/ImplicitContextStorage {
-	public abstract fun implicitContext ()Lio/opentelemetry/kotlin/context/Context;
-	public abstract fun setImplicitContext (Lio/opentelemetry/kotlin/context/Context;)V
+public abstract interface class io/opentelemetry/kotlin/context/CurrentContextStorage {
+	public abstract fun current ()Lio/opentelemetry/kotlin/context/Context;
+	public abstract fun setCurrent (Lio/opentelemetry/kotlin/context/Context;)V
 }
 
-public final class io/opentelemetry/kotlin/context/ImplicitContextStorageMode : java/lang/Enum {
-	public static final field GLOBAL Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
-	public static final field THREAD_LOCAL Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
+public final class io/opentelemetry/kotlin/context/CurrentContextStorageMode : java/lang/Enum {
+	public static final field SINGLE_SLOT Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
+	public static final field THREAD_LOCAL Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
-	public static fun values ()[Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
+	public static fun values ()[Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
 }
 
 public final class io/opentelemetry/kotlin/error/NoopSdkErrorHandler : io/opentelemetry/kotlin/error/SdkErrorHandler {
@@ -135,8 +135,8 @@ public abstract interface class io/opentelemetry/kotlin/init/ConfigFileDsl {
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/ContextConfigDsl {
-	public abstract fun getStorageMode ()Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;
-	public abstract fun setStorageMode (Lio/opentelemetry/kotlin/context/ImplicitContextStorageMode;)V
+	public abstract fun getStorageMode ()Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
+	public abstract fun setStorageMode (Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;)V
 	public abstract fun storage (Lkotlin/jvm/functions/Function1;)V
 }
 

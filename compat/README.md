@@ -16,16 +16,16 @@ the long term as this use-case has less focused testing compared to using each m
 
 ## Context
 
-The Kotlin and Java APIs must agree on a single implicit context, otherwise spans and logs lose their
+The Kotlin and Java APIs must agree on a single current context, otherwise spans and logs lose their
 parent or their trace/span IDs.
 
-`createCompatOpenTelemetry()` and `toOtelKotlinApi()` always store the implicit context in whichever
+`createCompatOpenTelemetry()` and `toOtelKotlinApi()` always store the current context in whichever
 `ContextStorage` is configured on opentelemetry-java (thread-local by default), so the Kotlin and Java
 Context APIs can be used interchangeably. Configuration supplied via `context { ... }` to
 `createCompatOpenTelemetry()` is ignored and reported as a warning to the `SdkErrorHandler`. To customize
 storage, configure opentelemetry-java's `ContextStorage` instead.
 
-When using `implementation` together with `toOtelJavaApi()`, opt in to storing the implicit context in
+When using `implementation` together with `toOtelJavaApi()`, opt in to storing the current context in
 opentelemetry-java's `ContextStorage` when creating the SDK:
 
 ```kotlin
@@ -38,11 +38,11 @@ val javaApi = otel.toOtelJavaApi()
 ```
 
 This lets Java code use `Context.current()`, `Context.makeCurrent()`, `Span.current()`,
-`Baggage.current()` and similar APIs with the same implicit context as the Kotlin API. It also
+`Baggage.current()` and similar APIs with the same current context as the Kotlin API. It also
 respects any `ContextStorage` wrappers that are installed (e.g. by the Java agent). If
 `toOtelJavaApi()` is called without this option, a warning is reported to the SDK's error handler.
 
-Without the option, do not read or set the opentelemetry-java implicit context directly through
+Without the option, do not read or set the opentelemetry-java current context directly through
 the APIs above. They use a separate store that the Kotlin SDK never sees. Use
 `OpenTelemetry.context.current()` and `Context.attach()` instead, or call `makeCurrent()` on a span
 obtained from the Java API.

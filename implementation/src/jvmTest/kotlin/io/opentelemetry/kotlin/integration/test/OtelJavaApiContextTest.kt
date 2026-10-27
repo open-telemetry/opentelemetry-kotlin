@@ -12,7 +12,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertSame
 
 /**
- * Verifies that the Java API returned by toOtelJavaApi() shares implicit context with the
+ * Verifies that the Java API returned by toOtelJavaApi() shares current context with the
  * Kotlin API.
  */
 internal class OtelJavaApiContextTest {
@@ -85,7 +85,7 @@ internal class OtelJavaApiContextTest {
     }
 
     @Test
-    fun testSetNoParentIgnoresImplicitContext() = runTest {
+    fun testSetNoParentIgnoresCurrentContext() = runTest {
         val kotlinSpan = harness.tracer.startSpan("kotlin_span")
         withAttached(kotlinSpan) {
             javaApi.tracerProvider.get("tracer").spanBuilder("java_span").setNoParent().startSpan().end()

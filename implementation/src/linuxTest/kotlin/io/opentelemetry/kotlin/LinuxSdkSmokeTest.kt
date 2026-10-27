@@ -2,7 +2,7 @@
 
 package io.opentelemetry.kotlin
 
-import io.opentelemetry.kotlin.context.ImplicitContextStorageMode
+import io.opentelemetry.kotlin.context.CurrentContextStorageMode
 import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
@@ -30,7 +30,7 @@ internal class LinuxSdkSmokeTest {
         val api = createOpenTelemetry {
             serviceName = "linux-smoke-test"
             errorHandler(errors)
-            context { storageMode = ImplicitContextStorageMode.THREAD_LOCAL }
+            context { storageMode = CurrentContextStorageMode.THREAD_LOCAL }
             resourceDetection {
                 detector(hostResourceDetector())
                 detector(deviceResourceDetector())

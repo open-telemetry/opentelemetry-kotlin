@@ -13,7 +13,7 @@ internal class ScopeImplTest {
 
     private lateinit var handler: FakeSdkErrorHandler
     private lateinit var factory: ContextFactoryImpl
-    private lateinit var storage: DefaultImplicitContextStorage
+    private lateinit var storage: SingleSlotCurrentContextStorage
 
     @BeforeTest
     fun setUp() {
@@ -21,7 +21,7 @@ internal class ScopeImplTest {
         factory = ContextFactoryImpl(
             sdkErrorHandler = handler,
         )
-        storage = DefaultImplicitContextStorage(factory::root)
+        storage = SingleSlotCurrentContextStorage(factory::root)
     }
 
     @Test

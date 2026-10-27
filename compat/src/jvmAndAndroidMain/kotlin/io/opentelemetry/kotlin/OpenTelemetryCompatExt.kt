@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.aliases.OtelJavaContextPropagators
 import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
-import io.opentelemetry.kotlin.context.OtelJavaImplicitContextStorage
+import io.opentelemetry.kotlin.context.OtelJavaCurrentContextStorage
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.reportError
@@ -23,11 +23,11 @@ import java.util.WeakHashMap
  * or [toOtelKotlinApi] instead.
  *
  * Instances created by [createCompatOpenTelemetry] or [toOtelKotlinApi] share opentelemetry-java's
- * ContextStorage, so the Kotlin and Java APIs share one implicit context.
+ * ContextStorage, so the Kotlin and Java APIs share one current context.
  *
  * If the receiver was created by `implementation`, opt in to `context { useOtelJavaContextStorage() }`
- * when creating the SDK so that the Kotlin and Java APIs share one implicit context. Otherwise, avoid
- * reading or setting the opentelemetry-java implicit context directly through `Context.current()`,
+ * when creating the SDK so that the Kotlin and Java APIs share one current context. Otherwise, avoid
+ * reading or setting the opentelemetry-java current context directly through `Context.current()`,
  * `Context.makeCurrent()`, `Span.current()`, `Baggage.current()`, etc., as these use a separate
  * store and trace context will not propagate correctly. See the compat README for details.
  */
@@ -50,13 +50,13 @@ private val warnedContextFactories: MutableSet<ContextFactory> =
 
 private fun warnIfNotUsingOtelJavaContextStorage(context: ContextFactory) {
     val factory = context as? ContextFactoryImpl ?: return
-    if (factory.storage is OtelJavaImplicitContextStorage || !warnedContextFactories.add(factory)) {
+    if (factory.storage is OtelJavaCurrentContextStorage || !warnedContextFactories.add(factory)) {
         return
     }
     factory.sdkErrorHandler.reportError(
         SdkError.ApiMisuse(
             api = "toOtelJavaApi",
-            message = "Implicit context is not shared with opentelemetry-java. " +
+            message = "Current context is not shared with opentelemetry-java. " +
                 "Call useOtelJavaContextStorage() in the context {} config when creating the SDK.",
             severity = SdkErrorSeverity.WARNING,
         )

@@ -46,7 +46,7 @@ internal class OtelJavaLoggerAdapterTest {
     }
 
     @Test
-    fun `isEnabled without context uses implicit context from factory`() {
+    fun `isEnabled without context uses current context from factory`() {
         val impl = RecordingLogger()
         val ctx = OtelJavaContext.root().with(OtelJavaContextKey.named<String>("key"), "value").toOtelKotlinContext()
         val contextFactory = object : ContextFactory by CompatContextFactory() {

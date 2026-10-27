@@ -3,21 +3,21 @@ package io.opentelemetry.kotlin.context
 import io.opentelemetry.kotlin.ExperimentalApi
 
 /**
- * Defines a storage mechanism for the implicit Context.
+ * Defines a storage mechanism for the current Context.
  *
  * https://opentelemetry.io/docs/specs/otel/context/#optional-global-operations
  */
 @ExperimentalApi
-public interface ImplicitContextStorage {
+public interface CurrentContextStorage {
 
     /**
-     * Stores the supplied context as the current implicit context.
+     * Stores the supplied context as the current context.
      */
-    public fun setImplicitContext(context: Context)
+    public fun setCurrent(context: Context)
 
     /**
-     * Returns the current implicit context, or
+     * Returns the current context, or
      * [io.opentelemetry.kotlin.factory.ContextFactory.root] if none is set.
      */
-    public fun implicitContext(): Context
+    public fun current(): Context
 }
