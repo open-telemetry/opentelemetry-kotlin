@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordData
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.attributes.toOtelKotlinBody
+import io.opentelemetry.kotlin.droppedCount
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.toOtelKotlinSeverityNumber
 import io.opentelemetry.kotlin.resource.Resource
@@ -26,5 +27,5 @@ internal class LogRecordDataAdapter(
     override val resource: Resource = ResourceAdapter(impl.resource)
     override val instrumentationScopeInfo: InstrumentationScopeInfo =
         impl.instrumentationScopeInfo.toOtelKotlinInstrumentationScopeInfo()
-    override val droppedAttributesCount: Int = (impl.totalAttributeCount - impl.attributes.size()).coerceAtLeast(0)
+    override val droppedAttributesCount: Int = droppedCount(impl.totalAttributeCount, impl.attributes.size())
 }

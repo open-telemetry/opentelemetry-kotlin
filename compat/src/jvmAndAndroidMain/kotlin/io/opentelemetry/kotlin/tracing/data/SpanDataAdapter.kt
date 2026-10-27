@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.data
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanData
 import io.opentelemetry.kotlin.attributes.convertToMap
+import io.opentelemetry.kotlin.droppedCount
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
 import io.opentelemetry.kotlin.scope.toOtelKotlinInstrumentationScopeInfo
@@ -25,11 +26,11 @@ internal class SpanDataAdapter(
     override val endTimestamp: Long? = impl.endEpochNanos.takeIf { impl.hasEnded() }
     override val attributes: Map<String, Any> = impl.attributes.convertToMap()
     override val events: List<SpanEventData> = impl.events.map { SpanEventDataAdapter(it) }
-    override val droppedEventsCount: Int = (impl.totalRecordedEvents - impl.events.size).coerceAtLeast(0)
+    override val droppedEventsCount: Int = droppedCount(impl.totalRecordedEvents, impl.events.size)
     override val links: List<SpanLinkData> = impl.links.map { SpanLinkDataAdapter(it) }
-    override val droppedLinksCount: Int = (impl.totalRecordedLinks - impl.links.size).coerceAtLeast(0)
+    override val droppedLinksCount: Int = droppedCount(impl.totalRecordedLinks, impl.links.size)
     override val resource: Resource = ResourceAdapter(impl.resource)
     override val instrumentationScopeInfo: InstrumentationScopeInfo = impl.instrumentationScopeInfo.toOtelKotlinInstrumentationScopeInfo()
     override val hasEnded: Boolean = impl.hasEnded()
-    override val droppedAttributesCount: Int = (impl.totalAttributeCount - impl.attributes.size()).coerceAtLeast(0)
+    override val droppedAttributesCount: Int = droppedCount(impl.totalAttributeCount, impl.attributes.size())
 }

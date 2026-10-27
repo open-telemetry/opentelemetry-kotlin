@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing.data
 
 import io.opentelemetry.kotlin.aliases.OtelJavaLinkData
 import io.opentelemetry.kotlin.attributes.convertToMap
+import io.opentelemetry.kotlin.droppedCount
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 
@@ -10,5 +11,5 @@ internal class SpanLinkDataAdapter(
 ) : SpanLinkData {
     override val spanContext: SpanContext = impl.spanContext.toOtelKotlinSpanContext()
     override val attributes: Map<String, Any> = impl.attributes.convertToMap()
-    override val droppedAttributesCount: Int = (impl.totalAttributeCount - impl.attributes.size()).coerceAtLeast(0)
+    override val droppedAttributesCount: Int = droppedCount(impl.totalAttributeCount, impl.attributes.size())
 }
