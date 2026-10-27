@@ -33,6 +33,12 @@ abstract class OtelKotlinTestRule(context: TestCoroutineScheduler) {
     abstract val kotlinApi: OpenTelemetry
 
     /**
+     * Tracks the SDK created by [kotlinApi] so that [shutdown] can shut it down. Implementations
+     * should pass the created SDK to [SdkTracker.track].
+     */
+    protected val sdks: SdkTracker = SdkTracker()
+
+    /**
      * Configuration for the test harness that specifies how the API should behave.
      */
     val config: TestHarnessConfig = TestHarnessConfig()
@@ -103,6 +109,11 @@ abstract class OtelKotlinTestRule(context: TestCoroutineScheduler) {
      * Syntactic sugar to obtain a logger from the API.
      */
     val logger: Logger by lazy { kotlinApi.loggerProvider.getLogger("test_logger") }
+
+    /**
+     * Shuts down the SDK if [kotlinApi] was created. Call this from `@AfterTest`.
+     */
+    fun shutdown(): Unit = sdks.shutdownAll()
 
     /**
      * Asserts that log records were exported correctly. A custom assertion can be provided as a lambda,

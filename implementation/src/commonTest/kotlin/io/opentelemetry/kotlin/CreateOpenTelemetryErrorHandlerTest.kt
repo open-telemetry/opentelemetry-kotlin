@@ -4,9 +4,11 @@ import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
+import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlinx.coroutines.test.runTest
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -14,6 +16,11 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
 internal class CreateOpenTelemetryErrorHandlerTest {
+
+    private val sdks = SdkTracker()
+
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
 
     @Test
     fun `handler configured via the DSL receives errors thrown by user code`() = runTest {
@@ -23,7 +30,7 @@ internal class CreateOpenTelemetryErrorHandlerTest {
             tracerProvider {
                 export { throwingProcessor() }
             }
-        }
+        }.also(sdks::track)
 
         val result = tracerCloseable(api).shutdown()
 
@@ -41,7 +48,7 @@ internal class CreateOpenTelemetryErrorHandlerTest {
                 export { throwingProcessor() }
             }
             errorHandler(handler)
-        }
+        }.also(sdks::track)
 
         tracerCloseable(api).shutdown()
 
@@ -55,7 +62,7 @@ internal class CreateOpenTelemetryErrorHandlerTest {
             tracerProvider {
                 export { throwingProcessor() }
             }
-        }
+        }.also(sdks::track)
 
         // the throwing processor must not surface as an exception to the caller
         assertEquals(OperationResultCode.Failure, tracerCloseable(api).shutdown())
@@ -72,7 +79,7 @@ internal class CreateOpenTelemetryErrorHandlerTest {
                     FakeSpanProcessor(endAction = { throw IllegalStateException("boom") })
                 }
             }
-        }
+        }.also(sdks::track)
 
         api.tracerProvider.getTracer("test").startSpan("span").end()
 
@@ -91,7 +98,7 @@ internal class CreateOpenTelemetryErrorHandlerTest {
                     FakeLogRecordProcessor(action = { _, _ -> throw IllegalStateException("boom") })
                 }
             }
-        }
+        }.also(sdks::track)
 
         api.loggerProvider.getLogger("test").emit("message")
 
@@ -107,7 +114,7 @@ internal class CreateOpenTelemetryErrorHandlerTest {
             tracerProvider {
                 export { throwingProcessor() }
             }
-        }
+        }.also(sdks::track)
         assertEquals(OperationResultCode.Failure, tracerCloseable(api).shutdown())
     }
 

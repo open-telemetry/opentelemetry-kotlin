@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.model.hex
 import kotlinx.coroutines.test.runTest
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -23,6 +24,9 @@ internal class LogProcessorOnEmitTest {
         harness =
             IntegrationTestHarness(testScheduler)
     }
+
+    @AfterTest
+    fun tearDown() = harness.shutdown()
 
     @Test
     fun testOverridePropertiesInProcessor() = runTest {

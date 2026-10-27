@@ -11,12 +11,16 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanData
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanProcessor
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
+import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.toOtelKotlinApi
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 internal class TracerAdapterTimestampTest {
+
+    private val sdks = SdkTracker()
 
     private val sdkClock = SteppingClock(start = 1_000_000)
     private val ended = mutableListOf<OtelJavaSpanData>()
@@ -30,6 +34,9 @@ internal class TracerAdapterTimestampTest {
         CompatContextFactory(),
         NoopSdkErrorHandler,
     ).getTracer("test")
+
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
 
     @Test
     fun `span without explicit timestamps is timed by the sdk clock at both ends`() {
@@ -105,7 +112,7 @@ internal class TracerAdapterTimestampTest {
             .addSpanProcessor(CapturingProcessor(spans))
             .build()
         val kotlinTracer = OtelJavaOpenTelemetrySdk.builder().setTracerProvider(provider).build()
-            .toOtelKotlinApi(clock = { clock.now() })
+            .toOtelKotlinApi(clock = { clock.now() }).also(sdks::track)
             .tracerProvider.getTracer("test")
 
         val parent = provider.get("java").spanBuilder("parent").startSpan()
@@ -136,7 +143,7 @@ internal class TracerAdapterTimestampTest {
             .addSpanProcessor(CapturingProcessor(spans))
             .build()
         val kotlinTracer = OtelJavaOpenTelemetrySdk.builder().setTracerProvider(provider).build()
-            .toOtelKotlinApi(clock = { clock.now() })
+            .toOtelKotlinApi(clock = { clock.now() }).also(sdks::track)
             .tracerProvider.getTracer("test")
 
         val parent = kotlinTracer.startSpan("parent")

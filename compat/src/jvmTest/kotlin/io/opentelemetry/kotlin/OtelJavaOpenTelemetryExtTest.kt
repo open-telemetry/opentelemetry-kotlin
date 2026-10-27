@@ -12,24 +12,31 @@ import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordProcessor
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaMetricReader
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanProcessor
+import io.opentelemetry.kotlin.framework.SdkTracker
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import kotlin.test.AfterTest
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 @OptIn(ExperimentalApi::class)
 internal class OtelJavaOpenTelemetryExtTest {
 
+    private val sdks = SdkTracker()
+
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
+
     @Test
     fun testToOtelKotlinApi() {
-        val otel = OtelJavaOpenTelemetry.noop().toOtelKotlinApi()
+        val otel = OtelJavaOpenTelemetry.noop().toOtelKotlinApi().also(sdks::track)
         checkNotNull(otel)
     }
 
     @Test
     fun testLifecycleOperationsReachAllJavaSdkProviders() = runTest {
         val fixture = createJavaSdkFixture()
-        val closeable = assertIs<TelemetryCloseable>(fixture.sdk.toOtelKotlinApi())
+        val closeable = assertIs<TelemetryCloseable>(fixture.sdk.toOtelKotlinApi().also(sdks::track))
 
         assertEquals(OperationResultCode.Success, closeable.forceFlush())
         assertEquals(1, fixture.spanProcessor.flushCount)
@@ -51,7 +58,7 @@ internal class OtelJavaOpenTelemetryExtTest {
     fun testForceFlushReportsFailureAndContinuesWithRemainingProviders() = runTest {
         val fixture = createJavaSdkFixture()
         fixture.spanProcessor.nextResult = { OtelJavaCompletableResultCode.ofFailure() }
-        val closeable = assertIs<TelemetryCloseable>(fixture.sdk.toOtelKotlinApi())
+        val closeable = assertIs<TelemetryCloseable>(fixture.sdk.toOtelKotlinApi().also(sdks::track))
 
         assertEquals(OperationResultCode.Failure, closeable.forceFlush())
         assertEquals(1, fixture.spanProcessor.flushCount)
@@ -66,7 +73,7 @@ internal class OtelJavaOpenTelemetryExtTest {
     fun testShutdownReportsFailureAndContinuesWithRemainingProviders() = runTest {
         val fixture = createJavaSdkFixture()
         fixture.spanProcessor.nextResult = { OtelJavaCompletableResultCode.ofFailure() }
-        val closeable = assertIs<TelemetryCloseable>(fixture.sdk.toOtelKotlinApi())
+        val closeable = assertIs<TelemetryCloseable>(fixture.sdk.toOtelKotlinApi().also(sdks::track))
 
         assertEquals(OperationResultCode.Failure, closeable.shutdown())
         assertEquals(1, fixture.spanProcessor.shutdownCount)
@@ -77,7 +84,7 @@ internal class OtelJavaOpenTelemetryExtTest {
     @Test
     fun testNoopJavaApiReportsFailureForUnsupportedLifecycleOperations() = runTest {
         val closeable = assertIs<TelemetryCloseable>(
-            OtelJavaOpenTelemetry.noop().toOtelKotlinApi()
+            OtelJavaOpenTelemetry.noop().toOtelKotlinApi().also(sdks::track)
         )
 
         assertEquals(OperationResultCode.Failure, closeable.forceFlush())
@@ -90,7 +97,7 @@ internal class OtelJavaOpenTelemetryExtTest {
         fixture.spanProcessor.nextResult = { throw IllegalStateException("boom") }
         val errorHandler = FakeSdkErrorHandler()
         val closeable = assertIs<TelemetryCloseable>(
-            fixture.sdk.toOtelKotlinApi(sdkErrorHandler = errorHandler)
+            fixture.sdk.toOtelKotlinApi(sdkErrorHandler = errorHandler).also(sdks::track)
         )
 
         assertEquals(OperationResultCode.Failure, closeable.forceFlush())
@@ -102,7 +109,7 @@ internal class OtelJavaOpenTelemetryExtTest {
         val fixture = createJavaSdkFixture()
         fixture.spanProcessor.nextResult = { throw IllegalStateException("boom") }
         val closeable = assertIs<TelemetryCloseable>(
-            fixture.sdk.toOtelKotlinApi(sdkErrorHandler = { error("handler boom") })
+            fixture.sdk.toOtelKotlinApi(sdkErrorHandler = { error("handler boom") }).also(sdks::track)
         )
 
         assertEquals(OperationResultCode.Failure, closeable.forceFlush())

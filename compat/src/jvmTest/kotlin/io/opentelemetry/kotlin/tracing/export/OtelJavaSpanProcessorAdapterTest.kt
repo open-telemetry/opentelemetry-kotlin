@@ -17,6 +17,7 @@ import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 
@@ -28,6 +29,9 @@ internal class OtelJavaSpanProcessorAdapterTest {
     fun setUp() = runTest {
         harness = OtelKotlinHarness(testScheduler)
     }
+
+    @AfterTest
+    fun tearDown() = harness.shutdown()
 
     @Test
     fun `span propagated correctly`() {

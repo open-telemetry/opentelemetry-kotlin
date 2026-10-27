@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import kotlinx.coroutines.test.runTest
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -14,6 +15,9 @@ internal class TracerConfigTest {
     fun setUp() = runTest {
         harness = OtelKotlinHarness(testScheduler)
     }
+
+    @AfterTest
+    fun tearDown() = harness.shutdown()
 
     @Test
     fun `tracerConfigurator disables matching scope`() = runTest {

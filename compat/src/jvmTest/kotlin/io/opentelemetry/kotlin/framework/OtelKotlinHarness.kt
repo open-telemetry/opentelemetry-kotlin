@@ -20,7 +20,7 @@ internal class OtelKotlinHarness(scheduler: TestCoroutineScheduler) :
                 tracerProvider { tracerProviderConfig() }
                 loggerProvider { loggerProviderConfig() }
             },
-        )
+        ).also(sdks::track)
     }
 
     val javaApi by lazy {

@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
+import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.toOtelJavaApi
 import io.opentelemetry.kotlin.toOtelKotlinApi
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -25,11 +26,13 @@ import kotlin.test.assertTrue
  */
 internal class CompatImplicitContextIntegrationTest {
 
+    private val sdks = SdkTracker()
+
     private val errorHandler = FakeSdkErrorHandler()
     private val otel = createCompatOpenTelemetry {
         errorHandler(errorHandler)
         tracerProvider { export { FakeSpanProcessor() } }
-    }
+    }.also(sdks::track)
     private val tracer = otel.tracerProvider.getTracer("kotlin")
     private val javaTracer = otel.toOtelJavaApi().tracerProvider.get("java")
 
@@ -40,6 +43,7 @@ internal class CompatImplicitContextIntegrationTest {
             assertFalse(errorHandler.hasErrors())
         } finally {
             OtelJavaContext.root().makeCurrent()
+            sdks.shutdownAll()
         }
     }
 
@@ -154,7 +158,7 @@ internal class CompatImplicitContextIntegrationTest {
         val javaSdk = OtelJavaOpenTelemetrySdk.builder()
             .setTracerProvider(OtelJavaSdkTracerProvider.builder().build())
             .build()
-        val kotlinApi: OpenTelemetry = javaSdk.toOtelKotlinApi()
+        val kotlinApi: OpenTelemetry = javaSdk.toOtelKotlinApi().also(sdks::track)
         val parent = javaSdk.getTracer("java").spanBuilder("java").startSpan()
         val child = try {
             parent.makeCurrent().use {
@@ -172,7 +176,7 @@ internal class CompatImplicitContextIntegrationTest {
         val sdk = createCompatOpenTelemetry {
             errorHandler(handler)
             context { storageMode = ImplicitContextStorageMode.GLOBAL }
-        }
+        }.also(sdks::track)
         assertEquals(1, handler.apiMisuses.size)
 
         val key = OtelJavaContextKey.named<String>("key")

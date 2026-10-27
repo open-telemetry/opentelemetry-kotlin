@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.toOtelJavaApi
 import io.opentelemetry.kotlin.tracing.Span
 import kotlinx.coroutines.test.runTest
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,6 +26,9 @@ internal class OtelJavaApiContextTest {
         harness = IntegrationTestHarness(testScheduler)
         javaApi = harness.kotlinApi.toOtelJavaApi()
     }
+
+    @AfterTest
+    fun tearDown() = harness.shutdown()
 
     @Test
     fun testJavaMakeCurrentParentsKotlinSpan() = runTest {

@@ -12,6 +12,7 @@ import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.TimeUnit
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertSame
@@ -26,6 +27,9 @@ internal class OtelJavaLogExportTest {
     fun setUp() = runTest {
         harness = OtelKotlinHarness(testScheduler)
     }
+
+    @AfterTest
+    fun tearDown() = harness.shutdown()
 
     @Test
     fun `test minimal log export`() = runTest {

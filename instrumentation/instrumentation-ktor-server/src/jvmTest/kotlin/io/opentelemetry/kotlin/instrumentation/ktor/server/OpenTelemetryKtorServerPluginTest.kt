@@ -8,15 +8,19 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.createOpenTelemetry
+import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 internal class OpenTelemetryKtorServerPluginTest {
+
+    private val sdks = SdkTracker()
 
     private lateinit var processor: FakeSpanProcessor
 
@@ -27,6 +31,9 @@ internal class OpenTelemetryKtorServerPluginTest {
     fun setUp() {
         processor = FakeSpanProcessor()
     }
+
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
 
     @Test
     fun testRequestSuccess() = testApplication {
@@ -53,7 +60,7 @@ internal class OpenTelemetryKtorServerPluginTest {
     private fun openTelemetry(): OpenTelemetry =
         createOpenTelemetry {
             tracerProvider { export { processor } }
-        }
+        }.also(sdks::track)
 
     private fun ApplicationTestBuilder.server(routes: Route.() -> Unit) {
         install(openTelemetryKtorServerPlugin(openTelemetry()))

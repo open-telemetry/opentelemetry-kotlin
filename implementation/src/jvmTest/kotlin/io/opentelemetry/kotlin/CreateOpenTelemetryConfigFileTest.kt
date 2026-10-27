@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
+import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
 import io.opentelemetry.kotlin.init.SdkConfigFactory
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
@@ -15,6 +16,7 @@ import kotlinx.coroutines.runBlocking
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -23,13 +25,18 @@ import kotlin.test.assertTrue
 
 internal class CreateOpenTelemetryConfigFileTest {
 
+    private val sdks = SdkTracker()
+
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
+
     @Test
     fun `a config file that does not exist is reported`() {
         val handler = FakeSdkErrorHandler()
         createOpenTelemetry {
             errorHandler(handler)
             configFile("does-not-exist.yaml")
-        }
+        }.also(sdks::track)
         assertEquals(1, handler.errors.size)
         assertEquals("OTEL_CONFIG_FILE", handler.apiMisuses.single().api)
     }
@@ -41,7 +48,7 @@ internal class CreateOpenTelemetryConfigFileTest {
         createOpenTelemetry {
             errorHandler(handler)
             configFile(path)
-        }
+        }.also(sdks::track)
         assertEquals(1, handler.errors.size)
         assertEquals("OTEL_CONFIG_FILE", handler.apiMisuses.single().api)
     }
@@ -89,7 +96,7 @@ internal class CreateOpenTelemetryConfigFileTest {
             try {
                 val sdk = createOpenTelemetry {
                     configFile(writeConfigFile(BATCH_CONSOLE_CONFIG_FILE))
-                } as OpenTelemetrySdk
+                }.also(sdks::track) as OpenTelemetrySdk
                 sdk.tracerProvider.getTracer("test").startSpan("batch-console-span").end()
                 assertTrue(output.toString().isEmpty())
                 sdk.forceFlush()

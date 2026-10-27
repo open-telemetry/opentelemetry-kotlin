@@ -8,8 +8,10 @@ import io.opentelemetry.kotlin.aliases.OtelJavaTextMapGetter
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapSetter
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.createOpenTelemetry
+import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.toOtelJavaApi
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -18,20 +20,25 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class JavaApiPropagationSmokeTest {
 
+    private val sdks = SdkTracker()
+
     private val traceId = "0af7651916cd43dd8448eb211c80319c"
     private val seed = mapOf(
         "traceparent" to "00-$traceId-b7ad6b7169203331-01",
         "tracestate" to "vendor=value",
     )
 
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
+
     @Test
     fun `impl java api round trips w3cTraceContext`() {
-        assertRoundTrip(createOpenTelemetry { propagator { w3cTraceContext() } })
+        assertRoundTrip(createOpenTelemetry { propagator { w3cTraceContext() } }.also(sdks::track))
     }
 
     @Test
     fun `compat java api round trips w3cTraceContext`() {
-        assertRoundTrip(createCompatOpenTelemetry { propagator { w3cTraceContext() } })
+        assertRoundTrip(createCompatOpenTelemetry { propagator { w3cTraceContext() } }.also(sdks::track))
     }
 
     @Test
@@ -40,7 +47,7 @@ internal class JavaApiPropagationSmokeTest {
             createOpenTelemetry {
                 propagator { w3cTraceContext() }
                 tracerProvider { export { FakeSpanProcessor() } }
-            }
+            }.also(sdks::track)
         )
     }
 
@@ -50,18 +57,18 @@ internal class JavaApiPropagationSmokeTest {
             createCompatOpenTelemetry {
                 propagator { w3cTraceContext() }
                 tracerProvider { export { FakeSpanProcessor() } }
-            }
+            }.also(sdks::track)
         )
     }
 
     @Test
     fun `impl java api round trips w3cBaggage`() {
-        assertBaggageRoundTrip(createOpenTelemetry { propagator { w3cBaggage() } })
+        assertBaggageRoundTrip(createOpenTelemetry { propagator { w3cBaggage() } }.also(sdks::track))
     }
 
     @Test
     fun `compat java api round trips w3cBaggage`() {
-        assertBaggageRoundTrip(createCompatOpenTelemetry { propagator { w3cBaggage() } })
+        assertBaggageRoundTrip(createCompatOpenTelemetry { propagator { w3cBaggage() } }.also(sdks::track))
     }
 
     private fun assertRoundTrip(otel: OpenTelemetry) {

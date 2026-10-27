@@ -6,17 +6,28 @@ import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 internal class SpanProcessorExtTest {
 
+    private lateinit var harness: OtelKotlinHarness
+
+    @BeforeTest
+    fun setUp() = runTest {
+        harness = OtelKotlinHarness(testScheduler)
+    }
+
+    @AfterTest
+    fun tearDown() = harness.shutdown()
+
     @Test
     fun toOtelKotlinSpanProcessor() = runTest {
         val impl = FakeOtelJavaSpanProcessor()
         val adapter = impl.toOtelKotlinSpanProcessor()
-        val harness = OtelKotlinHarness(testScheduler)
         harness.config.spanProcessors.add(adapter)
 
         val tracer = harness.javaApi.tracerProvider.get("tracer")
@@ -46,7 +57,6 @@ internal class SpanProcessorExtTest {
     @Test
     fun toOtelKotlinExtendedSpanProcessor() = runTest {
         val impl = FakeOtelJavaExtendedSpanProcessor()
-        val harness = OtelKotlinHarness(testScheduler)
         harness.config.spanProcessors.add(impl.toOtelKotlinSpanProcessor())
 
         val tracer = harness.javaApi.tracerProvider.get("tracer")

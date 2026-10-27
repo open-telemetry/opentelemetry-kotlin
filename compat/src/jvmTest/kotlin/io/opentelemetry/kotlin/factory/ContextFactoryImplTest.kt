@@ -5,14 +5,21 @@ import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
 import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
+import io.opentelemetry.kotlin.framework.SdkTracker
 import org.junit.Test
+import kotlin.test.AfterTest
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
 internal class ContextFactoryImplTest {
 
+    private val sdks = SdkTracker()
+
     private val contextFactory = CompatContextFactory()
+
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
 
     @Test
     fun `test root`() {
@@ -21,7 +28,7 @@ internal class ContextFactoryImplTest {
 
     @Test
     fun `test store span`() {
-        val tracer = createCompatOpenTelemetry().tracerProvider.getTracer("tracer")
+        val tracer = createCompatOpenTelemetry().also(sdks::track).tracerProvider.getTracer("tracer")
         val span = tracer.startSpan("span")
         val ctx = contextFactory.root().storeSpan(span)
         val retrievedSpan = ctx.extractSpan()
