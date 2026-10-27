@@ -1,13 +1,10 @@
 package io.opentelemetry.kotlin.context
 
-import io.opentelemetry.kotlin.ExperimentalApi
-
 /**
  * Defines a 'scope' of execution in which an implicit Context is set. A scope
  * must be closed when an operation has finished, as this allows the previous context to be
  * restored.
  */
-@ExperimentalApi
 public interface Scope {
 
     /**
