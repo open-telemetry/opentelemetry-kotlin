@@ -2,7 +2,9 @@ package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -63,6 +65,36 @@ internal class TelemetryExporterTest {
     }
 
     @Test
+    fun testShutdownCancelsInProgressExport() = runTest {
+        val exportStarted = CompletableDeferred<Unit>()
+        val exporter = initTelemetryExporter {
+            exportStarted.complete(Unit)
+            CompletableDeferred<OtlpResponse>().await()
+        }
+
+        val export = launch {
+            exporter.export(listOf("data"))
+        }
+        exportStarted.await()
+
+        assertEquals(OperationResultCode.Success, exporter.shutdown())
+        assertTrue(export.isCancelled)
+    }
+
+    @Test
+    fun testExportEmptyTelemetrySucceedsWithoutCallingExportAction() = runTest {
+        var called = false
+        val exporter = initTelemetryExporter {
+            called = true
+            OtlpResponse.Success
+        }
+        exporter.withShutdown {
+            assertEquals(OperationResultCode.Success, exporter.export(emptyList()))
+            assertEquals(false, called)
+        }
+    }
+
+    @Test
     fun testClientErrorIsNotRetried() = runTest {
         var attempts = 0
         val exporter = initTelemetryExporter {
@@ -70,8 +102,7 @@ internal class TelemetryExporterTest {
             OtlpResponse.ClientError(400, null)
         }
         exporter.withShutdown {
-            exporter.export(listOf("data"))
-            advanceUntilIdle()
+            assertEquals(OperationResultCode.Failure, exporter.export(listOf("data")))
             assertEquals(1, attempts)
         }
     }
@@ -198,7 +229,8 @@ internal class TelemetryExporterTest {
         }
     }
 
-    fun testExportDoesNotPropagateExportActionFailure() = runTest {
+    @Test
+    fun testExportReturnsFailureWhenExportActionThrows() = runTest {
         val throwingExporter = initTelemetryExporter(
             initialDelayMs = 1,
             maxAttemptIntervalMs = 1,
@@ -206,9 +238,7 @@ internal class TelemetryExporterTest {
             exportAction = { error("network unreachable") },
         )
         throwingExporter.withShutdown {
-            // The failure occurs on a background coroutine whose scope has a CoroutineExceptionHandler,
-            // so it must not propagate to the caller nor crash the process.
-            assertEquals(OperationResultCode.Success, throwingExporter.export(listOf("data")))
+            assertEquals(OperationResultCode.Failure, throwingExporter.export(listOf("data")))
         }
     }
 }

@@ -350,7 +350,12 @@ internal class OtlpServerResponseTest {
                 Signal.LOGS -> client.exportLogs(listOf(FakeLogRecordData()))
             }.also { responses += it }
         }
-        assertEquals(OperationResultCode.Success, exporter.export(listOf(Unit)))
+        val result = exporter.export(listOf(Unit))
+        val expectedResult = when (responses.last()) {
+            is OtlpResponse.Success, is OtlpResponse.PartialSuccess -> OperationResultCode.Success
+            else -> OperationResultCode.Failure
+        }
+        assertEquals(expectedResult, result)
         advanceUntilIdle()
         assertEquals(server.requestCount, responses.size)
         exporter.shutdown()
