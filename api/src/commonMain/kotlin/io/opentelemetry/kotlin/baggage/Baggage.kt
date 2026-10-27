@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.baggage
 
-import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
 
 /**
@@ -10,7 +9,6 @@ import io.opentelemetry.kotlin.ThreadSafe
  *
  * https://opentelemetry.io/docs/specs/otel/baggage/api/
  */
-@ExperimentalApi
 @ThreadSafe
 public interface Baggage {
 

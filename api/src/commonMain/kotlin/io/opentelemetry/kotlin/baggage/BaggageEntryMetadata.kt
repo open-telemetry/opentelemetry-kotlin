@@ -1,7 +1,5 @@
 package io.opentelemetry.kotlin.baggage
 
-import io.opentelemetry.kotlin.ExperimentalApi
-
 /**
  * Opaque metadata associated with a [BaggageEntry].
  *
@@ -11,7 +9,6 @@ import io.opentelemetry.kotlin.ExperimentalApi
  *
  * https://opentelemetry.io/docs/specs/otel/baggage/api/#baggageentrymetadata
  */
-@ExperimentalApi
 public interface BaggageEntryMetadata {
 
     /** The raw metadata string. */
