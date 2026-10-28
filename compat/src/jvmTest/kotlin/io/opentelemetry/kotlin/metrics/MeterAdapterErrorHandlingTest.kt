@@ -17,6 +17,7 @@ import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 internal class MeterAdapterErrorHandlingTest {
@@ -69,13 +70,15 @@ internal class MeterAdapterErrorHandlingTest {
 
     @OptIn(ExperimentalApi::class)
     @Test
-    fun testThrowingObservableLongCounterBuilderReturnsNoopInstrument() {
+    fun testThrowingObservableLongCounterBuilderReturnsNoopRegistration() {
         val meter = MeterAdapter(ThrowingJavaMeter(), errorHandler)
         val counter = meter.createObservableLongCounter("long.counter")
 
-        counter.registerCallback { it.record(1L) }.close()
+        val registration = counter.registerCallback { it.record(1L) }
+        assertSame(NoopObservableCounterRegistration, registration)
+        registration.close()
         counter.close()
-        assertSdkErrors(listOf("Meter.createObservableLongCounter failed"))
+        assertSdkErrors(listOf("ObservableLongCounter.registerCallback failed"))
     }
 
     @Test
