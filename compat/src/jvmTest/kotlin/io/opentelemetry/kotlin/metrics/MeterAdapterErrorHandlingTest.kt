@@ -1,8 +1,10 @@
 package io.opentelemetry.kotlin.metrics
 
+import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaDoubleUpDownCounter
+import io.opentelemetry.kotlin.aliases.OtelJavaLongCounterBuilder
 import io.opentelemetry.kotlin.aliases.OtelJavaLongUpDownCounter
 import io.opentelemetry.kotlin.aliases.OtelJavaLongUpDownCounterBuilder
 import io.opentelemetry.kotlin.aliases.OtelJavaMeter
@@ -65,6 +67,17 @@ internal class MeterAdapterErrorHandlingTest {
         assertSdkErrors(listOf("Meter.createLongUpDownCounter failed", "Meter.createDoubleUpDownCounter failed"))
     }
 
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testThrowingObservableLongCounterBuilderReturnsNoopInstrument() {
+        val meter = MeterAdapter(ThrowingJavaMeter(), errorHandler)
+        val counter = meter.createObservableLongCounter("long.counter")
+
+        counter.registerCallback { it.record(1L) }.close()
+        counter.close()
+        assertSdkErrors(listOf("Meter.createObservableLongCounter failed"))
+    }
+
     @Test
     fun testThrowingAttributesDoesNotEscapeRecord() {
         val longMeasurement = ThrowingJavaLongMeasurement(throws = false)
@@ -115,6 +128,7 @@ internal class MeterAdapterErrorHandlingTest {
 
     private class ThrowingJavaMeter : OtelJavaMeter by OtelJavaMeterProvider.noop().get("") {
         override fun upDownCounterBuilder(name: String): OtelJavaLongUpDownCounterBuilder = error("boom")
+        override fun counterBuilder(name: String): OtelJavaLongCounterBuilder = error("boom")
     }
 
     private class ThrowingJavaLongCounter : OtelJavaLongUpDownCounter {

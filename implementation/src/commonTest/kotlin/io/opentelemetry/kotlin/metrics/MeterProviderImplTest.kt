@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.metrics
 
+import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
@@ -12,6 +13,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
@@ -33,6 +35,21 @@ internal class MeterProviderImplTest {
     @Test
     fun testMinimalMeterProvider() {
         assertNotNull(impl.getMeter(name = ""))
+    }
+
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testObservableLongCounterIsNoopUntilMetricsCollectionIsImplemented() {
+        var called = false
+        val counter = impl.getMeter("test").createObservableLongCounter(
+            name = "process.page.faults",
+            callbacks = arrayOf<(ObservableLongMeasurement) -> Unit>({ called = true }),
+        )
+
+        assertEquals("process.page.faults", counter.name)
+        counter.registerCallback { called = true }.close()
+        counter.close()
+        assertFalse(called)
     }
 
     @Test

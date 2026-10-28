@@ -38,6 +38,30 @@ internal class OtelJavaMeterAdapterAsyncCounterTest {
     }
 
     @Test
+    fun longCounterBuilderRecordsCallbackAndClosesIt() {
+        val meter = FakeMeter("test")
+        val counter = OtelJavaMeterAdapter(meter)
+            .counterBuilder("process.page.faults")
+            .setUnit("{fault}")
+            .setDescription("Page faults")
+            .buildWithCallback { measurement ->
+                measurement.record(4L, OtelJavaAttributes.builder().put("process", "worker").build())
+            }
+        val observableCounter = meter.observableLongCounters.single()
+        val measurement = FakeObservableLongMeasurement()
+
+        observableCounter.invokeCallbacks(measurement)
+
+        assertEquals("process.page.faults", observableCounter.name)
+        assertEquals("{fault}", observableCounter.unit)
+        assertEquals("Page faults", observableCounter.description)
+        assertEquals(listOf(4L to mapOf<String, Any>("process" to "worker")), measurement.adds)
+
+        counter.close()
+        assertTrue(observableCounter.callbacks.isEmpty())
+    }
+
+    @Test
     fun synchronousCounterBuildersRemainNoop() {
         val meter = FakeMeter("test")
         val javaMeter = OtelJavaMeterAdapter(meter)
