@@ -11,7 +11,8 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(project(":sdk-api"))
+                implementation(project(":api"))
+                implementation(project(":error-handling"))
                 api(libs.kotlinx.coroutines)
                 api(libs.okio)
             }

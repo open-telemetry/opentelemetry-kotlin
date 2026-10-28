@@ -1,0 +1,42 @@
+public final class io/opentelemetry/kotlin/error/NoopSdkErrorHandler : io/opentelemetry/kotlin/error/SdkErrorHandler {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/error/NoopSdkErrorHandler;
+	public fun onError (Lio/opentelemetry/kotlin/error/SdkError;)V
+}
+
+public abstract class io/opentelemetry/kotlin/error/SdkError {
+	public synthetic fun <init> (Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getSeverity ()Lio/opentelemetry/kotlin/error/SdkErrorSeverity;
+}
+
+public final class io/opentelemetry/kotlin/error/SdkError$ApiMisuse : io/opentelemetry/kotlin/error/SdkError {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;)V
+	public final fun getApi ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/opentelemetry/kotlin/error/SdkError$SdkCodeError : io/opentelemetry/kotlin/error/SdkError {
+	public fun <init> (Ljava/lang/Throwable;Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;)V
+	public final fun getCause ()Ljava/lang/Throwable;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/opentelemetry/kotlin/error/SdkError$UserCodeError : io/opentelemetry/kotlin/error/SdkError {
+	public fun <init> (Ljava/lang/Throwable;Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;)V
+	public final fun getCause ()Ljava/lang/Throwable;
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/opentelemetry/kotlin/error/SdkErrorHandler {
+	public abstract fun onError (Lio/opentelemetry/kotlin/error/SdkError;)V
+}
+
+public final class io/opentelemetry/kotlin/error/SdkErrorSeverity : java/lang/Enum {
+	public static final field ERROR Lio/opentelemetry/kotlin/error/SdkErrorSeverity;
+	public static final field INFO Lio/opentelemetry/kotlin/error/SdkErrorSeverity;
+	public static final field WARNING Lio/opentelemetry/kotlin/error/SdkErrorSeverity;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/error/SdkErrorSeverity;
+	public static fun values ()[Lio/opentelemetry/kotlin/error/SdkErrorSeverity;
+}
+
