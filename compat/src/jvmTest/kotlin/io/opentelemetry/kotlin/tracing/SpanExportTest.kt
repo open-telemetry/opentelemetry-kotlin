@@ -1,18 +1,22 @@
 package io.opentelemetry.kotlin.tracing
 
+import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.createContextKey
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
+import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.ext.storeInContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceFlags
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
+import io.opentelemetry.kotlin.tracing.model.SpanAdapter
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -538,6 +542,57 @@ internal class SpanExportTest {
             (span as AttributeContainer).attributes
         )
         span.end()
+    }
+
+    @Test
+    fun `test span attribute overwrite at count limit reflects java span`() = runTest {
+        harness.config.spanLimits = {
+            attributeCountLimit = 2
+        }
+        val span = harness.tracer.startSpan("span") {
+            setStringAttribute("a", "first")
+        }
+        span.setStringAttribute("b", "b")
+        span.setStringAttribute("c", "dropped")
+        span.setStringAttribute("a", "second")
+
+        assertEquals(
+            mapOf<String, Any>("a" to "second", "b" to "b"),
+            (span as AttributeContainer).attributes
+        )
+        span.end()
+    }
+
+    @Test
+    fun `test span attributes are not affected by later mutation of the input`() = runTest {
+        val span = harness.tracer.startSpan("span")
+        val input = mutableListOf("a")
+        span.setStringListAttribute("list", input)
+        input.add("b")
+
+        assertEquals(listOf("a"), (span as AttributeContainer).attributes["list"])
+        span.end()
+    }
+
+    @Test
+    fun `test span byte array attribute is exposed as bytes value`() = runTest {
+        val span = harness.tracer.startSpan("span")
+        span.setByteArrayAttribute("bytes", byteArrayOf(1, 2))
+        assertEquals(AnyValue.BytesValue(byteArrayOf(1, 2)), (span as AttributeContainer).attributes["bytes"])
+        span.end()
+    }
+
+    @Test
+    fun `test non-recording span has no attributes`() = runTest {
+        val span = SpanAdapter(
+            OtelJavaSpan.getInvalid(),
+            null,
+            SpanKind.INTERNAL,
+            CompatSpanLimitsConfig(),
+            NoopSdkErrorHandler,
+        )
+        span.setStringAttribute("key", "value")
+        assertEquals(emptyMap(), span.attributes)
     }
 
     @Test

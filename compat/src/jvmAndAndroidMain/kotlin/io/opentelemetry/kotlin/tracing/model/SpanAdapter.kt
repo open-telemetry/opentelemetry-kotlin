@@ -1,19 +1,17 @@
 package io.opentelemetry.kotlin.tracing.model
 
-import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaImplicitContextKeyed
+import io.opentelemetry.kotlin.aliases.OtelJavaReadableSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaScope
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
-import io.opentelemetry.kotlin.aliases.OtelJavaValue
-import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
-import io.opentelemetry.kotlin.attributes.toOtelJavaValue
-import io.opentelemetry.kotlin.behavior.limitOrUnset
+import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuard
+import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.Span
@@ -27,7 +25,6 @@ import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusData
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 
@@ -38,9 +35,12 @@ internal class SpanAdapter(
     private val spanLimitsConfig: CompatSpanLimitsConfig,
     private val sdkErrorHandler: SdkErrorHandler,
     creationState: CompatSpanCreationState? = null,
-) : Span, AttributeContainer, SpanCreationAction, OtelJavaImplicitContextKeyed {
+) : Span,
+    AttributeContainer,
+    SpanCreationAction,
+    OtelJavaImplicitContextKeyed,
+    AttributesMutator by OtelJavaSpanAttributesMutator(impl) {
 
-    private val attrs: MutableMap<String, Any> = ConcurrentHashMap(creationState?.attributes.orEmpty())
     private val linksImpl: ConcurrentLinkedQueue<SpanLink> =
         ConcurrentLinkedQueue(creationState?.links.orEmpty())
 
@@ -51,7 +51,9 @@ internal class SpanAdapter(
     override val spanContext: SpanContext = impl.spanContext.toOtelKotlinSpanContext()
 
     override val attributes: Map<String, Any>
-        get() = attrs.toMap()
+        get() = sdkErrorHandler.sdkGuardOrDefault(emptyMap(), "Span.attributes failed") {
+            (impl as? OtelJavaReadableSpan)?.attributes?.convertToMap().orEmpty()
+        }
 
     val links: List<SpanLinkData>
         get() = linksImpl.toList()
@@ -113,77 +115,6 @@ internal class SpanAdapter(
         } else {
             impl.addEvent(name, container.otelJavaAttributes())
         }
-    }
-
-    private fun storeAttribute(key: String, value: Any) {
-        if (attrs.containsKey(key) || attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = applyValueLengthLimit(value)
-        }
-    }
-
-    private fun applyValueLengthLimit(value: Any): Any {
-        val limit = limitOrUnset(spanLimitsConfig.attributeValueLengthLimit) ?: return value
-        return when (value) {
-            is String -> value.take(limit)
-            is List<*> -> value.map {
-                if (it is String) {
-                    it.take(limit)
-                } else {
-                    it
-                }
-            }
-            else -> value
-        }
-    }
-
-    override fun setBooleanAttribute(key: String, value: Boolean) {
-        impl.setAttribute(key, value)
-        storeAttribute(key, value)
-    }
-
-    override fun setStringAttribute(key: String, value: String) {
-        impl.setAttribute(key, value)
-        storeAttribute(key, value)
-    }
-
-    override fun setLongAttribute(key: String, value: Long) {
-        impl.setAttribute(key, value)
-        storeAttribute(key, value)
-    }
-
-    override fun setDoubleAttribute(key: String, value: Double) {
-        impl.setAttribute(key, value)
-        storeAttribute(key, value)
-    }
-
-    override fun setBooleanListAttribute(key: String, value: List<Boolean>) {
-        impl.setAttribute(OtelJavaAttributeKey.booleanArrayKey(key), value)
-        storeAttribute(key, value)
-    }
-
-    override fun setStringListAttribute(key: String, value: List<String>) {
-        impl.setAttribute(OtelJavaAttributeKey.stringArrayKey(key), value)
-        storeAttribute(key, value)
-    }
-
-    override fun setLongListAttribute(key: String, value: List<Long>) {
-        impl.setAttribute(OtelJavaAttributeKey.longArrayKey(key), value)
-        storeAttribute(key, value)
-    }
-
-    override fun setDoubleListAttribute(key: String, value: List<Double>) {
-        impl.setAttribute(OtelJavaAttributeKey.doubleArrayKey(key), value)
-        storeAttribute(key, value)
-    }
-
-    override fun setByteArrayAttribute(key: String, value: ByteArray) {
-        impl.setAttribute(OtelJavaAttributeKey.valueKey(key), OtelJavaValue.of(value))
-        storeAttribute(key, value)
-    }
-
-    override fun setAnyValueAttribute(key: String, value: AnyValue) {
-        impl.setAttribute(OtelJavaAttributeKey.valueKey(key), value.toOtelJavaValue())
-        storeAttribute(key, value)
     }
 
     override fun storeInContext(context: OtelJavaContext): OtelJavaContext? {

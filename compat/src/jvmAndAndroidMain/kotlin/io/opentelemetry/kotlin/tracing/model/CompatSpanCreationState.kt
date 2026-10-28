@@ -19,14 +19,9 @@ import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 internal class CompatSpanCreationState(
     private val spanLimitsConfig: CompatSpanLimitsConfig,
     private val attrs: CompatAttributesModel = CompatAttributesModel(),
-) : SpanCreationAction, AttributeContainer, AttributesMutator by attrs {
+) : SpanCreationAction, AttributesMutator by attrs, AttributeContainer by attrs {
 
     private val linksImpl = mutableListOf<SpanLinkCompatImpl>()
-
-    override val attributes: Map<String, Any>
-        get() = attrs.attributes.entries
-            .take(spanLimitsConfig.effectiveAttributeCountLimit)
-            .associate { it.key to it.value }
 
     val links: List<SpanLink> get() = linksImpl.take(spanLimitsConfig.effectiveLinkCountLimit)
 
