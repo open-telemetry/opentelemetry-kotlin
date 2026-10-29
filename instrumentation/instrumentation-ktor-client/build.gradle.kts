@@ -13,6 +13,8 @@ kotlin {
             dependencies {
                 api(project(":api"))
                 api(libs.ktor.client.core)
+                implementation(project(":platform-implementations"))
+                implementation(project(":semconv"))
             }
         }
         commonTest {
