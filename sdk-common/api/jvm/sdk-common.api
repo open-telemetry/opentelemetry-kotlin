@@ -7,6 +7,85 @@ public final class io/opentelemetry/kotlin/SdkBuildKonfig {
 	public final fun getSDK_VERSION ()Ljava/lang/String;
 }
 
+public abstract class io/opentelemetry/kotlin/attributes/AttributeValue {
+	public static final field Companion Lio/opentelemetry/kotlin/attributes/AttributeValue$Companion;
+	public abstract fun applyTo (Ljava/lang/String;Lio/opentelemetry/kotlin/attributes/AttributesMutator;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public abstract fun toAny ()Ljava/lang/Object;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/opentelemetry/kotlin/attributes/AttributeValue$Bool : io/opentelemetry/kotlin/attributes/AttributeValue {
+	public fun <init> (Z)V
+	public fun applyTo (Ljava/lang/String;Lio/opentelemetry/kotlin/attributes/AttributesMutator;)V
+	public final fun getValue ()Z
+	public fun toAny ()Ljava/lang/Object;
+}
+
+public final class io/opentelemetry/kotlin/attributes/AttributeValue$BoolList : io/opentelemetry/kotlin/attributes/AttributeValue {
+	public fun <init> (Ljava/util/List;)V
+	public fun applyTo (Ljava/lang/String;Lio/opentelemetry/kotlin/attributes/AttributesMutator;)V
+	public final fun getValue ()Ljava/util/List;
+	public fun toAny ()Ljava/lang/Object;
+}
+
+public final class io/opentelemetry/kotlin/attributes/AttributeValue$Companion {
+	public final fun fromPublic (Ljava/lang/Object;)Lio/opentelemetry/kotlin/attributes/AttributeValue;
+}
+
+public final class io/opentelemetry/kotlin/attributes/AttributeValue$Double : io/opentelemetry/kotlin/attributes/AttributeValue {
+	public fun <init> (D)V
+	public fun applyTo (Ljava/lang/String;Lio/opentelemetry/kotlin/attributes/AttributesMutator;)V
+	public final fun getValue ()D
+	public fun toAny ()Ljava/lang/Object;
+}
+
+public final class io/opentelemetry/kotlin/attributes/AttributeValue$DoubleList : io/opentelemetry/kotlin/attributes/AttributeValue {
+	public fun <init> (Ljava/util/List;)V
+	public fun applyTo (Ljava/lang/String;Lio/opentelemetry/kotlin/attributes/AttributesMutator;)V
+	public final fun getValue ()Ljava/util/List;
+	public fun toAny ()Ljava/lang/Object;
+}
+
+public final class io/opentelemetry/kotlin/attributes/AttributeValue$Long : io/opentelemetry/kotlin/attributes/AttributeValue {
+	public fun <init> (J)V
+	public fun applyTo (Ljava/lang/String;Lio/opentelemetry/kotlin/attributes/AttributesMutator;)V
+	public final fun getValue ()J
+	public fun toAny ()Ljava/lang/Object;
+}
+
+public final class io/opentelemetry/kotlin/attributes/AttributeValue$LongList : io/opentelemetry/kotlin/attributes/AttributeValue {
+	public fun <init> (Ljava/util/List;)V
+	public fun applyTo (Ljava/lang/String;Lio/opentelemetry/kotlin/attributes/AttributesMutator;)V
+	public final fun getValue ()Ljava/util/List;
+	public fun toAny ()Ljava/lang/Object;
+}
+
+public final class io/opentelemetry/kotlin/attributes/AttributeValue$Str : io/opentelemetry/kotlin/attributes/AttributeValue {
+	public fun <init> (Ljava/lang/String;I)V
+	public synthetic fun <init> (Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun applyTo (Ljava/lang/String;Lio/opentelemetry/kotlin/attributes/AttributesMutator;)V
+	public final fun getValue ()Ljava/lang/String;
+	public fun toAny ()Ljava/lang/Object;
+}
+
+public final class io/opentelemetry/kotlin/attributes/AttributeValue$StrList : io/opentelemetry/kotlin/attributes/AttributeValue {
+	public fun <init> (Ljava/util/List;I)V
+	public synthetic fun <init> (Ljava/util/List;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun applyTo (Ljava/lang/String;Lio/opentelemetry/kotlin/attributes/AttributesMutator;)V
+	public final fun getValue ()Ljava/util/List;
+	public fun toAny ()Ljava/lang/Object;
+}
+
+public final class io/opentelemetry/kotlin/attributes/AttributeValue$Value : io/opentelemetry/kotlin/attributes/AttributeValue {
+	public fun <init> (Lio/opentelemetry/kotlin/attributes/AnyValue;I)V
+	public synthetic fun <init> (Lio/opentelemetry/kotlin/attributes/AnyValue;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun applyTo (Ljava/lang/String;Lio/opentelemetry/kotlin/attributes/AttributesMutator;)V
+	public final fun getValue ()Lio/opentelemetry/kotlin/attributes/AnyValue;
+	public fun toAny ()Ljava/lang/Object;
+}
+
 public final class io/opentelemetry/kotlin/attributes/EmptyAttributeContainer : io/opentelemetry/kotlin/attributes/AttributeContainer {
 	public static final field INSTANCE Lio/opentelemetry/kotlin/attributes/EmptyAttributeContainer;
 	public fun getAttributes ()Ljava/util/Map;
