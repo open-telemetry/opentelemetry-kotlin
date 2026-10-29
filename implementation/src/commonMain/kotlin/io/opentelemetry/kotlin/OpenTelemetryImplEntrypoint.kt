@@ -67,6 +67,7 @@ public fun createOpenTelemetry(
             metricsConfig = metricsConfig,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior()
         ),
+        configProvider = NoopOpenTelemetry.configProvider,
         clock = clock,
         context = contextFactory,
         idGenerator = idGenerator,

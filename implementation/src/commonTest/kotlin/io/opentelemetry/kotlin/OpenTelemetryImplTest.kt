@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.config.FakeConfigProvider
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
@@ -180,6 +181,7 @@ internal class OpenTelemetryImplTest {
         tracerProvider = tracerProvider,
         loggerProvider = loggerProvider,
         meterProvider = FakeMeterProvider(),
+        configProvider = FakeConfigProvider(),
         clock = FakeClock(),
         context = FakeContextFactory(),
         idGenerator = FakeIdGenerator(),

@@ -44,11 +44,6 @@ private fun AttributeNameValue.toAttribute(): Pair<String, Any>? {
     return name to mappedValue
 }
 
-private fun Number.toLongIfWhole(): Long? {
-    val doubleValue = toDouble()
-    return toLong().takeIf { doubleValue.isFinite() && doubleValue == it.toDouble() }
-}
-
 private inline fun <reified T> Any.toListOf(): List<T>? {
     val list = this as? List<*> ?: return null
     return list.map { it as? T ?: return null }

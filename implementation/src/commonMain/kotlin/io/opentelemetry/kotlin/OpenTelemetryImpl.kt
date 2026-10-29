@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.config.ConfigProvider
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
@@ -18,6 +19,7 @@ internal class OpenTelemetryImpl(
     override val tracerProvider: TracerProvider,
     override val loggerProvider: LoggerProvider,
     override val meterProvider: MeterProvider,
+    override val configProvider: ConfigProvider,
     override val clock: Clock,
     override val context: ContextFactory,
     override val idGenerator: IdGenerator,
