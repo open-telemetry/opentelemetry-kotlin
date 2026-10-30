@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanBuilder
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
-import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import io.opentelemetry.kotlin.factory.ContextFactory
@@ -113,10 +112,10 @@ internal class OtelJavaSpanBuilderAdapter(
             spanKind = kind.toOtelKotlinSpanKind(),
             startTimestamp = start,
             action = {
-                setTypedAttributes(attrs.build().asMap().mapKeys { it.key.key })
+                setTypedAttributes(attrs.build())
                 links.forEach { link ->
                     addLink(link.spanContext.toOtelKotlinSpanContext()) {
-                        setTypedAttributes(link.attributes.convertToMap())
+                        setTypedAttributes(link.attributes)
                     }
                 }
             }
