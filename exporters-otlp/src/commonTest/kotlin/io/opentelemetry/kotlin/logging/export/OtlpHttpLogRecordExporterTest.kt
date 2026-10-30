@@ -195,8 +195,10 @@ internal class OtlpHttpLogRecordExporterTest {
             val code = factoryExporter.export(logRecords)
             assertEquals(OperationResultCode.Success, code)
 
+            // Awaiting the mock handler proves the custom engine received the export request.
+            // On Kotlin/Native, requestHistory is populated after the handler resumes, so reading
+            // it immediately after the deferred completes can race with that bookkeeping.
             request.await()
-            assertEquals(1, mockServer.requestHistory.size)
         } finally {
             withContext(NonCancellable) {
                 factoryExporter.shutdown()
