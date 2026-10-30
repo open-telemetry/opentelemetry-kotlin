@@ -32,6 +32,7 @@ import io.opentelemetry.api.metrics.MeterBuilder
 import io.opentelemetry.api.metrics.MeterProvider
 import io.opentelemetry.api.metrics.ObservableDoubleCounter
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement
+import io.opentelemetry.api.metrics.ObservableDoubleUpDownCounter
 import io.opentelemetry.api.metrics.ObservableLongCounter
 import io.opentelemetry.api.metrics.ObservableLongMeasurement
 import io.opentelemetry.api.metrics.ObservableLongUpDownCounter
@@ -160,6 +161,7 @@ typealias OtelJavaDoubleUpDownCounterBuilder = DoubleUpDownCounterBuilder
 typealias OtelJavaLongUpDownCounterBuilder = LongUpDownCounterBuilder
 typealias OtelJavaObservableDoubleCounter = ObservableDoubleCounter
 typealias OtelJavaObservableLongCounter = ObservableLongCounter
+typealias OtelJavaObservableDoubleUpDownCounter = ObservableDoubleUpDownCounter
 typealias OtelJavaObservableLongUpDownCounter = ObservableLongUpDownCounter
 typealias OtelJavaObservableMeasurement = ObservableMeasurement
 typealias OtelJavaObservableLongMeasurement = ObservableLongMeasurement

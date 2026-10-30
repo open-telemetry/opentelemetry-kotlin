@@ -86,6 +86,33 @@ internal class OtelJavaMeterAdapterAsyncCounterTest {
     }
 
     @Test
+    fun doubleUpDownCounterBuilderRecordsCallbackAndClosesIt() {
+        val meter = FakeMeter("test")
+        val counter = OtelJavaMeterAdapter(meter)
+            .upDownCounterBuilder("process.cpu.load")
+            .setUnit("1")
+            .setDescription("Process CPU load")
+            .ofDoubles()
+            .setUnit("1")
+            .setDescription("Process CPU load (double)")
+            .buildWithCallback { measurement ->
+                measurement.record(-0.5, OtelJavaAttributes.builder().put("process", "worker").build())
+            }
+        val observableCounter = meter.observableDoubleUpDownCounters.single()
+        val measurement = FakeObservableDoubleMeasurement()
+
+        observableCounter.invokeCallbacks(measurement)
+
+        assertEquals("process.cpu.load", observableCounter.name)
+        assertEquals("1", observableCounter.unit)
+        assertEquals("Process CPU load (double)", observableCounter.description)
+        assertEquals(listOf(-0.5 to mapOf<String, Any>("process" to "worker")), measurement.adds)
+
+        counter.close()
+        assertTrue(observableCounter.callbacks.isEmpty())
+    }
+
+    @Test
     fun synchronousCounterBuildersRemainNoop() {
         val meter = FakeMeter("test")
         val javaMeter = OtelJavaMeterAdapter(meter)
