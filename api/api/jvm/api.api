@@ -271,6 +271,7 @@ public abstract interface class io/opentelemetry/kotlin/metrics/Meter {
 	public abstract fun createLongUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/LongUpDownCounter;
 	public abstract fun createObservableDoubleCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleCounter;
 	public abstract fun createObservableLongCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableLongCounter;
+	public abstract fun createObservableLongUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableLongUpDownCounter;
 }
 
 public final class io/opentelemetry/kotlin/metrics/Meter$DefaultImpls {
@@ -278,6 +279,7 @@ public final class io/opentelemetry/kotlin/metrics/Meter$DefaultImpls {
 	public static synthetic fun createLongUpDownCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/LongUpDownCounter;
 	public static synthetic fun createObservableDoubleCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleCounter;
 	public static synthetic fun createObservableLongCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableLongCounter;
+	public static synthetic fun createObservableLongUpDownCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableLongUpDownCounter;
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/MeterProvider {
@@ -302,6 +304,9 @@ public abstract interface class io/opentelemetry/kotlin/metrics/ObservableLongCo
 public abstract interface class io/opentelemetry/kotlin/metrics/ObservableLongMeasurement : io/opentelemetry/kotlin/metrics/ObservableMeasurement {
 	public abstract fun record (J)V
 	public abstract fun record (JLkotlin/jvm/functions/Function1;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/metrics/ObservableLongUpDownCounter : io/opentelemetry/kotlin/metrics/AsynchronousInstrument {
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/ObservableMeasurement {

@@ -86,4 +86,23 @@ public interface Meter {
         description: String? = null,
         vararg callbacks: (ObservableLongMeasurement) -> Unit,
     ): ObservableLongCounter
+
+    /**
+     * Creates an [ObservableLongUpDownCounter] for reporting additive values during metric
+     * collection.
+     *
+     * [name] is required and should conform to the
+     * [instrument name syntax](https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-name-syntax).
+     * [unit] and [description] are optional. [callbacks] are registered with the instrument at
+     * creation and remain registered until the instrument is closed.
+     *
+     * https://opentelemetry.io/docs/specs/otel/metrics/api/#asynchronous-updowncounter-creation
+     */
+    @ThreadSafe
+    public fun createObservableLongUpDownCounter(
+        name: String,
+        unit: String? = null,
+        description: String? = null,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongUpDownCounter
 }

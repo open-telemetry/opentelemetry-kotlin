@@ -34,4 +34,11 @@ internal object NoopMeter : Meter {
         description: String?,
         vararg callbacks: (ObservableLongMeasurement) -> Unit,
     ): ObservableLongCounter = NoopObservableLongCounter(name, unit, description)
+
+    override fun createObservableLongUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongUpDownCounter = NoopObservableLongUpDownCounter(name, unit, description)
 }

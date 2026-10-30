@@ -79,11 +79,20 @@ internal class OtelJavaUpDownCounterAdapterTest {
     }
 
     @Test
-    fun buildWithCallbackUsesInjectedMeterProvider() {
+    fun buildWithCallbackUsesKotlinMeter() {
+        val meter = FakeMeter("test")
         val javaMeterProvider = RecordingJavaMeterProvider()
-        OtelJavaLongUpDownCounterBuilderAdapter(FakeMeter("test"), "n", javaMeterProvider)
-            .buildWithCallback { }
-        assertEquals(1, javaMeterProvider.getCount)
+        val observableCounter = OtelJavaLongUpDownCounterBuilderAdapter(meter, "n", javaMeterProvider)
+            .buildWithCallback { it.record(-1L) }
+        val fakeCounter = meter.observableLongUpDownCounters.single()
+        val measurement = FakeObservableLongMeasurement()
+
+        fakeCounter.invokeCallbacks(measurement)
+
+        assertEquals(listOf(-1L), measurement.adds.map { it.first })
+        assertEquals(0, javaMeterProvider.getCount)
+        observableCounter.close()
+        assertTrue(fakeCounter.callbacks.isEmpty())
     }
 
     private class RecordingJavaMeterProvider(

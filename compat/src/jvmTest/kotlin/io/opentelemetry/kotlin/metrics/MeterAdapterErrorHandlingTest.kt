@@ -81,6 +81,19 @@ internal class MeterAdapterErrorHandlingTest {
         assertSdkErrors(listOf("ObservableLongCounter.registerCallback failed"))
     }
 
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testThrowingObservableLongUpDownCounterBuilderReturnsNoopRegistration() {
+        val meter = MeterAdapter(ThrowingJavaMeter(), errorHandler)
+        val counter = meter.createObservableLongUpDownCounter("long.up_down.counter")
+
+        val registration = counter.registerCallback { it.record(-1L) }
+        assertSame(NoopObservableCounterRegistration, registration)
+        registration.close()
+        counter.close()
+        assertSdkErrors(listOf("ObservableLongUpDownCounter.registerCallback failed"))
+    }
+
     @Test
     fun testThrowingAttributesDoesNotEscapeRecord() {
         val longMeasurement = ThrowingJavaLongMeasurement(throws = false)
