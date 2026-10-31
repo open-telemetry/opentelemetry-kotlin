@@ -411,6 +411,25 @@ internal class CompatTracerProviderSamplerTest {
     }
 
     @Test
+    fun `composite with composableRuleBased observes links set at creation time`() {
+        val tracer = tracerWith {
+            composite {
+                composableRuleBased {
+                    rule({ _, _, _, _, links -> links.singleOrNull()?.spanContext?.isValid == true }) {
+                        composableAlwaysOn()
+                    }
+                }
+            }
+        }
+        val linked = tracer.startSpan("linked")
+
+        val span = tracer.startSpan("span") { addLink(linked.spanContext) }
+
+        assertTrue(span.isRecording())
+        assertTrue(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
     fun `sampler observes attributes and links set in the span creation lambda`() {
         val sampler = FakeSampler()
         val tracer = tracerWith { sampler }

@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import io.opentelemetry.kotlin.init.ComposableRuleBasedConfigDsl
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
+import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanLink
 import io.opentelemetry.sdk.extension.incubator.trace.samplers.SamplingPredicate as OtelJavaSamplingPredicate
 
 /**
@@ -92,13 +93,13 @@ private class CompatComposableRuleBasedConfig(
 }
 
 private fun SamplingPredicate.toOtelJavaSamplingPredicate(): OtelJavaSamplingPredicate =
-    OtelJavaSamplingPredicate { parentContext, _, name, spanKind, attributes, _ ->
+    OtelJavaSamplingPredicate { parentContext, _, name, spanKind, attributes, parentLinks ->
         matches(
             parentContext.toOtelKotlinContext(),
             name,
             spanKind.toOtelKotlinSpanKind(),
             CompatAttributesModel(attributes.toBuilder()),
-            emptyList(),
+            parentLinks.map { it.toOtelKotlinSpanLink() },
         )
     }
 
