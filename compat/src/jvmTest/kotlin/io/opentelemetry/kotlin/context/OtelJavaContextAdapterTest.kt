@@ -10,8 +10,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
-import io.opentelemetry.kotlin.tracing.NonRecordingSpan
-import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
+import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
 import io.opentelemetry.kotlin.tracing.createSpanContext
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
 import org.junit.Test
@@ -26,8 +25,7 @@ internal class OtelJavaContextAdapterTest {
 
     private val contextFactory = CompatContextFactory()
     private val kotlinContextFactory = ContextFactoryImpl()
-    private val kotlinSpan = NonRecordingSpan(
-        createInvalidSpanContext(),
+    private val kotlinSpan = createNonRecordingSpan(
         createSpanContext("0af7651916cd43dd8448eb211c80319c", "b7ad6b7169203331"),
     )
 
@@ -144,23 +142,23 @@ internal class OtelJavaContextAdapterTest {
     @Test
     fun `make current uses kotlin implicit context storage`() {
         val javaCurrent = OtelJavaContext.current()
-        val previous = kotlinContextFactory.implicit()
+        val previous = kotlinContextFactory.current()
         val kotlinCtx = kotlinContextFactory.root().storeSpan(kotlinSpan)
 
         OtelJavaContextAdapter(kotlinCtx).makeCurrent().use {
-            assertSame(kotlinCtx, kotlinContextFactory.implicit())
+            assertSame(kotlinCtx, kotlinContextFactory.current())
             assertSame(javaCurrent, OtelJavaContext.current())
         }
-        assertSame(previous, kotlinContextFactory.implicit())
+        assertSame(previous, kotlinContextFactory.current())
     }
 
     @Test
     fun `wrapped runnable uses kotlin implicit context storage`() {
         val kotlinCtx = kotlinContextFactory.root().storeSpan(kotlinSpan)
         var observed: Context? = null
-        OtelJavaContextAdapter(kotlinCtx).wrap(Runnable { observed = kotlinContextFactory.implicit() }).run()
+        OtelJavaContextAdapter(kotlinCtx).wrap(Runnable { observed = kotlinContextFactory.current() }).run()
 
         assertSame(kotlinCtx, observed)
-        assertSame(kotlinContextFactory.root(), kotlinContextFactory.implicit())
+        assertSame(kotlinContextFactory.root(), kotlinContextFactory.current())
     }
 }

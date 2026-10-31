@@ -53,13 +53,13 @@ internal class OtelJavaContextStorageTest {
 
     @Test
     fun testImplicitIsRootByDefault() {
-        assertSame(harness.kotlinApi.context.root(), harness.kotlinApi.context.implicit())
+        assertSame(harness.kotlinApi.context.root(), harness.kotlinApi.context.current())
     }
 
     @Test
     fun testKotlinAttachVisibleToJavaStaticApis() {
         val span = harness.tracer.startSpan("kotlin_span")
-        val ctx = harness.kotlinApi.context.implicit()
+        val ctx = harness.kotlinApi.context.current()
             .storeSpan(span)
             .storeBaggage(createBaggage { put("key", "value") })
         val scope = ctx.attach()
@@ -77,7 +77,7 @@ internal class OtelJavaContextStorageTest {
     fun testJavaMakeCurrentParentsKotlinSpan() = runTest {
         val javaSpan = javaApi.tracerProvider.get("tracer").spanBuilder("java_span").startSpan()
         OtelJavaContext.current().with(javaSpan).makeCurrent().use {
-            assertEquals(javaSpan.spanContext.spanId, harness.kotlinApi.context.implicit().extractSpan().spanContext.spanId)
+            assertEquals(javaSpan.spanContext.spanId, harness.kotlinApi.context.current().extractSpan().spanContext.spanId)
             harness.tracer.startSpan("kotlin_span").end()
         }
         javaSpan.end()
@@ -91,9 +91,9 @@ internal class OtelJavaContextStorageTest {
     @Test
     fun testJavaBaggageVisibleToKotlin() {
         OtelJavaBaggage.builder().put("key", "value").build().makeCurrent().use {
-            assertEquals("value", harness.kotlinApi.context.implicit().extractBaggage().asMap()["key"]?.value)
+            assertEquals("value", harness.kotlinApi.context.current().extractBaggage().asMap()["key"]?.value)
         }
-        assertSame(harness.kotlinApi.context.root(), harness.kotlinApi.context.implicit())
+        assertSame(harness.kotlinApi.context.root(), harness.kotlinApi.context.current())
     }
 
     @Test
@@ -101,7 +101,7 @@ internal class OtelJavaContextStorageTest {
         val outer = harness.tracer.startSpan("outer")
         val inner = harness.tracer.startSpan("inner")
         val outerScope = harness.kotlinApi.context.root().storeSpan(outer).attach()
-        val innerScope = harness.kotlinApi.context.implicit().storeSpan(inner).attach()
+        val innerScope = harness.kotlinApi.context.current().storeSpan(inner).attach()
 
         assertEquals(inner.spanContext.spanId, OtelJavaSpan.current().spanContext.spanId)
         assertTrue(innerScope.detach())
@@ -114,7 +114,7 @@ internal class OtelJavaContextStorageTest {
     @Test
     fun testOutOfOrderDetachReportsMisuse() {
         val outerScope = harness.kotlinApi.context.root().storeSpan(harness.tracer.startSpan("outer")).attach()
-        val innerScope = harness.kotlinApi.context.implicit().storeSpan(harness.tracer.startSpan("inner")).attach()
+        val innerScope = harness.kotlinApi.context.current().storeSpan(harness.tracer.startSpan("inner")).attach()
         assertFalse(outerScope.detach())
         assertEquals("Scope.detach", errorHandler.apiMisuses.single().api)
 

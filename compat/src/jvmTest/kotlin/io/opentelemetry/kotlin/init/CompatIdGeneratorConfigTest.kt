@@ -5,10 +5,12 @@ import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import org.junit.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertSame
 
@@ -59,5 +61,18 @@ internal class CompatIdGeneratorConfigTest {
         val idGenerator = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory()).idGenerator
 
         assertSame(custom, idGenerator)
+    }
+
+    @Test
+    fun throwingCustomIdGeneratorSupplierFallsBackToDefault() {
+        val handler = FakeSdkErrorHandler()
+        val cfg = CompatOpenTelemetryConfig(clock).apply {
+            errorHandler(handler)
+            idGenerator { error("boom") }
+        }
+        val idGenerator = CompatSdkConfigFactory(cfg, cfg.toBehavior(), clock, CompatContextFactory()).idGenerator
+
+        assertIs<CompatIdGenerator>(idGenerator)
+        assertEquals("boom", handler.userCodeErrors.single().cause.message)
     }
 }

@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.aliases.OtelJavaCompletableResultCode
+import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProvider
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -45,6 +46,17 @@ internal class LoggerProviderAdapterTest {
         val first = adapter.getLogger(name = "name")
         val second = adapter.getLogger(name = "name", version = "null")
         assertNotSame(first, second)
+    }
+
+    @Test
+    fun testForceFlushAndShutdownFailForNonSdkProvider() = runTest {
+        val adapter = LoggerProviderAdapter(
+            OtelJavaOpenTelemetry.noop().logsBridge,
+            NoopSdkErrorHandler,
+        )
+
+        assertEquals(OperationResultCode.Failure, adapter.forceFlush())
+        assertEquals(OperationResultCode.Failure, adapter.shutdown())
     }
 
     @Test

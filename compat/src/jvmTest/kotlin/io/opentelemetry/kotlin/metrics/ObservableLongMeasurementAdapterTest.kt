@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.metrics
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaObservableLongMeasurement
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -12,7 +13,7 @@ internal class ObservableLongMeasurementAdapterTest {
     @Test
     fun recordWithoutAttributesDelegatesToJava() {
         val javaMeasurement = RecordingJavaLongMeasurement()
-        val adapter = ObservableLongMeasurementAdapter(javaMeasurement)
+        val adapter = ObservableLongMeasurementAdapter(javaMeasurement, NoopSdkErrorHandler)
         adapter.record(42L)
         adapter.record(-42L)
         adapter.record(0L)
@@ -29,7 +30,7 @@ internal class ObservableLongMeasurementAdapterTest {
     @Test
     fun recordWithAttributesDelegatesToJava() {
         val javaMeasurement = RecordingJavaLongMeasurement()
-        val adapter = ObservableLongMeasurementAdapter(javaMeasurement)
+        val adapter = ObservableLongMeasurementAdapter(javaMeasurement, NoopSdkErrorHandler)
         adapter.record(42L) { setStringAttribute("color", "red") }
         assertEquals(
             listOf(

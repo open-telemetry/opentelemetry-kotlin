@@ -3,21 +3,27 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 internal class OtlpFileLogRecordExporterTest {
 
+    private val dispatcher = StandardTestDispatcher()
+
+    private fun exporter() = OtlpFileLogRecordExporter(
+        initialDelayMs = 3,
+        maxAttemptIntervalMs = 5,
+        maxAttempts = 3,
+        sdkErrorHandler = NoopSdkErrorHandler,
+        coroutineContext = dispatcher
+    )
+
     @Test
-    fun testExportInitialSuccess() = runTest {
+    fun testExportInitialSuccess() = runTest(dispatcher) {
         // given
-        val exporter = OtlpFileLogRecordExporter(
-            initialDelayMs = 3,
-            maxAttemptIntervalMs = 5,
-            maxAttempts = 3,
-            sdkErrorHandler = NoopSdkErrorHandler,
-        )
+        val exporter = exporter()
         val logRecords = listOf(FakeLogRecordData())
 
         // when
@@ -28,14 +34,9 @@ internal class OtlpFileLogRecordExporterTest {
     }
 
     @Test
-    fun testExportForceFlush() = runTest {
+    fun testExportForceFlush() = runTest(dispatcher) {
         // given
-        val exporter = OtlpFileLogRecordExporter(
-            initialDelayMs = 3,
-            maxAttemptIntervalMs = 5,
-            maxAttempts = 3,
-            sdkErrorHandler = NoopSdkErrorHandler,
-        )
+        val exporter = exporter()
 
         // when
         val result = exporter.forceFlush()
@@ -45,14 +46,9 @@ internal class OtlpFileLogRecordExporterTest {
     }
 
     @Test
-    fun testExportShutdown() = runTest {
+    fun testExportShutdown() = runTest(dispatcher) {
         // given
-        val exporter = OtlpFileLogRecordExporter(
-            initialDelayMs = 3,
-            maxAttemptIntervalMs = 5,
-            maxAttempts = 3,
-            sdkErrorHandler = NoopSdkErrorHandler,
-        )
+        val exporter = exporter()
         val logRecords = listOf(FakeLogRecordData())
 
         // when
@@ -65,14 +61,9 @@ internal class OtlpFileLogRecordExporterTest {
     }
 
     @Test
-    fun testExportNoOpOnEmpty() = runTest {
+    fun testExportNoOpOnEmpty() = runTest(dispatcher) {
         // given
-        val exporter = OtlpFileLogRecordExporter(
-            initialDelayMs = 3,
-            maxAttemptIntervalMs = 5,
-            maxAttempts = 3,
-            sdkErrorHandler = NoopSdkErrorHandler,
-        )
+        val exporter = exporter()
 
         // when
         val result = exporter.export(emptyList())

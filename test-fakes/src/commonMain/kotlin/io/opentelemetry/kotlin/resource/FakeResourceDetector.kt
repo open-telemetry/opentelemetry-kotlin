@@ -3,11 +3,20 @@ package io.opentelemetry.kotlin.resource
 import io.opentelemetry.kotlin.factory.ResourceFactory
 
 class FakeResourceDetector(
-    override val name: String = "fake",
+    name: String = "fake",
     private val attributes: Map<String, String> = emptyMap(),
     private val schemaUrl: String? = null,
     private val error: Throwable? = null,
+    private val nameError: Throwable? = null,
 ) : ResourceDetector {
+
+    private val detectorName = name
+
+    override val name: String
+        get() {
+            nameError?.let { throw it }
+            return detectorName
+        }
 
     var detectCount: Int = 0
         private set

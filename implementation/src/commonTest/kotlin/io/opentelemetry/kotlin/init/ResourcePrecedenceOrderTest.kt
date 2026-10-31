@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.resource.FakeResourceDetector
 import io.opentelemetry.kotlin.resource.SdkMode
@@ -42,7 +43,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testSdkDefaultSchemaUrl() {
-        val schemaUrl = ResourceFactoryImpl().sdkDefaultResource(SdkMode.REGULAR).schemaUrl
+        val schemaUrl = ResourceFactoryImpl(NoopSdkErrorHandler).sdkDefaultResource(SdkMode.REGULAR).schemaUrl
         assertNotNull(schemaUrl)
         assertTrue(
             schemaUrl.startsWith("https://opentelemetry.io/schemas/"),

@@ -34,7 +34,6 @@ internal class TracerInvalidSpanNameTest {
     @Test
     fun testEmptyNameReturnsNonRecordingSpan() {
         val span = createTracer().startSpan("")
-        assertTrue(span is NonRecordingSpan)
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.isValid)
         assertTrue(processor.startCalls.isEmpty())
@@ -43,7 +42,6 @@ internal class TracerInvalidSpanNameTest {
     @Test
     fun testBlankNameReturnsNonRecordingSpan() {
         val span = createTracer().startSpan("   ")
-        assertTrue(span is NonRecordingSpan)
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.isValid)
         assertTrue(processor.startCalls.isEmpty())

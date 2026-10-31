@@ -7,10 +7,9 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
-import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.TraceState
-import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
+import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
 import io.opentelemetry.kotlin.tracing.createSpanContext
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import kotlin.random.Random
@@ -37,7 +36,7 @@ internal class BuiltInCompositeSamplerTest {
                 traceState { put("ot", otValue) }
             }
         }
-        val parentSpan = NonRecordingSpan(createInvalidSpanContext(), parentSpanContext)
+        val parentSpan = createNonRecordingSpan(parentSpanContext)
         return contextFactory.root().storeSpan(parentSpan)
     }
 

@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.behavior.toSeverityLevel
 import io.opentelemetry.kotlin.config.envar.logging.LogLimitsEnvVars
 import io.opentelemetry.kotlin.config.envar.logging.LogRecordProcessorEnvVars
 import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
@@ -22,8 +23,14 @@ import io.opentelemetry.kotlin.config.envar.tracing.TracesExporterEnvVars
 class OpenTelemetryEnvVars(
     private val reader: ReportingEnvVarReader,
 ) {
-
+    /**
+     * No Environment variables for [OpenTelemetryBehavior.distribution].
+     * See https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#general-sdk-configuration.
+     */
     fun toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
+        disabled = reader.readBoolean(SDK_DISABLED),
+        logLevel = reader.readString(LOG_LEVEL)?.toSeverityLevel(),
+        entities = null, // TODO: Add support for entities. Blocked by !1251.
         resource = ResourceEnvVars(reader).toBehavior(),
         attributeLimits = AttributeLimitsEnvVars(reader).toBehavior(),
         tracerProvider = TracerProviderBehavior(
@@ -43,5 +50,8 @@ class OpenTelemetryEnvVars(
         const val OTLP_ENDPOINT = "OTEL_EXPORTER_OTLP_ENDPOINT"
         const val OTLP_TIMEOUT = "OTEL_EXPORTER_OTLP_TIMEOUT"
         const val OTLP_HEADERS = "OTEL_EXPORTER_OTLP_HEADERS"
+
+        const val SDK_DISABLED = "OTEL_SDK_DISABLED"
+        const val LOG_LEVEL = "OTEL_LOG_LEVEL"
     }
 }

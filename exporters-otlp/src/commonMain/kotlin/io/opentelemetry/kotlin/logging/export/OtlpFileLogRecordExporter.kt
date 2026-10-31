@@ -4,10 +4,12 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpFileExporter
 import io.opentelemetry.kotlin.export.TelemetryExporter
+import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.encode.JsonLogRecordEncoder
 import okio.blackholeSink
 import okio.buffer
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A [LogRecordExporter] that outputs log records in JSON format to a file.
@@ -19,6 +21,7 @@ internal class OtlpFileLogRecordExporter(
     maxAttemptIntervalMs: Long,
     maxAttempts: Int,
     sdkErrorHandler: SdkErrorHandler,
+    coroutineContext: CoroutineContext = ioDispatcher
 ) : LogRecordExporter {
 
     private val exporter = TelemetryExporter(
@@ -26,6 +29,7 @@ internal class OtlpFileLogRecordExporter(
         maxAttemptIntervalMs,
         maxAttempts,
         sdkErrorHandler,
+        coroutineContext
     ) { telemetry ->
         val encodedTelemetry = telemetry.map { encoder.encode(it) }
         fileExporter.exportTelemetry(encodedTelemetry)

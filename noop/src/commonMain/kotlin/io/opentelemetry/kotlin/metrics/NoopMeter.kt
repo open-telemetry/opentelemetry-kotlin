@@ -20,4 +20,25 @@ internal object NoopMeter : Meter {
         unit: String?,
         description: String?,
     ): LongUpDownCounter = NoopLongUpDownCounter(name, unit, description)
+
+    override fun createObservableDoubleCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
+    ): ObservableDoubleCounter = NoopObservableDoubleCounter(name, unit, description)
+
+    override fun createObservableLongCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongCounter = NoopObservableLongCounter(name, unit, description)
+
+    override fun createObservableLongUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongUpDownCounter = NoopObservableLongUpDownCounter(name, unit, description)
 }

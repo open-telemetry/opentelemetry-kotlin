@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.metrics
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaObservableDoubleMeasurement
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -12,7 +13,7 @@ internal class ObservableDoubleMeasurementAdapterTest {
     @Test
     fun recordWithoutAttributesDelegatesToJava() {
         val javaMeasurement = RecordingJavaDoubleMeasurement()
-        val adapter = ObservableDoubleMeasurementAdapter(javaMeasurement)
+        val adapter = ObservableDoubleMeasurementAdapter(javaMeasurement, NoopSdkErrorHandler)
         adapter.record(4.2)
         adapter.record(-4.2)
         adapter.record(0.0)
@@ -29,7 +30,7 @@ internal class ObservableDoubleMeasurementAdapterTest {
     @Test
     fun recordWithAttributesDelegatesToJava() {
         val javaMeasurement = RecordingJavaDoubleMeasurement()
-        val adapter = ObservableDoubleMeasurementAdapter(javaMeasurement)
+        val adapter = ObservableDoubleMeasurementAdapter(javaMeasurement, NoopSdkErrorHandler)
         adapter.record(4.2) { setStringAttribute("color", "red") }
         assertEquals(
             listOf(

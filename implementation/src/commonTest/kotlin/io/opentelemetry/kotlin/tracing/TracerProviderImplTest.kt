@@ -137,6 +137,22 @@ internal class TracerProviderImplTest {
     }
 
     @Test
+    fun testTracerProviderSameByteArrayAttributes() {
+        val provider = createProvider()
+        val first = provider.getTracer(name = "name") {
+            setByteArrayAttribute("key", byteArrayOf(1, 2, 3))
+        }
+        val second = provider.getTracer(name = "name") {
+            setByteArrayAttribute("key", byteArrayOf(1, 2, 3))
+        }
+        val third = provider.getTracer(name = "name") {
+            setByteArrayAttribute("key", byteArrayOf(4, 5, 6))
+        }
+        assertSame(first, second)
+        assertNotEquals(first, third)
+    }
+
+    @Test
     fun testForceFlushEmptyProcessors() = runTest {
         val result = impl.forceFlush()
         assertEquals(OperationResultCode.Success, result)

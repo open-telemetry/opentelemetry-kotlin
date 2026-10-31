@@ -10,8 +10,8 @@ import kotlin.test.assertTrue
 
 internal class ResourceDetectionTest {
 
-    private val factory = ResourceFactoryImpl()
     private val errorHandler = FakeSdkErrorHandler()
+    private val factory = ResourceFactoryImpl(errorHandler)
 
     @Test
     fun testNoDetectors() {
@@ -95,6 +95,40 @@ internal class ResourceDetectionTest {
         val error = errorHandler.apiMisuses.single()
         assertEquals("ResourceDetector", error.api)
         assertEquals("Multiple resource detectors are named 'host'", error.message)
+    }
+
+    @Test
+    fun testDetectorWithThrowingNameIsReportedAndSkipped() {
+        val exception = IllegalStateException("boom")
+        val broken = FakeResourceDetector(attributes = mapOf("host.name" to "a"), nameError = exception)
+        val detectors = listOf(
+            broken,
+            FakeResourceDetector(name = "working", attributes = mapOf("process.pid" to "123")),
+        )
+
+        val resource = detectors.detectResource(factory, errorHandler)
+
+        assertEquals(mapOf("process.pid" to "123"), resource.attributes)
+        assertEquals(0, broken.detectCount)
+
+        val error = errorHandler.userCodeErrors.single()
+        assertEquals(exception, error.cause)
+        assertEquals("Failed to read resource detector name, skipping detector", error.message)
+    }
+
+    @Test
+    fun testDetectorWithThrowingNameDoesNotPreventDuplicateNameReport() {
+        val detectors = listOf(
+            FakeResourceDetector(name = "host", attributes = mapOf("host.name" to "a")),
+            FakeResourceDetector(nameError = IllegalStateException("boom")),
+            FakeResourceDetector(name = "host", attributes = mapOf("host.arch" to "arm64")),
+        )
+
+        val resource = detectors.detectResource(factory, errorHandler)
+
+        assertEquals(mapOf("host.name" to "a", "host.arch" to "arm64"), resource.attributes)
+        assertEquals("Multiple resource detectors are named 'host'", errorHandler.apiMisuses.single().message)
+        assertEquals(1, errorHandler.userCodeErrors.size)
     }
 
     @Test

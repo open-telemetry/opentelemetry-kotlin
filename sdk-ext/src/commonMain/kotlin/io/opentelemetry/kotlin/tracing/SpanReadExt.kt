@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 /**
  * Syntactic sugar for converting a [Span] to a [ReadableSpan].
  *
- * Note: this cast will only succeed when using the KMP implementation of [io.opentelemetry.kotlin.OpenTelemetry].
+ * Returns a no-op readable span when this span does not implement [ReadableSpan].
  */
 @ExperimentalApi
-public fun Span.toReadableSpan(): ReadableSpan = this as ReadableSpan
+public fun Span.toReadableSpan(): ReadableSpan = this as? ReadableSpan ?: NoopReadableSpan

@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.attributes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 internal class AttributesMutatorImplTest {
@@ -345,6 +346,93 @@ internal class AttributesMutatorImplTest {
     }
 
     @Test
+    fun testAnyValueCyclicListIsReplacedWithNull() {
+        val items = mutableListOf<AnyValue>(AnyValue.StringValue("a"))
+        val list = AnyValue.ListValue(items)
+        items.add(list)
+        val attrs = AttributesModel(attributeLimit).apply {
+            setAnyValueAttribute("list", list)
+        }.attributes
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.StringValue("a"), AnyValue.NullValue)),
+            attrs["list"],
+        )
+    }
+
+    @Test
+    fun testAnyValueCyclicMapIsReplacedWithNull() {
+        val entries = mutableMapOf<String, AnyValue>()
+        val map = AnyValue.MapValue(entries)
+        entries["self"] = map
+        val attrs = AttributesModel(attributeLimit).apply {
+            setAnyValueAttribute("map", map)
+        }.attributes
+        assertEquals(
+            AnyValue.MapValue(mapOf("self" to AnyValue.NullValue)),
+            attrs["map"],
+        )
+    }
+
+    @Test
+    fun testAnyValueDeepNestingIsBounded() {
+        var value: AnyValue = AnyValue.StringValue("leaf")
+        repeat(100) { value = AnyValue.ListValue(listOf(value)) }
+        var observed = storedAnyValue("deep", value)
+        var depth = 0
+        while (observed is AnyValue.ListValue) {
+            observed = observed.values.single()
+            depth++
+        }
+        assertEquals(16, depth)
+        assertSame(AnyValue.NullValue, observed)
+    }
+
+    @Test
+    fun testAnyValueAtDepthLimitIsPreserved() {
+        var value: AnyValue = AnyValue.StringValue("leaf")
+        repeat(15) { value = AnyValue.ListValue(listOf(value)) }
+        var observed = storedAnyValue("deep", value)
+        var depth = 0
+        while (observed is AnyValue.ListValue) {
+            observed = observed.values.single()
+            depth++
+        }
+        assertEquals(15, depth)
+        assertEquals(AnyValue.StringValue("leaf"), observed)
+    }
+
+    @Test
+    fun testAnyValueLeafBeyondDepthBecomesNull() {
+        var value: AnyValue = AnyValue.StringValue("leaf")
+        repeat(16) { value = AnyValue.ListValue(listOf(value)) }
+        var observed = storedAnyValue("deep", value)
+        var depth = 0
+        while (observed is AnyValue.ListValue) {
+            observed = observed.values.single()
+            depth++
+        }
+        assertEquals(16, depth)
+        assertSame(AnyValue.NullValue, observed)
+    }
+
+    @Test
+    fun testAnyValueCyclicValueIsTruncatedAndBounded() {
+        val items = mutableListOf<AnyValue>(AnyValue.StringValue("abcdef"))
+        val list = AnyValue.ListValue(items)
+        items.add(list)
+        val attrs = AttributesModel(
+            attributeLimit = attributeLimit,
+            attributeValueLengthLimit = 3,
+        ).apply {
+            setAnyValueAttribute("list", list)
+        }.attributes
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.StringValue("abc"), AnyValue.NullValue)),
+            attrs["list"],
+        )
+    }
+
+    @Test
     fun testNegativeLimitsFallBackToDefaults() {
         val attrs = AttributesModel(attributeLimit = -1, attributeValueLengthLimit = -1).apply {
             setStringAttribute("key", "abcdef")
@@ -353,6 +441,11 @@ internal class AttributesMutatorImplTest {
         assertEquals("abcdef", attrs.attributes["key"])
         assertEquals(0, attrs.droppedAttributesCount)
     }
+
+    private fun storedAnyValue(key: String, value: AnyValue): Any? =
+        AttributesModel(attributeLimit).apply {
+            setAnyValueAttribute(key, value)
+        }.attributes[key]
 
     private fun AttributesMutator.addTestAttributes(keyToken: String = "") {
         setStringAttribute("string$keyToken", "value")

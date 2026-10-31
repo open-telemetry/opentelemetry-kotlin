@@ -109,11 +109,14 @@ public final class io/opentelemetry/kotlin/factory/IdGeneratorKt {
 
 public abstract interface class io/opentelemetry/kotlin/factory/ResourceFactory {
 	public abstract fun create (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/resource/Resource;
+	public abstract fun createEntity (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/resource/Entity;
 	public abstract fun getEmpty ()Lio/opentelemetry/kotlin/resource/Resource;
 }
 
 public final class io/opentelemetry/kotlin/factory/ResourceFactory$DefaultImpls {
 	public static synthetic fun create$default (Lio/opentelemetry/kotlin/factory/ResourceFactory;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/resource/Resource;
+	public static fun createEntity (Lio/opentelemetry/kotlin/factory/ResourceFactory;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/resource/Entity;
+	public static synthetic fun createEntity$default (Lio/opentelemetry/kotlin/factory/ResourceFactory;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/resource/Entity;
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/AttributeLimitsConfigDsl {
@@ -405,6 +408,18 @@ public final class io/opentelemetry/kotlin/metrics/instrument/InstrumentValueTyp
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/instrument/InstrumentValueType;
 	public static fun values ()[Lio/opentelemetry/kotlin/metrics/instrument/InstrumentValueType;
+}
+
+public abstract interface class io/opentelemetry/kotlin/resource/Entity {
+	public abstract fun getDescription ()Ljava/util/Map;
+	public abstract fun getId ()Ljava/util/Map;
+	public abstract fun getSchemaUrl ()Ljava/lang/String;
+	public abstract fun getType ()Ljava/lang/String;
+}
+
+public abstract interface class io/opentelemetry/kotlin/resource/EntityAttributesMutator {
+	public abstract fun description (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun id (Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/resource/MutableResource {

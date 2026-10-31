@@ -113,6 +113,43 @@ internal class OpenTelemetryConfigReaderTest {
     }
 
     @Test
+    fun `should not read the environment when there is no environment variable reader`() {
+        var resolvedEnvars: OpenTelemetryBehavior? = OpenTelemetryBehavior()
+        var fileRead = false
+        val behavior = read(
+            env = null,
+            dsl = logAttributeCountLimit(64),
+            onRead = { fileRead = true },
+            resolver = object : BehaviorResolver {
+                override fun resolve(
+                    envars: OpenTelemetryBehavior?,
+                    declarativeFile: OpenTelemetryBehavior?,
+                    dsl: OpenTelemetryBehavior?,
+                ): OpenTelemetryBehavior {
+                    resolvedEnvars = envars
+                    return BehaviorResolverImpl().resolve(envars, declarativeFile, dsl)
+                }
+            },
+        )
+        assertNull(resolvedEnvars)
+        assertTrue(!fileRead, "no path was supplied, so no file should have been read")
+        assertEquals(64, behavior.logRecordAttributeCountLimit())
+    }
+
+    @Test
+    fun `should read an explicit config file when there is no environment variable reader`() {
+        var requested: String? = null
+        val behavior = read(
+            env = null,
+            fileContents = logAttributeCountLimit(64),
+            configFilePath = PATH,
+            onRead = { requested = it },
+        )
+        assertEquals(PATH, requested)
+        assertEquals(64, behavior.logRecordAttributeCountLimit())
+    }
+
+    @Test
     fun `should report unknown sampler via SdkErrorHandler`() {
         val handler = FakeSdkErrorHandler()
         val reader = OpenTelemetryConfigReader(
@@ -208,7 +245,7 @@ internal class OpenTelemetryConfigReaderTest {
     }
 
     private fun read(
-        env: Map<String, String> = emptyMap(),
+        env: Map<String, String>? = emptyMap(),
         dsl: OpenTelemetryBehavior? = null,
         dslProvider: () -> OpenTelemetryBehavior? = { dsl },
         fileContents: OpenTelemetryBehavior = OpenTelemetryBehavior(),
@@ -218,7 +255,7 @@ internal class OpenTelemetryConfigReaderTest {
         handler: SdkErrorHandler = NoopSdkErrorHandler,
     ): OpenTelemetryBehavior {
         val reader = OpenTelemetryConfigReader(
-            envVarReader = EnvVarReader(env::get),
+            envVarReader = env?.let { EnvVarReader(it::get) },
             declarativeConfigReader = { path ->
                 onRead(path)
                 fileContents

@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.SeverityLevel
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
@@ -29,9 +30,22 @@ internal class OpenTelemetryEnvVarsTest {
     @Test
     fun emptyEnv() {
         val behavior = behaviorFrom(emptyMap())
-        assertNull(behavior.resource)
-        assertEquals(AttributeLimitsBehavior(), behavior.attributeLimits)
-        assertEquals(LogLimitsBehavior(), behavior.loggerProvider?.logLimits)
+        assertEquals(
+            OpenTelemetryBehavior(
+                disabled = false,
+                attributeLimits = AttributeLimitsBehavior(),
+                loggerProvider = LoggerProviderBehavior(
+                    logLimits = LogLimitsBehavior(),
+                    processor = LogRecordProcessorBehavior(
+                        batch = BatchLogRecordProcessorBehavior(),
+                    ),
+                ),
+                tracerProvider = TracerProviderBehavior(
+                    spanLimits = SpanLimitsBehavior(),
+                ),
+            ),
+            behavior,
+        )
     }
 
     @Test
@@ -59,6 +73,8 @@ internal class OpenTelemetryEnvVarsTest {
     @Test
     fun `should read every node from its own env vars`() {
         val env = mapOf(
+            OpenTelemetryEnvVars.SDK_DISABLED to "true",
+            OpenTelemetryEnvVars.LOG_LEVEL to "ERROR3",
             AttributeLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT to "1",
             AttributeLimitsEnvVars.ATTRIBUTE_VALUE_LENGTH_LIMIT to "2",
             SpanLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT to "3",
@@ -76,6 +92,8 @@ internal class OpenTelemetryEnvVarsTest {
         )
 
         val expected = OpenTelemetryBehavior(
+            disabled = true,
+            logLevel = SeverityLevel.ERROR3,
             resource = ResourceBehavior(
                 serviceName = "checkout",
                 attributes = mapOf("region" to "eu"),
@@ -115,6 +133,7 @@ internal class OpenTelemetryEnvVarsTest {
     @Test
     fun `should leave every limit unset when the environment configures nothing`() {
         val expected = OpenTelemetryBehavior(
+            disabled = false,
             attributeLimits = AttributeLimitsBehavior(),
             tracerProvider = TracerProviderBehavior(spanLimits = SpanLimitsBehavior()),
             loggerProvider = LoggerProviderBehavior(

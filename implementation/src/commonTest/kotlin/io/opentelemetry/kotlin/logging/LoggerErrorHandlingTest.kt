@@ -5,8 +5,6 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.ContextKey
-import io.opentelemetry.kotlin.context.FakeContextKey
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -44,16 +42,50 @@ internal class LoggerErrorHandlingTest {
 
             logger.emit("message", exception = case.exception, attributes = case.attributes)
 
-            assertTrue(processor.logs.isEmpty(), case.name)
-            val error = errorHandler.errors.single()
-            val cause = when (case.userCode) {
-                true -> assertIs<SdkError.UserCodeError>(error, case.name).cause
-                false -> assertIs<SdkError.SdkCodeError>(error, case.name).cause
+            when (case.name) {
+                "attributes lambda throws" -> {
+                    assertEquals(1, processor.logs.size, case.name)
+                    val error = errorHandler.userCodeErrors.single()
+                    assertEquals("Logger.emit attributes failed", error.message, case.name)
+                    assertEquals("boom", error.cause.message, case.name)
+                }
+                "exception message throws" -> {
+                    assertEquals(1, processor.logs.size, case.name)
+                    val error = errorHandler.userCodeErrors.single()
+                    assertEquals("LogRecord.exception attributes failed", error.message, case.name)
+                    assertEquals("boom", error.cause.message, case.name)
+                }
+                else -> {
+                    assertTrue(processor.logs.isEmpty(), case.name)
+                    val error = errorHandler.errors.single()
+                    val cause = when (case.userCode) {
+                        true -> assertIs<SdkError.UserCodeError>(error, case.name).cause
+                        false -> assertIs<SdkError.SdkCodeError>(error, case.name).cause
+                    }
+                    assertEquals("Logger.emit failed", error.message, case.name)
+                    assertEquals(SdkErrorSeverity.WARNING, error.severity, case.name)
+                    assertEquals("boom", cause.message, case.name)
+                }
             }
-            assertEquals("Logger.emit failed", error.message, case.name)
-            assertEquals(SdkErrorSeverity.WARNING, error.severity, case.name)
-            assertEquals("boom", cause.message, case.name)
         }
+    }
+
+    @Test
+    fun testExceptionAttributeFailureDoesNotPreventUserAttributesOrEmit() {
+        val errorHandler = FakeSdkErrorHandler()
+        val processor = FakeLogRecordProcessor()
+        val logger = createLogger(Case("healthy"), processor, errorHandler)
+        var attributesApplied = false
+
+        logger.emit(
+            "message",
+            exception = HostileThrowable(),
+            attributes = { attributesApplied = true },
+        )
+
+        assertTrue(attributesApplied)
+        assertEquals(1, processor.logs.size)
+        assertEquals("LogRecord.exception attributes failed", errorHandler.userCodeErrors.single().message)
     }
 
     @Test
@@ -80,11 +112,11 @@ internal class LoggerErrorHandlingTest {
 
         logger.emit("first") { boom() }
         assertEquals(1, errorHandler.userCodeErrors.size)
-        assertTrue(processor.logs.isEmpty())
+        assertTrue(processor.logs.isNotEmpty())
 
         logger.emit("second")
         assertEquals(1, errorHandler.userCodeErrors.size)
-        assertEquals(1, processor.logs.size)
+        assertEquals(2, processor.logs.size)
     }
 
     @Test
@@ -145,9 +177,7 @@ internal class LoggerErrorHandlingTest {
 
         override fun root(): Context = delegate.root()
 
-        override fun implicit(): Context = boom()
-
-        override fun <T> createKey(name: String): ContextKey<T> = FakeContextKey(name)
+        override fun current(): Context = boom()
     }
 
     private class HostileThrowable : Throwable() {

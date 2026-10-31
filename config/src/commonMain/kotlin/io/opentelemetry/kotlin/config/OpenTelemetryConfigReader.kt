@@ -12,7 +12,6 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
-import io.opentelemetry.kotlin.getEnvVarValue
 
 /**
  * Reads the configuration supplied by every mechanism (DSL, YAML, envars), then resolves their
@@ -20,13 +19,13 @@ import io.opentelemetry.kotlin.getEnvVarValue
  */
 @ExperimentalApi
 class OpenTelemetryConfigReader(
-    envVarReader: EnvVarReader = EnvVarReader(::getEnvVarValue),
+    envVarReader: EnvVarReader? = platformEnvVarReader(),
     private val declarativeConfigReader: DeclarativeConfigReader? = platformDeclarativeConfigReader(),
     private val behaviorResolver: BehaviorResolver = BehaviorResolverImpl(),
     private val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
 ) {
 
-    private val reportingEnvVarReader = ReportingEnvVarReader(envVarReader, ::reportEnvironmentWarning)
+    private val reportingEnvVarReader = envVarReader?.let { ReportingEnvVarReader(it, ::reportEnvironmentWarning) }
 
     /**
      * Resolves behavior against the DSL, YAML, and envars.
@@ -36,6 +35,9 @@ class OpenTelemetryConfigReader(
      *
      * A `null` [declarativeConfigReader] means this platform does not read declarative config
      * files at all, so neither [configFilePath] nor `OTEL_CONFIG_FILE` is acted on.
+     *
+     * A `null` `envVarReader` means this platform does not read envars, so the envar layer is unset
+     * and `OTEL_CONFIG_FILE` is not read.
      *
      * This function never throws. Exceptions in the DSL, YAML, or envar layers treats the layer as
      * unset.
@@ -53,7 +55,7 @@ class OpenTelemetryConfigReader(
         return try {
             behaviorResolver.resolve(
                 envars = guard("read environment variables", fallback = null) {
-                    OpenTelemetryEnvVars(reportingEnvVarReader).toBehavior()
+                    reportingEnvVarReader?.let { OpenTelemetryEnvVars(it).toBehavior() }
                 },
                 declarativeFile = readDeclarativeFile(configFilePath),
                 dsl = dslBehavior,
@@ -71,7 +73,7 @@ class OpenTelemetryConfigReader(
     private fun readDeclarativeFile(configFilePath: String?): OpenTelemetryBehavior? {
         val reader = declarativeConfigReader ?: return null
         val path = guard("read $CONFIG_FILE", fallback = null) {
-            configFilePath ?: reportingEnvVarReader.readString(CONFIG_FILE)
+            configFilePath ?: reportingEnvVarReader?.readString(CONFIG_FILE)
         } ?: return null
         return guard(
             "read declarative config file '$path'",
