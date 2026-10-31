@@ -28,6 +28,7 @@ import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -187,11 +188,8 @@ internal class OtlpHttpSpanExporterTest {
 
     @Test
     fun testFactoryWithCustomEngineExports() = runTest {
-        val request = CompletableDeferred<HttpRequestData>()
         val mockServer = MockEngine {
-            val response = respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
-            request.complete(it)
-            response
+            respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
         }
         val factoryExporter = fakeConfig().otlpHttpSpanExporter {
             endpoint = baseUrl
@@ -200,7 +198,10 @@ internal class OtlpHttpSpanExporterTest {
         try {
             val code = factoryExporter.export(spans)
             assertEquals(OperationResultCode.Success, code)
-            request.await()
+            // export() only enqueues; shutdown() waits for the background export to finish. The DSL exporter
+            // does real IO, so shutdown must run on real time, not the test's virtual time.
+            val shutdownCode = withContext(Dispatchers.Default) { factoryExporter.shutdown() }
+            assertEquals(OperationResultCode.Success, shutdownCode)
             assertEquals(1, mockServer.requestHistory.size)
         } finally {
             withContext(NonCancellable) {
