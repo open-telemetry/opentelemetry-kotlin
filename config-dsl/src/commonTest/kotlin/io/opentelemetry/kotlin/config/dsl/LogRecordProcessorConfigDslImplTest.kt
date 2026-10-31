@@ -35,15 +35,23 @@ internal class LogRecordProcessorConfigDslImplTest {
     }
 
     @Test
-    fun mapsSimpleAndBatchTogether() {
+    fun batchReplacesEarlierSimple() {
         val dsl = LogRecordProcessorConfigDslImpl()
         dsl.simple()
         dsl.batch()
         assertEquals(
-            LogRecordProcessorBehavior(
-                simple = SimpleLogRecordProcessorBehavior(),
-                batch = BatchLogRecordProcessorBehavior(),
-            ),
+            LogRecordProcessorBehavior(batch = BatchLogRecordProcessorBehavior()),
+            dsl.toBehavior(),
+        )
+    }
+
+    @Test
+    fun simpleReplacesEarlierBatch() {
+        val dsl = LogRecordProcessorConfigDslImpl()
+        dsl.batch()
+        dsl.simple()
+        assertEquals(
+            LogRecordProcessorBehavior(simple = SimpleLogRecordProcessorBehavior()),
             dsl.toBehavior(),
         )
     }

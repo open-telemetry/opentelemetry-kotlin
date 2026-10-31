@@ -19,7 +19,13 @@ class LogRecordProcessorConfigDslImpl {
         else -> LogRecordProcessorBehavior(simple = simple, batch = batch)
     }
 
-    fun simple(): SimpleLogRecordProcessorBehavior = SimpleLogRecordProcessorBehavior().also { simple = it }
+    fun simple(): SimpleLogRecordProcessorBehavior = SimpleLogRecordProcessorBehavior().also {
+        simple = it
+        batch = null
+    }
 
-    fun batch(): BatchLogRecordProcessorBehavior = BatchLogRecordProcessorBehavior().also { batch = it }
+    fun batch(): BatchLogRecordProcessorBehavior = BatchLogRecordProcessorBehavior().also {
+        batch = it
+        simple = null
+    }
 }
