@@ -25,14 +25,18 @@ import io.opentelemetry.api.metrics.DoubleUpDownCounter
 import io.opentelemetry.api.metrics.DoubleUpDownCounterBuilder
 import io.opentelemetry.api.metrics.LongCounter
 import io.opentelemetry.api.metrics.LongCounterBuilder
+import io.opentelemetry.api.metrics.LongGauge
+import io.opentelemetry.api.metrics.LongGaugeBuilder
 import io.opentelemetry.api.metrics.LongUpDownCounter
 import io.opentelemetry.api.metrics.LongUpDownCounterBuilder
 import io.opentelemetry.api.metrics.Meter
 import io.opentelemetry.api.metrics.MeterBuilder
 import io.opentelemetry.api.metrics.MeterProvider
 import io.opentelemetry.api.metrics.ObservableDoubleCounter
+import io.opentelemetry.api.metrics.ObservableDoubleGauge
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement
 import io.opentelemetry.api.metrics.ObservableLongCounter
+import io.opentelemetry.api.metrics.ObservableLongGauge
 import io.opentelemetry.api.metrics.ObservableLongMeasurement
 import io.opentelemetry.api.metrics.ObservableLongUpDownCounter
 import io.opentelemetry.api.metrics.ObservableMeasurement
@@ -154,12 +158,16 @@ typealias OtelJavaDoubleCounter = DoubleCounter
 typealias OtelJavaLongCounter = LongCounter
 typealias OtelJavaDoubleCounterBuilder = DoubleCounterBuilder
 typealias OtelJavaLongCounterBuilder = LongCounterBuilder
+typealias OtelJavaLongGauge = LongGauge
+typealias OtelJavaLongGaugeBuilder = LongGaugeBuilder
 typealias OtelJavaDoubleUpDownCounter = DoubleUpDownCounter
 typealias OtelJavaLongUpDownCounter = LongUpDownCounter
 typealias OtelJavaDoubleUpDownCounterBuilder = DoubleUpDownCounterBuilder
 typealias OtelJavaLongUpDownCounterBuilder = LongUpDownCounterBuilder
 typealias OtelJavaObservableDoubleCounter = ObservableDoubleCounter
+typealias OtelJavaObservableDoubleGauge = ObservableDoubleGauge
 typealias OtelJavaObservableLongCounter = ObservableLongCounter
+typealias OtelJavaObservableLongGauge = ObservableLongGauge
 typealias OtelJavaObservableLongUpDownCounter = ObservableLongUpDownCounter
 typealias OtelJavaObservableMeasurement = ObservableMeasurement
 typealias OtelJavaObservableLongMeasurement = ObservableLongMeasurement

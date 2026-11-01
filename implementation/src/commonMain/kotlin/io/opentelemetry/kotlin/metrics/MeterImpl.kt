@@ -13,6 +13,19 @@ internal class MeterImpl(
     val resource: Resource,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Meter {
+    override fun createLongGauge(
+        name: String,
+        unit: String?,
+        description: String?,
+    ): LongGauge {
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: return LongGaugeImpl(
+            name,
+            sanitizeInstrumentUnit(unit),
+            sanitizeInstrumentDescription(description),
+        )
+        return noopMeter.createLongGauge(name, unit, description)
+    }
+
     override fun createDoubleUpDownCounter(
         name: String,
         unit: String?,

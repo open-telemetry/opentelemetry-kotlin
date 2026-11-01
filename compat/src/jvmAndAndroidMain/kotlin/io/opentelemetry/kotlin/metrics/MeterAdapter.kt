@@ -13,6 +13,18 @@ internal class MeterAdapter(
 ) : Meter {
     private val noopMeter = NoopOpenTelemetry.meterProvider.getMeter("")
 
+    override fun createLongGauge(
+        name: String,
+        unit: String?,
+        description: String?,
+    ): LongGauge =
+        sdkErrorHandler.sdkGuardOrDefault(null, "Meter.createLongGauge failed") {
+            val builder = impl.gaugeBuilder(name).ofLongs()
+            unit?.let(builder::setUnit)
+            description?.let(builder::setDescription)
+            LongGaugeAdapter(builder.build(), name, unit, description, sdkErrorHandler)
+        } ?: noopMeter.createLongGauge(name, unit, description)
+
     override fun createDoubleUpDownCounter(
         name: String,
         unit: String?,

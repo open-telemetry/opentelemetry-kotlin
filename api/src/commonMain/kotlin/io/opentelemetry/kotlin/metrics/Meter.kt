@@ -18,6 +18,18 @@ import io.opentelemetry.kotlin.ThreadSafe
 public interface Meter {
 
     /**
+     * Creates a [LongGauge] for recording current integer values.
+     *
+     * https://opentelemetry.io/docs/specs/otel/metrics/api/#gauge-creation
+     */
+    @ThreadSafe
+    public fun createLongGauge(
+        name: String,
+        unit: String? = null,
+        description: String? = null,
+    ): LongGauge
+
+    /**
      * Creates a [DoubleUpDownCounter] for recording signed floating-point increments and decrements.
      *
      * [name] is required and should conform to the
