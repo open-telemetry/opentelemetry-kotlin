@@ -9,6 +9,10 @@ class FakeMeter(
     val observableDoubleCounters: MutableList<FakeObservableDoubleCounter> = mutableListOf()
     val observableLongCounters: MutableList<FakeObservableLongCounter> = mutableListOf()
     val observableLongUpDownCounters: MutableList<FakeObservableLongUpDownCounter> = mutableListOf()
+    val doubleGauges: MutableList<FakeDoubleGauge> = mutableListOf()
+
+    override fun createDoubleGauge(name: String, unit: String?, description: String?): DoubleGauge =
+        FakeDoubleGauge(name, unit, description).also { doubleGauges.add(it) }
 
     override fun createDoubleUpDownCounter(
         name: String,

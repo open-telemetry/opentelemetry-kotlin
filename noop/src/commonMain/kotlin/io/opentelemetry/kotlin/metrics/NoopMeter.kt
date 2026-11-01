@@ -9,6 +9,9 @@ import io.opentelemetry.kotlin.ExperimentalApi
  */
 @ExperimentalApi
 internal object NoopMeter : Meter {
+    override fun createDoubleGauge(name: String, unit: String?, description: String?): DoubleGauge =
+        NoopDoubleGauge(name, unit, description)
+
     override fun createDoubleUpDownCounter(
         name: String,
         unit: String?,
