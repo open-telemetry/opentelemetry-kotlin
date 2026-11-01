@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaMetricReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 @OptIn(ExperimentalApi::class)
 internal class ObservableDoubleUpDownCounterAdapterTest {
@@ -59,5 +60,25 @@ internal class ObservableDoubleUpDownCounterAdapterTest {
         val recorded = errorHandler.userCodeErrors.single()
         assertEquals("ObservableDoubleUpDownCounter callback failed", recorded.message)
         assertEquals("boom", recorded.cause.message)
+    }
+
+    @Test
+    fun closingCounterUnregistersCallbacksAndRejectsNewOnes() {
+        var callbackCount = 0
+        val counter = meter.createObservableDoubleUpDownCounter(
+            name = "process.cpu.load",
+            callbacks = arrayOf({ callbackCount++ }),
+        )
+        counter.registerCallback { callbackCount++ }
+
+        reader.collect()
+        assertEquals(2, callbackCount)
+
+        counter.close()
+        counter.registerCallback { callbackCount++ }.close()
+        reader.collect()
+
+        assertEquals(2, callbackCount)
+        assertFalse(reader.collect().any { it.name == "process.cpu.load" })
     }
 }

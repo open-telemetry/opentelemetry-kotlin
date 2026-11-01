@@ -93,8 +93,6 @@ internal class OtelJavaMeterAdapterAsyncCounterTest {
             .setUnit("1")
             .setDescription("Process CPU load")
             .ofDoubles()
-            .setUnit("1")
-            .setDescription("Process CPU load (double)")
             .buildWithCallback { measurement ->
                 measurement.record(-0.5, OtelJavaAttributes.builder().put("process", "worker").build())
             }
@@ -105,7 +103,7 @@ internal class OtelJavaMeterAdapterAsyncCounterTest {
 
         assertEquals("process.cpu.load", observableCounter.name)
         assertEquals("1", observableCounter.unit)
-        assertEquals("Process CPU load (double)", observableCounter.description)
+        assertEquals("Process CPU load", observableCounter.description)
         assertEquals(listOf(-0.5 to mapOf<String, Any>("process" to "worker")), measurement.adds)
 
         counter.close()
