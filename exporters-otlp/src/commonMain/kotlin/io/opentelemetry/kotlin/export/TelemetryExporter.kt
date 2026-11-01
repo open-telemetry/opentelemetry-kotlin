@@ -42,9 +42,9 @@ internal class TelemetryExporter<T>(
         if (telemetry.isEmpty()) {
             return Success
         }
+        val currentJob = currentCoroutineContext()[Job]!!
         return try {
             withContext(coroutineContext) {
-                val currentJob = currentCoroutineContext()[Job]!!
                 val registered = activeExportsMutex.withLock {
                     if (shutdownState.isShutdown) {
                         false
