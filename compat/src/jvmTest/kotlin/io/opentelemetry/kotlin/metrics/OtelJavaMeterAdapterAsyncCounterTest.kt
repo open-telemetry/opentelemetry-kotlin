@@ -111,6 +111,24 @@ internal class OtelJavaMeterAdapterAsyncCounterTest {
     }
 
     @Test
+    fun doubleUpDownCounterBuilderCanSetMetadataAfterConvertingToDouble() {
+        val meter = FakeMeter("test")
+        val counter = OtelJavaMeterAdapter(meter)
+            .upDownCounterBuilder("process.memory.available")
+            .ofDoubles()
+            .setUnit("By")
+            .setDescription("Available memory")
+            .buildWithCallback { measurement -> measurement.record(1.5) }
+        val observableCounter = meter.observableDoubleUpDownCounters.single()
+
+        assertEquals("By", observableCounter.unit)
+        assertEquals("Available memory", observableCounter.description)
+
+        counter.close()
+        assertTrue(observableCounter.callbacks.isEmpty())
+    }
+
+    @Test
     fun synchronousCounterBuildersRemainNoop() {
         val meter = FakeMeter("test")
         val javaMeter = OtelJavaMeterAdapter(meter)
