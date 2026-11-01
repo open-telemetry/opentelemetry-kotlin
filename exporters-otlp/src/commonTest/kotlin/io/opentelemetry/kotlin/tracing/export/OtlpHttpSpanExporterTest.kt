@@ -34,6 +34,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -108,12 +109,12 @@ internal class OtlpHttpSpanExporterTest {
         exporter().withShutdown { exporter ->
             mockResponseStatus = HttpStatusCode.OK
             serverDelayMs = 1000
-            val code = exporter.export(spans)
-            assertEquals(OperationResultCode.Success, code)
+            val export = launch { exporter.export(spans) }
             requestBody.await()
 
             val shutdownCode = exporter.shutdown()
             assertEquals(OperationResultCode.Success, shutdownCode)
+            assertTrue(export.isCancelled)
             advanceUntilIdle()
             assertTrue(server.requestHistory.isEmpty())
         }
