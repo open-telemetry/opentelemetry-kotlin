@@ -29,6 +29,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -103,12 +104,12 @@ internal class OtlpHttpLogRecordExporterTest {
         exporter().withShutdown { exporter ->
             mockResponseStatus = HttpStatusCode.OK
             serverDelayMs = 1000
-            val code = exporter.export(logRecords)
-            assertEquals(OperationResultCode.Success, code)
+            val export = launch { exporter.export(logRecords) }
             requestBody.await()
 
             val shutdownCode = exporter.shutdown()
             assertEquals(OperationResultCode.Success, shutdownCode)
+            assertTrue(export.isCancelled)
 
             advanceUntilIdle()
             assertTrue(server.requestHistory.isEmpty())
