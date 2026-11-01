@@ -17,6 +17,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 internal class MeterProviderImplTest {
 
@@ -65,6 +66,38 @@ internal class MeterProviderImplTest {
         counter.registerCallback { called = true }.close()
         counter.close()
         assertFalse(called)
+    }
+
+    @Test
+    fun testDoubleGaugeExposesMetadata() {
+        val gauge = impl.getMeter("test").createDoubleGauge(
+            name = "temperature",
+            unit = "Cel",
+            description = "Current temperature",
+        )
+
+        assertEquals("temperature", gauge.name)
+        assertEquals("Cel", gauge.unit)
+        assertEquals("Current temperature", gauge.description)
+        assertTrue(gauge.enabled())
+        gauge.record(21.5) { setStringAttribute("room", "server") }
+    }
+
+    @Test
+    fun testInvalidDoubleGaugeNameReturnsNoop() {
+        val handler = FakeSdkErrorHandler()
+        val provider = MeterProviderImpl(
+            MetricsConfig(
+                resource = ResourceImpl(AttributesModel(), null),
+                sdkErrorHandler = handler,
+            ),
+            attributeLimits,
+        )
+
+        val gauge = provider.getMeter("test").createDoubleGauge("1.invalid")
+
+        assertFalse(gauge.enabled())
+        assertEquals("Instrument.name", handler.apiMisuses.single().api)
     }
 
     @Test
