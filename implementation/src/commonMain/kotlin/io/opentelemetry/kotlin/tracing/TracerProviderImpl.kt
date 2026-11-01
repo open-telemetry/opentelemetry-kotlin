@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
@@ -40,8 +39,7 @@ internal class TracerProviderImpl(
         tracingConfig.processor?.let { listOf(it) } ?: emptyList(),
         sdkErrorHandler,
     )
-    private val noopTracer = NoopOpenTelemetry.tracerProvider.getTracer("")
-    private val propagatingNoopTracer = PropagatingNoopTracer(contextFactory, sdkErrorHandler)
+    private val noopTracer = PropagatingNoopTracer(contextFactory, sdkErrorHandler)
     private val spanLimitConfig = SpanLimitConfig(spanLimits)
 
     private val sampler = sdkErrorHandler.guardOrDefault(DefaultSampler, "Failed to create sampler, using default") {
@@ -50,7 +48,7 @@ internal class TracerProviderImpl(
 
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
         if (tracingConfig.processor == null) {
-            return@ApiProviderImpl propagatingNoopTracer
+            return@ApiProviderImpl noopTracer
         }
         val tracerConfig = userCode { tracingConfig.tracerConfigurator.tracerConfig(key) }
         if (!tracerConfig.enabled) {

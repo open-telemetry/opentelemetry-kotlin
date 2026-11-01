@@ -14,5 +14,11 @@ internal object NoopTracer : Tracer {
         spanKind: SpanKind,
         startTimestamp: Long?,
         action: (SpanCreationAction.() -> Unit)?
-    ): Span = NoopSpan
+    ): Span {
+        val parentSpanContext = runCatching { parentContext?.extractSpan()?.spanContext }.getOrNull()
+        return when {
+            parentSpanContext?.isValid == true -> createNonRecordingSpan(parentSpanContext)
+            else -> NoopSpan
+        }
+    }
 }

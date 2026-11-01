@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.toOtelJavaValue
+import io.opentelemetry.kotlin.behavior.limitOrUnset
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.error.userCode
@@ -39,7 +40,12 @@ internal class SpanAdapter(
     creationState: CompatSpanCreationState? = null,
 ) : Span, AttributeContainer, SpanCreationAction, OtelJavaImplicitContextKeyed {
 
-    private val attrs: MutableMap<String, Any> = ConcurrentHashMap(creationState?.attributes.orEmpty())
+    private val attrs: MutableMap<String, Any> = ConcurrentHashMap(
+        creationState?.attributes.orEmpty().mapValues { (_, value) -> truncateAttributeValue(value) }
+    )
+
+    private val attributeValueLengthLimit: Int
+        get() = limitOrUnset(spanLimitsConfig.attributeValueLengthLimit) ?: Int.MAX_VALUE
     private val linksImpl: ConcurrentLinkedQueue<SpanLink> =
         ConcurrentLinkedQueue(creationState?.links.orEmpty())
 
@@ -114,74 +120,90 @@ internal class SpanAdapter(
         }
     }
 
+    private fun storeAttribute(key: String, value: Any) {
+        if (attrs.containsKey(key) || attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
+            attrs[key] = applyValueLengthLimit(value)
+        }
+    }
+
+    private fun applyValueLengthLimit(value: Any): Any {
+        limitOrUnset(spanLimitsConfig.attributeValueLengthLimit) ?: return value
+        return truncateAttributeValue(value)
+    }
+
     override fun setBooleanAttribute(key: String, value: Boolean) {
         impl.setAttribute(key, value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        storeAttribute(key, value)
     }
 
     override fun setStringAttribute(key: String, value: String) {
         impl.setAttribute(key, value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        storeAttribute(key, value)
     }
 
     override fun setLongAttribute(key: String, value: Long) {
         impl.setAttribute(key, value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        storeAttribute(key, value)
     }
 
     override fun setDoubleAttribute(key: String, value: Double) {
         impl.setAttribute(key, value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        storeAttribute(key, value)
     }
 
     override fun setBooleanListAttribute(key: String, value: List<Boolean>) {
         impl.setAttribute(OtelJavaAttributeKey.booleanArrayKey(key), value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        storeAttribute(key, value)
     }
 
     override fun setStringListAttribute(key: String, value: List<String>) {
         impl.setAttribute(OtelJavaAttributeKey.stringArrayKey(key), value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        storeAttribute(key, value)
     }
 
     override fun setLongListAttribute(key: String, value: List<Long>) {
         impl.setAttribute(OtelJavaAttributeKey.longArrayKey(key), value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        storeAttribute(key, value)
     }
 
     override fun setDoubleListAttribute(key: String, value: List<Double>) {
         impl.setAttribute(OtelJavaAttributeKey.doubleArrayKey(key), value)
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        storeAttribute(key, value)
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
         impl.setAttribute(OtelJavaAttributeKey.valueKey(key), OtelJavaValue.of(value))
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
-        }
+        storeAttribute(key, value)
     }
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
         impl.setAttribute(OtelJavaAttributeKey.valueKey(key), value.toOtelJavaValue())
-        if (attrs.size < spanLimitsConfig.effectiveAttributeCountLimit) {
-            attrs[key] = value
+        storeAttribute(key, value)
+    }
+
+    private fun truncateAttributeValue(value: Any): Any = when (value) {
+        is String -> value.take(attributeValueLengthLimit)
+        is List<*> -> value.map { item ->
+            if (item is String) {
+                item.take(attributeValueLengthLimit)
+            } else {
+                item
+            }
         }
+        is ByteArray -> value.copyOf(minOf(value.size, attributeValueLengthLimit))
+        is AnyValue -> truncateAnyValue(value)
+        else -> value
+    }
+
+    private fun truncateAnyValue(value: AnyValue): AnyValue = when (value) {
+        is AnyValue.StringValue -> AnyValue.StringValue(value.value.take(attributeValueLengthLimit))
+        is AnyValue.BytesValue -> AnyValue.BytesValue(value.value.copyOf(minOf(value.value.size, attributeValueLengthLimit)))
+        is AnyValue.ListValue -> AnyValue.ListValue(value.values.map(::truncateAnyValue))
+        is AnyValue.MapValue -> AnyValue.MapValue(value.values.mapValues { (_, nested) -> truncateAnyValue(nested) })
+        AnyValue.NullValue,
+        is AnyValue.BoolValue,
+        is AnyValue.LongValue,
+        is AnyValue.DoubleValue -> value
     }
 
     override fun storeInContext(context: OtelJavaContext): OtelJavaContext? {

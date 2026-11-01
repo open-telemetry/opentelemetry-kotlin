@@ -22,7 +22,6 @@ import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 /**
@@ -51,7 +50,6 @@ internal class TracerErrorHandlingTest {
 
             val span = tracer.startSpan("test-span", action = case.action)
 
-            assertIs<NonRecordingSpan>(span, case.name)
             assertFalse(span.isRecording(), case.name)
             assertFalse(span.spanContext.isValid, case.name)
             assertTrue(processor.startCalls.isEmpty(), case.name)

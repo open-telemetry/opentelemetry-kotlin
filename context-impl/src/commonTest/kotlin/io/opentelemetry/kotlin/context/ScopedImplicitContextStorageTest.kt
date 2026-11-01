@@ -27,12 +27,12 @@ internal class ScopedImplicitContextStorageTest {
     fun testAttachDelegatesToStorage() {
         val ctx = newContext()
         val scope = ctx.attach()
-        assertSame(ctx, factory.implicit())
+        assertSame(ctx, factory.current())
         assertEquals(1, storage.attachCount)
         assertEquals(0, storage.setCount)
 
         assertTrue(scope.detach())
-        assertSame(factory.root(), factory.implicit())
+        assertSame(factory.root(), factory.current())
         assertEquals(0, storage.setCount)
     }
 
@@ -64,11 +64,11 @@ internal class ScopedImplicitContextStorageTest {
 
         assertTrue(scope2.detach())
         assertTrue(scope1.detach())
-        assertSame(factory.root(), factory.implicit())
+        assertSame(factory.root(), factory.current())
     }
 
     private fun newContext(): Context =
-        factory.root().set(factory.createKey("key"), Any())
+        factory.root().set(createContextKey("key"), Any())
 
     private class FakeScopedImplicitContextStorage(
         rootSupplier: () -> Context,

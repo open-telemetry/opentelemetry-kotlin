@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.propagation
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.context.FakeContext
-import io.opentelemetry.kotlin.context.FakeContextKey
+import io.opentelemetry.kotlin.context.createContextKey
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -49,8 +49,8 @@ internal class CompositePropagatorEntrypointTest {
 
     @Test
     fun `extract threads context through delegates left-to-right`() {
-        val keyA = FakeContextKey<String>("a")
-        val keyB = FakeContextKey<String>("b")
+        val keyA = createContextKey<String>("a")
+        val keyB = createContextKey<String>("b")
         val composite = createCompositePropagator(
             FakeTextMapPropagator(onExtract = { it.set(keyA, "alpha") }),
             FakeTextMapPropagator(onExtract = { it.set(keyB, "beta") }),
@@ -69,7 +69,7 @@ internal class CompositePropagatorEntrypointTest {
 
     @Test
     fun `later delegate sees the context written by an earlier one`() {
-        val key = FakeContextKey<String>("k")
+        val key = createContextKey<String>("k")
         var observed: Any? = null
         val composite = createCompositePropagator(
             FakeTextMapPropagator(onExtract = { it.set(key, "first") }),

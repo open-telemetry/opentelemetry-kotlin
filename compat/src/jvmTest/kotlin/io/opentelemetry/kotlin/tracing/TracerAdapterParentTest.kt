@@ -43,7 +43,7 @@ internal class TracerAdapterParentTest {
     @Test
     fun `kotlin span inherits attached kotlin span as parent`() {
         val parent = tracer.startSpan("parent")
-        val scope = contextFactory.implicit().storeSpan(parent).attach()
+        val scope = contextFactory.current().storeSpan(parent).attach()
         val child = try {
             tracer.startSpan("child")
         } finally {

@@ -39,6 +39,36 @@ internal class MeterImpl(
         return noopMeter.createLongUpDownCounter(name, unit, description)
     }
 
+    override fun createObservableDoubleCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
+    ): ObservableDoubleCounter {
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
+        return noopMeter.createObservableDoubleCounter(name, unit, description, *callbacks)
+    }
+
+    override fun createObservableLongCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongCounter {
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
+        return noopMeter.createObservableLongCounter(name, unit, description, *callbacks)
+    }
+
+    override fun createObservableLongUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongUpDownCounter {
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
+        return noopMeter.createObservableLongUpDownCounter(name, unit, description, *callbacks)
+    }
+
     /**
      * Returns a noop meter if [name] is not a valid
      * [instrument name](https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-name-syntax),
@@ -48,8 +78,10 @@ internal class MeterImpl(
     private fun obtainNoopMeterIfInvalid(name: String): Meter? = if (isValidInstrumentName(name)) {
         null
     } else {
-        NoopOpenTelemetry.meterProvider.getMeter("")
+        getNoopMeter()
     }
+
+    private fun getNoopMeter(): Meter = NoopOpenTelemetry.meterProvider.getMeter("")
 
     /**
      * Checks [name] against the

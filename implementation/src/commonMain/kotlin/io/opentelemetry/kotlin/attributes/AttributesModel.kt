@@ -88,7 +88,7 @@ internal class AttributesModel(
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
         ifPreconditionsOk(key) {
-            attrs[key] = copyAnyValue(truncateAnyValue(value))
+            attrs[key] = truncateAnyValue(copyAnyValue(value, emptyList()))
         }
     }
 
@@ -166,15 +166,23 @@ internal class AttributesModel(
         }
     }
 
-    private fun copyAnyValue(value: AnyValue): AnyValue = when (value) {
-        is AnyValue.BytesValue -> AnyValue.BytesValue(value.value.copyOf())
-        is AnyValue.ListValue -> AnyValue.ListValue(value.values.map(::copyAnyValue))
-        is AnyValue.MapValue -> AnyValue.MapValue(value.values.mapValues { (_, nested) -> copyAnyValue(nested) })
-        AnyValue.NullValue,
-        is AnyValue.StringValue,
-        is AnyValue.BoolValue,
-        is AnyValue.LongValue,
-        is AnyValue.DoubleValue -> value
+    private fun copyAnyValue(value: AnyValue, ancestors: List<AnyValue>): AnyValue {
+        if (ancestors.size >= MAX_ATTRIBUTE_VALUE_DEPTH || ancestors.any { it === value }) {
+            return AnyValue.NullValue
+        }
+        val path = ancestors + value
+        return when (value) {
+            is AnyValue.BytesValue -> AnyValue.BytesValue(value.value.copyOf())
+            is AnyValue.ListValue -> AnyValue.ListValue(value.values.map { copyAnyValue(it, path) })
+            is AnyValue.MapValue -> AnyValue.MapValue(
+                value.values.mapValues { (_, nested) -> copyAnyValue(nested, path) },
+            )
+            AnyValue.NullValue,
+            is AnyValue.StringValue,
+            is AnyValue.BoolValue,
+            is AnyValue.LongValue,
+            is AnyValue.DoubleValue -> value
+        }
     }
 
     private var droppedAttributesCountImpl = 0
@@ -256,3 +264,9 @@ internal class AttributesModel(
 internal const val DEFAULT_ATTRIBUTE_LIMIT: Int = 128
 internal const val DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT: Int = Int.MAX_VALUE
 internal const val NO_ATTRIBUTE_LIMIT: Int = Int.MAX_VALUE
+
+/**
+ * Nested values deeper than this, and values that contain themselves, are stored as
+ * [AnyValue.NullValue]. Same bound as log-body normalization.
+ */
+internal const val MAX_ATTRIBUTE_VALUE_DEPTH: Int = 16

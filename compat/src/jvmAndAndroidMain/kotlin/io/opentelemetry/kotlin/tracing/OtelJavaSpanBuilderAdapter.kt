@@ -105,7 +105,7 @@ internal class OtelJavaSpanBuilderAdapter(
     override fun startSpan(): OtelJavaSpan {
         val parentContext = when {
             noParent -> contextFactory.root()
-            else -> parent?.toOtelKotlinContext() ?: contextFactory.implicit()
+            else -> parent?.toOtelKotlinContext() ?: contextFactory.current()
         }
         val span = tracer.startSpan(
             name = spanName,

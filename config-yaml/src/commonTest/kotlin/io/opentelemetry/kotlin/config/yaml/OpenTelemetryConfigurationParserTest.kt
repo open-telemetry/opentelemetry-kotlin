@@ -34,6 +34,7 @@ internal class OpenTelemetryConfigurationParserTest {
             fileFormat = "1.0",
             disabled = false,
             logLevel = SeverityNumber.INFO,
+            distribution = mapOf("key" to "value"),
             resource = Resource(
                 attributes = listOf(
                     AttributeNameValue(

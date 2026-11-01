@@ -101,7 +101,7 @@ internal class OtelJavaLogRecordBuilderAdapter(
             eventName = eventName,
             timestamp = timestamp,
             observedTimestamp = observedTimestamp,
-            context = context?.toOtelKotlinContext() ?: contextFactory.implicit(),
+            context = context?.toOtelKotlinContext() ?: contextFactory.current(),
             severityNumber = severity?.toOtelKotlinSeverityNumber(),
             severityText = severityText,
             exception = exception,

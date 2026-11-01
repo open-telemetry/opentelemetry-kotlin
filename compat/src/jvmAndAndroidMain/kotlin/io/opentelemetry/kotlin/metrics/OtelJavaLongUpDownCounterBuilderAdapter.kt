@@ -34,6 +34,13 @@ internal class OtelJavaLongUpDownCounterBuilderAdapter(
 
     override fun buildWithCallback(
         callback: Consumer<OtelJavaObservableLongMeasurement>,
-    ): OtelJavaObservableLongUpDownCounter =
-        javaMeterProvider.get("").upDownCounterBuilder(name).buildWithCallback(callback)
+    ): OtelJavaObservableLongUpDownCounter {
+        val measurementCallback: (ObservableLongMeasurement) -> Unit = { measurement ->
+            callback.accept(OtelJavaObservableLongMeasurementAdapter(measurement))
+        }
+        val counter = meter.createObservableLongUpDownCounter(name, unit, description, measurementCallback)
+        return object : OtelJavaObservableLongUpDownCounter {
+            override fun close() = counter.close()
+        }
+    }
 }

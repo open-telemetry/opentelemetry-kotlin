@@ -24,6 +24,7 @@ internal class TelemetryExporter<T>(
     private val maxAttempts: Int,
     private val sdkErrorHandler: SdkErrorHandler,
     private val coroutineContext: CoroutineContext = ioDispatcher,
+    timeSource: kotlin.time.TimeSource.WithComparableMarks = kotlin.time.TimeSource.Monotonic,
     private val random: Random = Random.Default,
     private val exportAction: suspend (telemetry: List<T>) -> OtlpResponse,
 ) : TelemetryCloseable {

@@ -96,7 +96,7 @@ private fun demonstrateSpanNesting(tracer: Tracer, contextFactory: ContextFactor
         SpanKind.INTERNAL,
         null
     ) { setStringAttribute("operation.type", "database-transaction") }
-    val parentContext = contextFactory.implicit().storeSpan(parentSpan)
+    val parentContext = contextFactory.current().storeSpan(parentSpan)
 
     // Create first child span (database query)
     val childSpan1 =

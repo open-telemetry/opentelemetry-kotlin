@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
@@ -432,8 +433,8 @@ internal class SpanExportTest {
         harness.config.spanProcessors.add(contextCapturingProcessor)
 
         // Create a context key and add a test value
-        val currentContext = harness.kotlinApi.context.implicit()
-        val contextKey = harness.kotlinApi.context.createKey<String>("best_team")
+        val currentContext = harness.kotlinApi.context.current()
+        val contextKey = createContextKey<String>("best_team")
         val testContextValue = "independiente"
         val testContext = currentContext.set(contextKey, testContextValue)
 
@@ -504,6 +505,39 @@ internal class SpanExportTest {
         b.end()
         c.end()
         harness.assertSpans(3, "span_limits.json")
+    }
+
+    @Test
+    fun `test span attribute can be updated after the count limit is reached`() = runTest {
+        harness.config.spanLimits = {
+            attributeCountLimit = 1
+        }
+        val span = harness.tracer.startSpan("span")
+        span.setStringAttribute("key", "first")
+        span.setStringAttribute("other", "ignored")
+        span.setStringAttribute("key", "second")
+
+        assertEquals(
+            mapOf<String, Any>("key" to "second"),
+            (span as AttributeContainer).attributes
+        )
+        span.end()
+    }
+
+    @Test
+    fun `test span attribute values are truncated to the length limit`() = runTest {
+        harness.config.spanLimits = {
+            attributeValueLengthLimit = 3
+        }
+        val span = harness.tracer.startSpan("span")
+        span.setStringAttribute("key", "abcdef")
+        span.setStringListAttribute("list", listOf("abcdef", "xy"))
+
+        assertEquals(
+            mapOf<String, Any>("key" to "abc", "list" to listOf("abc", "xy")),
+            (span as AttributeContainer).attributes
+        )
+        span.end()
     }
 
     @Test

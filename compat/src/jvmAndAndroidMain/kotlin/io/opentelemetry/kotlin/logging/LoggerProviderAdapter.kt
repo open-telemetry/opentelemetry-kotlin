@@ -52,7 +52,7 @@ internal class LoggerProviderAdapter(
         ) {
             awaitOperationResultCode { impl.forceFlush() }
         }
-        else -> OperationResultCode.Success
+        else -> OperationResultCode.Failure
     }
 
     override suspend fun shutdown(): OperationResultCode = when (impl) {
@@ -62,6 +62,6 @@ internal class LoggerProviderAdapter(
         ) {
             awaitOperationResultCode { impl.shutdown() }
         }
-        else -> OperationResultCode.Success
+        else -> OperationResultCode.Failure
     }
 }

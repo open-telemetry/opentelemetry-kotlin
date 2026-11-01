@@ -75,13 +75,13 @@ internal class OtelJavaOpenTelemetryExtTest {
     }
 
     @Test
-    fun testNoopJavaApiHasSuccessfulNoOpLifecycleOperations() = runTest {
+    fun testNoopJavaApiReportsFailureForUnsupportedLifecycleOperations() = runTest {
         val closeable = assertIs<TelemetryCloseable>(
             OtelJavaOpenTelemetry.noop().toOtelKotlinApi()
         )
 
-        assertEquals(OperationResultCode.Success, closeable.forceFlush())
-        assertEquals(OperationResultCode.Success, closeable.shutdown())
+        assertEquals(OperationResultCode.Failure, closeable.forceFlush())
+        assertEquals(OperationResultCode.Failure, closeable.shutdown())
     }
 
     @Test

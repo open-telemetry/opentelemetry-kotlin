@@ -24,7 +24,7 @@ internal class TracerAdapter(
 ) : Tracer {
 
     private val invalidSpan: Span by lazy {
-        NonRecordingSpan(createInvalidSpanContext(), createInvalidSpanContext())
+        createNonRecordingSpan(createInvalidSpanContext())
     }
 
     override fun enabled(): Boolean =
@@ -40,7 +40,7 @@ internal class TracerAdapter(
         action: (SpanCreationAction.() -> Unit)?
     ): Span {
         val parentCtx = sdkErrorHandler.sdkGuardOrDefault(null, "Tracer.startSpan failed") {
-            (parentContext ?: contextFactory.implicit()).toOtelJavaContext()
+            (parentContext ?: contextFactory.current()).toOtelJavaContext()
         } ?: return invalidSpan
 
         return sdkErrorHandler.sdkGuardOrDefault(null, "Tracer.startSpan failed") {
@@ -78,6 +78,6 @@ internal class TracerAdapter(
     private fun fallbackSpan(parentCtx: OtelJavaContext): Span =
         sdkErrorHandler.sdkGuardOrDefault(invalidSpan) {
             val parent = OtelJavaSpan.fromContext(parentCtx).spanContext.toOtelKotlinSpanContext()
-            NonRecordingSpan(parent, parent)
+            createNonRecordingSpan(parent, parent = parent)
         }
 }

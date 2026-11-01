@@ -107,7 +107,7 @@ internal class OtelJavaSpanAdapter(
         return if ((span is OtelJavaImplicitContextKeyed)) {
             span.makeCurrent()
         } else {
-            val scope = contextFactory.implicit().storeSpan(span).attach()
+            val scope = contextFactory.current().storeSpan(span).attach()
             OtelJavaScope { scope.detach() }
         }
     }

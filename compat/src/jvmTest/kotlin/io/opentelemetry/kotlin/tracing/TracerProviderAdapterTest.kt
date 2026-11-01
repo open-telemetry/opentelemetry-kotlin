@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.aliases.OtelJavaCompletableResultCode
+import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -52,6 +53,19 @@ internal class TracerProviderAdapterTest {
         val first = adapter.getTracer(name = "name")
         val second = adapter.getTracer(name = "name", version = "null")
         assertNotSame(first, second)
+    }
+
+    @Test
+    fun testForceFlushAndShutdownFailForNonSdkProvider() = runTest {
+        val adapter = TracerProviderAdapter(
+            OtelJavaOpenTelemetry.noop().tracerProvider,
+            CompatSpanLimitsConfig(),
+            CompatContextFactory(),
+            NoopSdkErrorHandler,
+        )
+
+        assertEquals(OperationResultCode.Failure, adapter.forceFlush())
+        assertEquals(OperationResultCode.Failure, adapter.shutdown())
     }
 
     @Test

@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.config.dsl.PropagatorConfigImpl
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
+import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -18,7 +19,7 @@ internal class CompatPropagatorApiTest {
 
     @Test
     fun `composite of zero propagators returns a working noop`() {
-        val key: ContextKey<String> = contextFactory.createKey("k")
+        val key: ContextKey<String> = createContextKey("k")
         val composite = dsl.composite()
         assertTrue(composite.fields().isEmpty())
 
@@ -61,8 +62,8 @@ internal class CompatPropagatorApiTest {
 
     @Test
     fun `composite threads context through extract delegates left-to-right`() {
-        val keyA: ContextKey<String> = contextFactory.createKey("a")
-        val keyB: ContextKey<String> = contextFactory.createKey("b")
+        val keyA: ContextKey<String> = createContextKey("a")
+        val keyB: ContextKey<String> = createContextKey("b")
         val composite = dsl.composite(
             ContextWritingPropagator(keyA, "alpha"),
             ContextWritingPropagator(keyB, "beta"),
@@ -114,12 +115,12 @@ private class RecordingPropagator(private val keys: List<String>) : TextMapPropa
 
     override fun fields(): Collection<String> = keys
 
-    override fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>) {
+    override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {
         injectCalled = true
         keys.forEach { setter.set(carrier, it, "set-by-$it") }
     }
 
-    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context {
+    override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context {
         extractCalled = true
         return context
     }
@@ -131,7 +132,7 @@ private class ContextWritingPropagator(
     private val value: String,
 ) : TextMapPropagator {
     override fun fields(): Collection<String> = emptyList()
-    override fun <T> inject(context: Context, carrier: T?, setter: TextMapSetter<T>) {}
-    override fun <T> extract(context: Context, carrier: T?, getter: TextMapGetter<T>): Context =
+    override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {}
+    override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context =
         context.set(key, value)
 }

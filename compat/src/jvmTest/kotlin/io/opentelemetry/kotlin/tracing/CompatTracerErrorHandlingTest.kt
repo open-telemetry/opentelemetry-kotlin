@@ -14,7 +14,6 @@ import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
@@ -28,7 +27,7 @@ internal class CompatTracerErrorHandlingTest {
         val tracer = createOtel(processor).tracerProvider.getTracer("test")
         val span = tracer.startSpan("span") { boom() }
 
-        assertIs<NonRecordingSpan>(span)
+        assertFalse(span.isRecording())
         assertFalse(span.spanContext.isValid)
         assertTrue(processor.startCalls.isEmpty())
         assertSingleError("Tracer.startSpan failed")

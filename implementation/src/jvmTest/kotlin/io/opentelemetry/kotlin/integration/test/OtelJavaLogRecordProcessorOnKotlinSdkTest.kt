@@ -171,7 +171,7 @@ internal class OtelJavaLogRecordProcessorOnKotlinSdkTest {
         val processor = RecordingOtelJavaLogRecordProcessor()
         harness.config.logRecordProcessors.add(processor.toOtelKotlinLogRecordProcessor())
         val span = harness.tracer.startSpan("span")
-        val ctx = harness.kotlinApi.context.implicit()
+        val ctx = harness.kotlinApi.context.current()
             .storeSpan(span)
             .storeBaggage(createBaggage { put("key", "value") })
         val scope = ctx.attach()

@@ -13,10 +13,9 @@ import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeTraceState
-import io.opentelemetry.kotlin.tracing.NonRecordingSpan
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.TracerImpl
-import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
+import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
 import io.opentelemetry.kotlin.tracing.createSpanContext
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.fakeSpanLimitsConfig
@@ -53,7 +52,7 @@ internal class BuiltInSamplersTest {
             isSampled = sampled
             this.isRemote = isRemote
         }
-        val parentSpan = NonRecordingSpan(createInvalidSpanContext(), parentSpanContext)
+        val parentSpan = createNonRecordingSpan(parentSpanContext)
         return contextFactory.root().storeSpan(parentSpan)
     }
 
