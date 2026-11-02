@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.export.TelemetryExporter
 import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.TimeSource
 
 internal class OtlpHttpLogRecordExporter(
     private val otlpClient: OtlpClient,
@@ -15,6 +16,7 @@ internal class OtlpHttpLogRecordExporter(
     maxAttempts: Int,
     sdkErrorHandler: SdkErrorHandler,
     coroutineContext: CoroutineContext = ioDispatcher,
+    timeSource: TimeSource.WithComparableMarks = TimeSource.Monotonic,
 ) : LogRecordExporter {
 
     private val exporter = TelemetryExporter(
@@ -23,6 +25,7 @@ internal class OtlpHttpLogRecordExporter(
         maxAttempts,
         sdkErrorHandler,
         coroutineContext,
+        timeSource
     ) {
         otlpClient.exportLogs(it)
     }
@@ -32,5 +35,10 @@ internal class OtlpHttpLogRecordExporter(
     }
 
     override suspend fun forceFlush(): OperationResultCode = exporter.forceFlush()
-    override suspend fun shutdown(): OperationResultCode = exporter.shutdown()
+
+    override suspend fun shutdown(): OperationResultCode = try {
+        exporter.shutdown()
+    } finally {
+        otlpClient.release()
+    }
 }

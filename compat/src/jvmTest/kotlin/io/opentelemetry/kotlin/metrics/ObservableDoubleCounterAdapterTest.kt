@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkMeterProvider
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaMetricReader
 import kotlin.test.Test
@@ -76,5 +77,24 @@ internal class ObservableDoubleCounterAdapterTest {
         }.close()
         reader.collect()
         assertEquals(2, calls)
+    }
+
+    @Test
+    fun throwingCallbackIsReported() {
+        val errorHandler = FakeSdkErrorHandler()
+        val reader = FakeOtelJavaMetricReader()
+        val meter = MeterProviderAdapter(
+            OtelJavaSdkMeterProvider.builder().registerMetricReader(reader).build(),
+            errorHandler,
+        ).getMeter("test")
+        meter.createObservableDoubleCounter(
+            name = "process.cpu.time",
+            callbacks = arrayOf<(ObservableDoubleMeasurement) -> Unit>({ error("boom") }, { it.record(1.0) }),
+        )
+
+        assertEquals(listOf(1.0), reader.collect().single().doubleSumData.points.map { it.value })
+        val recorded = errorHandler.userCodeErrors.single()
+        assertEquals("ObservableDoubleCounter callback failed", recorded.message)
+        assertEquals("boom", recorded.cause.message)
     }
 }

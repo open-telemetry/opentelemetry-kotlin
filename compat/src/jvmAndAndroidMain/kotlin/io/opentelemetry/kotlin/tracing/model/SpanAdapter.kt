@@ -40,7 +40,12 @@ internal class SpanAdapter(
     creationState: CompatSpanCreationState? = null,
 ) : Span, AttributeContainer, SpanCreationAction, OtelJavaImplicitContextKeyed {
 
-    private val attrs: MutableMap<String, Any> = ConcurrentHashMap(creationState?.attributes.orEmpty())
+    private val attrs: MutableMap<String, Any> = ConcurrentHashMap(
+        creationState?.attributes.orEmpty().mapValues { (_, value) -> truncateAttributeValue(value) }
+    )
+
+    private val attributeValueLengthLimit: Int
+        get() = limitOrUnset(spanLimitsConfig.attributeValueLengthLimit) ?: Int.MAX_VALUE
     private val linksImpl: ConcurrentLinkedQueue<SpanLink> =
         ConcurrentLinkedQueue(creationState?.links.orEmpty())
 
@@ -122,18 +127,8 @@ internal class SpanAdapter(
     }
 
     private fun applyValueLengthLimit(value: Any): Any {
-        val limit = limitOrUnset(spanLimitsConfig.attributeValueLengthLimit) ?: return value
-        return when (value) {
-            is String -> value.take(limit)
-            is List<*> -> value.map {
-                if (it is String) {
-                    it.take(limit)
-                } else {
-                    it
-                }
-            }
-            else -> value
-        }
+        limitOrUnset(spanLimitsConfig.attributeValueLengthLimit) ?: return value
+        return truncateAttributeValue(value)
     }
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
@@ -184,6 +179,31 @@ internal class SpanAdapter(
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
         impl.setAttribute(OtelJavaAttributeKey.valueKey(key), value.toOtelJavaValue())
         storeAttribute(key, value)
+    }
+
+    private fun truncateAttributeValue(value: Any): Any = when (value) {
+        is String -> value.take(attributeValueLengthLimit)
+        is List<*> -> value.map { item ->
+            if (item is String) {
+                item.take(attributeValueLengthLimit)
+            } else {
+                item
+            }
+        }
+        is ByteArray -> value.copyOf(minOf(value.size, attributeValueLengthLimit))
+        is AnyValue -> truncateAnyValue(value)
+        else -> value
+    }
+
+    private fun truncateAnyValue(value: AnyValue): AnyValue = when (value) {
+        is AnyValue.StringValue -> AnyValue.StringValue(value.value.take(attributeValueLengthLimit))
+        is AnyValue.BytesValue -> AnyValue.BytesValue(value.value.copyOf(minOf(value.value.size, attributeValueLengthLimit)))
+        is AnyValue.ListValue -> AnyValue.ListValue(value.values.map(::truncateAnyValue))
+        is AnyValue.MapValue -> AnyValue.MapValue(value.values.mapValues { (_, nested) -> truncateAnyValue(nested) })
+        AnyValue.NullValue,
+        is AnyValue.BoolValue,
+        is AnyValue.LongValue,
+        is AnyValue.DoubleValue -> value
     }
 
     override fun storeInContext(context: OtelJavaContext): OtelJavaContext? {

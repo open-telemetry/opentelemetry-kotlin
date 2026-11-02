@@ -143,6 +143,20 @@ internal class CompatResourceDetectionConfigTest {
         assertEquals("Resource detector 'broken' failed", handler.userCodeErrors.single().message)
     }
 
+    @Test
+    fun `detector with throwing name is reported and skipped`() {
+        val handler = FakeSdkErrorHandler()
+        val cfg = CompatOpenTelemetryConfig(clock)
+        cfg.errorHandler(handler)
+        cfg.resourceDetection {
+            detector(FakeResourceDetector(name = "working", attributes = mapOf(testKey to "detected")))
+            detector(FakeResourceDetector(attributes = mapOf(testKey to "broken"), nameError = IllegalStateException("boom")))
+        }
+
+        assertEquals("detected", baseResource(cfg).attributes[testKey])
+        assertEquals("Failed to read resource detector name, skipping detector", handler.userCodeErrors.single().message)
+    }
+
     private fun baseResource(cfg: CompatOpenTelemetryConfig) =
         CompatSdkConfigFactory(cfg, cfg.toBehavior(), clock, CompatContextFactory()).baseResource
 }

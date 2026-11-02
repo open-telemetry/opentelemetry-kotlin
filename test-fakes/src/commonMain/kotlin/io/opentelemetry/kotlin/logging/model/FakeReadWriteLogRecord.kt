@@ -2,7 +2,8 @@ package io.opentelemetry.kotlin.logging.model
 
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
-import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.attributes.FakeAttributesMutator
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import io.opentelemetry.kotlin.logging.data.LogRecordData
@@ -11,62 +12,48 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.SpanContext
 
-class FakeReadWriteLogRecord(
-    override var timestamp: Long? = null,
-    override var observedTimestamp: Long? = null,
-    override var severityNumber: SeverityNumber? = SeverityNumber.UNKNOWN,
-    override var severityText: String? = null,
-    override var body: Any? = null,
-    override var eventName: String? = null,
-    override var spanContext: SpanContext = FakeSpanContext.INVALID,
-    override val attributes: Map<String, Any> = emptyMap(),
-    override val resource: Resource = FakeResource(),
-    override val instrumentationScopeInfo: InstrumentationScopeInfo =
-        FakeInstrumentationScopeInfo(),
-    override val droppedAttributesCount: Int = 0,
-) : ReadWriteLogRecord {
+class FakeReadWriteLogRecord private constructor(
+    override var timestamp: Long?,
+    override var observedTimestamp: Long?,
+    override var severityNumber: SeverityNumber?,
+    override var severityText: String?,
+    override var body: Any?,
+    override var eventName: String?,
+    override var spanContext: SpanContext,
+    private val attrs: FakeAttributesMutator,
+    override val resource: Resource,
+    override val instrumentationScopeInfo: InstrumentationScopeInfo,
+    override val droppedAttributesCount: Int,
+) : ReadWriteLogRecord, AttributesMutator by attrs {
 
-    override fun setBooleanAttribute(key: String, value: Boolean) {
-    }
+    constructor(
+        timestamp: Long? = null,
+        observedTimestamp: Long? = null,
+        severityNumber: SeverityNumber? = SeverityNumber.UNKNOWN,
+        severityText: String? = null,
+        body: Any? = null,
+        eventName: String? = null,
+        spanContext: SpanContext = FakeSpanContext.INVALID,
+        attributes: Map<String, Any> = emptyMap(),
+        resource: Resource = FakeResource(),
+        instrumentationScopeInfo: InstrumentationScopeInfo =
+            FakeInstrumentationScopeInfo(),
+        droppedAttributesCount: Int = 0,
+    ) : this(
+        timestamp,
+        observedTimestamp,
+        severityNumber,
+        severityText,
+        body,
+        eventName,
+        spanContext,
+        FakeAttributesMutator(attributes.toMutableMap()),
+        resource,
+        instrumentationScopeInfo,
+        droppedAttributesCount
+    )
 
-    override fun setStringAttribute(key: String, value: String) {
-    }
-
-    override fun setLongAttribute(key: String, value: Long) {
-    }
-
-    override fun setDoubleAttribute(key: String, value: Double) {
-    }
-
-    override fun setBooleanListAttribute(
-        key: String,
-        value: List<Boolean>
-    ) {
-    }
-
-    override fun setStringListAttribute(
-        key: String,
-        value: List<String>
-    ) {
-    }
-
-    override fun setLongListAttribute(
-        key: String,
-        value: List<Long>
-    ) {
-    }
-
-    override fun setDoubleListAttribute(
-        key: String,
-        value: List<Double>
-    ) {
-    }
-
-    override fun setByteArrayAttribute(key: String, value: ByteArray) {
-    }
-
-    override fun setAnyValueAttribute(key: String, value: AnyValue) {
-    }
+    override val attributes: Map<String, Any> get() = attrs.attributes
 
     override fun toLogRecordData(): LogRecordData = FakeLogRecordData(
         timestamp = timestamp,
