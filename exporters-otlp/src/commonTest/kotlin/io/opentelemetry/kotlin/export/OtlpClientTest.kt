@@ -291,6 +291,17 @@ internal class OtlpClientTest {
     }
 
     @Test
+    fun testThrowingConfigBlockIsReportedAndKeepsPartialConfig() {
+        val fakeHandler = FakeSdkErrorHandler()
+        val createdClient = createOtlpHttpClient(fakeHandler, OtlpEndpoint.Traces, getEnvVar = { null }) {
+            endpoint = "$baseUrl/partial"
+            error("bad config")
+        }
+        assertEquals("$baseUrl/partial", createdClient.baseUrl)
+        assertEquals(1, fakeHandler.userCodeErrors.size)
+    }
+
+    @Test
     fun testEndpointEnvironmentPrecedence() {
         val values = mapOf(
             "OTEL_EXPORTER_OTLP_ENDPOINT" to "$baseUrl/base",
