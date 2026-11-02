@@ -5,13 +5,13 @@ import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaContextStorage
 
 /**
- * Stores the implicit context in opentelemetry-java's `ContextStorage`, so that Kotlin and Java
- * code can share a single implicit context. This is only relevant when using [toOtelJavaApi].
+ * Stores the current context in opentelemetry-java's `ContextStorage`, so that Kotlin and Java
+ * code can share a single current context. This is only relevant when using [toOtelJavaApi].
  */
 @ExperimentalApi
-internal class OtelJavaImplicitContextStorage(
+internal class OtelJavaCurrentContextStorage(
     rootSupplier: () -> Context,
-) : ScopedImplicitContextStorage {
+) : ScopedCurrentContextStorage {
 
     private val root by lazy { rootSupplier() }
 
@@ -20,11 +20,11 @@ internal class OtelJavaImplicitContextStorage(
         return ScopeAdapter(scope)
     }
 
-    override fun setImplicitContext(context: Context) {
+    override fun setCurrent(context: Context) {
         OtelJavaContextStorage.get().attach(context.toOtelJavaContext())
     }
 
-    override fun implicitContext(): Context {
+    override fun current(): Context {
         return when (val current = OtelJavaContext.current()) {
             OtelJavaContext.root() -> root
             else -> current.toOtelKotlinContext()

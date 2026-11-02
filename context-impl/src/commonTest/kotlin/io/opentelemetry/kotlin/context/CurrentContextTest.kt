@@ -9,7 +9,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-internal class ImplicitContextTest {
+internal class CurrentContextTest {
 
     private lateinit var factory: ContextFactory
 
@@ -23,7 +23,7 @@ internal class ImplicitContextTest {
         val scope = ScopeImpl.create(
             factory.root(),
             factory.root(),
-            DefaultImplicitContextStorage(factory::root),
+            SingleSlotCurrentContextStorage(factory::root),
             NoopSdkErrorHandler,
         )
         assertTrue(scope.detach())
@@ -87,7 +87,7 @@ internal class ImplicitContextTest {
     }
 
     @Test
-    fun testImplicitContext() {
+    fun testCurrentContext() {
         // assert default is root
         val root = factory.root()
         assertSame(root, factory.current())
@@ -102,15 +102,15 @@ internal class ImplicitContextTest {
         val scope2 = ctx2.attach()
         assertSame(ctx2, factory.current())
 
-        // invalid call as not current implicit context, ignore.
+        // invalid call as not current context, ignore.
         scope1.detach()
         assertSame(ctx2, factory.current())
 
-        // detach current implicit context
+        // detach current context
         scope2.detach()
         assertSame(ctx1, factory.current())
 
-        // detach current implicit context
+        // detach current context
         scope1.detach()
         assertSame(root, factory.current())
     }

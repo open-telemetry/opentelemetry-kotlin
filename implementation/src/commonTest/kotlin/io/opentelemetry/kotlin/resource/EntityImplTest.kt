@@ -21,7 +21,7 @@ internal class EntityImplTest {
     }
 
     @Test
-    fun testEqualsAndHashCodeByTypeSchemaUrlIdAndDescription() {
+    fun testEqualsAndHashCodeByTypeAndId() {
         val a = EntityImpl(
             type = "service",
             schemaUrl = "https://example.com/schema",
@@ -40,30 +40,61 @@ internal class EntityImplTest {
             id = mapOf("service.name" to "my-service"),
             description = mapOf("org" to "open-telemetry"),
         )
-        val differentSchemaUrl = EntityImpl(
-            type = "service",
-            schemaUrl = "https://example.com/other",
-            id = mapOf("service.name" to "my-service"),
-            description = mapOf("org" to "open-telemetry"),
-        )
         val differentId = EntityImpl(
             type = "service",
             schemaUrl = "https://example.com/schema",
             id = mapOf("service.name" to "other-service"),
             description = mapOf("org" to "open-telemetry"),
         )
-        val differentDescription = EntityImpl(
+
+        assertEquals(a, b)
+        assertEquals(a.hashCode(), b.hashCode())
+        assertNotEquals(a, differentType)
+        assertNotEquals(a, differentId)
+    }
+
+    @Test
+    fun testDescriptionAndSchemaUrlDoNotAffectIdentity() {
+        val a = EntityImpl(
             type = "service",
             schemaUrl = "https://example.com/schema",
+            id = mapOf("service.name" to "my-service"),
+            description = mapOf("org" to "open-telemetry"),
+        )
+        val b = EntityImpl(
+            type = "service",
+            schemaUrl = null,
             id = mapOf("service.name" to "my-service"),
             description = mapOf("org" to "other"),
         )
 
         assertEquals(a, b)
         assertEquals(a.hashCode(), b.hashCode())
-        assertNotEquals(a, differentType)
-        assertNotEquals(a, differentSchemaUrl)
-        assertNotEquals(a, differentId)
-        assertNotEquals(a, differentDescription)
+    }
+
+    @Test
+    fun testByteArrayIdComparedByContent() {
+        val a = EntityImpl(
+            type = "host",
+            schemaUrl = null,
+            id = mapOf("host.id" to byteArrayOf(1, 2, 3)),
+            description = emptyMap(),
+        )
+        val b = EntityImpl(
+            type = "host",
+            schemaUrl = null,
+            id = mapOf("host.id" to byteArrayOf(1, 2, 3)),
+            description = emptyMap(),
+        )
+        val different = EntityImpl(
+            type = "host",
+            schemaUrl = null,
+            id = mapOf("host.id" to byteArrayOf(4, 5, 6)),
+            description = emptyMap(),
+        )
+
+        assertEquals(a, b)
+        assertEquals(a.hashCode(), b.hashCode())
+        assertNotEquals(a, different)
     }
 }

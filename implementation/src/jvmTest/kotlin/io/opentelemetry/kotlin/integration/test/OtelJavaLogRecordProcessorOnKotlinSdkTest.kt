@@ -171,7 +171,7 @@ internal class OtelJavaLogRecordProcessorOnKotlinSdkTest {
     }
 
     @Test
-    fun testJavaProcessorReadsImplicitKotlinSpanAndBaggage() = runTest {
+    fun testJavaProcessorReadsCurrentKotlinSpanAndBaggage() = runTest {
         val processor = RecordingOtelJavaLogRecordProcessor()
         harness.config.logRecordProcessors.add(processor.toOtelKotlinLogRecordProcessor())
         val span = harness.tracer.startSpan("span")

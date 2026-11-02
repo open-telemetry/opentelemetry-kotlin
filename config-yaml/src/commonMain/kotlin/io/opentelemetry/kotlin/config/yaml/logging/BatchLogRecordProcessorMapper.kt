@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.behavior.BatchLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.config.schema.model.BatchLogRecordProcessor
 
 /**
- * Maps`tracer_provider.processors.items` onto batch processor behavior.
+ * Maps `logger_provider.processors.batch` onto batch log record processor behavior.
  */
 @ExperimentalApi
 fun BatchLogRecordProcessor.toBehavior(): BatchLogRecordProcessorBehavior {
@@ -15,8 +15,10 @@ fun BatchLogRecordProcessor.toBehavior(): BatchLogRecordProcessorBehavior {
         ?: BatchLogRecordProcessorBehavior.DEFAULT_EXPORT_TIMEOUT
     val maxQueueSize = maxQueueSize?.takeIf { value -> value in 1..Int.MAX_VALUE.toLong() }?.toInt()
         ?: BatchLogRecordProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE
-    val maxExportBatchSize = maxExportBatchSize?.takeIf { value -> value in 1..Int.MAX_VALUE.toLong() }?.toInt()
+    val requestedBatchSize = maxExportBatchSize?.takeIf { value -> value in 1..Int.MAX_VALUE.toLong() }?.toInt()
         ?: BatchLogRecordProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE
+
+    val maxExportBatchSize = minOf(requestedBatchSize, maxQueueSize)
     return BatchLogRecordProcessorBehavior(
         scheduleDelay = scheduleDelay,
         exportTimeout = exportTimeout,

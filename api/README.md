@@ -36,28 +36,28 @@ Any component marked stable here should NOT have api surface marked with `@Exper
 | propagation | ⚠️          | ️      |
 | tracing     | ⚠️          | ️      |
 
-## Implicit Context API - an explanation
+## Current Context API - an explanation
 
-The [implicit Context API](https://opentelemetry.io/docs/specs/otel/context/#optional-global-operations)
-allows for context to be set on traces/logs implicitly, rather than explicitly passing in a
+The [current Context API](https://opentelemetry.io/docs/specs/otel/context/#optional-global-operations)
+allows for context to be applied to traces/logs automatically, rather than explicitly passing in a
 `Context` parameter every time. This is a fairly tricky concept to grasp intuitively, but
 essentially it composes of these parts:
 
-1. A storage mechanism that records _what_ the current implicit context is. There can only be one
-   implicit context at a time in this API. The storage mechanism is fulfilled
-   by the `ImplicitContextStorage` API.
-2. A mechanism for context objects to set themselves as the current implicit context. This is
-   achieved by calling `Context.attach()`, which stores the object in the `ImplicitContextStorage`
+1. A storage mechanism that records _what_ the current context is. There can only be one
+   current context at a time in this API. The storage mechanism is fulfilled
+   by the `CurrentContextStorage` API.
+2. A mechanism for context objects to set themselves as the current context. This is
+   achieved by calling `Context.attach()`, which stores the object in the `CurrentContextStorage`
    and returns a `Scope` object
-3. When a context object no longer needs to be the implicit context, there needs to be a way to
-   reset the implicit context to its previous state. A `Scope` object is a token that achieves this
+3. When a context object no longer needs to be the current context, there needs to be a way to
+   reset the current context to its previous state. A `Scope` object is a token that achieves this
    goal by calling `detach()`
-4. A means of determining what the implicit context is at any one time. `ContextFactory.current()`
+4. A means of determining what the current context is at any one time. `ContextFactory.current()`
    solves this.
 5. The library users calls `attach()` for contexts at appropriate units of execution in their
    application (e.g. spanning a function, or a particular workflow). Nested calls are allowed
 
-### Implicit Context API example usage
+### Current Context API example usage
 
 A code sample makes this easier to understand:
 
@@ -67,20 +67,20 @@ A code sample makes this easier to understand:
 private val USER_ID: ContextKey<String> = createContextKey("user.id")
 
 internal fun exampleUsage(api: OpenTelemetry) {
-    // 1. obtain the current context. Defaults to root() if no implicit context is available.
+    // 1. obtain the current context. Defaults to root() if no current context is available.
     val ctx = api.context.current()
 
-    // 2. create a new context but don't set it as the implicit context.
+    // 2. create a new context but don't set it as the current context.
     val newContext = ctx.set(USER_ID, "abc123")
 
-    // 3. set the new context as the implicit context.
+    // 3. set the new context as the current context.
     val scope = newContext.attach()
 
     // 4. perform tracing/logging here. tracers/loggers should call current()
     // internally so the appropriate context is set automatically.
     api.tracerProvider.getTracer("tracer").startSpan("my_span")
 
-    // 5. unset the new context as the implicit context and restore the previous context.
+    // 5. unset the new context as the current context and restore the previous context.
     scope.detach()
 }
 ```
