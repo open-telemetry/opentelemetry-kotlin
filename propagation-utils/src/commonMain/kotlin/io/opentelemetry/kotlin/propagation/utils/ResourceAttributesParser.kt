@@ -3,14 +3,21 @@ package io.opentelemetry.kotlin.propagation.utils
 /**
  * Parses a comma-separated list of resource attributes.
  *
- * Returns null when [value] does not conform to the `OTEL_RESOURCE_ATTRIBUTES` format.
+ * Each entry is split on its first `=`, so values may contain unencoded `=` characters. Empty
+ * entries (e.g. from a trailing comma) are skipped.
+ *
+ * Returns null when [value] does not conform to the `OTEL_RESOURCE_ATTRIBUTES` format, in which
+ * case the spec requires the entire value to be discarded.
  */
 fun parseResourceAttributes(value: String): Map<String, String>? {
     val attributes = mutableMapOf<String, String>()
     for (rawEntry in value.split(ENTRY_DELIMITER)) {
         val entry = rawEntry.trim(SPACE, HORIZONTAL_TAB)
+        if (entry.isEmpty()) {
+            continue
+        }
         val separatorIndex = entry.indexOf(KEY_VALUE_DELIMITER)
-        if (separatorIndex <= 0 || separatorIndex != entry.lastIndexOf(KEY_VALUE_DELIMITER)) {
+        if (separatorIndex <= 0) {
             return null
         }
 
