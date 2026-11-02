@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.NoopOpenTelemetry
+import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -15,6 +16,9 @@ internal class MeterImpl(
     val resource: Resource,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Meter {
+    private val lock = ReentrantReadWriteLock()
+    private val instrumentRegistry = mutableMapOf<String, InstrumentEntry>()
+
     override fun createLongGauge(
         name: String,
         unit: String?,
@@ -40,18 +44,25 @@ internal class MeterImpl(
         )
         return noopMeter.createDoubleGauge(name, unit, description)
     }
-
     override fun createDoubleUpDownCounter(
         name: String,
         unit: String?,
         description: String?,
     ): DoubleUpDownCounter {
-        val noopMeter = obtainNoopMeterIfInvalid(name) ?: return DoubleUpDownCounterImpl(
+        val noopMeter = obtainNoopMeterIfInvalid(name)
+        if (noopMeter != null) {
+            return noopMeter.createDoubleUpDownCounter(name, unit, description)
+        }
+        val sanitizedUnit = sanitizeInstrumentUnit(unit)
+        val sanitizedDescription = sanitizeInstrumentDescription(description)
+        return getOrRegisterInstrument(
             name,
-            sanitizeInstrumentUnit(unit),
-            sanitizeInstrumentDescription(description),
+            sanitizedUnit,
+            sanitizedDescription,
+            InstrumentType.DOUBLE_UP_DOWN_COUNTER,
+            create = { DoubleUpDownCounterImpl(name, sanitizedUnit, sanitizedDescription) },
+            createNoop = { NoopOpenTelemetry.meterProvider.getMeter("").createDoubleUpDownCounter(name, sanitizedUnit, sanitizedDescription) }
         )
-        return noopMeter.createDoubleUpDownCounter(name, unit, description)
     }
 
     override fun createLongUpDownCounter(
@@ -59,12 +70,20 @@ internal class MeterImpl(
         unit: String?,
         description: String?,
     ): LongUpDownCounter {
-        val noopMeter = obtainNoopMeterIfInvalid(name) ?: return LongUpDownCounterImpl(
+        val noopMeter = obtainNoopMeterIfInvalid(name)
+        if (noopMeter != null) {
+            return noopMeter.createLongUpDownCounter(name, unit, description)
+        }
+        val sanitizedUnit = sanitizeInstrumentUnit(unit)
+        val sanitizedDescription = sanitizeInstrumentDescription(description)
+        return getOrRegisterInstrument(
             name,
-            sanitizeInstrumentUnit(unit),
-            sanitizeInstrumentDescription(description),
+            sanitizedUnit,
+            sanitizedDescription,
+            InstrumentType.LONG_UP_DOWN_COUNTER,
+            create = { LongUpDownCounterImpl(name, sanitizedUnit, sanitizedDescription) },
+            createNoop = { NoopOpenTelemetry.meterProvider.getMeter("").createLongUpDownCounter(name, sanitizedUnit, sanitizedDescription) }
         )
-        return noopMeter.createLongUpDownCounter(name, unit, description)
     }
 
     override fun createObservableDoubleCounter(
@@ -117,6 +136,66 @@ internal class MeterImpl(
         return noopMeter.createObservableLongGauge(name, unit, description, *callbacks)
     }
 
+    private fun <T : Any> getOrRegisterInstrument(
+        name: String,
+        unit: String?,
+        description: String?,
+        type: InstrumentType,
+        create: () -> T,
+        createNoop: () -> T,
+    ): T {
+        val key = name.lowercase()
+        
+        // First check read-only
+        val existing = lock.read {
+            instrumentRegistry[key]
+        }
+        
+        if (existing != null) {
+            if (existing.type != type) {
+                sdkErrorHandler.reportError(
+                    SdkError.ApiMisuse(
+                        api = "Meter",
+                        message = "Instrument '$name' is already registered as ${existing.type}, " +
+                            "cannot re-register as $type",
+                        severity = SdkErrorSeverity.ERROR,
+                    )
+                )
+                // Return a noop instrument when types don't match
+                return createNoop()
+            }
+            // Return existing instrument even if unit/description differ - per spec
+            @Suppress("UNCHECKED_CAST")
+            return existing.instrument as T
+        }
+        
+        // Double-check and insert write-only
+        return lock.write {
+            val doubleCheck = instrumentRegistry[key]
+            if (doubleCheck != null) {
+                if (doubleCheck.type != type) {
+                    return@write createNoop()
+                }
+                @Suppress("UNCHECKED_CAST")
+                return@write doubleCheck.instrument as T
+            }
+            val instrument = create()
+            instrumentRegistry[key] = InstrumentEntry(instrument, type, unit, description)
+            instrument
+        }
+    }
+
+    private enum class InstrumentType {
+        DOUBLE_UP_DOWN_COUNTER,
+        LONG_UP_DOWN_COUNTER,
+    }
+
+    private data class InstrumentEntry(
+        val instrument: Any,
+        val type: InstrumentType,
+        val unit: String?,
+        val description: String?,
+    )
     /**
      * Returns a noop meter if [name] is not a valid
      * [instrument name](https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-name-syntax),
