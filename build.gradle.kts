@@ -61,7 +61,9 @@ tasks.register("verify") {
     val gradleIntegrationTest = ":gradle-integration-test"
     dependsOn(checkDuplicatePublicApi)
     subprojects.filter { it.path != gradleIntegrationTest }.forEach { project ->
-        dependsOn(project.tasks.matching { it.name == LifecycleBasePlugin.CHECK_TASK_NAME })
+        project.plugins.withType(LifecycleBasePlugin::class.java) {
+            dependsOn(project.tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME))
+        }
     }
 }
 
