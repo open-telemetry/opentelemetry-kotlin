@@ -147,7 +147,7 @@ internal class ResourceDetectionTest {
         val resource = detectors.detectResource(factory, errorHandler)
         // Keeps the last schema URL (process wins)
         assertEquals("https://example.com/2.0.0", resource.schemaUrl)
-        
+
         val error = errorHandler.apiMisuses.single()
         assertEquals("ResourceDetector", error.api)
         assertTrue(error.message.contains("conflicting schema URL"))
