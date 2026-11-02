@@ -31,6 +31,7 @@ import io.opentelemetry.kotlin.logging.export.toProtobufByteArray
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.export.deserializeTraceRecordPartialSuccess
 import io.opentelemetry.kotlin.tracing.export.toProtobufByteArray
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.io.readByteArray
 
 internal class OtlpClient(
@@ -40,6 +41,7 @@ internal class OtlpClient(
     internal val signalEndpoint: String? = null,
     private val headers: suspend () -> Map<String, String> = { emptyMap() },
     private val httpClientLease: HttpClientLease? = null,
+    private val headersTimeoutMs: Long = EXPORT_REQUEST_TIMEOUT_MS,
 ) {
 
     /** Releases an SDK-owned HTTP client; caller-supplied clients are not owned here. */
@@ -78,7 +80,9 @@ internal class OtlpClient(
         } else {
             "$baseUrl/${endpoint.path}"
         }
-        val requestHeaders = headers()
+        // A hung provider would otherwise hold an export worker indefinitely.
+        val requestHeaders = withTimeoutOrNull(headersTimeoutMs) { headers() }
+            ?: throw IllegalStateException("headers() did not complete within $headersTimeoutMs ms")
         val response = httpClient.post(url) {
             if (supportsHttpCompression) {
                 compress("gzip")
