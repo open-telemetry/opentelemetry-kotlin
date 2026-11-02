@@ -43,6 +43,7 @@ internal class OtelJavaContextStorageTest {
             assertSame(OtelJavaContext.root(), OtelJavaContext.current())
         } finally {
             OtelJavaContext.root().makeCurrent()
+            harness.shutdown()
         }
     }
 

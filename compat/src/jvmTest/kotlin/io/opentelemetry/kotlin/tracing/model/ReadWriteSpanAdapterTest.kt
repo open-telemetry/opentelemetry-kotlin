@@ -26,6 +26,7 @@ import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusData
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 
@@ -43,6 +44,9 @@ internal class ReadWriteSpanAdapterTest {
         adapter = ReadWriteSpanAdapter(fakeImpl)
         harness = OtelKotlinHarness(testScheduler)
     }
+
+    @AfterTest
+    fun tearDown() = harness.shutdown()
 
     @Test
     fun `pass through of initial state`() {

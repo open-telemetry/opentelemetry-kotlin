@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
+import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.tracing.Tracer
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.compositeSpanProcessor
@@ -18,12 +19,18 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.test.AfterTest
 
 @OptIn(ExperimentalApi::class)
 internal class CompatTracerProviderSamplerTest {
 
+    private val sdks = SdkTracker()
+
     private val idGenerator = CompatIdGenerator()
     private val noSpanLimits = SpanLimitsBehavior()
+
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
 
     @Test
     fun `default sampler records and samples spans`() {
@@ -102,7 +109,7 @@ internal class CompatTracerProviderSamplerTest {
                 sampler { alwaysOn() }
                 export { compositeSpanProcessor(processor) }
             }
-        }
+        }.also(sdks::track)
         sdk.tracerProvider.getTracer("test").startSpan("span").end()
         assertEquals(1, processor.endCalls.size)
     }
@@ -145,7 +152,7 @@ internal class CompatTracerProviderSamplerTest {
                 sampler { FakeSampler(SamplingResult.Decision.DROP) }
                 export { compositeSpanProcessor(processor) }
             }
-        }
+        }.also(sdks::track)
         val span = sdk.tracerProvider.getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         span.end()
@@ -289,7 +296,7 @@ internal class CompatTracerProviderSamplerTest {
                 }
                 export { compositeSpanProcessor(processor) }
             }
-        }
+        }.also(sdks::track)
         sdk.tracerProvider.getTracer("test").startSpan("span").end()
         assertEquals(1, processor.endCalls.size)
         assertEquals("on", processor.endCalls.single().attributes["sampling.rule"])
@@ -303,7 +310,7 @@ internal class CompatTracerProviderSamplerTest {
                 sampler { FakeSampler(samplerAttributes = mapOf("shared.key" to "sampler.value")) }
                 export { compositeSpanProcessor(processor) }
             }
-        }
+        }.also(sdks::track)
         sdk.tracerProvider.getTracer("test").startSpan("span") {
             setStringAttribute("shared.key", "span.value")
         }.end()
@@ -324,7 +331,7 @@ internal class CompatTracerProviderSamplerTest {
                 }
                 export { compositeSpanProcessor(processor) }
             }
-        }
+        }.also(sdks::track)
         val span = sdk.tracerProvider.getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         span.end()
@@ -411,6 +418,25 @@ internal class CompatTracerProviderSamplerTest {
     }
 
     @Test
+    fun `composite with composableRuleBased observes links set at creation time`() {
+        val tracer = tracerWith {
+            composite {
+                composableRuleBased {
+                    rule({ _, _, _, _, links -> links.singleOrNull()?.spanContext?.isValid == true }) {
+                        composableAlwaysOn()
+                    }
+                }
+            }
+        }
+        val linked = tracer.startSpan("linked")
+
+        val span = tracer.startSpan("span") { addLink(linked.spanContext) }
+
+        assertTrue(span.isRecording())
+        assertTrue(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
     fun `sampler observes attributes and links set in the span creation lambda`() {
         val sampler = FakeSampler()
         val tracer = tracerWith { sampler }
@@ -461,7 +487,7 @@ internal class CompatTracerProviderSamplerTest {
                 }
                 export { compositeSpanProcessor(processor) }
             }
-        }
+        }.also(sdks::track)
         sdk.tracerProvider.getTracer("test").startSpan("span").end()
         assertEquals("sampler.value", processor.endCalls.single().attributes["sampler.key"])
     }

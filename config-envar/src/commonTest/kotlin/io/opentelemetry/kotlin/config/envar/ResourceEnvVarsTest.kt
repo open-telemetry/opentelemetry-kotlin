@@ -79,6 +79,18 @@ internal class ResourceEnvVarsTest {
     }
 
     @Test
+    fun `should split on the first separator and skip empty entries`() {
+        val behavior = toBehavior(
+            mapOf(ResourceEnvVars.RESOURCE_ATTRIBUTES to "service.name=checkout,k8s.pod.label=app=web,,"),
+        )
+
+        assertEquals(
+            mapOf("service.name" to "checkout", "k8s.pod.label" to "app=web"),
+            behavior?.attributes,
+        )
+    }
+
+    @Test
     fun `should use the last value for a duplicate key`() {
         val behavior = toBehavior(
             mapOf(ResourceEnvVars.RESOURCE_ATTRIBUTES to "region=eu,region=us"),
@@ -150,9 +162,7 @@ internal class ResourceEnvVarsTest {
         val INVALID_VALUES = listOf(
             "missing-value",
             "=missing-key",
-            "key=value=with-unescaped-equals",
             "key=%ZZ",
-            "valid=value,,another=valid",
         )
     }
 }

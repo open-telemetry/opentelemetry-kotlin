@@ -43,10 +43,40 @@ internal class MeterProviderImplTest {
         var called = false
         val counter = impl.getMeter("test").createObservableLongCounter(
             name = "process.page.faults",
-            callbacks = arrayOf<(ObservableLongMeasurement) -> Unit>({ called = true }),
+            callbacks = arrayOf({ called = true }),
         )
 
         assertEquals("process.page.faults", counter.name)
+        counter.registerCallback { called = true }.close()
+        counter.close()
+        assertFalse(called)
+    }
+
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testObservableLongUpDownCounterIsNoopUntilMetricsCollectionIsImplemented() {
+        var called = false
+        val counter = impl.getMeter("test").createObservableLongUpDownCounter(
+            name = "process.memory.working_set",
+            callbacks = arrayOf({ called = true }),
+        )
+
+        assertEquals("process.memory.working_set", counter.name)
+        counter.registerCallback { called = true }.close()
+        counter.close()
+        assertFalse(called)
+    }
+
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testObservableDoubleUpDownCounterIsNoopUntilMetricsCollectionIsImplemented() {
+        var called = false
+        val counter = impl.getMeter("test").createObservableDoubleUpDownCounter(
+            name = "process.cpu.load",
+            callbacks = arrayOf<(ObservableDoubleMeasurement) -> Unit>({ called = true }),
+        )
+
+        assertEquals("process.cpu.load", counter.name)
         counter.registerCallback { called = true }.close()
         counter.close()
         assertFalse(called)
