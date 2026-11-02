@@ -39,7 +39,13 @@ internal class OtlpClient(
     private val sdkErrorHandler: SdkErrorHandler,
     internal val signalEndpoint: String? = null,
     private val headers: suspend () -> Map<String, String> = { emptyMap() },
+    private val httpClientLease: HttpClientLease? = null,
 ) {
+
+    /** Releases an SDK-owned HTTP client; caller-supplied clients are not owned here. */
+    internal fun release() {
+        httpClientLease?.release()
+    }
 
     private val contentType = ContentType.parse("application/x-protobuf")
     private val userAgent = "OTel-OTLP-Exporter-Kotlin/${BuildKonfig.VERSION}"

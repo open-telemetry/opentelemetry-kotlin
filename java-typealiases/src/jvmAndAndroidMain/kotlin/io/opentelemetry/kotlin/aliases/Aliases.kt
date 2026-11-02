@@ -19,8 +19,12 @@ import io.opentelemetry.api.logs.Logger
 import io.opentelemetry.api.logs.LoggerBuilder
 import io.opentelemetry.api.logs.LoggerProvider
 import io.opentelemetry.api.logs.Severity
+import io.opentelemetry.api.metrics.DoubleCounter
+import io.opentelemetry.api.metrics.DoubleCounterBuilder
 import io.opentelemetry.api.metrics.DoubleUpDownCounter
 import io.opentelemetry.api.metrics.DoubleUpDownCounterBuilder
+import io.opentelemetry.api.metrics.LongCounter
+import io.opentelemetry.api.metrics.LongCounterBuilder
 import io.opentelemetry.api.metrics.LongUpDownCounter
 import io.opentelemetry.api.metrics.LongUpDownCounterBuilder
 import io.opentelemetry.api.metrics.Meter
@@ -28,6 +32,8 @@ import io.opentelemetry.api.metrics.MeterBuilder
 import io.opentelemetry.api.metrics.MeterProvider
 import io.opentelemetry.api.metrics.ObservableDoubleCounter
 import io.opentelemetry.api.metrics.ObservableDoubleMeasurement
+import io.opentelemetry.api.metrics.ObservableDoubleUpDownCounter
+import io.opentelemetry.api.metrics.ObservableLongCounter
 import io.opentelemetry.api.metrics.ObservableLongMeasurement
 import io.opentelemetry.api.metrics.ObservableLongUpDownCounter
 import io.opentelemetry.api.metrics.ObservableMeasurement
@@ -145,11 +151,17 @@ typealias OtelJavaScopeConfigurator<T> = ScopeConfigurator<T>
 typealias OtelJavaMeterProvider = MeterProvider
 typealias OtelJavaMeterBuilder = MeterBuilder
 typealias OtelJavaMeter = Meter
+typealias OtelJavaDoubleCounter = DoubleCounter
+typealias OtelJavaLongCounter = LongCounter
+typealias OtelJavaDoubleCounterBuilder = DoubleCounterBuilder
+typealias OtelJavaLongCounterBuilder = LongCounterBuilder
 typealias OtelJavaDoubleUpDownCounter = DoubleUpDownCounter
 typealias OtelJavaLongUpDownCounter = LongUpDownCounter
 typealias OtelJavaDoubleUpDownCounterBuilder = DoubleUpDownCounterBuilder
 typealias OtelJavaLongUpDownCounterBuilder = LongUpDownCounterBuilder
 typealias OtelJavaObservableDoubleCounter = ObservableDoubleCounter
+typealias OtelJavaObservableLongCounter = ObservableLongCounter
+typealias OtelJavaObservableDoubleUpDownCounter = ObservableDoubleUpDownCounter
 typealias OtelJavaObservableLongUpDownCounter = ObservableLongUpDownCounter
 typealias OtelJavaObservableMeasurement = ObservableMeasurement
 typealias OtelJavaObservableLongMeasurement = ObservableLongMeasurement

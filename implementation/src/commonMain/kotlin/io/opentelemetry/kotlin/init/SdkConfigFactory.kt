@@ -22,11 +22,11 @@ import io.opentelemetry.kotlin.resource.sdkDefaultResource
 internal class SdkConfigFactory(
     private val cfg: OpenTelemetryConfigImpl,
     behavior: OpenTelemetryBehavior,
-    resourceFactory: ResourceFactory = ResourceFactoryImpl(),
+    resourceFactory: ResourceFactory = ResourceFactoryImpl(cfg.sdkErrorHandler),
 ) {
 
     val idGenerator: IdGenerator =
-        behavior.tracerProvider?.idGenerator?.toIdGenerator()
+        behavior.tracerProvider?.idGenerator?.toIdGenerator(cfg.sdkErrorHandler)
             ?: IdGeneratorImpl()
 
     private val sampler: SamplerBehavior? = behavior.tracerProvider?.sampler

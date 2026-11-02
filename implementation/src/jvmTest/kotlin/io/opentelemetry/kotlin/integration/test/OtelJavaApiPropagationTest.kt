@@ -6,8 +6,10 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapGetter
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapSetter
 import io.opentelemetry.kotlin.createOpenTelemetry
+import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.toOtelJavaApi
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -16,15 +18,20 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class OtelJavaApiPropagationTest {
 
+    private val sdks = SdkTracker()
+
     private val traceId = "0af7651916cd43dd8448eb211c80319c"
     private val seed = mapOf(
         "traceparent" to "00-$traceId-b7ad6b7169203331-01",
         "tracestate" to "vendor=value",
     )
 
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
+
     @Test
     fun `java api round trips w3cTraceContext`() {
-        val otel = createOpenTelemetry { propagator { w3cTraceContext() } }
+        val otel = createOpenTelemetry { propagator { w3cTraceContext() } }.also(sdks::track)
         val propagator = otel.toOtelJavaApi().propagators.textMapPropagator
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
 
@@ -39,7 +46,7 @@ internal class OtelJavaApiPropagationTest {
         val otel = createOpenTelemetry {
             propagator { w3cTraceContext() }
             tracerProvider { export { FakeSpanProcessor() } }
-        }
+        }.also(sdks::track)
         val javaApi = otel.toOtelJavaApi()
         val propagator = javaApi.propagators.textMapPropagator
         val extracted = propagator.extract(OtelJavaContext.root(), seed, MapGetter)
@@ -60,7 +67,7 @@ internal class OtelJavaApiPropagationTest {
 
     @Test
     fun `java api round trips w3cBaggage`() {
-        val otel = createOpenTelemetry { propagator { w3cBaggage() } }
+        val otel = createOpenTelemetry { propagator { w3cBaggage() } }.also(sdks::track)
         val propagator = otel.toOtelJavaApi().propagators.textMapPropagator
         val carrier = mapOf("baggage" to "userId=alice")
 

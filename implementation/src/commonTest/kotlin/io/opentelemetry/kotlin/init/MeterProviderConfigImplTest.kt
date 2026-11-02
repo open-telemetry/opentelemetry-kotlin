@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 
 internal class MeterProviderConfigImplTest {
 
-    private val base = ResourceFactoryImpl().sdkDefaultResource(SdkMode.REGULAR)
+    private val base = ResourceFactoryImpl(NoopSdkErrorHandler).sdkDefaultResource(SdkMode.REGULAR)
 
     @Test
     fun testDefaultMetricsConfig() {

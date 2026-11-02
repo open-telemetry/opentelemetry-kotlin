@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.smoketest
 
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
+import io.opentelemetry.kotlin.framework.shutdownForTest
 import io.opentelemetry.kotlin.logging.export.otlpHttpLogRecordExporter
 import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.otlpHttpSpanExporter
@@ -46,6 +47,7 @@ class OpenTelemetryCompatSmokeTest {
 
     @AfterTest
     fun tearDown() {
+        otel.shutdownForTest()
         server.close()
     }
 

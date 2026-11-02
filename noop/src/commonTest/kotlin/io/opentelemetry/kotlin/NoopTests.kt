@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.metrics.NoopObservableDoubleMeasurement
 import io.opentelemetry.kotlin.metrics.NoopObservableLongMeasurement
 import io.opentelemetry.kotlin.metrics.ObservableDoubleMeasurement
+import io.opentelemetry.kotlin.metrics.ObservableLongMeasurement
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapSetter
 import io.opentelemetry.kotlin.propagation.createNoopPropagator
@@ -309,6 +310,22 @@ internal class NoopTests {
         }.close()
         observableCounter.close()
         assertFalse(callbackInvoked)
+
+        var longCallbackInvoked = false
+        val longCreationCallback: (ObservableLongMeasurement) -> Unit = { measurement ->
+            longCallbackInvoked = true
+            measurement.record(1L)
+        }
+        val observableLongCounter = meter.createObservableLongCounter(
+            name = "process.page.faults",
+            callbacks = arrayOf(longCreationCallback),
+        )
+        observableLongCounter.registerCallback {
+            longCallbackInvoked = true
+            it.record(2L)
+        }.close()
+        observableLongCounter.close()
+        assertFalse(longCallbackInvoked)
     }
 
     @OptIn(ExperimentalApi::class)
