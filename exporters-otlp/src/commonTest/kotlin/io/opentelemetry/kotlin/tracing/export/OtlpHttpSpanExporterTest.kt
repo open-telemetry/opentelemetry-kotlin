@@ -28,6 +28,7 @@ import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -40,6 +41,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -158,9 +161,33 @@ internal class OtlpHttpSpanExporterTest {
         } finally {
             withContext(NonCancellable) {
                 customExporter.shutdown()
+                assertTrue(customClient.coroutineContext[Job]?.isActive == true)
                 customClient.close()
                 customServer.close()
             }
+        }
+    }
+
+    @Test
+    fun testOwnedHttpClientClosesAfterLastExporterShutdown() = runTest {
+        HttpClientRegistry.clear()
+        try {
+            val firstExporter = fakeConfig().otlpHttpSpanExporter { endpoint = baseUrl }
+            val secondExporter = fakeConfig().otlpHttpSpanExporter { endpoint = baseUrl }
+            val sharedClient = assertNotNull(
+                HttpClientRegistry.peek(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
+            )
+
+            assertTrue(sharedClient.coroutineContext[Job]?.isActive == true)
+            firstExporter.shutdown()
+            assertTrue(sharedClient.coroutineContext[Job]?.isActive == true)
+            secondExporter.shutdown()
+            assertNull(
+                HttpClientRegistry.peek(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
+            )
+            assertTrue(sharedClient.coroutineContext[Job]?.isCompleted == true)
+        } finally {
+            HttpClientRegistry.clear()
         }
     }
 
