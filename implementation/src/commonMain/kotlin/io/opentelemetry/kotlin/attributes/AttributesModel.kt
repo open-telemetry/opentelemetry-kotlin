@@ -224,41 +224,45 @@ internal class AttributesModel(
         if (other !is AttributesModel) {
             return false
         }
-        val otherAttrs = other.attrs
-        if (attrs.size != otherAttrs.size) {
+        return attributeMapsEqual(attrs, other.attrs)
+    }
+
+    override fun hashCode(): Int = attributeMapHashCode(attrs)
+}
+
+internal fun attributeMapsEqual(a: Map<String, Any>, b: Map<String, Any>): Boolean {
+    if (a.size != b.size) {
+        return false
+    }
+    for ((key, value) in a) {
+        val otherValue = b[key] ?: return false
+        if (!attributeValuesEqual(value, otherValue)) {
             return false
         }
-        for ((key, value) in attrs) {
-            val otherValue = otherAttrs[key] ?: return false
-            if (!attributeValuesEqual(value, otherValue)) {
-                return false
-            }
-        }
-        return true
     }
+    return true
+}
 
-    override fun hashCode(): Int {
-        var result = 0
-        for ((key, value) in attrs) {
-            result += key.hashCode() xor attributeValueHashCode(value)
-        }
-        return result
+internal fun attributeMapHashCode(attrs: Map<String, Any>): Int {
+    var result = 0
+    for ((key, value) in attrs) {
+        result += key.hashCode() xor attributeValueHashCode(value)
     }
+    return result
+}
 
-    // ByteArray uses identity equality/hashCode, so route through content-aware variants.
-    private fun attributeValuesEqual(a: Any, b: Any): Boolean {
-        if (a is ByteArray && b is ByteArray) {
-            return a.contentEquals(b)
-        }
-        return a == b
+private fun attributeValuesEqual(a: Any, b: Any): Boolean {
+    if (a is ByteArray && b is ByteArray) {
+        return a.contentEquals(b)
     }
+    return a == b
+}
 
-    private fun attributeValueHashCode(value: Any): Int {
-        if (value is ByteArray) {
-            return value.contentHashCode()
-        }
-        return value.hashCode()
+private fun attributeValueHashCode(value: Any): Int {
+    if (value is ByteArray) {
+        return value.contentHashCode()
     }
+    return value.hashCode()
 }
 
 internal const val DEFAULT_ATTRIBUTE_LIMIT: Int = 128

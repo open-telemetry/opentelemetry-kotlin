@@ -1,5 +1,8 @@
 package io.opentelemetry.kotlin.resource
 
+import io.opentelemetry.kotlin.attributes.attributeMapHashCode
+import io.opentelemetry.kotlin.attributes.attributeMapsEqual
+
 internal class EntityImpl(
     override val type: String,
     override val schemaUrl: String?,
@@ -7,6 +10,12 @@ internal class EntityImpl(
     override val description: Map<String, Any>
 ) : Entity {
 
+    /**
+     * An entity is identified by its [type] and [id] only. [description] and [schemaUrl] are not
+     * part of its identity.
+     *
+     * https://opentelemetry.io/docs/specs/otel/entities/data-model/
+     */
     override fun equals(other: Any?): Boolean {
         if (this === other) {
             return true
@@ -14,17 +23,8 @@ internal class EntityImpl(
         if (other !is EntityImpl) {
             return false
         }
-        return type == other.type &&
-            schemaUrl == other.schemaUrl &&
-            id == other.id &&
-            description == other.description
+        return type == other.type && attributeMapsEqual(id, other.id)
     }
 
-    override fun hashCode(): Int {
-        var result = type.hashCode()
-        result = 31 * result + (schemaUrl?.hashCode() ?: 0)
-        result = 31 * result + id.hashCode()
-        result = 31 * result + description.hashCode()
-        return result
-    }
+    override fun hashCode(): Int = 31 * type.hashCode() + attributeMapHashCode(id)
 }
