@@ -2,10 +2,12 @@ package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import kotlin.random.Random
 import kotlin.test.Test
@@ -198,6 +200,28 @@ internal class TelemetryExporterTest {
             exporter.export(listOf("data"))
             advanceTimeBy(10_000)
             timestamps
+        }
+    }
+
+    @Test
+    fun testExportFailsImmediatelyWhenQueueIsFull() = runTest {
+        val gate = CompletableDeferred<Unit>()
+        val exporter = initTelemetryExporter {
+            gate.await()
+            OtlpResponse.Success
+        }
+        exporter.withShutdown {
+            repeat(MAX_QUEUE_ENTRIES) {
+                assertEquals(OperationResultCode.Success, exporter.export(listOf("data")))
+            }
+            val start = currentTime
+            assertEquals(OperationResultCode.Failure, exporter.export(listOf("overflow")))
+            assertEquals(start, currentTime)
+
+            // Capacity is restored once queued entries complete.
+            gate.complete(Unit)
+            testScheduler.advanceUntilIdle()
+            assertEquals(OperationResultCode.Success, exporter.export(listOf("data")))
         }
     }
 
