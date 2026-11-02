@@ -14,6 +14,7 @@ import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceFlags
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import kotlinx.coroutines.test.runTest
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -38,6 +39,9 @@ internal class SpanExportTest {
             attributeCountPerEventLimit = 100
         }
     }
+
+    @AfterTest
+    fun tearDown() = harness.shutdown()
 
     @Test
     fun `test minimal span export`() = runTest {

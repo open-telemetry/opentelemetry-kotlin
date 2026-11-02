@@ -4,14 +4,18 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
@@ -225,6 +229,105 @@ internal class TelemetryExporterTest {
         }
     }
 
+    @Test
+    fun testShutdownSkipsDrainWhenBlockedPastDeadline() = runTest {
+        var attempts = 0
+        val exporter = initTelemetryExporter(maxAttemptIntervalMs = 60_000, maxAttempts = 5) {
+            attempts++
+            OtlpResponse.RetryableError(503, retryAfterMs = 30_000, errorMessage = null)
+        }
+        exporter.export(listOf("data"))
+        advanceTimeBy(100)
+
+        val start = testScheduler.currentTime
+        assertEquals(OperationResultCode.Failure, exporter.shutdown())
+        assertEquals(start, testScheduler.currentTime)
+        assertEquals(1, attempts)
+    }
+
+    @Test
+    fun testShutdownDrainsWhenBackoffEndsBeforeDeadline() = runTest {
+        var attempts = 0
+        val exporter = initTelemetryExporter(maxAttemptIntervalMs = 60_000, random = Random(0)) {
+            if (attempts++ == 0) {
+                OtlpResponse.RetryableError(503, retryAfterMs = 1000, errorMessage = null)
+            } else {
+                OtlpResponse.Success
+            }
+        }
+        exporter.export(listOf("data"))
+        advanceTimeBy(100)
+
+        assertEquals(OperationResultCode.Success, exporter.shutdown())
+        assertEquals(2, attempts)
+    }
+
+    @Test
+    fun testShutdownIsBoundedByCallerDeadline() = runTest {
+        var exportCancelled = false
+        val exporter = initTelemetryExporter {
+            try {
+                awaitCancellation()
+            } finally {
+                exportCancelled = true
+            }
+        }
+        exporter.export(listOf("data"))
+        advanceTimeBy(100)
+
+        val start = testScheduler.currentTime
+        val result = withTimeoutOrNull(1000) { exporter.shutdown() }
+        assertNull(result)
+        assertEquals(start + 1000, testScheduler.currentTime)
+        assertTrue(exportCancelled)
+    }
+
+    @Test
+    fun testShutdownWaitsForInFlightEntryWhileBlocked() = runTest {
+        var delivered = false
+        val exporter = initTelemetryExporter(maxAttemptIntervalMs = 60_000, maxAttempts = 5) { batch ->
+            if (batch == listOf("blocked")) {
+                delay(50)
+                OtlpResponse.RetryableError(503, retryAfterMs = 30_000, errorMessage = null)
+            } else {
+                delay(2000)
+                delivered = true
+                OtlpResponse.Success
+            }
+        }
+        exporter.export(listOf("blocked"))
+        exporter.export(listOf("in-flight"))
+        advanceTimeBy(100)
+
+        val start = testScheduler.currentTime
+        assertEquals(OperationResultCode.Failure, exporter.shutdown())
+        assertTrue(delivered)
+        assertEquals(start + 5000, testScheduler.currentTime)
+    }
+
+    @Test
+    fun testShutdownSucceedsWithEmptyQueueWhileBlocked() = runTest {
+        val exporter = initTelemetryExporter(maxAttemptIntervalMs = 60_000, maxAttempts = 1) {
+            OtlpResponse.RetryableError(503, retryAfterMs = 30_000, errorMessage = null)
+        }
+        exporter.export(listOf("data"))
+        advanceTimeBy(100)
+
+        assertEquals(OperationResultCode.Success, exporter.shutdown())
+    }
+
+    @Test
+    fun testShutdownTimesOutWhenExportHangs() = runTest {
+        val exporter = initTelemetryExporter { awaitCancellation() }
+        exporter.export(listOf("data"))
+        advanceTimeBy(100)
+
+        val start = testScheduler.currentTime
+        assertEquals(OperationResultCode.Failure, exporter.shutdown())
+        assertEquals(start + 5000, testScheduler.currentTime)
+    }
+
+    @Test
     fun testExportDoesNotPropagateExportActionFailure() = runTest {
         val throwingExporter = initTelemetryExporter(
             initialDelayMs = 1,

@@ -36,9 +36,7 @@ internal class OpenTelemetryEnvVarsTest {
                 attributeLimits = AttributeLimitsBehavior(),
                 loggerProvider = LoggerProviderBehavior(
                     logLimits = LogLimitsBehavior(),
-                    processor = LogRecordProcessorBehavior(
-                        batch = BatchLogRecordProcessorBehavior(),
-                    ),
+                    processor = LogRecordProcessorBehavior(),
                 ),
                 tracerProvider = TracerProviderBehavior(
                     spanLimits = SpanLimitsBehavior(),
@@ -138,7 +136,7 @@ internal class OpenTelemetryEnvVarsTest {
             tracerProvider = TracerProviderBehavior(spanLimits = SpanLimitsBehavior()),
             loggerProvider = LoggerProviderBehavior(
                 logLimits = LogLimitsBehavior(),
-                processor = LogRecordProcessorBehavior(batch = BatchLogRecordProcessorBehavior())
+                processor = LogRecordProcessorBehavior()
             ),
 
         )
