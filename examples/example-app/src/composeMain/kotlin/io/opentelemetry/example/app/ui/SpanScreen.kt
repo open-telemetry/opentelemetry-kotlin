@@ -117,10 +117,10 @@ fun SpanScreen(
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         ) {
             Checkbox(
-                checked = formState.setAsImplicitContext,
-                onCheckedChange = { formState = formState.copy(setAsImplicitContext = it) },
+                checked = formState.setAsCurrentContext,
+                onCheckedChange = { formState = formState.copy(setAsCurrentContext = it) },
             )
-            Text("Set as implicit context")
+            Text("Set as current context")
         }
 
         OutlinedTextField(
@@ -236,8 +236,8 @@ private fun startSpan(otel: OpenTelemetry, form: SpanFormState): Pair<Span, Scop
         }
     }
 
-    // Set span as implicit context if requested
-    val scope = if (form.setAsImplicitContext) {
+    // Set span as current context if requested
+    val scope = if (form.setAsCurrentContext) {
         otel.context.current().storeSpan(span).attach()
     } else {
         null

@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.export
 import com.sun.net.httpserver.HttpsConfigurator
 import com.sun.net.httpserver.HttpsExchange
 import com.sun.net.httpserver.HttpsServer
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import kotlinx.coroutines.runBlocking
@@ -59,5 +60,16 @@ internal class OtlpHttpTlsTest {
         } finally {
             server.stop(0)
         }
+    }
+
+    @Test
+    fun testInvalidTlsFilesAreReportedWithoutThrowing() {
+        val errorHandler = FakeSdkErrorHandler()
+        val client = createOtlpHttpClient(errorHandler, OtlpEndpoint.Traces, getEnvVar = { null }) {
+            endpoint = "https://localhost:4318"
+            configureTls(certificateFile = "/does/not/exist.pem")
+        }
+        assertEquals("https://localhost:4318", client.baseUrl)
+        assertEquals(1, errorHandler.userCodeErrors.size)
     }
 }

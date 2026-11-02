@@ -104,7 +104,7 @@ internal class ContextImplTest {
     }
 
     @Test
-    fun testImplicitContext() {
+    fun testCurrentContext() {
         val ctx = factory.root()
         assertSame(ctx, factory.current())
     }
