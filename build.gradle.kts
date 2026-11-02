@@ -68,6 +68,26 @@ tasks.register("verify") {
     }
 }
 
+tasks.register("ciBuild") {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = "Runs everything the gradle-test CI job checks. CI adds -x :gradle-integration-test:test."
+    val perProjectTasks = setOf(
+        LifecycleBasePlugin.BUILD_TASK_NAME,
+        "linuxX64Test",
+        "linkDebugTestLinuxArm64",
+        "koverXmlReport",
+    )
+    allprojects.forEach { project ->
+        dependsOn(provider { project.tasks.names.filter { it in perProjectTasks }.map { "${project.path}:$it" } })
+    }
+    dependsOn(
+        ":benchmark-android:assemble",
+        ":benchmark-android:compileReleaseAndroidTestKotlin",
+        ":benchmark-jvm:assemble",
+        ":examples:example-app-android:assembleRelease",
+    )
+}
+
 // Kover instruments every JVM test class, so only apply it on CI (where coverage is reported) or
 // when requested with -Pio.opentelemetry.kotlin.coverage=true.
 val koverEnabled = providers.environmentVariable("CI").isPresent ||
