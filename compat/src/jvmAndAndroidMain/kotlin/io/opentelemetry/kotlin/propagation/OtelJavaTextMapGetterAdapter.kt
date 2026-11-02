@@ -17,4 +17,11 @@ internal class OtelJavaTextMapGetterAdapter<C : Any>(
         }
         return delegate.get(carrier, key)
     }
+
+    override fun getAll(carrier: C?, key: String): MutableIterator<String> {
+        if (carrier == null) {
+            return mutableListOf<String>().iterator()
+        }
+        return delegate.getAll(carrier, key).toMutableList().iterator()
+    }
 }

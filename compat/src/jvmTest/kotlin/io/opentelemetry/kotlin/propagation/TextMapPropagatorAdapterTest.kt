@@ -138,6 +138,47 @@ internal class TextMapPropagatorAdapterTest {
     }
 
     @Test
+    fun `kotlin getter adapter returns all values from getAll when multiple values present`() {
+        val carrier = mapOf("baggage" to listOf("a=1", "b=2"))
+        val adapter = TextMapGetterAdapter(JavaMultiValueMapGetter)
+        assertEquals(listOf("a=1", "b=2"), adapter.getAll(carrier, "baggage"))
+    }
+
+    @Test
+    fun `kotlin getter adapter preserves value ordering from getAll`() {
+        val carrier = mapOf("baggage" to listOf("c=3", "a=1", "b=2"))
+        val adapter = TextMapGetterAdapter(JavaMultiValueMapGetter)
+        assertEquals(listOf("c=3", "a=1", "b=2"), adapter.getAll(carrier, "baggage"))
+    }
+
+    @Test
+    fun `java getter adapter returns all values from getAll when multiple values present`() {
+        val carrier = mapOf("baggage" to listOf("a=1", "b=2"))
+        val adapter = OtelJavaTextMapGetterAdapter(KotlinMultiValueMapGetter)
+        assertEquals(listOf("a=1", "b=2"), adapter.getAll(carrier, "baggage").asSequence().toList())
+    }
+
+    @Test
+    fun `java getter adapter preserves value ordering from getAll`() {
+        val carrier = mapOf("baggage" to listOf("c=3", "a=1", "b=2"))
+        val adapter = OtelJavaTextMapGetterAdapter(KotlinMultiValueMapGetter)
+        assertEquals(listOf("c=3", "a=1", "b=2"), adapter.getAll(carrier, "baggage").asSequence().toList())
+    }
+
+    @Test
+    fun `java getter adapter returns empty list from getAll when key absent`() {
+        val carrier = mapOf("baggage" to listOf("a=1"))
+        val adapter = OtelJavaTextMapGetterAdapter(KotlinMultiValueMapGetter)
+        assertTrue(adapter.getAll(carrier, "missing").asSequence().toList().isEmpty())
+    }
+
+    @Test
+    fun `java getter adapter returns empty list from getAll when carrier is null`() {
+        val adapter = OtelJavaTextMapGetterAdapter(KotlinMultiValueMapGetter)
+        assertTrue(adapter.getAll(null, "baggage").asSequence().toList().isEmpty())
+    }
+
+    @Test
     fun `getter adapter returns null when carrier is null`() {
         val throwingDelegate = object : TextMapGetter<Map<String, String>> {
             val errMsg = "delegate must not be invoked when carrier is null"
@@ -173,6 +214,25 @@ internal class TextMapPropagatorAdapterTest {
     }
 
     private object JavaMapGetter : OtelJavaTextMapGetter<Map<String, String>> {
+        @Deprecated("Overrideing deprecated interface member")
+        override fun keys(carrier: Map<String, String>): Iterable<String> = carrier.keys
         override fun get(carrier: Map<String, String>?, key: String): String? = carrier?.get(key)
+    }
+
+    private object JavaMultiValueMapGetter : OtelJavaTextMapGetter<Map<String, List<String>>> {
+        @Deprecated("Overriding deprecated interface member")
+        override fun keys(carrier: Map<String, List<String>>): Iterable<String> = carrier.keys
+        override fun get(carrier: Map<String, List<String>>?, key: String): String? =
+            carrier?.get(key)?.firstOrNull()
+        override fun getAll(carrier: Map<String, List<String>>?, key: String): MutableIterator<String> =
+            carrier?.get(key).orEmpty().toMutableList().iterator()
+    }
+
+    private object KotlinMultiValueMapGetter : TextMapGetter<Map<String, List<String>>> {
+        override fun keys(carrier: Map<String, List<String>>): Collection<String> = carrier.keys
+        override fun get(carrier: Map<String, List<String>>, key: String): String? =
+            carrier[key]?.firstOrNull()
+        override fun getAll(carrier: Map<String, List<String>>, key: String): List<String> =
+            carrier[key].orEmpty()
     }
 }
