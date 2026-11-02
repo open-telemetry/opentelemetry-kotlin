@@ -66,4 +66,14 @@ internal class MeterAdapter(
         sdkErrorHandler.sdkGuardOrDefault(null, "Meter.createObservableLongUpDownCounter failed") {
             ObservableLongUpDownCounterAdapter(impl, name, unit, description, callbacks, sdkErrorHandler)
         } ?: noopMeter.createObservableLongUpDownCounter(name, unit, description)
+
+    override fun createObservableDoubleUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
+    ): ObservableDoubleUpDownCounter =
+        sdkErrorHandler.sdkGuardOrDefault(null, "Meter.createObservableDoubleUpDownCounter failed") {
+            ObservableDoubleUpDownCounterAdapter(impl, name, unit, description, callbacks, sdkErrorHandler)
+        } ?: noopMeter.createObservableDoubleUpDownCounter(name, unit, description)
 }

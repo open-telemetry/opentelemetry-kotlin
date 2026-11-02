@@ -9,6 +9,7 @@ class FakeMeter(
     val observableDoubleCounters: MutableList<FakeObservableDoubleCounter> = mutableListOf()
     val observableLongCounters: MutableList<FakeObservableLongCounter> = mutableListOf()
     val observableLongUpDownCounters: MutableList<FakeObservableLongUpDownCounter> = mutableListOf()
+    val observableDoubleUpDownCounters: MutableList<FakeObservableDoubleUpDownCounter> = mutableListOf()
 
     override fun createDoubleUpDownCounter(
         name: String,
@@ -52,5 +53,15 @@ class FakeMeter(
     ): ObservableLongUpDownCounter =
         FakeObservableLongUpDownCounter(name, unit, description, callbacks.toList()).also {
             observableLongUpDownCounters.add(it)
+        }
+
+    override fun createObservableDoubleUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
+    ): ObservableDoubleUpDownCounter =
+        FakeObservableDoubleUpDownCounter(name, unit, description, callbacks.toList()).also {
+            observableDoubleUpDownCounters.add(it)
         }
 }
