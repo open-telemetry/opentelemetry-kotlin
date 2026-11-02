@@ -137,7 +137,8 @@ internal class LogRecordDataExtTest {
         ).getLogger("test").emit(body = "log", timestamp = 42)
 
         val impl = processor.exports.single()
-        val observed = ReadWriteLogRecordAdapter(impl).toOtelJavaLogRecordData()
+        val observed = ReadWriteLogRecordAdapter(impl, UnsupportedLogRecordWriteReporter(NoopSdkErrorHandler))
+            .toOtelJavaLogRecordData()
         assertFalse(observed is OtelJavaLogRecordDataImpl)
         assertEquals(impl.toLogRecordData().timestampEpochNanos, observed.timestampEpochNanos)
         assertEquals("log", observed.bodyValue?.asString())
