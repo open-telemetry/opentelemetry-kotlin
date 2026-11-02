@@ -2,10 +2,12 @@ package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.random.Random
 import kotlin.test.Test
@@ -27,7 +29,6 @@ internal class TelemetryExporterTest {
         maxAttempts = maxAttempts,
         sdkErrorHandler = NoopSdkErrorHandler,
         coroutineContext = StandardTestDispatcher(testScheduler),
-        timeSource = testScheduler.timeSource,
         random = random,
         exportAction = exportAction,
     )
@@ -64,6 +65,36 @@ internal class TelemetryExporterTest {
     }
 
     @Test
+    fun testShutdownCancelsInProgressExport() = runTest {
+        val exportStarted = CompletableDeferred<Unit>()
+        val exporter = initTelemetryExporter {
+            exportStarted.complete(Unit)
+            CompletableDeferred<OtlpResponse>().await()
+        }
+
+        val export = launch {
+            exporter.export(listOf("data"))
+        }
+        exportStarted.await()
+
+        assertEquals(OperationResultCode.Success, exporter.shutdown())
+        assertTrue(export.isCancelled)
+    }
+
+    @Test
+    fun testExportEmptyTelemetrySucceedsWithoutCallingExportAction() = runTest {
+        var called = false
+        val exporter = initTelemetryExporter {
+            called = true
+            OtlpResponse.Success
+        }
+        exporter.withShutdown {
+            assertEquals(OperationResultCode.Success, exporter.export(emptyList()))
+            assertEquals(false, called)
+        }
+    }
+
+    @Test
     fun testClientErrorIsNotRetried() = runTest {
         var attempts = 0
         val exporter = initTelemetryExporter {
@@ -71,8 +102,7 @@ internal class TelemetryExporterTest {
             OtlpResponse.ClientError(400, null)
         }
         exporter.withShutdown {
-            exporter.export(listOf("data"))
-            advanceTimeBy(5_000)
+            assertEquals(OperationResultCode.Failure, exporter.export(listOf("data")))
             assertEquals(1, attempts)
         }
     }
@@ -92,7 +122,7 @@ internal class TelemetryExporterTest {
             }
             exporter.withShutdown {
                 exporter.export(listOf("data"))
-                advanceTimeBy(5_000)
+                advanceUntilIdle()
                 assertEquals(1, attempts, "$response")
             }
         }
@@ -107,7 +137,7 @@ internal class TelemetryExporterTest {
         }
         exporter.withShutdown {
             exporter.export(listOf("data"))
-            advanceTimeBy(5_000)
+            advanceUntilIdle()
             assertEquals(3, attempts)
         }
     }
@@ -121,7 +151,7 @@ internal class TelemetryExporterTest {
         }
         exporter.withShutdown {
             exporter.export(listOf("data"))
-            advanceTimeBy(5_000)
+            advanceUntilIdle()
             assertEquals(1, attempts)
         }
     }
@@ -143,20 +173,18 @@ internal class TelemetryExporterTest {
         }
         exporter.withShutdown {
             exporter.export(listOf("data"))
-            advanceTimeBy(5_000)
+            advanceUntilIdle()
 
             assertEquals(maxAttempts, timestamps.size)
 
-            val pollingIntervalMs = 100L
-            val maxJitterMs = 100L
-            var expectedBackoffMs = initialDelayMs
-            timestamps.zipWithNext { previous, next -> next - previous }.forEach { delta ->
-                val upperExclusive = expectedBackoffMs + pollingIntervalMs + maxJitterMs
+            var base = initialDelayMs
+            timestamps.zipWithNext { a, b -> b - a }.forEach { delta ->
+                val cappedBase = base.coerceAtMost(maxIntervalMs)
                 assertTrue(
-                    delta in expectedBackoffMs..<upperExclusive,
-                    "backoff delta $delta outside [$expectedBackoffMs, $upperExclusive)",
+                    delta in (cappedBase / 2)..cappedBase,
+                    "backoff delta $delta outside [${cappedBase / 2}, $cappedBase]",
                 )
-                expectedBackoffMs = (expectedBackoffMs * 2).coerceAtMost(maxIntervalMs)
+                base = (base * 2).coerceAtMost(maxIntervalMs)
             }
         }
     }
@@ -166,7 +194,7 @@ internal class TelemetryExporterTest {
         val retryAfterMs = 5000L
         val timestamps = recordRetryAfterAttempts(retryAfterMs, maxAttemptIntervalMs = 10_000)
         assertEquals(2, timestamps.size)
-        assertTrue(timestamps[1] - timestamps[0] in retryAfterMs..<(retryAfterMs + 200))
+        assertEquals(retryAfterMs, timestamps[1] - timestamps[0])
     }
 
     @Test
@@ -174,7 +202,7 @@ internal class TelemetryExporterTest {
         val maxAttemptIntervalMs = 1000L
         val timestamps = recordRetryAfterAttempts(Long.MAX_VALUE, maxAttemptIntervalMs)
         assertEquals(2, timestamps.size)
-        assertTrue(timestamps[1] - timestamps[0] in maxAttemptIntervalMs..<(maxAttemptIntervalMs + 200))
+        assertEquals(maxAttemptIntervalMs, timestamps[1] - timestamps[0])
     }
 
     private suspend fun TestScope.recordRetryAfterAttempts(
@@ -196,12 +224,13 @@ internal class TelemetryExporterTest {
         }
         return exporter.withShutdown {
             exporter.export(listOf("data"))
-            advanceTimeBy(10_000)
+            advanceUntilIdle()
             timestamps
         }
     }
 
-    fun testExportDoesNotPropagateExportActionFailure() = runTest {
+    @Test
+    fun testExportReturnsFailureWhenExportActionThrows() = runTest {
         val throwingExporter = initTelemetryExporter(
             initialDelayMs = 1,
             maxAttemptIntervalMs = 1,
@@ -209,9 +238,7 @@ internal class TelemetryExporterTest {
             exportAction = { error("network unreachable") },
         )
         throwingExporter.withShutdown {
-            // The failure occurs on a background coroutine whose scope has a CoroutineExceptionHandler,
-            // so it must not propagate to the caller nor crash the process.
-            assertEquals(OperationResultCode.Success, throwingExporter.export(listOf("data")))
+            assertEquals(OperationResultCode.Failure, throwingExporter.export(listOf("data")))
         }
     }
 }
