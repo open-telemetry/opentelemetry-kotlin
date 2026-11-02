@@ -8,6 +8,9 @@ import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.behavior.toSeverityLevel
 import io.opentelemetry.kotlin.config.envar.logging.LogLimitsEnvVars
 import io.opentelemetry.kotlin.config.envar.logging.LogRecordProcessorEnvVars
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Invalid
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Value
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 import io.opentelemetry.kotlin.config.envar.tracing.BatchSpanProcessorEnvVars
 import io.opentelemetry.kotlin.config.envar.tracing.SamplerEnvVars
@@ -29,7 +32,10 @@ class OpenTelemetryEnvVars(
      */
     fun toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
         disabled = reader.readBoolean(SDK_DISABLED),
-        logLevel = reader.readString(LOG_LEVEL)?.toSeverityLevel(),
+        logLevel = reader.readStringAndTransform(LOG_LEVEL) { value ->
+            value.toSeverityLevel()?.let { Value(it) }
+                ?: Invalid(EnvVarReadWarning(LOG_LEVEL, "Unknown value '$value'; ignoring"))
+        },
         entities = null, // TODO: Add support for entities. Blocked by !1251.
         resource = ResourceEnvVars(reader).toBehavior(),
         attributeLimits = AttributeLimitsEnvVars(reader).toBehavior(),

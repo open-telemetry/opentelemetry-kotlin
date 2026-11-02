@@ -167,6 +167,7 @@ internal class OpenTelemetryEnvVarsTest {
             SamplerEnvVars.SAMPLER to "not_a_sampler",
             TracesExporterEnvVars.TRACES_EXPORTER to "not_an_exporter",
             LogRecordExporterEnvVars.LOGS_EXPORTER to "not_an_exporter",
+            OpenTelemetryEnvVars.LOG_LEVEL to "not_a_level",
         )
         val warnings = mutableListOf<EnvVarReadWarning>()
         toBehavior(env::get, warnings::add)
@@ -178,9 +179,33 @@ internal class OpenTelemetryEnvVarsTest {
                 SamplerEnvVars.SAMPLER,
                 TracesExporterEnvVars.TRACES_EXPORTER,
                 LogRecordExporterEnvVars.LOGS_EXPORTER,
+                OpenTelemetryEnvVars.LOG_LEVEL,
             ),
             warnings.map { it.name }.toSet(),
         )
+    }
+
+    @Test
+    fun `should warn and ignore unknown OTEL_LOG_LEVEL`() {
+        val env = mapOf(OpenTelemetryEnvVars.LOG_LEVEL to "verbose")
+        val warnings = mutableListOf<EnvVarReadWarning>()
+        val behavior = toBehavior(env::get, warnings::add)
+
+        assertNull(behavior.logLevel)
+        assertEquals(
+            listOf(EnvVarReadWarning(OpenTelemetryEnvVars.LOG_LEVEL, "Unknown value 'verbose'; ignoring")),
+            warnings,
+        )
+    }
+
+    @Test
+    fun `should parse OTEL_LOG_LEVEL case-insensitively without warning`() {
+        val env = mapOf(OpenTelemetryEnvVars.LOG_LEVEL to "warn")
+        val warnings = mutableListOf<EnvVarReadWarning>()
+        val behavior = toBehavior(env::get, warnings::add)
+
+        assertEquals(SeverityLevel.WARN, behavior.logLevel)
+        assertEquals(emptyList(), warnings)
     }
 
     private fun behaviorFrom(vars: Map<String, String>) =
