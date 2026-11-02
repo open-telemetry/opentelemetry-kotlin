@@ -10,10 +10,10 @@ internal class LogRecordProcessorEnvVarsTest {
     @Test
     fun `should map batch processor`() {
         val configs = mapOf(
-            BatchLogRecordProcessorEnvVars.SCHEDULE_DELAY to "1",
-            BatchLogRecordProcessorEnvVars.EXPORT_TIMEOUT to "2",
-            BatchLogRecordProcessorEnvVars.MAX_QUEUE_SIZE to "3",
-            BatchLogRecordProcessorEnvVars.MAX_EXPORT_BATCH_SIZE to "4",
+            "OTEL_BLRP_SCHEDULE_DELAY" to "1",
+            "OTEL_BLRP_EXPORT_TIMEOUT" to "2",
+            "OTEL_BLRP_MAX_QUEUE_SIZE" to "3",
+            "OTEL_BLRP_MAX_EXPORT_BATCH_SIZE" to "4",
         )
         assertEquals(
             LogRecordProcessorBehavior(
