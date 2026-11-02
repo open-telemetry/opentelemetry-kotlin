@@ -28,9 +28,8 @@ private const val SHUTDOWN_TIMEOUT_MS = 5000L
 private const val CANCELLATION_TIMEOUT_MS = 500L
 
 // Includes both pending and in-flight entries; each entry holds one List<T>.
-private const val MAX_QUEUE_ENTRIES = 2048
+internal const val MAX_QUEUE_ENTRIES = 2048
 private const val MAX_JITTER_MS = 100L
-private const val ENQUEUE_TIMEOUT_MS = 1000L
 
 private data class EndpointRetryState(
     var blockedUntil: ComparableTimeMark? = null,
@@ -273,13 +272,13 @@ internal class TelemetryExporter<T>(
             return Success
         }
 
-        var acquired = false
+        // Drop rather than wait when the queue is full: waiting would stall the caller
+        // (e.g. the batch worker) while the endpoint is backed off.
+        if (!semaphore.tryAcquire()) {
+            return Failure
+        }
         var enqueued = false
         try {
-            withTimeoutOrNull(ENQUEUE_TIMEOUT_MS) {
-                semaphore.acquire()
-                acquired = true
-            } ?: return Failure
             mutex.withLock {
                 if (shutdownState.isShutdown) {
                     return Failure
@@ -290,7 +289,7 @@ internal class TelemetryExporter<T>(
                 return Success
             }
         } finally {
-            if (acquired && !enqueued) {
+            if (!enqueued) {
                 semaphore.release()
             }
         }
