@@ -22,9 +22,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Asserts that the Kotlin and Java Context APIs share a single implicit context in compat mode.
+ * Asserts that the Kotlin and Java Context APIs share a single current context in compat mode.
  */
-internal class CompatImplicitContextIntegrationTest {
+internal class CompatCurrentContextIntegrationTest {
 
     private val sdks = SdkTracker()
 
@@ -37,7 +37,7 @@ internal class CompatImplicitContextIntegrationTest {
     private val javaTracer = otel.toOtelJavaApi().tracerProvider.get("java")
 
     @After
-    fun resetImplicitContext() {
+    fun resetCurrentContext() {
         try {
             assertEquals(OtelJavaContext.root(), OtelJavaContext.current(), "Test leaked a scope")
             assertFalse(errorHandler.hasErrors())
@@ -154,7 +154,7 @@ internal class CompatImplicitContextIntegrationTest {
     }
 
     @Test
-    fun `toOtelKotlinApi shares java implicit context`() {
+    fun `toOtelKotlinApi shares java current context`() {
         val javaSdk = OtelJavaOpenTelemetrySdk.builder()
             .setTracerProvider(OtelJavaSdkTracerProvider.builder().build())
             .build()
@@ -175,7 +175,7 @@ internal class CompatImplicitContextIntegrationTest {
         val handler = FakeSdkErrorHandler()
         val sdk = createCompatOpenTelemetry {
             errorHandler(handler)
-            context { storageMode = ImplicitContextStorageMode.GLOBAL }
+            context { storageMode = CurrentContextStorageMode.SINGLE_SLOT }
         }.also(sdks::track)
         assertEquals(1, handler.apiMisuses.size)
 

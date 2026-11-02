@@ -25,7 +25,7 @@ data class SpanFormState(
     val startTimestamp: String = "",
     val attributes: List<AttributeEntry> = emptyList(),
     val events: List<EventEntry> = emptyList(),
-    val setAsImplicitContext: Boolean = false,
+    val setAsCurrentContext: Boolean = false,
 )
 
 data class LogFormState(
