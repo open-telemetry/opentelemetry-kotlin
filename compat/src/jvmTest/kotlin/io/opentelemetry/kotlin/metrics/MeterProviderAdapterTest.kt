@@ -1,5 +1,8 @@
 package io.opentelemetry.kotlin.metrics
 
+import io.opentelemetry.kotlin.NoopOpenTelemetry
+import io.opentelemetry.kotlin.aliases.OtelJavaMeterBuilder
+import io.opentelemetry.kotlin.aliases.OtelJavaMeterProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkMeterProvider
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -108,5 +111,43 @@ internal class MeterProviderAdapterTest {
             listOf("MeterProvider.forceFlush failed", "MeterProvider.shutdown failed"),
             errorHandler.userCodeErrors.map { it.message },
         )
+    }
+
+    @Test
+    fun testThrowingAttributesReturnsNoopMeter() {
+        val errorHandler = FakeSdkErrorHandler()
+        val adapter = MeterProviderAdapter(OtelJavaSdkMeterProvider.builder().build(), errorHandler)
+
+        val meter = adapter.getMeter(name = "name") { error("boom") }
+
+        assertSame(NoopOpenTelemetry.meterProvider.getMeter(""), meter)
+        val recorded = errorHandler.userCodeErrors.single()
+        assertEquals("MeterProvider.getMeter failed", recorded.message)
+        assertEquals("boom", recorded.cause.message)
+        assertEquals(0, errorHandler.sdkCodeErrors.size)
+
+        val healthy = adapter.getMeter(name = "name")
+        assertNotSame(meter, healthy)
+        healthy.createLongUpDownCounter("counter").add(1)
+    }
+
+    @Test
+    fun testThrowingMeterBuilderReturnsNoopMeter() {
+        val errorHandler = FakeSdkErrorHandler()
+        val adapter = MeterProviderAdapter(ThrowingJavaMeterProvider(), errorHandler)
+
+        val meter = adapter.getMeter(name = "name")
+
+        assertSame(NoopOpenTelemetry.meterProvider.getMeter(""), meter)
+        val recorded = errorHandler.sdkCodeErrors.single()
+        assertEquals("MeterProvider.getMeter failed", recorded.message)
+        assertEquals("boom", recorded.cause.message)
+        assertEquals(0, errorHandler.userCodeErrors.size)
+    }
+
+    private class ThrowingJavaMeterProvider(
+        private val delegate: OtelJavaMeterProvider = OtelJavaMeterProvider.noop(),
+    ) : OtelJavaMeterProvider by delegate {
+        override fun meterBuilder(instrumentationScopeName: String): OtelJavaMeterBuilder = error("boom")
     }
 }

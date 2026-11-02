@@ -49,6 +49,36 @@ internal class MeterImpl(
         return noopMeter.createObservableDoubleCounter(name, unit, description, *callbacks)
     }
 
+    override fun createObservableLongCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongCounter {
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
+        return noopMeter.createObservableLongCounter(name, unit, description, *callbacks)
+    }
+
+    override fun createObservableLongUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongUpDownCounter {
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
+        return noopMeter.createObservableLongUpDownCounter(name, unit, description, *callbacks)
+    }
+
+    override fun createObservableDoubleUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
+    ): ObservableDoubleUpDownCounter {
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
+        return noopMeter.createObservableDoubleUpDownCounter(name, unit, description, *callbacks)
+    }
+
     /**
      * Returns a noop meter if [name] is not a valid
      * [instrument name](https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-name-syntax),

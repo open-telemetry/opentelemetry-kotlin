@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaMeter
 import io.opentelemetry.kotlin.aliases.OtelJavaMeterProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaObservableDoubleMeasurement
 import io.opentelemetry.kotlin.aliases.OtelJavaObservableLongMeasurement
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import java.util.function.Consumer
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,7 +23,7 @@ internal class MeterAdapterUpDownCounterTest {
     @Test
     fun createLongUpDownCounterDelegatesAdd() {
         val javaMeter = RecordingJavaMeter()
-        val counter = MeterAdapter(javaMeter).createLongUpDownCounter(
+        val counter = MeterAdapter(javaMeter, NoopSdkErrorHandler).createLongUpDownCounter(
             name = "grocery.customers",
             unit = "{customer}",
             description = "customers in store",
@@ -49,7 +50,7 @@ internal class MeterAdapterUpDownCounterTest {
     @Test
     fun createLongUpDownCounterOmitsNullUnitAndDescription() {
         val javaMeter = RecordingJavaMeter()
-        val counter = MeterAdapter(javaMeter).createLongUpDownCounter("grocery.customers")
+        val counter = MeterAdapter(javaMeter, NoopSdkErrorHandler).createLongUpDownCounter("grocery.customers")
         assertEquals("grocery.customers", counter.name)
         assertEquals(null, counter.unit)
         assertEquals(null, counter.description)
@@ -62,7 +63,7 @@ internal class MeterAdapterUpDownCounterTest {
     @Test
     fun createDoubleUpDownCounterDelegatesAdd() {
         val javaMeter = RecordingJavaMeter()
-        val counter = MeterAdapter(javaMeter).createDoubleUpDownCounter(
+        val counter = MeterAdapter(javaMeter, NoopSdkErrorHandler).createDoubleUpDownCounter(
             name = "queue.depth",
             unit = "{item}",
             description = "queue size",
@@ -89,7 +90,7 @@ internal class MeterAdapterUpDownCounterTest {
     @Test
     fun createDoubleUpDownCounterOmitsNullUnitAndDescription() {
         val javaMeter = RecordingJavaMeter()
-        val counter = MeterAdapter(javaMeter).createDoubleUpDownCounter("queue.depth")
+        val counter = MeterAdapter(javaMeter, NoopSdkErrorHandler).createDoubleUpDownCounter("queue.depth")
         assertEquals("queue.depth", counter.name)
         assertEquals(null, counter.unit)
         assertEquals(null, counter.description)

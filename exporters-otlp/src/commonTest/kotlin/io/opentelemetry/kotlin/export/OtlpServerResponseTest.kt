@@ -13,7 +13,7 @@ import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -221,7 +221,8 @@ internal class OtlpServerResponseTest {
         val (server, _) = export(failure(HttpStatusCode.ServiceUnavailable))
         var base = INITIAL_DELAY_MS
         server.intervals().forEach { interval ->
-            assertTrue(interval in (base / 2)..base, "interval $interval outside [${base / 2}, $base]")
+            val upperExclusive = base + RETRY_SCHEDULING_TOLERANCE_MS
+            assertTrue(interval in base..<upperExclusive, "interval $interval outside [$base, $upperExclusive)")
             base = (base * 2).coerceAtMost(MAX_INTERVAL_MS)
         }
     }
@@ -232,14 +233,17 @@ internal class OtlpServerResponseTest {
             val (server, responses) = export(failure(status, retryAfter = "30"), traceSuccess())
             assertEquals(2, server.requestCount, "status $status")
             assertEquals(30_000L, assertIs<OtlpResponse.RetryableError>(responses.first()).retryAfterMs)
-            assertEquals(listOf(MAX_INTERVAL_MS), server.intervals(), "status $status")
+            assertTrue(
+                server.intervals().single() in MAX_INTERVAL_MS..<(MAX_INTERVAL_MS + RETRY_SCHEDULING_TOLERANCE_MS),
+                "status $status",
+            )
         }
     }
 
     @Test
-    fun testZeroRetryAfterRetriesImmediately() = runTest {
+    fun testZeroRetryAfterOnlyWaitsForPollingAndJitter() = runTest {
         val (server, _) = export(failure(HttpStatusCode.TooManyRequests, retryAfter = "0"), traceSuccess())
-        assertEquals(listOf(0L), server.intervals())
+        assertTrue(server.intervals().single() in 0L..<RETRY_SCHEDULING_TOLERANCE_MS)
     }
 
     @Test
@@ -251,7 +255,10 @@ internal class OtlpServerResponseTest {
             )
             assertNull(assertIs<OtlpResponse.RetryableError>(responses.first()).retryAfterMs, retryAfter)
             val interval = server.intervals().single()
-            assertTrue(interval in (INITIAL_DELAY_MS / 2)..INITIAL_DELAY_MS, "Retry-After '$retryAfter': $interval")
+            assertTrue(
+                interval in INITIAL_DELAY_MS..<(INITIAL_DELAY_MS + RETRY_SCHEDULING_TOLERANCE_MS),
+                "Retry-After '$retryAfter': $interval",
+            )
         }
     }
 
@@ -344,17 +351,20 @@ internal class OtlpServerResponseTest {
             maxAttempts = MAX_ATTEMPTS,
             sdkErrorHandler = errorHandler,
             coroutineContext = dispatcher,
+            timeSource = testScheduler.timeSource,
         ) {
             when (signal) {
                 Signal.TRACES -> client.exportTraces(listOf(FakeSpanData()))
                 Signal.LOGS -> client.exportLogs(listOf(FakeLogRecordData()))
             }.also { responses += it }
         }
-        assertEquals(OperationResultCode.Success, exporter.export(listOf(Unit)))
-        advanceUntilIdle()
-        assertEquals(server.requestCount, responses.size)
-        exporter.shutdown()
-        return ExportResult(server, responses)
+        return exporter.withShutdown {
+            assertEquals(OperationResultCode.Success, exporter.export(listOf(Unit)))
+            // Workers remain active while idle; allow enough time for all attempts instead.
+            advanceTimeBy(MAX_ATTEMPTS * (REQUEST_TIMEOUT_MS + MAX_INTERVAL_MS + RETRY_SCHEDULING_TOLERANCE_MS))
+            assertEquals(server.requestCount, responses.size)
+            ExportResult(server, responses)
+        }
     }
 
     private companion object {
@@ -362,6 +372,9 @@ internal class OtlpServerResponseTest {
         const val MAX_INTERVAL_MS = 4000L
         const val MAX_ATTEMPTS = 5
         const val REQUEST_TIMEOUT_MS = 10_000L
+
+        // One polling interval plus the maximum additive jitter.
+        const val RETRY_SCHEDULING_TOLERANCE_MS = 200L
         const val MAX_RESPONSE_BYTES = 4 * 1024 * 1024
     }
 }

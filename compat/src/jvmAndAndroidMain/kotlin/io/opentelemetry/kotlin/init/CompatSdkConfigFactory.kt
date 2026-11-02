@@ -36,7 +36,7 @@ internal class CompatSdkConfigFactory(
 ) {
 
     val idGenerator: IdGenerator =
-        behavior.tracerProvider?.idGenerator?.toIdGenerator()
+        behavior.tracerProvider?.idGenerator?.toIdGenerator(cfg.sdkErrorHandler)
             ?: CompatIdGenerator()
 
     val spanLimits: SpanLimitsBehavior =
