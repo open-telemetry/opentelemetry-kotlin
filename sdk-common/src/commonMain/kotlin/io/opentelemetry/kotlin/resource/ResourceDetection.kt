@@ -73,11 +73,11 @@ private fun reportSchemaUrlConflict(
 ) {
     val detectedSchema = detected.schemaUrl
     val newSchema = newResource.schemaUrl
-    
+
     // Treat empty strings as absent (no schema URL)
     val detectedSchemaEffective = detectedSchema?.takeIf { it.isNotEmpty() }
     val newSchemaEffective = newSchema?.takeIf { it.isNotEmpty() }
-    
+
     // Only report conflict if both are non-empty and different
     if (detectedSchemaEffective != null && newSchemaEffective != null && detectedSchemaEffective != newSchemaEffective) {
         errorHandler.reportError(
