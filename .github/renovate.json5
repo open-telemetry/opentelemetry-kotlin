@@ -4,6 +4,7 @@
     "config:best-practices",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
+  "minimumReleaseAge": "7 days",
   "packageRules": [
     {
       "groupName": "all patch versions",
@@ -12,6 +13,12 @@
     },
     {
       "matchUpdateTypes": ["minor", "major"],
+      "schedule": ["before 8am on Monday"]
+    },
+    {
+      "description": "Raise all GitHub Actions updates as one weekly PR. Must come after the patch group so this groupName wins.",
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions",
       "schedule": ["before 8am on Monday"]
     },
     {
