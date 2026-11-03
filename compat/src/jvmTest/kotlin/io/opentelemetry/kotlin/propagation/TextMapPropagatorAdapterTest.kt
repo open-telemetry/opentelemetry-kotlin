@@ -10,7 +10,6 @@ import io.opentelemetry.kotlin.context.ContextAdapter
 import io.opentelemetry.kotlin.context.FakeContext
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -76,35 +75,42 @@ internal class TextMapPropagatorAdapterTest {
     }
 
     @Test
-    fun `inject is a no-op when context is not a ContextAdapter`() {
+    fun `inject with empty context does not write carrier`() {
         val carrier = mutableMapOf<String, String>()
-        val throwingSetter = TextMapSetter<MutableMap<String, String>> { _, _, _ ->
-            error("setter must not be invoked when context is not a ContextAdapter")
-        }
 
-        TextMapPropagatorAdapter(impl).inject(FakeContext(), carrier, throwingSetter)
+        TextMapPropagatorAdapter(impl).inject(FakeContext(), carrier, MapSetter)
 
         assertTrue(carrier.isEmpty())
     }
 
     @Test
-    fun `extract returns input context unchanged when context is not a ContextAdapter`() {
-        val input = FakeContext()
-        val throwingGetter = object : TextMapGetter<Map<String, String>> {
-            val errMsg = "getter must not be invoked when context is not a ContextAdapter"
+    fun `extract adapts context that is not a ContextAdapter`() {
+        var getterCalled = false
+        val getter = object : TextMapGetter<Map<String, String>> {
+            override fun keys(carrier: Map<String, String>): Collection<String> {
+                getterCalled = true
+                return carrier.keys
+            }
 
-            override fun keys(carrier: Map<String, String>): Collection<String> = error(errMsg)
-            override fun get(carrier: Map<String, String>, key: String): String = error(errMsg)
-            override fun getAll(carrier: Map<String, String>, key: String): List<String> = error(errMsg)
+            override fun get(carrier: Map<String, String>, key: String): String? {
+                getterCalled = true
+                return carrier[key]
+            }
+
+            override fun getAll(carrier: Map<String, String>, key: String): List<String> {
+                getterCalled = true
+                return carrier[key]?.let(::listOf) ?: emptyList()
+            }
         }
 
         val extracted = TextMapPropagatorAdapter(impl).extract(
-            input,
+            FakeContext(),
             mapOf("baggage" to "k=v"),
-            throwingGetter
+            getter
         )
 
-        assertSame(input, extracted)
+        assertTrue(getterCalled)
+        assertTrue(extracted is FakeContext)
     }
 
     @Test
