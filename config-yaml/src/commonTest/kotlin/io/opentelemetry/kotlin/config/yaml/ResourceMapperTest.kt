@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.config.yaml
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.config.schema.model.AttributeNameValue
 import io.opentelemetry.kotlin.config.schema.model.AttributeType
 import io.opentelemetry.kotlin.config.schema.model.Resource
@@ -147,7 +146,7 @@ internal class ResourceMapperTest {
     @Test
     fun defaultsToStringTypeWhenTypeOmitted() {
         val resource = Resource(
-            attributes = listOf(AttributeNameValue(name = "k", value = "v"))  // no type field
+            attributes = listOf(AttributeNameValue(name = "k", value = "v")) // no type field
         )
         val behavior = resource.toBehavior()
         assertEquals(mapOf("k" to "v"), behavior.attributes)
