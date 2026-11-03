@@ -28,7 +28,7 @@ internal class LoggerProviderConfigDslImplTest {
     @Test
     fun processorCallSetsSimple() {
         val dsl = LoggerProviderConfigDslImpl()
-        dsl.processor { simple() }
+        dsl.processor { simple {} }
 
         assertEquals(
             LogRecordProcessorBehavior(simple = SimpleLogRecordProcessorBehavior()),
@@ -39,7 +39,7 @@ internal class LoggerProviderConfigDslImplTest {
     @Test
     fun processorCallSetsBatch() {
         val dsl = LoggerProviderConfigDslImpl()
-        dsl.processor { batch() }
+        dsl.processor { batch {} }
 
         assertEquals(
             LogRecordProcessorBehavior(batch = BatchLogRecordProcessorBehavior()),
@@ -50,7 +50,7 @@ internal class LoggerProviderConfigDslImplTest {
     @Test
     fun exportKeepsProcessorAlreadyChosen() {
         val dsl = LoggerProviderConfigDslImpl()
-        dsl.processor { simple() }
+        dsl.processor { simple {} }
         dsl.export { error("behavior mapping does not run the export lambda") }
 
         assertEquals(

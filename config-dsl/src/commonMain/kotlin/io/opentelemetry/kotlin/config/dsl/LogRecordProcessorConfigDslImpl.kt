@@ -19,13 +19,17 @@ class LogRecordProcessorConfigDslImpl {
         else -> LogRecordProcessorBehavior(simple = simple, batch = batch)
     }
 
-    fun simple(): SimpleLogRecordProcessorBehavior = SimpleLogRecordProcessorBehavior().also {
-        simple = it
+    fun simple(action: SimpleLogRecordProcessorConfigDslImpl.() -> Unit) {
+        val impl = SimpleLogRecordProcessorConfigDslImpl()
+        impl.action()
+        simple = impl.toBehavior()
         batch = null
     }
 
-    fun batch(): BatchLogRecordProcessorBehavior = BatchLogRecordProcessorBehavior().also {
-        batch = it
+    fun batch(action: BatchLogRecordProcessorConfigDslImpl.() -> Unit) {
+        val impl = BatchLogRecordProcessorConfigDslImpl()
+        impl.action()
+        batch = impl.toBehavior()
         simple = null
     }
 }
