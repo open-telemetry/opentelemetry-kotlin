@@ -81,8 +81,13 @@ internal class OtlpClient(
             "$baseUrl/${endpoint.path}"
         }
         // A hung provider would otherwise hold an export worker indefinitely.
-        val requestHeaders = withTimeoutOrNull(headersTimeoutMs) { headers() }
-            ?: error("headers() did not complete within $headersTimeoutMs ms")
+        val requestHeaders = withTimeoutOrNull(headersTimeoutMs) { headers() } ?: run {
+            sdkErrorHandler.reportUserCodeError(
+                IllegalStateException("headers() did not complete within $headersTimeoutMs ms"),
+                "OTLP headers provider timed out",
+            )
+            emptyMap()
+        }
         val response = httpClient.post(url) {
             if (supportsHttpCompression) {
                 compress("gzip")

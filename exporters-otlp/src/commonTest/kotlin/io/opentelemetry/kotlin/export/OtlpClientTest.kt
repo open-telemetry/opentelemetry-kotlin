@@ -281,7 +281,7 @@ internal class OtlpClientTest {
     }
 
     @Test
-    fun testHungHeaderProviderTimesOutWithoutSending() = runTest {
+    fun testHungHeaderProviderTimesOutAndSendsWithoutHeaders() = runTest {
         mockResponseStatus = HttpStatusCode.OK
         client = createOtlpHttpClient(errorHandler, OtlpEndpoint.Traces, getEnvVar = { null }) {
             httpClient = createDefaultHttpClient(INFINITE_TIMEOUT_MS, server)
@@ -289,10 +289,10 @@ internal class OtlpClientTest {
             headers = { awaitCancellation() }
         }
 
-        assertEquals(OtlpResponse.Unknown, client.exportTraces(spans))
-        assertEquals(OtlpResponse.Unknown, client.exportLogs(logRecords))
+        assertEquals(OtlpResponse.Success, client.exportTraces(spans))
+        assertEquals(OtlpResponse.Success, client.exportLogs(logRecords))
         assertEquals(2, errorHandler.userCodeErrors.size)
-        assertEquals(0, server.requestHistory.size)
+        assertEquals(2, server.requestHistory.size)
     }
 
     @Test

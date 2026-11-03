@@ -31,7 +31,7 @@ public interface OtlpHttpExporterConfigDsl {
 
     /**
      * HTTP request timeout in milliseconds. Defaults to 10 seconds.
-     * Also bounds how long [headers] may take, after which the export fails.
+     * Also bounds how long [headers] may take, after which the export is sent without them.
      * The request timeout is ignored when [httpClient] is set.
      */
     public var timeoutMs: Long
