@@ -18,6 +18,34 @@ object JvmAttributes {
     const val JVM_BUFFER_POOL_NAME: String = "jvm.buffer.pool.name"
 
     /**
+    * <p>Name of the executor.</p>
+    * <p>Notes:</p>
+    * <p>The executor name SHOULD be low-cardinality. If <c>jvm.executor.owner.name</c> is present, the combination of <c>jvm.executor.owner.name</c> and <c>jvm.executor.name</c> SHOULD be unique within the instrumented application; otherwise, <c>jvm.executor.name</c> SHOULD be unique when an executor-specific name is available. If the executor implementation does not provide an explicit name, instrumentation SHOULD derive a name from available implementation-specific metadata, such as a normalized worker thread name. If no executor-specific name or metadata is available, instrumentation MAY use <c>unknown</c>. The <c>unknown</c> value does not identify an executor, and metrics from multiple executors using this value MAY be aggregated. Users requiring per-executor metric series SHOULD configure a distinct name through the executor's <c>ThreadFactory</c>. Instrumentations SHOULD document how the name is derived and how users can configure it. Once metric series registration for an executor has started, <c>jvm.executor.name</c> and <c>jvm.executor.owner.name</c> MUST remain stable for the lifetime of that registration. Instrumentations SHOULD determine these attributes before the first worker is registered. Instrumentations MUST NOT re-register cumulative metrics under a new attribute set or replay prior cumulative values under new attributes.</p>
+    */
+    @IncubatingApi
+    const val JVM_EXECUTOR_NAME: String = "jvm.executor.name"
+
+    /**
+    * <p>Name of the logical component that owns the executor.</p>
+    * <p>Notes:</p>
+    * <p>The executor owner name SHOULD be a low-cardinality identifier for the component that creates and configures the executor. It is neither the executor implementation type nor an OpenTelemetry instrumentation scope.</p>
+    */
+    @IncubatingApi
+    const val JVM_EXECUTOR_OWNER_NAME: String = "jvm.executor.owner.name"
+
+    /**
+    * <p>State of an executor thread.</p>
+    */
+    @IncubatingApi
+    const val JVM_EXECUTOR_THREAD_STATE: String = "jvm.executor.thread.state"
+
+    /**
+    * <p>The fully qualified class name of the executor implementation.</p>
+    */
+    @IncubatingApi
+    const val JVM_EXECUTOR_TYPE: String = "jvm.executor.type"
+
+    /**
     * <p>Name of the garbage collector action.</p>
     * <p>Notes:</p>
     * <p>Garbage collector action is generally obtained via <a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.management/com/sun/management/GarbageCollectionNotificationInfo.html#getGcAction()">GarbageCollectionNotificationInfo#getGcAction()</a>.</p>
@@ -60,6 +88,23 @@ object JvmAttributes {
     * <p>State of the thread.</p>
     */
     const val JVM_THREAD_STATE: String = "jvm.thread.state"
+
+    /**
+    * <p>JVM_EXECUTOR_THREAD_STATE</p>
+    */
+    @IncubatingApi
+    enum class JvmExecutorThreadStateValues(val value: String) {
+
+        /**
+        * <p>The thread is currently executing a task.</p>
+        */
+        ACTIVE("active"),
+
+        /**
+        * <p>The thread currently exists but is not executing a task.</p>
+        */
+        IDLE("idle"),
+    }
 
     /**
     * <p>JVM_MEMORY_TYPE</p>

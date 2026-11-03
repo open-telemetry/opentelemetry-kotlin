@@ -22,10 +22,16 @@ object SystemAttributes {
     const val SYSTEM_CPU_STATE: String = "system.cpu.state"
 
     /**
-    * <p>The device identifier</p>
+    * <p>Deprecated, use <c>system.device.name</c> instead.</p>
+    */
+    @Deprecated("Replaced by `system.device.name`.")
+    const val SYSTEM_DEVICE: String = "system.device"
+
+    /**
+    * <p>The OS level identifier for a device, such as disk, partition or network interface.</p>
     */
     @IncubatingApi
-    const val SYSTEM_DEVICE: String = "system.device"
+    const val SYSTEM_DEVICE_NAME: String = "system.device.name"
 
     /**
     * <p>The filesystem mode</p>
@@ -256,6 +262,11 @@ object SystemAttributes {
         * <p>Actual used virtual memory in bytes.</p>
         */
         USED("used"),
+
+        /**
+        * <p>An estimate of how much memory is available for starting new applications, without causing swapping.</p>
+        */
+        AVAILABLE("available"),
 
         /**
         * <p>free.</p>

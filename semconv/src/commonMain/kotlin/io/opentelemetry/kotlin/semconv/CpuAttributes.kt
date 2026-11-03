@@ -10,7 +10,9 @@ object CpuAttributes {
   
 
     /**
-    * <p>The logical CPU number [0..n-1]</p>
+    * <p>The identifier of a logical execution target (CPU) as seen by the operating system, in the range [0..n-1].</p>
+    * <p>Notes:</p>
+    * <p>On systems with simultaneous multithreading (SMT) enabled — such as Intel Hyper-Threading or AMD SMT — this value will usually differ from the physical core number, because each core presents multiple logical CPUs for the system to use.</p>
     */
     @IncubatingApi
     const val CPU_LOGICAL_NUMBER: String = "cpu.logical_number"

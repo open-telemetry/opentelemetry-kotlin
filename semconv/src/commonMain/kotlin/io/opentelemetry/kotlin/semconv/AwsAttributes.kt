@@ -160,7 +160,7 @@ object AwsAttributes {
     const val AWS_ECS_CLUSTER_ARN: String = "aws.ecs.cluster.arn"
 
     /**
-    * <p>The Amazon Resource Name (ARN) of an <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_instances.html">ECS container instance</a>.</p>
+    * <p>The Amazon Resource Name (ARN) of an <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint-v4-response.html">ECS container</a>.</p>
     */
     @IncubatingApi
     const val AWS_ECS_CONTAINER_ARN: String = "aws.ecs.container.arn"

@@ -14,13 +14,13 @@ object OpentracingAttributes {
     * <p>Notes:</p>
     * <p>The causal relationship between a child Span and a parent Span.</p>
     */
-    @IncubatingApi
+    @Deprecated("OpenTracing compatibility requirements are [deprecated in OpenTelemetry Specification](https://opentelemetry.io/docs/specs/otel/compatibility/opentracing/)")
     const val OPENTRACING_REF_TYPE: String = "opentracing.ref_type"
 
     /**
     * <p>OPENTRACING_REF_TYPE</p>
     */
-    @IncubatingApi
+    @Deprecated("OpenTracing compatibility requirements are [deprecated in OpenTelemetry Specification](https://opentelemetry.io/docs/specs/otel/compatibility/opentracing/)")
     enum class OpentracingRefTypeValues(val value: String) {
 
         /**

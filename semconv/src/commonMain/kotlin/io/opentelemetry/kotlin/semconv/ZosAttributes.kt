@@ -10,14 +10,14 @@ object ZosAttributes {
   
 
     /**
-    * <p>The System Management Facility (SMF) Identifier uniquely identified a z/OS system within a SYSPLEX or mainframe environment and is used for system and performance analysis.</p>
+    * <p>The System Management Facility (SMF) identifier that uniquely identifies a z/OS system within a sysplex or mainframe environment and is used for system and performance analysis.</p>
     */
-    @IncubatingApi
+    @Deprecated("Moved to the [OpenTelemetry Mainframe semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-mainframe).")
     const val ZOS_SMF_ID: String = "zos.smf.id"
 
     /**
-    * <p>The name of the SYSPLEX to which the z/OS system belongs too.</p>
+    * <p>The name of the sysplex to which the z/OS system belongs.</p>
     */
-    @IncubatingApi
+    @Deprecated("Moved to the [OpenTelemetry Mainframe semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-mainframe).")
     const val ZOS_SYSPLEX_NAME: String = "zos.sysplex.name"
 }
