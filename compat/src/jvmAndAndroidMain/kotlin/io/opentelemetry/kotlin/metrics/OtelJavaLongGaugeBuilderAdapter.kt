@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.aliases.OtelJavaLongGauge
 import io.opentelemetry.kotlin.aliases.OtelJavaLongGaugeBuilder
-import io.opentelemetry.kotlin.aliases.OtelJavaMeter
 import io.opentelemetry.kotlin.aliases.OtelJavaObservableLongGauge
 import io.opentelemetry.kotlin.aliases.OtelJavaObservableLongMeasurement
 import java.util.function.Consumer
@@ -10,7 +9,6 @@ import java.util.function.Consumer
 internal class OtelJavaLongGaugeBuilderAdapter(
     private val meter: Meter,
     private val name: String,
-    private val javaMeter: OtelJavaMeter,
     private var unit: String? = null,
     private var description: String? = null,
 ) : OtelJavaLongGaugeBuilder {
@@ -29,9 +27,13 @@ internal class OtelJavaLongGaugeBuilderAdapter(
 
     override fun buildWithCallback(
         callback: Consumer<OtelJavaObservableLongMeasurement>,
-    ): OtelJavaObservableLongGauge =
-        javaMeter.gaugeBuilder(name).ofLongs().also { builder ->
-            unit?.let(builder::setUnit)
-            description?.let(builder::setDescription)
-        }.buildWithCallback(callback)
+    ): OtelJavaObservableLongGauge {
+        val measurementCallback: (ObservableLongMeasurement) -> Unit = { measurement ->
+            callback.accept(OtelJavaObservableLongMeasurementAdapter(measurement))
+        }
+        val gauge = meter.createObservableLongGauge(name, unit, description, measurementCallback)
+        return object : OtelJavaObservableLongGauge {
+            override fun close() = gauge.close()
+        }
+    }
 }
