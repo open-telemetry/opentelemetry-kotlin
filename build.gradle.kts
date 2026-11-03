@@ -41,7 +41,7 @@ if (snapshotPublish) {
     }
 }
 
-val checkDuplicatePublicApi by tasks.registering(CheckDuplicatePublicApiTask::class) {
+val checkDuplicatePublicApi = tasks.register<CheckDuplicatePublicApiTask>("checkDuplicatePublicApi") {
     description = "Fails if two modules declare the same public class or top-level function."
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     apiDumps.from(
