@@ -17,7 +17,7 @@ plugins.withType<YarnPlugin> {
         resolution("glob", ">=10.5.0")
         resolution("js-yaml", ">=5.4.1")
         resolution("minimatch", ">=9.0.7")
-        resolution("serialize-javascript", ">=7.0.5")
+        resolution("serialize-javascript", ">=7.1.4")
         resolution("**/ws", "8.21.0")
         resolution("ws", "8.21.0")
     }
@@ -61,7 +61,9 @@ tasks.register("verify") {
     val gradleIntegrationTest = ":gradle-integration-test"
     dependsOn(checkDuplicatePublicApi)
     subprojects.filter { it.path != gradleIntegrationTest }.forEach { project ->
-        dependsOn(project.tasks.matching { it.name == LifecycleBasePlugin.CHECK_TASK_NAME })
+        project.plugins.withType(LifecycleBasePlugin::class.java) {
+            dependsOn(project.tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME))
+        }
     }
 }
 

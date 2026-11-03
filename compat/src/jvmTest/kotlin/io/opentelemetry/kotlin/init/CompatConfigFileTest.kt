@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
+import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlinx.coroutines.runBlocking
@@ -17,12 +18,18 @@ import java.util.logging.Handler
 import java.util.logging.Level
 import java.util.logging.LogRecord
 import java.util.logging.Logger
+import kotlin.test.AfterTest
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 internal class CompatConfigFileTest {
 
+    private val sdks = SdkTracker()
+
     private val clock = FakeClock()
+
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
 
     @Test
     fun `a config file that does not exist is reported`() {
@@ -30,7 +37,7 @@ internal class CompatConfigFileTest {
         createCompatOpenTelemetry {
             errorHandler(handler)
             configFile("does-not-exist.yaml")
-        }
+        }.also(sdks::track)
         assertEquals(1, handler.errors.size)
         assertEquals("OTEL_CONFIG_FILE", handler.apiMisuses.single().api)
     }
@@ -42,7 +49,7 @@ internal class CompatConfigFileTest {
         createCompatOpenTelemetry {
             errorHandler(handler)
             configFile(path)
-        }
+        }.also(sdks::track)
         assertEquals(1, handler.errors.size)
         assertEquals("OTEL_CONFIG_FILE", handler.apiMisuses.single().api)
     }
@@ -78,7 +85,7 @@ internal class CompatConfigFileTest {
             val messages = captureJul(LoggingSpanExporter::class.java.name) {
                 val sdk = createCompatOpenTelemetry {
                     configFile(writeConfigFile(CONSOLE_CONFIG_FILE))
-                }
+                }.also(sdks::track)
                 sdk.tracerProvider.getTracer("test").startSpan("compat-console-span").end()
                 sdk.loggerProvider.getLogger("test").emit(body = "compat-console-log")
             }
@@ -92,7 +99,7 @@ internal class CompatConfigFileTest {
         captureJul(LoggingSpanExporter::class.java.name) { messages ->
             val sdk = createCompatOpenTelemetry {
                 configFile(writeConfigFile(BATCH_CONSOLE_CONFIG_FILE))
-            } as OpenTelemetrySdk
+            }.also(sdks::track) as OpenTelemetrySdk
             sdk.tracerProvider.getTracer("test").startSpan("batch-console-span").end()
             assertTrue(messages.isEmpty())
             runBlocking { sdk.forceFlush() }
@@ -109,7 +116,7 @@ internal class CompatConfigFileTest {
             configFile(writeConfigFile(CONSOLE_CONFIG_FILE))
             tracerProvider { export { spanProcessor } }
             loggerProvider { export { logProcessor } }
-        }
+        }.also(sdks::track)
         sdk.tracerProvider.getTracer("test").startSpan("dsl-span").end()
         sdk.loggerProvider.getLogger("test").emit(body = "dsl-log")
         assertEquals(1, spanProcessor.endCalls.size)

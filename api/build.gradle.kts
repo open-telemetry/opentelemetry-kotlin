@@ -11,6 +11,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
+                implementation(project(":error-handling"))
                 implementation(project(":propagation-utils"))
             }
         }

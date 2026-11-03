@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
 import io.opentelemetry.kotlin.toOtelJavaApi
 import kotlinx.coroutines.test.runTest
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -16,6 +17,9 @@ internal class OtelJavaApiExportTest {
     fun setUp() = runTest {
         harness = IntegrationTestHarness(testScheduler)
     }
+
+    @AfterTest
+    fun tearDown() = harness.shutdown()
 
     @Test
     fun testSimpleSpanExport() = runTest {

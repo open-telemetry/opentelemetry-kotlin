@@ -28,9 +28,8 @@ private const val SHUTDOWN_TIMEOUT_MS = 5000L
 private const val CANCELLATION_TIMEOUT_MS = 500L
 
 // Includes both pending and in-flight entries; each entry holds one List<T>.
-private const val MAX_QUEUE_ENTRIES = 2048
+internal const val MAX_QUEUE_ENTRIES = 2048
 private const val MAX_JITTER_MS = 100L
-private const val ENQUEUE_TIMEOUT_MS = 1000L
 
 private data class EndpointRetryState(
     var blockedUntil: ComparableTimeMark? = null,
@@ -273,13 +272,13 @@ internal class TelemetryExporter<T>(
             return Success
         }
 
-        var acquired = false
+        // Drop rather than wait when the queue is full: waiting would stall the caller
+        // (e.g. the batch worker) while the endpoint is backed off.
+        if (!semaphore.tryAcquire()) {
+            return Failure
+        }
         var enqueued = false
         try {
-            withTimeoutOrNull(ENQUEUE_TIMEOUT_MS) {
-                semaphore.acquire()
-                acquired = true
-            } ?: return Failure
             mutex.withLock {
                 if (shutdownState.isShutdown) {
                     return Failure
@@ -290,7 +289,7 @@ internal class TelemetryExporter<T>(
                 return Success
             }
         } finally {
-            if (acquired && !enqueued) {
+            if (!enqueued) {
                 semaphore.release()
             }
         }
@@ -298,35 +297,58 @@ internal class TelemetryExporter<T>(
 
     override suspend fun forceFlush(): OperationResultCode = Success
 
-    override suspend fun shutdown(): OperationResultCode = withContext(NonCancellable) {
-        mutex.withLock {
-            shutdownState.shutdownNow()
-            if (queue.isEmpty()) {
-                // If the queue is already empty, close the channel to wake idle workers so they can exit.
-                workAvailable.close()
+    override suspend fun shutdown(): OperationResultCode {
+        val deadline = timeSource.markNow() + SHUTDOWN_TIMEOUT_MS.milliseconds
+        val canDrain = withContext(NonCancellable) {
+            mutex.withLock {
+                shutdownState.shutdownNow()
+                if (queue.isEmpty()) {
+                    // If the queue is already empty, close the channel to wake idle workers so they can exit.
+                    workAvailable.close()
+                }
+                canDrainBefore(deadline)
             }
         }
-        // Let workers drain the queue and exit before the shutdown deadline.
-        val completed = withTimeoutOrNull(SHUTDOWN_TIMEOUT_MS) {
+        var drained = false
+        try {
             exportJob.complete()
-            exportJob.join()
-            queue.isEmpty()
+            if (canDrain) {
+                drained = withTimeoutOrNull(deadline - timeSource.markNow()) {
+                    exportJob.join()
+                    mutex.withLock { queue.isEmpty() }
+                } ?: false
+            }
+        } finally {
+            if (!drained) {
+                withContext(NonCancellable) {
+                    cancelWorkersAndClearQueue()
+                }
+            }
         }
-        if (completed != null && completed) {
-            return@withContext Success
+        return if (drained) {
+            Success
+        } else {
+            Failure
         }
-        // If graceful shutdown did not succeed, cancel the workers and allow time for cleanup.
+    }
+
+    private fun canDrainBefore(deadline: ComparableTimeMark): Boolean {
+        val blockedUntil = state.blockedUntil ?: return true
+        val anyInFlight = queue.any { it.state == QueuedTelemetryState.InFlight }
+        return queue.isEmpty() || anyInFlight || blockedUntil < deadline
+    }
+
+    private suspend fun cancelWorkersAndClearQueue() {
         exportJob.cancel()
         val cancelled = withTimeoutOrNull(CANCELLATION_TIMEOUT_MS) {
             exportJob.join()
             true
         } ?: false
         // Clear retained entries only after all workers have stopped accessing the queue.
-        mutex.withLock {
-            if (cancelled) {
+        if (cancelled) {
+            mutex.withLock {
                 queue.clear()
             }
         }
-        return@withContext Failure
     }
 }

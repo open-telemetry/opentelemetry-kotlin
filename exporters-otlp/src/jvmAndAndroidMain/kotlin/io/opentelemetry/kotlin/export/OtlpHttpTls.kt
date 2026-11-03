@@ -24,6 +24,9 @@ import kotlin.io.encoding.ExperimentalEncodingApi
  * The private key must be unencrypted PKCS#8 PEM. A supplied
  * [OtlpHttpExporterConfigDsl.httpClient] takes precedence for requests.
  *
+ * If the files cannot be read or parsed, the failure is reported to the SDK error handler and the
+ * exporter falls back to the default engine.
+ *
  * Available on JVM and Android. Other targets can supply a TLS-configured `httpClient`.
  */
 @ExperimentalApi

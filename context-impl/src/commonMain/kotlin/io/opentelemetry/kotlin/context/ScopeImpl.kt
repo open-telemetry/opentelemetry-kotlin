@@ -11,7 +11,7 @@ private const val OUT_OF_ORDER_MSG = "Scope.detach() called out of order — con
 
 internal class ScopeImpl private constructor(
     private val currentContext: Context,
-    private val storage: ImplicitContextStorage,
+    private val storage: CurrentContextStorage,
     private val sdkErrorHandler: SdkErrorHandler,
     private val restore: () -> Unit,
 ) : Scope {
@@ -19,7 +19,7 @@ internal class ScopeImpl private constructor(
     private val detached = AtomicBoolean(false)
 
     override fun detach(): Boolean {
-        if (storage.implicitContext() != currentContext) {
+        if (storage.current() != currentContext) {
             val message = when {
                 detached.get() -> ALREADY_DETACHED_MSG
                 else -> OUT_OF_ORDER_MSG
@@ -49,9 +49,9 @@ internal class ScopeImpl private constructor(
         fun create(
             previousContext: Context,
             currentContext: Context,
-            storage: ImplicitContextStorage,
+            storage: CurrentContextStorage,
             sdkErrorHandler: SdkErrorHandler,
-            restore: () -> Unit = { storage.setImplicitContext(previousContext) },
+            restore: () -> Unit = { storage.setCurrent(previousContext) },
         ): Scope =
             if (previousContext == currentContext) {
                 sdkErrorHandler.reportError(

@@ -21,12 +21,27 @@ internal class ResourceAttributesParserTest {
     }
 
     @Test
+    fun splitsOnFirstSeparator() {
+        assertEquals(
+            mapOf("k8s.pod.label" to "app=web", "url" to "a=b=c"),
+            parseResourceAttributes("k8s.pod.label=app=web,url=a=b=c"),
+        )
+    }
+
+    @Test
+    fun skipsEmptyEntries() {
+        assertEquals(
+            mapOf("a" to "b", "c" to "d"),
+            parseResourceAttributes(" ,a=b,, \t,c=d,"),
+        )
+        assertEquals(emptyMap(), parseResourceAttributes(""))
+    }
+
+    @Test
     fun rejectsInvalidResourceAttributes() {
         listOf(
-            "",
             "missing-value",
             "missing-key=value,=value",
-            "too=many=separators",
             "invalid%=value",
             "invalid-percent=%",
         ).forEach { value ->
