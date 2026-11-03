@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision.DROP
@@ -31,4 +32,6 @@ internal class AlwaysRecordSampler(
         }
         return delegate
     }
+
+    override suspend fun shutdown(): OperationResultCode = root.shutdown()
 }
