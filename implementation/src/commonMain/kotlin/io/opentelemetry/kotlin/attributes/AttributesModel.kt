@@ -1,190 +1,54 @@
 package io.opentelemetry.kotlin.attributes
 
 import io.opentelemetry.kotlin.behavior.limitOrUnset
-import io.opentelemetry.kotlin.internal.codePointCount
-import io.opentelemetry.kotlin.internal.takeCodePoints
 
 internal class AttributesModel(
     attributeLimit: Int = DEFAULT_ATTRIBUTE_LIMIT,
     attributeValueLengthLimit: Int = DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
-    private val attrs: MutableMap<String, Any> = mutableMapOf()
-) : AttributesMutator, AttributeContainer {
+    private val attrs: MutableMap<String, AttributeValue> = mutableMapOf()
+) : AttributesMutator, TypedAttributeContainer {
 
     private val attributeLimit: Int = limitOrUnset(attributeLimit) ?: DEFAULT_ATTRIBUTE_LIMIT
-    private val attributeValueLengthLimit: Int = limitOrUnset(attributeValueLengthLimit) ?: DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
-
-    /**
-     * True when [attributeValueLengthLimit] doesn't truncate anything, which is the default.
-     */
-    private val truncationDisabled = this.attributeValueLengthLimit == Int.MAX_VALUE
+    private val lengthLimit: Int = limitOrUnset(attributeValueLengthLimit) ?: DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
-        ifPreconditionsOk(key) {
-            attrs[key] = value
-        }
+        set(key) { AttributeValue.Bool(value) }
     }
 
     override fun setStringAttribute(key: String, value: String) {
-        ifPreconditionsOk(key) {
-            attrs[key] = truncateString(value)
-        }
+        set(key) { AttributeValue.Str(value, lengthLimit) }
     }
 
     override fun setLongAttribute(key: String, value: Long) {
-        ifPreconditionsOk(key) {
-            attrs[key] = value
-        }
+        set(key) { AttributeValue.Long(value) }
     }
 
     override fun setDoubleAttribute(key: String, value: Double) {
-        ifPreconditionsOk(key) {
-            attrs[key] = value
-        }
+        set(key) { AttributeValue.Double(value) }
     }
 
-    override fun setBooleanListAttribute(
-        key: String,
-        value: List<Boolean>
-    ) {
-        ifPreconditionsOk(key) {
-            attrs[key] = value.toList()
-        }
+    override fun setBooleanListAttribute(key: String, value: List<Boolean>) {
+        set(key) { AttributeValue.BoolList(value) }
     }
 
-    override fun setStringListAttribute(
-        key: String,
-        value: List<String>
-    ) {
-        ifPreconditionsOk(key) {
-            attrs[key] = if (truncationDisabled) {
-                value.toList()
-            } else {
-                value.map(::truncateString)
-            }
-        }
+    override fun setStringListAttribute(key: String, value: List<String>) {
+        set(key) { AttributeValue.StrList(value, lengthLimit) }
     }
 
-    override fun setLongListAttribute(
-        key: String,
-        value: List<Long>
-    ) {
-        ifPreconditionsOk(key) {
-            attrs[key] = value.toList()
-        }
+    override fun setLongListAttribute(key: String, value: List<Long>) {
+        set(key) { AttributeValue.LongList(value) }
     }
 
-    override fun setDoubleListAttribute(
-        key: String,
-        value: List<Double>
-    ) {
-        ifPreconditionsOk(key) {
-            attrs[key] = value.toList()
-        }
+    override fun setDoubleListAttribute(key: String, value: List<Double>) {
+        set(key) { AttributeValue.DoubleList(value) }
     }
 
     override fun setByteArrayAttribute(key: String, value: ByteArray) {
-        ifPreconditionsOk(key) {
-            attrs[key] = value.copyOf(minOf(value.size, attributeValueLengthLimit))
-        }
+        set(key) { AttributeValue.Value(AnyValue.BytesValue(value), lengthLimit) }
     }
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
-        ifPreconditionsOk(key) {
-            attrs[key] = truncateAnyValue(copyAnyValue(value, emptyList()))
-        }
-    }
-
-    private fun truncateString(value: String): String =
-        if (value.codePointCount() > attributeValueLengthLimit) {
-            value.takeCodePoints(attributeValueLengthLimit)
-        } else {
-            value
-        }
-
-    private fun truncateByteArray(value: ByteArray): ByteArray =
-        if (value.size > attributeValueLengthLimit) {
-            value.copyOf(attributeValueLengthLimit)
-        } else {
-            value
-        }
-
-    private fun truncateAnyValue(value: AnyValue): AnyValue {
-        if (truncationDisabled) {
-            return value
-        }
-        return when (value) {
-            is AnyValue.StringValue -> {
-                val truncated = truncateString(value.value)
-                if (truncated === value.value) {
-                    value
-                } else {
-                    AnyValue.StringValue(truncated)
-                }
-            }
-            is AnyValue.BytesValue -> {
-                val truncated = truncateByteArray(value.value)
-                if (truncated === value.value) {
-                    value
-                } else {
-                    AnyValue.BytesValue(truncated)
-                }
-            }
-            is AnyValue.ListValue -> {
-                var changed = false
-                val mapped = value.values.map { item ->
-                    val truncated = truncateAnyValue(item)
-                    if (truncated !== item) {
-                        changed = true
-                    }
-                    truncated
-                }
-                if (changed) {
-                    AnyValue.ListValue(mapped)
-                } else {
-                    value
-                }
-            }
-            is AnyValue.MapValue -> {
-                var changed = false
-                val mapped = value.values.mapValues { entry ->
-                    val truncated = truncateAnyValue(entry.value)
-                    if (truncated !== entry.value) {
-                        changed = true
-                    }
-                    truncated
-                }
-                if (changed) {
-                    AnyValue.MapValue(mapped)
-                } else {
-                    value
-                }
-            }
-            AnyValue.NullValue,
-            is AnyValue.BoolValue,
-            is AnyValue.LongValue,
-            is AnyValue.DoubleValue -> {
-                value
-            }
-        }
-    }
-
-    private fun copyAnyValue(value: AnyValue, ancestors: List<AnyValue>): AnyValue {
-        if (ancestors.size >= MAX_ATTRIBUTE_VALUE_DEPTH || ancestors.any { it === value }) {
-            return AnyValue.NullValue
-        }
-        val path = ancestors + value
-        return when (value) {
-            is AnyValue.BytesValue -> AnyValue.BytesValue(value.value.copyOf())
-            is AnyValue.ListValue -> AnyValue.ListValue(value.values.map { copyAnyValue(it, path) })
-            is AnyValue.MapValue -> AnyValue.MapValue(
-                value.values.mapValues { (_, nested) -> copyAnyValue(nested, path) },
-            )
-            AnyValue.NullValue,
-            is AnyValue.StringValue,
-            is AnyValue.BoolValue,
-            is AnyValue.LongValue,
-            is AnyValue.DoubleValue -> value
-        }
+        set(key) { AttributeValue.Value(value, lengthLimit) }
     }
 
     private var droppedAttributesCountImpl = 0
@@ -195,28 +59,30 @@ internal class AttributesModel(
     val droppedAttributesCount: Int
         get() = droppedAttributesCountImpl
 
-    override val attributes: Map<String, Any>
+    override val typedAttributes: Map<String, AttributeValue>
         get() = attrs.toMap()
 
+    override val attributes: Map<String, Any>
+        get() = when {
+            attrs.isEmpty() -> emptyMap()
+            else -> attrs.mapValues { it.value.toAny() }
+        }
+
     /**
-     * Runs [setter] only if [key] passes the attribute preconditions, keeping the drop check and
-     * the write coupled so an attribute can never be counted as dropped without also being skipped.
+     * Stores the result of [value] only if [key] passes the attribute preconditions, keeping the
+     * drop check and the write coupled so an attribute can never be counted as dropped without
+     * also being skipped. [value] is only evaluated when the write happens, so dropped values are
+     * never copied.
      */
-    private fun ifPreconditionsOk(key: String, setter: () -> Unit) {
+    private inline fun set(key: String, value: () -> AttributeValue) {
         if (key.isEmpty()) {
-            // Invalid key: ignored, not counted as a dropped attribute.
             return
         }
-        if (attrs.contains(key)) {
-            // Overwriting an existing attribute never drops.
-            setter()
-            return
-        }
-        if (attrs.size >= attributeLimit) {
+        if (!attrs.contains(key) && attrs.size >= attributeLimit) {
             droppedAttributesCountImpl++
             return
         }
-        setter()
+        attrs[key] = value()
     }
 
     override fun equals(other: Any?): Boolean {
@@ -226,53 +92,12 @@ internal class AttributesModel(
         if (other !is AttributesModel) {
             return false
         }
-        return attributeMapsEqual(attrs, other.attrs)
+        return attrs == other.attrs
     }
 
-    override fun hashCode(): Int = attributeMapHashCode(attrs)
-}
-
-internal fun attributeMapsEqual(a: Map<String, Any>, b: Map<String, Any>): Boolean {
-    if (a.size != b.size) {
-        return false
-    }
-    for ((key, value) in a) {
-        val otherValue = b[key] ?: return false
-        if (!attributeValuesEqual(value, otherValue)) {
-            return false
-        }
-    }
-    return true
-}
-
-internal fun attributeMapHashCode(attrs: Map<String, Any>): Int {
-    var result = 0
-    for ((key, value) in attrs) {
-        result += key.hashCode() xor attributeValueHashCode(value)
-    }
-    return result
-}
-
-private fun attributeValuesEqual(a: Any, b: Any): Boolean {
-    if (a is ByteArray && b is ByteArray) {
-        return a.contentEquals(b)
-    }
-    return a == b
-}
-
-private fun attributeValueHashCode(value: Any): Int {
-    if (value is ByteArray) {
-        return value.contentHashCode()
-    }
-    return value.hashCode()
+    override fun hashCode(): Int = attrs.hashCode()
 }
 
 internal const val DEFAULT_ATTRIBUTE_LIMIT: Int = 128
 internal const val DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT: Int = Int.MAX_VALUE
 internal const val NO_ATTRIBUTE_LIMIT: Int = Int.MAX_VALUE
-
-/**
- * Nested values deeper than this, and values that contain themselves, are stored as
- * [AnyValue.NullValue]. Same bound as log-body normalization.
- */
-internal const val MAX_ATTRIBUTE_VALUE_DEPTH: Int = 16

@@ -42,7 +42,6 @@ internal class ApiProviderImpl<T>(
         val container = AttributesModel(
             attributeLimit = attributeLimits.attributeCountLimit ?: DEFAULT_ATTRIBUTE_LIMIT,
             attributeValueLengthLimit = attributeLimits.attributeValueLengthLimit ?: DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
-            attrs = mutableMapOf(),
         )
         if (attributes != null) {
             userCode { attributes(container) }

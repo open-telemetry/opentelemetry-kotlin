@@ -1,7 +1,9 @@
 package io.opentelemetry.kotlin.resource
 
+import io.opentelemetry.kotlin.attributes.AttributeValue
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
+import io.opentelemetry.kotlin.attributes.toAttributeValues
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -12,7 +14,7 @@ internal class ResourceImplTest {
     @Test
     fun testResourceImpl() {
         val attrs =
-            AttributesModel(attrs = mutableMapOf("key" to "value"))
+            AttributesModel(attrs = typed(mapOf("key" to "value")))
         val resource = ResourceImpl(attrs, "https://example.com/schema")
         val another = resource.asNewResource {
             attributes["foo"] = "value"
@@ -32,7 +34,7 @@ internal class ResourceImplTest {
     @Test
     fun testEmptyResource() {
         val attrs =
-            AttributesModel(attrs = mutableMapOf("key" to "value"))
+            AttributesModel(attrs = typed(mapOf("key" to "value")))
         val resource = ResourceImpl(attrs, "https://example.com/schema")
         val another = resource.asNewResource {
             attributes.clear()
@@ -44,7 +46,7 @@ internal class ResourceImplTest {
 
     @Test
     fun testDefensiveCopy() {
-        val container = AttributesModel(attrs = mutableMapOf())
+        val container = AttributesModel()
         val resource = ResourceImpl(container, null)
         lateinit var attrs: MutableMap<String, Any>
         val another = resource.asNewResource {
@@ -58,7 +60,7 @@ internal class ResourceImplTest {
     fun testNewResourceNoAttributeLimit() {
         val count = DEFAULT_ATTRIBUTE_LIMIT + 3
         val attrs = (0 until count).associate { "key$it" to "value$it" }
-        val container = AttributesModel(attrs = attrs.toMutableMap())
+        val container = AttributesModel(attrs = typed(attrs))
         val resource = ResourceImpl(container, "https://example.com/schema")
         assertEquals(count, resource.attributes.size)
     }
@@ -67,7 +69,7 @@ internal class ResourceImplTest {
     fun testMutateResourceNoAttributeLimit() {
         val count = DEFAULT_ATTRIBUTE_LIMIT + 3
         val attrs = (0 until count).associate { "key$it" to "value$it" }
-        val container = AttributesModel(attrs = attrs.toMutableMap())
+        val container = AttributesModel(attrs = typed(attrs))
         val resource = ResourceImpl(container, "https://example.com/schema")
         val mutated = resource.asNewResource {
             attributes["extraKey"] = "extraValue"
@@ -78,8 +80,8 @@ internal class ResourceImplTest {
 
     @Test
     fun testMergeNonOverlapping() {
-        val base = ResourceImpl(AttributesModel(attrs = mutableMapOf("a" to "1")), "https://example.com/base")
-        val other = ResourceImpl(AttributesModel(attrs = mutableMapOf("b" to "2")), "https://example.com/other")
+        val base = ResourceImpl(AttributesModel(attrs = typed(mapOf("a" to "1"))), "https://example.com/base")
+        val other = ResourceImpl(AttributesModel(attrs = typed(mapOf("b" to "2"))), "https://example.com/other")
         val merged = base.merge(other)
         assertEquals("1", merged.attributes["a"])
         assertEquals("2", merged.attributes["b"])
@@ -87,8 +89,8 @@ internal class ResourceImplTest {
 
     @Test
     fun testMergeOtherWinsOnConflict() {
-        val base = ResourceImpl(AttributesModel(attrs = mutableMapOf("key" to "base")), null)
-        val other = ResourceImpl(AttributesModel(attrs = mutableMapOf("key" to "other")), null)
+        val base = ResourceImpl(AttributesModel(attrs = typed(mapOf("key" to "base"))), null)
+        val other = ResourceImpl(AttributesModel(attrs = typed(mapOf("key" to "other"))), null)
         val merged = base.merge(other)
         assertEquals("other", merged.attributes["key"])
     }
@@ -132,8 +134,8 @@ internal class ResourceImplTest {
     fun testMergeNoAttributeLimit() {
         val baseAttrs = (0 until DEFAULT_ATTRIBUTE_LIMIT).associate { "base$it" to "v$it" }
         val otherAttrs = mapOf("extra" to "value")
-        val base = ResourceImpl(AttributesModel(attrs = baseAttrs.toMutableMap()), null)
-        val other = ResourceImpl(AttributesModel(attrs = otherAttrs.toMutableMap()), null)
+        val base = ResourceImpl(AttributesModel(attrs = typed(baseAttrs)), null)
+        val other = ResourceImpl(AttributesModel(attrs = typed(otherAttrs)), null)
         val merged = base.merge(other)
         assertEquals(DEFAULT_ATTRIBUTE_LIMIT + 1, merged.attributes.size)
         assertEquals("value", merged.attributes["extra"])
@@ -142,19 +144,19 @@ internal class ResourceImplTest {
     @Test
     fun testEqualsAndHashCodeByAttributesAndSchemaUrl() {
         val a = ResourceImpl(
-            AttributesModel(attrs = mutableMapOf("k" to "v")),
+            AttributesModel(attrs = typed(mapOf("k" to "v"))),
             "https://example.com/schema",
         )
         val b = ResourceImpl(
-            AttributesModel(attrs = mutableMapOf("k" to "v")),
+            AttributesModel(attrs = typed(mapOf("k" to "v"))),
             "https://example.com/schema",
         )
         val differentAttrs = ResourceImpl(
-            AttributesModel(attrs = mutableMapOf("k" to "other")),
+            AttributesModel(attrs = typed(mapOf("k" to "other"))),
             "https://example.com/schema",
         )
         val differentSchema = ResourceImpl(
-            AttributesModel(attrs = mutableMapOf("k" to "v")),
+            AttributesModel(attrs = typed(mapOf("k" to "v"))),
             "https://example.com/other",
         )
 
@@ -163,4 +165,7 @@ internal class ResourceImplTest {
         assertNotEquals(a, differentAttrs)
         assertNotEquals(a, differentSchema)
     }
+
+    private fun typed(attrs: Map<String, Any>): MutableMap<String, AttributeValue> =
+        attrs.toAttributeValues().toMutableMap()
 }

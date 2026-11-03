@@ -97,7 +97,7 @@ internal class AttributesMutatorImplTest {
         val attrs = AttributesModel(attributeLimit).apply {
             setByteArrayAttribute("bytes", bytes)
         }.attributes
-        val stored = attrs["bytes"] as ByteArray
+        val stored = (attrs["bytes"] as AnyValue.BytesValue).value
         assertTrue(stored.contentEquals(bytes))
     }
 
@@ -108,7 +108,7 @@ internal class AttributesMutatorImplTest {
             setByteArrayAttribute("bytes", bytes)
         }
         bytes[0] = 0x09
-        val stored = model.attributes["bytes"] as ByteArray
+        val stored = (model.attributes["bytes"] as AnyValue.BytesValue).value
         assertTrue(stored.contentEquals(byteArrayOf(0x01, 0x02, 0x03)))
     }
 
@@ -117,7 +117,7 @@ internal class AttributesMutatorImplTest {
         val attrs = AttributesModel(attributeLimit = attributeLimit, attributeValueLengthLimit = 3).apply {
             setByteArrayAttribute("bytes", byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05, 0x06))
         }.attributes
-        val stored = attrs["bytes"] as ByteArray
+        val stored = (attrs["bytes"] as AnyValue.BytesValue).value
         assertTrue(stored.contentEquals(byteArrayOf(0x01, 0x02, 0x03)))
     }
 
@@ -190,7 +190,7 @@ internal class AttributesMutatorImplTest {
         val attrs = AttributesModel(attributeLimit, attributeValueLengthLimit = 5).apply {
             setByteArrayAttribute("bytes", bytes)
         }.attributes
-        val stored = attrs["bytes"] as ByteArray
+        val stored = (attrs["bytes"] as AnyValue.BytesValue).value
         assertTrue(stored.contentEquals(bytes))
     }
 
