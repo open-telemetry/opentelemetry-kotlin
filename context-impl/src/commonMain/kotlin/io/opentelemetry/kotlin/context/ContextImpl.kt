@@ -37,12 +37,8 @@ internal class ContextImpl(
             return DetachedScope
         }
         val current = storage.current()
-        if (storage is ScopedCurrentContextStorage) {
-            val scope = storage.attach(this)
-            return ScopeImpl.create(current, this, storage, sdkErrorHandler) { scope.detach() }
-        }
-        storage.setCurrent(this)
-        return ScopeImpl.create(current, this, storage, sdkErrorHandler)
+        val scope = storage.attach(this)
+        return ScopeImpl.create(current, this, storage, sdkErrorHandler) { scope.detach() }
     }
 
     override fun storeSpan(span: Span): Context = set(SPAN_KEY, span)

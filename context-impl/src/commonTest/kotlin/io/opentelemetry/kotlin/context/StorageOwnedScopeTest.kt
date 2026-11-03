@@ -9,17 +9,17 @@ import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-internal class ScopedCurrentContextStorageTest {
+internal class StorageOwnedScopeTest {
 
     private lateinit var handler: FakeSdkErrorHandler
-    private lateinit var storage: FakeScopedCurrentContextStorage
+    private lateinit var storage: FakeStackCurrentContextStorage
     private lateinit var factory: ContextFactoryImpl
 
     @BeforeTest
     fun setUp() {
         handler = FakeSdkErrorHandler()
         factory = ContextFactoryImpl(handler) { rootSupplier ->
-            FakeScopedCurrentContextStorage(rootSupplier).also { storage = it }
+            FakeStackCurrentContextStorage(rootSupplier).also { storage = it }
         }
     }
 
@@ -29,11 +29,10 @@ internal class ScopedCurrentContextStorageTest {
         val scope = ctx.attach()
         assertSame(ctx, factory.current())
         assertEquals(1, storage.attachCount)
-        assertEquals(0, storage.setCount)
 
         assertTrue(scope.detach())
         assertSame(factory.root(), factory.current())
-        assertEquals(0, storage.setCount)
+        assertEquals(1, storage.restoreCount)
     }
 
     @Test
@@ -70,15 +69,14 @@ internal class ScopedCurrentContextStorageTest {
     private fun newContext(): Context =
         factory.root().set(createContextKey("key"), Any())
 
-    private class FakeScopedCurrentContextStorage(
+    private class FakeStackCurrentContextStorage(
         rootSupplier: () -> Context,
-    ) : ScopedCurrentContextStorage {
+    ) : CurrentContextStorage {
 
         private val root by lazy { rootSupplier() }
         private val stack = ArrayDeque<Context>()
 
         var attachCount = 0
-        var setCount = 0
         var restoreCount = 0
 
         override fun attach(context: Context): Scope {
@@ -91,10 +89,6 @@ internal class ScopedCurrentContextStorageTest {
                     return true
                 }
             }
-        }
-
-        override fun setCurrent(context: Context) {
-            setCount++
         }
 
         override fun current(): Context = stack.lastOrNull() ?: root

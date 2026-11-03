@@ -11,17 +11,13 @@ import io.opentelemetry.kotlin.aliases.OtelJavaContextStorage
 @ExperimentalApi
 internal class OtelJavaCurrentContextStorage(
     rootSupplier: () -> Context,
-) : ScopedCurrentContextStorage {
+) : CurrentContextStorage {
 
     private val root by lazy { rootSupplier() }
 
     override fun attach(context: Context): Scope {
         val scope = OtelJavaContextStorage.get().attach(context.toOtelJavaContext())
         return ScopeAdapter(scope)
-    }
-
-    override fun setCurrent(context: Context) {
-        OtelJavaContextStorage.get().attach(context.toOtelJavaContext())
     }
 
     override fun current(): Context {
