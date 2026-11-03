@@ -25,6 +25,7 @@ import io.opentelemetry.proto.collector.logs.v1.ExportLogsPartialSuccess
 import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse
 import io.opentelemetry.proto.collector.trace.v1.ExportTracePartialSuccess
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -277,6 +278,38 @@ internal class OtlpClientTest {
         assertEquals(OtlpResponse.Unknown, client.exportTraces(spans))
         assertEquals(1, errorHandler.userCodeErrors.size)
         assertEquals(0, server.requestHistory.size)
+    }
+
+    @Test
+    fun testHungHeaderProviderTimesOutAndSendsWithoutHeaders() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        client = createOtlpHttpClient(errorHandler, OtlpEndpoint.Traces, getEnvVar = { null }) {
+            httpClient = createDefaultHttpClient(INFINITE_TIMEOUT_MS, server)
+            timeoutMs = requestTimeoutMs
+            headers = { awaitCancellation() }
+        }
+
+        assertEquals(OtlpResponse.Success, client.exportTraces(spans))
+        assertEquals(OtlpResponse.Success, client.exportLogs(logRecords))
+        assertEquals(2, errorHandler.userCodeErrors.size)
+        assertEquals(2, server.requestHistory.size)
+    }
+
+    @Test
+    fun testSlowHeaderProviderWithinTimeoutIsSent() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        client = createOtlpHttpClient(errorHandler, OtlpEndpoint.Traces, getEnvVar = { null }) {
+            httpClient = createDefaultHttpClient(INFINITE_TIMEOUT_MS, server)
+            timeoutMs = requestTimeoutMs
+            headers = {
+                delay((requestTimeoutMs / 2).milliseconds)
+                mapOf(HttpHeaders.Authorization to "Bearer token")
+            }
+        }
+
+        assertEquals(OtlpResponse.Success, client.exportTraces(spans))
+        assertEquals(0, errorHandler.userCodeErrors.size)
+        assertEquals("Bearer token", server.requestHistory.single().headers[HttpHeaders.Authorization])
     }
 
     @Test
