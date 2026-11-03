@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
+import java.time.Duration
+
 plugins {
     kotlin("multiplatform")
     id("com.android.kotlin.multiplatform.library")
@@ -24,4 +27,8 @@ kotlin {
             }
         }
     }
+}
+
+tasks.withType<KotlinNativeTest>().configureEach {
+    timeout.set(Duration.ofMinutes(30))
 }

@@ -1,6 +1,7 @@
 import io.opentelemetry.kotlin.isJvmAndroidModule
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import java.time.Duration
 
 plugins {
     kotlin("jvm")
@@ -36,6 +37,7 @@ fun List<Project>.names(): String = map { it.name }.sorted().joinToString(",")
 // Kotlin/Native klib writes to race against the outer build's `build/` directories.
 tasks.test {
     useJUnitPlatform()
+    timeout.set(Duration.ofMinutes(25))
     systemProperty("otelKotlinVersion", snapshotVersion)
     systemProperty("minSupportedGradle", minSupportedGradle)
     systemProperty("catalogPath", catalogFile.absolutePath)
