@@ -268,10 +268,10 @@ internal class MeterProviderImplTest {
         val attributeLimits = AttributeLimitsBehavior()
         val provider = MeterProviderImpl(config, attributeLimits)
         val meter = provider.getMeter(name = "test")
-        
+
         val longCounter = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
         val doubleCounter = meter.createDoubleUpDownCounter("my.counter", unit = "1", description = "test")
-        
+
         // Should return a noop instrument when types don't match
         assertFalse(longCounter === doubleCounter)
         // Should report an error
@@ -307,9 +307,9 @@ internal class MeterProviderImplTest {
         val attributeLimits = AttributeLimitsBehavior()
         val provider = MeterProviderImpl(config, attributeLimits)
         val meter = provider.getMeter(name = "test")
-        
+
         val counter = meter.createLongUpDownCounter("invalid-name!", unit = "1", description = "test")
-        
+
         // Should return a noop instrument
         assertNotNull(counter)
         assertEquals(1, handler.apiMisuses.size)
@@ -326,10 +326,10 @@ internal class MeterProviderImplTest {
         val attributeLimits = AttributeLimitsBehavior()
         val provider = MeterProviderImpl(config, attributeLimits)
         val meter = provider.getMeter(name = "test")
-        
+
         // Valid unit should be preserved
         val counter1 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
-        
+
         // Invalid unit (non-ASCII) should be dropped and reported
         val counter2 = meter.createLongUpDownCounter("my.counter2", unit = "°C", description = "test")
         assertEquals(1, handler.apiMisuses.size)
@@ -346,10 +346,10 @@ internal class MeterProviderImplTest {
         val attributeLimits = AttributeLimitsBehavior()
         val provider = MeterProviderImpl(config, attributeLimits)
         val meter = provider.getMeter(name = "test")
-        
+
         // Valid description should be preserved
         val counter1 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
-        
+
         // Long description should be truncated and reported
         val longDesc = "a".repeat(2000)
         val counter2 = meter.createLongUpDownCounter("my.counter2", unit = "1", description = longDesc)
