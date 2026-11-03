@@ -15,8 +15,10 @@ public class SingleSlotCurrentContextStorage(
     @Volatile
     private var current: Context? = null
 
-    override fun setCurrent(context: Context) {
+    override fun attach(context: Context): Scope {
+        val previous = current
         current = context
+        return RestoringScope { current = previous }
     }
 
     override fun current(): Context = current ?: root

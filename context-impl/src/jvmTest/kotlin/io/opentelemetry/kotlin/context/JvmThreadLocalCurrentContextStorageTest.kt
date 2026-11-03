@@ -14,14 +14,14 @@ internal class JvmThreadLocalCurrentContextStorageTest {
         val storage = ThreadLocalCurrentContextStorage(factory::root)
 
         val mainContext = FakeContext()
-        storage.setCurrent(mainContext)
+        storage.attach(mainContext)
 
         val observedFromOtherThread = AtomicReference<Context>()
         val otherContext = FakeContext()
 
         val thread = Thread {
             observedFromOtherThread.set(storage.current())
-            storage.setCurrent(otherContext)
+            storage.attach(otherContext)
         }
         thread.start()
         thread.join()

@@ -11,13 +11,13 @@ import io.opentelemetry.kotlin.ExperimentalApi
 public interface CurrentContextStorage {
 
     /**
-     * Stores the supplied context as the current context.
-     */
-    public fun setCurrent(context: Context)
-
-    /**
-     * Returns the current context, or
-     * [io.opentelemetry.kotlin.factory.ContextFactory.root] if none is set.
+     * Returns the current context. When nothing is attached this returns the root context.
      */
     public fun current(): Context
+
+    /**
+     * Attaches [context] to this storage. Detaching the returned [Scope] restores the state this
+     * storage had before the call.
+     */
+    public fun attach(context: Context): Scope
 }

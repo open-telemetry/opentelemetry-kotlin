@@ -51,7 +51,7 @@ internal class ScopeImpl private constructor(
             currentContext: Context,
             storage: CurrentContextStorage,
             sdkErrorHandler: SdkErrorHandler,
-            restore: () -> Unit = { storage.setCurrent(previousContext) },
+            restore: () -> Unit,
         ): Scope =
             if (previousContext == currentContext) {
                 sdkErrorHandler.reportError(
