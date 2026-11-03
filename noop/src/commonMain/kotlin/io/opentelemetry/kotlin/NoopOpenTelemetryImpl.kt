@@ -1,5 +1,7 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.config.ConfigProvider
+import io.opentelemetry.kotlin.config.NoopConfigProvider
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
@@ -21,6 +23,7 @@ internal object NoopOpenTelemetryImpl : OpenTelemetrySdk {
     override val tracerProvider: TracerProvider = NoopTracerProvider
     override val loggerProvider: LoggerProvider = NoopLoggerProvider
     override val meterProvider: MeterProvider = NoopMeterProvider
+    override val configProvider: ConfigProvider = NoopConfigProvider
     override val clock: Clock = NoopClock
     override val context: ContextFactory = NoopContextFactory
     override val idGenerator: IdGenerator = NoopIdGenerator
