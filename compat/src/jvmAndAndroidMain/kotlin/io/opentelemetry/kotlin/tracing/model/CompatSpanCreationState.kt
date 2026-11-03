@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanBuilder
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.attributes.compatAttributes
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanCreationAction
@@ -29,11 +30,7 @@ internal class CompatSpanCreationState(
         spanContext: SpanContext,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
-        val container = CompatAttributesModel()
-        if (attributes != null) {
-            attributes(container)
-        }
-        linksImpl.add(SpanLinkCompatImpl(spanContext, container))
+        linksImpl.add(SpanLinkCompatImpl(spanContext, compatAttributes(attributes)))
     }
 
     fun applyTo(builder: OtelJavaSpanBuilder) {
