@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.baggage.Baggage
 import io.opentelemetry.kotlin.baggage.BaggageEntry
 import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.propagation.utils.isValidBaggageKey
 import io.opentelemetry.kotlin.propagation.utils.percentDecodeBaggageValue
 import io.opentelemetry.kotlin.propagation.utils.percentEncodeBaggageValue
 
@@ -60,6 +61,9 @@ internal object W3CBaggagePropagator : TextMapPropagator {
     }
 
     private fun encodeIfFits(name: String, entry: BaggageEntry, currentLength: Int): String? {
+        if (!isValidBaggageKey(name)) {
+            return null
+        }
         val piece = encodeEntry(name, entry.value, entry.metadata.value)
         if (piece.length > MAX_ENTRY_BYTES) {
             return null
@@ -156,6 +160,9 @@ internal object W3CBaggagePropagator : TextMapPropagator {
             return null
         }
         val key = keyValuePart.substring(0, eq).trim(SPACE, HTAB)
+        if (!isValidBaggageKey(key)) {
+            return null
+        }
         val rawValue = keyValuePart.substring(eq + 1).trim(SPACE, HTAB)
         val value = percentDecodeBaggageValue(rawValue) ?: return null
         return ParsedEntry(key, value, metadata.trim(SPACE, HTAB))

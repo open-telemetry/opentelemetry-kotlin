@@ -1,8 +1,6 @@
 package io.opentelemetry.kotlin.baggage
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.propagation.utils.isValidBaggageKey
-import io.opentelemetry.kotlin.propagation.utils.isValidBaggageValue
 
 @OptIn(ExperimentalApi::class)
 internal class BaggageImpl private constructor(
@@ -40,12 +38,6 @@ internal class BaggageImpl private constructor(
     override fun toString(): String = "BaggageImpl(entries=$entries)"
 
     private fun setImpl(name: String, value: String, metadata: BaggageEntryMetadata): Baggage {
-        if (!isValidBaggageKey(name)) {
-            return this
-        }
-        if (!isValidBaggageValue(value)) {
-            return this
-        }
         if (entries.size >= MAX_ENTRIES && name !in entries) {
             return this
         }
