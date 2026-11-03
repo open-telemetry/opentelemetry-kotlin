@@ -10,6 +10,11 @@ class FakeMeter(
     val observableLongCounters: MutableList<FakeObservableLongCounter> = mutableListOf()
     val observableLongUpDownCounters: MutableList<FakeObservableLongUpDownCounter> = mutableListOf()
     val observableDoubleUpDownCounters: MutableList<FakeObservableDoubleUpDownCounter> = mutableListOf()
+    val longGauges: MutableList<FakeLongGauge> = mutableListOf()
+
+    override fun createLongGauge(name: String, unit: String?, description: String?): LongGauge =
+        FakeLongGauge(name, unit, description).also { longGauges.add(it) }
+
     val doubleGauges: MutableList<FakeDoubleGauge> = mutableListOf()
 
     override fun createDoubleGauge(name: String, unit: String?, description: String?): DoubleGauge =

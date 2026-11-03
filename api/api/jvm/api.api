@@ -258,6 +258,14 @@ public abstract interface class io/opentelemetry/kotlin/metrics/Instrument {
 	public abstract fun getUnit ()Ljava/lang/String;
 }
 
+public abstract interface class io/opentelemetry/kotlin/metrics/LongGauge : io/opentelemetry/kotlin/metrics/SynchronousInstrument {
+	public abstract fun record (JLkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/opentelemetry/kotlin/metrics/LongGauge$DefaultImpls {
+	public static synthetic fun record$default (Lio/opentelemetry/kotlin/metrics/LongGauge;JLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
 public abstract interface class io/opentelemetry/kotlin/metrics/LongHistogram : io/opentelemetry/kotlin/metrics/SynchronousInstrument {
 	public abstract fun record (JLio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function1;)V
 }
@@ -277,6 +285,7 @@ public final class io/opentelemetry/kotlin/metrics/LongUpDownCounter$DefaultImpl
 public abstract interface class io/opentelemetry/kotlin/metrics/Meter {
 	public abstract fun createDoubleGauge (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/DoubleGauge;
 	public abstract fun createDoubleUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/DoubleUpDownCounter;
+	public abstract fun createLongGauge (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/LongGauge;
 	public abstract fun createLongUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/LongUpDownCounter;
 	public abstract fun createObservableDoubleCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleCounter;
 	public abstract fun createObservableDoubleUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleUpDownCounter;
@@ -287,6 +296,7 @@ public abstract interface class io/opentelemetry/kotlin/metrics/Meter {
 public final class io/opentelemetry/kotlin/metrics/Meter$DefaultImpls {
 	public static synthetic fun createDoubleGauge$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/DoubleGauge;
 	public static synthetic fun createDoubleUpDownCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/DoubleUpDownCounter;
+	public static synthetic fun createLongGauge$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/LongGauge;
 	public static synthetic fun createLongUpDownCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/LongUpDownCounter;
 	public static synthetic fun createObservableDoubleCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleCounter;
 	public static synthetic fun createObservableDoubleUpDownCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleUpDownCounter;
