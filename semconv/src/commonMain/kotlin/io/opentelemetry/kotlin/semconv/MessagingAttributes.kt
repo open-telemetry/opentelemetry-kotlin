@@ -93,41 +93,41 @@ object MessagingAttributes {
     const val MESSAGING_EVENTHUBS_CONSUMER_GROUP: String = "messaging.eventhubs.consumer.group"
 
     /**
-    * <p>The UTC epoch seconds at which the message has been accepted and stored in the entity.</p>
+    * <p>Deprecated, use <c>azure.eventhubs.message.enqueued_time</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `azure.eventhubs.message.enqueued_time`.")
     const val MESSAGING_EVENTHUBS_MESSAGE_ENQUEUED_TIME: String = "messaging.eventhubs.message.enqueued_time"
 
     /**
-    * <p>The ack deadline in seconds set for the modify ack deadline request.</p>
+    * <p>Deprecated, use <c>gcp.pubsub.message.ack_deadline</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `gcp.pubsub.message.ack_deadline`.")
     const val MESSAGING_GCP_PUBSUB_MESSAGE_ACK_DEADLINE: String = "messaging.gcp_pubsub.message.ack_deadline"
 
     /**
-    * <p>The ack ID for a given message.</p>
+    * <p>Deprecated, use <c>gcp.pubsub.message.ack_id</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `gcp.pubsub.message.ack_id`.")
     const val MESSAGING_GCP_PUBSUB_MESSAGE_ACK_ID: String = "messaging.gcp_pubsub.message.ack_id"
 
     /**
-    * <p>The delivery attempt for a given message.</p>
+    * <p>Deprecated, use <c>gcp.pubsub.message.delivery_attempt</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `gcp.pubsub.message.delivery_attempt`.")
     const val MESSAGING_GCP_PUBSUB_MESSAGE_DELIVERY_ATTEMPT: String = "messaging.gcp_pubsub.message.delivery_attempt"
 
     /**
-    * <p>The ordering key for a given message. If the attribute is not present, the message does not have an ordering key.</p>
+    * <p>Deprecated, use <c>gcp.pubsub.message.ordering_key</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `gcp.pubsub.message.ordering_key`.")
     const val MESSAGING_GCP_PUBSUB_MESSAGE_ORDERING_KEY: String = "messaging.gcp_pubsub.message.ordering_key"
 
     /**
-    * <p>The Kafka cluster ID, obtained from the broker metadata exposed through the Kafka client (or AdminClient) API.</p>
+    * <p>Deprecated, use <c>kafka.cluster.id</c> instead.</p>
     * <p>Notes:</p>
     * <p>The cluster ID is a unique identifier reported by the Kafka broker. It identifies the cluster independently of the individual brokers the client is configured to connect to, and remains stable even if broker hostnames, IP addresses, or ports change.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `kafka.cluster.id`.")
     const val MESSAGING_KAFKA_CLUSTER_ID: String = "messaging.kafka.cluster.id"
 
     /**
@@ -143,29 +143,29 @@ object MessagingAttributes {
     const val MESSAGING_KAFKA_DESTINATION_PARTITION: String = "messaging.kafka.destination.partition"
 
     /**
-    * <p>Message keys in Kafka are used for grouping alike messages to ensure they're processed on the same partition. They differ from <c>messaging.message.id</c> in that they're not unique. If the key is <c>null</c>, the attribute MUST NOT be set.</p>
+    * <p>Deprecated, use <c>kafka.message.key</c> instead.</p>
     * <p>Notes:</p>
     * <p>If the key type is not string, it's string representation has to be supplied for the attribute. If the key has no unambiguous, canonical string form, don't include its value.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `kafka.message.key`.")
     const val MESSAGING_KAFKA_MESSAGE_KEY: String = "messaging.kafka.message.key"
 
     /**
-    * <p>Deprecated, use <c>messaging.kafka.offset</c> instead.</p>
+    * <p>Deprecated, use <c>kafka.offset</c> instead.</p>
     */
-    @Deprecated("Replaced by `messaging.kafka.offset`.")
+    @Deprecated("Replaced by `kafka.offset`.")
     const val MESSAGING_KAFKA_MESSAGE_OFFSET: String = "messaging.kafka.message.offset"
 
     /**
-    * <p>A boolean that is true if the message is a tombstone.</p>
+    * <p>Deprecated, use <c>kafka.message.tombstone</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `kafka.message.tombstone`.")
     const val MESSAGING_KAFKA_MESSAGE_TOMBSTONE: String = "messaging.kafka.message.tombstone"
 
     /**
-    * <p>The offset of a record in the corresponding Kafka partition.</p>
+    * <p>Deprecated, use <c>kafka.offset</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `kafka.offset`.")
     const val MESSAGING_KAFKA_OFFSET: String = "messaging.kafka.offset"
 
     /**
@@ -219,15 +219,15 @@ object MessagingAttributes {
     const val MESSAGING_OPERATION_TYPE: String = "messaging.operation.type"
 
     /**
-    * <p>RabbitMQ message routing key.</p>
+    * <p>Deprecated, use <c>rabbitmq.destination.routing_key</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rabbitmq.destination.routing_key`.")
     const val MESSAGING_RABBITMQ_DESTINATION_ROUTING_KEY: String = "messaging.rabbitmq.destination.routing_key"
 
     /**
-    * <p>RabbitMQ message delivery tag</p>
+    * <p>Deprecated, use <c>rabbitmq.message.delivery_tag</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rabbitmq.message.delivery_tag`.")
     const val MESSAGING_RABBITMQ_MESSAGE_DELIVERY_TAG: String = "messaging.rabbitmq.message.delivery_tag"
 
     /**
@@ -237,51 +237,51 @@ object MessagingAttributes {
     const val MESSAGING_ROCKETMQ_CLIENT_GROUP: String = "messaging.rocketmq.client_group"
 
     /**
-    * <p>Model of message consumption. This only applies to consumer spans.</p>
+    * <p>Deprecated, use <c>rocketmq.consumption_model</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rocketmq.consumption_model`.")
     const val MESSAGING_ROCKETMQ_CONSUMPTION_MODEL: String = "messaging.rocketmq.consumption_model"
 
     /**
-    * <p>The delay time level for delay message, which determines the message delay time.</p>
+    * <p>Deprecated, use <c>rocketmq.message.delay_time_level</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rocketmq.message.delay_time_level`.")
     const val MESSAGING_ROCKETMQ_MESSAGE_DELAY_TIME_LEVEL: String = "messaging.rocketmq.message.delay_time_level"
 
     /**
-    * <p>The timestamp in milliseconds that the delay message is expected to be delivered to consumer.</p>
+    * <p>Deprecated, use <c>rocketmq.message.delivery_timestamp</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rocketmq.message.delivery_timestamp`.")
     const val MESSAGING_ROCKETMQ_MESSAGE_DELIVERY_TIMESTAMP: String = "messaging.rocketmq.message.delivery_timestamp"
 
     /**
-    * <p>It is essential for FIFO message. Messages that belong to the same message group are always processed one by one within the same consumer group.</p>
+    * <p>Deprecated, use <c>rocketmq.message.group</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rocketmq.message.group`.")
     const val MESSAGING_ROCKETMQ_MESSAGE_GROUP: String = "messaging.rocketmq.message.group"
 
     /**
-    * <p>Key(s) of message, another way to mark message besides message ID.</p>
+    * <p>Deprecated, use <c>rocketmq.message.keys</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rocketmq.message.keys`.")
     const val MESSAGING_ROCKETMQ_MESSAGE_KEYS: String = "messaging.rocketmq.message.keys"
 
     /**
-    * <p>The secondary classifier of message besides topic.</p>
+    * <p>Deprecated, use <c>rocketmq.message.tag</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rocketmq.message.tag`.")
     const val MESSAGING_ROCKETMQ_MESSAGE_TAG: String = "messaging.rocketmq.message.tag"
 
     /**
-    * <p>Type of message.</p>
+    * <p>Deprecated, use <c>rocketmq.message.type</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rocketmq.message.type`.")
     const val MESSAGING_ROCKETMQ_MESSAGE_TYPE: String = "messaging.rocketmq.message.type"
 
     /**
-    * <p>Namespace of RocketMQ resources, resources in different namespaces are individual.</p>
+    * <p>Deprecated, use <c>rocketmq.namespace</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rocketmq.namespace`.")
     const val MESSAGING_ROCKETMQ_NAMESPACE: String = "messaging.rocketmq.namespace"
 
     /**
@@ -291,30 +291,49 @@ object MessagingAttributes {
     const val MESSAGING_SERVICEBUS_DESTINATION_SUBSCRIPTION_NAME: String = "messaging.servicebus.destination.subscription_name"
 
     /**
-    * <p>Describes the <a href="https://learn.microsoft.com/azure/service-bus-messaging/message-transfers-locks-settlement#peeklock">settlement type</a>.</p>
+    * <p>Deprecated, use <c>azure.servicebus.disposition_status</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `azure.servicebus.disposition_status`.")
     const val MESSAGING_SERVICEBUS_DISPOSITION_STATUS: String = "messaging.servicebus.disposition_status"
 
     /**
-    * <p>Number of deliveries that have been attempted for this message.</p>
+    * <p>Deprecated, use <c>azure.servicebus.message.delivery_count</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `azure.servicebus.message.delivery_count`.")
     const val MESSAGING_SERVICEBUS_MESSAGE_DELIVERY_COUNT: String = "messaging.servicebus.message.delivery_count"
 
     /**
-    * <p>The UTC epoch seconds at which the message has been accepted and stored in the entity.</p>
+    * <p>Deprecated, use <c>azure.servicebus.message.enqueued_time</c> instead.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `azure.servicebus.message.enqueued_time`.")
     const val MESSAGING_SERVICEBUS_MESSAGE_ENQUEUED_TIME: String = "messaging.servicebus.message.enqueued_time"
+
+    /**
+    * <p>Deprecated, use <c>messaging.system.name</c> instead.</p>
+    * <p>Notes:</p>
+    * <p>The actual messaging system may differ from the one known by the client.
+    * For example, when using Kafka client libraries to communicate with Azure Event Hubs, the <c>messaging.system</c>
+    * is set to <c>kafka</c> based on the instrumentation's best knowledge.</p>
+    * <p>When migrating to <c>messaging.system.name</c>, update the following values:</p>
+    * <ul>
+    *   <li><c>aws_sqs</c> to <c>aws.sqs</c></li>
+    *   <li><c>eventgrid</c> to <c>azure.eventgrid</c></li>
+    *   <li><c>eventhubs</c> to <c>azure.eventhubs</c></li>
+    *   <li><c>servicebus</c> to <c>azure.servicebus</c></li>
+    *   <li><c>gcp_pubsub</c> to <c>gcp.pubsub</c></li>
+    * </ul>
+    * <p>All other values are unchanged.</p>
+    */
+    @Deprecated("Replaced by `messaging.system.name`.")
+    const val MESSAGING_SYSTEM: String = "messaging.system"
 
     /**
     * <p>The messaging system as identified by the client instrumentation.</p>
     * <p>Notes:</p>
-    * <p>The actual messaging system may differ from the one known by the client. For example, when using Kafka client libraries to communicate with Azure Event Hubs, the <c>messaging.system</c> is set to <c>kafka</c> based on the instrumentation's best knowledge.</p>
+    * <p>The actual messaging system may differ from the one known by the client. For example, when using Kafka client libraries to communicate with Azure Event Hubs, the <c>messaging.system.name</c> is set to <c>kafka</c> based on the instrumentation's best knowledge.</p>
     */
     @IncubatingApi
-    const val MESSAGING_SYSTEM: String = "messaging.system"
+    const val MESSAGING_SYSTEM_NAME: String = "messaging.system.name"
 
     /**
     * <p>MESSAGING_OPERATION_TYPE</p>
@@ -361,7 +380,7 @@ object MessagingAttributes {
     /**
     * <p>MESSAGING_ROCKETMQ_CONSUMPTION_MODEL</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rocketmq.consumption_model`.")
     enum class MessagingRocketmqConsumptionModelValues(val value: String) {
 
         /**
@@ -378,7 +397,7 @@ object MessagingAttributes {
     /**
     * <p>MESSAGING_ROCKETMQ_MESSAGE_TYPE</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `rocketmq.message.type`.")
     enum class MessagingRocketmqMessageTypeValues(val value: String) {
 
         /**
@@ -405,7 +424,7 @@ object MessagingAttributes {
     /**
     * <p>MESSAGING_SERVICEBUS_DISPOSITION_STATUS</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `azure.servicebus.disposition_status`.")
     enum class MessagingServicebusDispositionStatusValues(val value: String) {
 
         /**
@@ -432,7 +451,7 @@ object MessagingAttributes {
     /**
     * <p>MESSAGING_SYSTEM</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `messaging.system.name`.")
     enum class MessagingSystemValues(val value: String) {
 
         /**
@@ -469,6 +488,73 @@ object MessagingAttributes {
         * <p>Google Cloud Pub/Sub</p>
         */
         GCP_PUBSUB("gcp_pubsub"),
+
+        /**
+        * <p>Java Message Service</p>
+        */
+        JMS("jms"),
+
+        /**
+        * <p>Apache Kafka</p>
+        */
+        KAFKA("kafka"),
+
+        /**
+        * <p>RabbitMQ</p>
+        */
+        RABBITMQ("rabbitmq"),
+
+        /**
+        * <p>Apache RocketMQ</p>
+        */
+        ROCKETMQ("rocketmq"),
+
+        /**
+        * <p>Apache Pulsar</p>
+        */
+        PULSAR("pulsar"),
+    }
+
+    /**
+    * <p>MESSAGING_SYSTEM_NAME</p>
+    */
+    @IncubatingApi
+    enum class MessagingSystemNameValues(val value: String) {
+
+        /**
+        * <p>Apache ActiveMQ</p>
+        */
+        ACTIVEMQ("activemq"),
+
+        /**
+        * <p>Amazon Simple Notification Service (SNS)</p>
+        */
+        AWS_SNS("aws.sns"),
+
+        /**
+        * <p>Amazon Simple Queue Service (SQS)</p>
+        */
+        AWS_SQS("aws.sqs"),
+
+        /**
+        * <p>Azure Event Grid</p>
+        */
+        AZURE_EVENTGRID("azure.eventgrid"),
+
+        /**
+        * <p>Azure Event Hubs</p>
+        */
+        AZURE_EVENTHUBS("azure.eventhubs"),
+
+        /**
+        * <p>Azure Service Bus</p>
+        */
+        AZURE_SERVICEBUS("azure.servicebus"),
+
+        /**
+        * <p>Google Cloud Pub/Sub</p>
+        */
+        GCP_PUBSUB("gcp.pubsub"),
 
         /**
         * <p>Java Message Service</p>

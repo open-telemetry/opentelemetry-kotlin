@@ -6,6 +6,8 @@ import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
+import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
+import io.opentelemetry.kotlin.tracing.createSpanContext
 import org.junit.Test
 import kotlin.test.AfterTest
 import kotlin.test.assertEquals
@@ -55,6 +57,38 @@ internal class CompatLoggerErrorHandlingTest {
         assertSingleError("LoggerProvider.getLogger failed")
     }
 
+    @Test
+    fun `unsupported log record writes are ignored and reported once per property`() {
+        val processor = FakeLogRecordProcessor(action = { log, _ -> log.writeAllProperties() })
+        val logger = createLogger(processor)
+        logger.emit(body = "first", severityText = "INFO")
+        logger.emit(body = "second", severityText = "INFO")
+
+        val expected = listOf(
+            "timestamp",
+            "observedTimestamp",
+            "severityNumber",
+            "severityText",
+            "body",
+            "spanContext",
+            "eventName",
+        ).map { "ReadWriteLogRecord.$it" }
+        assertEquals(expected.size, errorHandler.errors.size)
+        assertEquals(expected, errorHandler.apiMisuses.map { it.api })
+        errorHandler.errors.forEach { assertEquals(SdkErrorSeverity.WARNING, it.severity) }
+        assertEquals(listOf("first", "second"), processor.logs.map { it.body })
+        assertEquals("INFO", processor.logs.first().severityText)
+    }
+
+    @Test
+    fun `log record attribute writes are applied and not reported`() {
+        val processor = FakeLogRecordProcessor(action = { log, _ -> log.setStringAttribute("key", "value") })
+        createLogger(processor).emit(body = "log")
+
+        assertEquals("value", processor.logs.single().attributes["key"])
+        assertTrue(errorHandler.errors.isEmpty())
+    }
+
     private fun createLogger(vararg processors: FakeLogRecordProcessor): Logger =
         createCompatOpenTelemetry {
             errorHandler(errorHandler)
@@ -69,6 +103,16 @@ internal class CompatLoggerErrorHandlingTest {
         assertEquals(message, error.message)
         assertEquals(SdkErrorSeverity.WARNING, error.severity)
         assertEquals("boom", error.cause.message)
+    }
+
+    private fun ReadWriteLogRecord.writeAllProperties() {
+        timestamp = 1
+        observedTimestamp = 2
+        severityNumber = SeverityNumber.ERROR
+        severityText = "ERROR"
+        body = "changed"
+        spanContext = createSpanContext("0af7651916cd43dd8448eb211c80319c", "b7ad6b7169203331")
+        eventName = "event"
     }
 
     private fun boom(): Nothing = error("boom")

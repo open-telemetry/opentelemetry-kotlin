@@ -7,6 +7,11 @@ public final class io/opentelemetry/kotlin/SdkBuildKonfig {
 	public final fun getSDK_VERSION ()Ljava/lang/String;
 }
 
+public final class io/opentelemetry/kotlin/attributes/AnyValueTransformKt {
+	public static final fun transform (Lio/opentelemetry/kotlin/attributes/AnyValue;ILkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/attributes/AnyValue;
+	public static synthetic fun transform$default (Lio/opentelemetry/kotlin/attributes/AnyValue;ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/attributes/AnyValue;
+}
+
 public abstract class io/opentelemetry/kotlin/attributes/AttributeValue {
 	public static final field Companion Lio/opentelemetry/kotlin/attributes/AttributeValue$Companion;
 	public abstract fun applyTo (Ljava/lang/String;Lio/opentelemetry/kotlin/attributes/AttributesMutator;)V
@@ -95,6 +100,15 @@ public final class io/opentelemetry/kotlin/attributes/ExceptionAttributesExtKt {
 	public static final fun setExceptionAttributes (Lio/opentelemetry/kotlin/attributes/AttributesMutator;Ljava/lang/Throwable;)V
 }
 
+public abstract interface class io/opentelemetry/kotlin/attributes/TypedAttributeContainer : io/opentelemetry/kotlin/attributes/AttributeContainer {
+	public abstract fun getTypedAttributes ()Ljava/util/Map;
+}
+
+public final class io/opentelemetry/kotlin/attributes/TypedAttributeContainerKt {
+	public static final fun toAttributeValues (Ljava/util/Map;)Ljava/util/Map;
+	public static final fun typedAttributesOrConvert (Lio/opentelemetry/kotlin/attributes/AttributeContainer;)Ljava/util/Map;
+}
+
 public final class io/opentelemetry/kotlin/config/ValidationKt {
 	public static final fun validateOrUseDefault (Lio/opentelemetry/kotlin/error/SdkErrorHandler;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 }
@@ -173,6 +187,11 @@ public final class io/opentelemetry/kotlin/export/TelemetryExceptionHandlerKt {
 
 public final class io/opentelemetry/kotlin/export/TimeoutOperationKt {
 	public static final fun runWithTimeout (JLkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/opentelemetry/kotlin/internal/StringUtilsKt {
+	public static final fun codePointCount (Ljava/lang/String;)I
+	public static final fun takeCodePoints (Ljava/lang/String;I)Ljava/lang/String;
 }
 
 public final class io/opentelemetry/kotlin/logging/LogBodyNormalizationKt {

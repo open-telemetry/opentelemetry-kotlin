@@ -10,8 +10,6 @@ repositories {
     mavenCentral()
 }
 
-version = project.properties["version"] as String
-
 dependencies {
     implementation(gradleApi())
     implementation(libs.kotlinMultiplatform)

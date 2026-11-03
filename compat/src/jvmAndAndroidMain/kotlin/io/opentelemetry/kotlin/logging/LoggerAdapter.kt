@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaLogger
 import io.opentelemetry.kotlin.aliases.OtelJavaValueType
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.attributes.compatAttributes
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
 import io.opentelemetry.kotlin.attributes.toOtelJavaValue
 import io.opentelemetry.kotlin.context.Context
@@ -13,7 +13,6 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
-import io.opentelemetry.kotlin.error.userCode
 import java.util.concurrent.TimeUnit
 
 @ExperimentalApi
@@ -99,12 +98,9 @@ internal class LoggerAdapter(
             builder.setSeverityText(severityText)
         }
 
-        val container = CompatAttributesModel()
-        if (exception != null) {
-            userCode { container.setExceptionAttributes(exception) }
-        }
-        if (attributes != null) {
-            userCode { attributes(container) }
+        val container = compatAttributes {
+            exception?.let { setExceptionAttributes(it) }
+            attributes?.invoke(this)
         }
         if (exception != null || attributes != null) {
             builder.setAllAttributes(container.otelJavaAttributes())

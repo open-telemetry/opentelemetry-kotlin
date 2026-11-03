@@ -31,7 +31,7 @@ internal class OtelJavaSpanProcessorAdapter(
 
     override fun onStart(parentContext: OtelJavaContext, span: OtelJavaReadWriteSpan) {
         sdkErrorHandler.guard("SpanProcessor.onStart failed") {
-            impl.onStart(ReadWriteSpanAdapter(span), parentContext.toOtelKotlinContext())
+            impl.onStart(ReadWriteSpanAdapter(span, sdkErrorHandler), parentContext.toOtelKotlinContext())
         }
     }
 
@@ -43,7 +43,7 @@ internal class OtelJavaSpanProcessorAdapter(
 
     override fun onEnding(span: ReadWriteSpan) {
         sdkErrorHandler.guard("SpanProcessor.onEnding failed") {
-            impl.onEnding(ReadWriteSpanAdapter(span))
+            impl.onEnding(ReadWriteSpanAdapter(span, sdkErrorHandler))
         }
     }
 

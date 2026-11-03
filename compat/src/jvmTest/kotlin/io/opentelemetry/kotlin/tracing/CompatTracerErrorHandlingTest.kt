@@ -111,6 +111,25 @@ internal class CompatTracerErrorHandlingTest {
     }
 
     @Test
+    fun `throwing event and link attribute lambdas in onStart do not abort the processor`() {
+        val processor = FakeSpanProcessor(
+            startAction = { span, _ ->
+                span.addEvent("event") { boom() }
+                span.addLink(span.spanContext) { boom() }
+                span.setStringAttribute("after", "value")
+            }
+        )
+        val span = createOtel(processor).tracerProvider.getTracer("test").startSpan("span")
+
+        assertEquals(
+            listOf("Span.addEvent failed", "Span.addLink failed"),
+            errorHandler.userCodeErrors.map { it.message }
+        )
+        assertEquals(listOf("boom", "boom"), errorHandler.userCodeErrors.map { it.cause.message })
+        assertEquals("value", (span as AttributeContainer).attributes["after"])
+    }
+
+    @Test
     fun `throwing scope attributes lambda degrades to a noop tracer`() {
         val tracerProvider = createOtel(FakeSpanProcessor()).tracerProvider
         val tracer = tracerProvider.getTracer("test") { boom() }

@@ -3,6 +3,7 @@
 package io.opentelemetry.kotlin.tracing.ext
 
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaReadWriteSpan
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaReadableSpan
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanData
@@ -81,7 +82,8 @@ internal class SpanDataExtTest {
     @Test
     fun testReadWriteSpanAdapterIsUnwrapped() {
         val impl = FakeOtelJavaSpanData()
-        val span = ReadWriteSpanAdapter(FakeOtelJavaReadWriteSpan(FakeOtelJavaReadableSpan(impl)))
+        val span =
+            ReadWriteSpanAdapter(FakeOtelJavaReadWriteSpan(FakeOtelJavaReadableSpan(impl)), FakeSdkErrorHandler())
         assertSame(impl, span.toOtelJavaSpanData())
     }
 }

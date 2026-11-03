@@ -184,6 +184,30 @@ object GcpAttributes {
     const val GCP_GCE_INSTANCE_GROUP_MANAGER_ZONE: String = "gcp.gce.instance_group_manager.zone"
 
     /**
+    * <p>The ack deadline in seconds set for the modify ack deadline request.</p>
+    */
+    @IncubatingApi
+    const val GCP_PUBSUB_MESSAGE_ACK_DEADLINE: String = "gcp.pubsub.message.ack_deadline"
+
+    /**
+    * <p>The ack ID for a given message.</p>
+    */
+    @IncubatingApi
+    const val GCP_PUBSUB_MESSAGE_ACK_ID: String = "gcp.pubsub.message.ack_id"
+
+    /**
+    * <p>The delivery attempt for a given message.</p>
+    */
+    @IncubatingApi
+    const val GCP_PUBSUB_MESSAGE_DELIVERY_ATTEMPT: String = "gcp.pubsub.message.delivery_attempt"
+
+    /**
+    * <p>The ordering key for a given message. If the attribute is not present, the message does not have an ordering key.</p>
+    */
+    @IncubatingApi
+    const val GCP_PUBSUB_MESSAGE_ORDERING_KEY: String = "gcp.pubsub.message.ordering_key"
+
+    /**
     * <p>GCP_APPHUB_SERVICE_CRITICALITY_TYPE</p>
     */
     @IncubatingApi

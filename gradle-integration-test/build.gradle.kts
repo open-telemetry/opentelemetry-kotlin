@@ -1,4 +1,6 @@
 import io.opentelemetry.kotlin.isJvmAndroidModule
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import java.time.Duration
 
 plugins {
@@ -55,5 +57,9 @@ tasks.test {
     testLogging {
         showStandardStreams = true
         showStackTraces = false
+        warn {
+            events(TestLogEvent.FAILED)
+            exceptionFormat = TestExceptionFormat.FULL
+        }
     }
 }

@@ -265,6 +265,10 @@ internal class NoopTests {
         assertNull(NoopConfigProperties.getStructured(""))
         assertNull(NoopConfigProperties.getStructuredList(""))
         assertSame(emptySet(), NoopConfigProperties.propertyKeys)
+
+        assertSame(NoopConfigProvider, NoopOpenTelemetry.configProvider)
+        assertSame(NoopConfigProperties, NoopOpenTelemetry.configProvider.instrumentationConfig)
+        assertSame(emptySet(), NoopOpenTelemetry.configProvider.instrumentationConfig.propertyKeys)
     }
 
     @OptIn(ExperimentalApi::class)

@@ -10,16 +10,71 @@ object DestinationAttributes {
   
 
     /**
-    * <p>Destination address - domain name if available without reverse DNS lookup; otherwise, IP address or UNIX domain socket name.</p>
+    * <p>Destination address as observed at the point of instrumentation - typically an IP address, or a UNIX domain socket name; a domain name only when the receiver was addressed by name (for example a peer-to-peer node dialed by hostname), never obtained via reverse DNS lookup.</p>
     * <p>Notes:</p>
-    * <p>When observed from the source side, and when communicating through an intermediary, <c>destination.address</c> SHOULD represent the destination address behind any intermediaries, for example proxies, if it's available.</p>
+    * <p><c>destination.address</c> SHOULD be the receiver address as observed at the point of instrumentation, for example the destination of the packet, flow, or exchange seen on the wire or socket. Instrumentation SHOULD capture the available address and SHOULD NOT try to resolve the address behind intermediaries such as proxies or load balancers, or perform a reverse DNS lookup to obtain a domain name.</p>
     */
     @IncubatingApi
     const val DESTINATION_ADDRESS: String = "destination.address"
+
+    /**
+    * <p>The <a href="https://www.iana.org/assignments/as-numbers/as-numbers.xhtml">Autonomous System Number (ASN)</a> associated with the destination IP address.</p>
+    * <p>Notes:</p>
+    * <p>This attribute SHOULD only be set when the destination address is an IP address and the ASN is available from routing, enrichment, or lookup data. The value SHOULD be represented as an integer without the <c>AS</c> prefix.</p>
+    */
+    @IncubatingApi
+    const val DESTINATION_AS_NUMBER: String = "destination.as.number"
+
+    /**
+    * <p>The name of the organization associated with the autonomous system of the destination IP address.</p>
+    * <p>Notes:</p>
+    * <p>This attribute SHOULD only be set when <c>destination.as.number</c> is set and the organization name is available. The value SHOULD be the organization name as provided by the lookup or enrichment source, not the AS name or short code.</p>
+    */
+    @IncubatingApi
+    const val DESTINATION_AS_ORGANIZATION: String = "destination.as.organization"
+
+    /**
+    * <p>Destination Media Access Control (MAC) address.</p>
+    * <p>Notes:</p>
+    * <p>MAC addresses MUST be represented in <a href="https://standards.ieee.org/wp-content/uploads/import/documents/tutorials/eui.pdf">IEEE RA hexadecimal form</a>:
+    * as hyphen-separated octets in uppercase hexadecimal form from most to least significant.</p>
+    * <blockquote>
+    * <p>[!WARNING]</p>
+    * <p>This attribute may contain sensitive (PII) information.</p></blockquote>
+    */
+    @IncubatingApi
+    const val DESTINATION_MAC_ADDRESS: String = "destination.mac.address"
 
     /**
     * <p>Destination port number</p>
     */
     @IncubatingApi
     const val DESTINATION_PORT: String = "destination.port"
+
+    /**
+    * <p>The IP prefix associated with the destination IP address, in CIDR notation.</p>
+    * <p>Notes:</p>
+    * <blockquote>
+    * <p>[!WARNING]</p>
+    * <p>This attribute may contain sensitive (PII) information. A <c>/32</c> IPv4 prefix
+    * or <c>/128</c> IPv6 prefix preserves the complete endpoint IP address.
+    * Using CIDR notation does not guarantee that the data is anonymous.</p></blockquote>
+    * <p>The value MUST be an IPv4 or IPv6 network prefix in CIDR notation, as defined in
+    * <a href="https://www.rfc-editor.org/rfc/rfc4632.html">RFC 4632</a> for IPv4 and
+    * <a href="https://www.rfc-editor.org/rfc/rfc4291.html#section-2.3">RFC 4291</a> for IPv6.
+    * IPv4 prefixes MUST use a dotted-decimal address followed by <c>/</c> and a decimal
+    * prefix length from 0 to 32. IPv6 prefixes MUST use the canonical address text
+    * representation defined in <a href="https://www.rfc-editor.org/rfc/rfc5952.html">RFC 5952</a>,
+    * followed by <c>/</c> and a decimal prefix length from 0 to 128. All host bits in
+    * the address MUST be set to zero. The value MUST NOT contain a domain name,
+    * UNIX domain socket name, or IPv6 zone identifier.</p>
+    * <p>Instrumentation or Collector receivers that populate this attribute MUST
+    * convert native representations, such as an address and subnet mask or an
+    * address and prefix length, to equivalent CIDR notation before emitting it.</p>
+    * <p>This attribute MAY be set whether or not <c>destination.address</c> is set. If
+    * <c>destination.address</c> is also set to an IP address, it MUST use the same IP version
+    * and be contained in this prefix.</p>
+    */
+    @IncubatingApi
+    const val DESTINATION_PREFIX: String = "destination.prefix"
 }

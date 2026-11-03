@@ -5,8 +5,10 @@ import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaValue
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.attributes.compatAttributes
 import io.opentelemetry.kotlin.attributes.toOtelJavaValue
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
@@ -15,6 +17,7 @@ import java.util.concurrent.TimeUnit
 
 internal class ReadWriteSpanAdapter(
     val impl: OtelJavaReadWriteSpan,
+    private val sdkErrorHandler: SdkErrorHandler,
     private val readableSpan: ReadableSpanAdapter = ReadableSpanAdapter(impl)
 ) : ReadWriteSpan, ReadableSpan by readableSpan {
 
@@ -50,24 +53,17 @@ internal class ReadWriteSpanAdapter(
     override fun addLink(
         spanContext: SpanContext,
         attributes: (AttributesMutator.() -> Unit)?
-    ) {
-        val container = CompatAttributesModel()
-        if (attributes != null) {
-            attributes(container)
-        }
-        val ctx = spanContext.toOtelJavaSpanContext()
-        impl.addLink(ctx, container.otelJavaAttributes())
+    ) = sdkErrorHandler.sdkGuard("Span.addLink failed") {
+        val container = compatAttributes(attributes)
+        impl.addLink(spanContext.toOtelJavaSpanContext(), container.otelJavaAttributes())
     }
 
     override fun addEvent(
         name: String,
         timestamp: Long?,
         attributes: (AttributesMutator.() -> Unit)?
-    ) {
-        val container = CompatAttributesModel()
-        if (attributes != null) {
-            attributes(container)
-        }
+    ) = sdkErrorHandler.sdkGuard("Span.addEvent failed") {
+        val container = compatAttributes(attributes)
         if (timestamp != null && timestamp > 0) {
             impl.addEvent(name, container.otelJavaAttributes(), timestamp, TimeUnit.NANOSECONDS)
         } else {

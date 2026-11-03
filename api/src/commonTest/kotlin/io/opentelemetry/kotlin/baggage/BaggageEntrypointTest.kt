@@ -21,6 +21,15 @@ internal class BaggageEntrypointTest {
     }
 
     @Test
+    fun `throwing action returns the shared empty Baggage`() {
+        val baggage = createBaggage {
+            put("user", "alice")
+            error("boom")
+        }
+        assertSame(BaggageImpl.EMPTY, baggage)
+    }
+
+    @Test
     fun `creates functional Baggage without an OpenTelemetry instance`() {
         val baggage = createBaggage {
             put("user", "alice", "propagation=public")
