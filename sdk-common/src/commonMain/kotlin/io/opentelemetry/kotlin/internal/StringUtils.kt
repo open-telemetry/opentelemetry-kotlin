@@ -5,7 +5,7 @@ package io.opentelemetry.kotlin.internal
  * point. `String.length` is not used directly because on all Kotlin targets it counts UTF-16
  * code units, which over-counts characters outside the Basic Multilingual Plane.
  */
-internal fun String.codePointCount(): Int {
+public fun String.codePointCount(): Int {
     var count = 0
     var index = 0
     while (index < length) {
@@ -23,7 +23,7 @@ internal fun String.codePointCount(): Int {
  * Returns the prefix of this string containing at most [maxCodePoints] Unicode code points,
  * never splitting a surrogate pair.
  */
-internal fun String.takeCodePoints(maxCodePoints: Int): String {
+public fun String.takeCodePoints(maxCodePoints: Int): String {
     var count = 0
     var index = 0
     while (index < length && count < maxCodePoints) {
