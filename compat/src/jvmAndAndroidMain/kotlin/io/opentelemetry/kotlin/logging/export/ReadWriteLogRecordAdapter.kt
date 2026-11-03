@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.attributes.toOtelJavaValue
 import io.opentelemetry.kotlin.attributes.toOtelKotlinBody
+import io.opentelemetry.kotlin.droppedCount
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.data.LogRecordDataAdapter
@@ -102,7 +103,7 @@ internal class ReadWriteLogRecordAdapter(
         get() = impl.attributes.convertToMap()
 
     override val droppedAttributesCount: Int
-        get() = impl.toLogRecordData().totalAttributeCount - impl.attributes.size()
+        get() = droppedCount(impl.toLogRecordData().totalAttributeCount, impl.attributes.size())
 
     override val resource: Resource
         get() = ResourceAdapter(impl.toLogRecordData().resource)

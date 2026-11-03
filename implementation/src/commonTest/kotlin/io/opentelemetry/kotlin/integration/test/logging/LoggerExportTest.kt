@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.semconv.ExceptionAttributes
 import kotlinx.coroutines.test.runTest
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -24,6 +25,9 @@ internal class LoggerExportTest {
                 }
             }
     }
+
+    @AfterTest
+    fun tearDown() = harness.shutdown()
 
     @Test
     fun testMinimalLogExported() = runTest {

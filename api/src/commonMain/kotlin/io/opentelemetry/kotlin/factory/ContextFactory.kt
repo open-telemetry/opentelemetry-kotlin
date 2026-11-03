@@ -15,7 +15,7 @@ public interface ContextFactory {
     public fun root(): Context
 
     /**
-     * Retrieves the implicit Context, or [root] if none is currently set.
+     * Retrieves the current Context, or [root] if none is currently set.
      */
     public fun current(): Context
 }

@@ -1,8 +1,10 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.metrics.MeterImpl
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -10,6 +12,12 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
 internal class CreateOpenTelemetryAttributeLimitsTest {
+
+    private val sdks = SdkTracker()
+
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
+
     @Test
     fun `global attribute limits apply to tracer scope attributes`() {
         val spanProcessor = FakeSpanProcessor()
@@ -22,7 +30,7 @@ internal class CreateOpenTelemetryAttributeLimitsTest {
             tracerProvider {
                 export { spanProcessor }
             }
-        }
+        }.also(sdks::track)
 
         api.tracerProvider.getTracer("test") {
             setStringAttribute("first", "abcdef")
@@ -45,7 +53,7 @@ internal class CreateOpenTelemetryAttributeLimitsTest {
             loggerProvider {
                 export { logProcessor }
             }
-        }
+        }.also(sdks::track)
 
         api.loggerProvider.getLogger("test") {
             setStringAttribute("first", "abcdef")
@@ -63,7 +71,7 @@ internal class CreateOpenTelemetryAttributeLimitsTest {
                 attributeCountLimit = 1
                 attributeValueLengthLimit = 3
             }
-        }
+        }.also(sdks::track)
 
         val meter = api.meterProvider.getMeter("test") {
             setStringAttribute("first", "abcdef")
@@ -93,7 +101,7 @@ internal class CreateOpenTelemetryAttributeLimitsTest {
                 }
                 export { spanProcessor }
             }
-        }
+        }.also(sdks::track)
 
         api.tracerProvider.getTracer("test") {
             setStringAttribute("first", "abcdef")
@@ -120,7 +128,7 @@ internal class CreateOpenTelemetryAttributeLimitsTest {
                 }
                 export { logProcessor }
             }
-        }
+        }.also(sdks::track)
 
         api.loggerProvider.getLogger("test") {
             setStringAttribute("first", "abcdef")
@@ -137,7 +145,7 @@ internal class CreateOpenTelemetryAttributeLimitsTest {
             attributeLimits {
                 attributeCountLimit = 0
             }
-        }
+        }.also(sdks::track)
 
         val meter = api.meterProvider.getMeter("test") {
             setStringAttribute("first", "abcdef")
@@ -163,7 +171,7 @@ internal class CreateOpenTelemetryAttributeLimitsTest {
             tracerProvider {
                 export { spanProcessor }
             }
-        }
+        }.also(sdks::track)
 
         api.tracerProvider.getTracer("test").startSpan("span").end()
 

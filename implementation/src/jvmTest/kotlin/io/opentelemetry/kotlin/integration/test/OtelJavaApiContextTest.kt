@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.toOtelJavaApi
 import io.opentelemetry.kotlin.tracing.Span
 import kotlinx.coroutines.test.runTest
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -12,7 +13,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertSame
 
 /**
- * Verifies that the Java API returned by toOtelJavaApi() shares implicit context with the
+ * Verifies that the Java API returned by toOtelJavaApi() shares current context with the
  * Kotlin API.
  */
 internal class OtelJavaApiContextTest {
@@ -25,6 +26,9 @@ internal class OtelJavaApiContextTest {
         harness = IntegrationTestHarness(testScheduler)
         javaApi = harness.kotlinApi.toOtelJavaApi()
     }
+
+    @AfterTest
+    fun tearDown() = harness.shutdown()
 
     @Test
     fun testJavaMakeCurrentParentsKotlinSpan() = runTest {
@@ -85,7 +89,7 @@ internal class OtelJavaApiContextTest {
     }
 
     @Test
-    fun testSetNoParentIgnoresImplicitContext() = runTest {
+    fun testSetNoParentIgnoresCurrentContext() = runTest {
         val kotlinSpan = harness.tracer.startSpan("kotlin_span")
         withAttached(kotlinSpan) {
             javaApi.tracerProvider.get("tracer").spanBuilder("java_span").setNoParent().startSpan().end()

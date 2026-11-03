@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import io.opentelemetry.kotlin.semconv.ExceptionAttributes
 import io.opentelemetry.kotlin.tracing.Span
 import kotlinx.coroutines.test.runTest
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,6 +28,9 @@ internal class LogExportTest {
     fun setUp() = runTest {
         harness = OtelKotlinHarness(testScheduler)
     }
+
+    @AfterTest
+    fun tearDown() = harness.shutdown()
 
     @Test
     fun `test enabled returns true`() {

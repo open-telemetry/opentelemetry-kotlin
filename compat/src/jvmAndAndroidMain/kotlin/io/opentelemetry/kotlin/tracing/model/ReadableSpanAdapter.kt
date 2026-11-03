@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.model
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.aliases.OtelJavaReadableSpan
 import io.opentelemetry.kotlin.attributes.convertToMap
+import io.opentelemetry.kotlin.droppedCount
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
 import io.opentelemetry.kotlin.scope.toOtelKotlinInstrumentationScopeInfo
@@ -40,15 +41,15 @@ internal class ReadableSpanAdapter(
     override val events: List<SpanEventData>
         get() = impl.toSpanData().events.map(::SpanEventDataAdapter)
     override val droppedEventsCount: Int
-        get() = impl.toSpanData().let { (it.totalRecordedEvents - it.events.size).coerceAtLeast(0) }
+        get() = impl.toSpanData().let { droppedCount(it.totalRecordedEvents, it.events.size) }
     override val links: List<SpanLinkData>
         get() = impl.toSpanData().links.map(::SpanLinkDataAdapter)
     override val droppedLinksCount: Int
-        get() = impl.toSpanData().let { (it.totalRecordedLinks - it.links.size).coerceAtLeast(0) }
+        get() = impl.toSpanData().let { droppedCount(it.totalRecordedLinks, it.links.size) }
     override val hasEnded: Boolean
         get() = impl.hasEnded()
     override val droppedAttributesCount: Int
-        get() = impl.toSpanData().totalAttributeCount - impl.attributes.size()
+        get() = droppedCount(impl.toSpanData().totalAttributeCount, impl.attributes.size())
 
     override fun toSpanData(): SpanData = SpanDataAdapter(impl.toSpanData())
 

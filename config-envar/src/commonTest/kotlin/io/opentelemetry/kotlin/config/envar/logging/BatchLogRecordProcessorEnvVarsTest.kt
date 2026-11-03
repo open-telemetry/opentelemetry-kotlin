@@ -8,16 +8,17 @@ import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 internal class BatchLogRecordProcessorEnvVarsTest {
     @Test
     fun readBatchSettings() {
         val env = mapOf(
-            BatchLogRecordProcessorEnvVars.SCHEDULE_DELAY to "100",
-            BatchLogRecordProcessorEnvVars.EXPORT_TIMEOUT to "0",
-            BatchLogRecordProcessorEnvVars.MAX_QUEUE_SIZE to "40",
-            BatchLogRecordProcessorEnvVars.MAX_EXPORT_BATCH_SIZE to "20",
-            LogRecordExporterEnvVars.LOGS_EXPORTER to Exporter.CONSOLE.toString(),
+            "OTEL_BLRP_SCHEDULE_DELAY" to "100",
+            "OTEL_BLRP_EXPORT_TIMEOUT" to "0",
+            "OTEL_BLRP_MAX_QUEUE_SIZE" to "40",
+            "OTEL_BLRP_MAX_EXPORT_BATCH_SIZE" to "20",
+            "OTEL_LOGS_EXPORTER" to Exporter.CONSOLE.toString(),
         )
         assertEquals(
             BatchLogRecordProcessorBehavior(
@@ -48,5 +49,21 @@ internal class BatchLogRecordProcessorEnvVarsTest {
             BatchLogRecordProcessorEnvVars(reader).toBehavior(),
         )
         assertEquals(3, warnings.size)
+    }
+
+    @Test
+    fun leavesUnsetBatchSettingsUnset() {
+        assertNull(BatchLogRecordProcessorEnvVars(reportingEnvVarReader({ null })).toBehavior())
+    }
+
+    @Test
+    fun ignoresBatchSpanProcessorSettings() {
+        val env = mapOf(
+            "OTEL_BSP_SCHEDULE_DELAY" to "100",
+            "OTEL_BSP_EXPORT_TIMEOUT" to "200",
+            "OTEL_BSP_MAX_QUEUE_SIZE" to "40",
+            "OTEL_BSP_MAX_EXPORT_BATCH_SIZE" to "20",
+        )
+        assertNull(BatchLogRecordProcessorEnvVars(reportingEnvVarReader(env::get)).toBehavior())
     }
 }
