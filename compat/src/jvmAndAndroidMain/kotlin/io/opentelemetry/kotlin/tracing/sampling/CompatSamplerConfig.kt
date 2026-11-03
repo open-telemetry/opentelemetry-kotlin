@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaCompositeSampler
 import io.opentelemetry.kotlin.aliases.OtelJavaSampler
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.attributes.compatAttributes
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import io.opentelemetry.kotlin.init.ComposableRuleBasedConfigDsl
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
@@ -67,7 +68,7 @@ internal class CompatSamplerConfig : SamplerConfigDsl {
     ): ComposableSampler = OtelJavaBackedComposableSampler(
         OtelJavaComposableSampler.annotating(
             delegate.toOtelJavaComposableSampler(),
-            CompatAttributesModel().apply(attributes).otelJavaAttributes(),
+            compatAttributes(attributes).otelJavaAttributes(),
         )
     )
 
