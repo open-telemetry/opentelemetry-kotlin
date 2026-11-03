@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
@@ -29,7 +30,10 @@ public fun createOpenTelemetry(
      */
     config: OpenTelemetryConfigDsl.() -> Unit = {}
 ): OpenTelemetry {
-    val cfg = OpenTelemetryConfigImpl(clock).apply(config)
+    val cfg = OpenTelemetryConfigImpl(clock)
+    cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
+        cfg.config()
+    }
     val resourceFactory = ResourceFactoryImpl(cfg.sdkErrorHandler)
     val behavior = defaultBehaviorReader(sdkErrorHandler = cfg.sdkErrorHandler)
         .read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)

@@ -38,6 +38,97 @@ internal class OtelJavaMeterAdapterAsyncCounterTest {
     }
 
     @Test
+    fun longCounterBuilderRecordsCallbackAndClosesIt() {
+        val meter = FakeMeter("test")
+        val counter = OtelJavaMeterAdapter(meter)
+            .counterBuilder("process.page.faults")
+            .setUnit("{fault}")
+            .setDescription("Page faults")
+            .buildWithCallback { measurement ->
+                measurement.record(4L, OtelJavaAttributes.builder().put("process", "worker").build())
+            }
+        val observableCounter = meter.observableLongCounters.single()
+        val measurement = FakeObservableLongMeasurement()
+
+        observableCounter.invokeCallbacks(measurement)
+
+        assertEquals("process.page.faults", observableCounter.name)
+        assertEquals("{fault}", observableCounter.unit)
+        assertEquals("Page faults", observableCounter.description)
+        assertEquals(listOf(4L to mapOf<String, Any>("process" to "worker")), measurement.adds)
+
+        counter.close()
+        assertTrue(observableCounter.callbacks.isEmpty())
+    }
+
+    @Test
+    fun longUpDownCounterBuilderRecordsCallbackAndClosesIt() {
+        val meter = FakeMeter("test")
+        val counter = OtelJavaMeterAdapter(meter)
+            .upDownCounterBuilder("process.memory.working_set")
+            .setUnit("By")
+            .setDescription("Process working set size")
+            .buildWithCallback { measurement ->
+                measurement.record(-4L, OtelJavaAttributes.builder().put("process", "worker").build())
+            }
+        val observableCounter = meter.observableLongUpDownCounters.single()
+        val measurement = FakeObservableLongMeasurement()
+
+        observableCounter.invokeCallbacks(measurement)
+
+        assertEquals("process.memory.working_set", observableCounter.name)
+        assertEquals("By", observableCounter.unit)
+        assertEquals("Process working set size", observableCounter.description)
+        assertEquals(listOf(-4L to mapOf<String, Any>("process" to "worker")), measurement.adds)
+
+        counter.close()
+        assertTrue(observableCounter.callbacks.isEmpty())
+    }
+
+    @Test
+    fun doubleUpDownCounterBuilderRecordsCallbackAndClosesIt() {
+        val meter = FakeMeter("test")
+        val counter = OtelJavaMeterAdapter(meter)
+            .upDownCounterBuilder("process.cpu.load")
+            .setUnit("1")
+            .setDescription("Process CPU load")
+            .ofDoubles()
+            .buildWithCallback { measurement ->
+                measurement.record(-0.5, OtelJavaAttributes.builder().put("process", "worker").build())
+            }
+        val observableCounter = meter.observableDoubleUpDownCounters.single()
+        val measurement = FakeObservableDoubleMeasurement()
+
+        observableCounter.invokeCallbacks(measurement)
+
+        assertEquals("process.cpu.load", observableCounter.name)
+        assertEquals("1", observableCounter.unit)
+        assertEquals("Process CPU load", observableCounter.description)
+        assertEquals(listOf(-0.5 to mapOf<String, Any>("process" to "worker")), measurement.adds)
+
+        counter.close()
+        assertTrue(observableCounter.callbacks.isEmpty())
+    }
+
+    @Test
+    fun doubleUpDownCounterBuilderCanSetMetadataAfterConvertingToDouble() {
+        val meter = FakeMeter("test")
+        val counter = OtelJavaMeterAdapter(meter)
+            .upDownCounterBuilder("process.memory.available")
+            .ofDoubles()
+            .setUnit("By")
+            .setDescription("Available memory")
+            .buildWithCallback { measurement -> measurement.record(1.5) }
+        val observableCounter = meter.observableDoubleUpDownCounters.single()
+
+        assertEquals("By", observableCounter.unit)
+        assertEquals("Available memory", observableCounter.description)
+
+        counter.close()
+        assertTrue(observableCounter.callbacks.isEmpty())
+    }
+
+    @Test
     fun synchronousCounterBuildersRemainNoop() {
         val meter = FakeMeter("test")
         val javaMeter = OtelJavaMeterAdapter(meter)

@@ -140,7 +140,7 @@ internal class OtelJavaContextAdapterTest {
     }
 
     @Test
-    fun `make current uses kotlin implicit context storage`() {
+    fun `make current uses kotlin current context storage`() {
         val javaCurrent = OtelJavaContext.current()
         val previous = kotlinContextFactory.current()
         val kotlinCtx = kotlinContextFactory.root().storeSpan(kotlinSpan)
@@ -153,7 +153,7 @@ internal class OtelJavaContextAdapterTest {
     }
 
     @Test
-    fun `wrapped runnable uses kotlin implicit context storage`() {
+    fun `wrapped runnable uses kotlin current context storage`() {
         val kotlinCtx = kotlinContextFactory.root().storeSpan(kotlinSpan)
         var observed: Context? = null
         OtelJavaContextAdapter(kotlinCtx).wrap(Runnable { observed = kotlinContextFactory.current() }).run()

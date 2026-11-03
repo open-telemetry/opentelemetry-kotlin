@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.attributes.transform
 
 private const val MAX_BODY_DEPTH = 16
 
@@ -35,10 +36,7 @@ private fun Any?.toImmutableAnyValue(ancestors: List<Any>): AnyValue {
     }
     val path = ancestors + this
     return when (this) {
-        is AnyValue.ListValue -> AnyValue.ListValue(values.map { it.toImmutableAnyValue(path) })
-        is AnyValue.MapValue -> AnyValue.MapValue(values.mapValues { it.value.toImmutableAnyValue(path) })
-        is AnyValue.BytesValue -> AnyValue.BytesValue(value.copyOf())
-        is AnyValue -> this
+        is AnyValue -> transform(maxDepth = MAX_BODY_DEPTH - ancestors.size)
         is String -> AnyValue.StringValue(this)
         is Boolean -> AnyValue.BoolValue(this)
         is Long -> AnyValue.LongValue(this)

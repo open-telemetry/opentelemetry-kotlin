@@ -26,7 +26,7 @@ internal class SdkConfigFactory(
 ) {
 
     val idGenerator: IdGenerator =
-        behavior.tracerProvider?.idGenerator?.toIdGenerator()
+        behavior.tracerProvider?.idGenerator?.toIdGenerator(cfg.sdkErrorHandler)
             ?: IdGeneratorImpl()
 
     private val sampler: SamplerBehavior? = behavior.tracerProvider?.sampler

@@ -19,6 +19,8 @@ internal class OtelJavaLogRecordProcessorAdapter(
     private val sdkErrorHandler: SdkErrorHandler,
 ) : OtelJavaLogRecordProcessor {
 
+    private val unsupportedWrites = UnsupportedLogRecordWriteReporter(sdkErrorHandler)
+
     private val scope by lazy {
         CoroutineScope(SupervisorJob() + Dispatchers.Default + telemetryExceptionHandler("LogRecordProcessor", sdkErrorHandler))
     }
@@ -28,7 +30,7 @@ internal class OtelJavaLogRecordProcessorAdapter(
         logRecord: OtelJavaReadWriteLogRecord
     ) {
         sdkErrorHandler.guard("LogRecordProcessor.onEmit failed") {
-            impl.onEmit(ReadWriteLogRecordAdapter(logRecord), context.toOtelKotlinContext())
+            impl.onEmit(ReadWriteLogRecordAdapter(logRecord, unsupportedWrites), context.toOtelKotlinContext())
         }
     }
 

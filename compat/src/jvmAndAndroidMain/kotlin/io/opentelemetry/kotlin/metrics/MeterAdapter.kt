@@ -13,6 +13,30 @@ internal class MeterAdapter(
 ) : Meter {
     private val noopMeter = NoopOpenTelemetry.meterProvider.getMeter("")
 
+    override fun createLongGauge(
+        name: String,
+        unit: String?,
+        description: String?,
+    ): LongGauge =
+        sdkErrorHandler.sdkGuardOrDefault(null, "Meter.createLongGauge failed") {
+            val builder = impl.gaugeBuilder(name).ofLongs()
+            unit?.let(builder::setUnit)
+            description?.let(builder::setDescription)
+            LongGaugeAdapter(builder.build(), name, unit, description, sdkErrorHandler)
+        } ?: noopMeter.createLongGauge(name, unit, description)
+
+    override fun createDoubleGauge(
+        name: String,
+        unit: String?,
+        description: String?,
+    ): DoubleGauge =
+        sdkErrorHandler.sdkGuardOrDefault(null, "Meter.createDoubleGauge failed") {
+            val builder = impl.gaugeBuilder(name)
+            unit?.let(builder::setUnit)
+            description?.let(builder::setDescription)
+            DoubleGaugeAdapter(builder.build(), name, unit, description, sdkErrorHandler)
+        } ?: noopMeter.createDoubleGauge(name, unit, description)
+
     override fun createDoubleUpDownCounter(
         name: String,
         unit: String?,
@@ -46,4 +70,34 @@ internal class MeterAdapter(
         sdkErrorHandler.sdkGuardOrDefault(null, "Meter.createObservableDoubleCounter failed") {
             ObservableDoubleCounterAdapter(impl, name, unit, description, callbacks, sdkErrorHandler)
         } ?: noopMeter.createObservableDoubleCounter(name, unit, description)
+
+    override fun createObservableLongCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongCounter =
+        sdkErrorHandler.sdkGuardOrDefault(null, "Meter.createObservableLongCounter failed") {
+            ObservableLongCounterAdapter(impl, name, unit, description, callbacks, sdkErrorHandler)
+        } ?: noopMeter.createObservableLongCounter(name, unit, description)
+
+    override fun createObservableLongUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongUpDownCounter =
+        sdkErrorHandler.sdkGuardOrDefault(null, "Meter.createObservableLongUpDownCounter failed") {
+            ObservableLongUpDownCounterAdapter(impl, name, unit, description, callbacks, sdkErrorHandler)
+        } ?: noopMeter.createObservableLongUpDownCounter(name, unit, description)
+
+    override fun createObservableDoubleUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
+    ): ObservableDoubleUpDownCounter =
+        sdkErrorHandler.sdkGuardOrDefault(null, "Meter.createObservableDoubleUpDownCounter failed") {
+            ObservableDoubleUpDownCounterAdapter(impl, name, unit, description, callbacks, sdkErrorHandler)
+        } ?: noopMeter.createObservableDoubleUpDownCounter(name, unit, description)
 }

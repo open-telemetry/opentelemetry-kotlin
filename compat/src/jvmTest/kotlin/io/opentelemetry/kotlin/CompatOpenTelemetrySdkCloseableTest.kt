@@ -8,12 +8,14 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordExporter
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanExporter
+import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
+import kotlin.test.AfterTest
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -25,8 +27,13 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class CompatOpenTelemetrySdkCloseableTest {
 
+    private val sdks = SdkTracker()
+
     private val spanExporter = FakeOtelJavaSpanExporter()
     private val logExporter = FakeOtelJavaLogRecordExporter()
+
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
 
     private fun createSdk(): OpenTelemetrySdk {
         val otelJavaSdk = OtelJavaOpenTelemetrySdk.builder()
@@ -41,7 +48,7 @@ internal class CompatOpenTelemetrySdkCloseableTest {
                     .build()
             )
             .build()
-        return otelJavaSdk.toOtelKotlinApi() as OpenTelemetrySdk
+        return otelJavaSdk.toOtelKotlinApi().also(sdks::track) as OpenTelemetrySdk
     }
 
     @Test
@@ -86,7 +93,7 @@ internal class CompatOpenTelemetrySdkCloseableTest {
 
     @Test
     fun `flush and shutdown fail when the wrapped providers are not sdk instances`() = runBlocking {
-        val sdk = OtelJavaOpenTelemetry.noop().toOtelKotlinApi() as OpenTelemetrySdk
+        val sdk = OtelJavaOpenTelemetry.noop().toOtelKotlinApi().also(sdks::track) as OpenTelemetrySdk
         assertEquals(OperationResultCode.Failure, sdk.forceFlush())
         assertEquals(OperationResultCode.Failure, sdk.shutdown())
     }
@@ -95,7 +102,7 @@ internal class CompatOpenTelemetrySdkCloseableTest {
     fun `shutdown of a dsl configured sdk stops spans being recorded`() = runBlocking {
         val sdk = createCompatOpenTelemetry {
             tracerProvider { export { FakeSpanProcessor() } }
-        } as OpenTelemetrySdk
+        }.also(sdks::track) as OpenTelemetrySdk
         val tracer = sdk.tracerProvider.getTracer("test")
         assertTrue(tracer.startSpan("before").isRecording())
         assertEquals(Success, sdk.forceFlush())
@@ -130,7 +137,7 @@ internal class CompatOpenTelemetrySdkCloseableTest {
         val sdk = createCompatOpenTelemetry {
             tracerProvider { export { spanProcessor } }
             loggerProvider { export { logProcessor } }
-        } as OpenTelemetrySdk
+        }.also(sdks::track) as OpenTelemetrySdk
 
         assertEquals(Success, sdk.forceFlush())
         assertEquals(setOf("span-flush", "log-flush"), calls.toSet())

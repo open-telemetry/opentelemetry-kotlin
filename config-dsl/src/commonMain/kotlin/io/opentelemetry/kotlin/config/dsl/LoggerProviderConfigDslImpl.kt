@@ -16,7 +16,15 @@ class LoggerProviderConfigDslImpl : BehaviorSupplier<LoggerProviderBehavior> {
 
     @Suppress("UnusedParameter")
     fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
-        processor = LogRecordProcessorBehavior()
+        if (processor == null) {
+            processor = LogRecordProcessorBehavior()
+        }
+    }
+
+    fun processor(action: LogRecordProcessorConfigDslImpl.() -> Unit) {
+        val impl = LogRecordProcessorConfigDslImpl()
+        impl.action()
+        processor = impl.toBehavior()
     }
 
     override fun toBehavior(): LoggerProviderBehavior =

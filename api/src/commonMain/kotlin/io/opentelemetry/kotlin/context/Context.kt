@@ -34,8 +34,8 @@ public interface Context {
     public fun <T> get(key: ContextKey<T>): T?
 
     /**
-     * Sets the supplied context as the current implicit context. A [Scope] object
-     * is returned; when the [Scope] is closed the previous implicit context
+     * Sets the supplied context as the current context. A [Scope] object
+     * is returned; when the [Scope] is closed the previous context
      * will be restored.
      *
      * Neglecting to close the [Scope] once the 'execution unit' of the context

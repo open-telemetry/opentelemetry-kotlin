@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.resource
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.factory.ResourceFactory
 
@@ -18,16 +19,21 @@ public fun List<ResourceDetector>.detectResource(
     factory: ResourceFactory,
     errorHandler: SdkErrorHandler,
 ): Resource {
-    reportDuplicateNames(errorHandler)
+    val namedDetectors = mapNotNull { detector ->
+        errorHandler.guardOrDefault(null, "Failed to read resource detector name, skipping detector") {
+            detector.name to detector
+        }
+    }
+    namedDetectors.reportDuplicateNames(errorHandler)
 
-    return fold(factory.empty) { detected, detector ->
+    return namedDetectors.fold(factory.empty) { detected, (name, detector) ->
         try {
             detected.merge(with(detector) { factory.detect() })
         } catch (exc: Throwable) {
             errorHandler.reportError(
                 SdkError.UserCodeError(
                     exc,
-                    "Resource detector '${detector.name}' failed",
+                    "Resource detector '$name' failed",
                     SdkErrorSeverity.ERROR,
                 )
             )
@@ -41,8 +47,8 @@ public fun List<ResourceDetector>.detectResource(
  * unambiguously in configuration. Duplicates are reported but not rejected - every detector still
  * runs.
  */
-private fun List<ResourceDetector>.reportDuplicateNames(errorHandler: SdkErrorHandler) {
-    groupBy(ResourceDetector::name)
+private fun List<Pair<String, ResourceDetector>>.reportDuplicateNames(errorHandler: SdkErrorHandler) {
+    groupBy { (name, _) -> name }
         .filterValues { it.size > 1 }
         .keys
         .forEach { name ->

@@ -18,7 +18,8 @@ object V8jsAttributes {
     /**
     * <p>The name of the space type of heap memory.</p>
     * <p>Notes:</p>
-    * <p>Value can be retrieved from value <c>space_name</c> of <a href="https://nodejs.org/api/v8.html#v8getheapspacestatistics"><c>v8.getHeapSpaceStatistics()</c></a></p>
+    * <p>Value can be retrieved from value <c>space_name</c> of <a href="https://nodejs.org/api/v8.html#v8getheapspacestatistics"><c>v8.getHeapSpaceStatistics()</c></a>.
+    * The set of reported spaces depends on the V8 version the runtime embeds.</p>
     */
     @IncubatingApi
     const val V8JS_HEAP_SPACE_NAME: String = "v8js.heap.space.name"
@@ -86,6 +87,51 @@ object V8jsAttributes {
         * <p>Large object memory space.</p>
         */
         LARGE_OBJECT_SPACE("large_object_space"),
+
+        /**
+        * <p>Read-only memory space, holding immutable objects created at startup.</p>
+        */
+        READ_ONLY_SPACE("read_only_space"),
+
+        /**
+        * <p>Memory space for objects shared across isolates (e.g. shared strings and structs).</p>
+        */
+        SHARED_SPACE("shared_space"),
+
+        /**
+        * <p>Memory space for trusted objects kept outside the V8 sandbox (e.g. bytecode).</p>
+        */
+        TRUSTED_SPACE("trusted_space"),
+
+        /**
+        * <p>Shared variant of the trusted memory space.</p>
+        */
+        SHARED_TRUSTED_SPACE("shared_trusted_space"),
+
+        /**
+        * <p>Large object space for young-generation objects.</p>
+        */
+        NEW_LARGE_OBJECT_SPACE("new_large_object_space"),
+
+        /**
+        * <p>Large object space for code objects.</p>
+        */
+        CODE_LARGE_OBJECT_SPACE("code_large_object_space"),
+
+        /**
+        * <p>Large object space for shared objects.</p>
+        */
+        SHARED_LARGE_OBJECT_SPACE("shared_large_object_space"),
+
+        /**
+        * <p>Large object space for shared trusted objects.</p>
+        */
+        SHARED_TRUSTED_LARGE_OBJECT_SPACE("shared_trusted_large_object_space"),
+
+        /**
+        * <p>Large object space for trusted objects.</p>
+        */
+        TRUSTED_LARGE_OBJECT_SPACE("trusted_large_object_space"),
     }
 
     /**

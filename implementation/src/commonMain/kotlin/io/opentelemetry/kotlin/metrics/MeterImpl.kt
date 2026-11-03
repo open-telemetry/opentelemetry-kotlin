@@ -13,6 +13,32 @@ internal class MeterImpl(
     val resource: Resource,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Meter {
+    override fun createLongGauge(
+        name: String,
+        unit: String?,
+        description: String?,
+    ): LongGauge {
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: return LongGaugeImpl(
+            name,
+            sanitizeInstrumentUnit(unit),
+            sanitizeInstrumentDescription(description),
+        )
+        return noopMeter.createLongGauge(name, unit, description)
+    }
+
+    override fun createDoubleGauge(
+        name: String,
+        unit: String?,
+        description: String?,
+    ): DoubleGauge {
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: return DoubleGaugeImpl(
+            name,
+            sanitizeInstrumentUnit(unit),
+            sanitizeInstrumentDescription(description),
+        )
+        return noopMeter.createDoubleGauge(name, unit, description)
+    }
+
     override fun createDoubleUpDownCounter(
         name: String,
         unit: String?,
@@ -47,6 +73,36 @@ internal class MeterImpl(
     ): ObservableDoubleCounter {
         val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
         return noopMeter.createObservableDoubleCounter(name, unit, description, *callbacks)
+    }
+
+    override fun createObservableLongCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongCounter {
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
+        return noopMeter.createObservableLongCounter(name, unit, description, *callbacks)
+    }
+
+    override fun createObservableLongUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongUpDownCounter {
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
+        return noopMeter.createObservableLongUpDownCounter(name, unit, description, *callbacks)
+    }
+
+    override fun createObservableDoubleUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
+    ): ObservableDoubleUpDownCounter {
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
+        return noopMeter.createObservableDoubleUpDownCounter(name, unit, description, *callbacks)
     }
 
     /**

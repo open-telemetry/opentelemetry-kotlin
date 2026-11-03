@@ -7,6 +7,18 @@ class FakeMeter(
     val doubleUpDownCounters: MutableList<FakeDoubleUpDownCounter> = mutableListOf()
     val longUpDownCounters: MutableList<FakeLongUpDownCounter> = mutableListOf()
     val observableDoubleCounters: MutableList<FakeObservableDoubleCounter> = mutableListOf()
+    val observableLongCounters: MutableList<FakeObservableLongCounter> = mutableListOf()
+    val observableLongUpDownCounters: MutableList<FakeObservableLongUpDownCounter> = mutableListOf()
+    val observableDoubleUpDownCounters: MutableList<FakeObservableDoubleUpDownCounter> = mutableListOf()
+    val longGauges: MutableList<FakeLongGauge> = mutableListOf()
+
+    override fun createLongGauge(name: String, unit: String?, description: String?): LongGauge =
+        FakeLongGauge(name, unit, description).also { longGauges.add(it) }
+
+    val doubleGauges: MutableList<FakeDoubleGauge> = mutableListOf()
+
+    override fun createDoubleGauge(name: String, unit: String?, description: String?): DoubleGauge =
+        FakeDoubleGauge(name, unit, description).also { doubleGauges.add(it) }
 
     override fun createDoubleUpDownCounter(
         name: String,
@@ -32,4 +44,33 @@ class FakeMeter(
     ): ObservableDoubleCounter = FakeObservableDoubleCounter(name, unit, description, callbacks.toList()).also {
         observableDoubleCounters.add(it)
     }
+
+    override fun createObservableLongCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongCounter = FakeObservableLongCounter(name, unit, description, callbacks.toList()).also {
+        observableLongCounters.add(it)
+    }
+
+    override fun createObservableLongUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongUpDownCounter =
+        FakeObservableLongUpDownCounter(name, unit, description, callbacks.toList()).also {
+            observableLongUpDownCounters.add(it)
+        }
+
+    override fun createObservableDoubleUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
+    ): ObservableDoubleUpDownCounter =
+        FakeObservableDoubleUpDownCounter(name, unit, description, callbacks.toList()).also {
+            observableDoubleUpDownCounters.add(it)
+        }
 }

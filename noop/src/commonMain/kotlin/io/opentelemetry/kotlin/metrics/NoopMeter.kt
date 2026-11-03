@@ -9,6 +9,12 @@ import io.opentelemetry.kotlin.ExperimentalApi
  */
 @ExperimentalApi
 internal object NoopMeter : Meter {
+    override fun createLongGauge(name: String, unit: String?, description: String?): LongGauge =
+        NoopLongGauge(name, unit, description)
+
+    override fun createDoubleGauge(name: String, unit: String?, description: String?): DoubleGauge =
+        NoopDoubleGauge(name, unit, description)
+
     override fun createDoubleUpDownCounter(
         name: String,
         unit: String?,
@@ -27,4 +33,25 @@ internal object NoopMeter : Meter {
         description: String?,
         vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
     ): ObservableDoubleCounter = NoopObservableDoubleCounter(name, unit, description)
+
+    override fun createObservableLongCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongCounter = NoopObservableLongCounter(name, unit, description)
+
+    override fun createObservableLongUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableLongMeasurement) -> Unit,
+    ): ObservableLongUpDownCounter = NoopObservableLongUpDownCounter(name, unit, description)
+
+    override fun createObservableDoubleUpDownCounter(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
+    ): ObservableDoubleUpDownCounter = NoopObservableDoubleUpDownCounter(name, unit, description)
 }

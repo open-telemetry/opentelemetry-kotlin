@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.createOpenTelemetry
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.export.TelemetryCloseable
+import io.opentelemetry.kotlin.framework.shutdownForTest
 import io.opentelemetry.kotlin.logging.export.otlpHttpLogRecordExporter
 import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.otlpHttpSpanExporter
@@ -51,6 +52,7 @@ class ShutdownComplianceSmokeTest {
 
     @AfterTest
     fun tearDown() {
+        otel.shutdownForTest()
         server.close()
     }
 
