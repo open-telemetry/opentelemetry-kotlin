@@ -1,4 +1,5 @@
 import io.opentelemetry.kotlin.CheckDuplicatePublicApiTask
+import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 
@@ -7,7 +8,7 @@ plugins {
     id("com.android.kotlin.multiplatform.library") apply false
     id("org.jetbrains.kotlin.multiplatform") apply false
     id("com.vanniktech.maven.publish") apply false
-    id("org.jetbrains.kotlinx.kover") version "0.9.11"
+    id("org.jetbrains.kotlinx.kover") version "0.9.11" apply false
 }
 
 plugins.withType<YarnPlugin> {
@@ -67,7 +68,17 @@ tasks.register("verify") {
     }
 }
 
-kover {
+// Kover instruments every JVM test class, so only apply it on CI (where coverage is reported) or
+// when requested with -Pio.opentelemetry.kotlin.coverage=true.
+val koverEnabled = providers.environmentVariable("CI").isPresent ||
+    providers.gradleProperty("io.opentelemetry.kotlin.coverage").map { it.toBoolean() }.getOrElse(false)
+
+if (koverEnabled) {
+    apply(plugin = "org.jetbrains.kotlinx.kover")
+    configureKover()
+}
+
+fun configureKover() = extensions.configure<KoverProjectExtension> {
     merge {
         subprojects { project ->
             project.findProperty("io.opentelemetry.kotlin.enableCodeCoverage")?.toString()?.toBoolean() ?: true
