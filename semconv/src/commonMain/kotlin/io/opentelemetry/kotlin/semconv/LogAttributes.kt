@@ -10,31 +10,31 @@ object LogAttributes {
   
 
     /**
-    * <p>The basename of the file.</p>
+    * <p>The basename of the file to which the log record was emitted.</p>
     */
     @IncubatingApi
     const val LOG_FILE_NAME: String = "log.file.name"
 
     /**
-    * <p>The basename of the file, with symlinks resolved.</p>
+    * <p>The basename of the file to which the log record was emitted, with symlinks resolved.</p>
     */
     @IncubatingApi
     const val LOG_FILE_NAME_RESOLVED: String = "log.file.name_resolved"
 
     /**
-    * <p>The full path to the file.</p>
+    * <p>The full path to the file to which the log record was emitted.</p>
     */
     @IncubatingApi
     const val LOG_FILE_PATH: String = "log.file.path"
 
     /**
-    * <p>The full path to the file, with symlinks resolved.</p>
+    * <p>The full path to the file to which the log record was emitted, with symlinks resolved.</p>
     */
     @IncubatingApi
     const val LOG_FILE_PATH_RESOLVED: String = "log.file.path_resolved"
 
     /**
-    * <p>The stream associated with the log. See below for a list of well-known values.</p>
+    * <p>The stream the log record was emitted to.</p>
     */
     @IncubatingApi
     const val LOG_IOSTREAM: String = "log.iostream"

@@ -17,7 +17,7 @@ object EnduserAttributes {
     * <p>[!Warning]
     * This field contains sensitive (PII) information.</p></blockquote>
     */
-    @IncubatingApi
+    @Deprecated("Moved to the [OpenTelemetry Client-Side semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-client-side).")
     const val ENDUSER_ID: String = "enduser.id"
 
     /**
@@ -28,7 +28,7 @@ object EnduserAttributes {
     * <p>[!Warning]
     * This field contains sensitive (linkable PII) information.</p></blockquote>
     */
-    @IncubatingApi
+    @Deprecated("Moved to the [OpenTelemetry Client-Side semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-client-side).")
     const val ENDUSER_PSEUDO_ID: String = "enduser.pseudo.id"
 
     /**

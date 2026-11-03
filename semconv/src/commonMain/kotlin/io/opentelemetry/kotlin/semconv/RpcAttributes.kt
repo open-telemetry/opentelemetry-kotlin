@@ -10,45 +10,45 @@ object RpcAttributes {
   
 
     /**
-    * <p>Deprecated, use <c>rpc.response.status_code</c> attribute instead.</p>
+    * <p>Deprecated, use <c>rpc.status_code</c> attribute instead.</p>
     */
-    @Deprecated("Replaced by `rpc.response.status_code`.")
+    @Deprecated("Replaced by `rpc.status_code`.")
     const val RPC_CONNECT_RPC_ERROR_CODE: String = "rpc.connect_rpc.error_code"
 
     /**
-    * <p>Deprecated, use <c>rpc.request.metadata</c> instead.</p>
+    * <p>Deprecated, use <c>rpc.request.header</c> instead.</p>
     */
-    @Deprecated("Replaced by `rpc.request.metadata`.")
+    @Deprecated("Replaced by `rpc.request.header`.")
     const val RPC_CONNECT_RPC_REQUEST_METADATA: String = "rpc.connect_rpc.request.metadata"
 
     /**
-    * <p>Deprecated, use <c>rpc.response.metadata</c> instead.</p>
+    * <p>Deprecated, use <c>rpc.response.header</c> and <c>rpc.response.trailer</c>.</p>
     */
-    @Deprecated("Replaced by `rpc.response.metadata`.")
+    @Deprecated("Split to `rpc.response.header` for metadata sent before the response payload and `rpc.response.trailer` for metadata sent after it.")
     const val RPC_CONNECT_RPC_RESPONSE_METADATA: String = "rpc.connect_rpc.response.metadata"
 
     /**
-    * <p>Deprecated, use <c>rpc.request.metadata</c> instead.</p>
+    * <p>Deprecated, use <c>rpc.request.header</c> instead.</p>
     */
-    @Deprecated("Replaced by `rpc.request.metadata`.")
+    @Deprecated("Replaced by `rpc.request.header`.")
     const val RPC_GRPC_REQUEST_METADATA: String = "rpc.grpc.request.metadata"
 
     /**
-    * <p>Deprecated, use <c>rpc.response.metadata</c> instead.</p>
+    * <p>Deprecated, use <c>rpc.response.header</c> and <c>rpc.response.trailer</c>.</p>
     */
-    @Deprecated("Replaced by `rpc.response.metadata`.")
+    @Deprecated("Split to `rpc.response.header` for metadata sent before the response payload and `rpc.response.trailer` for metadata sent after it.")
     const val RPC_GRPC_RESPONSE_METADATA: String = "rpc.grpc.response.metadata"
 
     /**
-    * <p>Deprecated, use string representation on the <c>rpc.response.status_code</c> attribute instead.</p>
+    * <p>Deprecated, use string representation on the <c>rpc.status_code</c> attribute instead.</p>
     */
-    @Deprecated("Use string representation of the gRPC status code on the `rpc.response.status_code` attribute.")
+    @Deprecated("Use string representation of the gRPC status code on the `rpc.status_code` attribute.")
     const val RPC_GRPC_STATUS_CODE: String = "rpc.grpc.status_code"
 
     /**
-    * <p>Deprecated, use string representation on the <c>rpc.response.status_code</c> attribute instead.</p>
+    * <p>Deprecated, use string representation on the <c>rpc.status_code</c> attribute instead.</p>
     */
-    @Deprecated("Use string representation of the error code on the `rpc.response.status_code` attribute.")
+    @Deprecated("Use string representation of the error code on the `rpc.status_code` attribute.")
     const val RPC_JSONRPC_ERROR_CODE: String = "rpc.jsonrpc.error_code"
 
     /**
@@ -116,51 +116,93 @@ object RpcAttributes {
     * method actually executing the call on the server side, or the
     * RPC client stub method on the client side.</p>
     */
-    @IncubatingApi
     const val RPC_METHOD: String = "rpc.method"
 
     /**
     * <p>The original name of the method used by the client.</p>
     */
-    @IncubatingApi
     const val RPC_METHOD_ORIGINAL: String = "rpc.method_original"
 
     /**
-    * <p>RPC request metadata, <c><key></c> being the normalized RPC metadata key (lowercase), the value being the metadata values.</p>
+    * <p>RPC request headers or metadata, <c><key></c> being the normalized header name (lowercase), the value being the header values.</p>
     * <p>Notes:</p>
-    * <p>Instrumentations SHOULD require an explicit configuration of which metadata values are to be captured.
-    * Including all request metadata values can be a security risk - explicit configuration helps avoid leaking sensitive information.</p>
-    * <p>For example, a property <c>my-custom-key</c> with value <c>["1.2.3.4", "1.2.3.5"]</c> SHOULD be recorded as
-    * <c>rpc.request.metadata.my-custom-key</c> attribute with value <c>["1.2.3.4", "1.2.3.5"]</c></p>
+    * <p>Instrumentations SHOULD require an explicit configuration of which headers are to be captured.
+    * Including all request headers can be a security risk - explicit configuration helps avoid leaking sensitive information.</p>
+    * <p>For example, a header <c>my-custom-key</c> with value <c>["1.2.3.4", "1.2.3.5"]</c> SHOULD be recorded as
+    * the <c>rpc.request.header.my-custom-key</c> attribute with value <c>["1.2.3.4", "1.2.3.5"]</c></p>
+    * <p>The attribute value MUST consist of either multiple header values as an array of
+    * strings or a single-item array containing a possibly comma-concatenated string,
+    * depending on the way the RPC library provides access to headers.</p>
+    * <p>Values that the RPC system exposes as binary data, or that are otherwise not valid
+    * UTF-8 strings, SHOULD be base64-encoded when recorded.</p>
     */
     @IncubatingApi
+    const val RPC_REQUEST_HEADER: String = "rpc.request.header"
+
+    /**
+    * <p>Deprecated, use <c>rpc.request.header</c> instead.</p>
+    */
+    @Deprecated("Replaced by `rpc.request.header`.")
     const val RPC_REQUEST_METADATA: String = "rpc.request.metadata"
 
     /**
-    * <p>RPC response metadata, <c><key></c> being the normalized RPC metadata key (lowercase), the value being the metadata values.</p>
+    * <p>RPC response headers or metadata sent before the response payload, <c><key></c> being the normalized header name (lowercase), the value being the header values.</p>
     * <p>Notes:</p>
-    * <p>Instrumentations SHOULD require an explicit configuration of which metadata values are to be captured.
-    * Including all response metadata values can be a security risk - explicit configuration helps avoid leaking sensitive information.</p>
-    * <p>For example, a property <c>my-custom-key</c> with value <c>["attribute_value"]</c> SHOULD be recorded as
-    * the <c>rpc.response.metadata.my-custom-key</c> attribute with value <c>["attribute_value"]</c></p>
+    * <p>Instrumentations SHOULD require an explicit configuration of which headers are to be captured.
+    * Including all response headers can be a security risk - explicit configuration helps avoid leaking sensitive information.</p>
+    * <p>For example, a header <c>my-custom-key</c> with value <c>["attribute_value"]</c> SHOULD be recorded as
+    * the <c>rpc.response.header.my-custom-key</c> attribute with value <c>["attribute_value"]</c></p>
+    * <p>The attribute value MUST consist of either multiple header values as an array of
+    * strings or a single-item array containing a possibly comma-concatenated string,
+    * depending on the way the RPC library provides access to headers.</p>
+    * <p>Values that the RPC system exposes as binary data, or that are otherwise not valid
+    * UTF-8 strings, SHOULD be base64-encoded when recorded.</p>
     */
     @IncubatingApi
+    const val RPC_RESPONSE_HEADER: String = "rpc.response.header"
+
+    /**
+    * <p>Deprecated, use <c>rpc.response.header</c> and <c>rpc.response.trailer</c>.</p>
+    */
+    @Deprecated("Split to `rpc.response.header` for metadata sent before the response payload and `rpc.response.trailer` for metadata sent after it.")
     const val RPC_RESPONSE_METADATA: String = "rpc.response.metadata"
 
     /**
-    * <p>Status code of the RPC returned by the RPC server or generated by the client</p>
+    * <p>Deprecated, use <c>rpc.status_code</c> instead.</p>
+    */
+    @Deprecated("Replaced by `rpc.status_code`.")
+    const val RPC_RESPONSE_STATUS_CODE: String = "rpc.response.status_code"
+
+    /**
+    * <p>RPC response trailers or metadata sent after the response payload, <c><key></c> being the normalized trailer name (lowercase), the value being the trailer values.</p>
     * <p>Notes:</p>
-    * <p>Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
-    * Semantic conventions for individual RPC frameworks SHOULD document what <c>rpc.response.status_code</c> means in the context of that system and which values are considered to represent errors.</p>
+    * <p>Instrumentations SHOULD require an explicit configuration of which trailers are to be captured.
+    * Including all response trailers can be a security risk - explicit configuration helps avoid leaking sensitive information.</p>
+    * <p>For example, a trailer <c>my-custom-key</c> with value <c>["attribute_value"]</c> SHOULD be recorded as
+    * the <c>rpc.response.trailer.my-custom-key</c> attribute with value <c>["attribute_value"]</c></p>
+    * <p>The attribute value MUST consist of either multiple trailer values as an array of
+    * strings or a single-item array containing a possibly comma-concatenated string,
+    * depending on the way the RPC library provides access to trailers.</p>
+    * <p>Values that the RPC system exposes as binary data, or that are otherwise not valid
+    * UTF-8 strings, SHOULD be base64-encoded when recorded.</p>
     */
     @IncubatingApi
-    const val RPC_RESPONSE_STATUS_CODE: String = "rpc.response.status_code"
+    const val RPC_RESPONSE_TRAILER: String = "rpc.response.trailer"
 
     /**
     * <p>Deprecated, use fully-qualified <c>rpc.method</c> instead.</p>
     */
     @Deprecated("Value should be included in `rpc.method` which is expected to be a fully-qualified name.")
     const val RPC_SERVICE: String = "rpc.service"
+
+    /**
+    * <p>Status code of the RPC returned by the RPC server or generated by the client</p>
+    * <p>Notes:</p>
+    * <p>Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
+    * The value MAY use a standardized string representation of a numeric status code, if one exists, instead of the numeric code. The value MAY be a synthetic status provided by the client library rather than returned by the remote service.
+    * Semantic conventions for individual RPC frameworks SHOULD document what <c>rpc.status_code</c> means in the context of that system and which values are considered to represent errors.</p>
+    */
+    const val RPC_STATUS_CODE: String = "rpc.status_code"
 
     /**
     * <p>Deprecated, use <c>rpc.system.name</c> attribute instead.</p>
@@ -173,13 +215,12 @@ object RpcAttributes {
     * <p>Notes:</p>
     * <p>The client and server RPC systems may differ for the same RPC interaction. For example, a client may use Apache Dubbo or Connect RPC to communicate with a server that uses gRPC since both protocols provide compatibility with gRPC.</p>
     */
-    @IncubatingApi
     const val RPC_SYSTEM_NAME: String = "rpc.system.name"
 
     /**
     * <p>RPC_CONNECT_RPC_ERROR_CODE</p>
     */
-    @Deprecated("Replaced by `rpc.response.status_code`.")
+    @Deprecated("Replaced by `rpc.status_code`.")
     enum class RpcConnectRpcErrorCodeValues(val value: String) {
 
         /**
@@ -266,7 +307,7 @@ object RpcAttributes {
     /**
     * <p>RPC_GRPC_STATUS_CODE</p>
     */
-    @Deprecated("Use string representation of the gRPC status code on the `rpc.response.status_code` attribute.")
+    @Deprecated("Use string representation of the gRPC status code on the `rpc.status_code` attribute.")
     enum class RpcGrpcStatusCodeValues(val value: Int) {
 
         /**
@@ -417,7 +458,6 @@ object RpcAttributes {
     /**
     * <p>RPC_SYSTEM_NAME</p>
     */
-    @IncubatingApi
     enum class RpcSystemNameValues(val value: String) {
 
         /**

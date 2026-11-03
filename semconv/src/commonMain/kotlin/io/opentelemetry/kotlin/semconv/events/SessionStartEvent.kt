@@ -12,7 +12,7 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 /**
 * <p>Indicates that a new session has been started, optionally linking to the prior session.</p>
 * <p>Notes:</p>
-* <p>For instrumentation that tracks user behavior during user sessions, a <c>session.start</c> event MUST be emitted every time a session is created. When a new session is created as a continuation of a prior session, the <c>session.previous_id</c> SHOULD be included in the event. The values of <c>session.id</c> and <c>session.previous_id</c> MUST be different.
+* <p>For instrumentation that tracks user behavior during user sessions, a <c>session.start</c> event MUST be emitted every time a session is created. When a new session is created as a continuation of a prior session, the <c>session.previous_id</c> MUST be included in the event. The values of <c>session.id</c> and <c>session.previous_id</c> MUST be different.
 * When the <c>session.start</c> event contains both <c>session.id</c> and <c>session.previous_id</c> fields, the event indicates that the previous session has ended. If the session ID in <c>session.previous_id</c> has not yet ended via explicit <c>session.end</c> event, then the consumer SHOULD treat this continuation event as semantically equivalent to <c>session.end(session.previous_id)</c> and <c>session.start(session.id)</c>.</p>
 */
 @ExperimentalApi
@@ -23,7 +23,7 @@ class SessionStartEvent(
     */
     val sessionId: String,
     /**
-    * <p>The previous <c>session.id</c> for this user, when known.</p>
+    * <p>The previous <c>session.id</c> for this user.</p>
     */
     val sessionPreviousId: String? = null,
 ) : OpenTelemetryEvent {

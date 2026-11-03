@@ -85,5 +85,10 @@ object ProfileAttributes {
         * <p><a href="https://en.wikipedia.org/wiki/LuaJIT">LuaJIT</a></p>
         */
         LUAJIT("luajit"),
+
+        /**
+        * <p><a href="https://wikipedia.org/wiki/CUDA">CUDA</a></p>
+        */
+        CUDA("cuda"),
     }
 }

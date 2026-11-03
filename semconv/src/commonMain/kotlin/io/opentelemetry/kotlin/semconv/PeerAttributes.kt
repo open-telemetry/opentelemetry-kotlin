@@ -18,6 +18,6 @@ object PeerAttributes {
     *   <li>A gRPC service <c>rpc.service="io.opentelemetry.AuthService"</c> may be hosted in both a gateway, <c>peer.service="ExternalApiService"</c> and a backend, <c>peer.service="AuthService"</c>.</li>
     * </ul>
     */
-    @Deprecated("Replaced by `service.peer.name`.")
+    @Deprecated("Use `server.service.name` on the client side or `client.service.name` on the server side.")
     const val PEER_SERVICE: String = "peer.service"
 }
