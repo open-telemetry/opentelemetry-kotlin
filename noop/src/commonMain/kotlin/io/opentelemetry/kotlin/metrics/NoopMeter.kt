@@ -12,6 +12,9 @@ internal object NoopMeter : Meter {
     override fun createLongGauge(name: String, unit: String?, description: String?): LongGauge =
         NoopLongGauge(name, unit, description)
 
+    override fun createDoubleGauge(name: String, unit: String?, description: String?): DoubleGauge =
+        NoopDoubleGauge(name, unit, description)
+
     override fun createDoubleUpDownCounter(
         name: String,
         unit: String?,

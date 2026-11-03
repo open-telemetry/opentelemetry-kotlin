@@ -59,7 +59,13 @@ object FaasAttributes {
     * <p>The invocation ID of the current function invocation.</p>
     */
     @IncubatingApi
-    const val FAAS_INVOCATION_ID: String = "faas.invocation_id"
+    const val FAAS_INVOCATION_ID: String = "faas.invocation.id"
+
+    /**
+    * <p>A string containing the function invocation time in the <a href="https://www.iso.org/iso-8601-date-and-time-format.html">ISO 8601</a> format expressed in <a href="https://www.w3.org/TR/NOTE-datetime">UTC</a>.</p>
+    */
+    @IncubatingApi
+    const val FAAS_INVOCATION_START_TIME: String = "faas.invocation.start_time"
 
     /**
     * <p>The name of the invoked function.</p>
@@ -119,7 +125,7 @@ object FaasAttributes {
     /**
     * <p>A string containing the function invocation time in the <a href="https://www.iso.org/iso-8601-date-and-time-format.html">ISO 8601</a> format expressed in <a href="https://www.w3.org/TR/NOTE-datetime">UTC</a>.</p>
     */
-    @IncubatingApi
+    @Deprecated("Replaced by `faas.invocation.start_time`.")
     const val FAAS_TIME: String = "faas.time"
 
     /**

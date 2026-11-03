@@ -18,6 +18,22 @@ object ServiceAttributes {
     const val SERVICE_CRITICALITY: String = "service.criticality"
 
     /**
+    * <p>Identifier of the cost center associated with the service instance.</p>
+    * <p>Notes:</p>
+    * <p>The cost center identifier enables tracking and attribution of service resource costs to organizational units, billing accounts, or teams. It is typically a string identifier such as a billing account ID, cost allocation code, or internal accounting ID.</p>
+    */
+    @IncubatingApi
+    const val SERVICE_INSTANCE_COST_CENTER_ID: String = "service.instance.cost_center.id"
+
+    /**
+    * <p>Name of the cost center associated with the service instance.</p>
+    * <p>Notes:</p>
+    * <p>A human-readable name of the cost center, department, or organizational unit responsible for the service instance costs.</p>
+    */
+    @IncubatingApi
+    const val SERVICE_INSTANCE_COST_CENTER_NAME: String = "service.instance.cost_center.name"
+
+    /**
     * <p>The string ID of the service instance.</p>
     * <p>Notes:</p>
     * <p>MUST be unique for each instance of the same <c>service.namespace,service.name</c> pair (in other words
@@ -63,13 +79,13 @@ object ServiceAttributes {
     /**
     * <p>Logical name of the service on the other side of the connection. SHOULD be equal to the actual <a href="/docs/resource/README.md#service"><c>service.name</c></a> resource attribute of the remote service if any.</p>
     */
-    @IncubatingApi
+    @Deprecated("Use `server.service.name` on the client side or `client.service.name` on the server side.")
     const val SERVICE_PEER_NAME: String = "service.peer.name"
 
     /**
     * <p>Logical namespace of the service on the other side of the connection. SHOULD be equal to the actual <a href="/docs/resource/README.md#service"><c>service.namespace</c></a> resource attribute of the remote service if any.</p>
     */
-    @IncubatingApi
+    @Deprecated("Use `server.service.namespace` on the client side or `client.service.namespace` on the server side.")
     const val SERVICE_PEER_NAMESPACE: String = "service.peer.namespace"
 
     /**

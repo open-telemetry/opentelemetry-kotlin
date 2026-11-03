@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaClock
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.ReadWriteLogRecordAdapter
+import io.opentelemetry.kotlin.logging.export.UnsupportedLogRecordWriteReporter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -52,7 +53,10 @@ internal class LoggerAdapterTimestampTest {
     @Test
     fun `unset timestamp is null when read through the kotlin api`() {
         logger.emit(body = "log")
-        val record = ReadWriteLogRecordAdapter(processor.exports.single())
+        val record = ReadWriteLogRecordAdapter(
+            processor.exports.single(),
+            UnsupportedLogRecordWriteReporter(NoopSdkErrorHandler),
+        )
         assertNull(record.timestamp)
         assertEquals(1_000_000, record.observedTimestamp)
     }

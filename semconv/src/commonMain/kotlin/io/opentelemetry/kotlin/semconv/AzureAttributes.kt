@@ -54,6 +54,12 @@ object AzureAttributes {
     const val AZURE_COSMOSDB_RESPONSE_SUB_STATUS_CODE: String = "azure.cosmosdb.response.sub_status_code"
 
     /**
+    * <p>The UTC epoch seconds at which the message has been accepted and stored in the entity.</p>
+    */
+    @IncubatingApi
+    const val AZURE_EVENTHUBS_MESSAGE_ENQUEUED_TIME: String = "azure.eventhubs.message.enqueued_time"
+
+    /**
     * <p>The name of the Azure <a href="https://learn.microsoft.com/azure/azure-resource-manager/management/manage-resource-groups-portal">resource group</a> the resource belongs to.</p>
     */
     @IncubatingApi
@@ -70,6 +76,24 @@ object AzureAttributes {
     */
     @IncubatingApi
     const val AZURE_SERVICE_REQUEST_ID: String = "azure.service.request.id"
+
+    /**
+    * <p>Describes the <a href="https://learn.microsoft.com/azure/service-bus-messaging/message-transfers-locks-settlement#peeklock">settlement type</a>.</p>
+    */
+    @IncubatingApi
+    const val AZURE_SERVICEBUS_DISPOSITION_STATUS: String = "azure.servicebus.disposition_status"
+
+    /**
+    * <p>Number of deliveries that have been attempted for this message.</p>
+    */
+    @IncubatingApi
+    const val AZURE_SERVICEBUS_MESSAGE_DELIVERY_COUNT: String = "azure.servicebus.message.delivery_count"
+
+    /**
+    * <p>The UTC epoch seconds at which the message has been accepted and stored in the entity.</p>
+    */
+    @IncubatingApi
+    const val AZURE_SERVICEBUS_MESSAGE_ENQUEUED_TIME: String = "azure.servicebus.message.enqueued_time"
 
     /**
     * <p>AZURE_COSMOSDB_CONNECTION_MODE</p>
@@ -118,5 +142,32 @@ object AzureAttributes {
         * <p>Consistent Prefix</p>
         */
         CONSISTENT_PREFIX("ConsistentPrefix"),
+    }
+
+    /**
+    * <p>AZURE_SERVICEBUS_DISPOSITION_STATUS</p>
+    */
+    @IncubatingApi
+    enum class AzureServicebusDispositionStatusValues(val value: String) {
+
+        /**
+        * <p>Message is completed</p>
+        */
+        COMPLETE("complete"),
+
+        /**
+        * <p>Message is abandoned</p>
+        */
+        ABANDON("abandon"),
+
+        /**
+        * <p>Message is sent to dead letter queue</p>
+        */
+        DEAD_LETTER("dead_letter"),
+
+        /**
+        * <p>Message is deferred</p>
+        */
+        DEFER("defer"),
     }
 }

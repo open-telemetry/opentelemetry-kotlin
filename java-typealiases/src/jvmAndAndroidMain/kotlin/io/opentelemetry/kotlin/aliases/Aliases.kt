@@ -21,6 +21,8 @@ import io.opentelemetry.api.logs.LoggerProvider
 import io.opentelemetry.api.logs.Severity
 import io.opentelemetry.api.metrics.DoubleCounter
 import io.opentelemetry.api.metrics.DoubleCounterBuilder
+import io.opentelemetry.api.metrics.DoubleGauge
+import io.opentelemetry.api.metrics.DoubleGaugeBuilder
 import io.opentelemetry.api.metrics.DoubleUpDownCounter
 import io.opentelemetry.api.metrics.DoubleUpDownCounterBuilder
 import io.opentelemetry.api.metrics.LongCounter
@@ -158,6 +160,8 @@ typealias OtelJavaMeter = Meter
 typealias OtelJavaDoubleCounter = DoubleCounter
 typealias OtelJavaLongCounter = LongCounter
 typealias OtelJavaDoubleCounterBuilder = DoubleCounterBuilder
+typealias OtelJavaDoubleGauge = DoubleGauge
+typealias OtelJavaDoubleGaugeBuilder = DoubleGaugeBuilder
 typealias OtelJavaLongCounterBuilder = LongCounterBuilder
 typealias OtelJavaLongGauge = LongGauge
 typealias OtelJavaLongGaugeBuilder = LongGaugeBuilder

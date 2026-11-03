@@ -26,6 +26,19 @@ internal class MeterImpl(
         return noopMeter.createLongGauge(name, unit, description)
     }
 
+    override fun createDoubleGauge(
+        name: String,
+        unit: String?,
+        description: String?,
+    ): DoubleGauge {
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: return DoubleGaugeImpl(
+            name,
+            sanitizeInstrumentUnit(unit),
+            sanitizeInstrumentDescription(description),
+        )
+        return noopMeter.createDoubleGauge(name, unit, description)
+    }
+
     override fun createDoubleUpDownCounter(
         name: String,
         unit: String?,

@@ -15,6 +15,11 @@ class FakeMeter(
     override fun createLongGauge(name: String, unit: String?, description: String?): LongGauge =
         FakeLongGauge(name, unit, description).also { longGauges.add(it) }
 
+    val doubleGauges: MutableList<FakeDoubleGauge> = mutableListOf()
+
+    override fun createDoubleGauge(name: String, unit: String?, description: String?): DoubleGauge =
+        FakeDoubleGauge(name, unit, description).also { doubleGauges.add(it) }
+
     override fun createDoubleUpDownCounter(
         name: String,
         unit: String?,

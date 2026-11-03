@@ -32,7 +32,8 @@ public interface OtlpHttpExporterConfigDsl {
 
     /**
      * HTTP request timeout in milliseconds. Defaults to 10 seconds.
-     * Ignored when [httpClient] is set.
+     * Also bounds how long [headers] may take, after which the export is sent without them.
+     * The request timeout is ignored when [httpClient] is set.
      */
     public var timeoutMs: Long
 
@@ -125,6 +126,7 @@ internal fun createOtlpHttpClient(
         signalEndpoint = signalEndpoint,
         headers = config.headers,
         httpClientLease = httpClientLease,
+        headersTimeoutMs = timeoutMs,
     )
 }
 
