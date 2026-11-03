@@ -28,6 +28,8 @@ import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -40,6 +42,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -158,9 +162,33 @@ internal class OtlpHttpSpanExporterTest {
         } finally {
             withContext(NonCancellable) {
                 customExporter.shutdown()
+                assertTrue(customClient.coroutineContext[Job]?.isActive == true)
                 customClient.close()
                 customServer.close()
             }
+        }
+    }
+
+    @Test
+    fun testOwnedHttpClientClosesAfterLastExporterShutdown() = runTest {
+        HttpClientRegistry.clear()
+        try {
+            val firstExporter = fakeConfig().otlpHttpSpanExporter { endpoint = baseUrl }
+            val secondExporter = fakeConfig().otlpHttpSpanExporter { endpoint = baseUrl }
+            val sharedClient = assertNotNull(
+                HttpClientRegistry.peek(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
+            )
+
+            assertTrue(sharedClient.coroutineContext[Job]?.isActive == true)
+            firstExporter.shutdown()
+            assertTrue(sharedClient.coroutineContext[Job]?.isActive == true)
+            secondExporter.shutdown()
+            assertNull(
+                HttpClientRegistry.peek(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
+            )
+            assertTrue(sharedClient.coroutineContext[Job]?.isCompleted == true)
+        } finally {
+            HttpClientRegistry.clear()
         }
     }
 
@@ -187,11 +215,8 @@ internal class OtlpHttpSpanExporterTest {
 
     @Test
     fun testFactoryWithCustomEngineExports() = runTest {
-        val request = CompletableDeferred<HttpRequestData>()
         val mockServer = MockEngine {
-            val response = respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
-            request.complete(it)
-            response
+            respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
         }
         val factoryExporter = fakeConfig().otlpHttpSpanExporter {
             endpoint = baseUrl
@@ -200,7 +225,10 @@ internal class OtlpHttpSpanExporterTest {
         try {
             val code = factoryExporter.export(spans)
             assertEquals(OperationResultCode.Success, code)
-            request.await()
+            // export() only enqueues; shutdown() waits for the background export to finish. The DSL exporter
+            // does real IO, so shutdown must run on real time, not the test's virtual time.
+            val shutdownCode = withContext(Dispatchers.Default) { factoryExporter.shutdown() }
+            assertEquals(OperationResultCode.Success, shutdownCode)
             assertEquals(1, mockServer.requestHistory.size)
         } finally {
             withContext(NonCancellable) {

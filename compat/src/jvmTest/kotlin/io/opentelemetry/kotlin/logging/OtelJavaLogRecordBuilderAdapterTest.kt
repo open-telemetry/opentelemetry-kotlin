@@ -141,7 +141,7 @@ internal class OtelJavaLogRecordBuilderAdapterTest {
     }
 
     @Test
-    fun `test implicit context from factory is used when context is unset`() {
+    fun `test current context from factory is used when context is unset`() {
         val impl = RecordingLogger()
         val ctx = OtelJavaContext.root().with(OtelJavaContextKey.named<String>("key"), "value").toOtelKotlinContext()
         val contextFactory = object : ContextFactory by CompatContextFactory() {

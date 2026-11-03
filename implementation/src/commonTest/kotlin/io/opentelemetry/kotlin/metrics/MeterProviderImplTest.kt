@@ -68,6 +68,21 @@ internal class MeterProviderImplTest {
         assertFalse(called)
     }
 
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testObservableDoubleUpDownCounterIsNoopUntilMetricsCollectionIsImplemented() {
+        var called = false
+        val counter = impl.getMeter("test").createObservableDoubleUpDownCounter(
+            name = "process.cpu.load",
+            callbacks = arrayOf<(ObservableDoubleMeasurement) -> Unit>({ called = true }),
+        )
+
+        assertEquals("process.cpu.load", counter.name)
+        counter.registerCallback { called = true }.close()
+        counter.close()
+        assertFalse(called)
+    }
+
     @Test
     fun testLongGaugeExposesMetadata() {
         val gauge = impl.getMeter("test").createLongGauge(

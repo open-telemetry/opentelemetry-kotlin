@@ -6,13 +6,13 @@ import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Returns a [CoroutineContext.Element] that installs this [Context] as the implicit context whenever
+ * Returns a [CoroutineContext.Element] that installs this [Context] as the current context whenever
  * a coroutine using it is resumed on a thread. When the coroutine suspends the previous context will
- * be restored. This makes the implicit context follow the coroutine across suspension, thread hops,
+ * be restored. This makes the current context follow the coroutine across suspension, thread hops,
  * and into child coroutines.
  *
- * The SDK must be configured with thread-local implicit-context storage (the `THREAD_LOCAL` storage
- * mode) for this to behave correctly. You should also avoid setting the implicit context in
+ * The SDK must be configured with thread-local current-context storage (the `THREAD_LOCAL` storage
+ * mode) for this to behave correctly. You should also avoid setting the current context in
  * any other way if you use this method.
  *
  * This API is only available on JVM/Android as it's backed by

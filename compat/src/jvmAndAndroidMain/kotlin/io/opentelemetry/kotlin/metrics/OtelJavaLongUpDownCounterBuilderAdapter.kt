@@ -26,8 +26,10 @@ internal class OtelJavaLongUpDownCounterBuilderAdapter(
         return this
     }
 
-    override fun ofDoubles(): OtelJavaDoubleUpDownCounterBuilder =
-        javaMeterProvider.get("").upDownCounterBuilder(name).ofDoubles()
+    override fun ofDoubles(): OtelJavaDoubleUpDownCounterBuilder {
+        val builder = javaMeterProvider.get("").upDownCounterBuilder(name).ofDoubles()
+        return OtelJavaDoubleUpDownCounterBuilderAdapter(meter, name, builder, unit, description)
+    }
 
     override fun build(): OtelJavaLongUpDownCounter =
         OtelJavaLongUpDownCounterAdapter(meter.createLongUpDownCounter(name, unit, description))

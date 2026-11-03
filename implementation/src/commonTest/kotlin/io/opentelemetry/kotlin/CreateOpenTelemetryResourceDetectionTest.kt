@@ -1,10 +1,12 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
+import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResourceDetector
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -16,7 +18,12 @@ import kotlin.test.assertEquals
 @OptIn(ExperimentalApi::class)
 internal class CreateOpenTelemetryResourceDetectionTest {
 
+    private val sdks = SdkTracker()
+
     private val testKey = "test.key"
+
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
 
     @Test
     fun `detected attributes are included in exported spans and logs`() {
@@ -41,7 +48,7 @@ internal class CreateOpenTelemetryResourceDetectionTest {
             loggerProvider {
                 export { logProcessor }
             }
-        }
+        }.also(sdks::track)
 
         api.tracerProvider.getTracer("test").startSpan("span").end()
         api.loggerProvider.getLogger("test").emit("message")
@@ -67,7 +74,7 @@ internal class CreateOpenTelemetryResourceDetectionTest {
             tracerProvider {
                 export { spanProcessor }
             }
-        }
+        }.also(sdks::track)
 
         api.tracerProvider.getTracer("test").startSpan("span").end()
 
@@ -89,7 +96,7 @@ internal class CreateOpenTelemetryResourceDetectionTest {
             tracerProvider {
                 export { spanProcessor }
             }
-        }
+        }.also(sdks::track)
 
         api.tracerProvider.getTracer("test").startSpan("span").end()
 

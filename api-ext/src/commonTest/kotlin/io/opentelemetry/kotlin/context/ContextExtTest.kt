@@ -8,7 +8,7 @@ import kotlin.test.assertTrue
 internal class ContextExtTest {
 
     @Test
-    fun testAsImplicitContext() {
+    fun testAsCurrentContext() {
         var attached = false
         var detached = false
         val ctx = FakeContext(
@@ -20,7 +20,7 @@ internal class ContextExtTest {
         )
 
         val expected = "result"
-        val result = ctx.asImplicitContext {
+        val result = ctx.asCurrentContext {
             expected
         }
 
@@ -30,7 +30,7 @@ internal class ContextExtTest {
     }
 
     @Test
-    fun testAsImplicitContextDetachesOnException() {
+    fun testAsCurrentContextDetachesOnException() {
         var attached = false
         var detached = false
         val ctx = FakeContext(
@@ -42,7 +42,7 @@ internal class ContextExtTest {
         )
 
         assertFailsWith<IllegalStateException> {
-            ctx.asImplicitContext {
+            ctx.asCurrentContext {
                 throw IllegalStateException("test exception")
             }
         }

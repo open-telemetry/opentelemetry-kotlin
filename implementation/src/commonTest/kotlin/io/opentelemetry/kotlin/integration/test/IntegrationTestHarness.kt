@@ -25,6 +25,6 @@ internal class IntegrationTestHarness(
                 loggerProvider { loggerProviderConfig() }
                 extraConfig()
             },
-        )
+        ).also(sdks::track)
     }
 }

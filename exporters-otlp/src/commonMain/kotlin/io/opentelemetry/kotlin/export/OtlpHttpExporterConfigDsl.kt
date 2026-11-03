@@ -5,6 +5,7 @@ import io.ktor.client.engine.HttpClientEngine
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.config.validateOrUseDefault
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.getEnvVarValue
 import io.opentelemetry.kotlin.init.ConfigDsl
 
@@ -73,7 +74,10 @@ internal fun createOtlpHttpClient(
     getEnvVar: (String) -> String? = ::getEnvVarValue,
     block: OtlpHttpExporterConfigDsl.() -> Unit,
 ): OtlpClient {
-    val config = OtlpHttpExporterConfig().apply(block)
+    val config = OtlpHttpExporterConfig()
+    sdkErrorHandler.guard("Failed to apply OTLP HTTP exporter config, continuing with partial config") {
+        config.block()
+    }
     val signalEndpoint = if (config.endpointConfigured) {
         null
     } else {
@@ -105,16 +109,22 @@ internal fun createOtlpHttpClient(
         value = config.timeoutMs,
         default = EXPORT_REQUEST_TIMEOUT_MS,
     ) { it > 0 }
-    val httpClient = config.httpClient ?: HttpClientRegistry.getOrCreate(
-        engine = config.httpClientEngine,
-        requestTimeoutMs = timeoutMs,
-    )
+    val suppliedClient = config.httpClient
+    val httpClientLease = if (suppliedClient == null) {
+        HttpClientRegistry.lease(
+            engine = config.httpClientEngine,
+            requestTimeoutMs = timeoutMs,
+        )
+    } else {
+        null
+    }
     return OtlpClient(
         baseUrl = endpoint,
-        httpClient = httpClient,
+        httpClient = suppliedClient ?: checkNotNull(httpClientLease).client,
         sdkErrorHandler = sdkErrorHandler,
         signalEndpoint = signalEndpoint,
         headers = config.headers,
+        httpClientLease = httpClientLease,
     )
 }
 

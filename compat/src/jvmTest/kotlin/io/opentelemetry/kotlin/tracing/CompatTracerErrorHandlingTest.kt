@@ -7,11 +7,13 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
 import org.junit.Test
+import kotlin.test.AfterTest
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -19,7 +21,12 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class CompatTracerErrorHandlingTest {
 
+    private val sdks = SdkTracker()
+
     private val errorHandler = FakeSdkErrorHandler()
+
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
 
     @Test
     fun `throwing span creation action degrades to a non-recording span`() {
@@ -55,7 +62,7 @@ internal class CompatTracerErrorHandlingTest {
                 sampler { HostileSampler() }
                 export { FakeSpanProcessor() }
             }
-        }
+        }.also(sdks::track)
         val span = otel.tracerProvider.getTracer("test").startSpan("span")
 
         assertFalse(span.isRecording())
@@ -118,7 +125,7 @@ internal class CompatTracerErrorHandlingTest {
             tracerProvider {
                 processors.forEach { processor -> export { processor } }
             }
-        }
+        }.also(sdks::track)
 
     private fun assertSingleError(message: String) {
         assertEquals(1, errorHandler.errors.size)

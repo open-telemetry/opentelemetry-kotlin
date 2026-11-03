@@ -18,7 +18,7 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /**
- * Verifies that opting in to opentelemetry-java's context storage shares a single implicit
+ * Verifies that opting in to opentelemetry-java's context storage shares a single current
  * context between the Kotlin API and the static opentelemetry-java context APIs.
  */
 internal class OtelJavaContextStorageTest {
@@ -43,6 +43,7 @@ internal class OtelJavaContextStorageTest {
             assertSame(OtelJavaContext.root(), OtelJavaContext.current())
         } finally {
             OtelJavaContext.root().makeCurrent()
+            harness.shutdown()
         }
     }
 
@@ -52,7 +53,7 @@ internal class OtelJavaContextStorageTest {
     }
 
     @Test
-    fun testImplicitIsRootByDefault() {
+    fun testCurrentIsRootByDefault() {
         assertSame(harness.kotlinApi.context.root(), harness.kotlinApi.context.current())
     }
 
