@@ -8,6 +8,9 @@ import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.init.config.MetricsConfig
+import io.opentelemetry.kotlin.metrics.instrument.InstrumentDescriptor
+import io.opentelemetry.kotlin.metrics.instrument.InstrumentKind
+import io.opentelemetry.kotlin.metrics.instrument.InstrumentValueType
 import io.opentelemetry.kotlin.resource.ResourceImpl
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -209,5 +212,128 @@ internal class MeterProviderImplTest {
         val recorded = errorHandler.userCodeErrors.single()
         assertEquals("MeterProvider.getMeter failed", recorded.message)
         assertEquals("boom", recorded.cause.message)
+    }
+
+    @Test
+    fun testNullUnitPreserved() {
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = null,
+            description = "test",
+        )
+        assertEquals(null, gauge.unit)
+    }
+
+    @Test
+    fun testEmptyUnitPreserved() {
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = "",
+            description = "test",
+        )
+        assertEquals("", gauge.unit)
+    }
+
+    @Test
+    fun testNonAsciiUnitPreserved() {
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = "°C",
+            description = "test",
+        )
+        assertEquals("°C", gauge.unit)
+    }
+
+    @Test
+    fun testLongUnitPreserved() {
+        val longUnit = "a".repeat(100)
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = longUnit,
+            description = "test",
+        )
+        assertEquals(longUnit, gauge.unit)
+    }
+
+    @Test
+    fun testNullDescriptionPreserved() {
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = "1",
+            description = null,
+        )
+        assertEquals(null, gauge.description)
+    }
+
+    @Test
+    fun testEmptyDescriptionPreserved() {
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = "1",
+            description = "",
+        )
+        assertEquals("", gauge.description)
+    }
+
+    @Test
+    fun testLongDescriptionPreserved() {
+        val longDesc = "a".repeat(2000)
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = "1",
+            description = longDesc,
+        )
+        assertEquals(longDesc, gauge.description)
+    }
+
+    @Test
+    fun testUnicodeDescriptionPreserved() {
+        val unicodeDesc = "°"
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = "1",
+            description = unicodeDesc,
+        )
+        assertEquals(unicodeDesc, gauge.description)
+    }
+
+    @Test
+    fun testNullEmptyUnitDescriptorEquivalence() {
+        val desc1 = InstrumentDescriptor(
+            name = "test",
+            unit = null,
+            description = "desc",
+            kind = InstrumentKind.HISTOGRAM,
+            valueType = InstrumentValueType.LONG,
+        )
+        val desc2 = InstrumentDescriptor(
+            name = "test",
+            unit = "",
+            description = "desc",
+            kind = InstrumentKind.HISTOGRAM,
+            valueType = InstrumentValueType.LONG,
+        )
+        assertEquals(desc1, desc2)
+        assertEquals(desc1.hashCode(), desc2.hashCode())
+    }
+
+    @Test
+    fun testNullEmptyDescriptionDescriptorEquivalence() {
+        val desc1 = InstrumentDescriptor(
+            name = "test",
+            unit = "1",
+            description = null,
+            kind = InstrumentKind.HISTOGRAM,
+            valueType = InstrumentValueType.LONG,
+        )
+        val desc2 = InstrumentDescriptor(
+            name = "test",
+            unit = "1",
+            description = "",
+            kind = InstrumentKind.HISTOGRAM,
+            valueType = InstrumentValueType.LONG,
+        )
+        assertEquals(desc1, desc2)
+        assertEquals(desc1.hashCode(), desc2.hashCode())
     }
 }
