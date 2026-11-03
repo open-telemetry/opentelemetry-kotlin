@@ -48,3 +48,10 @@ the APIs above. They use a separate store that the Kotlin SDK never sees. Use
 obtained from the Java API.
 
 This module only ships a JVM artifact because it depends on the `opentelemetry-java` library.
+
+## Log record processors
+
+opentelemetry-java only lets a log record processor change attributes. In compat mode, writes to
+any other `ReadWriteLogRecord` property (such as `body`, `severityNumber`, or `spanContext`) are
+ignored. The first write to each property by each processor is reported as a warning to the
+`SdkErrorHandler`.
