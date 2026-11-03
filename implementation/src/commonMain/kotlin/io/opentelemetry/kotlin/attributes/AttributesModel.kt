@@ -1,6 +1,8 @@
 package io.opentelemetry.kotlin.attributes
 
 import io.opentelemetry.kotlin.behavior.limitOrUnset
+import io.opentelemetry.kotlin.internal.codePointCount
+import io.opentelemetry.kotlin.internal.takeCodePoints
 
 internal class AttributesModel(
     attributeLimit: Int = DEFAULT_ATTRIBUTE_LIMIT,
@@ -93,8 +95,8 @@ internal class AttributesModel(
     }
 
     private fun truncateString(value: String): String =
-        if (value.length > attributeValueLengthLimit) {
-            value.take(attributeValueLengthLimit)
+        if (value.codePointCount() > attributeValueLengthLimit) {
+            value.takeCodePoints(attributeValueLengthLimit)
         } else {
             value
         }
