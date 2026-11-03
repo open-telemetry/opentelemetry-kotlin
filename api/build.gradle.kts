@@ -15,5 +15,11 @@ kotlin {
                 implementation(project(":propagation-utils"))
             }
         }
+        commonTest {
+            dependencies {
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.kotest.property)
+            }
+        }
     }
 }

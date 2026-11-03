@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.baggage
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.context.rootContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotSame
@@ -12,17 +12,15 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class BaggageContextStorageTest {
 
-    private val factory = ContextFactoryImpl()
-
     @Test
     fun `extractBaggage on root returns empty baggage`() {
-        assertSame(createBaggage(), factory.root().extractBaggage())
+        assertSame(createBaggage(), rootContext().extractBaggage())
     }
 
     @Test
     fun `storeBaggage then extractBaggage round-trips entries`() {
         val baggage = createBaggage().set("user", "alice").set("region", "eu")
-        val stored = factory.root().storeBaggage(baggage)
+        val stored = rootContext().storeBaggage(baggage)
 
         val extracted = stored.extractBaggage()
 
@@ -32,7 +30,7 @@ internal class BaggageContextStorageTest {
 
     @Test
     fun `clearBaggage on populated context yields empty baggage`() {
-        val populated = factory.root().storeBaggage(createBaggage().set("user", "alice"))
+        val populated = rootContext().storeBaggage(createBaggage().set("user", "alice"))
 
         val cleared = populated.clearBaggage()
 
@@ -42,7 +40,7 @@ internal class BaggageContextStorageTest {
 
     @Test
     fun `storing baggage does not mutate original context`() {
-        val root = factory.root()
+        val root = rootContext()
         val derived = root.storeBaggage(createBaggage().set("user", "alice"))
 
         assertNotSame(root, derived)
@@ -52,7 +50,7 @@ internal class BaggageContextStorageTest {
 
     @Test
     fun `clearBaggage does not mutate original context`() {
-        val populated = factory.root().storeBaggage(createBaggage().set("user", "alice"))
+        val populated = rootContext().storeBaggage(createBaggage().set("user", "alice"))
 
         val cleared = populated.clearBaggage()
 
@@ -62,6 +60,6 @@ internal class BaggageContextStorageTest {
 
     @Test
     fun `clearBaggage on root context still yields empty baggage`() {
-        assertTrue(factory.root().clearBaggage().extractBaggage().asMap().isEmpty())
+        assertTrue(rootContext().clearBaggage().extractBaggage().asMap().isEmpty())
     }
 }
