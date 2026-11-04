@@ -12,8 +12,6 @@ import io.opentelemetry.kotlin.tracing.createSpanContext
 import org.junit.Test
 import kotlin.test.AfterTest
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
