@@ -10,15 +10,16 @@ import io.opentelemetry.kotlin.config.schema.model.BatchLogRecordProcessor
 @ExperimentalApi
 fun BatchLogRecordProcessor.toBehavior(): BatchLogRecordProcessorBehavior {
     val scheduleDelay = scheduleDelay?.takeIf { value -> value >= 0 }
-        ?: BatchLogRecordProcessorBehavior.DEFAULT_SCHEDULE_DELAY
     val exportTimeout = exportTimeout?.takeIf { value -> value >= 0 }
-        ?: BatchLogRecordProcessorBehavior.DEFAULT_EXPORT_TIMEOUT
     val maxQueueSize = maxQueueSize?.takeIf { value -> value in 1..Int.MAX_VALUE.toLong() }?.toInt()
-        ?: BatchLogRecordProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE
     val requestedBatchSize = maxExportBatchSize?.takeIf { value -> value in 1..Int.MAX_VALUE.toLong() }?.toInt()
-        ?: BatchLogRecordProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE
 
-    val maxExportBatchSize = minOf(requestedBatchSize, maxQueueSize)
+    val maxExportBatchSize = let {
+        if(maxQueueSize != null && requestedBatchSize != null) {
+            return@let minOf(requestedBatchSize, maxQueueSize)
+        }
+        requestedBatchSize ?: maxQueueSize
+    }
     return BatchLogRecordProcessorBehavior(
         scheduleDelay = scheduleDelay,
         exportTimeout = exportTimeout,
