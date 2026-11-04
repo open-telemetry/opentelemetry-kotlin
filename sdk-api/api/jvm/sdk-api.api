@@ -19,11 +19,6 @@ public abstract interface class io/opentelemetry/kotlin/attributes/AttributeCont
 	public abstract fun getAttributes ()Ljava/util/Map;
 }
 
-public abstract interface class io/opentelemetry/kotlin/context/CurrentContextStorage {
-	public abstract fun attach (Lio/opentelemetry/kotlin/context/Context;)Lio/opentelemetry/kotlin/context/Scope;
-	public abstract fun current ()Lio/opentelemetry/kotlin/context/Context;
-}
-
 public final class io/opentelemetry/kotlin/context/CurrentContextStorageMode : java/lang/Enum {
 	public static final field SINGLE_SLOT Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
 	public static final field THREAD_LOCAL Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
