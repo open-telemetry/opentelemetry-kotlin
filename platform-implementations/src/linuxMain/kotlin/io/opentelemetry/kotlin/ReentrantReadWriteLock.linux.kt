@@ -2,6 +2,7 @@
 
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
@@ -28,8 +29,12 @@ public actual class ReentrantReadWriteLock {
 
     @Suppress("unused")
     private val cleaner = createCleaner(mutex) {
-        if (pthread_mutex_destroy(it) == 0) {
+        val result = pthread_mutex_destroy(it)
+        if (result == 0) {
             nativeHeap.free(it)
+        } else {
+            // leak rather than free a mutex in an unknown state
+            platformLog("pthread_mutex_destroy failed with code $result", SdkErrorSeverity.WARNING, null)
         }
     }
 
@@ -47,13 +52,27 @@ public actual class ReentrantReadWriteLock {
 
 private fun createRecursiveMutex(): CPointer<pthread_mutex_t> = memScoped {
     val attributes = alloc<pthread_mutexattr_t>()
-    pthread_mutexattr_init(attributes.ptr)
+    checkPthreadResult(pthread_mutexattr_init(attributes.ptr), "pthread_mutexattr_init")
     try {
-        pthread_mutexattr_settype(attributes.ptr, PTHREAD_MUTEX_RECURSIVE.toInt())
-        val mutex = nativeHeap.alloc<pthread_mutex_t>()
-        pthread_mutex_init(mutex.ptr, attributes.ptr)
-        mutex.ptr
+        checkPthreadResult(pthread_mutexattr_settype(attributes.ptr, PTHREAD_MUTEX_RECURSIVE.toInt()), "pthread_mutexattr_settype")
+        val mutex = nativeHeap.alloc<pthread_mutex_t>().ptr
+        val result = pthread_mutex_init(mutex, attributes.ptr)
+        if (result != 0) {
+            nativeHeap.free(mutex)
+            error("pthread_mutex_init failed with code $result")
+        }
+        mutex
     } finally {
-        pthread_mutexattr_destroy(attributes.ptr)
+        val result = pthread_mutexattr_destroy(attributes.ptr)
+        if (result != 0) {
+            platformLog("pthread_mutexattr_destroy failed with code $result", SdkErrorSeverity.WARNING, null)
+        }
     }
+}
+
+/**
+ * Throws if a pthread call failed. Callers of the lock must not run without mutual exclusion.
+ */
+private fun checkPthreadResult(result: Int, operation: String) {
+    check(result == 0) { "$operation failed with code $result" }
 }
