@@ -12,6 +12,7 @@ kotlin {
             dependencies {
                 api(project(":api"))
                 api(project(":sdk-api"))
+                implementation(project(":propagation-utils"))
             }
         }
         commonTest {

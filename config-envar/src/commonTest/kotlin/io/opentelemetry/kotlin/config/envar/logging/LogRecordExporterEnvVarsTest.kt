@@ -27,7 +27,7 @@ internal class LogRecordExporterEnvVarsTest {
             OtlpHttpLogRecordExporterEnvVars.OTLP_LOGS_ENDPOINT to "http://localhost:4318/v1/logs"
         )
         assertEquals(
-            LogRecordExporterBehavior(http = OtlpHttpLogsExporterBehavior(endpoint = "http://localhost:4318/v1/logs")),
+            LogRecordExporterBehavior(http = OtlpHttpLogsExporterBehavior(signalEndpoint = "http://localhost:4318/v1/logs")),
             toBehavior(configs::get),
         )
     }

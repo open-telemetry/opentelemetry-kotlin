@@ -48,7 +48,8 @@ internal class OtlpHttpLogRecordExporterEnvVarsTest {
         )
         assertEquals(
             OtlpHttpLogsExporterBehavior(
-                endpoint = "http://localhost:4317/traces",
+                endpoint = "http://localhost:4317",
+                signalEndpoint = "http://localhost:4317/traces",
                 timeout = 2,
                 headers = mapOf("key3" to "value3", "key4" to "value4")
             ),
@@ -65,6 +66,37 @@ internal class OtlpHttpLogRecordExporterEnvVarsTest {
             OtlpHttpLogsExporterBehavior(headers = mapOf("key1" to "value1", "key2" to "value2")),
             toBehavior(configs::get),
         )
+    }
+
+    @Test
+    fun `spec example 1 - general base endpoint only`() {
+        val configs = mapOf(
+            OpenTelemetryEnvVars.OTLP_ENDPOINT to "http://collector:4318",
+        )
+        val behavior = toBehavior(configs::get)
+        assertEquals("http://collector:4318", behavior.endpoint)
+        assertEquals(null, behavior.signalEndpoint)
+    }
+
+    @Test
+    fun `spec example 2 - custom base path for all signals`() {
+        val configs = mapOf(
+            OpenTelemetryEnvVars.OTLP_ENDPOINT to "http://collector:4318/mycollector/",
+        )
+        val behavior = toBehavior(configs::get)
+        assertEquals("http://collector:4318/mycollector/", behavior.endpoint)
+        assertEquals(null, behavior.signalEndpoint)
+    }
+
+    @Test
+    fun `spec example 3 - mixing base endpoint with per-signal overrides`() {
+        val configs = mapOf(
+            OpenTelemetryEnvVars.OTLP_ENDPOINT to "http://collector:4318/mycollector/",
+            OtlpHttpLogRecordExporterEnvVars.OTLP_LOGS_ENDPOINT to "https://collector.example.com/v1/logs/",
+        )
+        val behavior = toBehavior(configs::get)
+        assertEquals("http://collector:4318/mycollector/", behavior.endpoint)
+        assertEquals("https://collector.example.com/v1/logs/", behavior.signalEndpoint)
     }
 
     private fun toBehavior(getEnvVar: (String) -> String?) =

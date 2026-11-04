@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.behavior
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.propagation.utils.percentDecodeBaggageValue
 
 /**
  * OTLP exporter.
@@ -37,9 +38,9 @@ interface OtlpExporter {
                     if (parts.size != 2) {
                         return@forEach
                     }
-                    val key = parts[0].trim()
-                    val value = parts[1].trim()
-                    if (key.isNotEmpty() && value.isNotEmpty()) {
+                    val key = percentDecodeBaggageValue(parts[0].trim())
+                    val value = percentDecodeBaggageValue(parts[1].trim())
+                    if (!key.isNullOrEmpty() && !value.isNullOrEmpty()) {
                         put(key, value)
                     }
                 }
