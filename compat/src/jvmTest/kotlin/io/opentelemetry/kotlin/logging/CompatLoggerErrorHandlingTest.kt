@@ -7,10 +7,13 @@ import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
+import io.opentelemetry.kotlin.semconv.ExceptionAttributes
 import io.opentelemetry.kotlin.tracing.createSpanContext
 import org.junit.Test
 import kotlin.test.AfterTest
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
@@ -87,6 +90,27 @@ internal class CompatLoggerErrorHandlingTest {
 
         assertEquals("value", processor.logs.single().attributes["key"])
         assertTrue(errorHandler.errors.isEmpty())
+    }
+
+    @Test
+    fun `compat logger user attributes win on key collisions`() {
+        val processor = FakeLogRecordProcessor()
+        val logger = createCompatOpenTelemetry {
+            errorHandler(errorHandler)
+            loggerProvider { export { processor } }
+        }.also(sdks::track).loggerProvider.getLogger("test")
+
+        logger.emit(
+            body = "message",
+            exception = RuntimeException("exception message"),
+            attributes = {
+                setStringAttribute(ExceptionAttributes.EXCEPTION_MESSAGE, "user message")
+            }
+        )
+
+        assertEquals(1, processor.logs.size)
+        val log = processor.logs.single()
+        assertEquals("user message", log.attributes[ExceptionAttributes.EXCEPTION_MESSAGE])
     }
 
     private fun createLogger(vararg processors: FakeLogRecordProcessor): Logger =

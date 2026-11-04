@@ -61,4 +61,17 @@ internal class AttributesMutatorExtTest {
         assertNull(mutator.attributes[ExceptionAttributes.EXCEPTION_TYPE])
         assertNotNull(mutator.attributes[ExceptionAttributes.EXCEPTION_STACKTRACE])
     }
+
+    @Test
+    fun testSetExceptionAttributesDoesNotOverwriteExistingAttributes() {
+        val mutator = FakeAttributesMutator()
+        val exception = IllegalStateException("exception message")
+
+        mutator.setStringAttribute(ExceptionAttributes.EXCEPTION_MESSAGE, "user message")
+        mutator.setExceptionAttributes(exception)
+
+        assertEquals("user message", mutator.attributes[ExceptionAttributes.EXCEPTION_MESSAGE])
+        assertNotNull(mutator.attributes[ExceptionAttributes.EXCEPTION_STACKTRACE])
+        assertNotNull(mutator.attributes[ExceptionAttributes.EXCEPTION_TYPE])
+    }
 }
