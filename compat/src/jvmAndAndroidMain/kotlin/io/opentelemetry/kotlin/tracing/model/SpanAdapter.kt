@@ -38,7 +38,7 @@ internal class SpanAdapter(
     AttributeContainer,
     SpanCreationAction,
     OtelJavaImplicitContextKeyed,
-    AttributesMutator by OtelJavaSpanAttributesMutator(impl) {
+    AttributesMutator by OtelJavaSpanAttributesMutator(impl, sdkErrorHandler) {
 
     private val linksImpl: ConcurrentLinkedQueue<SpanLink> =
         ConcurrentLinkedQueue(creationState?.links.orEmpty())
@@ -58,12 +58,16 @@ internal class SpanAdapter(
         get() = linksImpl.toList()
 
     override fun setName(name: String) {
-        impl.updateName(name)
+        sdkErrorHandler.sdkGuard("Span.setName failed") {
+            impl.updateName(name)
+        }
     }
 
     override fun setStatus(status: StatusData) {
-        status.toOtelJavaStatusData().let {
-            impl.setStatus(it.statusCode, it.description)
+        sdkErrorHandler.sdkGuard("Span.setStatus failed") {
+            status.toOtelJavaStatusData().let {
+                impl.setStatus(it.statusCode, it.description)
+            }
         }
     }
 
@@ -114,7 +118,8 @@ internal class SpanAdapter(
         return impl.storeInContext(context)
     }
 
-    override fun makeCurrent(): OtelJavaScope? {
-        return impl.makeCurrent()
-    }
+    override fun makeCurrent(): OtelJavaScope? =
+        sdkErrorHandler.sdkGuardOrDefault(OtelJavaScope.noop(), "Span.makeCurrent failed") {
+            impl.makeCurrent()
+        }
 }
