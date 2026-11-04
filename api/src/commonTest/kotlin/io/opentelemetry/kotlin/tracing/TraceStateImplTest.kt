@@ -393,7 +393,7 @@ internal class TraceStateImplTest {
             override fun get(key: String): String? = null
 
             override fun asMap(): Map<String, String> {
-                throw RuntimeException("Custom implementation throws")
+                error("Custom implementation throws")
             }
 
             override fun put(key: String, value: String): TraceState = this
