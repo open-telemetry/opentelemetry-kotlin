@@ -7,7 +7,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkMeterProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
-import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaLogRecordProcessor
@@ -18,7 +17,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.AfterTest
 import kotlin.test.assertEquals
-import kotlin.test.assertSame
 import kotlin.test.assertIs
 
 @OptIn(ExperimentalApi::class)
