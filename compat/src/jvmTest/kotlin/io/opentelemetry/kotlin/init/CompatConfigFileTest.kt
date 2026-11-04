@@ -9,6 +9,9 @@ import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import kotlin.test.AfterTest
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import java.io.ByteArrayOutputStream
@@ -18,9 +21,6 @@ import java.util.logging.Handler
 import java.util.logging.Level
 import java.util.logging.LogRecord
 import java.util.logging.Logger
-import kotlin.test.AfterTest
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 internal class CompatConfigFileTest {
 
@@ -109,6 +109,22 @@ internal class CompatConfigFileTest {
     }
 
     @Test
+    fun `a batch config file buffers log records until flush`() {
+        val stdout = captureStdout { buffer ->
+            val sdk = createCompatOpenTelemetry {
+                configFile(writeConfigFile(BATCH_CONSOLE_CONFIG_FILE))
+            }.also(sdks::track) as OpenTelemetrySdk
+
+            sdk.loggerProvider.getLogger("test").emit(body = "compat-console-log")
+            assertTrue(buffer.toString().isEmpty())
+            runBlocking { sdk.forceFlush() }
+            assertTrue(buffer.toString().contains("compat-console-log"))
+        }
+
+        assertTrue(stdout.contains("compat-console-log"))
+    }
+
+    @Test
     fun `the dsl export takes precedence over console in the config file`() {
         val spanProcessor = FakeSpanProcessor()
         val logProcessor = FakeLogRecordProcessor()
@@ -157,12 +173,12 @@ internal class CompatConfigFileTest {
         return messages
     }
 
-    private fun captureStdout(block: () -> Unit): String {
+    private fun captureStdout(block: (ByteArrayOutputStream) -> Unit): String {
         val buffer = ByteArrayOutputStream()
         val previous = System.out
         System.setOut(PrintStream(buffer, true))
         try {
-            block()
+            block(buffer)
         } finally {
             System.setOut(previous)
         }
@@ -198,6 +214,12 @@ internal class CompatConfigFileTest {
                     schedule_delay: 60000
                     exporter:
                       console: {}
+            logger_provider:
+              processors:
+                - batch:
+                    schedule_delay: 60000
+                    exporter:
+                      console: {}          
         """.trimIndent()
     }
 }
