@@ -119,7 +119,7 @@ private fun AttributeNameValue.toAttribute(
         )
         return null
     }
-    val rawValue = value ?: return null  // spec: null value means ignore the entry
+    val rawValue = value ?: return null // spec: null value means ignore the entry
 
     val effectiveType = type ?: AttributeType.STRING
     val coerced = coerceValue(rawValue, effectiveType)
@@ -195,7 +195,9 @@ private fun coerceValue(rawValue: Any, type: AttributeType): Any? = when (type) 
 private fun <T : Any> coerceList(rawValue: Any, transform: (Any) -> T?): List<T>? {
     val list = rawValue as? List<*> ?: return null
     return list.mapNotNull { item ->
-        if (item == null) return null
+        if (item == null) {
+            return null
+        }
         transform(item) ?: return null
     }
 }
@@ -205,17 +207,23 @@ private fun <T : Any> coerceList(rawValue: Any, transform: (Any) -> T?): List<T>
  * Returns `null` if a malformed sequence is encountered.
  */
 private fun percentDecode(value: String): String? {
-    if (!value.contains('%')) return value
+    if (!value.contains('%')) {
+        return value
+    }
     val bytes = ByteArray(value.length)
     var pos = 0
     var i = 0
     while (i < value.length) {
         val c = value[i]
         if (c == '%') {
-            if (i + 2 >= value.length) return null
+            if (i + 2 >= value.length) {
+                return null
+            }
             val hi = hexDigitValue(value[i + 1])
             val lo = hexDigitValue(value[i + 2])
-            if (hi < 0 || lo < 0) return null
+            if (hi < 0 || lo < 0) {
+                return null
+            }
             bytes[pos++] = ((hi shl 4) or lo).toByte()
             i += 3
         } else {
