@@ -9,9 +9,6 @@ import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
-import kotlin.test.AfterTest
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import java.io.ByteArrayOutputStream
@@ -21,6 +18,9 @@ import java.util.logging.Handler
 import java.util.logging.Level
 import java.util.logging.LogRecord
 import java.util.logging.Logger
+import kotlin.test.AfterTest
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 internal class CompatConfigFileTest {
 
