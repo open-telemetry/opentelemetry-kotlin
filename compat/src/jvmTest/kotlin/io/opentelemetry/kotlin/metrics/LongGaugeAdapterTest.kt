@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
-import io.opentelemetry.kotlin.aliases.OtelJavaMeterProvider
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
@@ -44,11 +43,7 @@ internal class LongGaugeAdapterTest {
     @Test
     fun kotlinGaugeAdapterBuildsAndForwardsMetadata() {
         val meter = FakeMeter("test")
-        val builder = OtelJavaLongGaugeBuilderAdapter(
-            meter,
-            "queue.depth",
-            OtelJavaMeterProvider.noop().get("test"),
-        )
+        val builder = OtelJavaLongGaugeBuilderAdapter(meter, "queue.depth")
 
         assertSame(builder, builder.setUnit("{item}"))
         assertSame(builder, builder.setDescription("Current queue depth"))

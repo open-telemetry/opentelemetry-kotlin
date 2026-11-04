@@ -83,6 +83,21 @@ internal class MeterProviderImplTest {
         assertFalse(called)
     }
 
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testObservableLongGaugeIsNoopUntilMetricsCollectionIsImplemented() {
+        var called = false
+        val gauge = impl.getMeter("test").createObservableLongGauge(
+            name = "queue.depth",
+            callbacks = arrayOf({ called = true }),
+        )
+
+        assertEquals("queue.depth", gauge.name)
+        gauge.registerCallback { called = true }.close()
+        gauge.close()
+        assertFalse(called)
+    }
+
     @Test
     fun testLongGaugeExposesMetadata() {
         val gauge = impl.getMeter("test").createLongGauge(

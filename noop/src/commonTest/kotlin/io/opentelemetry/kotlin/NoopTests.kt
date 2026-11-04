@@ -330,6 +330,22 @@ internal class NoopTests {
         }.close()
         observableLongCounter.close()
         assertFalse(longCallbackInvoked)
+
+        var longGaugeCallbackInvoked = false
+        val longGaugeCreationCallback: (ObservableLongMeasurement) -> Unit = { measurement ->
+            longGaugeCallbackInvoked = true
+            measurement.record(3L)
+        }
+        val observableLongGauge = meter.createObservableLongGauge(
+            name = "queue.depth",
+            callbacks = arrayOf(longGaugeCreationCallback),
+        )
+        observableLongGauge.registerCallback {
+            longGaugeCallbackInvoked = true
+            it.record(4L)
+        }.close()
+        observableLongGauge.close()
+        assertFalse(longGaugeCallbackInvoked)
     }
 
     @OptIn(ExperimentalApi::class)
