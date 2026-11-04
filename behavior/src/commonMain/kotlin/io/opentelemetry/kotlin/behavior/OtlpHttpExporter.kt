@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 @ExperimentalApi
 data class OtlpHttpExporter(
     override val endpoint: String? = null,
+    val signalEndpoint: String? = null,
     override val timeout: Long? = null,
     override val headers: Map<String, String?>? = null
 ) : OtlpExporter

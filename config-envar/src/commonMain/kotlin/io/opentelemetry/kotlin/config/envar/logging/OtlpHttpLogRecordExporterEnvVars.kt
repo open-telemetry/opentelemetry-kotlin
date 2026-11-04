@@ -13,8 +13,8 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 @ExperimentalApi
 class OtlpHttpLogRecordExporterEnvVars(private val reader: ReportingEnvVarReader) {
     fun toBehavior(): OtlpHttpLogsExporterBehavior {
-        val endpoint = reader.readString(OTLP_LOGS_ENDPOINT)
-            ?: reader.readString(OpenTelemetryEnvVars.OTLP_ENDPOINT)
+        val signalEndpoint = reader.readString(OTLP_LOGS_ENDPOINT)
+        val endpoint = reader.readString(OpenTelemetryEnvVars.OTLP_ENDPOINT)
         val timeout = reader.readNonNegativeLong(OTLP_LOGS_TIMEOUT)
             ?: reader.readNonNegativeLong(OpenTelemetryEnvVars.OTLP_TIMEOUT)
         val headers = OtlpExporter.buildHeaderMap(
@@ -23,6 +23,7 @@ class OtlpHttpLogRecordExporterEnvVars(private val reader: ReportingEnvVarReader
         )
         return OtlpHttpLogsExporterBehavior(
             endpoint = endpoint,
+            signalEndpoint = signalEndpoint,
             timeout = timeout,
             headers = headers,
         )
