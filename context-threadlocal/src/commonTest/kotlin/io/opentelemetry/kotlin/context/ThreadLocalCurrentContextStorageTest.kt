@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.context
 
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertNotSame
@@ -9,18 +8,18 @@ import kotlin.test.assertTrue
 
 internal class ThreadLocalCurrentContextStorageTest {
 
-    private lateinit var factory: ContextFactoryImpl
+    private lateinit var root: Context
     private lateinit var storage: CurrentContextStorage
 
     @BeforeTest
     fun setUp() {
-        factory = ContextFactoryImpl()
-        storage = ThreadLocalCurrentContextStorage(factory::root)
+        root = FakeContext()
+        storage = ThreadLocalCurrentContextStorage { root }
     }
 
     @Test
     fun testRootReturnedWhenNoContextSet() {
-        assertSame(factory.root(), storage.current())
+        assertSame(root, storage.current())
     }
 
     @Test
@@ -41,14 +40,14 @@ internal class ThreadLocalCurrentContextStorageTest {
         assertTrue(innerScope.detach())
         assertSame(outer, storage.current())
         assertTrue(outerScope.detach())
-        assertSame(factory.root(), storage.current())
+        assertSame(root, storage.current())
     }
 
     @Test
     fun testSeparateInstancesAreIndependent() {
         val first = FakeContext()
         val second = FakeContext()
-        val otherStorage = ThreadLocalCurrentContextStorage(factory::root)
+        val otherStorage = ThreadLocalCurrentContextStorage { root }
         storage.attach(first)
         otherStorage.attach(second)
         assertSame(first, storage.current())
