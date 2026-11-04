@@ -1,6 +1,9 @@
 package io.opentelemetry.kotlin.baggage
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.RecordingSdkErrorHandler
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -8,6 +11,18 @@ import kotlin.test.assertSame
 
 @OptIn(ExperimentalApi::class)
 internal class BaggageEntrypointTest {
+
+    private val errorHandler = RecordingSdkErrorHandler()
+
+    @BeforeTest
+    fun setUp() {
+        errorHandler.install()
+    }
+
+    @AfterTest
+    fun tearDown() {
+        errorHandler.uninstall()
+    }
 
     @Test
     fun `omitting the action returns the shared empty Baggage`() {
@@ -22,11 +37,19 @@ internal class BaggageEntrypointTest {
 
     @Test
     fun `throwing action returns the shared empty Baggage`() {
+        val exc = IllegalStateException("boom")
         val baggage = createBaggage {
             put("user", "alice")
-            error("boom")
+            throw exc
         }
         assertSame(BaggageImpl.EMPTY, baggage)
+        errorHandler.assertSingleUserCodeError(exc)
+    }
+
+    @Test
+    fun `valid action reports nothing`() {
+        createBaggage { put("user", "alice") }
+        assertEquals(emptyList(), errorHandler.errors)
     }
 
     @Test
