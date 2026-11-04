@@ -60,8 +60,13 @@ internal class MeterImpl(
             sanitizedUnit,
             sanitizedDescription,
             InstrumentType.DOUBLE_UP_DOWN_COUNTER,
-            create = { DoubleUpDownCounterImpl(name, sanitizedUnit, sanitizedDescription) },
-            createNoop = { NoopOpenTelemetry.meterProvider.getMeter("").createDoubleUpDownCounter(name, sanitizedUnit, sanitizedDescription) }
+            create = {
+                DoubleUpDownCounterImpl(name, sanitizedUnit, sanitizedDescription)
+            },
+            createNoop = {
+                NoopOpenTelemetry.meterProvider.getMeter("")
+                    .createDoubleUpDownCounter(name, sanitizedUnit, sanitizedDescription)
+            },
         )
     }
 
@@ -81,8 +86,13 @@ internal class MeterImpl(
             sanitizedUnit,
             sanitizedDescription,
             InstrumentType.LONG_UP_DOWN_COUNTER,
-            create = { LongUpDownCounterImpl(name, sanitizedUnit, sanitizedDescription) },
-            createNoop = { NoopOpenTelemetry.meterProvider.getMeter("").createLongUpDownCounter(name, sanitizedUnit, sanitizedDescription) }
+            create = {
+                LongUpDownCounterImpl(name, sanitizedUnit, sanitizedDescription)
+            },
+            createNoop = {
+                NoopOpenTelemetry.meterProvider.getMeter("")
+                    .createLongUpDownCounter(name, sanitizedUnit, sanitizedDescription)
+            },
         )
     }
 
@@ -93,6 +103,7 @@ internal class MeterImpl(
         vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
     ): ObservableDoubleCounter {
         val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
+
         return noopMeter.createObservableDoubleCounter(name, unit, description, *callbacks)
     }
 
@@ -103,6 +114,7 @@ internal class MeterImpl(
         vararg callbacks: (ObservableLongMeasurement) -> Unit,
     ): ObservableLongCounter {
         val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
+
         return noopMeter.createObservableLongCounter(name, unit, description, *callbacks)
     }
 
@@ -145,12 +157,12 @@ internal class MeterImpl(
         createNoop: () -> T,
     ): T {
         val key = name.lowercase()
-        
+
         // First check read-only
         val existing = lock.read {
             instrumentRegistry[key]
         }
-        
+
         if (existing != null) {
             if (existing.type != type) {
                 sdkErrorHandler.reportError(
@@ -159,7 +171,7 @@ internal class MeterImpl(
                         message = "Instrument '$name' is already registered as ${existing.type}, " +
                             "cannot re-register as $type",
                         severity = SdkErrorSeverity.ERROR,
-                    )
+                    ),
                 )
                 // Return a noop instrument when types don't match
                 return createNoop()
@@ -168,7 +180,7 @@ internal class MeterImpl(
             @Suppress("UNCHECKED_CAST")
             return existing.instrument as T
         }
-        
+
         // Double-check and insert write-only
         return lock.write {
             val doubleCheck = instrumentRegistry[key]
@@ -196,6 +208,7 @@ internal class MeterImpl(
         val unit: String?,
         val description: String?,
     )
+
     /**
      * Returns a noop meter if [name] is not a valid
      * [instrument name](https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-name-syntax),
