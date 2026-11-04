@@ -1,53 +1,11 @@
 package io.opentelemetry.kotlin.attributes
 
-import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributesBuilder
-import io.opentelemetry.kotlin.aliases.OtelJavaValue
 
 internal class CompatAttributesModel(
     internal val attrs: OtelJavaAttributesBuilder = OtelJavaAttributes.builder()
-) : AttributesMutator, AttributeContainer {
-
-    override fun setBooleanAttribute(key: String, value: Boolean) {
-        attrs.put(key, value)
-    }
-
-    override fun setStringAttribute(key: String, value: String) {
-        attrs.put(key, value)
-    }
-
-    override fun setLongAttribute(key: String, value: Long) {
-        attrs.put(key, value)
-    }
-
-    override fun setDoubleAttribute(key: String, value: Double) {
-        attrs.put(key, value)
-    }
-
-    override fun setBooleanListAttribute(key: String, value: List<Boolean>) {
-        attrs.put(OtelJavaAttributeKey.booleanArrayKey(key), value)
-    }
-
-    override fun setStringListAttribute(key: String, value: List<String>) {
-        attrs.put(OtelJavaAttributeKey.stringArrayKey(key), value)
-    }
-
-    override fun setLongListAttribute(key: String, value: List<Long>) {
-        attrs.put(OtelJavaAttributeKey.longArrayKey(key), value)
-    }
-
-    override fun setDoubleListAttribute(key: String, value: List<Double>) {
-        attrs.put(OtelJavaAttributeKey.doubleArrayKey(key), value)
-    }
-
-    override fun setByteArrayAttribute(key: String, value: ByteArray) {
-        attrs.put(OtelJavaAttributeKey.valueKey(key), OtelJavaValue.of(value))
-    }
-
-    override fun setAnyValueAttribute(key: String, value: AnyValue) {
-        attrs.put(OtelJavaAttributeKey.valueKey(key), value.toOtelJavaValue())
-    }
+) : AttributesMutator by OtelJavaAttributesMutator(attrs.attributeSink()), AttributeContainer {
 
     override val attributes: Map<String, Any>
         get() = attrs.build().convertToMap()

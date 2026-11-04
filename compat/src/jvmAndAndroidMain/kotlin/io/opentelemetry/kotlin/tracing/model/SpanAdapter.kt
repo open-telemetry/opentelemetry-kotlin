@@ -7,6 +7,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaScope
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.attributes.OtelJavaAttributesMutator
+import io.opentelemetry.kotlin.attributes.attributeSink
 import io.opentelemetry.kotlin.attributes.compatAttributes
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -38,7 +40,7 @@ internal class SpanAdapter(
     AttributeContainer,
     SpanCreationAction,
     OtelJavaImplicitContextKeyed,
-    AttributesMutator by OtelJavaSpanAttributesMutator(impl) {
+    AttributesMutator by OtelJavaAttributesMutator(impl.attributeSink()) {
 
     private val linksImpl: ConcurrentLinkedQueue<SpanLink> =
         ConcurrentLinkedQueue(creationState?.links.orEmpty())
