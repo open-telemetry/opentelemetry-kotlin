@@ -1,39 +1,43 @@
 package io.opentelemetry.kotlin.config.dsl
 
 import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SimpleSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class TracerProviderConfigDslImplTest {
 
     @Test
-    fun processorStartsUnset() {
-        assertNull(TracerProviderConfigDslImpl().toBehavior().processor)
-    }
-
-    @Test
-    fun samplerStartsUnset() {
-        assertNull(TracerProviderConfigDslImpl().toBehavior().sampler)
+    fun startsUnset() {
+        assertEquals(TracerProviderBehavior(), TracerProviderConfigDslImpl().toBehavior())
     }
 
     @Test
     fun samplerCallSetsSampler() {
-        val dsl = TracerProviderConfigDslImpl()
-        dsl.sampler { alwaysOn() }
-        assertEquals(SamplerBehavior.AlwaysOn, dsl.toBehavior().sampler)
+        val dsl = TracerProviderConfigDslImpl().apply {
+            sampler { alwaysOn() }
+        }
+        assertEquals(
+            TracerProviderBehavior(sampler = SamplerBehavior.AlwaysOn),
+            dsl.toBehavior()
+        )
     }
 
     @Test
     fun samplerMapsParentBased() {
-        val dsl = TracerProviderConfigDslImpl()
-        dsl.sampler { parentBased(root = alwaysOff()) }
+        val dsl = TracerProviderConfigDslImpl().apply {
+            sampler { parentBased(root = alwaysOff()) }
+        }
         assertEquals(
-            SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOff),
-            dsl.toBehavior().sampler
+            TracerProviderBehavior(
+                sampler = SamplerBehavior.ParentBased(root = SamplerBehavior.AlwaysOff)
+            ),
+            dsl.toBehavior()
         )
     }
 
@@ -43,9 +47,13 @@ internal class TracerProviderConfigDslImplTest {
         dsl.export { error("behavior mapping does not run the export lambda") }
         dsl.sampler { alwaysOff() }
 
-        val behavior = dsl.toBehavior()
-        assertEquals(SpanProcessorBehavior(), behavior.processor)
-        assertEquals(SamplerBehavior.AlwaysOff, behavior.sampler)
+        assertEquals(
+            TracerProviderBehavior(
+                processor = SpanProcessorBehavior(),
+                sampler = SamplerBehavior.AlwaysOff
+            ),
+            dsl.toBehavior()
+        )
     }
 
     @Test
@@ -54,56 +62,124 @@ internal class TracerProviderConfigDslImplTest {
         dsl.export { error("behavior mapping does not run the export lambda") }
 
         assertEquals(
-            SpanProcessorBehavior(),
-            dsl.toBehavior().processor,
+            TracerProviderBehavior(
+                processor = SpanProcessorBehavior()
+            ),
+            dsl.toBehavior(),
         )
     }
 
     @Test
     fun processorCallSetsSimple() {
-        val dsl = TracerProviderConfigDslImpl()
-        dsl.processor { simple() }
-
+        val dsl = TracerProviderConfigDslImpl().apply {
+            processor {
+                simple {
+                    exporter {
+                        console()
+                    }
+                }
+            }
+        }
         assertEquals(
-            SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior()),
-            dsl.toBehavior().processor,
+            TracerProviderBehavior(
+                processor = SpanProcessorBehavior(
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(
+                            console = ConsoleExporterBehavior()
+                        )
+                    )
+                ),
+            ),
+            dsl.toBehavior()
         )
     }
 
     @Test
     fun processorCallSetsBatch() {
-        val dsl = TracerProviderConfigDslImpl()
-        dsl.processor { batch() }
+        val dsl = TracerProviderConfigDslImpl().apply {
+            processor {
+                batch {
+                    exporter {
+                        console()
+                    }
+                    scheduleDelay = 1
+                    exporterTimeout = 2
+                    maxQueueSize = 3
+                    maxExportBatchSize = 4
+                }
+            }
+        }
 
         assertEquals(
-            SpanProcessorBehavior(batch = BatchSpanProcessorBehavior()),
-            dsl.toBehavior().processor,
+            TracerProviderBehavior(
+                processor = SpanProcessorBehavior(
+                    batch = BatchSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(
+                            console = ConsoleExporterBehavior()
+                        ),
+                        scheduleDelay = 1,
+                        exportTimeout = 2,
+                        maxQueueSize = 3,
+                        maxExportBatchSize = 4
+                    )
+                ),
+            ),
+            dsl.toBehavior()
         )
     }
 
     @Test
     fun exportKeepsProcessorAlreadyChosen() {
-        val dsl = TracerProviderConfigDslImpl()
-        dsl.processor { simple() }
+        val dsl = TracerProviderConfigDslImpl().apply {
+            processor {
+                simple {
+                    exporter {
+                        console()
+                    }
+                }
+            }
+        }
         dsl.export { error("behavior mapping does not run the export lambda") }
 
         assertEquals(
-            SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior()),
-            dsl.toBehavior().processor,
+            TracerProviderBehavior(
+                processor = SpanProcessorBehavior(
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(
+                            console = ConsoleExporterBehavior()
+                        )
+                    )
+                ),
+            ),
+            dsl.toBehavior()
         )
     }
 
     @Test
     fun processorDoesNotDropSampler() {
-        val dsl = TracerProviderConfigDslImpl()
-        dsl.processor { simple() }
-        dsl.sampler { alwaysOff() }
+        val dsl = TracerProviderConfigDslImpl().apply {
+            sampler { alwaysOff() }
+            processor {
+                simple {
+                    exporter {
+                        console()
+                    }
+                }
+            }
+        }
 
-        val behavior = dsl.toBehavior()
         assertEquals(
-            SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior()),
-            behavior.processor,
+            TracerProviderBehavior(
+                processor = SpanProcessorBehavior(
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(
+                            console = ConsoleExporterBehavior()
+                        )
+                    )
+                ),
+                sampler = SamplerBehavior.AlwaysOff
+            ),
+            dsl.toBehavior()
         )
-        assertEquals(SamplerBehavior.AlwaysOff, behavior.sampler)
     }
 }

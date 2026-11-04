@@ -1,48 +1,99 @@
 package io.opentelemetry.kotlin.config.dsl
 
 import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.SimpleSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class SpanProcessorConfigDslImplTest {
 
     @Test
     fun startsUnset() {
-        assertNull(SpanProcessorConfigDslImpl().toBehavior())
+        assertEquals(SpanProcessorBehavior(), SpanProcessorConfigDslImpl().toBehavior())
     }
 
     @Test
     fun mapsSimple() {
-        val dsl = SpanProcessorConfigDslImpl()
-        dsl.simple()
+        val dsl = SpanProcessorConfigDslImpl().apply {
+            simple {
+                exporter {
+                    console()
+                }
+            }
+        }
         assertEquals(
-            SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior()),
+            SpanProcessorBehavior(
+                simple = SimpleSpanProcessorBehavior(
+                    exporter = SpanExporterBehavior(
+                        console = ConsoleExporterBehavior()
+                    )
+                )
+            ),
             dsl.toBehavior(),
         )
     }
 
     @Test
     fun mapsBatch() {
-        val dsl = SpanProcessorConfigDslImpl()
-        dsl.batch()
+        val dsl = SpanProcessorConfigDslImpl().apply {
+            batch {
+                exporter {
+                    console()
+                }
+                scheduleDelay = 1
+                exporterTimeout = 2
+                maxQueueSize = 3
+                maxExportBatchSize = 4
+            }
+        }
         assertEquals(
-            SpanProcessorBehavior(batch = BatchSpanProcessorBehavior()),
+            SpanProcessorBehavior(
+                batch = BatchSpanProcessorBehavior(
+                    exporter = SpanExporterBehavior(
+                        console = ConsoleExporterBehavior()
+                    ),
+                    scheduleDelay = 1,
+                    exportTimeout = 2,
+                    maxQueueSize = 3,
+                    maxExportBatchSize = 4
+                )
+            ),
             dsl.toBehavior(),
         )
     }
 
     @Test
-    fun mapsSimpleAndBatchTogether() {
-        val dsl = SpanProcessorConfigDslImpl()
-        dsl.simple()
-        dsl.batch()
+    fun doesNotMapSimpleAndBatchTogether() {
+        val dsl = SpanProcessorConfigDslImpl().apply {
+            simple {
+                exporter {
+                    console()
+                }
+            }
+            batch {
+                exporter {
+                    console()
+                }
+                scheduleDelay = 1
+                exporterTimeout = 2
+                maxQueueSize = 3
+                maxExportBatchSize = 4
+            }
+        }
         assertEquals(
             SpanProcessorBehavior(
-                simple = SimpleSpanProcessorBehavior(),
-                batch = BatchSpanProcessorBehavior(),
+                batch = BatchSpanProcessorBehavior(
+                    exporter = SpanExporterBehavior(
+                        console = ConsoleExporterBehavior()
+                    ),
+                    scheduleDelay = 1,
+                    exportTimeout = 2,
+                    maxQueueSize = 3,
+                    maxExportBatchSize = 4
+                ),
             ),
             dsl.toBehavior(),
         )
