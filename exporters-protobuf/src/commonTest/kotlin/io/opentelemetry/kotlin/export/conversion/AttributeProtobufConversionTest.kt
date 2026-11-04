@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.export.conversion
 
+import io.opentelemetry.kotlin.attributes.AttributeValue
 import io.opentelemetry.kotlin.attributes.AnyValue as KotlinAnyValue
 import io.opentelemetry.proto.common.v1.AnyValue
 import io.opentelemetry.proto.common.v1.ArrayValue
@@ -10,7 +11,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class AttributeProtobufConversionTest {
 
@@ -31,13 +31,20 @@ class AttributeProtobufConversionTest {
 
     @Test
     fun testListConversion() {
-        val createKeyValues = mapOf("key" to listOf("val", 32L)).createKeyValues()
+        val createKeyValues = mapOf("key" to listOf(1L, 32L)).createKeyValues()
         assertEquals(1, createKeyValues.size)
         assertEquals("key", createKeyValues[0].key)
         val array = createKeyValues.first().value_?.array_value?.values
         assertNotNull(array)
-        assertEquals(array[0].string_value, "val")
+        assertEquals(array[0].int_value, 1L)
         assertEquals(array[1].int_value, 32L)
+    }
+
+    @Test
+    fun testHeterogeneousListIsStringified() {
+        // matches setAttributes, which stores a heterogeneous list as a list of strings
+        val array = checkNotNull(createForValue(listOf("val", 32L)).value_?.array_value?.values)
+        assertEquals(listOf("val", "32"), array.map { it.string_value })
     }
 
     @Test
@@ -99,20 +106,75 @@ class AttributeProtobufConversionTest {
     @Test
     fun testListWithNullElementDoesNotThrow() {
         val array = checkNotNull(createForValue(listOf("a", null)).value_?.array_value?.values)
-        assertEquals(2, array.size)
-        assertEquals("a", array[0].string_value)
-        assertNull(array[1].string_value)
-        assertNull(array[1].int_value)
-        assertNull(array[1].double_value)
-        assertNull(array[1].bool_value)
+        assertEquals(listOf("a", "null"), array.map { it.string_value })
     }
 
     @Test
-    fun testRoundTripListWithNullElementDropsTheNull() {
+    fun testRoundTripListWithNullElementKeepsItsPosition() {
         val deserialized = mapOf<String, Any>("key" to listOf("a", null))
             .createKeyValues()
             .toAttributeMap()
-        assertEquals(listOf("a"), deserialized["key"])
+        assertEquals(listOf("a", "null"), deserialized["key"])
+    }
+
+    @Test
+    fun testAttributeMapDeserialization_arrayWithEmptyElement() {
+        val arrayValue = ArrayValue(
+            listOf(AnyValue(string_value = "a"), AnyValue(), AnyValue(string_value = "b"))
+        )
+        val map = listOf(KeyValue("key", AnyValue(array_value = arrayValue))).toAttributeMap()
+        assertEquals(
+            KotlinAnyValue.ListValue(
+                listOf(
+                    KotlinAnyValue.StringValue("a"),
+                    KotlinAnyValue.NullValue,
+                    KotlinAnyValue.StringValue("b"),
+                )
+            ),
+            map["key"]
+        )
+    }
+
+    @Test
+    fun testAttributeMapDeserialization_homogeneousArrays() {
+        fun array(vararg values: AnyValue) = AnyValue(array_value = ArrayValue(values.toList()))
+        val map = listOf(
+            KeyValue("str", array(AnyValue(string_value = "a"), AnyValue(string_value = "b"))),
+            KeyValue("bool", array(AnyValue(bool_value = true), AnyValue(bool_value = false))),
+            KeyValue("long", array(AnyValue(int_value = 1L), AnyValue(int_value = 2L))),
+            KeyValue("double", array(AnyValue(double_value = 1.0), AnyValue(double_value = 2.0))),
+            KeyValue("empty", array()),
+        ).toAttributeMap()
+        assertEquals(listOf("a", "b"), map["str"])
+        assertEquals(listOf(true, false), map["bool"])
+        assertEquals(listOf(1L, 2L), map["long"])
+        assertEquals(listOf(1.0, 2.0), map["double"])
+        assertEquals(emptyList<Any>(), map["empty"])
+    }
+
+    @Test
+    fun testRoundTripEveryAttributeValueCase() {
+        val values = listOf(
+            AttributeValue.Str("s"),
+            AttributeValue.Bool(true),
+            AttributeValue.Long(1L),
+            AttributeValue.Double(1.5),
+            AttributeValue.StrList(listOf("a", "b")),
+            AttributeValue.BoolList(listOf(true, false)),
+            AttributeValue.LongList(listOf(1L, 2L)),
+            AttributeValue.DoubleList(listOf(1.0, 2.5)),
+            AttributeValue.Value(KotlinAnyValue.BytesValue(byteArrayOf(0x01, 0x02))),
+            AttributeValue.Value(
+                KotlinAnyValue.ListValue(
+                    listOf(KotlinAnyValue.StringValue("a"), KotlinAnyValue.LongValue(1))
+                )
+            ),
+            AttributeValue.Value(
+                KotlinAnyValue.MapValue(mapOf("k" to KotlinAnyValue.StringValue("v")))
+            ),
+        )
+        val original = values.withIndex().associate { (index, value) -> "key$index" to value.toAny() }
+        assertEquals(original, original.createKeyValues().toAttributeMap())
     }
 
     @Test
@@ -152,10 +214,12 @@ class AttributeProtobufConversionTest {
         ))
         val keyValues = listOf(KeyValue("key", AnyValue(array_value = arrayValue)))
         val map = keyValues.toAttributeMap()
-        val list = map["key"] as List<*>
-        assertEquals(2, list.size)
-        assertEquals("a", list[0])
-        assertEquals(1L, list[1])
+        assertEquals(
+            KotlinAnyValue.ListValue(
+                listOf(KotlinAnyValue.StringValue("a"), KotlinAnyValue.LongValue(1))
+            ),
+            map["key"]
+        )
     }
 
     @Test
@@ -163,7 +227,7 @@ class AttributeProtobufConversionTest {
         val bytes = byteArrayOf(0xDE.toByte(), 0xAD.toByte(), 0xBE.toByte(), 0xEF.toByte())
         val keyValues = listOf(KeyValue("key", AnyValue(bytes_value = ByteString.of(*bytes))))
         val map = keyValues.toAttributeMap()
-        assertTrue((map["key"] as ByteArray).contentEquals(bytes))
+        assertEquals(KotlinAnyValue.BytesValue(bytes), map["key"])
     }
 
     @Test
@@ -172,7 +236,7 @@ class AttributeProtobufConversionTest {
         val original = mapOf("bytes" to value)
         val keyValues = original.createKeyValues()
         val deserialized = keyValues.toAttributeMap()
-        assertTrue((deserialized["bytes"] as ByteArray).contentEquals(value))
+        assertEquals(KotlinAnyValue.BytesValue(value), deserialized["bytes"])
     }
 
     @Test
@@ -210,7 +274,7 @@ class AttributeProtobufConversionTest {
             "long" to 123L,
             "double" to 4.56,
             "bool" to true,
-            "list" to listOf("a", 1L, 2.0, false)
+            "list" to listOf(1L, 2L, 3L)
         )
 
         val keyValues = original.createKeyValues()
