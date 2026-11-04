@@ -16,9 +16,9 @@ fun BatchSpanProcessor.toBehavior(): BatchSpanProcessorBehavior {
 
     val maxExportBatchSize = let {
         if (maxQueueSize != null && requestedBatchSize != null) {
-            minOf(requestedBatchSize, maxQueueSize)
+            return@let minOf(requestedBatchSize, maxQueueSize)
         }
-        maxQueueSize ?: requestedBatchSize
+        requestedBatchSize ?: maxQueueSize
     }
     return BatchSpanProcessorBehavior(
         scheduleDelay = scheduleDelay,
