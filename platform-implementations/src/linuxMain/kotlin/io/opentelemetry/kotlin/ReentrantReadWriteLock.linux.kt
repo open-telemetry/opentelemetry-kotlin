@@ -24,55 +24,60 @@ import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.ref.createCleaner
 
 public actual class ReentrantReadWriteLock {
+    // null if the mutex could not be created, in which case actions run without locking
     @PublishedApi
-    internal val mutex: CPointer<pthread_mutex_t> = createRecursiveMutex()
+    internal val mutex: CPointer<pthread_mutex_t>? = createRecursiveMutex()
 
     @Suppress("unused")
-    private val cleaner = createCleaner(mutex) {
-        val result = pthread_mutex_destroy(it)
-        if (result == 0) {
-            nativeHeap.free(it)
-        } else {
+    private val cleaner = mutex?.let {
+        createCleaner(it) { pointer ->
             // leak rather than free a mutex in an unknown state
-            platformLog("pthread_mutex_destroy failed with code $result", SdkErrorSeverity.WARNING, null)
+            if (pthreadSucceeded(pthread_mutex_destroy(pointer), "pthread_mutex_destroy")) {
+                nativeHeap.free(pointer)
+            }
         }
     }
 
     public actual inline fun <T> write(action: () -> T): T {
-        pthread_mutex_lock(mutex)
+        val pointer = mutex ?: return action()
+        pthread_mutex_lock(pointer)
         try {
             return action()
         } finally {
-            pthread_mutex_unlock(mutex)
+            pthread_mutex_unlock(pointer)
         }
     }
 
     public actual inline fun <T> read(action: () -> T): T = write(action)
 }
 
-private fun createRecursiveMutex(): CPointer<pthread_mutex_t> = memScoped {
+private fun createRecursiveMutex(): CPointer<pthread_mutex_t>? = memScoped {
     val attributes = alloc<pthread_mutexattr_t>()
-    checkPthreadResult(pthread_mutexattr_init(attributes.ptr), "pthread_mutexattr_init")
+    if (!pthreadSucceeded(pthread_mutexattr_init(attributes.ptr), "pthread_mutexattr_init")) {
+        return@memScoped null
+    }
     try {
-        checkPthreadResult(pthread_mutexattr_settype(attributes.ptr, PTHREAD_MUTEX_RECURSIVE.toInt()), "pthread_mutexattr_settype")
+        val typeResult = pthread_mutexattr_settype(attributes.ptr, PTHREAD_MUTEX_RECURSIVE.toInt())
+        if (!pthreadSucceeded(typeResult, "pthread_mutexattr_settype")) {
+            return@memScoped null
+        }
         val mutex = nativeHeap.alloc<pthread_mutex_t>().ptr
-        val result = pthread_mutex_init(mutex, attributes.ptr)
-        if (result != 0) {
+        if (!pthreadSucceeded(pthread_mutex_init(mutex, attributes.ptr), "pthread_mutex_init")) {
             nativeHeap.free(mutex)
-            error("pthread_mutex_init failed with code $result")
+            return@memScoped null
         }
         mutex
     } finally {
-        val result = pthread_mutexattr_destroy(attributes.ptr)
-        if (result != 0) {
-            platformLog("pthread_mutexattr_destroy failed with code $result", SdkErrorSeverity.WARNING, null)
-        }
+        pthreadSucceeded(pthread_mutexattr_destroy(attributes.ptr), "pthread_mutexattr_destroy")
     }
 }
 
 /**
- * Throws if a pthread call failed. Callers of the lock must not run without mutual exclusion.
+ * Logs a warning if a pthread call failed. Returns true if it succeeded.
  */
-private fun checkPthreadResult(result: Int, operation: String) {
-    check(result == 0) { "$operation failed with code $result" }
+private fun pthreadSucceeded(result: Int, operation: String): Boolean {
+    if (result != 0) {
+        platformLog("$operation failed with code $result", SdkErrorSeverity.WARNING, null)
+    }
+    return result == 0
 }
