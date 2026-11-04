@@ -10,10 +10,12 @@ import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.reportError
+import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.LoggerConfigImpl
 import io.opentelemetry.kotlin.logging.LoggerConfigurator
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
+import io.opentelemetry.kotlin.logging.export.batchLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.stdoutLogRecordExporter
 import io.opentelemetry.kotlin.resource.Resource
@@ -75,7 +77,17 @@ internal class LoggerProviderConfigImpl(
             return null
         }
         return LogExportConfigDslImpl(clock, sdkErrorHandler).run {
-            simpleLogRecordProcessor(stdoutLogRecordExporter())
+            when {
+                batch != null -> batchLogRecordProcessor(
+                    exporter = stdoutLogRecordExporter(),
+                    scheduleDelayMs = batch.scheduleDelay ?: BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS,
+                    exportTimeoutMs = batch.exportTimeout ?: BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
+                    maxQueueSize = batch.maxQueueSize ?: BatchTelemetryDefaults.MAX_QUEUE_SIZE,
+                    maxExportBatchSize = batch.maxExportBatchSize ?: BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE
+                )
+                simple != null -> simpleLogRecordProcessor(stdoutLogRecordExporter())
+                else -> null
+            }
         }
     }
 }
