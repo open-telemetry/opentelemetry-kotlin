@@ -31,6 +31,10 @@ public abstract interface class io/opentelemetry/kotlin/error/SdkErrorHandler {
 	public abstract fun onError (Lio/opentelemetry/kotlin/error/SdkError;)V
 }
 
+public final class io/opentelemetry/kotlin/error/SdkErrorHandlerEntrypointKt {
+	public static final fun setProcessSdkErrorHandler (Lio/opentelemetry/kotlin/error/SdkErrorHandler;)Z
+}
+
 public final class io/opentelemetry/kotlin/error/SdkErrorSeverity : java/lang/Enum {
 	public static final field ERROR Lio/opentelemetry/kotlin/error/SdkErrorSeverity;
 	public static final field INFO Lio/opentelemetry/kotlin/error/SdkErrorSeverity;
