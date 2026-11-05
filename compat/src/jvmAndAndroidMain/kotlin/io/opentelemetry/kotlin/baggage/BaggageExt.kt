@@ -4,7 +4,11 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaBaggage
 import io.opentelemetry.kotlin.aliases.OtelJavaBaggageEntryMetadata
 
-@OptIn(ExperimentalApi::class)
+/**
+ * Copies opentelemetry-kotlin [Baggage] into opentelemetry-java baggage, keeping each entry's
+ * value and metadata.
+ */
+@ExperimentalApi
 public fun Baggage.toOtelJavaBaggage(): OtelJavaBaggage {
     val builder = OtelJavaBaggage.builder()
     asMap().forEach { (name, entry) ->
