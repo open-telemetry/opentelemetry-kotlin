@@ -16,5 +16,5 @@ public interface DoubleGauge : SynchronousInstrument {
      * Records the current [value], optionally associating attributes with the measurement.
      */
     @ThreadSafe
-    public fun record(value: Double, attributes: AttributesMutator.() -> Unit = {})
+    public fun record(value: Double, attributes: (AttributesMutator.() -> Unit)? = null)
 }

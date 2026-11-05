@@ -84,8 +84,8 @@ internal class LongGaugeAdapterTest {
 
         override fun enabled(): Boolean = true
 
-        override fun record(value: Long, attributes: AttributesMutator.() -> Unit) {
-            val container = CompatAttributesModel().apply(attributes)
+        override fun record(value: Long, attributes: (AttributesMutator.() -> Unit)?) {
+            val container = CompatAttributesModel().apply { attributes?.invoke(this) }
             records += value to container.attributes
         }
     }
