@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.behavior.SamplerBehavior
 fun <T> SamplerBehavior.mapToSampler(
     alwaysOn: () -> T,
     alwaysOff: () -> T,
+    probability: (ratio: Double) -> T,
     parentBased: (
         root: T,
         remoteParentSampled: T,
@@ -17,21 +18,20 @@ fun <T> SamplerBehavior.mapToSampler(
         localParentSampled: T,
         localParentNotSampled: T,
     ) -> T,
-): T = when (this) {
-    SamplerBehavior.AlwaysOn -> alwaysOn()
-    SamplerBehavior.AlwaysOff -> alwaysOff()
-    is SamplerBehavior.ParentBased -> parentBased(
-        root?.mapToSampler(alwaysOn, alwaysOff, parentBased) ?: alwaysOn(),
-        remoteParentSampled?.mapToSampler(alwaysOn, alwaysOff, parentBased)
-            ?: alwaysOn(),
-        remoteParentNotSampled?.mapToSampler(
-            alwaysOn,
-            alwaysOff,
-            parentBased,
-        ) ?: alwaysOff(),
-        localParentSampled?.mapToSampler(alwaysOn, alwaysOff, parentBased)
-            ?: alwaysOn(),
-        localParentNotSampled?.mapToSampler(alwaysOn, alwaysOff, parentBased)
-            ?: alwaysOff(),
-    )
+): T {
+    fun SamplerBehavior?.mapOr(default: () -> T): T =
+        this?.mapToSampler(alwaysOn, alwaysOff, probability, parentBased) ?: default()
+
+    return when (this) {
+        SamplerBehavior.AlwaysOn -> alwaysOn()
+        SamplerBehavior.AlwaysOff -> alwaysOff()
+        is SamplerBehavior.Probability -> probability(ratio)
+        is SamplerBehavior.ParentBased -> parentBased(
+            root.mapOr(alwaysOn),
+            remoteParentSampled.mapOr(alwaysOn),
+            remoteParentNotSampled.mapOr(alwaysOff),
+            localParentSampled.mapOr(alwaysOn),
+            localParentNotSampled.mapOr(alwaysOff),
+        )
+    }
 }

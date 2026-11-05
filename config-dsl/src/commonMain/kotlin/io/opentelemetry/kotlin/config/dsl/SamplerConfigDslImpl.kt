@@ -17,6 +17,8 @@ class SamplerConfigDslImpl {
 
     fun alwaysOff(): SamplerBehavior = SamplerBehavior.AlwaysOff.also { sampler = it }
 
+    fun probability(ratio: Double): SamplerBehavior = SamplerBehavior.Probability(ratio).also { sampler = it }
+
     fun parentBased(
         root: SamplerBehavior? = null,
         remoteParentSampled: SamplerBehavior? = null,

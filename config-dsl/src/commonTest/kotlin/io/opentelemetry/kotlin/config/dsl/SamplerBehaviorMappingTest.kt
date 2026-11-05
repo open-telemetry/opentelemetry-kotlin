@@ -9,6 +9,7 @@ internal class SamplerBehaviorMappingTest {
     private fun SamplerBehavior.map(): String = mapToSampler(
         alwaysOn = { "AlwaysOn" },
         alwaysOff = { "AlwaysOff" },
+        probability = { ratio -> "Probability{$ratio}" },
         parentBased = { root, remoteParentSampled, remoteParentNotSampled, localParentSampled, localParentNotSampled ->
             "ParentBased{" +
                 "root:$root," +
@@ -28,6 +29,19 @@ internal class SamplerBehaviorMappingTest {
     @Test
     fun mapsAlwaysOff() {
         assertEquals("AlwaysOff", SamplerBehavior.AlwaysOff.map())
+    }
+
+    @Test
+    fun mapsProbability() {
+        assertEquals("Probability{0.25}", SamplerBehavior.Probability(0.25).map())
+    }
+
+    @Test
+    fun mapsParentBasedProbabilityRoot() {
+        assertEquals(
+            parentBased(root = "Probability{0.25}"),
+            SamplerBehavior.ParentBased(root = SamplerBehavior.Probability(0.25)).map(),
+        )
     }
 
     @Test

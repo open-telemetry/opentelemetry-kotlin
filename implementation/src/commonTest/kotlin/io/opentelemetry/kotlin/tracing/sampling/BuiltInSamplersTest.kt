@@ -71,6 +71,20 @@ internal class BuiltInSamplersTest {
     }
 
     @Test
+    fun testProbabilityOneSamplesSpan() {
+        val span = buildTracer(samplerDsl.probability(1.0)).startSpan("span")
+        assertTrue(span.isRecording())
+        assertTrue(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
+    fun testProbabilityZeroDropsSpan() {
+        val span = buildTracer(samplerDsl.probability(0.0)).startSpan("span")
+        assertFalse(span.isRecording())
+        assertFalse(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
     fun testParentBasedDescription() {
         val sampler = samplerDsl.parentBased(root = samplerDsl.alwaysOn())
         assertEquals(

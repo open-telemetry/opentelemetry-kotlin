@@ -13,6 +13,7 @@ internal fun SamplerConfigDsl.toSampler(behavior: SamplerBehavior): Sampler =
     behavior.mapToSampler(
         alwaysOn = { alwaysOn() },
         alwaysOff = { alwaysOff() },
+        probability = { ratio -> probability(ratio) },
         parentBased = { root, remoteParentSampled, remoteParentNotSampled, localParentSampled, localParentNotSampled ->
             parentBased(
                 root = root,
