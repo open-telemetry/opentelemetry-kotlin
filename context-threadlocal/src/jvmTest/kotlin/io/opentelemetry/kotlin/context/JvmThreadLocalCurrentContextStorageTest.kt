@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.context
 
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.Test
 import kotlin.test.assertNotSame
@@ -10,8 +9,8 @@ internal class JvmThreadLocalCurrentContextStorageTest {
 
     @Test
     fun testContextIsIsolatedPerThread() {
-        val factory = ContextFactoryImpl()
-        val storage = ThreadLocalCurrentContextStorage(factory::root)
+        val root = FakeContext()
+        val storage = ThreadLocalCurrentContextStorage { root }
 
         val mainContext = FakeContext()
         storage.attach(mainContext)
@@ -26,7 +25,7 @@ internal class JvmThreadLocalCurrentContextStorageTest {
         thread.start()
         thread.join()
 
-        assertSame(factory.root(), observedFromOtherThread.get())
+        assertSame(root, observedFromOtherThread.get())
         assertNotSame(mainContext, observedFromOtherThread.get())
         assertSame(mainContext, storage.current())
     }

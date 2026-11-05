@@ -17,7 +17,12 @@ public class ThreadLocalCurrentContextStorage(
     override fun attach(context: Context): Scope {
         val previous = current.get()
         current.set(context)
-        return RestoringScope { current.set(previous) }
+        return object : Scope {
+            override fun detach(): Boolean {
+                current.set(previous)
+                return true
+            }
+        }
     }
 
     override fun current(): Context = current.get() ?: root
