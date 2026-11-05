@@ -284,6 +284,7 @@ public final class io/opentelemetry/kotlin/metrics/LongUpDownCounter$DefaultImpl
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/Meter {
+	public abstract fun batchCallback (Lio/opentelemetry/kotlin/metrics/ObservableMeasurement;[Lio/opentelemetry/kotlin/metrics/ObservableMeasurement;Lkotlin/jvm/functions/Function0;)Ljava/lang/AutoCloseable;
 	public abstract fun createDoubleGauge (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/DoubleGauge;
 	public abstract fun createDoubleUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/DoubleUpDownCounter;
 	public abstract fun createLongGauge (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/LongGauge;

@@ -115,6 +115,16 @@ internal class MeterImpl(
         return noopMeter.createObservableLongGauge(name, unit, description, *callbacks)
     }
 
+    override fun batchCallback(
+        measurement: ObservableMeasurement,
+        vararg additionalMeasurements: ObservableMeasurement,
+        callback: () -> Unit,
+    ): AutoCloseable = NoopOpenTelemetry.meterProvider.getMeter("").batchCallback(
+        measurement,
+        *additionalMeasurements,
+        callback = callback,
+    )
+
     /**
      * Returns a noop meter if [name] is not a valid
      * [instrument name](https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-name-syntax),
