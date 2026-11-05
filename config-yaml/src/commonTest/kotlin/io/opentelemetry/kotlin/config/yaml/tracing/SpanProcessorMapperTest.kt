@@ -68,10 +68,6 @@ internal class SpanProcessorMapperTest {
         assertEquals(
             SpanProcessorBehavior(
                 batch = BatchSpanProcessorBehavior(
-                    scheduleDelay = BatchSpanProcessorBehavior.DEFAULT_SCHEDULE_DELAY,
-                    exportTimeout = BatchSpanProcessorBehavior.DEFAULT_EXPORT_TIMEOUT,
-                    maxQueueSize = BatchSpanProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE,
-                    maxExportBatchSize = BatchSpanProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE,
                     exporter = SpanExporterBehavior(console = ConsoleExporterBehavior()),
                 ),
             ),
@@ -85,10 +81,6 @@ internal class SpanProcessorMapperTest {
         assertEquals(
             SpanProcessorBehavior(
                 batch = BatchSpanProcessorBehavior(
-                    scheduleDelay = BatchSpanProcessorBehavior.DEFAULT_SCHEDULE_DELAY,
-                    exportTimeout = BatchSpanProcessorBehavior.DEFAULT_EXPORT_TIMEOUT,
-                    maxQueueSize = BatchSpanProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE,
-                    maxExportBatchSize = BatchSpanProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE,
                     exporter = SpanExporterBehavior(
                         http = OtlpHttpSpanExporterBehavior(
                             endpoint = "http://localhost:4317",
