@@ -19,10 +19,14 @@ internal class LongGaugeAdapter(
     override fun enabled(): Boolean =
         sdkErrorHandler.sdkGuardOrDefault(false, "LongGauge.enabled failed") { impl.isEnabled() }
 
-    override fun record(value: Long, attributes: AttributesMutator.() -> Unit) {
+    override fun record(value: Long, attributes: (AttributesMutator.() -> Unit)?) {
         sdkErrorHandler.sdkGuard("LongGauge.record failed") {
-            val container = compatAttributes(attributes)
-            impl.set(value, container.otelJavaAttributes())
+            if (attributes == null) {
+                impl.set(value)
+            } else {
+                val container = compatAttributes(attributes)
+                impl.set(value, container.otelJavaAttributes())
+            }
         }
     }
 }

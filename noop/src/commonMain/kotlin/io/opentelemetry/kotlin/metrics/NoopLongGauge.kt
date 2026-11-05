@@ -10,5 +10,5 @@ internal class NoopLongGauge(
     override val description: String?,
 ) : LongGauge {
     override fun enabled(): Boolean = false
-    override fun record(value: Long, attributes: AttributesMutator.() -> Unit) = Unit
+    override fun record(value: Long, attributes: (AttributesMutator.() -> Unit)?) = Unit
 }

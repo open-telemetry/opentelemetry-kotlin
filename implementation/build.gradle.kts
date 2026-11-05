@@ -16,6 +16,8 @@ kotlin {
                 implementation(project(":sdk-api"))
                 implementation(project(":config"))
                 implementation(project(":context-impl"))
+                implementation(project(":context-single-slot"))
+                implementation(project(":context-threadlocal"))
                 implementation(project(":propagation-utils"))
                 implementation(project(":config-dsl"))
                 implementation(project(":model"))

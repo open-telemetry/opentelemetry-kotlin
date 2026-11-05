@@ -12,7 +12,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanProcessor
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.framework.SdkTracker
-import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.toOtelKotlinApi
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -30,7 +29,6 @@ internal class TracerAdapterTimestampTest {
             .setClock(sdkClock)
             .addSpanProcessor(CapturingProcessor(ended))
             .build(),
-        CompatSpanLimitsConfig(),
         CompatContextFactory(),
         NoopSdkErrorHandler,
     ).getTracer("test")
