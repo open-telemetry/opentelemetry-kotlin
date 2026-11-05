@@ -23,7 +23,7 @@ internal object W3CBaggagePropagator : TextMapPropagator {
     private const val SPACE = ' '
     private const val HTAB = '\t'
     private const val MAX_HEADER_BYTES = 8192
-    private const val MAX_ENTRY_BYTES = 4096
+    private const val MAX_MEMBERS = 64
 
     private val FIELDS = listOf(FIELD)
 
@@ -49,26 +49,29 @@ internal object W3CBaggagePropagator : TextMapPropagator {
 
     private fun encode(entries: Map<String, BaggageEntry>): String? {
         val builder = StringBuilder()
+        var memberCount = 0
         for ((name, entry) in entries) {
-            val piece = encodeIfFits(name, entry, builder.length) ?: continue
+            if (memberCount >= MAX_MEMBERS) {
+                break
+            }
+            val piece = encodeIfFits(name, entry, builder.byteLength()) ?: continue
             if (builder.isNotEmpty()) {
                 builder.append(ENTRY_DELIMITER)
             }
             builder.append(piece)
+            memberCount++
         }
         return builder.takeIf(StringBuilder::isNotEmpty)?.toString()
     }
 
-    private fun encodeIfFits(name: String, entry: BaggageEntry, currentLength: Int): String? {
+    private fun encodeIfFits(name: String, entry: BaggageEntry, currentByteLength: Int): String? {
         val piece = encodeEntry(name, entry.value, entry.metadata.value)
-        if (piece.length > MAX_ENTRY_BYTES) {
-            return null
-        }
-        val separator = when (currentLength) {
+        val pieceByteLength = piece.utf8ByteLength()
+        val separator = when (currentByteLength) {
             0 -> 0
             else -> 1
         }
-        if (currentLength + separator + piece.length > MAX_HEADER_BYTES) {
+        if (currentByteLength + separator + pieceByteLength > MAX_HEADER_BYTES) {
             return null
         }
         return piece
@@ -85,33 +88,38 @@ internal object W3CBaggagePropagator : TextMapPropagator {
 
     private fun decode(header: String): Baggage? {
         val budget = HeaderBudget(MAX_HEADER_BYTES)
+        var memberCount = 0
         val baggage = createBaggage {
             for (rawElement in header.split(ENTRY_DELIMITER)) {
+                if (memberCount >= MAX_MEMBERS) {
+                    break
+                }
                 val parsed = parseElementIfFits(rawElement, budget) ?: continue
                 put(parsed.key, parsed.value, parsed.metadata)
+                memberCount++
             }
         }
         return baggage.takeIf { it.asMap().isNotEmpty() }
     }
 
     /**
-     * Trims and decodes [rawElement], honoring the per-entry size limit and [budget] for the
-     * whole header. Returns `null` for elements that are empty, malformed, or too large.
-     * Malformed entries do not consume any of the header's budget, but an oversized element
-     * permanently exhausts [budget] so later, smaller elements are skipped too -- matching how a
-     * real client would stop appending once the header is full.
+     * Trims and decodes [rawElement], honoring the [budget] for the whole header.
+     * Returns `null` for elements that are empty or malformed.
+     * An oversized element permanently exhausts [budget] so later, smaller elements are skipped too
+     * -- matching how a real client would stop appending once the header is full.
      */
     private fun parseElementIfFits(rawElement: String, budget: HeaderBudget): ParsedEntry? {
         val element = rawElement.trim(SPACE, HTAB)
-        if (element.isEmpty() || element.length > MAX_ENTRY_BYTES) {
+        if (element.isEmpty()) {
             return null
         }
-        if (!budget.hasRoomFor(element.length)) {
+        val elementByteLength = element.utf8ByteLength()
+        if (!budget.hasRoomFor(elementByteLength)) {
             budget.exhaust()
             return null
         }
         val parsed = decodeEntry(element) ?: return null
-        budget.reserve(element.length)
+        budget.reserve(elementByteLength)
         return parsed
     }
 
@@ -162,4 +170,10 @@ internal object W3CBaggagePropagator : TextMapPropagator {
     }
 
     private class ParsedEntry(val key: String, val value: String, val metadata: String)
+
+    /** Returns the UTF-8 byte length of this string. */
+    private fun String.utf8ByteLength(): Int = encodeToByteArray().size
+
+    /** Returns the UTF-8 byte length of this StringBuilder's current content. */
+    private fun StringBuilder.byteLength(): Int = toString().utf8ByteLength()
 }

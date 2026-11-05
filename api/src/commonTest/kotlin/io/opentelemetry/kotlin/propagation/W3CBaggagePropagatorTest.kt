@@ -86,11 +86,14 @@ internal class W3CBaggagePropagatorTest {
     }
 
     @Test
-    fun `inject skips entry whose serialized form exceeds per-entry limit`() {
-        val oversize = "x".repeat(5000)
-        val baggage = createBaggage().set("ok", "v").set("big", oversize)
+    fun `inject includes entry larger than 4096 bytes when total fits within 8192 bytes`() {
+        val largeValue = "x".repeat(5000)
+        val baggage = createBaggage().set("big", largeValue)
         val carrier = injectInto(baggage)
-        assertEquals("ok=v", carrier["baggage"])
+        val header = carrier["baggage"]
+        assertNotNull(header)
+        assertTrue(header!!.length > 4096)
+        assertEquals(largeValue, baggage.getValue("big"))
     }
 
     @Test
@@ -101,7 +104,7 @@ internal class W3CBaggagePropagatorTest {
         val carrier = injectInto(builder)
         val header = carrier["baggage"]
         assertTrue(header != null)
-        assertTrue(header.length <= 8192)
+        assertTrue(header!!.utf8ByteLength() <= 8192)
         assertTrue(header.startsWith("k0=vv"))
     }
 
@@ -113,13 +116,12 @@ internal class W3CBaggagePropagatorTest {
     }
 
     @Test
-    fun `extract skips entry whose serialized form exceeds per-entry limit`() {
-        val header = "ok=v,big=" + "x".repeat(5000) + ",keep=g"
+    fun `extract includes entry larger than 4096 bytes when total fits within 8192 bytes`() {
+        val largeValue = "x".repeat(5000)
+        val header = "big=$largeValue"
         val baggage = extract(header)
-        assertEquals("v", baggage.getValue("ok"))
-        assertEquals("g", baggage.getValue("keep"))
-        assertNull(baggage.getValue("big"))
-        assertEquals(2, baggage.asMap().size)
+        assertEquals(largeValue, baggage.getValue("big"))
+        assertEquals(1, baggage.asMap().size)
     }
 
     @Test
@@ -127,7 +129,7 @@ internal class W3CBaggagePropagatorTest {
         val header = (0 until 20).joinToString(",") { idx ->
             "k$idx=" + "v".repeat(500)
         }
-        assertTrue(header.length > 8192)
+        assertTrue(header.utf8ByteLength() > 8192)
         val baggage = extract(header)
         assertNotNull(baggage.getValue("k0"))
         assertNull(baggage.getValue("k19"))
@@ -140,7 +142,7 @@ internal class W3CBaggagePropagatorTest {
         val first = "a=" + "x".repeat(4094)
         val second = "b=" + "y".repeat(4093)
         val header = "$first,$second"
-        assertEquals(8192, header.length)
+        assertEquals(8192, header.utf8ByteLength())
         val baggage = extract(header)
         assertEquals("x".repeat(4094), baggage.getValue("a"))
         assertEquals("y".repeat(4093), baggage.getValue("b"))
@@ -148,14 +150,109 @@ internal class W3CBaggagePropagatorTest {
     }
 
     @Test
-    fun `inject caps at 180 entries even when bytes remain`() {
-        val baggage = (0 until 181).fold(createBaggage()) { acc, idx ->
+    fun `inject caps at 64 entries per W3C spec`() {
+        val baggage = (0 until 65).fold(createBaggage()) { acc, idx ->
             acc.set("k$idx", "v")
         }
         val carrier = injectInto(baggage)
         val header = carrier["baggage"]
         assertNotNull(header)
-        assertEquals(180, header.split(",").size)
+        assertEquals(64, header.split(",").size)
+    }
+
+    @Test
+    fun `inject accepts exactly 64 members`() {
+        val baggage = (0 until 64).fold(createBaggage()) { acc, idx ->
+            acc.set("k$idx", "v")
+        }
+        val carrier = injectInto(baggage)
+        val header = carrier["baggage"]
+        assertNotNull(header)
+        assertEquals(64, header.split(",").size)
+    }
+
+    @Test
+    fun `extract caps at 64 members per W3C spec`() {
+        val header = (0 until 65).joinToString(",") { idx -> "k$idx=v" }
+        val baggage = extract(header)
+        assertEquals(64, baggage.asMap().size)
+        assertNotNull(baggage.getValue("k0"))
+        assertNull(baggage.getValue("k64"))
+    }
+
+    @Test
+    fun `extract accepts exactly 64 members`() {
+        val header = (0 until 64).joinToString(",") { idx -> "k$idx=v" }
+        val baggage = extract(header)
+        assertEquals(64, baggage.asMap().size)
+        assertNotNull(baggage.getValue("k63"))
+    }
+
+    @Test
+    fun `inject measures header size in bytes not characters`() {
+        // Multi-byte UTF-8 character: é is 2 bytes in UTF-8 but 1 character in Kotlin
+        val multiByteValue = "é".repeat(4000) // ~8000 bytes in UTF-8
+        val baggage = createBaggage().set("key", multiByteValue)
+        val carrier = injectInto(baggage)
+        val header = carrier["baggage"]
+        assertNotNull(header)
+        // Should be truncated due to byte limit, not character limit
+        assertTrue(header!!.utf8ByteLength() <= 8192)
+    }
+
+    @Test
+    fun `extract measures header size in bytes not characters`() {
+        // Multi-byte UTF-8 character: é is 2 bytes in UTF-8
+        val multiByteValue = "é".repeat(4000) // ~8000 bytes in UTF-8
+        val header = "key=$multiByteValue"
+        val baggage = extract(header)
+        // Should accept since it's within byte limit
+        assertNotNull(baggage.getValue("key"))
+    }
+
+    @Test
+    fun `inject and extract round-trip with multi-byte UTF-8 characters`() {
+        val baggage = createBaggage().set("café", "café").set("", "")
+        val carrier = injectInto(baggage)
+        val ctx = root()
+        val extracted = propagator.extract(ctx, carrier, MapTextMapGetter).extractBaggage()
+        assertEquals("café", extracted.getValue("café"))
+        assertEquals("", extracted.getValue(""))
+    }
+
+    @Test
+    fun `inject enforces 8192 byte total limit`() {
+        val baggage = (0 until 20).fold(createBaggage()) { acc, idx ->
+            acc.set("k$idx", "v".repeat(500))
+        }
+        val carrier = injectInto(baggage)
+        val header = carrier["baggage"]
+        assertNotNull(header)
+        assertTrue(header!!.utf8ByteLength() <= 8192)
+    }
+
+    @Test
+    fun `extract enforces 8192 byte total limit`() {
+        val header = (0 until 20).joinToString(",") { idx ->
+            "k$idx=" + "v".repeat(500)
+        }
+        assertTrue(header.utf8ByteLength() > 8192)
+        val baggage = extract(header)
+        assertNotNull(baggage.getValue("k0"))
+        assertTrue(baggage.asMap().size < 20)
+        assertTrue(extractedHeaderSize(baggage) <= 8192)
+    }
+
+    @Test
+    fun `inject accepts header at exactly 8192 bytes`() {
+        val first = "a=" + "x".repeat(4094)
+        val second = "b=" + "y".repeat(4093)
+        val baggage = createBaggage().set("a", "x".repeat(4094)).set("b", "y".repeat(4093))
+        val carrier = injectInto(baggage)
+        val header = carrier["baggage"]
+        assertNotNull(header)
+        assertEquals("x".repeat(4094), baggage.getValue("a"))
+        assertEquals("y".repeat(4093), baggage.getValue("b"))
     }
 
     @Test
@@ -339,7 +436,9 @@ internal class W3CBaggagePropagatorTest {
     private fun root(): Context = FakeBaggageContext()
 
     private fun extractedHeaderSize(baggage: Baggage): Int =
-        injectInto(baggage)["baggage"]?.length ?: 0
+        injectInto(baggage)["baggage"]?.utf8ByteLength() ?: 0
+
+    private fun String.utf8ByteLength(): Int = encodeToByteArray().size
 
     private object MultiValueMapTextMapGetter : TextMapGetter<Map<String, List<String>>> {
         override fun keys(carrier: Map<String, List<String>>): Collection<String> = carrier.keys
