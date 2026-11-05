@@ -80,27 +80,20 @@ internal class BaggageEntrypointTest {
     }
 
     @Test
-    fun `put with invalid key drops entry`() {
+    fun `put accepts any string for key and value`() {
         val baggage = createBaggage {
             put("ok", "v")
-            put("bad key", "v")
+            put("bad key", "line1\nline2")
             put("", "v")
-        }
-        assertEquals(1, baggage.asMap().size)
-        assertEquals("v", baggage.getValue("ok"))
-        assertNull(baggage.getValue("bad key"))
-    }
-
-    @Test
-    fun `put with invalid value drops entry`() {
-        val baggage = createBaggage {
-            put("ok", "v")
             put("crlf", "bad\rvalue")
             put("nul", "bad\u0000value")
         }
-        assertEquals(1, baggage.asMap().size)
-        assertNull(baggage.getValue("crlf"))
-        assertNull(baggage.getValue("nul"))
+        assertEquals(5, baggage.asMap().size)
+        assertEquals("v", baggage.getValue("ok"))
+        assertEquals("line1\nline2", baggage.getValue("bad key"))
+        assertEquals("v", baggage.getValue(""))
+        assertEquals("bad\rvalue", baggage.getValue("crlf"))
+        assertEquals("bad\u0000value", baggage.getValue("nul"))
     }
 
     @Test

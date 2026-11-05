@@ -9,17 +9,24 @@ import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
  * Captures the span processor configured programmatically, and maps it onto a behavior.
  */
 @ExperimentalApi
-class SpanProcessorConfigDslImpl {
+class SpanProcessorConfigDslImpl : BehaviorSupplier<SpanProcessorBehavior> {
 
     private var simple: SimpleSpanProcessorBehavior? = null
     private var batch: BatchSpanProcessorBehavior? = null
 
-    fun toBehavior(): SpanProcessorBehavior? = when {
-        simple == null && batch == null -> null
-        else -> SpanProcessorBehavior(simple = simple, batch = batch)
+    override fun toBehavior(): SpanProcessorBehavior = SpanProcessorBehavior(simple = simple, batch = batch)
+
+    fun simple(action: SimpleSpanProcessorConfigDslImpl.() -> Unit) {
+        val impl = SimpleSpanProcessorConfigDslImpl()
+        impl.action()
+        simple = impl.toBehavior()
+        batch = null
     }
 
-    fun simple(): SimpleSpanProcessorBehavior = SimpleSpanProcessorBehavior().also { simple = it }
-
-    fun batch(): BatchSpanProcessorBehavior = BatchSpanProcessorBehavior().also { batch = it }
+    fun batch(action: BatchSpanProcessorConfigDslImpl.() -> Unit) {
+        val impl = BatchSpanProcessorConfigDslImpl()
+        impl.action()
+        batch = impl.toBehavior()
+        simple = null
+    }
 }

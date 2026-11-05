@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 
@@ -40,4 +41,8 @@ internal class ParentBasedSampler(
         }
         return delegate.shouldSample(context, traceIdBytes, name, spanKind, attributes, links)
     }
+
+    override suspend fun shutdown(): OperationResultCode = shutdownSamplers(
+        listOf(root, remoteParentSampled, remoteParentNotSampled, localParentSampled, localParentNotSampled)
+    )
 }

@@ -7,8 +7,6 @@ import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.reportError
-import io.opentelemetry.kotlin.internal.codePointCount
-import io.opentelemetry.kotlin.internal.takeCodePoints
 import io.opentelemetry.kotlin.resource.Resource
 
 internal class MeterImpl(
@@ -26,8 +24,8 @@ internal class MeterImpl(
     ): LongGauge {
         val noopMeter = obtainNoopMeterIfInvalid(name) ?: return LongGaugeImpl(
             name,
-            sanitizeInstrumentUnit(unit),
-            sanitizeInstrumentDescription(description),
+            unit,
+            description,
         )
         return noopMeter.createLongGauge(name, unit, description)
     }
@@ -39,8 +37,8 @@ internal class MeterImpl(
     ): DoubleGauge {
         val noopMeter = obtainNoopMeterIfInvalid(name) ?: return DoubleGaugeImpl(
             name,
-            sanitizeInstrumentUnit(unit),
-            sanitizeInstrumentDescription(description),
+            unit,
+            description,
         )
         return noopMeter.createDoubleGauge(name, unit, description)
     }
@@ -53,19 +51,17 @@ internal class MeterImpl(
         if (noopMeter != null) {
             return noopMeter.createDoubleUpDownCounter(name, unit, description)
         }
-        val sanitizedUnit = sanitizeInstrumentUnit(unit)
-        val sanitizedDescription = sanitizeInstrumentDescription(description)
         return getOrRegisterInstrument(
             name,
-            sanitizedUnit,
-            sanitizedDescription,
+            unit,
+            description,
             InstrumentType.DOUBLE_UP_DOWN_COUNTER,
             create = {
-                DoubleUpDownCounterImpl(name, sanitizedUnit, sanitizedDescription)
+                DoubleUpDownCounterImpl(name, unit, description)
             },
             createNoop = {
                 NoopOpenTelemetry.meterProvider.getMeter("")
-                    .createDoubleUpDownCounter(name, sanitizedUnit, sanitizedDescription)
+                    .createDoubleUpDownCounter(name, unit, description)
             },
         )
     }
@@ -79,19 +75,17 @@ internal class MeterImpl(
         if (noopMeter != null) {
             return noopMeter.createLongUpDownCounter(name, unit, description)
         }
-        val sanitizedUnit = sanitizeInstrumentUnit(unit)
-        val sanitizedDescription = sanitizeInstrumentDescription(description)
         return getOrRegisterInstrument(
             name,
-            sanitizedUnit,
-            sanitizedDescription,
+            unit,
+            description,
             InstrumentType.LONG_UP_DOWN_COUNTER,
             create = {
-                LongUpDownCounterImpl(name, sanitizedUnit, sanitizedDescription)
+                LongUpDownCounterImpl(name, unit, description)
             },
             createNoop = {
                 NoopOpenTelemetry.meterProvider.getMeter("")
-                    .createLongUpDownCounter(name, sanitizedUnit, sanitizedDescription)
+                    .createLongUpDownCounter(name, unit, description)
             },
         )
     }
@@ -245,62 +239,6 @@ internal class MeterImpl(
         return false
     }
 
-    /**
-     * Sanitizes [unit] to satisfy the
-     * [instrument unit](https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-unit)
-     * requirements: a case-sensitive ASCII string of at most [MAX_INSTRUMENT_UNIT_CHARS]
-     * characters.
-     *
-     * Invalid units are reported as [SdkError.ApiMisuse] and dropped to `null` rather than
-     * destabilizing the host or being rewritten to a misleading value. `null` stays `null`.
-     */
-    private fun sanitizeInstrumentUnit(unit: String?): String? {
-        if (unit == null) {
-            return null
-        }
-        if (unit.length <= MAX_INSTRUMENT_UNIT_CHARS && unit.all { it.code in 0..127 }) {
-            return unit
-        }
-        sdkErrorHandler.reportError(
-            SdkError.ApiMisuse(
-                api = "Instrument.unit",
-                message = "Instrument unit is invalid (must be ASCII, at most " +
-                    "$MAX_INSTRUMENT_UNIT_CHARS characters); it was dropped.",
-                severity = SdkErrorSeverity.WARNING,
-            )
-        )
-        return null
-    }
-
-    /**
-     * Sanitizes [description] to satisfy the
-     * [instrument description](https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-description)
-     * requirements: an opaque string that MUST support at least
-     * [MAX_INSTRUMENT_DESCRIPTION_CHARS] Unicode code points. Descriptions exceeding that
-     * length are truncated and reported as [SdkError.ApiMisuse] so the host is never
-     * destabilized by invalid input.
-     *
-     * `null` and strings within the limit are returned unchanged.
-     */
-    private fun sanitizeInstrumentDescription(description: String?): String? {
-        if (description == null) {
-            return null
-        }
-        val codePointCount = description.codePointCount()
-        if (codePointCount <= MAX_INSTRUMENT_DESCRIPTION_CHARS) {
-            return description
-        }
-        sdkErrorHandler.reportError(
-            SdkError.ApiMisuse(
-                api = "Instrument.description",
-                message = "Instrument description has $codePointCount code points, exceeding the " +
-                    "$MAX_INSTRUMENT_DESCRIPTION_CHARS code point limit; it was truncated.",
-                severity = SdkErrorSeverity.WARNING,
-            )
-        )
-        return description.takeCodePoints(MAX_INSTRUMENT_DESCRIPTION_CHARS)
-    }
-
     private companion object {
         /**
          * The maximum length instrument names must support, per
@@ -309,17 +247,5 @@ internal class MeterImpl(
         const val MAX_INSTRUMENT_NAME_CHARS = 255
 
         val INSTRUMENT_NAME = Regex("^[A-Za-z][A-Za-z0-9_./-]{0,254}$")
-
-        /**
-         * The maximum length instrument units must support, per
-         * https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-unit.
-         */
-        const val MAX_INSTRUMENT_UNIT_CHARS = 63
-
-        /**
-         * The minimum number of Unicode code points instrument descriptions must support, per
-         * https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-description.
-         */
-        const val MAX_INSTRUMENT_DESCRIPTION_CHARS = 1023
     }
 }

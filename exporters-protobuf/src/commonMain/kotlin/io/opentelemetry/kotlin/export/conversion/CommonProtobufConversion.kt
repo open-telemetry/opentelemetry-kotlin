@@ -53,7 +53,13 @@ internal fun io.opentelemetry.proto.resource.v1.Resource.toResource(
 
 internal fun TraceFlags.toFlagsInt(): Int = hex.toInt(16)
 
-internal fun TraceState.toW3CString(): String = W3CTraceStateCodec.encode(asMap())
+internal fun TraceState.toW3CString(): String = W3CTraceStateCodec.encode(
+    try {
+        asMap()
+    } catch (exc: Throwable) {
+        emptyMap()
+    }
+)
 
 private class DeserializedInstrumentationScopeInfo(
     override val name: String,

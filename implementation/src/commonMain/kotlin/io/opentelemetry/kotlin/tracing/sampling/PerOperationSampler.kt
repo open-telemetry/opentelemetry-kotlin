@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 
@@ -29,4 +30,7 @@ internal class PerOperationSampler(
             attributes = attributes,
             links = links,
         )
+
+    override suspend fun shutdown(): OperationResultCode =
+        shutdownSamplers(listOf(defaultSampler) + byOperation.values)
 }

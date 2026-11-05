@@ -28,7 +28,10 @@ public fun List<ResourceDetector>.detectResource(
 
     return namedDetectors.fold(factory.empty) { detected, (name, detector) ->
         try {
-            detected.merge(with(detector) { factory.detect() })
+            val detectedResource = with(detector) { factory.detect() }
+            val merged = detected.merge(detectedResource)
+            reportSchemaUrlConflict(detected, detectedResource, detector.name, errorHandler)
+            merged
         } catch (exc: Throwable) {
             errorHandler.reportError(
                 SdkError.UserCodeError(
@@ -60,4 +63,36 @@ private fun List<Pair<String, ResourceDetector>>.reportDuplicateNames(errorHandl
                 )
             )
         }
+}
+
+/**
+ * Reports an error when combining detectors with different non-empty schema URLs.
+ * The spec requires this to be an error condition.
+ *
+ * https://opentelemetry.io/docs/specs/otel/resource/sdk/#resource-detector
+ */
+private fun reportSchemaUrlConflict(
+    detected: Resource,
+    newResource: Resource,
+    detectorName: String,
+    errorHandler: SdkErrorHandler,
+) {
+    val detectedSchema = detected.schemaUrl
+    val newSchema = newResource.schemaUrl
+
+    // Treat empty strings as absent (no schema URL)
+    val detectedSchemaEffective = detectedSchema?.takeIf { it.isNotEmpty() }
+    val newSchemaEffective = newSchema?.takeIf { it.isNotEmpty() }
+
+    // Only report conflict if both are non-empty and different
+    if (detectedSchemaEffective != null && newSchemaEffective != null && detectedSchemaEffective != newSchemaEffective) {
+        errorHandler.reportError(
+            SdkError.ApiMisuse(
+                "ResourceDetector",
+                "Resource detector '$detectorName' has conflicting schema URL: " +
+                    "'$newSchemaEffective' does not match detected resource schema URL '$detectedSchemaEffective'",
+                SdkErrorSeverity.ERROR,
+            )
+        )
+    }
 }

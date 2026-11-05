@@ -18,6 +18,7 @@ import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.ResourceImpl
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
+import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -303,6 +304,70 @@ internal class TracerProviderImplTest {
         provider.getTracer(name = "test")
 
         assertEquals(OperationResultCode.Failure, provider.shutdown())
+    }
+
+    @Test
+    fun testShutdownShutsDownSamplerAfterProcessor() = runTest {
+        val order = mutableListOf<String>()
+        val sampler = FakeSampler(shutdownCode = {
+            order += "sampler"
+            OperationResultCode.Success
+        })
+        val provider = createProvider(
+            processor = FakeSpanProcessor(shutdownCode = {
+                order += "processor"
+                OperationResultCode.Success
+            }),
+            samplerFactory = { sampler },
+        )
+
+        assertEquals(OperationResultCode.Success, provider.shutdown())
+        assertEquals(listOf("processor", "sampler"), order)
+    }
+
+    @Test
+    fun testShutdownShutsDownSamplerOnlyOnce() = runTest {
+        val sampler = FakeSampler()
+        val provider = createProvider(samplerFactory = { sampler })
+
+        provider.shutdown()
+        provider.shutdown()
+        assertEquals(1, sampler.shutdownCount)
+    }
+
+    @Test
+    fun testForceFlushDoesNotShutDownSampler() = runTest {
+        val sampler = FakeSampler()
+        val provider = createProvider(samplerFactory = { sampler })
+
+        assertEquals(OperationResultCode.Success, provider.forceFlush())
+        assertEquals(0, sampler.shutdownCount)
+    }
+
+    @Test
+    fun testSamplerShutdownFailureIsReturned() = runTest {
+        val sampler = FakeSampler(shutdownCode = { OperationResultCode.Failure })
+        val provider = createProvider(samplerFactory = { sampler })
+
+        assertEquals(OperationResultCode.Failure, provider.shutdown())
+    }
+
+    @Test
+    fun testThrowingSamplerShutdownIsReported() = runTest {
+        var processorShutdown = false
+        val errorHandler = FakeSdkErrorHandler()
+        val provider = createProvider(
+            processor = FakeSpanProcessor(shutdownCode = {
+                processorShutdown = true
+                OperationResultCode.Success
+            }),
+            errorHandler = errorHandler,
+            samplerFactory = { FakeSampler(shutdownCode = { error("boom") }) },
+        )
+
+        assertEquals(OperationResultCode.Failure, provider.shutdown())
+        assertTrue(processorShutdown)
+        assertEquals("boom", errorHandler.userCodeErrors.single().cause.message)
     }
 
     private fun createProvider(

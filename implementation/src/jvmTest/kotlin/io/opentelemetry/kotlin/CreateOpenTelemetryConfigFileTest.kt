@@ -109,6 +109,27 @@ internal class CreateOpenTelemetryConfigFileTest {
     }
 
     @Test
+    fun `a batch config file buffers logs until flush`() {
+        runBlocking {
+            val output = ByteArrayOutputStream()
+            val previous = System.out
+            System.setOut(PrintStream(output, true))
+            try {
+                val sdk = createOpenTelemetry {
+                    configFile(writeConfigFile(BATCH_CONSOLE_CONFIG_FILE))
+                }.also(sdks::track) as OpenTelemetrySdk
+                sdk.loggerProvider.getLogger("test").emit("batch-console-log")
+                assertTrue(output.toString().isEmpty())
+                sdk.forceFlush()
+                assertTrue(output.toString().contains("batch-console-log"))
+                sdk.shutdown()
+            } finally {
+                System.setOut(previous)
+            }
+        }
+    }
+
+    @Test
     fun `the dsl export takes precedence over console in the config file`() {
         val spanProcessor = FakeSpanProcessor()
         val logProcessor = FakeLogRecordProcessor()
@@ -163,6 +184,12 @@ internal class CreateOpenTelemetryConfigFileTest {
                     schedule_delay: 60000
                     exporter:
                       console: {}
+            logger_provider:
+              processors:
+                - batch:
+                    schedule_delay: 60000
+                    exporter:
+                      console: {}     
         """.trimIndent()
     }
 }

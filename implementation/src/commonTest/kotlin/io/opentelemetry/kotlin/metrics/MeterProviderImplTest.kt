@@ -8,6 +8,9 @@ import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.init.config.MetricsConfig
+import io.opentelemetry.kotlin.metrics.instrument.InstrumentDescriptor
+import io.opentelemetry.kotlin.metrics.instrument.InstrumentKind
+import io.opentelemetry.kotlin.metrics.instrument.InstrumentValueType
 import io.opentelemetry.kotlin.resource.ResourceImpl
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -317,44 +320,125 @@ internal class MeterProviderImplTest {
     }
 
     @Test
-    fun testUnitSanitizationPreserved() {
-        val handler = FakeSdkErrorHandler()
-        val config = MetricsConfig(
-            resource = ResourceImpl(AttributesModel(), null),
-            sdkErrorHandler = handler,
+    fun testNullUnitPreserved() {
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = null,
+            description = "test",
         )
-        val attributeLimits = AttributeLimitsBehavior()
-        val provider = MeterProviderImpl(config, attributeLimits)
-        val meter = provider.getMeter(name = "test")
-
-        // Valid unit should be preserved
-        val counter1 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
-
-        // Invalid unit (non-ASCII) should be dropped and reported
-        val counter2 = meter.createLongUpDownCounter("my.counter2", unit = "°C", description = "test")
-        assertEquals(1, handler.apiMisuses.size)
-        assertTrue(handler.apiMisuses.single().message.contains("unit"))
+        assertEquals(null, gauge.unit)
     }
 
     @Test
-    fun testDescriptionSanitizationPreserved() {
-        val handler = FakeSdkErrorHandler()
-        val config = MetricsConfig(
-            resource = ResourceImpl(AttributesModel(), null),
-            sdkErrorHandler = handler,
+    fun testEmptyUnitPreserved() {
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = "",
+            description = "test",
         )
-        val attributeLimits = AttributeLimitsBehavior()
-        val provider = MeterProviderImpl(config, attributeLimits)
-        val meter = provider.getMeter(name = "test")
+        assertEquals("", gauge.unit)
+    }
 
-        // Valid description should be preserved
-        val counter1 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
+    @Test
+    fun testNonAsciiUnitPreserved() {
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = "°C",
+            description = "test",
+        )
+        assertEquals("°C", gauge.unit)
+    }
 
-        // Long description should be truncated and reported
+    @Test
+    fun testLongUnitPreserved() {
+        val longUnit = "a".repeat(100)
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = longUnit,
+            description = "test",
+        )
+        assertEquals(longUnit, gauge.unit)
+    }
+
+    @Test
+    fun testNullDescriptionPreserved() {
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = "1",
+            description = null,
+        )
+        assertEquals(null, gauge.description)
+    }
+
+    @Test
+    fun testEmptyDescriptionPreserved() {
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = "1",
+            description = "",
+        )
+        assertEquals("", gauge.description)
+    }
+
+    @Test
+    fun testLongDescriptionPreserved() {
         val longDesc = "a".repeat(2000)
-        val counter2 = meter.createLongUpDownCounter("my.counter2", unit = "1", description = longDesc)
-        assertEquals(1, handler.apiMisuses.size)
-        assertTrue(handler.apiMisuses.single().message.contains("description"))
-        assertTrue(handler.apiMisuses.single().message.contains("truncated"))
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = "1",
+            description = longDesc,
+        )
+        assertEquals(longDesc, gauge.description)
+    }
+
+    @Test
+    fun testUnicodeDescriptionPreserved() {
+        val unicodeDesc = "°"
+        val gauge = impl.getMeter("test").createLongGauge(
+            name = "test.counter",
+            unit = "1",
+            description = unicodeDesc,
+        )
+        assertEquals(unicodeDesc, gauge.description)
+    }
+
+    @Test
+    fun testNullEmptyUnitDescriptorEquivalence() {
+        val desc1 = InstrumentDescriptor(
+            name = "test",
+            unit = null,
+            description = "desc",
+            kind = InstrumentKind.HISTOGRAM,
+            valueType = InstrumentValueType.LONG,
+        )
+        val desc2 = InstrumentDescriptor(
+            name = "test",
+            unit = "",
+            description = "desc",
+            kind = InstrumentKind.HISTOGRAM,
+            valueType = InstrumentValueType.LONG,
+        )
+        assertEquals(desc1, desc2)
+        assertEquals(desc1.hashCode(), desc2.hashCode())
+    }
+
+    @Test
+    fun testNullEmptyDescriptionDescriptorEquivalence() {
+        val desc1 = InstrumentDescriptor(
+            name = "test",
+            unit = "1",
+            description = null,
+            kind = InstrumentKind.HISTOGRAM,
+            valueType = InstrumentValueType.LONG,
+        )
+        val desc2 = InstrumentDescriptor(
+            name = "test",
+            unit = "1",
+            description = "",
+            kind = InstrumentKind.HISTOGRAM,
+            valueType = InstrumentValueType.LONG,
+        )
+        assertEquals(desc1, desc2)
+        assertEquals(desc1.hashCode(), desc2.hashCode())
     }
 }
