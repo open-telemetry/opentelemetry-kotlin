@@ -16,7 +16,6 @@ kotlin {
                 api(project(":sdk-api"))
                 implementation(project(":config-yaml"))
                 implementation(project(":platform-implementations"))
-                implementation(libs.okio)
             }
         }
         commonTest {
