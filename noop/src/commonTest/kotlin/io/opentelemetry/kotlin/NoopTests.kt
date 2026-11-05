@@ -200,6 +200,12 @@ internal class NoopTests {
         val span = NoopOpenTelemetry.context.root().extractSpan()
         assertTrue(span is NoopSpan)
         assertFalse(span.isRecording())
+        assertSame(NoopSpanContext, span.spanContext)
+        assertSame(NoopSpanContext, span.parent)
+        verifySpanOperationsAreNoop(span)
+        span.setByteArrayAttribute("bytes", byteArrayOf(1))
+        span.setName("name")
+        span.end()
     }
 
     @Test

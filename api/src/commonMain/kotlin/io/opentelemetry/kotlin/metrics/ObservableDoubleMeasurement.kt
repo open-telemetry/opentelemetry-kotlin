@@ -9,12 +9,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 public interface ObservableDoubleMeasurement : ObservableMeasurement {
 
     /**
-     * Records a measurement.
+     * Records a measurement, optionally associating attributes with it.
      */
-    public fun record(value: Double)
-
-    /**
-     * Records a measurement with a set of attributes.
-     */
-    public fun record(value: Double, attributes: AttributesMutator.() -> Unit)
+    public fun record(value: Double, attributes: (AttributesMutator.() -> Unit)? = null)
 }

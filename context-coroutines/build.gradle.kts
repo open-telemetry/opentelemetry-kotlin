@@ -11,6 +11,7 @@ kotlin {
         getByName("jvmAndAndroidMain") {
             dependencies {
                 api(project(":api"))
+                api(project(":context-threadlocal"))
                 implementation(libs.kotlinx.coroutines)
             }
         }

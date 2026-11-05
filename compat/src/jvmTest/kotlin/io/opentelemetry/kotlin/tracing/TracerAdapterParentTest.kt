@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanProcessor
-import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -19,7 +18,6 @@ internal class TracerAdapterParentTest {
     private val contextFactory = CompatContextFactory()
     private val tracer = TracerProviderAdapter(
         javaTracerProvider,
-        CompatSpanLimitsConfig(),
         contextFactory,
         NoopSdkErrorHandler,
     ).getTracer("test")

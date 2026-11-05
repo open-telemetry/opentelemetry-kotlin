@@ -85,7 +85,7 @@ jobs:
 
       - name: Regenerate semantic conventions
         if: steps.check-version.outputs.update-needed == 'true'
-        run: ./gradlew :semconv:generateSemanticConventions
+        run: ./gradlew :semconv:generateSemanticConventions --warn
 
       - name: Use CLA approved github bot
         if: steps.check-version.outputs.update-needed == 'true'
