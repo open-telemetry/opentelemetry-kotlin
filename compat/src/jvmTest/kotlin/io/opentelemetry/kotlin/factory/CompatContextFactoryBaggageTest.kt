@@ -66,25 +66,25 @@ internal class CompatContextFactoryBaggageTest {
     }
 
     @Test
-    fun `extractBaggage drops otel-java entries rejected by kotlin validation`() {
+    fun `extractBaggage preserves otel-java entries with non-token keys`() {
         val javaBaggage = OtelJavaBaggage.builder().put("bad key", "b").put("good", "g").build()
         val javaCtx = javaBaggage.storeInContext(factory.root().toOtelJavaContext())
 
         val extracted = javaCtx.toOtelKotlinContext().extractBaggage()
 
-        assertNull(extracted.getValue("bad key"))
+        assertEquals("b", extracted.getValue("bad key"))
         assertEquals("g", extracted.getValue("good"))
     }
 
     @Test
-    fun `modifying extracted baggage writes back only valid otel-java entries`() {
+    fun `modifying extracted baggage writes back all otel-java entries`() {
         val javaBaggage = OtelJavaBaggage.builder().put("bad key", "b").put("good", "g").build()
         val ctx = javaBaggage.storeInContext(factory.root().toOtelJavaContext()).toOtelKotlinContext()
 
         val updated = ctx.storeBaggage(ctx.extractBaggage().set("user", "alice"))
         val written = OtelJavaBaggage.fromContext(updated.toOtelJavaContext())
 
-        assertEquals(mapOf("good" to "g", "user" to "alice"), written.asMap().mapValues { it.value.value })
+        assertEquals(mapOf("bad key" to "b", "good" to "g", "user" to "alice"), written.asMap().mapValues { it.value.value })
     }
 
     @Test
