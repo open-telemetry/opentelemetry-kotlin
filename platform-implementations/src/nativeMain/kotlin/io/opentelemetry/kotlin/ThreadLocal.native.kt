@@ -7,6 +7,11 @@ private val instanceCounter = AtomicLong()
 @ThreadLocal
 private val threadValues = mutableMapOf<Long, Any>()
 
+/**
+ * Native implementation of thread-local storage, backed by a map annotated with
+ * [kotlin.native.concurrent.ThreadLocal] so each thread sees its own copy. Every instance uses a
+ * unique key so separate instances stay independent.
+ */
 public actual class ThreadLocal<T> actual constructor() {
     private val key = instanceCounter.incrementAndGet()
 
