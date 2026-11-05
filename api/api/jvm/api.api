@@ -194,6 +194,7 @@ public final class io/opentelemetry/kotlin/logging/LoggerProvider$DefaultImpls {
 }
 
 public final class io/opentelemetry/kotlin/logging/SeverityNumber : java/lang/Enum {
+	public static final field Companion Lio/opentelemetry/kotlin/logging/SeverityNumber$Companion;
 	public static final field DEBUG Lio/opentelemetry/kotlin/logging/SeverityNumber;
 	public static final field DEBUG2 Lio/opentelemetry/kotlin/logging/SeverityNumber;
 	public static final field DEBUG3 Lio/opentelemetry/kotlin/logging/SeverityNumber;
@@ -220,9 +221,13 @@ public final class io/opentelemetry/kotlin/logging/SeverityNumber : java/lang/En
 	public static final field WARN3 Lio/opentelemetry/kotlin/logging/SeverityNumber;
 	public static final field WARN4 Lio/opentelemetry/kotlin/logging/SeverityNumber;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public final fun getSeverityNumber ()I
+	public final fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/logging/SeverityNumber;
 	public static fun values ()[Lio/opentelemetry/kotlin/logging/SeverityNumber;
+}
+
+public final class io/opentelemetry/kotlin/logging/SeverityNumber$Companion {
+	public final fun fromValue (I)Lio/opentelemetry/kotlin/logging/SeverityNumber;
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/AsynchronousInstrument : io/opentelemetry/kotlin/metrics/Instrument, java/lang/AutoCloseable {
@@ -463,6 +468,9 @@ public abstract class io/opentelemetry/kotlin/tracing/StatusData {
 
 public final class io/opentelemetry/kotlin/tracing/StatusData$Error : io/opentelemetry/kotlin/tracing/StatusData {
 	public fun <init> (Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/opentelemetry/kotlin/tracing/StatusData$Ok : io/opentelemetry/kotlin/tracing/StatusData {

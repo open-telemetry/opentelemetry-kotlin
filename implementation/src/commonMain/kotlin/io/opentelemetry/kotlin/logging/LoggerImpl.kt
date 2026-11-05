@@ -145,7 +145,7 @@ internal class LoggerImpl(
     ): Boolean {
         val severity = severityNumber ?: SeverityNumber.UNKNOWN
         val belowMinimumSeverity = severity != SeverityNumber.UNKNOWN &&
-            severity.severityNumber < loggerConfig.minimumSeverity.severityNumber
+            severity.value < loggerConfig.minimumSeverity.value
         if (belowMinimumSeverity) {
             return false
         }

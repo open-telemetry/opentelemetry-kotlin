@@ -11,7 +11,6 @@ import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
-import io.opentelemetry.kotlin.tracing.model.hex
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

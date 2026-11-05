@@ -14,7 +14,7 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.TraceFlags
 import io.opentelemetry.kotlin.tracing.TraceState
-import io.opentelemetry.kotlin.tracing.model.hex
+import io.opentelemetry.kotlin.tracing.hex
 import io.opentelemetry.proto.common.v1.InstrumentationScope
 import okio.ByteString
 import okio.ByteString.Companion.toByteString

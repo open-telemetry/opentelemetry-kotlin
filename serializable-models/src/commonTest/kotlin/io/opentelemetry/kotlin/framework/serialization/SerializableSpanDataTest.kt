@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
-import io.opentelemetry.kotlin.tracing.model.hex
+import io.opentelemetry.kotlin.tracing.hex
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
