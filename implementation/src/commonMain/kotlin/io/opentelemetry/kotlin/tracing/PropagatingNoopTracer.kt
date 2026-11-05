@@ -20,7 +20,7 @@ internal class PropagatingNoopTracer(
         name: String,
         parentContext: Context?,
         spanKind: SpanKind,
-        startTimestamp: Long?,
+        startTimestamp: Long,
         action: (SpanCreationAction.() -> Unit)?
     ): Span =
         sdkErrorHandler.sdkGuardOrDefault(invalidSpan, "Tracer.startSpan failed") {

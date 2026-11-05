@@ -50,7 +50,7 @@ internal class TracerImpl(
         name: String,
         parentContext: Context?,
         spanKind: SpanKind,
-        startTimestamp: Long?,
+        startTimestamp: Long,
         action: (SpanCreationAction.() -> Unit)?
     ): Span =
         sdkErrorHandler.sdkGuardOrDefault(invalidSpan, "Tracer.startSpan failed") {
@@ -120,7 +120,10 @@ internal class TracerImpl(
                 processor = processor,
                 name = name,
                 spanKind = spanKind,
-                startTimestamp = startTimestamp?.takeIf { it > 0 } ?: userCode { clock.now() },
+                startTimestamp = when {
+                    startTimestamp > 0 -> startTimestamp
+                    else -> userCode { clock.now() }
+                },
                 instrumentationScopeInfo = scope,
                 resource = resource,
                 parent = parentSpanContext,

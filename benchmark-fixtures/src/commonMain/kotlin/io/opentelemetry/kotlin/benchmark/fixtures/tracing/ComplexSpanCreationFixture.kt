@@ -16,7 +16,7 @@ class ComplexSpanCreationFixture(
             "new_span",
             otel.context.root(),
             SpanKind.CLIENT,
-            null
+            0
         ) {
             repeat(100) { k ->
                 setStringAttribute("key_$k", "value")
