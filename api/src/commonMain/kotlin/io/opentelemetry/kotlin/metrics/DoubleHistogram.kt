@@ -21,6 +21,6 @@ public interface DoubleHistogram : SynchronousInstrument {
     public fun record(
         value: Double,
         context: Context? = null,
-        attributes: AttributesMutator.() -> Unit = {},
+        attributes: (AttributesMutator.() -> Unit)? = null,
     )
 }

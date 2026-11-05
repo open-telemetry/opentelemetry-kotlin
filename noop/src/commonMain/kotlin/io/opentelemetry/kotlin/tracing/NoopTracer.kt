@@ -12,7 +12,7 @@ internal object NoopTracer : Tracer {
         name: String,
         parentContext: Context?,
         spanKind: SpanKind,
-        startTimestamp: Long?,
+        startTimestamp: Long,
         action: (SpanCreationAction.() -> Unit)?
     ): Span {
         val parentSpanContext = runCatching { parentContext?.extractSpan()?.spanContext }.getOrNull()

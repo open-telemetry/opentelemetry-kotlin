@@ -101,7 +101,7 @@ class FakeReadWriteSpan private constructor(
 
     override fun addEvent(
         name: String,
-        timestamp: Long?,
+        timestamp: Long,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         throw UnsupportedOperationException()

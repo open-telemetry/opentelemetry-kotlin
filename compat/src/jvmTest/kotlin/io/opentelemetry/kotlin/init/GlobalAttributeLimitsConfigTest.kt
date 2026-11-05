@@ -76,10 +76,10 @@ internal class GlobalAttributeLimitsConfigTest {
     }
 
     @Test
-    fun `the merged global limit reaches the adapters`() {
+    fun `the merged global limit reaches the Java span limits`() {
         val global = AttributeLimitsBehavior(attributeCountLimit = 64)
 
-        assertEquals(64, buildSpanLimits(global).effectiveAttributeCountLimit)
+        assertEquals(64, buildSpanLimits(global).build().maxNumberOfAttributes)
     }
 
     @Test

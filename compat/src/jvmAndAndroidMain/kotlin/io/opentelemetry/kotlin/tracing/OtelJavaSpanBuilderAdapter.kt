@@ -25,7 +25,7 @@ internal class OtelJavaSpanBuilderAdapter(
     private val contextFactory: ContextFactory,
 ) : OtelJavaSpanBuilder {
 
-    private var start: Long? = null
+    private var start: Long = 0
     private var parent: OtelJavaContext? = null
     private var noParent: Boolean = false
     private var kind: OtelJavaSpanKind = OtelJavaSpanKind.INTERNAL
