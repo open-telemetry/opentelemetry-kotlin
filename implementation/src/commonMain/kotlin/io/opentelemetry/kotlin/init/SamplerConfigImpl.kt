@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.tracing.sampling.ComposableParentThresholdSampler
 import io.opentelemetry.kotlin.tracing.sampling.ComposableProbabilitySampler
 import io.opentelemetry.kotlin.tracing.sampling.ComposableSampler
 import io.opentelemetry.kotlin.tracing.sampling.CompositeSampler
+import io.opentelemetry.kotlin.tracing.sampling.MIN_SAMPLING_RATIO
 import io.opentelemetry.kotlin.tracing.sampling.ParentBasedSampler
 import io.opentelemetry.kotlin.tracing.sampling.ProbabilitySampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
@@ -27,8 +28,10 @@ internal class SamplerConfigImpl(
 
     override fun alwaysRecord(root: Sampler): Sampler = AlwaysRecordSampler(root)
 
+    // A ratio below 2^-56 rounds to "never sample", so it drops instead of failing validation and
+    // falling back to the default sampler, which would sample everything.
     override fun probability(ratio: Double): Sampler =
-        if (ratio == 0.0) {
+        if (ratio >= 0.0 && ratio < MIN_SAMPLING_RATIO) {
             AlwaysOffSampler
         } else {
             ProbabilitySampler(ratio, sdkErrorHandler)

@@ -236,17 +236,19 @@ internal class CompatTracerProviderSamplerTest {
 
     @Test
     fun `probability 0_0 drops spans`() {
-        val clock = FakeClock()
-        val config = createConfig(clock).apply {
-            sampler { probability(0.0) }
+        listOf(0.0, 1e-20).forEach { ratio ->
+            val clock = FakeClock()
+            val config = createConfig(clock).apply {
+                sampler { probability(ratio) }
+            }
+            val span = config.build(
+                clock,
+                idGenerator,
+                spanLimits = noSpanLimits
+            ).getTracer("test").startSpan("span")
+            assertFalse(span.isRecording())
+            assertFalse(span.spanContext.traceFlags.isSampled)
         }
-        val span = config.build(
-            clock,
-            idGenerator,
-            spanLimits = noSpanLimits
-        ).getTracer("test").startSpan("span")
-        assertFalse(span.isRecording())
-        assertFalse(span.spanContext.traceFlags.isSampled)
     }
 
     @Test

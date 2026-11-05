@@ -79,9 +79,11 @@ internal class BuiltInSamplersTest {
 
     @Test
     fun testProbabilityZeroDropsSpan() {
-        val span = buildTracer(samplerDsl.probability(0.0)).startSpan("span")
-        assertFalse(span.isRecording())
-        assertFalse(span.spanContext.traceFlags.isSampled)
+        listOf(0.0, 1e-20).forEach { ratio ->
+            val span = buildTracer(samplerDsl.probability(ratio)).startSpan("span")
+            assertFalse(span.isRecording(), "ratio $ratio should drop")
+            assertFalse(span.spanContext.traceFlags.isSampled, "ratio $ratio should drop")
+        }
     }
 
     @Test
