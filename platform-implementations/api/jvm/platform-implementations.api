@@ -20,6 +20,13 @@ public final class io/opentelemetry/kotlin/AtomicLong {
 	public final fun set (J)V
 }
 
+public final class io/opentelemetry/kotlin/AtomicReference {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun compareAndSet (Ljava/lang/Object;Ljava/lang/Object;)Z
+	public final fun get ()Ljava/lang/Object;
+	public final fun set (Ljava/lang/Object;)V
+}
+
 public final class io/opentelemetry/kotlin/ClockImpl_jvmKt {
 	public static final fun getCurrentTimeNanos ()J
 }
