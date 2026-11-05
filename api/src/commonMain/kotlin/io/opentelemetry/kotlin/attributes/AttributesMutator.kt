@@ -69,4 +69,10 @@ public interface AttributesMutator {
      */
     @ThreadSafe
     public fun setAnyValueAttribute(key: String, value: AnyValue)
+
+    /**
+     * Removes an attribute with the given key. If the key does not exist, this method does nothing.
+     */
+    @ThreadSafe
+    public fun removeAttribute(key: String)
 }

@@ -110,4 +110,8 @@ internal class ReadWriteSpanAdapter(
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
         impl.setAttribute(OtelJavaAttributeKey.valueKey(key), value.toOtelJavaValue())
     }
+
+    override fun removeAttribute(key: String) {
+        impl.removeAttribute(OtelJavaAttributeKey.stringKey(key))
+    }
 }

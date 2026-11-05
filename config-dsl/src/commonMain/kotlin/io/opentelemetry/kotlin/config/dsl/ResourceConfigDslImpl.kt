@@ -50,6 +50,10 @@ private class ResourceAttributesMutator : AttributesMutator {
     override fun setByteArrayAttribute(key: String, value: ByteArray) = set(key, value.copyOf())
     override fun setAnyValueAttribute(key: String, value: AnyValue) = set(key, value.copyValue())
 
+    override fun removeAttribute(key: String) {
+        attributes.remove(key)
+    }
+
     private fun AnyValue.copyValue(): AnyValue = when (this) {
         AnyValue.NullValue -> this
         is AnyValue.StringValue -> AnyValue.StringValue(value)
