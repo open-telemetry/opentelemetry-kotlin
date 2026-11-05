@@ -239,7 +239,7 @@ internal class SpanModel(
 
     override fun addEvent(
         name: String,
-        timestamp: Long?,
+        timestamp: Long,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         sdkErrorHandler.sdkGuard("Span.addEvent failed") {
@@ -251,7 +251,10 @@ internal class SpanModel(
                 return
             }
             // avoid running user code under the lock
-            val eventTimestamp = timestamp?.takeIf { it > 0 } ?: userCode { clock.now() }
+            val eventTimestamp = when {
+                timestamp > 0 -> timestamp
+                else -> userCode { clock.now() }
+            }
             val container = AttributesModel(
                 attributeLimit = spanLimitConfig.attributeCountPerEventLimit,
                 attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit

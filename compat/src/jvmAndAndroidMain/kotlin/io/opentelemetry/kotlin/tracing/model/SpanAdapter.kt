@@ -7,6 +7,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaScope
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.attributes.OtelJavaAttributesMutator
+import io.opentelemetry.kotlin.attributes.attributeSink
 import io.opentelemetry.kotlin.attributes.compatAttributes
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -32,7 +34,7 @@ internal class SpanAdapter(
     AttributeContainer,
     SpanCreationAction,
     OtelJavaImplicitContextKeyed,
-    AttributesMutator by OtelJavaSpanAttributesMutator(impl, sdkErrorHandler) {
+    AttributesMutator by OtelJavaAttributesMutator(impl.attributeSink(), sdkErrorHandler, "Span") {
 
     override val parent: SpanContext =
         parentCtx?.let { OtelJavaSpan.fromContext(it) }?.spanContext?.toOtelKotlinSpanContext()
@@ -87,12 +89,12 @@ internal class SpanAdapter(
 
     override fun addEvent(
         name: String,
-        timestamp: Long?,
+        timestamp: Long,
         attributes: (AttributesMutator.() -> Unit)?
     ) = sdkErrorHandler.sdkGuard("Span.addEvent failed") {
         val container = compatAttributes(attributes)
         // As with the span start: left unset, the SDK stamps the event with the clock it times the span by.
-        if (timestamp != null && timestamp > 0) {
+        if (timestamp > 0) {
             impl.addEvent(name, container.otelJavaAttributes(), timestamp, TimeUnit.NANOSECONDS)
         } else {
             impl.addEvent(name, container.otelJavaAttributes())

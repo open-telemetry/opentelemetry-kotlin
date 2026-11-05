@@ -95,7 +95,7 @@ private fun demonstrateSpanNesting(tracer: Tracer, contextFactory: ContextFactor
         "parent-operation",
         null,
         SpanKind.INTERNAL,
-        null
+        0
     ) { setStringAttribute("operation.type", "database-transaction") }
     val parentContext = contextFactory.current().storeSpan(parentSpan)
 
@@ -117,7 +117,7 @@ private fun demonstrateSpanNesting(tracer: Tracer, contextFactory: ContextFactor
         "cache-lookup",
         parentContext,
         SpanKind.INTERNAL,
-        null
+        0
     ) { setStringAttribute("cache.type", "redis") }
     childSpan2.end()
 
