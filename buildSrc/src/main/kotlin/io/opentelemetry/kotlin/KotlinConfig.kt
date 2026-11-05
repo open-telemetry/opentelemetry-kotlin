@@ -20,7 +20,7 @@ fun Project.configureKotlin(
         }
 
         if (!project.isJvmAndroidModule()) {
-            js(IR) {
+            js {
                 nodejs()
                 browser {
                     testTask {
@@ -72,7 +72,14 @@ fun Project.configureKotlin(
             }
 
             if (!project.isJvmAndroidModule()) {
-                getByName("jsMain")
+                // shared by every target except JS
+                val nonJsMain = create("nonJsMain").apply {
+                    dependsOn(commonMain.get())
+                }
+                jvmAndAndroidMain.dependsOn(nonJsMain)
+                getByName("nativeMain").apply {
+                    dependsOn(nonJsMain)
+                }
             }
         }
         compilerOptions {

@@ -319,8 +319,11 @@ public abstract interface class io/opentelemetry/kotlin/metrics/ObservableDouble
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/ObservableDoubleMeasurement : io/opentelemetry/kotlin/metrics/ObservableMeasurement {
-	public abstract fun record (D)V
 	public abstract fun record (DLkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/opentelemetry/kotlin/metrics/ObservableDoubleMeasurement$DefaultImpls {
+	public static synthetic fun record$default (Lio/opentelemetry/kotlin/metrics/ObservableDoubleMeasurement;DLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/ObservableDoubleUpDownCounter : io/opentelemetry/kotlin/metrics/AsynchronousInstrument {
@@ -333,8 +336,11 @@ public abstract interface class io/opentelemetry/kotlin/metrics/ObservableLongGa
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/ObservableLongMeasurement : io/opentelemetry/kotlin/metrics/ObservableMeasurement {
-	public abstract fun record (J)V
 	public abstract fun record (JLkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/opentelemetry/kotlin/metrics/ObservableLongMeasurement$DefaultImpls {
+	public static synthetic fun record$default (Lio/opentelemetry/kotlin/metrics/ObservableLongMeasurement;JLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/ObservableLongUpDownCounter : io/opentelemetry/kotlin/metrics/AsynchronousInstrument {

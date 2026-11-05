@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaStatusCode
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
-import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.StatusData
 import kotlin.test.Test
@@ -96,7 +95,6 @@ internal class SpanAdapterErrorHandlingTest {
         impl,
         null,
         SpanKind.INTERNAL,
-        CompatSpanLimitsConfig(),
         errorHandler,
     )
 

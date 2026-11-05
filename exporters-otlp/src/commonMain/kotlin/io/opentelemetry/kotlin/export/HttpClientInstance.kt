@@ -5,7 +5,6 @@ import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.compression.ContentEncodingConfig
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.util.collections.ConcurrentMap
 import io.opentelemetry.kotlin.AtomicBoolean
 
@@ -119,7 +118,6 @@ internal fun createDefaultHttpClient(
     install(HttpTimeout) {
         requestTimeoutMillis = requestTimeoutMs
     }
-    install(ContentNegotiation)
     install(ContentEncoding) {
         mode = ContentEncodingConfig.Mode.All
         if (supportsHttpCompression) {
@@ -133,5 +131,5 @@ internal fun createDefaultHttpClient(
 
 internal expect fun createHttpEngine(): HttpClientEngine
 
-// Ktor's gzip/deflate encoders on native targets are a no-op
+// Ktor's gzip/deflate encoders on native and JS targets are a no-op
 internal expect val supportsHttpCompression: Boolean

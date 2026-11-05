@@ -74,7 +74,7 @@ jobs:
           java-version: 25
 
       - name: Build and publish artifacts
-        run: ./gradlew publishToMavenCentral -Dorg.gradle.parallel=false --no-build-cache --no-configuration-cache --stacktrace
+        run: ./gradlew publishToMavenCentral -Dorg.gradle.parallel=false --no-build-cache --no-configuration-cache --stacktrace --warn
         env:
           SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
           SONATYPE_KEY: ${{ secrets.SONATYPE_KEY }}
