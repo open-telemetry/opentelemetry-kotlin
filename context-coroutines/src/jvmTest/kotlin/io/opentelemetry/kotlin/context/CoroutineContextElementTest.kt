@@ -178,8 +178,13 @@ private class TestStorage : CurrentContextStorage {
 
     override fun current(): Context = current.get() ?: root
 
-    override fun setCurrent(context: Context) {
+    override fun attach(context: Context): Scope {
+        val previous = current.get()
         current.set(context)
+        return FakeScope {
+            current.set(previous)
+            true
+        }
     }
 }
 
@@ -195,8 +200,7 @@ private class TestContext(
 
     override fun attach(): Scope {
         attachCount.incrementAndGet()
-        val previous = storage.current()
-        storage.setCurrent(this)
+        val scope = storage.attach(this)
         var detached = false
         return FakeScope {
             if (detached) {
@@ -204,8 +208,7 @@ private class TestContext(
             } else {
                 detached = true
                 detachCount.incrementAndGet()
-                storage.setCurrent(previous)
-                true
+                scope.detach()
             }
         }
     }

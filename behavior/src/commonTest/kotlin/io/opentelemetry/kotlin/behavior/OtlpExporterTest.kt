@@ -34,5 +34,17 @@ internal class OtlpExporterTest {
         )
         assertEquals(emptyMap(), OtlpExporter.buildHeaderMap("garbage"))
         assertEquals(mapOf("key" to "value"), OtlpExporter.buildHeaderMap("key=value,"))
+        assertEquals(
+            mapOf("Authorization" to "Basic abc"),
+            OtlpExporter.buildHeaderMap("Authorization=Basic%20abc")
+        )
+        assertEquals(
+            mapOf("custom key" to "custom value"),
+            OtlpExporter.buildHeaderMap("custom%20key=custom%20value")
+        )
+        assertEquals(
+            emptyMap(),
+            OtlpExporter.buildHeaderMap("invalid%zz=value,key=invalid%zz")
+        )
     }
 }

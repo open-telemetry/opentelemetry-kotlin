@@ -27,7 +27,7 @@ internal class ScopeImplTest {
     @Test
     fun testCreateWithMatchingContextsReportsApiMisuse() {
         val root = factory.root()
-        val scope = ScopeImpl.create(root, root, storage, handler)
+        val scope = ScopeImpl.create(root, root, storage, handler) {}
 
         assertTrue(scope.detach())
         assertEquals(1, handler.apiMisuses.size)

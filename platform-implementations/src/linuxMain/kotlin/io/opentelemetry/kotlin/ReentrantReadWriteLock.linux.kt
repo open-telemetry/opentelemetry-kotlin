@@ -2,6 +2,7 @@
 
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
@@ -23,37 +24,60 @@ import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.ref.createCleaner
 
 public actual class ReentrantReadWriteLock {
+    // null if the mutex could not be created, in which case actions run without locking
     @PublishedApi
-    internal val mutex: CPointer<pthread_mutex_t> = createRecursiveMutex()
+    internal val mutex: CPointer<pthread_mutex_t>? = createRecursiveMutex()
 
     @Suppress("unused")
-    private val cleaner = createCleaner(mutex) {
-        if (pthread_mutex_destroy(it) == 0) {
-            nativeHeap.free(it)
+    private val cleaner = mutex?.let {
+        createCleaner(it) { pointer ->
+            // leak rather than free a mutex in an unknown state
+            if (pthreadSucceeded(pthread_mutex_destroy(pointer), "pthread_mutex_destroy")) {
+                nativeHeap.free(pointer)
+            }
         }
     }
 
     public actual inline fun <T> write(action: () -> T): T {
-        pthread_mutex_lock(mutex)
+        val pointer = mutex ?: return action()
+        pthread_mutex_lock(pointer)
         try {
             return action()
         } finally {
-            pthread_mutex_unlock(mutex)
+            pthread_mutex_unlock(pointer)
         }
     }
 
     public actual inline fun <T> read(action: () -> T): T = write(action)
 }
 
-private fun createRecursiveMutex(): CPointer<pthread_mutex_t> = memScoped {
+private fun createRecursiveMutex(): CPointer<pthread_mutex_t>? = memScoped {
     val attributes = alloc<pthread_mutexattr_t>()
-    pthread_mutexattr_init(attributes.ptr)
-    try {
-        pthread_mutexattr_settype(attributes.ptr, PTHREAD_MUTEX_RECURSIVE.toInt())
-        val mutex = nativeHeap.alloc<pthread_mutex_t>()
-        pthread_mutex_init(mutex.ptr, attributes.ptr)
-        mutex.ptr
-    } finally {
-        pthread_mutexattr_destroy(attributes.ptr)
+    if (!pthreadSucceeded(pthread_mutexattr_init(attributes.ptr), "pthread_mutexattr_init")) {
+        return@memScoped null
     }
+    try {
+        val typeResult = pthread_mutexattr_settype(attributes.ptr, PTHREAD_MUTEX_RECURSIVE.toInt())
+        if (!pthreadSucceeded(typeResult, "pthread_mutexattr_settype")) {
+            return@memScoped null
+        }
+        val mutex = nativeHeap.alloc<pthread_mutex_t>().ptr
+        if (!pthreadSucceeded(pthread_mutex_init(mutex, attributes.ptr), "pthread_mutex_init")) {
+            nativeHeap.free(mutex)
+            return@memScoped null
+        }
+        mutex
+    } finally {
+        pthreadSucceeded(pthread_mutexattr_destroy(attributes.ptr), "pthread_mutexattr_destroy")
+    }
+}
+
+/**
+ * Logs a warning if a pthread call failed. Returns true if it succeeded.
+ */
+private fun pthreadSucceeded(result: Int, operation: String): Boolean {
+    if (result != 0) {
+        platformLog("$operation failed with code $result", SdkErrorSeverity.WARNING, null)
+    }
+    return result == 0
 }

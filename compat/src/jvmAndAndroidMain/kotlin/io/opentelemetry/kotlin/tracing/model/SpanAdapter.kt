@@ -7,12 +7,11 @@ import io.opentelemetry.kotlin.aliases.OtelJavaScope
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.attributes.compatAttributes
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
-import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
@@ -39,7 +38,7 @@ internal class SpanAdapter(
     AttributeContainer,
     SpanCreationAction,
     OtelJavaImplicitContextKeyed,
-    AttributesMutator by OtelJavaSpanAttributesMutator(impl) {
+    AttributesMutator by OtelJavaSpanAttributesMutator(impl, sdkErrorHandler) {
 
     private val linksImpl: ConcurrentLinkedQueue<SpanLink> =
         ConcurrentLinkedQueue(creationState?.links.orEmpty())
@@ -59,12 +58,16 @@ internal class SpanAdapter(
         get() = linksImpl.toList()
 
     override fun setName(name: String) {
-        impl.updateName(name)
+        sdkErrorHandler.sdkGuard("Span.setName failed") {
+            impl.updateName(name)
+        }
     }
 
     override fun setStatus(status: StatusData) {
-        status.toOtelJavaStatusData().let {
-            impl.setStatus(it.statusCode, it.description)
+        sdkErrorHandler.sdkGuard("Span.setStatus failed") {
+            status.toOtelJavaStatusData().let {
+                impl.setStatus(it.statusCode, it.description)
+            }
         }
     }
 
@@ -90,10 +93,7 @@ internal class SpanAdapter(
         spanContext: SpanContext,
         attributes: (AttributesMutator.() -> Unit)?
     ) = sdkErrorHandler.sdkGuard("Span.addLink failed") {
-        val container = CompatAttributesModel()
-        if (attributes != null) {
-            userCode { attributes(container) }
-        }
+        val container = compatAttributes(attributes)
         if (linksImpl.size < spanLimitsConfig.effectiveLinkCountLimit) {
             linksImpl.add(SpanLinkCompatImpl(spanContext, container))
         }
@@ -105,10 +105,7 @@ internal class SpanAdapter(
         timestamp: Long?,
         attributes: (AttributesMutator.() -> Unit)?
     ) = sdkErrorHandler.sdkGuard("Span.addEvent failed") {
-        val container = CompatAttributesModel()
-        if (attributes != null) {
-            userCode { attributes(container) }
-        }
+        val container = compatAttributes(attributes)
         // As with the span start: left unset, the SDK stamps the event with the clock it times the span by.
         if (timestamp != null && timestamp > 0) {
             impl.addEvent(name, container.otelJavaAttributes(), timestamp, TimeUnit.NANOSECONDS)
@@ -121,7 +118,8 @@ internal class SpanAdapter(
         return impl.storeInContext(context)
     }
 
-    override fun makeCurrent(): OtelJavaScope? {
-        return impl.makeCurrent()
-    }
+    override fun makeCurrent(): OtelJavaScope? =
+        sdkErrorHandler.sdkGuardOrDefault(OtelJavaScope.noop(), "Span.makeCurrent failed") {
+            impl.makeCurrent()
+        }
 }

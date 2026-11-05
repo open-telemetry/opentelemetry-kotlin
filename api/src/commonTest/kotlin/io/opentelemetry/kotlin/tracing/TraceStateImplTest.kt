@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.propagation.TraceStateMarshaller
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -384,5 +385,40 @@ internal class TraceStateImplTest {
         val original = TraceStateImpl.EMPTY.put("key1", "value1")
         assertEquals(original, original.put("key2", "value2").remove("key2"))
         assertEquals(TraceStateImpl.EMPTY, original.remove("key1"))
+    }
+
+    @Test
+    fun testAsMapHandlesThrowingImplementation() {
+        val throwingTraceState = object : TraceState {
+            override fun get(key: String): String? = null
+
+            override fun asMap(): Map<String, String> {
+                error("Custom implementation throws")
+            }
+
+            override fun put(key: String, value: String): TraceState = this
+
+            override fun remove(key: String): TraceState = this
+        }
+
+        // Should return empty map instead of throwing when used in TraceStateMarshaller
+        val marshaller = TraceStateMarshaller(throwingTraceState)
+        val encoded = marshaller.encode()
+        // Empty tracestate encodes to empty string
+        assertEquals("", encoded)
+    }
+
+    @Test
+    fun testAsMapPreservesNormalBehavior() {
+        val normalTraceState = TraceStateImpl.EMPTY
+            .put("key1", "value1")
+            .put("key2", "value2")
+
+        // Normal tracestate should still work correctly
+        val marshaller = TraceStateMarshaller(normalTraceState)
+        val encoded = marshaller.encode()
+        // Should contain the key-value pairs
+        assertTrue(encoded.contains("key1=value1"))
+        assertTrue(encoded.contains("key2=value2"))
     }
 }

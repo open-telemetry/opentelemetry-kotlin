@@ -10,7 +10,6 @@ import io.opentelemetry.kotlin.context.ContextAdapter
 import io.opentelemetry.kotlin.context.FakeContext
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -76,35 +75,42 @@ internal class TextMapPropagatorAdapterTest {
     }
 
     @Test
-    fun `inject is a no-op when context is not a ContextAdapter`() {
+    fun `inject with empty context does not write carrier`() {
         val carrier = mutableMapOf<String, String>()
-        val throwingSetter = TextMapSetter<MutableMap<String, String>> { _, _, _ ->
-            error("setter must not be invoked when context is not a ContextAdapter")
-        }
 
-        TextMapPropagatorAdapter(impl).inject(FakeContext(), carrier, throwingSetter)
+        TextMapPropagatorAdapter(impl).inject(FakeContext(), carrier, MapSetter)
 
         assertTrue(carrier.isEmpty())
     }
 
     @Test
-    fun `extract returns input context unchanged when context is not a ContextAdapter`() {
-        val input = FakeContext()
-        val throwingGetter = object : TextMapGetter<Map<String, String>> {
-            val errMsg = "getter must not be invoked when context is not a ContextAdapter"
+    fun `extract adapts context that is not a ContextAdapter`() {
+        var getterCalled = false
+        val getter = object : TextMapGetter<Map<String, String>> {
+            override fun keys(carrier: Map<String, String>): Collection<String> {
+                getterCalled = true
+                return carrier.keys
+            }
 
-            override fun keys(carrier: Map<String, String>): Collection<String> = error(errMsg)
-            override fun get(carrier: Map<String, String>, key: String): String = error(errMsg)
-            override fun getAll(carrier: Map<String, String>, key: String): List<String> = error(errMsg)
+            override fun get(carrier: Map<String, String>, key: String): String? {
+                getterCalled = true
+                return carrier[key]
+            }
+
+            override fun getAll(carrier: Map<String, String>, key: String): List<String> {
+                getterCalled = true
+                return carrier[key]?.let(::listOf) ?: emptyList()
+            }
         }
 
         val extracted = TextMapPropagatorAdapter(impl).extract(
-            input,
+            FakeContext(),
             mapOf("baggage" to "k=v"),
-            throwingGetter
+            getter
         )
 
-        assertSame(input, extracted)
+        assertTrue(getterCalled)
+        assertTrue(extracted is FakeContext)
     }
 
     @Test
@@ -135,6 +141,47 @@ internal class TextMapPropagatorAdapterTest {
         val carrier = mapOf("a" to "1")
         val adapter = TextMapGetterAdapter(JavaMapGetter)
         assertTrue(adapter.getAll(carrier, "missing").isEmpty())
+    }
+
+    @Test
+    fun `kotlin getter adapter returns all values from getAll when multiple values present`() {
+        val carrier = mapOf("baggage" to listOf("a=1", "b=2"))
+        val adapter = TextMapGetterAdapter(JavaMultiValueMapGetter)
+        assertEquals(listOf("a=1", "b=2"), adapter.getAll(carrier, "baggage"))
+    }
+
+    @Test
+    fun `kotlin getter adapter preserves value ordering from getAll`() {
+        val carrier = mapOf("baggage" to listOf("c=3", "a=1", "b=2"))
+        val adapter = TextMapGetterAdapter(JavaMultiValueMapGetter)
+        assertEquals(listOf("c=3", "a=1", "b=2"), adapter.getAll(carrier, "baggage"))
+    }
+
+    @Test
+    fun `java getter adapter returns all values from getAll when multiple values present`() {
+        val carrier = mapOf("baggage" to listOf("a=1", "b=2"))
+        val adapter = OtelJavaTextMapGetterAdapter(KotlinMultiValueMapGetter)
+        assertEquals(listOf("a=1", "b=2"), adapter.getAll(carrier, "baggage").asSequence().toList())
+    }
+
+    @Test
+    fun `java getter adapter preserves value ordering from getAll`() {
+        val carrier = mapOf("baggage" to listOf("c=3", "a=1", "b=2"))
+        val adapter = OtelJavaTextMapGetterAdapter(KotlinMultiValueMapGetter)
+        assertEquals(listOf("c=3", "a=1", "b=2"), adapter.getAll(carrier, "baggage").asSequence().toList())
+    }
+
+    @Test
+    fun `java getter adapter returns empty list from getAll when key absent`() {
+        val carrier = mapOf("baggage" to listOf("a=1"))
+        val adapter = OtelJavaTextMapGetterAdapter(KotlinMultiValueMapGetter)
+        assertTrue(adapter.getAll(carrier, "missing").asSequence().toList().isEmpty())
+    }
+
+    @Test
+    fun `java getter adapter returns empty list from getAll when carrier is null`() {
+        val adapter = OtelJavaTextMapGetterAdapter(KotlinMultiValueMapGetter)
+        assertTrue(adapter.getAll(null, "baggage").asSequence().toList().isEmpty())
     }
 
     @Test
@@ -173,6 +220,25 @@ internal class TextMapPropagatorAdapterTest {
     }
 
     private object JavaMapGetter : OtelJavaTextMapGetter<Map<String, String>> {
+        @Deprecated("Overrideing deprecated interface member")
+        override fun keys(carrier: Map<String, String>): Iterable<String> = carrier.keys
         override fun get(carrier: Map<String, String>?, key: String): String? = carrier?.get(key)
+    }
+
+    private object JavaMultiValueMapGetter : OtelJavaTextMapGetter<Map<String, List<String>>> {
+        @Deprecated("Overriding deprecated interface member")
+        override fun keys(carrier: Map<String, List<String>>): Iterable<String> = carrier.keys
+        override fun get(carrier: Map<String, List<String>>?, key: String): String? =
+            carrier?.get(key)?.firstOrNull()
+        override fun getAll(carrier: Map<String, List<String>>?, key: String): MutableIterator<String> =
+            carrier?.get(key).orEmpty().toMutableList().iterator()
+    }
+
+    private object KotlinMultiValueMapGetter : TextMapGetter<Map<String, List<String>>> {
+        override fun keys(carrier: Map<String, List<String>>): Collection<String> = carrier.keys
+        override fun get(carrier: Map<String, List<String>>, key: String): String? =
+            carrier[key]?.firstOrNull()
+        override fun getAll(carrier: Map<String, List<String>>, key: String): List<String> =
+            carrier[key].orEmpty()
     }
 }

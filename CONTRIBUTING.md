@@ -37,6 +37,16 @@ would be accepted.
 `./gradlew verify` runs static analysis and tests for every module except `gradle-integration-test`.
 This should be sufficient for most changesets.
 
+`./gradlew ciBuild -x :gradle-integration-test:test` reproduces the `gradle-test` CI job. It is
+slower than `verify` because it also assembles every module, the benchmarks and the example app.
+
+Code coverage (Kover) is only enabled on CI, because it instruments every JVM test. To generate a
+coverage report locally, run:
+
+```bash
+./gradlew koverXmlReport -Pio.opentelemetry.kotlin.coverage=true   # writes build/reports/kover/report.xml
+```
+
 ### Running the full build including the integration test
 
 The `gradle-integration-test` module verifies that the library's published artifacts are consumable

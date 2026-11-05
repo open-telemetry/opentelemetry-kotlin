@@ -1,4 +1,5 @@
 import io.opentelemetry.kotlin.CheckDuplicatePublicApiTask
+import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 
@@ -7,16 +8,16 @@ plugins {
     id("com.android.kotlin.multiplatform.library") apply false
     id("org.jetbrains.kotlin.multiplatform") apply false
     id("com.vanniktech.maven.publish") apply false
-    id("org.jetbrains.kotlinx.kover") version "0.9.11"
+    id("org.jetbrains.kotlinx.kover") version "0.9.11" apply false
 }
 
 plugins.withType<YarnPlugin> {
     extensions.configure<YarnRootExtension> {
         resolution("brace-expansion", ">=5.0.12")
         resolution("diff", ">=8.0.3")
-        resolution("glob", ">=10.5.0")
+        resolution("glob", ">=14.0.2")
         resolution("js-yaml", ">=5.4.1")
-        resolution("minimatch", ">=9.0.7")
+        resolution("minimatch", ">=11.0.1")
         resolution("serialize-javascript", ">=7.1.4")
         resolution("**/ws", "8.21.0")
         resolution("ws", "8.21.0")
@@ -40,7 +41,7 @@ if (snapshotPublish) {
     }
 }
 
-val checkDuplicatePublicApi by tasks.registering(CheckDuplicatePublicApiTask::class) {
+val checkDuplicatePublicApi = tasks.register<CheckDuplicatePublicApiTask>("checkDuplicatePublicApi") {
     description = "Fails if two modules declare the same public class or top-level function."
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     apiDumps.from(
@@ -67,7 +68,37 @@ tasks.register("verify") {
     }
 }
 
-kover {
+tasks.register("ciBuild") {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = "Runs everything the gradle-test CI job checks. CI adds -x :gradle-integration-test:test."
+    val perProjectTasks = setOf(
+        LifecycleBasePlugin.BUILD_TASK_NAME,
+        "linuxX64Test",
+        "linkDebugTestLinuxArm64",
+        "koverXmlReport",
+    )
+    allprojects.forEach { project ->
+        dependsOn(provider { project.tasks.names.filter { it in perProjectTasks }.map { "${project.path}:$it" } })
+    }
+    dependsOn(
+        ":benchmark-android:assemble",
+        ":benchmark-android:compileReleaseAndroidTestKotlin",
+        ":benchmark-jvm:assemble",
+        ":examples:example-app-android:assembleRelease",
+    )
+}
+
+// Kover instruments every JVM test class, so only apply it on CI (where coverage is reported) or
+// when requested with -Pio.opentelemetry.kotlin.coverage=true.
+val koverEnabled = providers.environmentVariable("CI").isPresent ||
+    providers.gradleProperty("io.opentelemetry.kotlin.coverage").map { it.toBoolean() }.getOrElse(false)
+
+if (koverEnabled) {
+    apply(plugin = "org.jetbrains.kotlinx.kover")
+    configureKover()
+}
+
+fun configureKover() = extensions.configure<KoverProjectExtension> {
     merge {
         subprojects { project ->
             project.findProperty("io.opentelemetry.kotlin.enableCodeCoverage")?.toString()?.toBoolean() ?: true

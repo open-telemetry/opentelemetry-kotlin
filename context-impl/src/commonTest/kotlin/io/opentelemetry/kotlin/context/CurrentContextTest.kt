@@ -25,7 +25,7 @@ internal class CurrentContextTest {
             factory.root(),
             SingleSlotCurrentContextStorage(factory::root),
             NoopSdkErrorHandler,
-        )
+        ) {}
         assertTrue(scope.detach())
     }
 

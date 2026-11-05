@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaReadWriteSpan
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaReadableSpan
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanData
@@ -41,7 +42,7 @@ internal class ReadWriteSpanAdapterTest {
     fun setUp() = runTest {
         fakeReadableSpan = FakeOtelJavaReadableSpan(fakeInProgressOtelJavaSpanData)
         fakeImpl = FakeOtelJavaReadWriteSpan(fakeReadableSpan)
-        adapter = ReadWriteSpanAdapter(fakeImpl)
+        adapter = ReadWriteSpanAdapter(fakeImpl, FakeSdkErrorHandler())
         harness = OtelKotlinHarness(testScheduler)
     }
 

@@ -20,8 +20,8 @@ public abstract interface class io/opentelemetry/kotlin/attributes/AttributeCont
 }
 
 public abstract interface class io/opentelemetry/kotlin/context/CurrentContextStorage {
+	public abstract fun attach (Lio/opentelemetry/kotlin/context/Context;)Lio/opentelemetry/kotlin/context/Scope;
 	public abstract fun current ()Lio/opentelemetry/kotlin/context/Context;
-	public abstract fun setCurrent (Lio/opentelemetry/kotlin/context/Context;)V
 }
 
 public final class io/opentelemetry/kotlin/context/CurrentContextStorageMode : java/lang/Enum {
@@ -470,6 +470,11 @@ public abstract interface class io/opentelemetry/kotlin/tracing/sampling/Composa
 public abstract interface class io/opentelemetry/kotlin/tracing/sampling/Sampler {
 	public abstract fun getDescription ()Ljava/lang/String;
 	public abstract fun shouldSample (Lio/opentelemetry/kotlin/context/Context;[BLjava/lang/String;Lio/opentelemetry/kotlin/tracing/SpanKind;Lio/opentelemetry/kotlin/attributes/AttributeContainer;Ljava/util/List;)Lio/opentelemetry/kotlin/tracing/sampling/SamplingResult;
+	public abstract fun shutdown (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/opentelemetry/kotlin/tracing/sampling/Sampler$DefaultImpls {
+	public static fun shutdown (Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/sampling/SamplingIntent {

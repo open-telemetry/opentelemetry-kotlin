@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 
 /**
  * Creates a [Baggage] by configuring entries inside the [action] DSL block. Omitting [action]
- * returns the empty [Baggage].
+ * returns the empty [Baggage]. If [action] throws, the empty [Baggage] is returned.
  *
  * This does not require an [io.opentelemetry.kotlin.OpenTelemetry] instance: the Baggage API is
  * fully functional in the absence of an installed SDK.
@@ -14,7 +14,11 @@ import io.opentelemetry.kotlin.ExperimentalApi
 @ExperimentalApi
 public fun createBaggage(action: BaggageCreationAction.() -> Unit = {}): Baggage {
     val builder = BaggageCreationActionImpl()
-    builder.action()
+    try {
+        builder.action()
+    } catch (ignored: Throwable) {
+        return BaggageImpl.EMPTY
+    }
     return builder.build()
 }
 

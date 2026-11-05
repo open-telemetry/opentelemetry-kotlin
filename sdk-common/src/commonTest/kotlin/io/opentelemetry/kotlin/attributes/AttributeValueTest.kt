@@ -178,6 +178,60 @@ internal class AttributeValueTest {
     }
 
     @Test
+    fun testTruncationDoesNotSplitSurrogatePairs() {
+        // 😀 is one code point made of two UTF-16 code units
+        assertEquals("ab😀", AttributeValue.Str("ab😀cd", 3).value)
+        assertEquals(listOf("😀😀"), AttributeValue.StrList(listOf("😀😀😀"), 2).value)
+        val nested = AttributeValue.Value(AnyValue.ListValue(listOf(AnyValue.StringValue("a😀b"))), 2).value
+        assertEquals(AnyValue.ListValue(listOf(AnyValue.StringValue("a😀"))), nested)
+    }
+
+    @Test
+    fun testNestedValuesTruncatedAndCopiedOnConstruction() {
+        val source = byteArrayOf(1, 2, 3)
+        val items = mutableListOf<AnyValue>(AnyValue.StringValue("abc"), AnyValue.BytesValue(source))
+        val value = AttributeValue.Value(AnyValue.MapValue(mapOf("list" to AnyValue.ListValue(items))), 2)
+        items.add(AnyValue.StringValue("extra"))
+        source[0] = 9
+        val stored = ((value.value as AnyValue.MapValue).values["list"] as AnyValue.ListValue).values
+        assertEquals(2, stored.size)
+        assertEquals(AnyValue.StringValue("ab"), stored[0])
+        assertContentEquals(byteArrayOf(1, 2), (stored[1] as AnyValue.BytesValue).value)
+    }
+
+    @Test
+    fun testSelfReferentialValueReplacedWithNull() {
+        val items = mutableListOf<AnyValue>(AnyValue.StringValue("a"))
+        val list = AnyValue.ListValue(items)
+        items.add(list)
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.StringValue("a"), AnyValue.NullValue)),
+            AttributeValue.Value(list).value,
+        )
+    }
+
+    @Test
+    fun testTypedAttributesOrConvert() {
+        val typed = mapOf<String, AttributeValue>("d" to AttributeValue.Double(1.0))
+        val typedContainer = object : TypedAttributeContainer {
+            override val typedAttributes = typed
+            override val attributes: Map<String, Any> = mapOf("d" to 1.0)
+        }
+        assertSame(typed, typedContainer.typedAttributesOrConvert())
+
+        val untyped = object : AttributeContainer {
+            override val attributes: Map<String, Any> = mapOf("s" to "v", "bytes" to byteArrayOf(1))
+        }
+        assertEquals(
+            mapOf(
+                "s" to AttributeValue.Str("v"),
+                "bytes" to AttributeValue.Value(AnyValue.BytesValue(byteArrayOf(1))),
+            ),
+            untyped.typedAttributesOrConvert(),
+        )
+    }
+
+    @Test
     fun testNegativeLimitDoesNotTruncate() {
         assertEquals("abc", AttributeValue.Str("abc", -1).value)
         assertEquals(listOf("abc"), AttributeValue.StrList(listOf("abc"), -5).value)

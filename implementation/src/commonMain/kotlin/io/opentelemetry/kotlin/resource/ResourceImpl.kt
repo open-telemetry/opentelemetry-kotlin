@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.resource
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.NO_ATTRIBUTE_LIMIT
+import io.opentelemetry.kotlin.attributes.toAttributeValues
 
 internal class ResourceImpl(
     container: AttributeContainer,
@@ -14,12 +15,15 @@ internal class ResourceImpl(
     override fun asNewResource(action: MutableResource.() -> Unit): Resource {
         val impl = MutableResourceImpl(attributes.toMutableMap(), schemaUrl)
         impl.apply(action)
-        val container = AttributesModel(attributeLimit = NO_ATTRIBUTE_LIMIT, attrs = impl.attributes)
+        val container = AttributesModel(
+            attributeLimit = NO_ATTRIBUTE_LIMIT,
+            attrs = impl.attributes.toAttributeValues().toMutableMap(),
+        )
         return ResourceImpl(container, impl.schemaUrl)
     }
 
     override fun merge(other: Resource): Resource {
-        val mergedAttrs = (attributes + other.attributes).toMutableMap()
+        val mergedAttrs = (attributes + other.attributes).toAttributeValues().toMutableMap()
         val mergedSchema = when {
             schemaUrl == null -> other.schemaUrl
             other.schemaUrl == null -> schemaUrl

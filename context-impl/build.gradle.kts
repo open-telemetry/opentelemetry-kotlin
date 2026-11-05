@@ -1,10 +1,12 @@
+import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
+import java.time.Duration
+
 plugins {
     kotlin("multiplatform")
     id("com.android.kotlin.multiplatform.library")
     id("io.opentelemetry.kotlin.build-logic")
     id("signing")
     id("com.vanniktech.maven.publish")
-    id("org.jetbrains.kotlinx.kover")
 }
 
 kotlin {
@@ -22,9 +24,11 @@ kotlin {
         commonTest {
             dependencies {
                 implementation(project(":test-fakes"))
-                implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.kotest.property)
             }
         }
     }
+}
+
+tasks.withType<KotlinNativeTest>().configureEach {
+    timeout.set(Duration.ofMinutes(30))
 }

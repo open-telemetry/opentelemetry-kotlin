@@ -5,6 +5,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertNotSame
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 internal class ThreadLocalCurrentContextStorageTest {
 
@@ -25,8 +26,22 @@ internal class ThreadLocalCurrentContextStorageTest {
     @Test
     fun testSetContextReturnedOnSameThread() {
         val other = FakeContext()
-        storage.setCurrent(other)
+        storage.attach(other)
         assertSame(other, storage.current())
+    }
+
+    @Test
+    fun testDetachRestoresPreviousState() {
+        val outer = FakeContext()
+        val inner = FakeContext()
+        val outerScope = storage.attach(outer)
+        val innerScope = storage.attach(inner)
+        assertSame(inner, storage.current())
+
+        assertTrue(innerScope.detach())
+        assertSame(outer, storage.current())
+        assertTrue(outerScope.detach())
+        assertSame(factory.root(), storage.current())
     }
 
     @Test
@@ -34,8 +49,8 @@ internal class ThreadLocalCurrentContextStorageTest {
         val first = FakeContext()
         val second = FakeContext()
         val otherStorage = ThreadLocalCurrentContextStorage(factory::root)
-        storage.setCurrent(first)
-        otherStorage.setCurrent(second)
+        storage.attach(first)
+        otherStorage.attach(second)
         assertSame(first, storage.current())
         assertSame(second, otherStorage.current())
         assertNotSame(storage.current(), otherStorage.current())

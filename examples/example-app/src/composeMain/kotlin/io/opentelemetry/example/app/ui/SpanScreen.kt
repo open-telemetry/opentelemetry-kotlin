@@ -13,9 +13,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -28,7 +28,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.opentelemetry.example.app.AppConfig
-import kotlinx.coroutines.delay
 import io.opentelemetry.example.app.AttributeType
 import io.opentelemetry.example.app.SpanFormState
 import io.opentelemetry.example.app.ui.components.AttributeEditor
@@ -38,6 +37,7 @@ import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.context.Scope
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanKind
+import kotlinx.coroutines.delay
 
 @Composable
 fun SpanScreen(

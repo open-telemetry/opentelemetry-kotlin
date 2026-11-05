@@ -4,12 +4,11 @@ plugins {
     id("io.opentelemetry.kotlin.build-logic")
     id("signing")
     id("com.vanniktech.maven.publish")
-    id("org.jetbrains.kotlinx.kover")
 }
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(project(":api-ext"))
                 implementation(project(":sdk-api"))
@@ -20,7 +19,7 @@ kotlin {
                 implementation(libs.ktor.serialization.kotlinx.json)
             }
         }
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(project(":test-fakes"))
                 implementation(project(":integration-test"))
@@ -28,7 +27,7 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
             }
         }
-        val jvmTest by getting {
+        jvmTest {
             dependencies {
                 implementation(libs.kotlin.test)
             }

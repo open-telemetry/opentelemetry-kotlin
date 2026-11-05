@@ -22,8 +22,9 @@ public interface ContextConfigDsl {
      * Plugs in a custom [CurrentContextStorage] implementation. When set, this takes precedence
      * over [storageMode]. May only be called once.
      *
-     * The [action] receives a `rootSupplier` that provides the root [Context], allowing the
-     * custom implementation to fall back to the root context when none is set.
+     * The [action] receives a `rootSupplier` that provides the root [Context]. The custom
+     * implementation's [CurrentContextStorage.current] must return that instance when nothing is
+     * attached.
      */
     public fun storage(action: (rootSupplier: () -> Context) -> CurrentContextStorage)
 }

@@ -14,8 +14,10 @@ public class ThreadLocalCurrentContextStorage(
     private val root by lazy { rootSupplier() }
     private val current = ThreadLocal<Context>()
 
-    override fun setCurrent(context: Context) {
+    override fun attach(context: Context): Scope {
+        val previous = current.get()
         current.set(context)
+        return RestoringScope { current.set(previous) }
     }
 
     override fun current(): Context = current.get() ?: root
