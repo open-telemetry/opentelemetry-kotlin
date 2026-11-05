@@ -13,6 +13,7 @@ kotlin {
                 implementation(project(":sdk-api"))
                 implementation(project(":sdk-common"))
                 implementation(project(":platform-implementations"))
+                implementation(project(":platform-io"))
                 implementation(libs.kotlinx.coroutines)
             }
         }

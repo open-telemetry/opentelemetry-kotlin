@@ -38,6 +38,7 @@ include(
     ":model",
     ":compat",
     ":platform-implementations",
+    ":platform-io",
     ":testing",
     ":test-fakes",
     ":integration-test",
