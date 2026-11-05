@@ -1,12 +1,11 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
-import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteLogRecord
-import io.opentelemetry.kotlin.aliases.OtelJavaValue
-import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.attributes.OtelJavaAttributesMutator
+import io.opentelemetry.kotlin.attributes.attributeSink
 import io.opentelemetry.kotlin.attributes.convertToMap
-import io.opentelemetry.kotlin.attributes.toOtelJavaValue
 import io.opentelemetry.kotlin.attributes.toOtelKotlinBody
 import io.opentelemetry.kotlin.droppedCount
 import io.opentelemetry.kotlin.logging.SeverityNumber
@@ -24,7 +23,8 @@ import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 internal class ReadWriteLogRecordAdapter(
     val impl: OtelJavaReadWriteLogRecord,
     private val unsupportedWrites: UnsupportedLogRecordWriteReporter,
-) : ReadWriteLogRecord {
+) : ReadWriteLogRecord,
+    AttributesMutator by OtelJavaAttributesMutator(impl.attributeSink()) {
 
     override var timestamp: Long?
         get() = impl.timestampEpochNanos.takeIf { it > 0L }
@@ -67,46 +67,6 @@ internal class ReadWriteLogRecordAdapter(
         set(value) {
             unsupportedWrites.report("eventName")
         }
-
-    override fun setBooleanAttribute(key: String, value: Boolean) {
-        impl.setAttribute(OtelJavaAttributeKey.booleanKey(key), value)
-    }
-
-    override fun setStringAttribute(key: String, value: String) {
-        impl.setAttribute(OtelJavaAttributeKey.stringKey(key), value)
-    }
-
-    override fun setLongAttribute(key: String, value: Long) {
-        impl.setAttribute(OtelJavaAttributeKey.longKey(key), value)
-    }
-
-    override fun setDoubleAttribute(key: String, value: Double) {
-        impl.setAttribute(OtelJavaAttributeKey.doubleKey(key), value)
-    }
-
-    override fun setBooleanListAttribute(key: String, value: List<Boolean>) {
-        impl.setAttribute(OtelJavaAttributeKey.booleanArrayKey(key), value)
-    }
-
-    override fun setStringListAttribute(key: String, value: List<String>) {
-        impl.setAttribute(OtelJavaAttributeKey.stringArrayKey(key), value)
-    }
-
-    override fun setLongListAttribute(key: String, value: List<Long>) {
-        impl.setAttribute(OtelJavaAttributeKey.longArrayKey(key), value)
-    }
-
-    override fun setDoubleListAttribute(key: String, value: List<Double>) {
-        impl.setAttribute(OtelJavaAttributeKey.doubleArrayKey(key), value)
-    }
-
-    override fun setByteArrayAttribute(key: String, value: ByteArray) {
-        impl.setAttribute(OtelJavaAttributeKey.valueKey(key), OtelJavaValue.of(value))
-    }
-
-    override fun setAnyValueAttribute(key: String, value: AnyValue) {
-        impl.setAttribute(OtelJavaAttributeKey.valueKey(key), value.toOtelJavaValue())
-    }
 
     override val attributes: Map<String, Any>
         get() = impl.attributes.convertToMap()
