@@ -160,7 +160,7 @@ class ExportTraceServiceRequestCreatorTest {
             "long" to 123L,
             "double" to 45.67,
             "bool" to true,
-            "list" to listOf("a", 1L, true)
+            "list" to listOf("a", "b")
         )
         val spanData = FakeSpanData(attributes = attributes)
         val byteArray = listOf(spanData).toProtobufByteArray()

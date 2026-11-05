@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.export.OtlpPartialSuccess
-import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse
+import io.opentelemetry.kotlin.proto.collector.trace.v1.ExportTraceServiceResponse
 
 /**
  * Parses the `partial_success` field of a trace export response, returning null when it is absent,

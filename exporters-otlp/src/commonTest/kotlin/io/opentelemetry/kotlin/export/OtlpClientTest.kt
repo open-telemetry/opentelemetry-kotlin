@@ -18,13 +18,13 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.export.toProtobufByteArray
+import io.opentelemetry.kotlin.proto.collector.logs.v1.ExportLogsPartialSuccess
+import io.opentelemetry.kotlin.proto.collector.logs.v1.ExportLogsServiceResponse
+import io.opentelemetry.kotlin.proto.collector.trace.v1.ExportTracePartialSuccess
+import io.opentelemetry.kotlin.proto.collector.trace.v1.ExportTraceServiceResponse
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.export.toProtobufByteArray
-import io.opentelemetry.proto.collector.logs.v1.ExportLogsPartialSuccess
-import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse
-import io.opentelemetry.proto.collector.trace.v1.ExportTracePartialSuccess
-import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest

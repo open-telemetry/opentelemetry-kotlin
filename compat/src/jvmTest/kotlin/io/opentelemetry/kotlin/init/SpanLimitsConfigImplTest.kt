@@ -25,24 +25,15 @@ internal class SpanLimitsConfigImplTest {
     }
 
     @Test
-    fun `the limits the adapters enforce themselves resolve to a default`() {
-        CompatSpanLimitsConfig().apply {
-            assertEquals(DEFAULT_ATTR_LIMIT, effectiveAttributeCountLimit)
-            assertEquals(DEFAULT_LINK_LIMIT, effectiveLinkCountLimit)
-            assertEquals(DEFAULT_EVENT_LIMIT, effectiveEventCountLimit)
-        }
-    }
-
-    @Test
     fun `a configured zero is not treated as unset`() {
-        CompatSpanLimitsConfig().apply {
+        val impl = CompatSpanLimitsConfig().apply {
             attributeCountLimit = 0
             linkCountLimit = 0
             eventCountLimit = 0
-            assertEquals(0, effectiveAttributeCountLimit)
-            assertEquals(0, effectiveLinkCountLimit)
-            assertEquals(0, effectiveEventCountLimit)
-        }
+        }.build()
+        assertEquals(0, impl.maxNumberOfAttributes)
+        assertEquals(0, impl.maxNumberOfLinks)
+        assertEquals(0, impl.maxNumberOfEvents)
     }
 
     @Test
@@ -75,9 +66,6 @@ internal class SpanLimitsConfigImplTest {
             attributeCountPerEventLimit = -1
             attributeCountPerLinkLimit = -1
         }
-        assertEquals(DEFAULT_ATTR_LIMIT, cfg.effectiveAttributeCountLimit)
-        assertEquals(DEFAULT_LINK_LIMIT, cfg.effectiveLinkCountLimit)
-        assertEquals(DEFAULT_EVENT_LIMIT, cfg.effectiveEventCountLimit)
         assertEquals(OtelJavaSpanLimits.getDefault(), cfg.build())
     }
 }

@@ -25,7 +25,6 @@ import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
-import io.opentelemetry.kotlin.tracing.frozenCopy
 import io.opentelemetry.kotlin.tracing.toSnapshot
 
 /**
@@ -300,7 +299,7 @@ internal class SpanModel(
             spanKind,
             startTimestamp,
             endTimestampImpl,
-            attrs.attributes.frozenCopy(),
+            attrs.attributes,
             eventsList.map { it.toSnapshot() },
             droppedEventsCountImpl,
             linksList.map { it.toSnapshot() },

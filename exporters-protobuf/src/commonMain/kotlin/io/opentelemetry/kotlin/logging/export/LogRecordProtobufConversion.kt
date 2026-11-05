@@ -15,33 +15,33 @@ import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.normalizeLogBody
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.proto.common.v1.AnyValue
-import io.opentelemetry.proto.logs.v1.LogRecord
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_DEBUG
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_DEBUG2
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_DEBUG3
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_DEBUG4
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_ERROR
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_ERROR2
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_ERROR3
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_ERROR4
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_FATAL
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_FATAL2
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_FATAL3
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_FATAL4
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_INFO
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_INFO2
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_INFO3
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_INFO4
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_TRACE
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_TRACE2
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_TRACE3
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_TRACE4
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_UNSPECIFIED
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN2
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN3
-import io.opentelemetry.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN4
+import io.opentelemetry.kotlin.proto.common.v1.AnyValue
+import io.opentelemetry.kotlin.proto.logs.v1.LogRecord
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_DEBUG
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_DEBUG2
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_DEBUG3
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_DEBUG4
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_ERROR
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_ERROR2
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_ERROR3
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_ERROR4
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_FATAL
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_FATAL2
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_FATAL3
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_FATAL4
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_INFO
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_INFO2
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_INFO3
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_INFO4
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_TRACE
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_TRACE2
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_TRACE3
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_TRACE4
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_UNSPECIFIED
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN2
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN3
+import io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.SEVERITY_NUMBER_WARN4
 
 
 internal fun LogRecordData.toProtobuf(): LogRecord = LogRecord(
@@ -106,7 +106,7 @@ private fun AnyValue.toAny(): Any? = when {
     else                 -> null
 }
 
-private fun SeverityNumber.convertSeverityNumber(): io.opentelemetry.proto.logs.v1.SeverityNumber =
+private fun SeverityNumber.convertSeverityNumber(): io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber =
     when (this) {
         SeverityNumber.UNKNOWN -> SEVERITY_NUMBER_UNSPECIFIED
         SeverityNumber.TRACE -> SEVERITY_NUMBER_TRACE
@@ -135,7 +135,7 @@ private fun SeverityNumber.convertSeverityNumber(): io.opentelemetry.proto.logs.
         SeverityNumber.FATAL4 -> SEVERITY_NUMBER_FATAL4
     }
 
-private fun io.opentelemetry.proto.logs.v1.SeverityNumber.toSeverityNumber(): SeverityNumber? =
+private fun io.opentelemetry.kotlin.proto.logs.v1.SeverityNumber.toSeverityNumber(): SeverityNumber? =
     when (this) {
         SEVERITY_NUMBER_UNSPECIFIED -> null
         SEVERITY_NUMBER_TRACE -> SeverityNumber.TRACE

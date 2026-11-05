@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.semconv.DbAttributes
 import io.opentelemetry.kotlin.semconv.ErrorAttributes
+import io.opentelemetry.kotlin.semconv.ExceptionAttributes
 import io.opentelemetry.kotlin.semconv.HttpAttributes
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 import io.opentelemetry.kotlin.semconv.UrlAttributes
@@ -161,7 +162,7 @@ private fun demonstrateComplexLogging(logger: Logger) {
         severityText = "ERROR",
         attributes = {
             setStringAttribute(ErrorAttributes.ERROR_TYPE, "DatabaseConnectionError")
-            setStringAttribute(ErrorAttributes.ERROR_MESSAGE, "Connection timeout after 30s")
+            setStringAttribute(ExceptionAttributes.EXCEPTION_MESSAGE, "Connection timeout after 30s")
             setStringAttribute("db.host", "db.example.com")
         })
 }
