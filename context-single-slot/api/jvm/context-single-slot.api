@@ -1,0 +1,6 @@
+public final class io/opentelemetry/kotlin/context/SingleSlotCurrentContextStorage : io/opentelemetry/kotlin/context/CurrentContextStorage {
+	public fun <init> (Lkotlin/jvm/functions/Function0;)V
+	public fun attach (Lio/opentelemetry/kotlin/context/Context;)Lio/opentelemetry/kotlin/context/Scope;
+	public fun current ()Lio/opentelemetry/kotlin/context/Context;
+}
+

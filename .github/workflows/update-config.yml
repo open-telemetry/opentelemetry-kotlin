@@ -70,7 +70,7 @@ jobs:
 
       - name: Regenerate declarative configuration classes
         if: steps.check-version.outputs.update-needed == 'true'
-        run: ./gradlew :config-schema:generateOpenTelemetryConfiguration
+        run: ./gradlew :config-schema:generateOpenTelemetryConfiguration --warn
 
       - name: Use CLA approved github bot
         if: steps.check-version.outputs.update-needed == 'true'

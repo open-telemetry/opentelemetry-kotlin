@@ -15,19 +15,6 @@ internal class CompatSpanLimitsConfig : SpanLimitsConfigDsl {
     override var attributeCountPerLinkLimit: Int? = null
 
     /**
-     * The Java SDK cannot report dropped links, events, or attributes back to us, so the adapters
-     * enforce those three limits themselves and need the default filled in here.
-     */
-    val effectiveAttributeCountLimit: Int
-        get() = limitOrUnset(attributeCountLimit) ?: DEFAULT_ATTR_LIMIT
-
-    val effectiveLinkCountLimit: Int
-        get() = limitOrUnset(linkCountLimit) ?: DEFAULT_LINK_LIMIT
-
-    val effectiveEventCountLimit: Int
-        get() = limitOrUnset(eventCountLimit) ?: DEFAULT_EVENT_LIMIT
-
-    /**
      * Only the limits that were configured are set, so anything left unset falls back to the Java
      * SDK's own default.
      */
