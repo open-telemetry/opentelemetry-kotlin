@@ -180,7 +180,7 @@ internal class CompatTracerProviderConfig(
         }
         builder.setClock(clock.toOtelJavaClock())
         sampler?.let(::setSampler)
-        return TracerProviderAdapter(builder.build(), spanLimitsConfig, contextFactory, sdkErrorHandler)
+        return TracerProviderAdapter(builder.build(), contextFactory, sdkErrorHandler)
     }
 
     fun toBehavior(): TracerProviderBehavior =
