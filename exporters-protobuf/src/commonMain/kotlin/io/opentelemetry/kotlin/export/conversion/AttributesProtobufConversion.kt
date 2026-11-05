@@ -1,10 +1,10 @@
 package io.opentelemetry.kotlin.export.conversion
 
 import io.opentelemetry.kotlin.attributes.AnyValue as KotlinAnyValue
-import io.opentelemetry.proto.common.v1.AnyValue
-import io.opentelemetry.proto.common.v1.ArrayValue
-import io.opentelemetry.proto.common.v1.KeyValue
-import io.opentelemetry.proto.common.v1.KeyValueList
+import io.opentelemetry.kotlin.proto.common.v1.AnyValue
+import io.opentelemetry.kotlin.proto.common.v1.ArrayValue
+import io.opentelemetry.kotlin.proto.common.v1.KeyValue
+import io.opentelemetry.kotlin.proto.common.v1.KeyValueList
 import okio.ByteString
 
 fun Map<String, Any>.createKeyValues(): List<KeyValue> = map(::createKeyValue)
