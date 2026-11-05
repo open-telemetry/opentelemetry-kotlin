@@ -2,7 +2,6 @@
 
 package io.opentelemetry.kotlin
 
-import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
@@ -77,7 +76,7 @@ private fun createRecursiveMutex(): CPointer<pthread_mutex_t>? = memScoped {
  */
 private fun pthreadSucceeded(result: Int, operation: String): Boolean {
     if (result != 0) {
-        platformLog("$operation failed with code $result", SdkErrorSeverity.WARNING, null)
+        platformLog("$operation failed with code $result", PlatformLogLevel.WARNING, null)
     }
     return result == 0
 }

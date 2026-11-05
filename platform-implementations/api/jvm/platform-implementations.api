@@ -32,17 +32,18 @@ public final class io/opentelemetry/kotlin/ExceptionType_jvmKt {
 	public static final fun exceptionType (Ljava/lang/Throwable;)Ljava/lang/String;
 }
 
-public final class io/opentelemetry/kotlin/FileSystem_jvmKt {
-	public static final fun getFileSystem ()Lokio/FileSystem;
-}
-
-public final class io/opentelemetry/kotlin/IoDispatcher_jvmKt {
-	public static final fun getIoDispatcher ()Lkotlinx/coroutines/CoroutineDispatcher;
+public final class io/opentelemetry/kotlin/PlatformLogLevel : java/lang/Enum {
+	public static final field ERROR Lio/opentelemetry/kotlin/PlatformLogLevel;
+	public static final field INFO Lio/opentelemetry/kotlin/PlatformLogLevel;
+	public static final field WARNING Lio/opentelemetry/kotlin/PlatformLogLevel;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/PlatformLogLevel;
+	public static fun values ()[Lio/opentelemetry/kotlin/PlatformLogLevel;
 }
 
 public final class io/opentelemetry/kotlin/PlatformLogger_jvmKt {
-	public static final fun platformLog (Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;Ljava/lang/Throwable;)V
-	public static synthetic fun platformLog$default (Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	public static final fun platformLog (Ljava/lang/String;Lio/opentelemetry/kotlin/PlatformLogLevel;Ljava/lang/Throwable;)V
+	public static synthetic fun platformLog$default (Ljava/lang/String;Lio/opentelemetry/kotlin/PlatformLogLevel;Ljava/lang/Throwable;ILjava/lang/Object;)V
 }
 
 public final class io/opentelemetry/kotlin/ReentrantReadWriteLock {
