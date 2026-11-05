@@ -459,7 +459,7 @@ internal class SpanExportTest {
         val list = AnyValue.ListValue(listOf(AnyValue.LongValue(1), AnyValue.StringValue("a")))
         val map = AnyValue.MapValue(mapOf("k" to AnyValue.BoolValue(true)))
         val bytes = byteArrayOf(1, 2)
-        val span = harness.tracer.startSpan("span", null, SpanKind.INTERNAL, null, {
+        val span = harness.tracer.startSpan("span", null, SpanKind.INTERNAL, 0, {
             setAnyValueAttribute("start_list", list)
         })
         span.setAnyValueAttribute("map", map)
@@ -491,7 +491,7 @@ internal class SpanExportTest {
         }
         val a = harness.tracer.startSpan("a")
         val b = harness.tracer.startSpan("b")
-        val c = harness.tracer.startSpan("span", null, SpanKind.INTERNAL, null, {
+        val c = harness.tracer.startSpan("span", null, SpanKind.INTERNAL, 0, {
             addMultipleAttrs()
 
             addLink(a.spanContext) {

@@ -176,12 +176,12 @@ public final class io/opentelemetry/kotlin/init/B3Format : java/lang/Enum {
 }
 
 public abstract interface class io/opentelemetry/kotlin/logging/Logger {
-	public abstract fun emit (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/SeverityNumber;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun emit (Ljava/lang/Object;Ljava/lang/String;JJLio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/SeverityNumber;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun enabled (Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/SeverityNumber;Ljava/lang/String;)Z
 }
 
 public final class io/opentelemetry/kotlin/logging/Logger$DefaultImpls {
-	public static synthetic fun emit$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/Object;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/SeverityNumber;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static synthetic fun emit$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/Object;Ljava/lang/String;JJLio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/SeverityNumber;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun enabled$default (Lio/opentelemetry/kotlin/logging/Logger;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/SeverityNumber;Ljava/lang/String;ILjava/lang/Object;)Z
 }
 
@@ -426,11 +426,11 @@ public abstract interface class io/opentelemetry/kotlin/tracing/SpanCreationActi
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/SpanEventCreator {
-	public abstract fun addEvent (Ljava/lang/String;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun addEvent (Ljava/lang/String;JLkotlin/jvm/functions/Function1;)V
 }
 
 public final class io/opentelemetry/kotlin/tracing/SpanEventCreator$DefaultImpls {
-	public static synthetic fun addEvent$default (Lio/opentelemetry/kotlin/tracing/SpanEventCreator;Ljava/lang/String;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static synthetic fun addEvent$default (Lio/opentelemetry/kotlin/tracing/SpanEventCreator;Ljava/lang/String;JLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public final class io/opentelemetry/kotlin/tracing/SpanKind : java/lang/Enum {
@@ -497,11 +497,11 @@ public abstract interface class io/opentelemetry/kotlin/tracing/TraceStateCreati
 
 public abstract interface class io/opentelemetry/kotlin/tracing/Tracer {
 	public abstract fun enabled ()Z
-	public abstract fun startSpan (Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/SpanKind;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/Span;
+	public abstract fun startSpan (Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/SpanKind;JLkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/Span;
 }
 
 public final class io/opentelemetry/kotlin/tracing/Tracer$DefaultImpls {
-	public static synthetic fun startSpan$default (Lio/opentelemetry/kotlin/tracing/Tracer;Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/SpanKind;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/Span;
+	public static synthetic fun startSpan$default (Lio/opentelemetry/kotlin/tracing/Tracer;Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/SpanKind;JLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/Span;
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/TracerProvider {

@@ -35,7 +35,7 @@ internal class SpanProcessOnStartOverrideTest {
     @Test
     fun testOverridePropertiesInProcessor() = runTest {
         harness.config.spanProcessors.add(OnStartSpanProcessor())
-        harness.tracer.startSpan("span", null, SpanKind.INTERNAL, null) {
+        harness.tracer.startSpan("span", null, SpanKind.INTERNAL, 0) {
             setStringAttribute("key", "value")
             addLink(FakeSpanContext.INVALID)
         }

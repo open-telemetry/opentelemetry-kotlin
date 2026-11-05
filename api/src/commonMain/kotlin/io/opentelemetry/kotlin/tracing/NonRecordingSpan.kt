@@ -40,7 +40,7 @@ internal class NonRecordingSpan(
 
     override fun addEvent(
         name: String,
-        timestamp: Long?,
+        timestamp: Long,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
     }
