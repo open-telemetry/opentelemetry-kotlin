@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.config.yaml
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
 import io.opentelemetry.kotlin.getEnvVarValue
 import net.mamoe.yamlkt.Yaml
 import okio.FileSystem
@@ -12,11 +11,11 @@ import okio.Path
  *
  * Returned values follow yamlkt's representation (`Map<String, Any?>`, `List<*>`, or
  * scalars), or `null` for an empty document. Environment variable references in scalar values are
- * substituted from [envVarReader].
+ * substituted from [getEnvVar].
  */
 @ExperimentalApi
 class YamlConfigParser(
-    private val envVarReader: EnvVarReader = EnvVarReader(::getEnvVarValue),
+    private val getEnvVar: (String) -> String? = ::getEnvVarValue,
 ) {
 
     /**
@@ -27,7 +26,7 @@ class YamlConfigParser(
         if (yaml.isBlank()) {
             return null
         }
-        return Yaml.decodeAnyFromString(substituteEnvVars(yaml, envVarReader))
+        return Yaml.decodeAnyFromString(substituteEnvVars(yaml, getEnvVar))
     }
 
     /**

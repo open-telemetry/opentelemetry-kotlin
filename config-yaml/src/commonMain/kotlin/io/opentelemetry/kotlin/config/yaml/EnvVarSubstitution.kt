@@ -1,7 +1,5 @@
 package io.opentelemetry.kotlin.config.yaml
 
-import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult
-import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
 import net.mamoe.yamlkt.Yaml
 import net.mamoe.yamlkt.YamlElement
 import net.mamoe.yamlkt.YamlList
@@ -19,8 +17,8 @@ private val ESCAPE_OR_REFERENCE = Regex("""\$\$|\$\{((?:[^}\n$]|\$(?!\$))+)\}"""
 private val WHITESPACE = Regex("""\s+""")
 private val NULL_VALUES = setOf("", "~", "null", "NULL")
 private val ENV_SUBSTITUTION = Regex("""(?:env:)?([a-zA-Z_][a-zA-Z0-9_]*)(?::-(.*))?""")
-private val BEFORE_WHOLE_VALUE = Regex("""(?:^|[:-])[ \t]+$""")
-private val AFTER_WHOLE_VALUE = Regex("""^[ \t]*(?:#.*)?$""")
+private val BEFORE_WHOLE_VALUE = Regex("""(?:(?:^|[:-])[ \t]+|[\[{,][ \t]*)$""")
+private val AFTER_WHOLE_VALUE = Regex("""^[ \t]*(?:[\]},].*|#.*)?$""")
 
 /**
  * Substitutes environment variable references in [yaml], so that node types are interpreted
@@ -32,15 +30,15 @@ private val AFTER_WHOLE_VALUE = Regex("""^[ \t]*(?:#.*)?$""")
  */
 // shortcut: yamlkt hides scalar nodes and cannot read `${` in a plain scalar, so the text is
 // substituted before parsing, then checked against the document with placeholders. References in
-// comments are substituted too, and references in mapping keys fail. Needs a parser that exposes
-// scalar nodes.
-internal fun substituteEnvVars(yaml: String, envVarReader: EnvVarReader): String {
+// mapping keys fail. Needs a parser that exposes scalar nodes.
+internal fun substituteEnvVars(yaml: String, getEnvVar: (String) -> String?): String {
     if ('$' !in yaml) {
         return yaml
     }
     val values = mutableListOf<String>()
     val substituted = substitute(yaml) { name, default ->
-        ((envVarReader.readString(name) as? EnvVarReadResult.Value)?.value ?: default).also { values += it }
+        // the platform lookup is hostile, so a failure reads as unset
+        runCatching { getEnvVar(name) }.getOrNull().orEmpty().ifEmpty { default }.also { values += it }
     }
     var index = 0
     val expected = Yaml.decodeYamlFromString(substitute(yaml) { _, _ -> "\uE000${index++}\uE001" })
@@ -52,6 +50,9 @@ internal fun substituteEnvVars(yaml: String, envVarReader: EnvVarReader): String
 
 private fun substitute(yaml: String, resolve: (name: String, default: String) -> String): String =
     ESCAPE_OR_REFERENCE.replace(yaml) { match ->
+        if (yaml.isInComment(match.range.first)) {
+            return@replace match.value
+        }
         val reference = match.groups[1] ?: return@replace "$"
         val envVar = requireNotNull(ENV_SUBSTITUTION.matchEntire(reference.value)) {
             "Invalid environment variable reference '${match.value}'"
@@ -66,6 +67,26 @@ private fun String.isWholePlainValue(range: IntRange): Boolean {
     val before = substring(lastIndexOf('\n', range.first) + 1, range.first)
     val after = substring(range.last + 1, indexOf('\n', range.last).takeIf { it >= 0 } ?: length)
     return BEFORE_WHOLE_VALUE.containsMatchIn(before) && AFTER_WHOLE_VALUE.matches(after)
+}
+
+// shortcut: quotes are tracked within one line, so a quoted scalar spanning lines can hide a
+// comment. Needs a parser that exposes comments.
+private fun String.isInComment(index: Int): Boolean {
+    val lineStart = lastIndexOf('\n', index - 1) + 1
+    var quote: Char? = null
+    var i = lineStart
+    while (i < index) {
+        val char = this[i]
+        val startsToken = i == lineStart || this[i - 1].isWhitespace() || this[i - 1] in "[{,"
+        when {
+            quote == '"' && char == '\\' -> i++
+            quote != null -> quote = quote.takeUnless { char == it }
+            char == '#' && startsToken -> return true
+            (char == '"' || char == '\'') && startsToken -> quote = char
+        }
+        i++
+    }
+    return false
 }
 
 /**

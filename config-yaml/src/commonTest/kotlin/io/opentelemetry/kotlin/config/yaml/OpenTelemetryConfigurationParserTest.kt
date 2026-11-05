@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.config.yaml
 
-import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
 import io.opentelemetry.kotlin.config.schema.model.AttributeLimits
 import io.opentelemetry.kotlin.config.schema.model.AttributeNameValue
 import io.opentelemetry.kotlin.config.schema.model.AttributeType
@@ -112,7 +111,7 @@ internal class OpenTelemetryConfigurationParserTest {
               schema_url: ${'$'}{UNSET}
         """.trimIndent()
 
-        val config = OpenTelemetryConfigurationParser(EnvVarReader(envVars::get)).parse(yaml)
+        val config = OpenTelemetryConfigurationParser(envVars::get).parse(yaml)
 
         assertEquals(AttributeLimits(attributeCountLimit = 64, attributeValueLengthLimit = 256), config.attributeLimits)
         assertEquals(Resource(attributesList = "service.name=demo"), config.resource)
@@ -121,7 +120,7 @@ internal class OpenTelemetryConfigurationParserTest {
     @Test
     fun envVarCannotInjectStructure() {
         val envVars = mapOf("LEVEL" to "info\ndisabled: true")
-        val parser = OpenTelemetryConfigurationParser(EnvVarReader(envVars::get))
+        val parser = OpenTelemetryConfigurationParser(envVars::get)
 
         assertFailsWith<IllegalArgumentException> {
             parser.parse("$MINIMAL_DOCUMENT\nlog_level: ${'$'}{LEVEL}")

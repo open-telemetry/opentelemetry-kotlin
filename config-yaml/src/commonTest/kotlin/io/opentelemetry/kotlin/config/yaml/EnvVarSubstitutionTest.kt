@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.config.yaml
 
-import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -26,8 +25,9 @@ internal class EnvVarSubstitutionTest {
         "REPLACE_ME" to "\${DO_NOT_REPLACE_ME}",
         "VALUE_WITH_ESCAPE" to "value\$\$",
         "EMPTY_VALUE" to "",
+        "WHITESPACE_VALUE" to " ",
     )
-    private val parser = YamlConfigParser(EnvVarReader(envVars::get))
+    private val parser = YamlConfigParser(envVars::get)
 
     @Test
     fun substitutesScalarValues() {
@@ -68,6 +68,23 @@ internal class EnvVarSubstitutionTest {
     fun substitutesSequenceElements() {
         val yaml = "list:\n  - \${INT_VALUE}\n  - \${STRING_VALUE}"
         assertEquals(mapOf("list" to listOf(1, "value")), parser.parse(yaml))
+    }
+
+    @Test
+    fun keepsUndefinedFlowMappingValue() {
+        val yaml = "map: {key: \${UNDEFINED_KEY}, other: \${STRING_VALUE}}"
+        assertEquals(mapOf("map" to mapOf("key" to null, "other" to "value")), parser.parse(yaml))
+    }
+
+    @Test
+    fun ignoresReferencesInComments() {
+        val yaml = "# \${STRING_VALUE:?required}\nkey: \"#\${STRING_VALUE}\" # example: \${1API_KEY}"
+        assertEquals(mapOf("key" to "#value"), parser.parse(yaml))
+    }
+
+    @Test
+    fun keepsWhitespaceValue() {
+        assertEquals(mapOf("key" to " "), parser.parse("key: \"\${WHITESPACE_VALUE:-fallback}\""))
     }
 
     @Test
