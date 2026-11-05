@@ -24,5 +24,5 @@ public interface DoubleUpDownCounter : SynchronousInstrument {
      * [value] may be positive, negative, or zero.
      */
     @ThreadSafe
-    public fun add(value: Double, attributes: AttributesMutator.() -> Unit = {})
+    public fun add(value: Double, attributes: (AttributesMutator.() -> Unit)? = null)
 }
