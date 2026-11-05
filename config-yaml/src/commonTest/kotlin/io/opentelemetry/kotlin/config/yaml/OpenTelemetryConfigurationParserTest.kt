@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.config.yaml
 
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
 import io.opentelemetry.kotlin.config.schema.model.AttributeLimits
 import io.opentelemetry.kotlin.config.schema.model.AttributeNameValue
 import io.opentelemetry.kotlin.config.schema.model.AttributeType
@@ -96,6 +97,49 @@ internal class OpenTelemetryConfigurationParserTest {
         val idGenerator = parser.parse(yaml).tracerProvider?.idGenerator
 
         assertNotNull(idGenerator?.random)
+    }
+
+    @Test
+    fun substitutesEnvVarsBeforeMapping() {
+        val envVars = mapOf("COUNT_LIMIT" to "64", "ATTRIBUTES" to "service.name=demo")
+        val yaml = """
+            $MINIMAL_DOCUMENT
+            attribute_limits:
+              attribute_count_limit: ${'$'}{COUNT_LIMIT}
+              attribute_value_length_limit: ${'$'}{UNSET:-256}
+            resource:
+              attributes_list: "${'$'}{ATTRIBUTES}"
+              schema_url: ${'$'}{UNSET}
+        """.trimIndent()
+
+        val config = OpenTelemetryConfigurationParser(EnvVarReader(envVars::get)).parse(yaml)
+
+        assertEquals(AttributeLimits(attributeCountLimit = 64, attributeValueLengthLimit = 256), config.attributeLimits)
+        assertEquals(Resource(attributesList = "service.name=demo"), config.resource)
+    }
+
+    @Test
+    fun envVarCannotInjectStructure() {
+        val envVars = mapOf("LEVEL" to "info\ndisabled: true")
+        val parser = OpenTelemetryConfigurationParser(EnvVarReader(envVars::get))
+
+        assertFailsWith<IllegalArgumentException> {
+            parser.parse("$MINIMAL_DOCUMENT\nlog_level: ${'$'}{LEVEL}")
+        }
+    }
+
+    @Test
+    fun substitutionKeepsValuesWithoutReferences() {
+        val golden = loadTestFixture(GOLDEN_FILE)
+
+        assertEquals(parser.parse(golden), parser.parse("$golden\n# costs ${'$'}5"))
+    }
+
+    @Test
+    fun invalidEnvVarReferenceFails() {
+        assertFailsWith<IllegalArgumentException> {
+            parser.parse("$MINIMAL_DOCUMENT\nlog_level: ${'$'}{LEVEL:?unset}")
+        }
     }
 
     @Test

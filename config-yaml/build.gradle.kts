@@ -13,6 +13,7 @@ kotlin {
                 implementation(project(":sdk-api"))
                 api(project(":behavior"))
                 api(project(":config-schema"))
+                api(project(":config-envar"))
                 implementation(project(":platform-implementations"))
                 implementation(project(":platform-io"))
                 implementation(project(":propagation-utils"))
