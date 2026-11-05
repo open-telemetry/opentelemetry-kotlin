@@ -4,9 +4,9 @@ import io.opentelemetry.kotlin.export.conversion.toResource
 import io.opentelemetry.kotlin.export.conversion.toInstrumentationScopeInfo
 import io.opentelemetry.kotlin.export.conversion.toProtobuf
 import io.opentelemetry.kotlin.logging.data.LogRecordData
-import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest
-import io.opentelemetry.proto.logs.v1.ResourceLogs
-import io.opentelemetry.proto.logs.v1.ScopeLogs
+import io.opentelemetry.kotlin.proto.collector.logs.v1.ExportLogsServiceRequest
+import io.opentelemetry.kotlin.proto.logs.v1.ResourceLogs
+import io.opentelemetry.kotlin.proto.logs.v1.ScopeLogs
 
 fun List<LogRecordData>.toProtobufByteArray(): ByteArray =
     ExportLogsServiceRequest.ADAPTER.encode(toExportLogsServiceRequest())
