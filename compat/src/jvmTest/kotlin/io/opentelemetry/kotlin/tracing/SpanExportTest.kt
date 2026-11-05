@@ -10,7 +10,6 @@ import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
-import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.ext.storeInContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceFlags
@@ -592,7 +591,6 @@ internal class SpanExportTest {
             OtelJavaSpan.getInvalid(),
             null,
             SpanKind.INTERNAL,
-            CompatSpanLimitsConfig(),
             NoopSdkErrorHandler,
         )
         span.setStringAttribute("key", "value")

@@ -19,10 +19,12 @@ import io.opentelemetry.kotlin.config.schema.model.Sampler
 import io.opentelemetry.kotlin.config.schema.model.SeverityNumber
 import io.opentelemetry.kotlin.config.schema.model.SpanLimits
 import io.opentelemetry.kotlin.config.schema.model.TracerProvider
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.framework.loadTestFixture
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 internal class OpenTelemetryConfigurationMapperTest {
 
@@ -128,6 +130,31 @@ internal class OpenTelemetryConfigurationMapperTest {
         SeverityNumber.entries.forEach {
             assertEquals(it.name, it.toString().toSeverityLevel()?.name)
         }
+    }
+
+    @Test
+    fun sdkErrorHandlerReceivesWarningForMalformedAttributesList() {
+        val handler = FakeSdkErrorHandler()
+        val config = OpenTelemetryConfiguration(
+            fileFormat = FILE_FORMAT,
+            resource = io.opentelemetry.kotlin.config.schema.model.Resource(attributesList = "bad-entry-no-equals"),
+        )
+        config.toBehavior(handler)
+
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals("resource.attributes_list", handler.apiMisuses.single().api)
+    }
+
+    @Test
+    fun noErrorWhenResourceAttributesAreValid() {
+        val handler = FakeSdkErrorHandler()
+        val config = OpenTelemetryConfiguration(
+            fileFormat = FILE_FORMAT,
+            resource = io.opentelemetry.kotlin.config.schema.model.Resource(attributesList = "k=v"),
+        )
+        config.toBehavior(handler)
+
+        assertTrue(handler.errors.isEmpty())
     }
 
     private companion object {

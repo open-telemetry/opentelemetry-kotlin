@@ -14,7 +14,7 @@ class FakeLongUpDownCounter(
 
     override fun enabled(): Boolean = enabledResult()
 
-    override fun add(value: Long, attributes: AttributesMutator.() -> Unit) {
-        adds.add(value to FakeAttributesMutator().apply(attributes).attributes)
+    override fun add(value: Long, attributes: (AttributesMutator.() -> Unit)?) {
+        adds.add(value to FakeAttributesMutator().apply { attributes?.invoke(this) }.attributes)
     }
 }

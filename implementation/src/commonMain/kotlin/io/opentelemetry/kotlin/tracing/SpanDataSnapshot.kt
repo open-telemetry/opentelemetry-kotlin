@@ -3,29 +3,16 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 
-internal fun Map<String, Any>.frozenCopy(): Map<String, Any> {
-    if (isEmpty()) {
-        return emptyMap()
-    }
-    return mapValues { (_, value) -> freezeAttributeValue(value) }
-}
-
-private fun freezeAttributeValue(value: Any): Any = when (value) {
-    is ByteArray -> value.copyOf()
-    is List<*> -> value.toList()
-    else -> value
-}
-
 internal fun SpanEventData.toSnapshot(): SpanEventData = SnapshotSpanEventData(
     name = name,
     timestamp = timestamp,
-    attributes = attributes.frozenCopy(),
+    attributes = attributes,
     droppedAttributesCount = droppedAttributesCount,
 )
 
 internal fun SpanLinkData.toSnapshot(): SpanLinkData = SnapshotSpanLinkData(
     spanContext = spanContext,
-    attributes = attributes.frozenCopy(),
+    attributes = attributes,
     droppedAttributesCount = droppedAttributesCount,
 )
 

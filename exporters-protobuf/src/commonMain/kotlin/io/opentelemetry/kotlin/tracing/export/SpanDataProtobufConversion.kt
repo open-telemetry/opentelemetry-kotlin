@@ -14,9 +14,9 @@ import io.opentelemetry.kotlin.tracing.StatusCode
 import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanKind
-import io.opentelemetry.proto.trace.v1.Span
-import io.opentelemetry.proto.trace.v1.SpanFlags
-import io.opentelemetry.proto.trace.v1.Status
+import io.opentelemetry.kotlin.proto.trace.v1.Span
+import io.opentelemetry.kotlin.proto.trace.v1.SpanFlags
+import io.opentelemetry.kotlin.proto.trace.v1.Status
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 

@@ -11,7 +11,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
@@ -184,10 +183,9 @@ internal class UpDownCounterImplTest {
         val unit = "a".repeat(maxUnitChars + 1)
         val counter = invalidUnitMeter.createDoubleUpDownCounter("grocery.customers", unit = unit)
 
-        assertNull(counter.unit)
+        assertEquals(unit, counter.unit)
         assertTrue(counter.enabled())
-        assertEquals(1, handler.apiMisuses.size)
-        assertEquals("Instrument.unit", handler.apiMisuses.single().api)
+        assertTrue(handler.apiMisuses.isEmpty())
     }
 
     @Test
@@ -209,7 +207,7 @@ internal class UpDownCounterImplTest {
     }
 
     @Test
-    fun createWithNonAsciiUnitDropsUnitAndReportsApiMisuse() {
+    fun createWithNonAsciiUnitPreservesUnit() {
         val handler = FakeSdkErrorHandler()
         val nonAsciiUnitMeter = MeterProviderImpl(
             MetricsConfig(
@@ -221,14 +219,13 @@ internal class UpDownCounterImplTest {
 
         val counter = nonAsciiUnitMeter.createDoubleUpDownCounter("grocery.customers", unit = "café")
 
-        assertNull(counter.unit)
+        assertEquals("café", counter.unit)
         assertTrue(counter.enabled())
-        assertEquals(1, handler.apiMisuses.size)
-        assertEquals("Instrument.unit", handler.apiMisuses.single().api)
+        assertTrue(handler.apiMisuses.isEmpty())
     }
 
     @Test
-    fun createTruncatesOverLongDescriptionAndReportsApiMisuse() {
+    fun createWithOverLongDescriptionPreservesDescription() {
         val handler = FakeSdkErrorHandler()
         val overLongMeter = MeterProviderImpl(
             MetricsConfig(
@@ -241,8 +238,8 @@ internal class UpDownCounterImplTest {
         val description = "a".repeat(maxDescriptionChars + 1)
         val counter = overLongMeter.createDoubleUpDownCounter("grocery.customers", description = description)
 
-        assertEquals("a".repeat(maxDescriptionChars), counter.description)
-        assertEquals(1, handler.apiMisuses.size)
+        assertEquals(description, counter.description)
+        assertTrue(handler.apiMisuses.isEmpty())
     }
 
     @Test
@@ -284,7 +281,7 @@ internal class UpDownCounterImplTest {
     }
 
     @Test
-    fun createTruncationDoesNotSplitSupplementaryPlaneCharacter() {
+    fun createWithSupplementaryPlaneCharacterAtBoundaryPreservesDescription() {
         val handler = FakeSdkErrorHandler()
         val supplementaryMeter = MeterProviderImpl(
             MetricsConfig(
@@ -295,11 +292,11 @@ internal class UpDownCounterImplTest {
         ).getMeter("test")
 
         val emoji = "\uD83D\uDE00"
-        // Surrogate pair sits right at the boundary; truncation must drop it whole, not split it.
+        // Surrogate pair sits right at the boundary; should be preserved
         val description = "a".repeat(maxDescriptionChars) + emoji
         val counter = supplementaryMeter.createDoubleUpDownCounter("grocery.customers", description = description)
 
-        assertEquals("a".repeat(maxDescriptionChars), counter.description)
-        assertEquals(1, handler.apiMisuses.size)
+        assertEquals(description, counter.description)
+        assertTrue(handler.apiMisuses.isEmpty())
     }
 }

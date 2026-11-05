@@ -21,10 +21,14 @@ internal class LongUpDownCounterAdapter(
             impl.isEnabled()
         }
 
-    override fun add(value: Long, attributes: AttributesMutator.() -> Unit) {
+    override fun add(value: Long, attributes: (AttributesMutator.() -> Unit)?) {
         sdkErrorHandler.sdkGuard("LongUpDownCounter.add failed") {
-            val container = compatAttributes(attributes)
-            impl.add(value, container.otelJavaAttributes())
+            if (attributes == null) {
+                impl.add(value)
+            } else {
+                val container = compatAttributes(attributes)
+                impl.add(value, container.otelJavaAttributes())
+            }
         }
     }
 }
