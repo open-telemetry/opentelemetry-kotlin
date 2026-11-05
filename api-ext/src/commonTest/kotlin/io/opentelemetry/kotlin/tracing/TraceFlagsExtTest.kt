@@ -1,6 +1,5 @@
-package io.opentelemetry.kotlin.tracing.model
+package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.tracing.FakeTraceFlags
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
