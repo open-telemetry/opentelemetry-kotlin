@@ -18,6 +18,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures { compose = true }
+    packaging {
+        // pre-stripped by androidx.graphics:graphics-path - avoids an "Unable to strip" warning
+        jniLibs.keepDebugSymbols += "**/libandroidx.graphics.path.so"
+    }
 }
 
 kotlin {
