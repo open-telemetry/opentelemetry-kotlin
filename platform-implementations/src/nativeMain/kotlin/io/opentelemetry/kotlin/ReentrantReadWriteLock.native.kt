@@ -10,7 +10,6 @@ import kotlinx.cinterop.free
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.nativeHeap
 import kotlinx.cinterop.ptr
-import platform.posix.PTHREAD_MUTEX_RECURSIVE
 import platform.posix.pthread_mutex_destroy
 import platform.posix.pthread_mutex_init
 import platform.posix.pthread_mutex_lock
@@ -51,13 +50,19 @@ public actual class ReentrantReadWriteLock {
     public actual inline fun <T> read(action: () -> T): T = write(action)
 }
 
+/**
+ * The platform's `PTHREAD_MUTEX_RECURSIVE` value. Its type differs between Apple (`Int`) and
+ * Linux (`UInt`), so it can't be referenced from the commonized native metadata.
+ */
+internal expect val recursiveMutexType: Int
+
 private fun createRecursiveMutex(): CPointer<pthread_mutex_t>? = memScoped {
     val attributes = alloc<pthread_mutexattr_t>()
     if (!pthreadSucceeded(pthread_mutexattr_init(attributes.ptr), "pthread_mutexattr_init")) {
         return@memScoped null
     }
     try {
-        val typeResult = pthread_mutexattr_settype(attributes.ptr, PTHREAD_MUTEX_RECURSIVE.toInt())
+        val typeResult = pthread_mutexattr_settype(attributes.ptr, recursiveMutexType)
         if (!pthreadSucceeded(typeResult, "pthread_mutexattr_settype")) {
             return@memScoped null
         }

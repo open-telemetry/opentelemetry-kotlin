@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 
-internal class LinuxConcurrencyTest {
+internal class NativeConcurrencyTest {
     @Test
     fun threadLocalValuesAreIsolatedAndCleared() {
         val local = ThreadLocal<String>()
