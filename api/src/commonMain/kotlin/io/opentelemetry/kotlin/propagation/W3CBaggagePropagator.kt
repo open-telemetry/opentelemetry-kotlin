@@ -54,7 +54,7 @@ internal object W3CBaggagePropagator : TextMapPropagator {
             if (memberCount >= MAX_MEMBERS) {
                 break
             }
-            val piece = encodeIfFits(name, entry, builder.byteLength()) ?: continue
+            val piece = encodeIfFits(name, entry, builder.utf8ByteLength()) ?: continue
             if (builder.isNotEmpty()) {
                 builder.append(ENTRY_DELIMITER)
             }
@@ -88,8 +88,8 @@ internal object W3CBaggagePropagator : TextMapPropagator {
 
     private fun decode(header: String): Baggage? {
         val budget = HeaderBudget(MAX_HEADER_BYTES)
-        var memberCount = 0
         val baggage = createBaggage {
+            var memberCount = 0
             for (rawElement in header.split(ENTRY_DELIMITER)) {
                 if (memberCount >= MAX_MEMBERS) {
                     break
@@ -175,5 +175,5 @@ internal object W3CBaggagePropagator : TextMapPropagator {
     private fun String.utf8ByteLength(): Int = encodeToByteArray().size
 
     /** Returns the UTF-8 byte length of this StringBuilder's current content. */
-    private fun StringBuilder.byteLength(): Int = toString().utf8ByteLength()
+    private fun StringBuilder.utf8ByteLength(): Int = toString().utf8ByteLength()
 }
