@@ -84,6 +84,88 @@ internal class LogRecordMutatorErrorHandlingTest {
         assertNull(log.attributes["key"])
     }
 
+    @Test
+    fun testRemoveAttributeRemovesExistingAttribute() {
+        val log = createLogRecord(FakeSdkErrorHandler())
+        log.setStringAttribute("key1", "value1")
+        log.setStringAttribute("key2", "value2")
+        assertEquals("value1", log.attributes["key1"])
+        assertEquals("value2", log.attributes["key2"])
+
+        log.removeAttribute("key1")
+        assertNull(log.attributes["key1"])
+        assertEquals("value2", log.attributes["key2"])
+    }
+
+    @Test
+    fun testRemoveAttributeDoesNothingForMissingKey() {
+        val log = createLogRecord(FakeSdkErrorHandler())
+        log.setStringAttribute("key1", "value1")
+        assertEquals("value1", log.attributes["key1"])
+
+        log.removeAttribute("nonexistent")
+        assertEquals("value1", log.attributes["key1"])
+    }
+
+    @Test
+    fun testRemoveAttributePreservesOtherAttributes() {
+        val log = createLogRecord(FakeSdkErrorHandler())
+        log.setStringAttribute("key1", "value1")
+        log.setStringAttribute("key2", "value2")
+        log.setStringAttribute("key3", "value3")
+
+        log.removeAttribute("key2")
+        assertEquals("value1", log.attributes["key1"])
+        assertNull(log.attributes["key2"])
+        assertEquals("value3", log.attributes["key3"])
+    }
+
+    @Test
+    fun testAddModifyThenRemoveSameKey() {
+        val log = createLogRecord(FakeSdkErrorHandler())
+        log.setStringAttribute("key", "original")
+        assertEquals("original", log.attributes["key"])
+
+        log.setStringAttribute("key", "modified")
+        assertEquals("modified", log.attributes["key"])
+
+        log.removeAttribute("key")
+        assertNull(log.attributes["key"])
+    }
+
+    @Test
+    fun testRemoveMultipleAttributes() {
+        val log = createLogRecord(FakeSdkErrorHandler())
+        log.setStringAttribute("key1", "value1")
+        log.setStringAttribute("key2", "value2")
+        log.setStringAttribute("key3", "value3")
+
+        log.removeAttribute("key1")
+        log.removeAttribute("key3")
+        assertNull(log.attributes["key1"])
+        assertEquals("value2", log.attributes["key2"])
+        assertNull(log.attributes["key3"])
+    }
+
+    @Test
+    fun testRemoveAttributeWithEmptyAttributes() {
+        val log = createLogRecord(FakeSdkErrorHandler())
+        log.removeAttribute("any")
+        assertTrue(log.attributes.isEmpty())
+    }
+
+    @Test
+    fun testRemoveAttributeReflectedInLogRecordData() {
+        val log = createLogRecord(FakeSdkErrorHandler())
+        log.setStringAttribute("sensitive", "secret")
+        log.setStringAttribute("safe", "public")
+
+        log.removeAttribute("sensitive")
+        val data = log.toLogRecordData()
+        assertNull(data.attributes["sensitive"])
+        assertEquals("public", data.attributes["safe"])
+    }
+
     private fun createLogRecord(errorHandler: SdkErrorHandler) = LogRecordModel(
         resource = FakeResource(),
         instrumentationScopeInfo = FakeInstrumentationScopeInfo(),

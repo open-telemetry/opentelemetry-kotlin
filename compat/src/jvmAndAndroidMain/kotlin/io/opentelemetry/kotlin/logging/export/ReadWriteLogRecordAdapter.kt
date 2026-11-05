@@ -108,6 +108,10 @@ internal class ReadWriteLogRecordAdapter(
         impl.setAttribute(OtelJavaAttributeKey.valueKey(key), value.toOtelJavaValue())
     }
 
+    override fun removeAttribute(key: String) {
+        impl.removeAttribute(OtelJavaAttributeKey.stringKey(key))
+    }
+
     override val attributes: Map<String, Any>
         get() = impl.attributes.convertToMap()
 

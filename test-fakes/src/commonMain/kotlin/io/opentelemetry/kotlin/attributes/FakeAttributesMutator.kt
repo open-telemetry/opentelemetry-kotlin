@@ -55,6 +55,10 @@ class FakeAttributesMutator(
         map[key] = value
     }
 
+    override fun removeAttribute(key: String) {
+        map.remove(key)
+    }
+
     val attributes: Map<String, Any>
         get() = map.toMap()
 }

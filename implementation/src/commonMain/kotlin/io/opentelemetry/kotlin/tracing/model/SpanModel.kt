@@ -409,4 +409,10 @@ internal class SpanModel(
             userCode { attrs.setAnyValueAttribute(key, value) }
         }
     }
+
+    override fun removeAttribute(key: String) {
+        mutate("Span.removeAttribute failed") {
+            attrs.removeAttribute(key)
+        }
+    }
 }

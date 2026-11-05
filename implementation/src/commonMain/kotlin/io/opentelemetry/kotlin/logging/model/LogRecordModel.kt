@@ -198,6 +198,12 @@ internal class LogRecordModel(
         }
     }
 
+    override fun removeAttribute(key: String) {
+        mutate("LogRecord.removeAttribute failed") {
+            attrs.removeAttribute(key)
+        }
+    }
+
     /**
      * Takes the snapshot under a single read lock so that the returned [LogRecordData] is internally
      * consistent.

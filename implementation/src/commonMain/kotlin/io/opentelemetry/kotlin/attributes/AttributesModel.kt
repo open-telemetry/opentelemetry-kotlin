@@ -51,6 +51,10 @@ internal class AttributesModel(
         set(key) { AttributeValue.Value(value, lengthLimit) }
     }
 
+    override fun removeAttribute(key: String) {
+        attrs.remove(key)
+    }
+
     private var droppedAttributesCountImpl = 0
 
     /**
