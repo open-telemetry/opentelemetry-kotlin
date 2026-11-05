@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.exporter.logging.LoggingSpanExporter
-import io.opentelemetry.kotlin.OpenTelemetrySdk
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
@@ -99,7 +98,7 @@ internal class CompatConfigFileTest {
         captureJul(LoggingSpanExporter::class.java.name) { messages ->
             val sdk = createCompatOpenTelemetry {
                 configFile(writeConfigFile(BATCH_CONSOLE_CONFIG_FILE))
-            }.also(sdks::track) as OpenTelemetrySdk
+            }.also(sdks::track)
             sdk.tracerProvider.getTracer("test").startSpan("batch-console-span").end()
             assertTrue(messages.isEmpty())
             runBlocking { sdk.forceFlush() }
@@ -113,7 +112,7 @@ internal class CompatConfigFileTest {
         val stdout = captureStdout { buffer ->
             val sdk = createCompatOpenTelemetry {
                 configFile(writeConfigFile(BATCH_CONSOLE_CONFIG_FILE))
-            }.also(sdks::track) as OpenTelemetrySdk
+            }.also(sdks::track)
 
             sdk.loggerProvider.getLogger("test").emit(body = "compat-console-log")
             assertTrue(buffer.toString().isEmpty())

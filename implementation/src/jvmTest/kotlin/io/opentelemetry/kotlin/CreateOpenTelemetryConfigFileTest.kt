@@ -96,7 +96,7 @@ internal class CreateOpenTelemetryConfigFileTest {
             try {
                 val sdk = createOpenTelemetry {
                     configFile(writeConfigFile(BATCH_CONSOLE_CONFIG_FILE))
-                }.also(sdks::track) as OpenTelemetrySdk
+                }.also(sdks::track)
                 sdk.tracerProvider.getTracer("test").startSpan("batch-console-span").end()
                 assertTrue(output.toString().isEmpty())
                 sdk.forceFlush()
@@ -117,7 +117,7 @@ internal class CreateOpenTelemetryConfigFileTest {
             try {
                 val sdk = createOpenTelemetry {
                     configFile(writeConfigFile(BATCH_CONSOLE_CONFIG_FILE))
-                }.also(sdks::track) as OpenTelemetrySdk
+                }.also(sdks::track)
                 sdk.loggerProvider.getLogger("test").emit("batch-console-log")
                 assertTrue(output.toString().isEmpty())
                 sdk.forceFlush()
