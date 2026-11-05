@@ -12,19 +12,17 @@ internal class ObservableDoubleMeasurementAdapter(
     private val impl: OtelJavaObservableDoubleMeasurement,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : ObservableDoubleMeasurement {
-    override fun record(value: Double) {
-        sdkErrorHandler.sdkGuard("ObservableDoubleMeasurement.record failed") {
-            impl.record(value)
-        }
-    }
-
     override fun record(
         value: Double,
-        attributes: AttributesMutator.() -> Unit,
+        attributes: (AttributesMutator.() -> Unit)?,
     ) {
         sdkErrorHandler.sdkGuard("ObservableDoubleMeasurement.record failed") {
-            val container = compatAttributes(attributes)
-            impl.record(value, container.otelJavaAttributes())
+            if (attributes == null) {
+                impl.record(value)
+            } else {
+                val container = compatAttributes(attributes)
+                impl.record(value, container.otelJavaAttributes())
+            }
         }
     }
 }

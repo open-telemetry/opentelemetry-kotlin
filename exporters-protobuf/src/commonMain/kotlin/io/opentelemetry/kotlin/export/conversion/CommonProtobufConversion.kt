@@ -15,7 +15,7 @@ import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.TraceFlags
 import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.model.hex
-import io.opentelemetry.proto.common.v1.InstrumentationScope
+import io.opentelemetry.kotlin.proto.common.v1.InstrumentationScope
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 
@@ -32,7 +32,7 @@ fun InstrumentationScopeInfo.toProtobuf(): InstrumentationScope = Instrumentatio
 )
 
 internal fun Resource.toProtobuf() =
-    io.opentelemetry.proto.resource.v1.Resource(attributes = attributes.createKeyValues())
+    io.opentelemetry.kotlin.proto.resource.v1.Resource(attributes = attributes.createKeyValues())
 
 internal fun InstrumentationScope.toInstrumentationScopeInfo(
     schemaUrl: String?
@@ -43,7 +43,7 @@ internal fun InstrumentationScope.toInstrumentationScopeInfo(
     attributes = attributes.toAttributeMap()
 )
 
-internal fun io.opentelemetry.proto.resource.v1.Resource.toResource(
+internal fun io.opentelemetry.kotlin.proto.resource.v1.Resource.toResource(
     schemaUrl: String? = null,
 ): Resource =
     DeserializedResource(

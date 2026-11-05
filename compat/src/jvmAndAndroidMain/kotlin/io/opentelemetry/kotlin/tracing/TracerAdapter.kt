@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.model.CompatSpanCreationState
@@ -18,7 +17,6 @@ import java.util.concurrent.TimeUnit
 
 internal class TracerAdapter(
     private val tracer: OtelJavaTracer,
-    private val spanLimitsConfig: CompatSpanLimitsConfig,
     private val contextFactory: ContextFactory,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Tracer {
@@ -64,15 +62,13 @@ internal class TracerAdapter(
             builder.setStartTimestamp(startTimestamp, TimeUnit.NANOSECONDS)
         }
 
-        val creationState = action?.let { userCode { CompatSpanCreationState(spanLimitsConfig).apply(it) } }
+        val creationState = action?.let { userCode { CompatSpanCreationState().apply(it) } }
         creationState?.applyTo(builder)
 
         return SpanAdapter(
             impl = builder.startSpan(),
             parentCtx = parentCtx,
             spanKind = spanKind,
-            spanLimitsConfig = spanLimitsConfig,
-            creationState = creationState,
             sdkErrorHandler = sdkErrorHandler,
         )
     }

@@ -2,7 +2,8 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
-import io.opentelemetry.kotlin.attributes.copyTypedAttributes
+import io.opentelemetry.kotlin.attributes.copyAttributes
+import io.opentelemetry.kotlin.attributes.typedAttributesOrConvert
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
@@ -134,8 +135,8 @@ internal class TracerImpl(
                 initialDroppedLinksCount = collector.droppedLinksCount,
                 sdkErrorHandler = sdkErrorHandler
             )
-            spanModel.copyTypedAttributes(collector.attributes.attributes)
-            spanModel.copyTypedAttributes(userCode { result.attributes.attributes })
+            spanModel.copyAttributes(collector.attributes)
+            spanModel.copyAttributes(userCode { result.attributes.typedAttributesOrConvert() })
             sdkErrorHandler.guard {
                 processor?.takeIf(SpanProcessor::isStartRequired)
                     ?.onStart(ReadWriteSpanImpl(spanModel), ctx)

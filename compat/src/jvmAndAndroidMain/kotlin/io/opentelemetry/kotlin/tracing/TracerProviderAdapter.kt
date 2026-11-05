@@ -14,14 +14,12 @@ import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.scope.scopeCacheKey
 import java.util.concurrent.ConcurrentHashMap
 
 @ExperimentalApi
 internal class TracerProviderAdapter(
     private val tracerProvider: OtelJavaTracerProvider,
-    private val spanLimitsConfig: CompatSpanLimitsConfig,
     private val contextFactory: ContextFactory,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : TracerProvider, TelemetryCloseable {
@@ -42,7 +40,7 @@ internal class TracerProviderAdapter(
             schemaUrl?.let(tracerBuilder::setSchemaUrl)
             version?.let(tracerBuilder::setInstrumentationVersion)
             val tracer = tracerBuilder.build()
-            TracerAdapter(tracer, spanLimitsConfig, contextFactory, sdkErrorHandler)
+            TracerAdapter(tracer, contextFactory, sdkErrorHandler)
         }
     }
 

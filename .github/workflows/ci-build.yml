@@ -46,16 +46,27 @@ jobs:
         with:
           platforms: arm64
 
+      # print one line per test binary, and the full test output only for binaries that fail.
       - name: Linux ARM64 tests
         timeout-minutes: 10
         run: |
           mapfile -d '' binaries < <(find "$PWD" -path '*/build/bin/linuxArm64/debugTest/test.kexe' -print0)
           test "${#binaries[@]}" -gt 0
+          docker pull --quiet --platform linux/arm64 ubuntu:24.04 > /dev/null
+          failed=0
           for binary in "${binaries[@]}"; do
-            docker run --rm --platform linux/arm64 --network none \
+            name="${binary#"$PWD"/}"
+            if output=$(docker run --rm --platform linux/arm64 --network none \
               --mount "type=bind,source=$(dirname "$binary"),target=/tests,readonly" \
-              --workdir /tests ubuntu:24.04 /tests/test.kexe
+              --workdir /tests ubuntu:24.04 /tests/test.kexe 2>&1); then
+              echo "$name: $(grep -F '[  PASSED  ]' <<< "$output" | tail -n 1)"
+            else
+              echo "::error title=Linux ARM64 tests failed::$name"
+              echo "$output"
+              failed=1
+            fi
           done
+          exit "$failed"
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
