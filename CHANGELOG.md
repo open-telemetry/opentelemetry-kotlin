@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 0.10.0 (2026-11-05)
+
 ### Migration notes
 
 - "Implicit context" has been renamed to "current context". `ImplicitContextStorage` is now
