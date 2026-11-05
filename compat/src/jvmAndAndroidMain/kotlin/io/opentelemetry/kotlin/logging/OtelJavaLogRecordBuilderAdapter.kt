@@ -18,8 +18,8 @@ internal class OtelJavaLogRecordBuilderAdapter(
     private val contextFactory: ContextFactory,
 ) : OtelJavaLogRecordBuilder {
 
-    private var timestamp: Long? = null
-    private var observedTimestamp: Long? = null
+    private var timestamp: Long = 0
+    private var observedTimestamp: Long = 0
     private var context: OtelJavaContext? = null
     private var severity: OtelJavaSeverity? = null
     private var severityText: String? = null
@@ -109,12 +109,15 @@ internal class OtelJavaLogRecordBuilderAdapter(
         )
     }
 
-    private fun Instant.convertToNanos(): Long? {
+    /**
+     * Converts to epoch nanoseconds, returning 0 (unset) if the conversion fails.
+     */
+    private fun Instant.convertToNanos(): Long {
         runCatching {
             val seconds: Long = epochSecond
             val nanos: Int = nano
             return seconds * 1000000000L + nanos
         }
-        return null
+        return 0
     }
 }

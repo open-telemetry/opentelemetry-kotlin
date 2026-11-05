@@ -34,7 +34,7 @@ internal class TracerAdapter(
         name: String,
         parentContext: Context?,
         spanKind: SpanKind,
-        startTimestamp: Long?,
+        startTimestamp: Long,
         action: (SpanCreationAction.() -> Unit)?
     ): Span {
         val parentCtx = sdkErrorHandler.sdkGuardOrDefault(null, "Tracer.startSpan failed") {
@@ -50,7 +50,7 @@ internal class TracerAdapter(
         name: String,
         parentCtx: OtelJavaContext,
         spanKind: SpanKind,
-        startTimestamp: Long?,
+        startTimestamp: Long,
         action: (SpanCreationAction.() -> Unit)?
     ): Span {
         val builder = tracer.spanBuilder(name)
@@ -58,7 +58,9 @@ internal class TracerAdapter(
             .setParent(parentCtx)
         // Left unset, the SDK stamps the start with the same clock it uses for end(). Filling it in
         // from [clock] would mix two clocks, skewing durations and ending short spans before they start.
-        startTimestamp?.let { builder.setStartTimestamp(it, TimeUnit.NANOSECONDS) }
+        if (startTimestamp > 0) {
+            builder.setStartTimestamp(startTimestamp, TimeUnit.NANOSECONDS)
+        }
 
         val creationState = action?.let { userCode { CompatSpanCreationState().apply(it) } }
         creationState?.applyTo(builder)
