@@ -5,6 +5,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 internal class PlatformDeclarativeConfigReaderTest {
 
@@ -14,6 +15,20 @@ internal class PlatformDeclarativeConfigReaderTest {
         val behavior = reader.read(writeConfigFile(CONFIG_FILE))
         assertEquals(64, behavior.attributeLimits?.attributeCountLimit)
         assertEquals(256, behavior.tracerProvider?.spanLimits?.attributeCountLimit)
+    }
+
+    @Test
+    fun `should surface the instrumentation node on the returned behavior`() {
+        val reader = assertNotNull(platformDeclarativeConfigReader())
+        val behavior = reader.read(writeConfigFile(CONFIG_FILE_WITH_INSTRUMENTATION))
+        assertEquals("bar", behavior.instrumentation?.get("foo"))
+    }
+
+    @Test
+    fun `should leave the instrumentation node null when absent`() {
+        val reader = assertNotNull(platformDeclarativeConfigReader())
+        val behavior = reader.read(writeConfigFile(CONFIG_FILE))
+        assertNull(behavior.instrumentation)
     }
 
     @Test
@@ -45,6 +60,12 @@ internal class PlatformDeclarativeConfigReaderTest {
               processors: []
               limits:
                 attribute_count_limit: 256
+        """.trimIndent()
+
+        val CONFIG_FILE_WITH_INSTRUMENTATION = """
+            file_format: "1.0"
+            instrumentation:
+              foo: bar
         """.trimIndent()
     }
 }
