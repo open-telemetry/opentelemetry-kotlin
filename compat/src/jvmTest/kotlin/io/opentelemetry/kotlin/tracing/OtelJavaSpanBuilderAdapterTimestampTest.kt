@@ -37,7 +37,7 @@ internal class OtelJavaSpanBuilderAdapterTimestampTest {
             name: String,
             parentContext: Context?,
             spanKind: SpanKind,
-            startTimestamp: Long?,
+            startTimestamp: Long,
             action: (SpanCreationAction.() -> Unit)?
         ): Span {
             this.startTimestamp = startTimestamp

@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.tracing.ext
 
+import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.createSpanContext
@@ -11,6 +12,7 @@ private const val RANDOM_BIT = 0b10
  * Copies an opentelemetry-java span context into the Kotlin [SpanContext] implementation. Any
  * trace state entry that the Kotlin implementation rejects is dropped.
  */
+@ExperimentalApi
 public fun OtelJavaSpanContext.toOtelKotlinSpanContext(): SpanContext {
     val flags = traceFlags.asByte().toInt()
     return createSpanContext(traceId, spanId) {

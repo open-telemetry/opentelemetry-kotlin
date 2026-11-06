@@ -15,7 +15,10 @@ import io.opentelemetry.kotlin.metrics.MeterProviderImpl
 import io.opentelemetry.kotlin.tracing.TracerProviderImpl
 
 /**
- * Constructs an [OpenTelemetry] instance that uses the opentelemetry-kotlin implementation.
+ * Constructs an [OpenTelemetrySdk] instance that uses the opentelemetry-kotlin implementation.
+ *
+ * The caller owns the returned instance and should call [OpenTelemetrySdk.shutdown] when telemetry
+ * is no longer needed.
  */
 @ExperimentalApi
 public fun createOpenTelemetry(
@@ -29,7 +32,7 @@ public fun createOpenTelemetry(
      * Defines configuration for OpenTelemetry.
      */
     config: OpenTelemetryConfigDsl.() -> Unit = {}
-): OpenTelemetry {
+): OpenTelemetrySdk {
     val cfg = OpenTelemetryConfigImpl(clock)
     cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
         cfg.config()

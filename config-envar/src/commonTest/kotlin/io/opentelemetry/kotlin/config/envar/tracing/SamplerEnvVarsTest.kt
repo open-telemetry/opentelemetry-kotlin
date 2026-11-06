@@ -41,6 +41,43 @@ internal class SamplerEnvVarsTest {
     }
 
     @Test
+    fun `should map traceidratio with arg`() {
+        assertEquals(
+            SamplerBehavior.Probability(0.25),
+            toBehavior(env(SamplerEnvVars.TRACE_ID_RATIO, arg = "0.25")),
+        )
+    }
+
+    @Test
+    fun `should map parentbased_traceidratio with arg`() {
+        assertEquals(
+            SamplerBehavior.ParentBased(root = SamplerBehavior.Probability(0.25)),
+            toBehavior(env(SamplerEnvVars.PARENT_BASED_TRACE_ID_RATIO, arg = "0.25")),
+        )
+    }
+
+    @Test
+    fun `should default traceidratio arg to 1_0`() {
+        val warnings = mutableListOf<EnvVarReadWarning>()
+        val behavior = SamplerEnvVars(reportingEnvVarReader(env(SamplerEnvVars.TRACE_ID_RATIO), warnings::add))
+            .toBehavior()
+        assertEquals(SamplerBehavior.Probability(1.0), behavior)
+        assertEquals(emptyList(), warnings)
+    }
+
+    @Test
+    fun `should warn and default on invalid traceidratio arg`() {
+        listOf("abc", "-0.1", "1.5", "NaN").forEach { arg ->
+            val warnings = mutableListOf<EnvVarReadWarning>()
+            val behavior = SamplerEnvVars(
+                reportingEnvVarReader(env(SamplerEnvVars.TRACE_ID_RATIO, arg = arg), warnings::add)
+            ).toBehavior()
+            assertEquals(SamplerBehavior.Probability(1.0), behavior, "<$arg> should fall back to 1.0")
+            assertEquals(SamplerEnvVars.SAMPLER_ARG, warnings.single().name, "<$arg> should warn")
+        }
+    }
+
+    @Test
     fun `should leave unknown sampler unset`() {
         listOf("sampler_test", "").forEach { name ->
             assertNull(toBehavior(env(name)), "<$name> should not configure a sampler")
@@ -62,9 +99,10 @@ internal class SamplerEnvVarsTest {
         assertEquals(emptyList(), warnings)
     }
 
-    private fun env(sampler: String): (String) -> String? {
+    private fun env(sampler: String, arg: String? = null): (String) -> String? {
         val values = buildMap {
             put(SamplerEnvVars.SAMPLER, sampler)
+            arg?.let { put(SamplerEnvVars.SAMPLER_ARG, it) }
         }
         return values::get
     }

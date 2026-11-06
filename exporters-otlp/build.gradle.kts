@@ -25,6 +25,7 @@ kotlin {
                 implementation(project(":exporters-json"))
                 implementation(project(":serializable-models"))
                 implementation(project(":platform-implementations"))
+                implementation(project(":platform-io"))
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.encoding)
             }

@@ -41,13 +41,13 @@ suspend fun runAllExamples(platform: String) {
     demonstrateComplexLogging(logger)
 
     // flush all pending telemetry before terminating
-    AppConfig.forceFlush()
+    otel.forceFlush()
 
     // give HTTP client time to complete requests before process exits.
     // in future the SDK needs to be updated to handle this automatically.
     delay(500)
 
-    AppConfig.shutdown()
+    otel.shutdown()
 }
 
 /**
@@ -95,7 +95,7 @@ private fun demonstrateSpanNesting(tracer: Tracer, contextFactory: ContextFactor
         "parent-operation",
         null,
         SpanKind.INTERNAL,
-        null
+        0
     ) { setStringAttribute("operation.type", "database-transaction") }
     val parentContext = contextFactory.current().storeSpan(parentSpan)
 
@@ -117,7 +117,7 @@ private fun demonstrateSpanNesting(tracer: Tracer, contextFactory: ContextFactor
         "cache-lookup",
         parentContext,
         SpanKind.INTERNAL,
-        null
+        0
     ) { setStringAttribute("cache.type", "redis") }
     childSpan2.end()
 

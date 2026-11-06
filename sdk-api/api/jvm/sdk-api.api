@@ -168,6 +168,7 @@ public abstract interface class io/opentelemetry/kotlin/init/SamplerConfigDsl {
 	public abstract fun composableRuleBased (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/sampling/ComposableSampler;
 	public abstract fun composite (Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
 	public abstract fun parentBased (Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;Lio/opentelemetry/kotlin/tracing/sampling/Sampler;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
+	public abstract fun probability (D)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
 }
 
 public final class io/opentelemetry/kotlin/init/SamplerConfigDsl$DefaultImpls {

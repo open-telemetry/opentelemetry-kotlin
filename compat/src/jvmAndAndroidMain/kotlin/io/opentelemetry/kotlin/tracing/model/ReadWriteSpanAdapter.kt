@@ -60,11 +60,11 @@ internal class ReadWriteSpanAdapter(
 
     override fun addEvent(
         name: String,
-        timestamp: Long?,
+        timestamp: Long,
         attributes: (AttributesMutator.() -> Unit)?
     ) = sdkErrorHandler.sdkGuard("Span.addEvent failed") {
         val container = compatAttributes(attributes)
-        if (timestamp != null && timestamp > 0) {
+        if (timestamp > 0) {
             impl.addEvent(name, container.otelJavaAttributes(), timestamp, TimeUnit.NANOSECONDS)
         } else {
             impl.addEvent(name, container.otelJavaAttributes())

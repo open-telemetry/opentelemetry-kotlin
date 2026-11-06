@@ -28,13 +28,16 @@ internal fun randomnessFromTraceIdBytes(traceIdBytes: ByteArray): Long {
 
 private const val MAX_THRESHOLD: Long = 1L shl 56
 
+/** The smallest sampling probability that can be represented as a threshold, `2^-56`. */
+internal const val MIN_SAMPLING_RATIO: Double = 1.0 / MAX_THRESHOLD
+
 /**
  * Validates that [ratio] is a usable sampling probability, i.e. in `[2^-56, 1]`.
  *
  * https://opentelemetry.io/docs/specs/otel/trace/tracestate-probability-sampling/#sampling-probability
  */
 internal fun validateRatio(ratio: Double) {
-    require(ratio in (1.0 / MAX_THRESHOLD)..1.0) { "ratio must be between 2^-56 and 1, got $ratio" }
+    require(ratio in MIN_SAMPLING_RATIO..1.0) { "ratio must be between 2^-56 and 1, got $ratio" }
 }
 
 /**

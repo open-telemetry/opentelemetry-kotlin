@@ -5,7 +5,7 @@ package io.opentelemetry.kotlin.logging
  *
  * https://opentelemetry.io/docs/specs/otel/logs/data-model/#field-severitynumber
  */
-public enum class SeverityNumber(public val severityNumber: Int) {
+public enum class SeverityNumber(public val value: Int) {
     UNKNOWN(0),
     TRACE(1),
     TRACE2(2),
@@ -30,5 +30,14 @@ public enum class SeverityNumber(public val severityNumber: Int) {
     FATAL(21),
     FATAL2(22),
     FATAL3(23),
-    FATAL4(24),
+    FATAL4(24);
+
+    public companion object {
+
+        /**
+         * Returns the [SeverityNumber] with the given numeric [value], or [UNKNOWN] if [value] is outside
+         * the 0-24 range defined by the OpenTelemetry log data model.
+         */
+        public fun fromValue(value: Int): SeverityNumber = entries.getOrNull(value) ?: UNKNOWN
+    }
 }

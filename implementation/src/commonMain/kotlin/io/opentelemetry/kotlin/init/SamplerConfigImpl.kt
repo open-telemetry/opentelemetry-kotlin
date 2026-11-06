@@ -1,6 +1,8 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOffSampler
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysRecordSampler
@@ -11,16 +13,29 @@ import io.opentelemetry.kotlin.tracing.sampling.ComposableParentThresholdSampler
 import io.opentelemetry.kotlin.tracing.sampling.ComposableProbabilitySampler
 import io.opentelemetry.kotlin.tracing.sampling.ComposableSampler
 import io.opentelemetry.kotlin.tracing.sampling.CompositeSampler
+import io.opentelemetry.kotlin.tracing.sampling.MIN_SAMPLING_RATIO
 import io.opentelemetry.kotlin.tracing.sampling.ParentBasedSampler
+import io.opentelemetry.kotlin.tracing.sampling.ProbabilitySampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 
-internal class SamplerConfigImpl : SamplerConfigDsl {
+internal class SamplerConfigImpl(
+    private val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
+) : SamplerConfigDsl {
 
     override fun alwaysOn(): Sampler = AlwaysOnSampler
 
     override fun alwaysOff(): Sampler = AlwaysOffSampler
 
     override fun alwaysRecord(root: Sampler): Sampler = AlwaysRecordSampler(root)
+
+    // A ratio below 2^-56 rounds to "never sample", so it drops instead of failing validation and
+    // falling back to the default sampler, which would sample everything.
+    override fun probability(ratio: Double): Sampler =
+        if (ratio >= 0.0 && ratio < MIN_SAMPLING_RATIO) {
+            AlwaysOffSampler
+        } else {
+            ProbabilitySampler(ratio, sdkErrorHandler)
+        }
 
     override fun parentBased(
         root: Sampler,
