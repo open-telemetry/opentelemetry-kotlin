@@ -116,14 +116,17 @@ internal class LoggerImpl(
                     eventName = eventName,
                     sdkErrorHandler = sdkErrorHandler,
                 )
-                if (exception != null) {
-                    sdkErrorHandler.guard("LogRecord.exception attributes failed") {
-                        log.setExceptionAttributes(exception)
-                    }
-                }
+                // Process user attributes first so they take precedence for attribute count limit
+                // and are not overwritten by exception-derived attributes.
                 if (attributes != null) {
                     sdkErrorHandler.guard("Logger.emit attributes failed") {
                         attributes(log)
+                    }
+                }
+                // Add exception-derived attributes only for keys not already set by user attributes.
+                if (exception != null) {
+                    sdkErrorHandler.guard("LogRecord.exception attributes failed") {
+                        log.setExceptionAttributes(exception)
                     }
                 }
                 sdkErrorHandler.guard {

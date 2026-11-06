@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
@@ -14,11 +15,13 @@ import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
+import io.opentelemetry.kotlin.semconv.ExceptionAttributes
 import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -146,6 +149,155 @@ internal class LoggerErrorHandlingTest {
         logger.emit("message")
 
         assertTrue(processor.logs.isEmpty())
+    }
+
+    @Test
+    fun testUserAttributesSurviveAttributeCountLimit() {
+        val errorHandler = FakeSdkErrorHandler()
+        val processor = FakeLogRecordProcessor()
+        val logLimits = AttributeLimitsBehavior(attributeCountLimit = 2, attributeValueLengthLimit = 128)
+        val logger = LoggerImpl(
+            clock = FakeClock(),
+            processor = processor,
+            contextFactory = FakeContextFactory(),
+            key = key,
+            resource = FakeResource(),
+            logLimits = logLimits,
+            shutdownState = MutableShutdownState(),
+            sdkErrorHandler = errorHandler,
+        )
+
+        logger.emit(
+            "message",
+            exception = RuntimeException("test exception"),
+            attributes = {
+                setStringAttribute("user.key1", "value1")
+                setStringAttribute("user.key2", "value2")
+            }
+        )
+
+        assertEquals(1, processor.logs.size)
+        val log = processor.logs.single()
+        // User attributes should be retained (filling the limit)
+        assertEquals("value1", log.attributes["user.key1"])
+        assertEquals("value2", log.attributes["user.key2"])
+        // Exception attributes should be dropped due to limit
+        assertNull(log.attributes[ExceptionAttributes.EXCEPTION_MESSAGE])
+    }
+
+    @Test
+    fun testExceptionAttributesAddedWhenCapacityRemains() {
+        val errorHandler = FakeSdkErrorHandler()
+        val processor = FakeLogRecordProcessor()
+        val logLimits = AttributeLimitsBehavior(attributeCountLimit = 5, attributeValueLengthLimit = 128)
+        val logger = LoggerImpl(
+            clock = FakeClock(),
+            processor = processor,
+            contextFactory = FakeContextFactory(),
+            key = key,
+            resource = FakeResource(),
+            logLimits = logLimits,
+            shutdownState = MutableShutdownState(),
+            sdkErrorHandler = errorHandler,
+        )
+
+        logger.emit(
+            "message",
+            exception = RuntimeException("test exception"),
+            attributes = {
+                setStringAttribute("user.key1", "value1")
+                setStringAttribute("user.key2", "value2")
+            }
+        )
+
+        assertEquals(1, processor.logs.size)
+        val log = processor.logs.single()
+        // User attributes should be retained
+        assertEquals("value1", log.attributes["user.key1"])
+        assertEquals("value2", log.attributes["user.key2"])
+        // Exception attributes should be added where capacity permits
+        assertEquals("test exception", log.attributes[ExceptionAttributes.EXCEPTION_MESSAGE])
+        assertNotNull(log.attributes[ExceptionAttributes.EXCEPTION_TYPE])
+        assertNotNull(log.attributes[ExceptionAttributes.EXCEPTION_STACKTRACE])
+    }
+
+    @Test
+    fun testUserAttributesWinOnKeyCollisions() {
+        val errorHandler = FakeSdkErrorHandler()
+        val processor = FakeLogRecordProcessor()
+        val logger = createLogger(Case("healthy"), processor, errorHandler)
+
+        logger.emit(
+            "message",
+            exception = RuntimeException("exception message"),
+            attributes = {
+                setStringAttribute(ExceptionAttributes.EXCEPTION_MESSAGE, "user message")
+            }
+        )
+
+        assertEquals(1, processor.logs.size)
+        val log = processor.logs.single()
+        // User-provided exception.message should win
+        assertEquals("user message", log.attributes[ExceptionAttributes.EXCEPTION_MESSAGE])
+    }
+
+    @Test
+    fun testAttributeCountRemainsBounded() {
+        val errorHandler = FakeSdkErrorHandler()
+        val processor = FakeLogRecordProcessor()
+        val logLimits = AttributeLimitsBehavior(attributeCountLimit = 3, attributeValueLengthLimit = 128)
+        val logger = LoggerImpl(
+            clock = FakeClock(),
+            processor = processor,
+            contextFactory = FakeContextFactory(),
+            key = key,
+            resource = FakeResource(),
+            logLimits = logLimits,
+            shutdownState = MutableShutdownState(),
+            sdkErrorHandler = errorHandler,
+        )
+
+        logger.emit(
+            "message",
+            exception = RuntimeException("test exception"),
+            attributes = {
+                setStringAttribute("user.key1", "value1")
+                setStringAttribute("user.key2", "value2")
+                setStringAttribute("user.key3", "value3")
+            }
+        )
+
+        assertEquals(1, processor.logs.size)
+        val log = processor.logs.single()
+        // Total attributes should not exceed the limit
+        assertTrue(log.attributes.size <= 3)
+        assertEquals(3, log.attributes.size)
+        // User attributes should all be present
+        assertEquals("value1", log.attributes["user.key1"])
+        assertEquals("value2", log.attributes["user.key2"])
+        assertEquals("value3", log.attributes["user.key3"])
+        // Exception attributes should be dropped
+        assertNull(log.attributes[ExceptionAttributes.EXCEPTION_MESSAGE])
+    }
+
+    @Test
+    fun testNoExceptionNormalBehavior() {
+        val errorHandler = FakeSdkErrorHandler()
+        val processor = FakeLogRecordProcessor()
+        val logger = createLogger(Case("healthy"), processor, errorHandler)
+
+        logger.emit(
+            "message",
+            attributes = {
+                setStringAttribute("user.key1", "value1")
+                setStringAttribute("user.key2", "value2")
+            }
+        )
+
+        assertEquals(1, processor.logs.size)
+        val log = processor.logs.single()
+        assertEquals("value1", log.attributes["user.key1"])
+        assertEquals("value2", log.attributes["user.key2"])
     }
 
     private fun createLogger(
