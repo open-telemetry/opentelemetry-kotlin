@@ -3,16 +3,22 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.FakeLogExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -36,6 +42,7 @@ internal class SimpleLogRecordProcessorTest {
         val processor = SimpleLogRecordProcessor(
             exporter,
             CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
+            NoopSdkErrorHandler,
         )
 
         val log = FakeReadWriteLogRecord(body = "my_log")
@@ -51,6 +58,7 @@ internal class SimpleLogRecordProcessorTest {
         val processor = SimpleLogRecordProcessor(
             exporter,
             CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
+            NoopSdkErrorHandler,
         )
 
         val log = FakeReadWriteLogRecord(body = "my_log")
@@ -70,6 +78,7 @@ internal class SimpleLogRecordProcessorTest {
         val processor = SimpleLogRecordProcessor(
             exporter,
             CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
+            NoopSdkErrorHandler,
         )
         processor.shutdown()
 
@@ -83,6 +92,7 @@ internal class SimpleLogRecordProcessorTest {
         val processor = SimpleLogRecordProcessor(
             FakeLogRecordExporter(),
             CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
+            NoopSdkErrorHandler,
         )
 
         assertEquals(OperationResultCode.Success, processor.shutdown())
@@ -94,6 +104,7 @@ internal class SimpleLogRecordProcessorTest {
         val processor = SimpleLogRecordProcessor(
             FakeLogRecordExporter(),
             CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
+            NoopSdkErrorHandler,
         )
         processor.shutdown()
 
@@ -105,6 +116,7 @@ internal class SimpleLogRecordProcessorTest {
         val processor = SimpleLogRecordProcessor(
             FakeLogRecordExporter(),
             CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
+            NoopSdkErrorHandler,
         )
         processor.shutdown()
 
@@ -117,12 +129,247 @@ internal class SimpleLogRecordProcessorTest {
         val processor = SimpleLogRecordProcessor(
             exporter,
             CoroutineScope(StandardTestDispatcher(testScheduler)),
+            NoopSdkErrorHandler,
         )
         repeat(5) { processor.onEmit(FakeReadWriteLogRecord(body = "log_$it"), FakeContext()) }
         advanceUntilIdle()
 
         assertFalse(exporter.observedConcurrentExport)
         assertEquals(List(5) { "log_$it" }, exporter.exports)
+    }
+
+    @Test
+    fun testForceFlushWaitsForPendingExports() = runTest {
+        val exporter = SlowLogRecordExporter()
+        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+        val processor = SimpleLogRecordProcessor(exporter, scope, NoopSdkErrorHandler)
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        processor.onEmit(FakeReadWriteLogRecord(body = "log2"), FakeContext())
+
+        // Force flush should wait for exports to complete
+        assertEquals(OperationResultCode.Success, processor.forceFlush())
+        assertEquals(2, exporter.exports.size)
+    }
+
+    @Test
+    fun testShutdownWaitsForPendingExports() = runTest {
+        val exporter = SlowLogRecordExporter()
+        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+        val processor = SimpleLogRecordProcessor(exporter, scope, NoopSdkErrorHandler)
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        processor.onEmit(FakeReadWriteLogRecord(body = "log2"), FakeContext())
+
+        // Shutdown should wait for exports to complete
+        assertEquals(OperationResultCode.Success, processor.shutdown())
+        assertEquals(2, exporter.exports.size)
+    }
+
+    @Test
+    fun testConcurrentForceFlush() = runTest {
+        val exporter = SlowLogRecordExporter()
+        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+        val processor = SimpleLogRecordProcessor(exporter, scope, NoopSdkErrorHandler)
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+
+        // Multiple concurrent forceFlush calls should all succeed
+        val flushResults = listOf(
+            async { processor.forceFlush() },
+            async { processor.forceFlush() },
+            async { processor.forceFlush() }
+        ).awaitAll()
+
+        assertTrue(flushResults.all { it == OperationResultCode.Success })
+    }
+
+    @Test
+    fun testExportFailureDoesNotCrashProcessor() = runTest {
+        val exporter = FailingLogRecordExporter()
+        val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
+        val processor = SimpleLogRecordProcessor(exporter, scope, NoopSdkErrorHandler)
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        advanceUntilIdle()
+
+        // Processor should still work after failure
+        processor.onEmit(FakeReadWriteLogRecord(body = "log2"), FakeContext())
+        advanceUntilIdle()
+
+        assertEquals(2, exporter.exportCallCount)
+    }
+
+    @Test
+    fun testForceFlushWaitsForExportAlreadyExecuting() = runTest {
+        val exporter = BlockingLogRecordExporter()
+        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+        val processor = SimpleLogRecordProcessor(exporter, scope, NoopSdkErrorHandler)
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        runCurrent()
+
+        val flushResult = async { processor.forceFlush() }
+        runCurrent()
+
+        exporter.release()
+        advanceUntilIdle()
+
+        assertEquals(OperationResultCode.Success, flushResult.await())
+        assertEquals(listOf("log1"), exporter.exports)
+    }
+
+    @Test
+    fun testForceFlushWaitsForExportQueuedBehindMutex() = runTest {
+        val exporter = BlockingLogRecordExporter()
+        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+        val processor = SimpleLogRecordProcessor(exporter, scope, NoopSdkErrorHandler)
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        runCurrent()
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log2"), FakeContext())
+        runCurrent()
+
+        val flushResult = async { processor.forceFlush() }
+        runCurrent()
+
+        exporter.release()
+        advanceUntilIdle()
+
+        assertEquals(OperationResultCode.Success, flushResult.await())
+        assertEquals(listOf("log1", "log2"), exporter.exports)
+    }
+
+    @Test
+    fun testForceFlushCallsExporterFlushOnlyAfterExportsFinish() = runTest {
+        val exporter = OrderTrackingLogRecordExporter()
+        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+        val processor = SimpleLogRecordProcessor(exporter, scope, NoopSdkErrorHandler)
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        runCurrent()
+
+        val flushResult = async { processor.forceFlush() }
+        runCurrent()
+
+        exporter.release()
+        advanceUntilIdle()
+
+        assertEquals(OperationResultCode.Success, flushResult.await())
+        assertEquals(listOf("export:log1", "forceFlush"), exporter.events)
+    }
+
+    @Test
+    fun testShutdownWaitsForExportAlreadyExecuting() = runTest {
+        val exporter = BlockingLogRecordExporter()
+        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+        val processor = SimpleLogRecordProcessor(exporter, scope, NoopSdkErrorHandler)
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        runCurrent()
+
+        val shutdownResult = async { processor.shutdown() }
+        runCurrent()
+
+        exporter.release()
+        advanceUntilIdle()
+
+        assertEquals(OperationResultCode.Success, shutdownResult.await())
+        assertEquals(listOf("log1"), exporter.exports)
+    }
+
+    @Test
+    fun testShutdownWaitsForExportsQueuedBehindMutex() = runTest {
+        val exporter = BlockingLogRecordExporter()
+        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+        val processor = SimpleLogRecordProcessor(exporter, scope, NoopSdkErrorHandler)
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        runCurrent()
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log2"), FakeContext())
+        runCurrent()
+
+        val shutdownResult = async { processor.shutdown() }
+        runCurrent()
+
+        exporter.release()
+        advanceUntilIdle()
+
+        assertEquals(OperationResultCode.Success, shutdownResult.await())
+        assertEquals(listOf("log1", "log2"), exporter.exports)
+    }
+
+    @Test
+    fun testShutdownCallsExporterFlushAndShutdownAfterDrain() = runTest {
+        val exporter = OrderTrackingLogRecordExporter()
+        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+        val processor = SimpleLogRecordProcessor(exporter, scope, NoopSdkErrorHandler)
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        runCurrent()
+
+        val shutdownResult = async { processor.shutdown() }
+        runCurrent()
+
+        exporter.release()
+        advanceUntilIdle()
+
+        assertEquals(OperationResultCode.Success, shutdownResult.await())
+        assertEquals(listOf("export:log1", "forceFlush", "shutdown"), exporter.events)
+    }
+
+    @Test
+    fun testExportTimeoutReleasesMutexAndDoesNotBlockProcessor() = runTest {
+        val exporter = ConfigurableDelayLogRecordExporter()
+        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+        val processor = SimpleLogRecordProcessor(exporter, scope, NoopSdkErrorHandler)
+
+        exporter.delayMs = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS + 1000
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        advanceUntilIdle()
+
+        assertTrue(exporter.exports.isEmpty())
+
+        exporter.delayMs = 0
+        processor.onEmit(FakeReadWriteLogRecord(body = "log2"), FakeContext())
+        advanceUntilIdle()
+
+        assertEquals(listOf("log2"), exporter.exports)
+    }
+
+    @Test
+    fun testExporterReturningFailureDoesNotBlockProcessor() = runTest {
+        val exporter = FailureResultLogRecordExporter()
+        val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
+        val processor = SimpleLogRecordProcessor(exporter, scope, NoopSdkErrorHandler)
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        advanceUntilIdle()
+
+        assertEquals(1, exporter.exportCount)
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log2"), FakeContext())
+        advanceUntilIdle()
+
+        assertEquals(2, exporter.exportCount)
+    }
+
+    @Test
+    fun testConcurrentSubmissionAndFlushDoNotDeadlock() = runTest {
+        val exporter = SlowLogRecordExporter()
+        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
+        val processor = SimpleLogRecordProcessor(exporter, scope, NoopSdkErrorHandler)
+
+        repeat(10) { processor.onEmit(FakeReadWriteLogRecord(body = "log_$it"), FakeContext()) }
+
+        val flushResult = async { processor.forceFlush() }
+        repeat(10) { processor.onEmit(FakeReadWriteLogRecord(body = "extra_$it"), FakeContext()) }
+        advanceUntilIdle()
+
+        assertEquals(OperationResultCode.Success, flushResult.await())
+        assertTrue(exporter.exports.size >= 10)
     }
 
     private class SuspendingLogRecordExporter : LogRecordExporter {
@@ -147,5 +394,101 @@ internal class SimpleLogRecordProcessorTest {
         private companion object {
             const val EXPORT_DURATION_MS = 2L
         }
+    }
+
+    private class SlowLogRecordExporter : LogRecordExporter {
+        val exports: MutableList<String> = mutableListOf()
+
+        override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode {
+            delay(10)
+            exports.addAll(telemetry.map { it.body.toString() })
+            return OperationResultCode.Success
+        }
+
+        override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
+        override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
+    }
+
+    private class FailingLogRecordExporter : LogRecordExporter {
+        var exportCallCount = 0
+
+        override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode {
+            exportCallCount++
+            error("Export failed")
+        }
+
+        override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
+        override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
+    }
+
+    /** Blocks the first export until [release] is completed, then records the log body. */
+    private class BlockingLogRecordExporter : LogRecordExporter {
+        val exports = mutableListOf<String>()
+        private val release = CompletableDeferred<Unit>()
+
+        fun release() = release.complete(Unit)
+
+        override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode {
+            release.await()
+            exports += telemetry.map { it.body.toString() }
+            return OperationResultCode.Success
+        }
+
+        override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
+        override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
+    }
+
+    /** Records the order of export, forceFlush, and shutdown calls. */
+    private class OrderTrackingLogRecordExporter : LogRecordExporter {
+        val events = mutableListOf<String>()
+        private val release = CompletableDeferred<Unit>()
+
+        fun release() = release.complete(Unit)
+
+        override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode {
+            events += "export:${telemetry.first().body}"
+            release.await()
+            return OperationResultCode.Success
+        }
+
+        override suspend fun forceFlush(): OperationResultCode {
+            events += "forceFlush"
+            return OperationResultCode.Success
+        }
+
+        override suspend fun shutdown(): OperationResultCode {
+            events += "shutdown"
+            return OperationResultCode.Success
+        }
+    }
+
+    /** Exporter whose delay is configurable per export. */
+    private class ConfigurableDelayLogRecordExporter : LogRecordExporter {
+        val exports = mutableListOf<String>()
+        var delayMs: Long = 0
+
+        override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode {
+            if (delayMs > 0) {
+                delay(delayMs)
+            }
+            exports += telemetry.map { it.body.toString() }
+            return OperationResultCode.Success
+        }
+
+        override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
+        override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
+    }
+
+    /** Always returns [OperationResultCode.Failure] from export. */
+    private class FailureResultLogRecordExporter : LogRecordExporter {
+        var exportCount = 0
+
+        override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode {
+            exportCount++
+            return OperationResultCode.Failure
+        }
+
+        override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
+        override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
     }
 }

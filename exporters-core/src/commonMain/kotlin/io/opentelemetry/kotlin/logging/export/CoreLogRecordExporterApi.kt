@@ -40,7 +40,7 @@ public fun LogExportConfigDsl.simpleLogRecordProcessor(exporter: LogRecordExport
     val scope = CoroutineScope(
         SupervisorJob() + ioDispatcher + telemetryExceptionHandler("Simple log record processor", sdkErrorHandler)
     )
-    return SimpleLogRecordProcessor(exporter, scope)
+    return SimpleLogRecordProcessor(exporter, scope, sdkErrorHandler)
 }
 
 /**
