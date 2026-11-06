@@ -30,11 +30,4 @@ data class BatchLogRecordProcessorBehavior(
         maxExportBatchSize = higher.maxExportBatchSize ?: maxExportBatchSize,
         exporter = mergeNode(exporter, higher.exporter),
     )
-
-    companion object {
-        const val DEFAULT_SCHEDULE_DELAY = 1_000L
-        const val DEFAULT_EXPORT_TIMEOUT = 30_000L
-        const val DEFAULT_MAX_QUEUE_SIZE = 2_048
-        const val DEFAULT_MAX_EXPORT_BATCH_SIZE = 512
-    }
 }
