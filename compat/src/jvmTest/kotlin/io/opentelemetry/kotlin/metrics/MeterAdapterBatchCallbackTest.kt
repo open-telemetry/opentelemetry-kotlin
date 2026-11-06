@@ -27,8 +27,8 @@ internal class MeterAdapterBatchCallbackTest {
         var calls = 0
 
         val registration = meter.batchCallback(
-            ObservableLongMeasurementAdapter(longMeasurement),
-            ObservableDoubleMeasurementAdapter(doubleMeasurement),
+            ObservableLongMeasurementAdapter(longMeasurement, NoopSdkErrorHandler),
+            ObservableDoubleMeasurementAdapter(doubleMeasurement, NoopSdkErrorHandler),
         ) { calls++ }
 
         assertEquals(listOf(longMeasurement, doubleMeasurement), javaMeter.measurements)
@@ -59,7 +59,7 @@ internal class MeterAdapterBatchCallbackTest {
         val javaMeter = RecordingJavaMeter()
         val errorHandler = FakeSdkErrorHandler()
         MeterAdapter(javaMeter, errorHandler).batchCallback(
-            ObservableLongMeasurementAdapter(RecordingJavaLongMeasurement()),
+            ObservableLongMeasurementAdapter(RecordingJavaLongMeasurement(), errorHandler),
         ) { error("callback failed") }
 
         javaMeter.callback?.run()

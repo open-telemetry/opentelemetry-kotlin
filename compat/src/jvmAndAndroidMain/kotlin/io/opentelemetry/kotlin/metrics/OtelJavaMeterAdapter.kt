@@ -28,6 +28,7 @@ internal class OtelJavaMeterAdapter(
     override fun upDownCounterBuilder(name: String): OtelJavaLongUpDownCounterBuilder =
         OtelJavaLongUpDownCounterBuilderAdapter(impl, name, javaMeterProvider)
 
+    @Suppress("SpreadOperator")
     override fun batchCallback(
         callback: Runnable,
         observableMeasurement: OtelJavaObservableMeasurement,

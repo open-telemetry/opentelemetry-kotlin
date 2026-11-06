@@ -116,6 +116,7 @@ internal class MeterAdapter(
             ObservableLongGaugeAdapter(impl, name, unit, description, callbacks, sdkErrorHandler)
         } ?: noopMeter.createObservableLongGauge(name, unit, description)
 
+    @Suppress("SpreadOperator")
     override fun batchCallback(
         measurement: ObservableMeasurement,
         vararg additionalMeasurements: ObservableMeasurement,
