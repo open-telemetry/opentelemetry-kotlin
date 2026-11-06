@@ -15,7 +15,7 @@ fun BatchLogRecordProcessor.toBehavior(): BatchLogRecordProcessorBehavior {
     val requestedBatchSize = maxExportBatchSize?.takeIf { value -> value in 1..Int.MAX_VALUE.toLong() }?.toInt()
 
     val maxExportBatchSize = let {
-        if(maxQueueSize != null && requestedBatchSize != null) {
+        if (maxQueueSize != null && requestedBatchSize != null) {
             return@let minOf(requestedBatchSize, maxQueueSize)
         }
         requestedBatchSize ?: maxQueueSize
