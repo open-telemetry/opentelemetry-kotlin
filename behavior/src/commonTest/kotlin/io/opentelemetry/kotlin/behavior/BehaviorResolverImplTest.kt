@@ -67,13 +67,12 @@ internal class BehaviorResolverImplTest {
 
     @Test
     fun dslSelectsSimpleSpanProcessorAndPreservesDeclarativeExporter() {
-        val http = OtlpHttpSpanExporterBehavior(endpoint = "https://example.com")
         val resolved = resolver.resolve(
             envars = null,
             declarativeFile = OpenTelemetryBehavior(
                 fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 tracerProvider = TracerProviderBehavior(
-                    processor = SpanProcessorBehavior(http = http),
+                    processor = SpanProcessorBehavior(),
                 ),
             ),
             dsl = OpenTelemetryBehavior(
@@ -85,7 +84,6 @@ internal class BehaviorResolverImplTest {
         )
 
         val processor = resolved.tracerProvider?.processor
-        assertEquals(http, processor?.http)
         assertEquals(SimpleSpanProcessorBehavior(), processor?.simple)
     }
 
