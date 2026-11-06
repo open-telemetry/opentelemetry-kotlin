@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.framework.serialization.conversion
 
 import io.opentelemetry.kotlin.framework.serialization.SerializableSpanContext
 import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.kotlin.tracing.model.hex
+import io.opentelemetry.kotlin.tracing.hex
 
 /**
  * Safely calls [SpanContext.traceState.asMap()], returning an empty map if the operation throws.

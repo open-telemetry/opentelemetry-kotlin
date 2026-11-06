@@ -3,8 +3,6 @@
 package io.opentelemetry.kotlin
 
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import platform.posix.setenv
 import platform.posix.unsetenv
 import kotlin.test.Test
@@ -22,16 +20,5 @@ internal class LinuxPlatformTest {
             unsetenv(name)
         }
         assertNull(getEnvVarValue(name))
-    }
-
-    @Test
-    fun ioDispatcherRunsOffTheCallingThread() = runBlocking {
-        val local = ThreadLocal<String>()
-        local.set("caller")
-        try {
-            withContext(ioDispatcher) { assertNull(local.get()) }
-        } finally {
-            local.set(null)
-        }
     }
 }

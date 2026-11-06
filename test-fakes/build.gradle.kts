@@ -10,6 +10,7 @@ kotlin {
             dependencies {
                 api(project(":sdk-api"))
                 api(project(":platform-implementations"))
+                api(project(":platform-io"))
             }
         }
     }

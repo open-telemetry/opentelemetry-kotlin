@@ -14,6 +14,7 @@ kotlin {
                 api(project(":behavior"))
                 api(project(":config-schema"))
                 implementation(project(":platform-implementations"))
+                implementation(project(":platform-io"))
                 implementation(project(":propagation-utils"))
                 implementation(libs.yamlkt)
                 implementation(libs.okio)
