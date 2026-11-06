@@ -18,7 +18,11 @@ private const val UNKNOWN_SERVICE = "unknown_service"
 public val SDK_DEFAULT_SERVICE_NAME: String = defaultServiceName(getProcessExecutableName())
 
 internal fun defaultServiceName(executableName: String?): String =
-    if (executableName.isNullOrBlank()) UNKNOWN_SERVICE else "$UNKNOWN_SERVICE:$executableName"
+    if (executableName.isNullOrBlank()) {
+        UNKNOWN_SERVICE
+    } else {
+        "$UNKNOWN_SERVICE:$executableName"
+    }
 
 /**
  * Resource attribute key recording which [SdkMode] produced the telemetry.
