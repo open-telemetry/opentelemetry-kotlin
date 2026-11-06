@@ -156,6 +156,39 @@ internal class OtelJavaAttributesExtTest {
     }
 
     @Test
+    fun testToOtelJavaAttributesUsesTypedValues() {
+        val container = object : TypedAttributeContainer {
+            override val attributes: Map<String, Any> = mapOf("l" to emptyList<Long>())
+            override val typedAttributes: Map<String, AttributeValue> =
+                mapOf("l" to AttributeValue.LongList(emptyList()))
+        }
+        val attrs = container.toOtelJavaAttributes()
+        assertEquals(emptyList<Long>(), attrs.get(AttributeKey.longArrayKey("l")))
+    }
+
+    @Test
+    fun testGetOtelJavaAttributeMatchesAttrsFromMap() {
+        val map = mapOf<String, Any>(
+            "long" to AnyValue.LongValue(3),
+            "str" to AnyValue.StringValue("s"),
+            "list" to AnyValue.ListValue(listOf(AnyValue.LongValue(1))),
+        )
+        val keys = listOf(
+            AttributeKey.longKey("long"),
+            AttributeKey.valueKey("long"),
+            AttributeKey.stringKey("str"),
+            AttributeKey.longKey("str"),
+            AttributeKey.valueKey("list"),
+            AttributeKey.longArrayKey("list"),
+        )
+        val attrs = attrsFromMap(map)
+        keys.forEach { key ->
+            assertEquals("key $key", attrs.get(key), map.getOtelJavaAttribute(key))
+        }
+        assertEquals(3L, map.getOtelJavaAttribute(AttributeKey.longKey("long")))
+    }
+
+    @Test
     fun testResourceFromMap() {
         val resource = resourceFromMap(
             FakeResource(
