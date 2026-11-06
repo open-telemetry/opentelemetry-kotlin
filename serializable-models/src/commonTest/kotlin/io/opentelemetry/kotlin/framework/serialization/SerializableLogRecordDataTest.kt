@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.framework.serialization.conversion.toSerializable
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.kotlin.tracing.model.hex
+import io.opentelemetry.kotlin.tracing.hex
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

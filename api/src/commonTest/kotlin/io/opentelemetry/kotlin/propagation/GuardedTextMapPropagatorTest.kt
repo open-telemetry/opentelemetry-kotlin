@@ -4,14 +4,31 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.error.RecordingSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.init.B3Format
 import io.opentelemetry.kotlin.tracing.createSpanContext
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
 internal class GuardedTextMapPropagatorTest {
+
+    private val errorHandler = RecordingSdkErrorHandler()
+
+    @BeforeTest
+    fun setUp() {
+        errorHandler.install()
+    }
+
+    @AfterTest
+    fun tearDown() {
+        errorHandler.uninstall()
+    }
 
     private val builtIns = listOf(
         createW3CTraceContextPropagator(),
@@ -58,10 +75,59 @@ internal class GuardedTextMapPropagatorTest {
         assertEquals("alice", extracted.extractBaggage().getValue("user"))
     }
 
+    @Test
+    fun `throwing fields reports one user code error`() {
+        assertEquals(emptyList(), ThrowingPropagator.guarded().fields().toList())
+        errorHandler.assertSingleUserCodeError(BOOM)
+    }
+
+    @Test
+    fun `throwing inject reports one user code error`() {
+        ThrowingPropagator.guarded().inject(populatedContext, mutableMapOf(), FakeTextMapSetter)
+        errorHandler.assertSingleUserCodeError(BOOM)
+    }
+
+    @Test
+    fun `throwing extract reports one user code error`() {
+        val ctx = rootContext()
+        assertSame(ctx, ThrowingPropagator.guarded().extract(ctx, emptyMap(), FakeTextMapGetter))
+        errorHandler.assertSingleUserCodeError(BOOM)
+    }
+
+    @Test
+    fun `composite reports each throwing delegate once per call`() {
+        val composite = createCompositePropagator(ThrowingPropagator, ThrowingPropagator)
+        assertReportedTwice()
+
+        errorHandler.errors.clear()
+        composite.inject(populatedContext, mutableMapOf(), FakeTextMapSetter)
+        assertReportedTwice()
+    }
+
+    private fun assertReportedTwice() {
+        assertEquals(2, errorHandler.errors.size)
+        assertTrue(errorHandler.errors.all { it is SdkError.UserCodeError && it.cause === BOOM })
+    }
+
+    @Test
+    fun `successful propagation reports nothing`() {
+        val carrier = mutableMapOf<String, String>()
+        builtIns.forEach { propagator ->
+            propagator.fields()
+            propagator.inject(populatedContext, carrier, FakeTextMapSetter)
+            propagator.extract(rootContext(), carrier, FakeTextMapGetter)
+        }
+        assertEquals(emptyList(), errorHandler.errors)
+    }
+
+    private companion object {
+        val BOOM = IllegalStateException("boom")
+    }
+
     private object ThrowingPropagator : TextMapPropagator {
-        override fun fields(): Collection<String> = error("boom")
-        override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>): Unit = error("boom")
-        override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context = error("boom")
+        override fun fields(): Collection<String> = throw BOOM
+        override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>): Unit = throw BOOM
+        override fun <T> extract(context: Context, carrier: T, getter: TextMapGetter<T>): Context = throw BOOM
     }
 
     private object ThrowingTextMapSetter : TextMapSetter<MutableMap<String, String>> {

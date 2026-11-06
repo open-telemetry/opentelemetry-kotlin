@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.FakeTraceFlags
 import io.opentelemetry.kotlin.tracing.TraceState
-import io.opentelemetry.proto.common.v1.InstrumentationScope
+import io.opentelemetry.kotlin.proto.common.v1.InstrumentationScope
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -102,7 +102,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testResourceDeserialization() {
-        val proto = io.opentelemetry.proto.resource.v1.Resource(
+        val proto = io.opentelemetry.kotlin.proto.resource.v1.Resource(
             attributes = emptyList()
         )
         val resource = proto.toResource()
@@ -111,7 +111,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testResourceDeserialization_usesSchemaUrl() {
-        val proto = io.opentelemetry.proto.resource.v1.Resource(
+        val proto = io.opentelemetry.kotlin.proto.resource.v1.Resource(
             attributes = emptyList()
         )
         val resource = proto.toResource("https://example.com/schema")
@@ -120,7 +120,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testResourceDeserialization_emptySchemaUrlIsNull() {
-        val proto = io.opentelemetry.proto.resource.v1.Resource(
+        val proto = io.opentelemetry.kotlin.proto.resource.v1.Resource(
             attributes = emptyList()
         )
         val resource = proto.toResource("")
@@ -373,7 +373,7 @@ class CommonProtobufConversionTest {
     }
 
     private fun deserializedResource(): Resource {
-        val proto = io.opentelemetry.proto.resource.v1.Resource(
+        val proto = io.opentelemetry.kotlin.proto.resource.v1.Resource(
             attributes = mapOf<String, Any>("existing" to "value").createKeyValues()
         )
         return proto.toResource()

@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.reportApiUserCodeError
 import io.opentelemetry.kotlin.propagation.utils.SPAN_ID_BYTES
 import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_BYTES
 import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateValidator
@@ -63,7 +64,8 @@ public fun createSpanContext(
  * [action] DSL block.
  *
  * An ID that is not the correct length, or that is all zeros, is replaced with all zeros, which
- * makes the [SpanContext] invalid. If [action] throws, the invalid [SpanContext] is returned.
+ * makes the [SpanContext] invalid. If [action] throws, the invalid [SpanContext] is returned and
+ * the exception is reported.
  *
  * This does not require an [io.opentelemetry.kotlin.OpenTelemetry] instance.
  *
@@ -78,7 +80,8 @@ public fun createSpanContext(
     val builder = SpanContextCreationActionImpl()
     try {
         builder.action()
-    } catch (ignored: Throwable) {
+    } catch (e: Throwable) {
+        reportApiUserCodeError(e, "createSpanContext action threw")
         return INVALID_SPAN_CONTEXT
     }
     return SpanContextImpl(

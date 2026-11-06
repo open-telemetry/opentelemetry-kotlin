@@ -20,27 +20,7 @@ fun Project.configureKotlin(
         }
 
         if (!project.isJvmAndroidModule()) {
-            js {
-                nodejs()
-                browser {
-                    testTask {
-                        // disable browser tests, as nodejs is enough
-                        enabled = false
-                    }
-                }
-            }
-
-            // assume that consumers depend on the published klibs and link their own frameworks
-            iosArm64()
-            iosSimulatorArm64()
-            tvosArm64()
-            tvosSimulatorArm64()
-
-            // modules need to opt in to the Linux targets
-            if (project.findProperty("io.opentelemetry.kotlin.linux")?.toString()?.toBoolean() == true) {
-                linuxX64()
-                linuxArm64()
-            }
+            configureNonJvmTargets()
         }
 
         sourceSets.apply {
@@ -72,13 +52,44 @@ fun Project.configureKotlin(
             }
 
             if (!project.isJvmAndroidModule()) {
-                getByName("jsMain")
+                // shared by every target except JS
+                val nonJsMain = create("nonJsMain").apply {
+                    dependsOn(commonMain.get())
+                }
+                jvmAndAndroidMain.dependsOn(nonJsMain)
+                getByName("nativeMain").apply {
+                    dependsOn(nonJsMain)
+                }
             }
         }
         compilerOptions {
             configureCompiler()
         }
     }
+}
+
+/**
+ * Declares every target other than JVM and Android. This is the single place to add a new target.
+ */
+private fun KotlinMultiplatformExtension.configureNonJvmTargets() {
+    js {
+        nodejs()
+        browser {
+            testTask {
+                // disable browser tests, as nodejs is enough
+                enabled = false
+            }
+        }
+    }
+
+    // assume that consumers depend on the published klibs and link their own frameworks
+    iosArm64()
+    iosSimulatorArm64()
+    tvosArm64()
+    tvosSimulatorArm64()
+
+    linuxX64()
+    linuxArm64()
 }
 
 fun KotlinCommonCompilerOptions.configureCompiler() {
