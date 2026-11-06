@@ -6,3 +6,5 @@
 package io.opentelemetry.kotlin
 
 public actual fun getEnvVarValue(name: String): String? = System.getenv(name)
+
+public actual val supportsEnvVars: Boolean = true
