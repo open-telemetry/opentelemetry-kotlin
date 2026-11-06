@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
 import io.opentelemetry.kotlin.aliases.OtelJavaValue
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.attributes.toOtelKotlinBody
+import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import io.opentelemetry.kotlin.factory.ContextFactory
 import java.time.Instant
@@ -101,7 +102,7 @@ internal class OtelJavaLogRecordBuilderAdapter(
             eventName = eventName,
             timestamp = timestamp,
             observedTimestamp = observedTimestamp,
-            context = context?.toOtelKotlinContext() ?: contextFactory.current(),
+            context = context?.toOtelKotlinContext() ?: contextFactory.currentContext(),
             severityNumber = severity?.toOtelKotlinSeverityNumber(),
             severityText = severityText,
             exception = exception,

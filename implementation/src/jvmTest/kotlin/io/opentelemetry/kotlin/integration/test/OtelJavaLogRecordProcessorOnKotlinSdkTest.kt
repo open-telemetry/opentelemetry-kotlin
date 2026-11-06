@@ -12,6 +12,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.LoggerConfig
 import io.opentelemetry.kotlin.logging.SeverityNumber
@@ -175,7 +176,7 @@ internal class OtelJavaLogRecordProcessorOnKotlinSdkTest {
         val processor = RecordingOtelJavaLogRecordProcessor()
         harness.config.logRecordProcessors.add(processor.toOtelKotlinLogRecordProcessor())
         val span = harness.tracer.startSpan("span")
-        val ctx = harness.kotlinApi.context.current()
+        val ctx = harness.kotlinApi.context.currentContext()
             .storeSpan(span)
             .storeBaggage(createBaggage { put("key", "value") })
         val scope = ctx.attach()
