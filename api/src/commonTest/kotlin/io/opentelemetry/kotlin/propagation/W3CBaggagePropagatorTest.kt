@@ -79,6 +79,99 @@ internal class W3CBaggagePropagatorTest {
     }
 
     @Test
+    fun `inject rejects metadata containing comma to prevent member injection`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("p=1,evil=injected"))
+        val carrier = injectInto(baggage)
+        // Metadata should be rejected, entry retained without metadata
+        assertEquals("k=v", carrier["baggage"])
+    }
+
+    @Test
+    fun `inject rejects metadata containing CR character`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("p=1\r"))
+        val carrier = injectInto(baggage)
+        assertEquals("k=v", carrier["baggage"])
+    }
+
+    @Test
+    fun `inject rejects metadata containing LF character`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("p=1\n"))
+        val carrier = injectInto(baggage)
+        assertEquals("k=v", carrier["baggage"])
+    }
+
+    @Test
+    fun `inject rejects metadata containing CRLF sequence`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("p=1\r\n"))
+        val carrier = injectInto(baggage)
+        assertEquals("k=v", carrier["baggage"])
+    }
+
+    @Test
+    fun `inject rejects metadata containing non-ASCII characters`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("p=café"))
+        val carrier = injectInto(baggage)
+        assertEquals("k=v", carrier["baggage"])
+    }
+
+    @Test
+    fun `inject accepts valid metadata with key-value pair`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("propagation=public"))
+        val carrier = injectInto(baggage)
+        assertEquals("k=v;propagation=public", carrier["baggage"])
+    }
+
+    @Test
+    fun `inject accepts valid metadata with key only`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("public"))
+        val carrier = injectInto(baggage)
+        assertEquals("k=v;public", carrier["baggage"])
+    }
+
+    @Test
+    fun `inject accepts valid metadata with multiple properties`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("propagation=public;ttl=1"))
+        val carrier = injectInto(baggage)
+        assertEquals("k=v;propagation=public;ttl=1", carrier["baggage"])
+    }
+
+    @Test
+    fun `inject percent-encodes property values with special characters`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("p=hello world"))
+        val carrier = injectInto(baggage)
+        assertEquals("k=v;p=hello%20world", carrier["baggage"])
+    }
+
+    @Test
+    fun `inject retains entry when metadata is invalid`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("invalid,char"))
+        val carrier = injectInto(baggage)
+        assertEquals("k=v", carrier["baggage"])
+        // Entry should still be extractable
+        val extracted = extract(carrier["baggage"]!!)
+        assertEquals("v", extracted.getValue("k"))
+    }
+
+    @Test
+    fun `inject and extract round-trip with valid metadata`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("propagation=public;ttl=1"))
+        val carrier = injectInto(baggage)
+        val extracted = extract(carrier["baggage"]!!)
+        assertEquals("v", extracted.getValue("k"))
+        assertEquals("propagation=public;ttl=1", extracted.asMap()["k"]?.metadata?.value)
+    }
+
+    @Test
+    fun `inject drops invalid metadata but preserves valid entry`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("p=1\r\n"))
+        val carrier = injectInto(baggage)
+        assertEquals("k=v", carrier["baggage"])
+        val extracted = extract(carrier["baggage"]!!)
+        assertEquals("v", extracted.getValue("k"))
+        assertEquals("", extracted.asMap()["k"]?.metadata?.value)
+    }
+
+    @Test
     fun `inject skips entry whose key is not a valid token`() {
         val baggage = createBaggage().set("good", "g").set("bad key", "b")
         val carrier = injectInto(baggage)

@@ -82,7 +82,124 @@ internal object W3CBaggagePropagator : TextMapPropagator {
         val sb = StringBuilder()
         sb.append(key).append(KEY_VALUE_DELIMITER).append(percentEncodeBaggageValue(value))
         if (metadata.isNotEmpty()) {
-            sb.append(METADATA_DELIMITER).append(metadata)
+            val encodedMetadata = encodeMetadata(metadata)
+            if (encodedMetadata != null) {
+                sb.append(METADATA_DELIMITER).append(encodedMetadata)
+            }
+        }
+        return sb.toString()
+    }
+
+    /**
+     * Validates and encodes metadata according to W3C property grammar.
+     * Returns null if metadata is invalid, causing the entry to be serialized without metadata.
+     * Property format: key OWS "=" OWS value OR key OWS
+     * Both key and value must be baggage-octet (ASCII subset, no CTLs, whitespace, comma, semicolon, etc.)
+     */
+    private fun encodeMetadata(metadata: String): String? {
+        val sb = StringBuilder()
+        var pos = 0
+        while (pos < metadata.length) {
+            // Skip leading whitespace
+            while (pos < metadata.length && metadata[pos] == SPACE || metadata[pos] == HTAB) {
+                pos++
+            }
+            if (pos >= metadata.length) break
+
+            // Parse property key
+            val keyStart = pos
+            while (pos < metadata.length && isBaggageOctet(metadata[pos]) && metadata[pos] != '=') {
+                pos++
+            }
+            val key = metadata.substring(keyStart, pos)
+
+            // Key must be a valid token (non-empty and valid baggage-octet)
+            if (key.isEmpty() || !isValidToken(key)) {
+                return null
+            }
+
+            // Check for value separator
+            val hasValue = pos < metadata.length && metadata[pos] == '='
+            if (hasValue) {
+                pos++ // skip '='
+                // Skip whitespace after '='
+                while (pos < metadata.length && (metadata[pos] == SPACE || metadata[pos] == HTAB)) {
+                    pos++
+                }
+                // Parse property value
+                val valueStart = pos
+                while (pos < metadata.length && isBaggageOctet(metadata[pos]) && metadata[pos] != ';') {
+                    pos++
+                }
+                val value = metadata.substring(valueStart, pos)
+                // Percent-encode the value
+                sb.append(key).append('=').append(percentEncodeProperty(value))
+            } else {
+                // Property without value
+                sb.append(key)
+            }
+
+            // Skip trailing whitespace
+            while (pos < metadata.length && (metadata[pos] == SPACE || metadata[pos] == HTAB)) {
+                pos++
+            }
+
+            // Check for next property or end
+            if (pos < metadata.length && metadata[pos] == ';') {
+                pos++
+                sb.append(';')
+            } else if (pos < metadata.length) {
+                // Invalid character or separator
+                return null
+            }
+        }
+        return sb.takeIf(StringBuilder::isNotEmpty)?.toString()
+    }
+
+    /**
+     * Checks if a character is a valid baggage-octet per W3C spec.
+     * baggage-octet = %x21 / %x23-2B / %x2D-3A / %x3C-5B / %x5D-7E
+     * Excludes CTLs, whitespace, DQUOTE, comma, semicolon, and backslash
+     */
+    private fun isBaggageOctet(c: Char): Boolean = when (c.code) {
+        0x21 -> true // !
+        in 0x23..0x2B -> true // # - +
+        in 0x2D..0x3A -> true // - - :
+        in 0x3C..0x5B -> true // < - [
+        in 0x5D..0x7E -> true // ] - ~
+        else -> false
+    }
+
+    /**
+     * Checks if a string is a valid token per RFC 7230.
+     * Uses the same validation as isValidBaggageKey from BaggageValidation.kt
+     */
+    private fun isValidToken(name: String): Boolean {
+        if (name.isEmpty()) {
+            return false
+        }
+        return name.all { c ->
+            (c in 'a'..'z' || c in 'A'..'Z' || c in '0'..'9') ||
+            c in setOf('!', '#', '$', '%', '&', '\'', '*', '+', '-', '.', '^', '_', '`', '|', '~')
+        }
+    }
+
+    /**
+     * Percent-encodes property values that contain non-baggage-octet characters.
+     * Similar to percentEncodeBaggageValue but specifically for property values.
+     */
+    private fun percentEncodeProperty(value: String): String {
+        val sb = StringBuilder()
+        for (c in value) {
+            if (isBaggageOctet(c)) {
+                sb.append(c)
+            } else {
+                // Percent-encode the character as UTF-8 bytes
+                val bytes = c.toString().encodeToByteArray()
+                for (b in bytes) {
+                    sb.append(String.format("%%%02X", b))
+                }
+            }
         }
         return sb.toString()
     }
