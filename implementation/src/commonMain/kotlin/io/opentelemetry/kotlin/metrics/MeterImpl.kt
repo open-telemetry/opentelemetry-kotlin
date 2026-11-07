@@ -115,6 +115,16 @@ internal class MeterImpl(
         return noopMeter.createObservableLongGauge(name, unit, description, *callbacks)
     }
 
+    override fun createObservableDoubleGauge(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
+    ): ObservableDoubleGauge {
+        val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
+        return noopMeter.createObservableDoubleGauge(name, unit, description, *callbacks)
+    }
+
     /**
      * Returns a noop meter if [name] is not a valid
      * [instrument name](https://opentelemetry.io/docs/specs/otel/metrics/api/#instrument-name-syntax),

@@ -110,4 +110,14 @@ internal class MeterAdapter(
         sdkErrorHandler.sdkGuardOrDefault(null, "Meter.createObservableLongGauge failed") {
             ObservableLongGaugeAdapter(impl, name, unit, description, callbacks, sdkErrorHandler)
         } ?: noopMeter.createObservableLongGauge(name, unit, description)
+
+    override fun createObservableDoubleGauge(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
+    ): ObservableDoubleGauge =
+        sdkErrorHandler.sdkGuardOrDefault(null, "Meter.createObservableDoubleGauge failed") {
+            ObservableDoubleGaugeAdapter(impl, name, unit, description, callbacks, sdkErrorHandler)
+        } ?: noopMeter.createObservableDoubleGauge(name, unit, description)
 }
