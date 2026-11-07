@@ -122,7 +122,7 @@ private class DeserializedTraceState(private val entries: Map<String, String>) :
     override fun asMap(): Map<String, String> = entries
     override fun put(key: String, value: String): TraceState = when {
         W3CTraceStateValidator.canPut(entries, key, value) ->
-            DeserializedTraceState(entries + (key to value))
+            DeserializedTraceState(mapOf(key to value) + (entries - key))
         else -> this
     }
 
