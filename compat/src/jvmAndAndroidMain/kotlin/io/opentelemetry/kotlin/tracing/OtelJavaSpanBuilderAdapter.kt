@@ -10,6 +10,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
@@ -104,8 +106,8 @@ internal class OtelJavaSpanBuilderAdapter(
 
     override fun startSpan(): OtelJavaSpan {
         val parentContext = when {
-            noParent -> contextFactory.root()
-            else -> parent?.toOtelKotlinContext() ?: contextFactory.current()
+            noParent -> contextFactory.rootContext()
+            else -> parent?.toOtelKotlinContext() ?: contextFactory.currentContext()
         }
         val span = tracer.startSpan(
             name = spanName,

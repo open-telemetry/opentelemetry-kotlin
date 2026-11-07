@@ -12,6 +12,7 @@ import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
 import io.opentelemetry.kotlin.attributes.setTypedAttribute
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.tracing.Span
@@ -107,7 +108,7 @@ internal class OtelJavaSpanAdapter(
         return if ((span is OtelJavaImplicitContextKeyed)) {
             span.makeCurrent()
         } else {
-            val scope = contextFactory.current().storeSpan(span).attach()
+            val scope = contextFactory.currentContext().storeSpan(span).attach()
             OtelJavaScope { scope.detach() }
         }
     }

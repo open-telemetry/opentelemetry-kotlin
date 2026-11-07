@@ -21,6 +21,7 @@ kotlin {
                 implementation(libs.kotlinx.benchmark.runtime)
                 implementation(project(":core"))
                 implementation(project(":implementation"))
+                implementation(project(":sdk-common"))
                 implementation(project(":benchmark-fixtures"))
             }
         }
