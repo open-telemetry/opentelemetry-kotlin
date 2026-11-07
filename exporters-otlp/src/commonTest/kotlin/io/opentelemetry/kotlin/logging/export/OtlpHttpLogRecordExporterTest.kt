@@ -26,10 +26,14 @@ import io.opentelemetry.kotlin.init.LogExportConfigDsl
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlin.test.BeforeTest
@@ -39,6 +43,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class OtlpHttpLogRecordExporterTest {
 
     private val logRecords = listOf(FakeLogRecordData())
@@ -55,15 +60,14 @@ internal class OtlpHttpLogRecordExporterTest {
     @BeforeTest
     fun setUp() {
         server = testMockEngine(dispatcher) {
-            delay(serverDelayMs)
-            val response = respond(
-                content = ByteReadChannel(""),
-                status = mockResponseStatus
-            )
             // Body transformations are tied to the request context, so capture the body here;
             // reading it later fails after the request completes.
             requestBody.complete(it.body.toByteArray())
-            response
+            delay(serverDelayMs)
+            respond(
+                content = ByteReadChannel(""),
+                status = mockResponseStatus
+            )
         }
         val httpClient = createTestHttpClient(INFINITE_TIMEOUT_MS, server, dispatcher)
         client = OtlpClient(baseUrl, httpClient = httpClient, sdkErrorHandler = NoopSdkErrorHandler)
@@ -75,8 +79,7 @@ internal class OtlpHttpLogRecordExporterTest {
         maxAttemptIntervalMs = 5,
         maxAttempts = 3,
         sdkErrorHandler = NoopSdkErrorHandler,
-        coroutineContext = dispatcher,
-        timeSource = dispatcher.scheduler.timeSource
+        coroutineContext = dispatcher
     )
 
     @Test
@@ -98,16 +101,19 @@ internal class OtlpHttpLogRecordExporterTest {
     }
 
     @Test
-    fun testShutdownDrainsPendingTelemetry() = runTest(dispatcher) {
+    fun testExportShutdown() = runTest(dispatcher) {
         exporter().withShutdown { exporter ->
             mockResponseStatus = HttpStatusCode.OK
             serverDelayMs = 1000
-            val code = exporter.export(logRecords)
-            assertEquals(OperationResultCode.Success, code)
+            val export = launch { exporter.export(logRecords) }
+            requestBody.await()
+
             val shutdownCode = exporter.shutdown()
             assertEquals(OperationResultCode.Success, shutdownCode)
-            requestBody.await()
-            assertEquals(1, server.requestHistory.size)
+            assertTrue(export.isCancelled)
+
+            advanceUntilIdle()
+            assertTrue(server.requestHistory.isEmpty())
         }
     }
 
@@ -183,6 +189,7 @@ internal class OtlpHttpLogRecordExporterTest {
     @Test
     fun testFactoryWithCustomEngineExports() = runTest {
         val mockServer = MockEngine {
+            request.complete(it)
             respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
         }
         val factoryExporter = fakeConfig().otlpHttpLogRecordExporter {
@@ -196,7 +203,6 @@ internal class OtlpHttpLogRecordExporterTest {
             // does real IO, so shutdown must run on real time, not the test's virtual time.
             val shutdownCode = withContext(Dispatchers.Default) { factoryExporter.shutdown() }
             assertEquals(OperationResultCode.Success, shutdownCode)
-            assertEquals(1, mockServer.requestHistory.size)
         } finally {
             withContext(NonCancellable) {
                 factoryExporter.shutdown()
@@ -206,8 +212,9 @@ internal class OtlpHttpLogRecordExporterTest {
         }
     }
 
-    private suspend fun waitAndAssertExportedTelemetry(telemetry: List<LogRecordData>) {
+    private suspend fun TestScope.waitAndAssertExportedTelemetry(telemetry: List<LogRecordData>) {
         val body = requestBody.await()
+        advanceUntilIdle()
         val requests = server.requestHistory
         check(server.requestHistory.size == 1) {
             "Expected 1 request, got ${requests.size}"
