@@ -352,6 +352,22 @@ internal class NoopTests {
         }.close()
         observableLongGauge.close()
         assertFalse(longGaugeCallbackInvoked)
+
+        var doubleGaugeCallbackInvoked = false
+        val doubleGaugeCreationCallback: (ObservableDoubleMeasurement) -> Unit = { measurement ->
+            doubleGaugeCallbackInvoked = true
+            measurement.record(21.5)
+        }
+        val observableDoubleGauge = meter.createObservableDoubleGauge(
+            name = "temperature",
+            callbacks = arrayOf(doubleGaugeCreationCallback),
+        )
+        observableDoubleGauge.registerCallback {
+            doubleGaugeCallbackInvoked = true
+            it.record(22.0)
+        }.close()
+        observableDoubleGauge.close()
+        assertFalse(doubleGaugeCallbackInvoked)
     }
 
     @OptIn(ExperimentalApi::class)
