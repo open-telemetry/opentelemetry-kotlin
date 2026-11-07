@@ -13,6 +13,12 @@ kotlin {
                 api(project(":api"))
                 api(project(":error-handling"))
                 implementation(project(":propagation-utils"))
+                implementation(project(":platform-implementations"))
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation(project(":test-fakes"))
             }
         }
     }
