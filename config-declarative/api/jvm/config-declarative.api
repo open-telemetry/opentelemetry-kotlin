@@ -1,0 +1,4 @@
+public final class io/opentelemetry/kotlin/config/YamlConfigReaderKt {
+	public static final fun yamlConfigReader ()Lio/opentelemetry/kotlin/init/DeclarativeConfigReader;
+}
+
