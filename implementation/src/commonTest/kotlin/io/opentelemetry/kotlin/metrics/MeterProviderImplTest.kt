@@ -230,6 +230,96 @@ internal class MeterProviderImplTest {
     }
 
     @Test
+    fun testDuplicateInstrumentRegistrationReturnsSameInstance() {
+        val meter = impl.getMeter(name = "test")
+        val counter1 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
+        val counter2 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
+        assertSame(counter1, counter2)
+    }
+
+    @Test
+    fun testCaseInsensitiveDuplicateRegistrationReturnsSameInstance() {
+        val meter = impl.getMeter(name = "test")
+        val counter1 = meter.createLongUpDownCounter("My.Counter", unit = "1", description = "test")
+        val counter2 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
+        assertSame(counter1, counter2)
+    }
+
+    @Test
+    fun testDifferentInstrumentsWithDifferentNames() {
+        val meter = impl.getMeter(name = "test")
+        val counter1 = meter.createLongUpDownCounter("counter1", unit = "1", description = "test")
+        val counter2 = meter.createLongUpDownCounter("counter2", unit = "1", description = "test")
+        assertNotEquals(counter1, counter2)
+    }
+
+    @Test
+    fun testDuplicateDoubleUpDownCounterRegistrationReturnsSameInstance() {
+        val meter = impl.getMeter(name = "test")
+        val counter1 = meter.createDoubleUpDownCounter("my.counter", unit = "1", description = "test")
+        val counter2 = meter.createDoubleUpDownCounter("my.counter", unit = "1", description = "test")
+        assertSame(counter1, counter2)
+    }
+
+    @Test
+    fun testSameNameDifferentInstrumentTypesReportsError() {
+        val handler = FakeSdkErrorHandler()
+        val config = MetricsConfig(
+            resource = ResourceImpl(AttributesModel(), null),
+            sdkErrorHandler = handler,
+        )
+        val attributeLimits = AttributeLimitsBehavior()
+        val provider = MeterProviderImpl(config, attributeLimits)
+        val meter = provider.getMeter(name = "test")
+
+        val longCounter = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
+        val doubleCounter = meter.createDoubleUpDownCounter("my.counter", unit = "1", description = "test")
+
+        // Should return a noop instrument when types don't match
+        assertFalse(longCounter === doubleCounter)
+        // Should report an error
+        assertEquals(1, handler.apiMisuses.size)
+        assertTrue(handler.apiMisuses.single().message.contains("already registered"))
+        assertTrue(handler.apiMisuses.single().message.contains("LONG_UP_DOWN_COUNTER"))
+        assertTrue(handler.apiMisuses.single().message.contains("DOUBLE_UP_DOWN_COUNTER"))
+    }
+
+    @Test
+    fun testSameNameDifferentUnitsReturnsFirstInstance() {
+        val meter = impl.getMeter(name = "test")
+        val counter1 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
+        val counter2 = meter.createLongUpDownCounter("my.counter", unit = "ms", description = "test")
+        assertSame(counter1, counter2)
+    }
+
+    @Test
+    fun testSameNameDifferentDescriptionsReturnsFirstInstance() {
+        val meter = impl.getMeter(name = "test")
+        val counter1 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "first")
+        val counter2 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "second")
+        assertSame(counter1, counter2)
+    }
+
+    @Test
+    fun testInvalidInstrumentNameReturnsNoopInstrument() {
+        val handler = FakeSdkErrorHandler()
+        val config = MetricsConfig(
+            resource = ResourceImpl(AttributesModel(), null),
+            sdkErrorHandler = handler,
+        )
+        val attributeLimits = AttributeLimitsBehavior()
+        val provider = MeterProviderImpl(config, attributeLimits)
+        val meter = provider.getMeter(name = "test")
+
+        val counter = meter.createLongUpDownCounter("invalid-name!", unit = "1", description = "test")
+
+        // Should return a noop instrument
+        assertNotNull(counter)
+        assertEquals(1, handler.apiMisuses.size)
+        assertTrue(handler.apiMisuses.single().message.contains("invalid"))
+    }
+
+    @Test
     fun testNullUnitPreserved() {
         val gauge = impl.getMeter("test").createLongGauge(
             name = "test.counter",
