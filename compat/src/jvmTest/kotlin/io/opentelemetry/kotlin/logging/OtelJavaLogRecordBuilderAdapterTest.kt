@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
 import org.junit.Test
 import java.time.Instant
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
@@ -72,7 +73,12 @@ internal class OtelJavaLogRecordBuilderAdapterTest {
         adapter.setAttribute(AttributeKey.longKey("long"), 42L)
         adapter.setAttribute(AttributeKey.doubleKey("double"), 42.0)
         adapter.setAttribute(AttributeKey.booleanKey("bool"), true)
+        adapter.setAttribute(AttributeKey.stringArrayKey("strList"), listOf("a", "b"))
+        adapter.setAttribute(AttributeKey.booleanArrayKey("boolList"), listOf(true, false))
+        adapter.setAttribute(AttributeKey.longArrayKey("longList"), listOf(1L, 2L))
         adapter.setAttribute(AttributeKey.doubleArrayKey("doubleList"), listOf(1.0, 2.0))
+        adapter.setAttribute(AttributeKey.valueKey("value"), Value.of(mapOf("k" to Value.of("v"))))
+        adapter.setAttribute(AttributeKey.valueKey("bytes"), Value.of(byteArrayOf(1, 2)))
         adapter.emit()
 
         val attrs = impl.logs.single().attributes
@@ -81,7 +87,12 @@ internal class OtelJavaLogRecordBuilderAdapterTest {
         // A whole-valued double must not collapse to a long, nor to the string "42.0".
         assertEquals(42.0, attrs["double"])
         assertEquals(true, attrs["bool"])
+        assertEquals(listOf("a", "b"), attrs["strList"])
+        assertEquals(listOf(true, false), attrs["boolList"])
+        assertEquals(listOf(1L, 2L), attrs["longList"])
         assertEquals(listOf(1.0, 2.0), attrs["doubleList"])
+        assertEquals(AnyValue.MapValue(mapOf("k" to AnyValue.StringValue("v"))), attrs["value"])
+        assertContentEquals(byteArrayOf(1, 2), attrs["bytes"] as ByteArray)
     }
 
     @Test
@@ -89,7 +100,6 @@ internal class OtelJavaLogRecordBuilderAdapterTest {
         val impl = FakeLogger("logger")
         val adapter = OtelJavaLogRecordBuilderAdapter(impl, CompatContextFactory())
 
-        // Must not throw: attrs is a ConcurrentHashMap, which forbids null values.
         adapter.setAttribute(AttributeKey.stringKey("nullable"), null)
         adapter.emit()
 

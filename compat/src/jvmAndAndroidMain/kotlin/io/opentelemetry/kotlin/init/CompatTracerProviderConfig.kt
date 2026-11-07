@@ -13,7 +13,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaTracerConfig
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.attrsFromMap
-import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.attributes.setAttributeMap
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
@@ -71,7 +71,7 @@ internal class CompatTracerProviderConfig(
     }
 
     override fun resource(map: Map<String, Any>) {
-        resourceAttrs.apply { setTypedAttributes(map) }
+        resourceAttrs.apply { setAttributeMap(map) }
     }
 
     override fun spanLimits(action: SpanLimitsConfigDsl.() -> Unit) {

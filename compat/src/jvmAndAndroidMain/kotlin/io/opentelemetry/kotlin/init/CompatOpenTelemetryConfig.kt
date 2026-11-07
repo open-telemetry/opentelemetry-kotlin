@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapPropagator
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
-import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.attributes.setAttributeMap
 import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
@@ -66,7 +66,7 @@ internal class CompatOpenTelemetryConfig(
     }
 
     override fun resource(map: Map<String, Any>) {
-        globalResourceAttrs.apply { setTypedAttributes(map) }
+        globalResourceAttrs.apply { setAttributeMap(map) }
     }
 
     internal val resourceDetectionConfig = ResourceDetectionConfigDslImpl()
