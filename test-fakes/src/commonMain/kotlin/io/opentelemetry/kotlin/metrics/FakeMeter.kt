@@ -83,4 +83,16 @@ class FakeMeter(
     ): ObservableLongGauge = FakeObservableLongGauge(name, unit, description, callbacks.toList()).also {
         observableLongGauges.add(it)
     }
+
+    val batchCallbacks: MutableList<FakeBatchCallback> = mutableListOf()
+
+    override fun batchCallback(
+        measurement: ObservableMeasurement,
+        vararg additionalMeasurements: ObservableMeasurement,
+        callback: () -> Unit,
+    ): AutoCloseable = FakeBatchCallback(
+        measurements = listOf(measurement) + additionalMeasurements,
+        callback = callback,
+        onClose = { batchCallbacks.remove(it) },
+    ).also(batchCallbacks::add)
 }

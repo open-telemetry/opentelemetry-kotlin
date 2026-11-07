@@ -61,4 +61,14 @@ internal object NoopMeter : Meter {
         description: String?,
         vararg callbacks: (ObservableLongMeasurement) -> Unit,
     ): ObservableLongGauge = NoopObservableLongGauge(name, unit, description)
+
+    override fun batchCallback(
+        measurement: ObservableMeasurement,
+        vararg additionalMeasurements: ObservableMeasurement,
+        callback: () -> Unit,
+    ): AutoCloseable = NoopBatchCallback
+}
+
+private object NoopBatchCallback : AutoCloseable {
+    override fun close() = Unit
 }

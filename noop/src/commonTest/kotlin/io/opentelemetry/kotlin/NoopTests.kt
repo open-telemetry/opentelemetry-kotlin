@@ -118,6 +118,22 @@ internal class NoopTests {
         assertFalse(logger.enabled())
     }
 
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testNoopBatchCallback() {
+        val meter = NoopOpenTelemetry.meterProvider.getMeter("test-meter")
+        var calls = 0
+
+        val registration = meter.batchCallback(
+            NoopObservableLongMeasurement(),
+            NoopObservableDoubleMeasurement(),
+        ) { calls++ }
+
+        registration.close()
+        registration.close()
+        assertEquals(0, calls)
+    }
+
     @Test
     fun testNoopEvent() {
         val otel = NoopOpenTelemetry

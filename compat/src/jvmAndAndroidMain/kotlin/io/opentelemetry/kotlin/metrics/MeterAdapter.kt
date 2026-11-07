@@ -3,8 +3,13 @@ package io.opentelemetry.kotlin.metrics
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.aliases.OtelJavaMeter
+import io.opentelemetry.kotlin.aliases.OtelJavaObservableMeasurement
+import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
+import io.opentelemetry.kotlin.error.userCode
 
 @ExperimentalApi
 internal class MeterAdapter(
@@ -110,4 +115,53 @@ internal class MeterAdapter(
         sdkErrorHandler.sdkGuardOrDefault(null, "Meter.createObservableLongGauge failed") {
             ObservableLongGaugeAdapter(impl, name, unit, description, callbacks, sdkErrorHandler)
         } ?: noopMeter.createObservableLongGauge(name, unit, description)
+
+    @Suppress("SpreadOperator")
+    override fun batchCallback(
+        measurement: ObservableMeasurement,
+        vararg additionalMeasurements: ObservableMeasurement,
+        callback: () -> Unit,
+    ): AutoCloseable {
+        val javaMeasurements = (listOf(measurement) + additionalMeasurements).mapNotNull { candidate ->
+            val converted = candidate.toOtelJavaMeasurementOrNull()
+            if (converted == null) {
+                sdkErrorHandler.reportError(
+                    SdkError.ApiMisuse(
+                        api = "Meter.batchCallback",
+                        message = "Observable measurement is not backed by OpenTelemetry Java; ignoring it.",
+                        severity = SdkErrorSeverity.WARNING,
+                    )
+                )
+            }
+            converted
+        }
+        if (javaMeasurements.isEmpty()) {
+            return noopBatchCallbackRegistration
+        }
+
+        return sdkErrorHandler.sdkGuardOrDefault(noopBatchCallbackRegistration, "Meter.batchCallback failed") {
+            val registration = impl.batchCallback(
+                {
+                    sdkErrorHandler.sdkGuardOrDefault(Unit, "Meter.batchCallback callback failed") {
+                        userCode { callback() }
+                    }
+                },
+                javaMeasurements.first(),
+                *javaMeasurements.drop(1).toTypedArray(),
+            )
+            AutoCloseable {
+                sdkErrorHandler.sdkGuardOrDefault(Unit, "Meter.batchCallback.close failed") {
+                    registration.close()
+                }
+            }
+        }
+    }
 }
+
+private fun ObservableMeasurement.toOtelJavaMeasurementOrNull(): OtelJavaObservableMeasurement? = when (this) {
+    is ObservableLongMeasurementAdapter -> impl
+    is ObservableDoubleMeasurementAdapter -> impl
+    else -> null
+}
+
+private val noopBatchCallbackRegistration: AutoCloseable = AutoCloseable { }
