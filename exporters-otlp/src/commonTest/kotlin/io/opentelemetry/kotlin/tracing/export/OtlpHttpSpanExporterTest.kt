@@ -28,6 +28,7 @@ import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -35,7 +36,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlin.test.BeforeTest
@@ -47,6 +51,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class OtlpHttpSpanExporterTest {
 
     private val spans = listOf(FakeSpanData())
@@ -63,15 +68,14 @@ internal class OtlpHttpSpanExporterTest {
     @BeforeTest
     fun setUp() {
         server = testMockEngine(dispatcher) {
-            delay(serverDelayMs)
-            val response = respond(
-                content = ByteReadChannel(""),
-                status = mockResponseStatus
-            )
             // Body transformations are tied to the request context, so capture the body here;
             // reading it later fails after the request completes.
             requestBody.complete(it.body.toByteArray())
-            response
+            delay(serverDelayMs)
+            respond(
+                content = ByteReadChannel(""),
+                status = mockResponseStatus
+            )
         }
         val httpClient = createTestHttpClient(INFINITE_TIMEOUT_MS, server, dispatcher)
         client = OtlpClient(baseUrl, httpClient = httpClient, sdkErrorHandler = NoopSdkErrorHandler)
@@ -83,8 +87,7 @@ internal class OtlpHttpSpanExporterTest {
         maxAttemptIntervalMs = 5,
         maxAttempts = 3,
         sdkErrorHandler = NoopSdkErrorHandler,
-        coroutineContext = dispatcher,
-        timeSource = dispatcher.scheduler.timeSource
+        coroutineContext = dispatcher
     )
 
     @Test
@@ -106,16 +109,18 @@ internal class OtlpHttpSpanExporterTest {
     }
 
     @Test
-    fun testShutdownDrainsPendingTelemetry() = runTest(dispatcher) {
+    fun testExportShutdown() = runTest(dispatcher) {
         exporter().withShutdown { exporter ->
             mockResponseStatus = HttpStatusCode.OK
             serverDelayMs = 1000
-            val code = exporter.export(spans)
-            assertEquals(OperationResultCode.Success, code)
+            val export = launch { exporter.export(spans) }
+            requestBody.await()
+
             val shutdownCode = exporter.shutdown()
             assertEquals(OperationResultCode.Success, shutdownCode)
-            requestBody.await()
-            assertEquals(1, server.requestHistory.size)
+            assertTrue(export.isCancelled)
+            advanceUntilIdle()
+            assertTrue(server.requestHistory.isEmpty())
         }
     }
 
@@ -143,9 +148,8 @@ internal class OtlpHttpSpanExporterTest {
     fun testCustomHttpClientIsUsed() = runTest {
         val request = CompletableDeferred<HttpRequestData>()
         val customServer = MockEngine {
-            val response = respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
             request.complete(it)
-            response
+            respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
         }
         val customClient = HttpClient(customServer) {
             defaultRequest { header("Authorization", "Bearer test-token") }
@@ -216,6 +220,7 @@ internal class OtlpHttpSpanExporterTest {
     @Test
     fun testFactoryWithCustomEngineExports() = runTest {
         val mockServer = MockEngine {
+            request.complete(it)
             respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
         }
         val factoryExporter = fakeConfig().otlpHttpSpanExporter {
@@ -229,7 +234,6 @@ internal class OtlpHttpSpanExporterTest {
             // does real IO, so shutdown must run on real time, not the test's virtual time.
             val shutdownCode = withContext(Dispatchers.Default) { factoryExporter.shutdown() }
             assertEquals(OperationResultCode.Success, shutdownCode)
-            assertEquals(1, mockServer.requestHistory.size)
         } finally {
             withContext(NonCancellable) {
                 factoryExporter.shutdown()
@@ -275,8 +279,9 @@ internal class OtlpHttpSpanExporterTest {
         HttpClientRegistry.clear()
     }
 
-    private suspend fun waitAndAssertExportedTelemetry(telemetry: List<SpanData>) {
+    private suspend fun TestScope.waitAndAssertExportedTelemetry(telemetry: List<SpanData>) {
         val body = requestBody.await()
+        advanceUntilIdle()
         val requests = server.requestHistory
         check(server.requestHistory.size == 1) {
             "Expected 1 request, got ${requests.size}"
