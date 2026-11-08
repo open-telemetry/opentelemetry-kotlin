@@ -16,154 +16,96 @@ internal class MeterInstrumentRegistrationTest {
 
     private val attributeLimits = AttributeLimitsBehavior()
 
+    private fun newMeter(handler: FakeSdkErrorHandler): Meter {
+        val config = MetricsConfig(
+            resource = ResourceImpl(AttributesModel(), null),
+            sdkErrorHandler = handler,
+        )
+        return MeterProviderImpl(config, attributeLimits).getMeter(name = "test")
+    }
+
     // Copilot Review Finding 1: Preserve conflicting instrument registrations
     @Test
-    fun testSameNameDifferentUnitRetainsRequestedUnit() {
+    fun testSameNameDifferentUnitOrDescriptionRetainsFirstDescriptor() {
         val handler = FakeSdkErrorHandler()
-        val config = MetricsConfig(
-            resource = ResourceImpl(AttributesModel(), null),
-            sdkErrorHandler = handler,
-        )
-        val provider = MeterProviderImpl(config, attributeLimits)
-        val meter = provider.getMeter(name = "test")
+        val meter = newMeter(handler)
 
-        val counter1 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
-        val counter2 = meter.createLongUpDownCounter("my.counter", unit = "ms", description = "test")
+        val unit1 = meter.createLongUpDownCounter("unit.counter", unit = "1", description = "test")
+        val unit2 = meter.createLongUpDownCounter("unit.counter", unit = "ms", description = "test")
+        assertSame(unit1, unit2)
 
-        // Should return the first instrument (spec says to reuse existing)
-        assertSame(counter1, counter2)
-        // Should report a warning about descriptor mismatch
-        assertEquals(1, handler.apiMisuses.size)
-        assertTrue(handler.apiMisuses.single().message.contains("different unit or description"))
-        assertTrue(handler.apiMisuses.single().severity == SdkErrorSeverity.WARNING)
+        val desc1 = meter.createLongUpDownCounter("desc.counter", unit = "1", description = "first")
+        val desc2 = meter.createLongUpDownCounter("desc.counter", unit = "1", description = "second")
+        assertSame(desc1, desc2)
+
+        assertEquals(2, handler.apiMisuses.size)
+        handler.apiMisuses.forEach {
+            assertTrue(it.message.contains("different unit or description"))
+            assertTrue(it.severity == SdkErrorSeverity.WARNING)
+        }
     }
 
     @Test
-    fun testSameNameDifferentDescriptionRetainsRequestedDescription() {
+    fun testLongAndDoubleInstrumentsWithSameName() {
         val handler = FakeSdkErrorHandler()
-        val config = MetricsConfig(
-            resource = ResourceImpl(AttributesModel(), null),
-            sdkErrorHandler = handler,
-        )
-        val provider = MeterProviderImpl(config, attributeLimits)
-        val meter = provider.getMeter(name = "test")
-
-        val counter1 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "first")
-        val counter2 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "second")
-
-        // Should return the first instrument (spec says to reuse existing)
-        assertSame(counter1, counter2)
-        // Should report a warning about descriptor mismatch
-        assertEquals(1, handler.apiMisuses.size)
-        assertTrue(handler.apiMisuses.single().message.contains("different unit or description"))
-        assertTrue(handler.apiMisuses.single().severity == SdkErrorSeverity.WARNING)
-    }
-
-    @Test
-    fun testLongAndDoubleInstrumentsWithSameNameBothFunctional() {
-        val handler = FakeSdkErrorHandler()
-        val config = MetricsConfig(
-            resource = ResourceImpl(AttributesModel(), null),
-            sdkErrorHandler = handler,
-        )
-        val provider = MeterProviderImpl(config, attributeLimits)
-        val meter = provider.getMeter(name = "test")
+        val meter = newMeter(handler)
 
         val longCounter = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
         val doubleCounter = meter.createDoubleUpDownCounter("my.counter", unit = "1", description = "test")
 
-        // Should not be the same instance (different valueTypes)
+        // Type mismatch: first stays functional, second is a noop per spec.
         assertFalse(longCounter === doubleCounter)
-        // First should be functional, second should be noop (type mismatch)
         assertTrue(longCounter.enabled())
         assertFalse(doubleCounter.enabled())
-        // Should report an error about type mismatch
         assertEquals(1, handler.apiMisuses.size)
-        assertTrue(handler.apiMisuses.single().message.contains("already registered"))
-        assertTrue(handler.apiMisuses.single().message.contains("LONG"))
-        assertTrue(handler.apiMisuses.single().message.contains("DOUBLE"))
-        assertTrue(handler.apiMisuses.single().severity == SdkErrorSeverity.ERROR)
+        val error = handler.apiMisuses.single()
+        assertTrue(error.message.contains("already registered"))
+        assertTrue(error.message.contains("LONG"))
+        assertTrue(error.message.contains("DOUBLE"))
+        assertTrue(error.severity == SdkErrorSeverity.ERROR)
     }
 
     @Test
-    fun testIdenticalDescriptorsCorrectlyReuseExistingInstrument() {
+    fun testIdenticalDescriptorsReuseExistingInstrumentWithoutError() {
         val handler = FakeSdkErrorHandler()
-        val config = MetricsConfig(
-            resource = ResourceImpl(AttributesModel(), null),
-            sdkErrorHandler = handler,
-        )
-        val provider = MeterProviderImpl(config, attributeLimits)
-        val meter = provider.getMeter(name = "test")
+        val meter = newMeter(handler)
 
         val counter1 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
         val counter2 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
+        val double1 = meter.createDoubleUpDownCounter("dbl.counter", unit = "1", description = "test")
+        val double2 = meter.createDoubleUpDownCounter("dbl.counter", unit = "1", description = "test")
 
-        // Should return the same instance (identical descriptors)
         assertSame(counter1, counter2)
-        // Should not report any errors
+        assertSame(double1, double2)
         assertEquals(0, handler.apiMisuses.size)
     }
 
     // Copilot Review Finding 2: Report case-only instrument name conflicts
     @Test
-    fun testCaseOnlyNameConflictReportsError() {
+    fun testCaseOnlyNameConflictReportsErrorInBothOrders() {
         val handler = FakeSdkErrorHandler()
         val config = MetricsConfig(
             resource = ResourceImpl(AttributesModel(), null),
             sdkErrorHandler = handler,
         )
         val provider = MeterProviderImpl(config, attributeLimits)
-        val meter = provider.getMeter(name = "test")
 
-        val counter1 = meter.createLongUpDownCounter("My.Counter", unit = "1", description = "test")
-        val counter2 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
+        // Uppercase first, then lowercase.
+        val meter1 = provider.getMeter(name = "test1")
+        val upper = meter1.createLongUpDownCounter("My.Counter", unit = "1", description = "test")
+        val lower = meter1.createLongUpDownCounter("my.counter", unit = "1", description = "test")
+        assertSame(upper, lower)
 
-        // Should return the same instance (case-insensitive)
-        assertSame(counter1, counter2)
-        // Should report an error about case-only difference
-        assertEquals(1, handler.apiMisuses.size)
-        assertTrue(handler.apiMisuses.single().message.contains("differs only in case"))
-        assertTrue(handler.apiMisuses.single().message.contains("My.Counter"))
-        assertTrue(handler.apiMisuses.single().message.contains("my.counter"))
-        assertTrue(handler.apiMisuses.single().severity == SdkErrorSeverity.ERROR)
-    }
+        // Lowercase first, then uppercase.
+        val meter2 = provider.getMeter(name = "test2")
+        val lowerFirst = meter2.createLongUpDownCounter("other.counter", unit = "1", description = "test")
+        val upperSecond = meter2.createLongUpDownCounter("Other.Counter", unit = "1", description = "test")
+        assertSame(lowerFirst, upperSecond)
 
-    @Test
-    fun testCaseOnlyNameConflictReverseOrder() {
-        val handler = FakeSdkErrorHandler()
-        val config = MetricsConfig(
-            resource = ResourceImpl(AttributesModel(), null),
-            sdkErrorHandler = handler,
-        )
-        val provider = MeterProviderImpl(config, attributeLimits)
-        val meter = provider.getMeter(name = "test")
-
-        val counter1 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
-        val counter2 = meter.createLongUpDownCounter("My.Counter", unit = "1", description = "test")
-
-        // Should return the same instance (case-insensitive)
-        assertSame(counter1, counter2)
-        // Should report an error about case-only difference
-        assertEquals(1, handler.apiMisuses.size)
-        assertTrue(handler.apiMisuses.single().message.contains("differs only in case"))
-    }
-
-    @Test
-    fun testIdenticalCaseDoesNotReportError() {
-        val handler = FakeSdkErrorHandler()
-        val config = MetricsConfig(
-            resource = ResourceImpl(AttributesModel(), null),
-            sdkErrorHandler = handler,
-        )
-        val provider = MeterProviderImpl(config, attributeLimits)
-        val meter = provider.getMeter(name = "test")
-
-        val counter1 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
-        val counter2 = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
-
-        // Should return the same instance
-        assertSame(counter1, counter2)
-        // Should not report any errors (identical case)
-        assertEquals(0, handler.apiMisuses.size)
+        assertEquals(2, handler.apiMisuses.size)
+        handler.apiMisuses.forEach { error ->
+            assertTrue(error.message.contains("differs only in case"))
+            assertTrue(error.severity == SdkErrorSeverity.ERROR)
+        }
     }
 }

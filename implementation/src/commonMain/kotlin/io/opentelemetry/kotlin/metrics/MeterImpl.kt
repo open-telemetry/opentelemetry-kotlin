@@ -65,7 +65,7 @@ internal class MeterImpl(
             name,
             unit,
             description,
-            InstrumentType.DOUBLE_UP_DOWN_COUNTER,
+            InstrumentValueType.DOUBLE,
             create = {
                 DoubleUpDownCounterImpl(name, unit, description)
             },
@@ -89,7 +89,7 @@ internal class MeterImpl(
             name,
             unit,
             description,
-            InstrumentType.LONG_UP_DOWN_COUNTER,
+            InstrumentValueType.LONG,
             create = {
                 LongUpDownCounterImpl(name, unit, description)
             },
@@ -156,180 +156,73 @@ internal class MeterImpl(
         name: String,
         unit: String?,
         description: String?,
-        type: InstrumentType,
+        valueType: InstrumentValueType,
         create: () -> T,
         createNoop: () -> T,
     ): T {
-        val requestedDescriptor = InstrumentDescriptor(
+        val requested = InstrumentDescriptor(
             name = name,
             unit = unit,
             description = description,
             kind = InstrumentKind.HISTOGRAM, // Placeholder, only valueType matters for registry
-            valueType = type.toInstrumentValueType(),
+            valueType = valueType,
         )
         val key = name.lowercase()
-
-        // First check read-only
-        val (existingEntry, conflictInfo) = lock.read {
-            val entry = instrumentRegistry[key]
-            if (entry != null) {
-                val conflict = checkForConflict(requestedDescriptor, entry.descriptor, entry.instrumentName)
-                Pair(entry, conflict)
-            } else {
-                Pair(null, null)
+        var conflict: SdkError? = null
+        val entry = lock.read {
+            instrumentRegistry[key]?.also { conflict = checkForConflict(requested, it.descriptor) }
+        } ?: run {
+            beforeWriteLock?.invoke(name)
+            lock.write {
+                val existing = instrumentRegistry[key]
+                if (existing == null) {
+                    InstrumentEntry(create(), requested).also { instrumentRegistry[key] = it }
+                } else {
+                    conflict = checkForConflict(requested, existing.descriptor)
+                    existing
+                }
             }
         }
-
-        // Report any conflict found during read lock (outside the lock)
-        conflictInfo?.let { reportConflict(it) }
-
-        if (existingEntry != null) {
-            // If valueTypes don't match, return a noop instrument
-            if (existingEntry.descriptor.valueType != requestedDescriptor.valueType) {
-                return createNoop()
-            }
-            // Return existing instrument even if unit/description differ - per spec
-            @Suppress("UNCHECKED_CAST")
-            return existingEntry.instrument as T
-        }
-
-        beforeWriteLock?.invoke(name)
-
-        // Double-check and insert write-only
-        val (registeredEntry, writeConflictInfo) = lock.write {
-            val doubleCheck = instrumentRegistry[key]
-            if (doubleCheck != null) {
-                val conflict = checkForConflict(requestedDescriptor, doubleCheck.descriptor, doubleCheck.instrumentName)
-                Pair(doubleCheck, conflict)
-            } else {
-                val instrument = create()
-                val entry = InstrumentEntry(
-                    instrument = instrument,
-                    descriptor = requestedDescriptor,
-                    instrumentName = name,
-                )
-                instrumentRegistry[key] = entry
-                Pair(entry, null)
-            }
-        }
-
-        // Report any conflict found during write lock (outside the lock)
-        writeConflictInfo?.let { reportConflict(it) }
-
-        // If valueTypes don't match after write lock race, return a noop instrument
-        if (registeredEntry.descriptor.valueType != requestedDescriptor.valueType) {
+        // Conflicts are reported only after the registry lock has been released so the
+        // user-provided error handler never executes under the lock.
+        conflict?.let(sdkErrorHandler::reportError)
+        // A type mismatch cannot reuse the registered instrument; return a noop instead.
+        if (entry.descriptor.valueType != valueType) {
             return createNoop()
         }
-
         @Suppress("UNCHECKED_CAST")
-        return registeredEntry.instrument as T
+        return entry.instrument as T
     }
 
     private fun checkForConflict(
         requested: InstrumentDescriptor,
         existing: InstrumentDescriptor,
-        existingName: String,
-    ): ConflictInfo? {
-        // Check for valueType mismatch (high severity)
-        if (requested.valueType != existing.valueType) {
-            return ConflictInfo(
-                type = ConflictType.TYPE_MISMATCH,
-                requestedName = requested.name,
-                existingName = existingName,
-                requestedValueType = requested.valueType,
-                existingValueType = existing.valueType,
-            )
-        }
-
-        // Check for case-only name difference (medium severity)
-        if (requested.name != existingName && requested.name.equals(existingName, ignoreCase = true)) {
-            return ConflictInfo(
-                type = ConflictType.CASE_ONLY_DIFFERENCE,
-                requestedName = requested.name,
-                existingName = existingName,
-                requestedValueType = requested.valueType,
-                existingValueType = existing.valueType,
-            )
-        }
-
-        // Check for descriptor mismatch (unit/description difference) - warning only
-        if (requested != existing) {
-            return ConflictInfo(
-                type = ConflictType.DESCRIPTOR_MISMATCH,
-                requestedName = requested.name,
-                existingName = existingName,
-                requestedValueType = requested.valueType,
-                existingValueType = existing.valueType,
-            )
-        }
-
-        return null
-    }
-
-    private fun reportConflict(conflict: ConflictInfo) {
-        when (conflict.type) {
-            ConflictType.TYPE_MISMATCH -> {
-                sdkErrorHandler.reportError(
-                    SdkError.ApiMisuse(
-                        api = "Meter",
-                        message = "Instrument '${conflict.requestedName}' is already registered as " +
-                            "${conflict.existingValueType}, " +
-                            "cannot re-register as ${conflict.requestedValueType}",
-                        severity = SdkErrorSeverity.ERROR,
-                    ),
-                )
-            }
-            ConflictType.CASE_ONLY_DIFFERENCE -> {
-                sdkErrorHandler.reportError(
-                    SdkError.ApiMisuse(
-                        api = "Meter",
-                        message = "Instrument name '${conflict.requestedName}' differs only in case " +
-                            "from existing '${conflict.existingName}'. Using first-seen name.",
-                        severity = SdkErrorSeverity.ERROR,
-                    ),
-                )
-            }
-            ConflictType.DESCRIPTOR_MISMATCH -> {
-                sdkErrorHandler.reportError(
-                    SdkError.ApiMisuse(
-                        api = "Meter",
-                        message = "Instrument '${conflict.requestedName}' is already registered with " +
-                            "different unit or description. Using first-seen descriptor.",
-                        severity = SdkErrorSeverity.WARNING,
-                    ),
-                )
-            }
-        }
-    }
-
-    private enum class ConflictType {
-        TYPE_MISMATCH,
-        CASE_ONLY_DIFFERENCE,
-        DESCRIPTOR_MISMATCH
-    }
-
-    private data class ConflictInfo(
-        val type: ConflictType,
-        val requestedName: String,
-        val existingName: String,
-        val requestedValueType: InstrumentValueType,
-        val existingValueType: InstrumentValueType,
-    )
-
-    private enum class InstrumentType {
-        DOUBLE_UP_DOWN_COUNTER,
-        LONG_UP_DOWN_COUNTER;
-
-        fun toInstrumentValueType(): InstrumentValueType = when (this) {
-            DOUBLE_UP_DOWN_COUNTER -> InstrumentValueType.DOUBLE
-            LONG_UP_DOWN_COUNTER -> InstrumentValueType.LONG
-        }
+    ): SdkError? = when {
+        requested.valueType != existing.valueType -> SdkError.ApiMisuse(
+            api = "Meter",
+            message = "Instrument '${requested.name}' is already registered as " +
+                "${existing.valueType}, cannot re-register as ${requested.valueType}",
+            severity = SdkErrorSeverity.ERROR,
+        )
+        requested.name != existing.name &&
+            requested.name.equals(existing.name, ignoreCase = true) -> SdkError.ApiMisuse(
+            api = "Meter",
+            message = "Instrument name '${requested.name}' differs only in case " +
+                "from existing '${existing.name}'. Using first-seen name.",
+            severity = SdkErrorSeverity.ERROR,
+        )
+        requested != existing -> SdkError.ApiMisuse(
+            api = "Meter",
+            message = "Instrument '${requested.name}' is already registered with " +
+                "different unit or description. Using first-seen descriptor.",
+            severity = SdkErrorSeverity.WARNING,
+        )
+        else -> null
     }
 
     private data class InstrumentEntry(
         val instrument: Any,
         val descriptor: InstrumentDescriptor,
-        val instrumentName: String,
     )
 
     /**
