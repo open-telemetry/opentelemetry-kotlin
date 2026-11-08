@@ -28,8 +28,8 @@ import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
@@ -201,11 +201,9 @@ internal class OtlpHttpSpanExporterTest {
         HttpClientRegistry.clear()
         val config = fakeConfig()
         try {
-            // First exporter creation populates the registry with the default engine/client.
             val exporter1 = config.otlpHttpSpanExporter { endpoint = baseUrl }
             exporter1.withShutdown {
                 val client1 = HttpClientRegistry.getOrCreate(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
-                // Second exporter creation should reuse the cached client.
                 val exporter2 = config.otlpHttpSpanExporter { endpoint = baseUrl }
                 exporter2.withShutdown {
                     val client2 = HttpClientRegistry.getOrCreate(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
@@ -229,8 +227,6 @@ internal class OtlpHttpSpanExporterTest {
         try {
             val code = factoryExporter.export(spans)
             assertEquals(OperationResultCode.Success, code)
-            // export() only enqueues; shutdown() waits for the background export to finish. The DSL exporter
-            // does real IO, so shutdown must run on real time, not the test's virtual time.
             val shutdownCode = withContext(Dispatchers.Default) { factoryExporter.shutdown() }
             assertEquals(OperationResultCode.Success, shutdownCode)
         } finally {
