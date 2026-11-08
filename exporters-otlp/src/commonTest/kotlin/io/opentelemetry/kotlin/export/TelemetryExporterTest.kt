@@ -6,9 +6,11 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.currentTime
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.random.Random
 import kotlin.test.Test
@@ -63,6 +65,18 @@ internal class TelemetryExporterTest {
         initTelemetryExporter().withShutdown { exporter ->
             assertEquals(OperationResultCode.Success, exporter.export(listOf("data")))
         }
+    }
+
+    @Test
+    fun testExportReturnsFailureWhenShutdownRacesWithRegistration() = runTest {
+        val exporter = initTelemetryExporter()
+        val export = launch(UnconfinedTestDispatcher(testScheduler)) {
+            assertEquals(OperationResultCode.Failure, exporter.export(listOf("data")))
+        }
+
+        assertEquals(OperationResultCode.Success, exporter.shutdown())
+        runCurrent()
+        export.join()
     }
 
     @Test
