@@ -36,32 +36,30 @@ internal class MeterWriteLockConflictTest {
         val probeFinishedDuringHandler = AtomicBoolean(false)
 
         var meter: Meter? = null
-        val handler = object : SdkErrorHandler {
-            override fun onError(error: SdkError) {
-                conflicts += error
-                if (error is SdkError.ApiMisuse && error.message.contains("already registered")) {
-                    // Prove the handler is not running under the registry lock: this
-                    // worker must be able to acquire the meter lock and register a
-                    // different instrument while the handler is still executing.
-                    val currentMeter = meter ?: return
-                    Thread {
-                        try {
-                            currentMeter.createLongUpDownCounter(PROBE_INSTRUMENT)
-                            probeCompleted.set(true)
-                        } catch (t: Throwable) {
-                            workerErrors += t
-                        } finally {
-                            probeFinished.countDown()
-                        }
-                    }.apply { isDaemon = true }.start()
+        val handler = SdkErrorHandler { error ->
+            conflicts += error
+            if (error is SdkError.ApiMisuse && error.message.contains("already registered")) {
+                // Prove the handler is not running under the registry lock: this
+                // worker must be able to acquire the meter lock and register a
+                // different instrument while the handler is still executing.
+                val currentMeter = meter ?: return@SdkErrorHandler
+                Thread {
+                    try {
+                        currentMeter.createLongUpDownCounter(PROBE_INSTRUMENT)
+                        probeCompleted.set(true)
+                    } catch (t: Throwable) {
+                        workerErrors += t
+                    } finally {
+                        probeFinished.countDown()
+                    }
+                }.apply { isDaemon = true }.start()
 
-                    // The probe must complete while this handler is still executing.
-                    // If the handler were invoked under the registry lock, the probe
-                    // could not acquire the meter lock and this await would time out.
-                    probeFinishedDuringHandler.set(
-                        probeFinished.await(LATCH_TIMEOUT_MS, TimeUnit.MILLISECONDS)
-                    )
-                }
+                // The probe must complete while this handler is still executing.
+                // If the handler were invoked under the registry lock, the probe
+                // could not acquire the meter lock and this await would time out.
+                probeFinishedDuringHandler.set(
+                    probeFinished.await(LATCH_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+                )
             }
         }
 
@@ -70,8 +68,9 @@ internal class MeterWriteLockConflictTest {
             sdkErrorHandler = handler,
         )
         val provider = MeterProviderImpl(config, AttributeLimitsBehavior())
-        meter = provider.getMeter(name = "test")
-        val meterImpl = meter as MeterImpl
+        val meterInstance = provider.getMeter(name = "test")
+        meter = meterInstance
+        val meterImpl = meterInstance as MeterImpl
 
         // Both threads must observe a read-lock miss before either may proceed to
         // the write lock. The hook fires after the read lookup and before the write
@@ -100,10 +99,10 @@ internal class MeterWriteLockConflictTest {
         }.apply { isDaemon = true }
 
         val longThread = launch {
-            longResult.set(meter!!.createLongUpDownCounter(INSTRUMENT_NAME, UNIT, DESCRIPTION))
+            longResult.set(meterInstance.createLongUpDownCounter(INSTRUMENT_NAME, UNIT, DESCRIPTION))
         }
         val doubleThread = launch {
-            doubleResult.set(meter!!.createDoubleUpDownCounter(INSTRUMENT_NAME, UNIT, DESCRIPTION))
+            doubleResult.set(meterInstance.createDoubleUpDownCounter(INSTRUMENT_NAME, UNIT, DESCRIPTION))
         }
 
         try {
@@ -112,8 +111,10 @@ internal class MeterWriteLockConflictTest {
 
             // Wait until both threads have missed the read lookup, then release
             // them together to compete for the write lock.
-            assertTrue(readMissed.await(LATCH_TIMEOUT_MS, TimeUnit.MILLISECONDS),
-                "timed out waiting for both read-lock misses")
+            assertTrue(
+                readMissed.await(LATCH_TIMEOUT_MS, TimeUnit.MILLISECONDS),
+                "timed out waiting for both read-lock misses"
+            )
             proceed.countDown()
 
             longThread.join(JOIN_TIMEOUT_MS)
@@ -138,22 +139,28 @@ internal class MeterWriteLockConflictTest {
         // The winner gets the real instrument; the loser gets a noop (type mismatch).
         val longInstrument = assertNotNull(longResult.get())
         val doubleInstrument = assertNotNull(doubleResult.get())
-        assertTrue(longInstrument.enabled() != doubleInstrument.enabled(),
-            "expected exactly one noop instrument from the type-mismatch conflict")
+        assertTrue(
+            longInstrument.enabled() != doubleInstrument.enabled(),
+            "expected exactly one noop instrument from the type-mismatch conflict"
+        )
 
         // The error handler ran outside the registry lock, so the probe
         // registration inside it must have completed within the bound while the
         // handler was still executing.
-        assertTrue(probeFinishedDuringHandler.get(),
+        assertTrue(
+            probeFinishedDuringHandler.get(),
             "probe instrument registration timed out inside the error handler; " +
-                "the handler may be running under the registry lock")
-        assertTrue(probeFinished.await(JOIN_TIMEOUT_MS, TimeUnit.MILLISECONDS),
-            "probe instrument registration did not finish")
+                "the handler may be running under the registry lock"
+        )
+        assertTrue(
+            probeFinished.await(JOIN_TIMEOUT_MS, TimeUnit.MILLISECONDS),
+            "probe instrument registration did not finish"
+        )
         assertTrue(probeCompleted.get(), "probe registration failed: $workerErrors")
         assertTrue(workerErrors.isEmpty(), "probe registration threw: $workerErrors")
 
         // Sanity: the probe instrument is registered and usable.
-        assertNotNull(meter!!.createLongUpDownCounter(PROBE_INSTRUMENT))
+        assertNotNull(meterInstance.createLongUpDownCounter(PROBE_INSTRUMENT))
     }
 
     private companion object {
