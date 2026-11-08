@@ -441,8 +441,8 @@ internal class SimpleSpanProcessorTest {
         fun release() = release.complete(Unit)
 
         override suspend fun export(telemetry: List<SpanData>): OperationResultCode {
-            events += "export:${telemetry.first().name}"
             release.await()
+            events += "export:${telemetry.first().name}"
             return OperationResultCode.Success
         }
 
