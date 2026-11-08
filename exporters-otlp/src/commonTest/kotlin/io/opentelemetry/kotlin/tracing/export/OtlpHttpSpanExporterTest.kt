@@ -220,7 +220,6 @@ internal class OtlpHttpSpanExporterTest {
     @Test
     fun testFactoryWithCustomEngineExports() = runTest {
         val mockServer = MockEngine {
-            request.complete(it)
             respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
         }
         val factoryExporter = fakeConfig().otlpHttpSpanExporter {
