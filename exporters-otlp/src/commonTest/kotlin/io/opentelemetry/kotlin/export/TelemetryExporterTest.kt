@@ -1,7 +1,9 @@
 package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
@@ -25,13 +27,14 @@ internal class TelemetryExporterTest {
         initialDelayMs: Long = 100,
         maxAttemptIntervalMs: Long = 1000,
         maxAttempts: Int = 3,
+        sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
         random: Random = Random.Default,
         exportAction: suspend (List<String>) -> OtlpResponse = { OtlpResponse.Success },
     ) = TelemetryExporter(
         initialDelayMs = initialDelayMs,
         maxAttemptIntervalMs = maxAttemptIntervalMs,
         maxAttempts = maxAttempts,
-        sdkErrorHandler = NoopSdkErrorHandler,
+        sdkErrorHandler = sdkErrorHandler,
         coroutineContext = StandardTestDispatcher(testScheduler),
         timeSource = testScheduler.timeSource,
         random = random,
@@ -339,6 +342,79 @@ internal class TelemetryExporterTest {
             // The failure occurs on a background coroutine whose scope has a CoroutineExceptionHandler,
             // so it must not propagate to the caller nor crash the process.
             assertEquals(OperationResultCode.Success, throwingExporter.export(listOf("data")))
+        }
+    }
+
+    @Test
+    fun testPartialSuccessWithRejectionsReportsError() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val exporter = initTelemetryExporter(
+            sdkErrorHandler = errorHandler,
+            exportAction = {
+                OtlpResponse.PartialSuccess(rejectedCount = 2, errorMessage = "2 spans dropped")
+            },
+        )
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            advanceTimeBy(1000)
+            assertEquals(1, errorHandler.userCodeErrors.size)
+            assertEquals("OTLP export partially rejected", errorHandler.userCodeErrors.single().message)
+            assertTrue(errorHandler.userCodeErrors.single().cause.message!!.contains("2 items"))
+        }
+    }
+
+    @Test
+    fun testPartialSuccessWithoutRejectionsDoesNotReportError() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val exporter = initTelemetryExporter(
+            sdkErrorHandler = errorHandler,
+            exportAction = {
+                OtlpResponse.PartialSuccess(rejectedCount = 0, errorMessage = null)
+            },
+        )
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            advanceTimeBy(1000)
+            assertEquals(0, errorHandler.userCodeErrors.size)
+        }
+    }
+
+    @Test
+    fun testUnretryableErrorReportsError() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val exporter = initTelemetryExporter(
+            sdkErrorHandler = errorHandler,
+            exportAction = {
+                OtlpResponse.ClientError(400, "bad request")
+            },
+        )
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            advanceTimeBy(1000)
+            assertEquals(1, errorHandler.userCodeErrors.size)
+            assertEquals("OTLP export unretryable error", errorHandler.userCodeErrors.single().message)
+            assertTrue(errorHandler.userCodeErrors.single().cause.message!!.contains("status=400"))
+        }
+    }
+
+    @Test
+    fun testExhaustingMaxAttemptsReportsError() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val exporter = initTelemetryExporter(
+            initialDelayMs = 10,
+            maxAttemptIntervalMs = 20,
+            maxAttempts = 3,
+            sdkErrorHandler = errorHandler,
+            exportAction = {
+                OtlpResponse.Unknown
+            },
+        )
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            advanceTimeBy(1000)
+            assertEquals(1, errorHandler.userCodeErrors.size)
+            assertEquals("OTLP export attempts exhausted", errorHandler.userCodeErrors.single().message)
+            assertTrue(errorHandler.userCodeErrors.single().cause.message!!.contains("3"))
         }
     }
 }

@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
+import io.opentelemetry.kotlin.error.reportUserCodeError
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.ioDispatcher
@@ -180,10 +181,22 @@ internal class TelemetryExporter<T>(
                 // The server accepted the request; retrying would only re-send the rejected
                 // portion, so treat a partial success as terminal.
                 is OtlpResponse.PartialSuccess -> {
+                    if (response.rejectedCount > 0) {
+                        val msg = "OTLP export partially rejected (${response.rejectedCount} items): ${response.errorMessage}"
+                        sdkErrorHandler.reportUserCodeError(
+                            IllegalStateException(msg),
+                            "OTLP export partially rejected",
+                        )
+                    }
                     onExportComplete(entry, epoch, resetBackoff = true)
                 }
 
                 is OtlpResponse.UnretryableError -> {
+                    val msg = "OTLP export failed with unretryable error (status=${response.statusCode})"
+                    sdkErrorHandler.reportUserCodeError(
+                        IllegalStateException(msg),
+                        "OTLP export unretryable error",
+                    )
                     onExportComplete(entry, epoch, resetBackoff = false)
                 }
 
@@ -251,6 +264,10 @@ internal class TelemetryExporter<T>(
                 }
             }
             if (telemetry.attempts >= maxAttempts) {
+                sdkErrorHandler.reportUserCodeError(
+                    IllegalStateException("OTLP export exhausted max attempts ($maxAttempts)"),
+                    "OTLP export attempts exhausted"
+                )
                 queue.remove(telemetry)
                 semaphore.release()
                 return
