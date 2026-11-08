@@ -20,6 +20,13 @@ internal class MeterImpl(
     private val lock = ReentrantReadWriteLock()
     private val instrumentRegistry = mutableMapOf<String, InstrumentEntry>()
 
+    /**
+     * Test-only hook invoked after the read-lock lookup misses, immediately before the
+     * write lock is acquired. Allows tests to deterministically coordinate a write-lock
+     * race. Not part of the public API.
+     */
+    internal var beforeWriteLock: ((instrumentName: String) -> Unit)? = null
+
     override fun createLongGauge(
         name: String,
         unit: String?,
@@ -186,6 +193,8 @@ internal class MeterImpl(
             return existingEntry.instrument as T
         }
 
+        beforeWriteLock?.invoke(name)
+
         // Double-check and insert write-only
         val (registeredEntry, writeConflictInfo) = lock.write {
             val doubleCheck = instrumentRegistry[key]
@@ -296,7 +305,7 @@ internal class MeterImpl(
     private enum class ConflictType {
         TYPE_MISMATCH,
         CASE_ONLY_DIFFERENCE,
-        DESCRIPTOR_MISMATCH;
+        DESCRIPTOR_MISMATCH
     }
 
     private data class ConflictInfo(

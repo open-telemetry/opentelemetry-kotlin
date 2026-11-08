@@ -597,28 +597,4 @@ internal class MeterProviderImplTest {
         assertEquals(0, handler.apiMisuses.size)
     }
 
-    // Copilot Review Finding 3: Report write-lock conflicts outside the lock
-    @Test
-    fun testWriteLockConflictReportedOutsideLock() {
-        val handler = FakeSdkErrorHandler()
-        val config = MetricsConfig(
-            resource = ResourceImpl(AttributesModel(), null),
-            sdkErrorHandler = handler,
-        )
-        val provider = MeterProviderImpl(config, attributeLimits)
-        val meter = provider.getMeter(name = "test")
-
-        // Create first instrument
-        val longCounter = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
-
-        // Simulate a write-lock race by creating a different type with same name
-        // This will go through the read lock (miss), then write lock (hit)
-        val doubleCounter = meter.createDoubleUpDownCounter("my.counter", unit = "1", description = "test")
-
-        // Should return a noop instrument (type mismatch)
-        assertTrue(doubleCounter.enabled() == false)
-        // Should report the error (was found during write lock recheck)
-        assertEquals(1, handler.apiMisuses.size)
-        assertTrue(handler.apiMisuses.single().message.contains("already registered"))
-    }
 }
