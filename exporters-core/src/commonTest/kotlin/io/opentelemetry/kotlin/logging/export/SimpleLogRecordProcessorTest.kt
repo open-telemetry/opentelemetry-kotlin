@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
-import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.FakeLogExportConfig
@@ -15,6 +14,7 @@ import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -514,6 +514,96 @@ internal class SimpleLogRecordProcessorTest {
 
         // Exception should be reported exactly once (by guardExporterCode)
         assertEquals(1, errorHandler.sdkCodeErrors.size)
+    }
+
+    @Test
+    fun testEagerlyCompletedExportLeavesNoStaleTrackingEntry() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val exporter = FakeLogRecordExporter()
+        val processor = SimpleLogRecordProcessor(
+            exporter,
+            CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
+            errorHandler,
+        )
+
+        // UnconfinedTestDispatcher runs the export coroutine eagerly, so it can
+        // complete before onEmit registers the job for tracking.
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        advanceUntilIdle()
+
+        // A successful export must never be reported, no matter how often we drain
+        processor.forceFlush()
+        processor.forceFlush()
+        processor.shutdown()
+
+        assertTrue(errorHandler.sdkCodeErrors.isEmpty())
+        assertTrue(errorHandler.userCodeErrors.isEmpty())
+    }
+
+    @Test
+    fun testExportFailureReportedExactlyOnceAcrossDrains() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val exporter = FailureResultLogRecordExporter()
+        val processor = SimpleLogRecordProcessor(
+            exporter,
+            CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
+            errorHandler,
+        )
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        advanceUntilIdle()
+
+        processor.forceFlush()
+        processor.forceFlush()
+        processor.shutdown()
+
+        // The failure is consumed by the first drain and must not be re-reported
+        assertEquals(1, errorHandler.sdkCodeErrors.size)
+        val error = errorHandler.sdkCodeErrors.first()
+        assertTrue(error.message.contains("Export failed"))
+        assertEquals(SdkErrorSeverity.WARNING, error.severity)
+    }
+
+    @Test
+    fun testExportTimeoutReportedToErrorHandler() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val exporter = ConfigurableDelayLogRecordExporter()
+        val processor = SimpleLogRecordProcessor(
+            exporter,
+            CoroutineScope(StandardTestDispatcher(testScheduler)),
+            errorHandler,
+        )
+
+        exporter.delayMs = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS + 1000
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        advanceUntilIdle()
+
+        processor.forceFlush()
+
+        assertEquals(1, errorHandler.sdkCodeErrors.size)
+        assertTrue(errorHandler.sdkCodeErrors.first().message.contains("Export failed"))
+    }
+
+    @Test
+    fun testCancelledExportIsNotReportedAsFailure() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val exporter = BlockingLogRecordExporter()
+        val scopeJob = Job()
+        val scope = CoroutineScope(scopeJob + StandardTestDispatcher(testScheduler))
+        val processor = SimpleLogRecordProcessor(exporter, scope, errorHandler)
+
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        runCurrent()
+
+        // Cancelling the scope cancels the in-flight export; cancellation must
+        // propagate rather than being reported as an export failure.
+        scopeJob.cancel()
+        advanceUntilIdle()
+
+        processor.forceFlush()
+
+        assertTrue(errorHandler.sdkCodeErrors.isEmpty())
+        assertTrue(errorHandler.userCodeErrors.isEmpty())
     }
 
     private class SuspendingLogRecordExporter : LogRecordExporter {

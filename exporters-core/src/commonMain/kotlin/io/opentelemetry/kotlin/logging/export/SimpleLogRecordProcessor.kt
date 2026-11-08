@@ -3,9 +3,9 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
-import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
@@ -19,6 +19,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.coroutineContext
 
 /**
@@ -50,6 +51,7 @@ internal class SimpleLogRecordProcessor(
             // live record may be mutated after onEmit returns.
             val data = log.toLogRecordData()
             val job = scope.launch {
+                val self = coroutineContext[Job]!!
                 val result = try {
                     val resultCode = exportMutex.withLock {
                         sdkErrorHandler.guardExporterCode("Export failed") {
@@ -63,14 +65,26 @@ internal class SimpleLogRecordProcessor(
                     } else {
                         ExportResult.Success
                     }
+                } catch (e: CancellationException) {
+                    // The export job itself was cancelled; drop its tracking entry and
+                    // let cancellation propagate instead of reporting an export failure.
+                    pendingExportsLock.write { pendingExports.remove(self) }
+                    throw e
                 } catch (e: Throwable) {
                     // Exceptions are already reported by guardExporterCode
                     ExportResult.Threw(e)
                 }
-                markExportComplete(coroutineContext[Job]!!, result)
+                markExportComplete(self, result)
             }
-            // Register job immediately - the job is already launched, so we track it
-            pendingExportsLock.write { pendingExports[job] = ExportResult.Pending }
+            // Register the job for tracking. On eager dispatchers the coroutine may
+            // already have finished and recorded its result via markExportComplete,
+            // so putIfAbsent preserves it. A job that completed without recording a
+            // result (e.g. cancelled before its body ran) is left untracked.
+            pendingExportsLock.write {
+                if (!job.isCompleted) {
+                    pendingExports.putIfAbsent(job, ExportResult.Pending)
+                }
+            }
         }
     }
 
@@ -116,20 +130,23 @@ internal class SimpleLogRecordProcessor(
         }
 
     /**
-     * Marks an export job as complete with its result, removing it from the tracking map.
+     * Records the result of a completed export job in the tracking map.
      * This is called from the job's completion handler, so it can be called without locks.
      */
     private fun markExportComplete(job: Job, result: ExportResult) {
-        pendingExportsLock.write { pendingExports.remove(job) }
+        pendingExportsLock.write { pendingExports[job] = result }
     }
 
     /**
-     * Waits for all currently pending exports to complete and returns their results.
+     * Waits for all currently pending exports to complete and returns their results,
+     * removing them from the tracking map so each result is reported at most once.
      */
     private suspend fun drainPendingExports(): List<ExportResult> {
         val jobs = pendingExportsLock.read { pendingExports.keys.toList() }
         jobs.forEach { it.join() }
-        return pendingExportsLock.read { pendingExports.values.toList() }
+        return pendingExportsLock.write {
+            jobs.mapNotNull { pendingExports.remove(it) }
+        }
     }
 
     /**
@@ -154,8 +171,14 @@ internal class SimpleLogRecordProcessor(
                     )
                 }
                 is ExportResult.Threw -> {
-                    // Exceptions are already reported by guardExporterCode in the export job
-                    // No additional reporting needed
+                    // Thrown outside guardExporterCode, so it has not been reported yet
+                    sdkErrorHandler.onError(
+                        SdkError.SdkCodeError(
+                            result.exception,
+                            "Export failed",
+                            SdkErrorSeverity.WARNING
+                        )
+                    )
                 }
                 is ExportResult.Pending -> {
                     // Should not happen after join(), but handle defensively
