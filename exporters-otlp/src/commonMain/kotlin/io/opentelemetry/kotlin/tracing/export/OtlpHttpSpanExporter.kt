@@ -7,7 +7,6 @@ import io.opentelemetry.kotlin.export.TelemetryExporter
 import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import kotlin.coroutines.CoroutineContext
-import kotlin.time.TimeSource
 
 internal class OtlpHttpSpanExporter(
     private val otlpClient: OtlpClient,
@@ -16,7 +15,6 @@ internal class OtlpHttpSpanExporter(
     maxAttempts: Int,
     sdkErrorHandler: SdkErrorHandler,
     coroutineContext: CoroutineContext = ioDispatcher,
-    timeSource: TimeSource.WithComparableMarks = TimeSource.Monotonic
 ) : SpanExporter {
 
     private val exporter = TelemetryExporter(
@@ -24,8 +22,7 @@ internal class OtlpHttpSpanExporter(
         maxAttemptIntervalMs,
         maxAttempts,
         sdkErrorHandler,
-        coroutineContext,
-        timeSource
+        coroutineContext
     ) {
         otlpClient.exportTraces(it)
     }
