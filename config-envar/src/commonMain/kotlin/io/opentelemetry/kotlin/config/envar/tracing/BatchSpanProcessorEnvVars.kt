@@ -12,9 +12,10 @@ internal class BatchSpanProcessorEnvVars(private val reader: ReportingEnvVarRead
         exportTimeout = reader.readNonNegativeLong(EXPORT_TIMEOUT),
         maxQueueSize = reader.readNonNegativeInt(MAX_QUEUE_SIZE, acceptZero = false),
         maxExportBatchSize = reader.readNonNegativeInt(MAX_EXPORT_BATCH_SIZE, acceptZero = false),
+        exporter = SpanExporterEnvVars(reader).toBehavior(),
     ).takeUnless {
         it.scheduleDelay == null && it.exportTimeout == null &&
-            it.maxQueueSize == null && it.maxExportBatchSize == null
+            it.maxQueueSize == null && it.maxExportBatchSize == null && it.exporter == null
     }
 
     internal companion object {
