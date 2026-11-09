@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.config.envar
 
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.BatchLogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordExporterBehavior
@@ -11,6 +12,7 @@ import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SeverityLevel
+import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
@@ -19,8 +21,8 @@ import io.opentelemetry.kotlin.config.envar.logging.LogRecordExporterEnvVars
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import io.opentelemetry.kotlin.config.envar.tracing.SamplerEnvVars
+import io.opentelemetry.kotlin.config.envar.tracing.SpanExporterEnvVars
 import io.opentelemetry.kotlin.config.envar.tracing.SpanLimitsEnvVars
-import io.opentelemetry.kotlin.config.envar.tracing.TracesExporterEnvVars
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -85,7 +87,7 @@ internal class OpenTelemetryEnvVarsTest {
             LogLimitsEnvVars.ATTRIBUTE_VALUE_LENGTH_LIMIT to "10",
             ResourceEnvVars.RESOURCE_ATTRIBUTES to "region=eu",
             ResourceEnvVars.SERVICE_NAME to "checkout",
-            TracesExporterEnvVars.TRACES_EXPORTER to Exporter.CONSOLE.value,
+            SpanExporterEnvVars.TRACES_EXPORTER to Exporter.CONSOLE.value,
             LogRecordExporterEnvVars.LOGS_EXPORTER to Exporter.CONSOLE.value,
         )
 
@@ -111,6 +113,11 @@ internal class OpenTelemetryEnvVarsTest {
                 ),
                 processor = SpanProcessorBehavior(
                     console = ConsoleExporterBehavior(),
+                    batch = BatchSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(
+                            console = ConsoleExporterBehavior()
+                        )
+                    )
                 )
             ),
             loggerProvider = LoggerProviderBehavior(
@@ -163,7 +170,7 @@ internal class OpenTelemetryEnvVarsTest {
             AttributeLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT to "invalid",
             ResourceEnvVars.RESOURCE_ATTRIBUTES to "invalid",
             SamplerEnvVars.SAMPLER to "not_a_sampler",
-            TracesExporterEnvVars.TRACES_EXPORTER to "not_an_exporter",
+            SpanExporterEnvVars.TRACES_EXPORTER to "not_an_exporter",
             LogRecordExporterEnvVars.LOGS_EXPORTER to "not_an_exporter",
             OpenTelemetryEnvVars.LOG_LEVEL to "not_a_level",
         )
@@ -175,7 +182,7 @@ internal class OpenTelemetryEnvVarsTest {
                 AttributeLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT,
                 ResourceEnvVars.RESOURCE_ATTRIBUTES,
                 SamplerEnvVars.SAMPLER,
-                TracesExporterEnvVars.TRACES_EXPORTER,
+                SpanExporterEnvVars.TRACES_EXPORTER,
                 LogRecordExporterEnvVars.LOGS_EXPORTER,
                 OpenTelemetryEnvVars.LOG_LEVEL,
             ),
