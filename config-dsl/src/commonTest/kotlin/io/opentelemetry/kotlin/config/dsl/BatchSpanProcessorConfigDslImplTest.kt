@@ -47,4 +47,18 @@ internal class BatchSpanProcessorConfigDslImplTest {
             dsl.toBehavior()
         )
     }
+
+    @Test
+    fun invalidFieldValuesFallbackToDefault() {
+        val dsl = BatchSpanProcessorConfigDslImpl().apply {
+            scheduleDelay = -1
+            exporterTimeout = -1
+            maxQueueSize = 0
+            maxExportBatchSize = 0
+        }
+        assertEquals(
+            BatchSpanProcessorBehavior(),
+            dsl.toBehavior()
+        )
+    }
 }
