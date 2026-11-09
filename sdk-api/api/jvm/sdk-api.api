@@ -43,10 +43,6 @@ public final class io/opentelemetry/kotlin/export/OperationResultCode$Success : 
 	public static final field INSTANCE Lio/opentelemetry/kotlin/export/OperationResultCode$Success;
 }
 
-public final class io/opentelemetry/kotlin/export/OperationResultCodeKt {
-	public static final fun and (Lio/opentelemetry/kotlin/export/OperationResultCode;Lio/opentelemetry/kotlin/export/OperationResultCode;)Lio/opentelemetry/kotlin/export/OperationResultCode;
-}
-
 public abstract interface class io/opentelemetry/kotlin/export/TelemetryCloseable {
 	public abstract fun forceFlush (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun shutdown (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

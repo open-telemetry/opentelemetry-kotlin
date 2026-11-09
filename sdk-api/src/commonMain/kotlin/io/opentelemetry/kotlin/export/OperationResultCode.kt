@@ -18,12 +18,3 @@ public sealed class OperationResultCode {
      */
     public object Failure : OperationResultCode()
 }
-
-/**
- * Combines two [OperationResultCode] values. Returns [Success] only if both are [Success].
- */
-@ExperimentalApi
-public infix fun OperationResultCode.and(other: OperationResultCode): OperationResultCode = when {
-    this == OperationResultCode.Success && other == OperationResultCode.Success -> OperationResultCode.Success
-    else -> OperationResultCode.Failure
-}
