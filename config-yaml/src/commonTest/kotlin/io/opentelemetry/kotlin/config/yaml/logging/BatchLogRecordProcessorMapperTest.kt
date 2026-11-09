@@ -16,12 +16,7 @@ internal class BatchLogRecordProcessorMapperTest {
     fun everyFieldStartsWithDefaultValue() {
         val behavior = BatchLogRecordProcessor(exporter = LogRecordExporter()).toBehavior()
         assertEquals(
-            BatchLogRecordProcessorBehavior(
-                scheduleDelay = BatchLogRecordProcessorBehavior.DEFAULT_SCHEDULE_DELAY,
-                exportTimeout = BatchLogRecordProcessorBehavior.DEFAULT_EXPORT_TIMEOUT,
-                maxQueueSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE,
-                maxExportBatchSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE
-            ),
+            BatchLogRecordProcessorBehavior(),
             behavior
         )
     }
@@ -67,12 +62,7 @@ internal class BatchLogRecordProcessorMapperTest {
             exporter = LogRecordExporter()
         ).toBehavior()
         assertEquals(
-            BatchLogRecordProcessorBehavior(
-                scheduleDelay = BatchLogRecordProcessorBehavior.DEFAULT_SCHEDULE_DELAY,
-                exportTimeout = BatchLogRecordProcessorBehavior.DEFAULT_EXPORT_TIMEOUT,
-                maxQueueSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE,
-                maxExportBatchSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE
-            ),
+            BatchLogRecordProcessorBehavior(),
             behavior
         )
     }

@@ -50,10 +50,6 @@ internal class LogRecordProcessorMapperTest {
         assertEquals(
             LogRecordProcessorBehavior(
                 batch = BatchLogRecordProcessorBehavior(
-                    scheduleDelay = BatchLogRecordProcessorBehavior.DEFAULT_SCHEDULE_DELAY,
-                    exportTimeout = BatchLogRecordProcessorBehavior.DEFAULT_EXPORT_TIMEOUT,
-                    maxQueueSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE,
-                    maxExportBatchSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE,
                     exporter = LogRecordExporterBehavior(
                         console = ConsoleExporterBehavior()
                     )
@@ -74,10 +70,6 @@ internal class LogRecordProcessorMapperTest {
         assertEquals(
             LogRecordProcessorBehavior(
                 batch = BatchLogRecordProcessorBehavior(
-                    scheduleDelay = BatchLogRecordProcessorBehavior.DEFAULT_SCHEDULE_DELAY,
-                    exportTimeout = BatchLogRecordProcessorBehavior.DEFAULT_EXPORT_TIMEOUT,
-                    maxQueueSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE,
-                    maxExportBatchSize = BatchLogRecordProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE,
                     exporter = LogRecordExporterBehavior(
                         console = ConsoleExporterBehavior()
                     )

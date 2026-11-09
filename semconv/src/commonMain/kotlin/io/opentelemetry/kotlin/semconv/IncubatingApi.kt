@@ -12,4 +12,4 @@ package io.opentelemetry.kotlin.semconv
     AnnotationTarget.PROPERTY,
     AnnotationTarget.TYPEALIAS
 )
-annotation class IncubatingApi
+public annotation class IncubatingApi

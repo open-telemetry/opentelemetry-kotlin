@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.attributes.setAttributeMap
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
@@ -72,5 +72,5 @@ internal class CompatSdkConfigFactory(
 private fun ResourceBehavior.toResource(): Resource = CompatResourceFactory.create(schemaUrl) {
     val attrs = attributes.orEmpty().toMutableMap()
     serviceName?.let { attrs[ServiceAttributes.SERVICE_NAME] = it }
-    setTypedAttributes(attrs)
+    setAttributeMap(attrs)
 }

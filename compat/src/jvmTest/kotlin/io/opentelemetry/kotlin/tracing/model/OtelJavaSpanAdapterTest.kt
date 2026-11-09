@@ -48,6 +48,18 @@ internal class OtelJavaSpanAdapterTest {
     }
 
     @Test
+    fun testSetSingleDoubleAttributeKeepsDouble() {
+        val span = FakeSpan()
+        val adapter = OtelJavaSpanAdapter(span)
+
+        adapter.setAttribute(AttributeKey.doubleKey("d"), 1.0)
+        adapter.setAttribute(AttributeKey.doubleArrayKey("dl"), listOf(1.0, 2.0))
+
+        assertEquals(1.0, span.attributes["d"])
+        assertEquals(listOf(1.0, 2.0), span.attributes["dl"])
+    }
+
+    @Test
     fun testSetValueAttributeKeepsShape() {
         val span = FakeSpan()
         val adapter = OtelJavaSpanAdapter(span)
