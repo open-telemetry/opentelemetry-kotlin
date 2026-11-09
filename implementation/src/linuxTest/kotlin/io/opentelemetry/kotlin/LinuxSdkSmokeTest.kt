@@ -47,7 +47,7 @@ internal class LinuxSdkSmokeTest {
                     batchLogRecordProcessor(logs)
                 }
             }
-        } as OpenTelemetrySdk
+        }
         val tracer = api.tracerProvider.getTracer("linux-test")
         val key = createContextKey<String>("thread-isolation")
         try {

@@ -94,41 +94,23 @@ internal class BaggageImplTest {
     }
 
     @Test
-    fun `set with invalid key returns same instance`() {
-        val original = BaggageImpl.EMPTY.set("ok", "v")
-        assertSame(original, original.set("bad key", "v"))
-        assertSame(original, original.set("bad,key", "v"))
-        assertSame(original, original.set("bad;key", "v"))
+    fun `set accepts non-token keys and values with special characters`() {
+        val baggage = BaggageImpl.EMPTY
+            .set("bad key", "line1\nline2")
+            .set("another,key;", "val\r\u0000")
+            .set("", "empty key")
+        assertEquals("line1\nline2", baggage.getValue("bad key"))
+        assertEquals("val\r\u0000", baggage.getValue("another,key;"))
+        assertEquals("empty key", baggage.getValue(""))
+        assertEquals(3, baggage.asMap().size)
     }
 
     @Test
-    fun `set with empty key returns same instance`() {
-        val original = BaggageImpl.EMPTY.set("ok", "v")
-        assertSame(original, original.set("", "v"))
-    }
-
-    @Test
-    fun `set with value containing CR returns same instance`() {
-        val original = BaggageImpl.EMPTY.set("ok", "v")
-        assertSame(original, original.set("k", "bad\rvalue"))
-    }
-
-    @Test
-    fun `set with value containing LF returns same instance`() {
-        val original = BaggageImpl.EMPTY.set("ok", "v")
-        assertSame(original, original.set("k", "bad\nvalue"))
-    }
-
-    @Test
-    fun `set with value containing NUL returns same instance`() {
-        val original = BaggageImpl.EMPTY.set("ok", "v")
-        assertSame(original, original.set("k", "bad\u0000value"))
-    }
-
-    @Test
-    fun `set with metadata enforces key validation`() {
-        val original = BaggageImpl.EMPTY.set("ok", "v")
-        assertSame(original, original.set("bad key", "v", BaggageEntryMetadataImpl("m")))
+    fun `set with metadata accepts non-token keys`() {
+        val meta = BaggageEntryMetadataImpl("m")
+        val baggage = BaggageImpl.EMPTY.set("bad key", "v", meta)
+        assertEquals("v", baggage.getValue("bad key"))
+        assertEquals("m", baggage.asMap()["bad key"]?.metadata?.value)
     }
 
     @Test

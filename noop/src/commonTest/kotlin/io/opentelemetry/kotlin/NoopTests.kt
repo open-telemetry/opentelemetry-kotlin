@@ -149,7 +149,7 @@ internal class NoopTests {
 
     @Test
     fun testNoopClockDefault() {
-        val otel = NoopOpenTelemetry as OpenTelemetrySdk
+        val otel = NoopOpenTelemetrySdk
         val clock = otel.clock
 
         // Noop clock always returns 0
@@ -200,11 +200,17 @@ internal class NoopTests {
         val span = NoopOpenTelemetry.context.root().extractSpan()
         assertTrue(span is NoopSpan)
         assertFalse(span.isRecording())
+        assertSame(NoopSpanContext, span.spanContext)
+        assertSame(NoopSpanContext, span.parent)
+        verifySpanOperationsAreNoop(span)
+        span.setByteArrayAttribute("bytes", byteArrayOf(1))
+        span.setName("name")
+        span.end()
     }
 
     @Test
     fun testNoopResource() {
-        val otel = NoopOpenTelemetry as OpenTelemetrySdk
+        val otel = NoopOpenTelemetrySdk
         val resourceFactory = otel.resource
 
         // empty resource has no attributes and no schemaUrl
@@ -408,7 +414,7 @@ internal class NoopTests {
 
     @Test
     fun testNoopFlushAndShutdown() = runTest {
-        val otel = NoopOpenTelemetry as OpenTelemetrySdk
+        val otel = NoopOpenTelemetrySdk
         assertEquals(OperationResultCode.Success, otel.forceFlush())
         assertEquals(OperationResultCode.Success, otel.shutdown())
     }

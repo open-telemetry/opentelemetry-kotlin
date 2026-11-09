@@ -102,7 +102,7 @@ internal class CompatOpenTelemetrySdkCloseableTest {
     fun `shutdown of a dsl configured sdk stops spans being recorded`() = runBlocking {
         val sdk = createCompatOpenTelemetry {
             tracerProvider { export { FakeSpanProcessor() } }
-        }.also(sdks::track) as OpenTelemetrySdk
+        }.also(sdks::track)
         val tracer = sdk.tracerProvider.getTracer("test")
         assertTrue(tracer.startSpan("before").isRecording())
         assertEquals(Success, sdk.forceFlush())
@@ -137,7 +137,7 @@ internal class CompatOpenTelemetrySdkCloseableTest {
         val sdk = createCompatOpenTelemetry {
             tracerProvider { export { spanProcessor } }
             loggerProvider { export { logProcessor } }
-        }.also(sdks::track) as OpenTelemetrySdk
+        }.also(sdks::track)
 
         assertEquals(Success, sdk.forceFlush())
         assertEquals(setOf("span-flush", "log-flush"), calls.toSet())

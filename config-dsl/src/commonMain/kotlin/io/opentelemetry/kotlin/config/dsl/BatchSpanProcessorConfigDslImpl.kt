@@ -24,10 +24,10 @@ class BatchSpanProcessorConfigDslImpl : BehaviorSupplier<BatchSpanProcessorBehav
     override fun toBehavior(): BatchSpanProcessorBehavior {
         return BatchSpanProcessorBehavior(
             exporter = exporter,
-            scheduleDelay = scheduleDelay,
-            exportTimeout = exporterTimeout,
-            maxQueueSize = maxQueueSize,
-            maxExportBatchSize = maxExportBatchSize,
+            scheduleDelay = scheduleDelay?.takeIf { it >= 0 },
+            exportTimeout = exporterTimeout?.takeIf { value -> value >= 0 },
+            maxQueueSize = maxQueueSize?.takeIf { value -> value in 1..Int.MAX_VALUE.toLong() },
+            maxExportBatchSize = maxExportBatchSize?.takeIf { value -> value in 1..Int.MAX_VALUE.toLong() },
         )
     }
 }

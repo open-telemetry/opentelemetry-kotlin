@@ -441,14 +441,6 @@ internal class W3CBaggagePropagatorTest {
 
     private fun String.utf8ByteLength(): Int = encodeToByteArray().size
 
-    private object MultiValueMapTextMapGetter : TextMapGetter<Map<String, List<String>>> {
-        override fun keys(carrier: Map<String, List<String>>): Collection<String> = carrier.keys
-        override fun get(carrier: Map<String, List<String>>, key: String): String? =
-            carrier[key]?.firstOrNull()
-        override fun getAll(carrier: Map<String, List<String>>, key: String): List<String> =
-            carrier[key].orEmpty()
-    }
-
     private object MapTextMapGetter : TextMapGetter<Map<String, String>> {
         override fun keys(carrier: Map<String, String>): Collection<String> = carrier.keys
         override fun get(carrier: Map<String, String>, key: String): String? = carrier[key]

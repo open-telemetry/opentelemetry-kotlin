@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.config.schema.model.OtlpHttpExporter
 import io.opentelemetry.kotlin.config.schema.model.SpanExporter
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 internal class BatchSpanProcessorMapperTest {
 
@@ -18,12 +19,7 @@ internal class BatchSpanProcessorMapperTest {
     fun everyFieldStartsWithDefaultValue() {
         val behavior = BatchSpanProcessor(exporter = SpanExporter()).toBehavior()
         assertEquals(
-            BatchSpanProcessorBehavior(
-                scheduleDelay = BatchSpanProcessorBehavior.DEFAULT_SCHEDULE_DELAY,
-                exportTimeout = BatchSpanProcessorBehavior.DEFAULT_EXPORT_TIMEOUT,
-                maxQueueSize = BatchSpanProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE,
-                maxExportBatchSize = BatchSpanProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE
-            ),
+            BatchSpanProcessorBehavior(),
             behavior
         )
     }
@@ -58,12 +54,7 @@ internal class BatchSpanProcessorMapperTest {
             exporter = SpanExporter()
         ).toBehavior()
         assertEquals(
-            BatchSpanProcessorBehavior(
-                scheduleDelay = BatchSpanProcessorBehavior.DEFAULT_SCHEDULE_DELAY,
-                exportTimeout = BatchSpanProcessorBehavior.DEFAULT_EXPORT_TIMEOUT,
-                maxQueueSize = BatchSpanProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE,
-                maxExportBatchSize = BatchSpanProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE
-            ),
+            BatchSpanProcessorBehavior(),
             behavior
         )
     }
@@ -75,8 +66,8 @@ internal class BatchSpanProcessorMapperTest {
             maxExportBatchSize = Int.MAX_VALUE.toLong() + 1,
             exporter = SpanExporter()
         ).toBehavior()
-        assertEquals(BatchSpanProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE, behavior.maxQueueSize)
-        assertEquals(BatchSpanProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE, behavior.maxExportBatchSize)
+        assertNull(behavior.maxQueueSize)
+        assertNull(behavior.maxExportBatchSize)
     }
 
     @Test

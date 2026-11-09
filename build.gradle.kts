@@ -111,7 +111,7 @@ fun configureKover() = extensions.configure<KoverProjectExtension> {
                 // generated code: protobuf messages and the opentelemetry-configuration schema model
                 classes(
                     "*.BuildConfig",
-                    "io.opentelemetry.proto.*",
+                    "io.opentelemetry.kotlin.proto.*",
                     "io.opentelemetry.kotlin.config.schema.model.*",
                 )
             }

@@ -48,10 +48,9 @@ public interface OtlpHttpExporterConfigDsl {
      * interceptors, or certificates.
      *
      * It's strongly recommended that the supplied [HttpClient] installs the
-     * [io.ktor.client.plugins.HttpTimeout],
-     * [io.ktor.client.plugins.contentnegotiation.ContentNegotiation] and
-     * [io.ktor.client.plugins.compression.ContentEncoding] plugins. Native sends uncompressed
-     * requests and should only advertise identity encoding.
+     * [io.ktor.client.plugins.HttpTimeout] and
+     * [io.ktor.client.plugins.compression.ContentEncoding] plugins. Native and JS send
+     * uncompressed requests and should only advertise identity encoding.
      */
     public var httpClient: HttpClient?
 }

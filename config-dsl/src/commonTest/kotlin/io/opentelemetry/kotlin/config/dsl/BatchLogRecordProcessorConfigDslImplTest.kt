@@ -47,4 +47,18 @@ class BatchLogRecordProcessorConfigDslImplTest {
             dsl.toBehavior()
         )
     }
+
+    @Test
+    fun invalidFieldValuesFallbackToDefault() {
+        val dsl = BatchLogRecordProcessorConfigDslImpl().apply {
+            scheduleDelay = -1
+            exporterTimeout = -1
+            maxQueueSize = 0
+            maxExportBatchSize = 0
+        }
+        assertEquals(
+            BatchLogRecordProcessorBehavior(),
+            dsl.toBehavior()
+        )
+    }
 }

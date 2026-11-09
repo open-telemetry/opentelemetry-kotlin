@@ -30,3 +30,11 @@ public fun setProcessSdkErrorHandler(delegate: SdkErrorHandler?): Boolean {
     }
     return DEFAULT_SDK_ERROR_HANDLER.setDelegate(delegate)
 }
+
+/**
+ * Reports [error] to the process-wide default [SdkErrorHandler]. It is buffered until a delegate
+ * is set via [setProcessSdkErrorHandler], then forwarded to it. Nothing escapes this function.
+ */
+public fun reportError(error: SdkError) {
+    DEFAULT_SDK_ERROR_HANDLER.onError(error)
+}

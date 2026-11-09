@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.FakeTraceFlags
 import io.opentelemetry.kotlin.tracing.TraceState
-import io.opentelemetry.proto.common.v1.InstrumentationScope
+import io.opentelemetry.kotlin.proto.common.v1.InstrumentationScope
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -102,7 +102,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testResourceDeserialization() {
-        val proto = io.opentelemetry.proto.resource.v1.Resource(
+        val proto = io.opentelemetry.kotlin.proto.resource.v1.Resource(
             attributes = emptyList()
         )
         val resource = proto.toResource()
@@ -111,7 +111,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testResourceDeserialization_usesSchemaUrl() {
-        val proto = io.opentelemetry.proto.resource.v1.Resource(
+        val proto = io.opentelemetry.kotlin.proto.resource.v1.Resource(
             attributes = emptyList()
         )
         val resource = proto.toResource("https://example.com/schema")
@@ -120,7 +120,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testResourceDeserialization_emptySchemaUrlIsNull() {
-        val proto = io.opentelemetry.proto.resource.v1.Resource(
+        val proto = io.opentelemetry.kotlin.proto.resource.v1.Resource(
             attributes = emptyList()
         )
         val resource = proto.toResource("")
@@ -292,14 +292,16 @@ class CommonProtobufConversionTest {
     fun testDeserializedTraceState_put() {
         val state = deserializedTraceState("foo=bar")
         val next = state.put("baz", "qux")
-        assertEquals(mapOf("foo" to "bar", "baz" to "qux"), next.asMap())
+        assertEquals(listOf("baz" to "qux", "foo" to "bar"), next.asMap().toList())
         assertEquals(mapOf("foo" to "bar"), state.asMap())
     }
 
     @Test
     fun testDeserializedTraceState_putOverwritesExistingKey() {
-        val state = deserializedTraceState("foo=bar")
-        assertEquals(mapOf("foo" to "baz"), state.put("foo", "baz").asMap())
+        val state = deserializedTraceState("foo=bar,baz=qux,other=value")
+        val next = state.put("baz", "updated")
+        assertEquals(listOf("baz" to "updated", "foo" to "bar", "other" to "value"), next.asMap().toList())
+        assertEquals("foo=bar,baz=qux,other=value", state.toW3CString())
     }
 
     @Test
@@ -332,9 +334,9 @@ class CommonProtobufConversionTest {
         val header = (0 until MAX_TRACE_STATE_ENTRIES).joinToString(",") { "key$it=value$it" }
         val state = deserializedTraceState(header)
 
-        val next = state.put("key0", "updated")
+        val next = state.put("key31", "updated")
         assertEquals(MAX_TRACE_STATE_ENTRIES, next.asMap().size)
-        assertEquals("updated", next.get("key0"))
+        assertEquals("key31" to "updated", next.asMap().toList().first())
     }
 
     @Test
@@ -357,7 +359,7 @@ class CommonProtobufConversionTest {
     @Test
     fun testDeserializedTraceState_putThenEncode() {
         val state = deserializedTraceState("foo=bar").put("baz", "qux")
-        assertEquals("foo=bar,baz=qux", state.toW3CString())
+        assertEquals("baz=qux,foo=bar", state.toW3CString())
     }
 
     @Test
@@ -373,7 +375,7 @@ class CommonProtobufConversionTest {
     }
 
     private fun deserializedResource(): Resource {
-        val proto = io.opentelemetry.proto.resource.v1.Resource(
+        val proto = io.opentelemetry.kotlin.proto.resource.v1.Resource(
             attributes = mapOf<String, Any>("existing" to "value").createKeyValues()
         )
         return proto.toResource()
