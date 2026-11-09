@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
-import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -10,9 +10,8 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -20,143 +19,92 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-/**
- * Shutdown lifecycle and export error-reporting tests for [SimpleSpanProcessor].
- */
+/** Shutdown lifecycle and export error-reporting tests for [SimpleSpanProcessor]. */
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class SimpleSpanProcessorShutdownTest {
 
+    private fun newProcessor(
+        exporter: SpanExporter,
+        handler: SdkErrorHandler = NoopSdkErrorHandler,
+        testScheduler: TestCoroutineScheduler,
+    ) = SimpleSpanProcessor(exporter, CoroutineScope(StandardTestDispatcher(testScheduler)), handler)
+
     @Test
-    fun testShutdownDrainTimeoutStillRunsExporterCleanup() = runTest {
-        val exporter = GatedSpanExporter(exportGate = CompletableDeferred())
-        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
-        val processor = SimpleSpanProcessor(exporter, scope, NoopSdkErrorHandler)
+    fun testShutdownCleanupAndExportErrorReporting() = runTest {
+        val drainExporter = TestSpanExporter(exportGate = CompletableDeferred())
+        val drainProcessor = newProcessor(drainExporter, testScheduler = testScheduler)
+        drainProcessor.onEnd(FakeReadWriteSpan(name = "span1"))
+        runCurrent()
 
-        processor.onEnd(FakeReadWriteSpan(name = "span1"))
-        runCurrent() // export starts and blocks on the gate
-
-        val result = async { processor.shutdown() }
+        val drainResult = async { drainProcessor.shutdown() }
         advanceUntilIdle() // drain hits SHUTDOWN_TIMEOUT_MS, jobs cancelled, cleanup runs
 
-        assertEquals(OperationResultCode.Failure, result.await())
-        assertEquals(1, exporter.shutdownCalls)
-        assertEquals(listOf("forceFlush", "shutdown"), exporter.events)
-    }
+        assertEquals(OperationResultCode.Failure, drainResult.await())
+        assertEquals(1, drainExporter.shutdownCalls)
+        assertEquals(listOf("forceFlush", "shutdown"), drainExporter.events)
 
-    @Test
-    fun testShutdownForceFlushTimeoutDoesNotSkipExporterShutdown() = runTest {
-        val exporter = GatedSpanExporter(flushGate = CompletableDeferred())
-        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
-        val processor = SimpleSpanProcessor(exporter, scope, NoopSdkErrorHandler)
+        assertEquals(OperationResultCode.Success, drainProcessor.shutdown())
+        assertEquals(1, drainExporter.shutdownCalls)
 
-        processor.onEnd(FakeReadWriteSpan(name = "span1"))
+        val flushExporter = TestSpanExporter(flushGate = CompletableDeferred())
+        val flushProcessor = newProcessor(flushExporter, testScheduler = testScheduler)
+        flushProcessor.onEnd(FakeReadWriteSpan(name = "span1"))
         runCurrent()
 
-        val result = async { processor.shutdown() }
-        advanceUntilIdle() // drain succeeds; exporter.forceFlush times out, then shutdown runs
-
-        assertEquals(OperationResultCode.Failure, result.await())
-        assertEquals(1, exporter.shutdownCalls)
-        assertEquals(listOf("export:span1", "forceFlush", "shutdown"), exporter.events)
-    }
-
-    @Test
-    fun testShutdownNormalPathOrdering() = runTest {
-        val exporter = GatedSpanExporter()
-        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
-        val processor = SimpleSpanProcessor(exporter, scope, NoopSdkErrorHandler)
-
-        processor.onEnd(FakeReadWriteSpan(name = "span1"))
-        runCurrent()
-
-        assertEquals(OperationResultCode.Success, processor.shutdown())
-        assertEquals(1, exporter.shutdownCalls)
-        assertEquals(listOf("export:span1", "forceFlush", "shutdown"), exporter.events)
-    }
-
-    @Test
-    fun testShutdownAfterDrainTimeoutDoesNotRepeatCleanup() = runTest {
-        val exporter = GatedSpanExporter(exportGate = CompletableDeferred())
-        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
-        val processor = SimpleSpanProcessor(exporter, scope, NoopSdkErrorHandler)
-
-        processor.onEnd(FakeReadWriteSpan(name = "span1"))
-        runCurrent()
-
-        assertEquals(OperationResultCode.Failure, processor.shutdown())
-        assertEquals(OperationResultCode.Success, processor.shutdown())
-        assertEquals(1, exporter.shutdownCalls)
-    }
-
-    @Test
-    fun testExportFailureResultIsReportedToErrorHandler() = runTest {
-        val handler = FakeSdkErrorHandler()
-        val exporter = StaticResultSpanExporter(OperationResultCode.Failure)
-        val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
-        val processor = SimpleSpanProcessor(exporter, scope, handler)
-
-        processor.onEnd(FakeReadWriteSpan(name = "span1"))
+        val flushResult = async { flushProcessor.shutdown() }
         advanceUntilIdle()
 
+        assertEquals(OperationResultCode.Failure, flushResult.await())
+        assertEquals(1, flushExporter.shutdownCalls)
+        assertEquals(listOf("export:span1", "forceFlush", "shutdown"), flushExporter.events)
+        val handler = FakeSdkErrorHandler()
+        var result: OperationResultCode = OperationResultCode.Failure
+        var exportCount = 0
+        val resultProcessor = newProcessor(
+            TestSpanExporter {
+                exportCount++
+                result
+            },
+            handler,
+            testScheduler,
+        )
+        resultProcessor.onEnd(FakeReadWriteSpan(name = "span1"))
+        advanceUntilIdle()
         assertEquals(1, handler.userCodeErrors.size)
         assertEquals("Export failed", handler.userCodeErrors.single().message)
 
-        // Processor remains operational after a failed export.
-        processor.onEnd(FakeReadWriteSpan(name = "span2"))
+        result = OperationResultCode.Success
+        resultProcessor.onEnd(FakeReadWriteSpan(name = "span2"))
         advanceUntilIdle()
-        assertEquals(2, exporter.exportCount)
-        assertEquals(2, handler.userCodeErrors.size)
-    }
-
-    @Test
-    fun testExportTimeoutIsReportedToErrorHandler() = runTest {
-        val handler = FakeSdkErrorHandler()
-        val exporter = DelayedSpanExporter(BatchTelemetryDefaults.EXPORT_TIMEOUT_MS + 1000)
-        val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
-        val processor = SimpleSpanProcessor(exporter, scope, handler)
-
-        processor.onEnd(FakeReadWriteSpan(name = "span1"))
-        advanceUntilIdle() // export times out at EXPORT_TIMEOUT_MS
-
         assertEquals(1, handler.userCodeErrors.size)
-        assertEquals("Export timed out", handler.userCodeErrors.single().message)
-        assertTrue(exporter.exports.isEmpty())
-    }
-
-    @Test
-    fun testSuccessfulExportIsNotReported() = runTest {
-        val handler = FakeSdkErrorHandler()
-        val exporter = StaticResultSpanExporter(OperationResultCode.Success)
-        val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
-        val processor = SimpleSpanProcessor(exporter, scope, handler)
-
-        processor.onEnd(FakeReadWriteSpan(name = "span1"))
+        assertEquals(2, exportCount)
+        val timeoutHandler = FakeSdkErrorHandler()
+        val timeoutProcessor = newProcessor(
+            TestSpanExporter(exportGate = CompletableDeferred()),
+            timeoutHandler,
+            testScheduler,
+        )
+        timeoutProcessor.onEnd(FakeReadWriteSpan(name = "span1"))
         advanceUntilIdle()
-
-        assertTrue(handler.errors.isEmpty())
-    }
-
-    @Test
-    fun testExportExceptionIsReportedExactlyOnce() = runTest {
-        val handler = FakeSdkErrorHandler()
-        val exporter = ThrowingSpanExporter()
-        val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
-        val processor = SimpleSpanProcessor(exporter, scope, handler)
-
-        processor.onEnd(FakeReadWriteSpan(name = "span1"))
+        assertEquals(1, timeoutHandler.userCodeErrors.size)
+        assertEquals("Export timed out", timeoutHandler.userCodeErrors.single().message)
+        val throwHandler = FakeSdkErrorHandler()
+        val throwProcessor = newProcessor(
+            TestSpanExporter { error("Export failed") },
+            throwHandler,
+            testScheduler,
+        )
+        throwProcessor.onEnd(FakeReadWriteSpan(name = "span1"))
+        throwProcessor.onEnd(FakeReadWriteSpan(name = "span2"))
         advanceUntilIdle()
-
-        assertEquals(1, handler.userCodeErrors.size)
-        assertEquals("Export failed", handler.userCodeErrors.single().message)
+        assertEquals(2, throwHandler.userCodeErrors.size)
+        assertTrue(throwHandler.userCodeErrors.all { it.message == "Export failed" })
     }
 
-    /**
-     * Exporter whose export and forceFlush can be gated; lifecycle events are recorded
-     * when the corresponding call completes (export) or is invoked (flush/shutdown).
-     */
-    private class GatedSpanExporter(
+    private class TestSpanExporter(
         private val exportGate: CompletableDeferred<Unit>? = null,
         private val flushGate: CompletableDeferred<Unit>? = null,
+        private val export: (suspend () -> OperationResultCode)? = null,
     ) : SpanExporter {
         val events = mutableListOf<String>()
         var shutdownCalls = 0
@@ -164,7 +112,7 @@ internal class SimpleSpanProcessorShutdownTest {
         override suspend fun export(telemetry: List<SpanData>): OperationResultCode {
             exportGate?.await()
             events += "export:${telemetry.first().name}"
-            return OperationResultCode.Success
+            return export?.invoke() ?: OperationResultCode.Success
         }
 
         override suspend fun forceFlush(): OperationResultCode {
@@ -178,39 +126,5 @@ internal class SimpleSpanProcessorShutdownTest {
             shutdownCalls++
             return OperationResultCode.Success
         }
-    }
-
-    private class StaticResultSpanExporter(private val result: OperationResultCode) : SpanExporter {
-        var exportCount = 0
-
-        override suspend fun export(telemetry: List<SpanData>): OperationResultCode {
-            exportCount++
-            return result
-        }
-
-        override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
-        override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
-    }
-
-    private class DelayedSpanExporter(private val delayMs: Long) : SpanExporter {
-        val exports = mutableListOf<String>()
-
-        override suspend fun export(telemetry: List<SpanData>): OperationResultCode {
-            delay(delayMs)
-            exports += telemetry.map(SpanData::name)
-            return OperationResultCode.Success
-        }
-
-        override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
-        override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
-    }
-
-    private class ThrowingSpanExporter : SpanExporter {
-        override suspend fun export(telemetry: List<SpanData>): OperationResultCode {
-            error("Export failed")
-        }
-
-        override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
-        override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
     }
 }

@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.export.and
 import io.opentelemetry.kotlin.export.guardExporterCode
 import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
@@ -39,16 +38,12 @@ internal class SimpleSpanProcessor(
     private val exportMutex = Mutex()
     private val shutdownState = MutableShutdownState()
 
-    // Tracks every launched export job so that forceFlush/shutdown can wait for them.
-    // A ReentrantReadWriteLock is used because onEnd() is non-suspend and must register
-    // jobs synchronously, while forceFlush/shutdown (suspend) need a consistent snapshot.
+    // Tracks launched export jobs so forceFlush/shutdown can wait for them. The lock is
+    // needed because onEnd() is non-suspend and must register synchronously.
     private val pendingExports = mutableSetOf<Job>()
     private val pendingExportsLock = ReentrantReadWriteLock()
 
-    /**
-     * Test hook invoked inside [pendingExportsLock] after an export job has been registered
-     * but before it is started. Lets tests pause admission deterministically.
-     */
+    /** Test hook fired inside [pendingExportsLock] after registration, before the job starts. */
     internal var beforeJobStart: (() -> Unit)? = null
 
     override fun onStart(
@@ -68,30 +63,21 @@ internal class SimpleSpanProcessor(
         job.start()
     }
 
-    /**
-     * Atomically admits [span] for export: the shutdown check, job creation and registration
-     * all happen while holding [pendingExportsLock], so a shutdown/forceFlush snapshot can
-     * never observe a state where an accepted export is missing from [pendingExports].
-     * The job is created LAZY and only started after the lock is released.
-     */
-    private fun admitExport(span: ReadableSpan): Job? {
-        var job: Job? = null
-        pendingExportsLock.write {
-            if (!shutdownState.isShutdown) {
-                val newJob = scope.launch(start = CoroutineStart.LAZY) {
-                    exportMutex.withLock {
-                        exportSpan(span)
-                    }
-                }
+    /** Atomically admits [span] under [pendingExportsLock]; the job starts after release. */
+    private fun admitExport(span: ReadableSpan): Job? = pendingExportsLock.write {
+        if (shutdownState.isShutdown) {
+            null
+        } else {
+            scope.launch(start = CoroutineStart.LAZY) {
+                exportMutex.withLock { exportSpan(span) }
+            }.also { newJob ->
                 pendingExports.add(newJob)
                 newJob.invokeOnCompletion {
                     pendingExportsLock.write { pendingExports.remove(newJob) }
                 }
                 beforeJobStart?.invoke()
-                job = newJob
             }
         }
-        return job
     }
 
     private suspend fun exportSpan(span: ReadableSpan) {
@@ -129,11 +115,7 @@ internal class SimpleSpanProcessor(
         }
         return runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS) {
             snapshotPendingExports().forEach { it.join() }
-            exportMutex.withLock {
-                sdkErrorHandler.guardExporterCode("Exporter forceFlush failed") {
-                    exporter.forceFlush()
-                }
-            }
+            boundedExporterCall("Exporter forceFlush failed") { exporter.forceFlush() }
         }
     }
 
@@ -146,13 +128,14 @@ internal class SimpleSpanProcessor(
             // export admitted before the snapshot is tracked and any later onEnd is rejected.
             val drainResult = shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS) {
                 ownsShutdown = true
-                drainPendingExports()
+                snapshotPendingExports().forEach { it.join() }
+                OperationResultCode.Success
             }
             completed = drainResult
             // Phase 2 runs even when draining timed out or failed, so the exporter is always
             // released. Losers of the shutdown race return Success without cleaning up again.
             return if (ownsShutdown) {
-                drainResult and cleanupExporter()
+                drainResult.combine(cleanupExporter())
             } else {
                 drainResult
             }
@@ -165,39 +148,28 @@ internal class SimpleSpanProcessor(
         }
     }
 
-    private suspend fun drainPendingExports(): OperationResultCode {
-        snapshotPendingExports().forEach { it.join() }
-        return OperationResultCode.Success
-    }
-
-    /**
-     * Cancels any exports that outlived the drain timeout, then flushes and shuts down the
-     * exporter in separate bounded phases so a stuck forceFlush cannot skip exporter shutdown.
-     * Exporter calls are serialized with in-flight exports via [exportMutex].
-     */
+    /** Cancels stragglers, then flushes and shuts down the exporter in separate bounded phases. */
     private suspend fun cleanupExporter(): OperationResultCode {
         snapshotPendingExports().forEach { it.cancel() }
-        val flushResult = runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS) {
-            exportMutex.withLock {
-                sdkErrorHandler.guardExporterCode("Exporter forceFlush failed") {
-                    exporter.forceFlush()
-                }
-            }
-        }
-        val shutdownResult = runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS) {
-            exportMutex.withLock {
-                sdkErrorHandler.guardExporterCode("Exporter shutdown failed") {
-                    exporter.shutdown()
-                }
-            }
-        }
-        return flushResult and shutdownResult
+        val flushResult = boundedExporterCall("Exporter forceFlush failed") { exporter.forceFlush() }
+        val shutdownResult = boundedExporterCall("Exporter shutdown failed") { exporter.shutdown() }
+        return flushResult.combine(shutdownResult)
     }
 
-    /**
-     * Returns a point-in-time copy of the tracked export jobs. The read lock guarantees the
-     * snapshot is consistent with any job that was registered before this call.
-     */
+    private suspend fun boundedExporterCall(
+        message: String,
+        call: suspend () -> OperationResultCode,
+    ): OperationResultCode = runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS) {
+        exportMutex.withLock { sdkErrorHandler.guardExporterCode(message, call) }
+    }
+
+    private fun OperationResultCode.combine(other: OperationResultCode): OperationResultCode =
+        if (this == OperationResultCode.Success && other == OperationResultCode.Success) {
+            OperationResultCode.Success
+        } else {
+            OperationResultCode.Failure
+        }
+
     private fun snapshotPendingExports(): List<Job> =
         pendingExportsLock.read { pendingExports.toList() }
 }
