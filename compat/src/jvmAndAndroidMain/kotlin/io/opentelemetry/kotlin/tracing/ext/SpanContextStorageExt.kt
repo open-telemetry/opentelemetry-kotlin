@@ -17,11 +17,11 @@ import io.opentelemetry.kotlin.tracing.model.SpanAdapter
  */
 @ExperimentalApi
 public fun Span.storeInContext(context: Context): Context {
-    return ContextAdapter(context.toOtelJavaContext().with(toOtelJavaSpan()))
+    return ContextAdapter(context.toOtelJavaContext().with(asOtelJavaSpan()))
 }
 
 /**
  * Spans created by this implementation wrap an opentelemetry-java span, so that is returned
  * directly. Any other implementation is wrapped so that its span context still survives.
  */
-internal fun Span.toOtelJavaSpan(): OtelJavaSpan = (this as? SpanAdapter)?.impl ?: OtelJavaSpanAdapter(this)
+internal fun Span.asOtelJavaSpan(): OtelJavaSpan = (this as? SpanAdapter)?.impl ?: OtelJavaSpanAdapter(this)
