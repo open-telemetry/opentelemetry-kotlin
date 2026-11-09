@@ -114,7 +114,13 @@ internal class TracerProviderConfigImplTest {
     fun testConsoleBehaviorInstallsProcessor() {
         assertEquals(
             "SimpleSpanProcessor",
-            processorClassName(SpanProcessorBehavior(console = ConsoleExporterBehavior())),
+            processorClassName(
+                SpanProcessorBehavior(
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(console = ConsoleExporterBehavior()),
+                    ),
+                )
+            ),
         )
     }
 
@@ -153,7 +159,6 @@ internal class TracerProviderConfigImplTest {
             "SimpleSpanProcessor",
             processorClassName(
                 SpanProcessorBehavior(
-                    console = ConsoleExporterBehavior(),
                     simple = SimpleSpanProcessorBehavior(),
                     batch = BatchSpanProcessorBehavior(scheduleDelay = 100),
                 ),
@@ -177,7 +182,13 @@ internal class TracerProviderConfigImplTest {
             export { dslProcessor }
         }.generateTracingConfig(
             base,
-            SpanProcessorBehavior(console = ConsoleExporterBehavior()),
+            SpanProcessorBehavior(
+                simple = SimpleSpanProcessorBehavior(
+                    exporter = SpanExporterBehavior(
+                        console = ConsoleExporterBehavior(),
+                    ),
+                )
+            ),
         )
         assertSame(dslProcessor, cfg.processor)
     }
