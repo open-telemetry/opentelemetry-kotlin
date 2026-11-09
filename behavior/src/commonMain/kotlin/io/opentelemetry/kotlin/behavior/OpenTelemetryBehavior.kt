@@ -55,14 +55,6 @@ data class OpenTelemetryBehavior(
      * Logger provider.
      */
     val loggerProvider: LoggerProviderBehavior? = null,
-    /**
-     * The raw `.instrumentation` mapping node from the declarative config file, as read directly
-     * off the parsed document.
-     *
-     * Only the declarative-file layer can supply this; it has no equivalent in environment
-     * variables or the DSL. It is converted to a `ConfigProperties` at the SDK entry point.
-     */
-    val instrumentation: Map<String, Any?>? = null,
 ) : Behavior<OpenTelemetryBehavior> {
     init {
         fileFormat?.let {
@@ -113,7 +105,6 @@ data class OpenTelemetryBehavior(
         attributeLimits = mergeNode(attributeLimits, higher.attributeLimits),
         tracerProvider = mergeNode(tracerProvider, higher.tracerProvider),
         loggerProvider = mergeNode(loggerProvider, higher.loggerProvider),
-        instrumentation = mergeMap(instrumentation, higher.instrumentation),
     )
 
     companion object {

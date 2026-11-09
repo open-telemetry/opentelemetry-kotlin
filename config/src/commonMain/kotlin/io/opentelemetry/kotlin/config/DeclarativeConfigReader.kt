@@ -15,4 +15,12 @@ fun interface DeclarativeConfigReader {
      * Throws if the file cannot be read, or does not hold a valid configuration.
      */
     fun read(path: String): OpenTelemetryBehavior
+
+    /**
+     * Reads the `.instrumentation` node of the declarative config file at [path], or returns `null`
+     * if this reader does not support it.
+     *
+     * Throws if the file cannot be read, or is not valid YAML.
+     */
+    fun readInstrumentation(path: String): ConfigProperties? = null
 }

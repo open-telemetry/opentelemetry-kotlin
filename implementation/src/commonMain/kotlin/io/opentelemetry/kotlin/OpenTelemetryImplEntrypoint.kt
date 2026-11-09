@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.config.ConfigProviderImpl
-import io.opentelemetry.kotlin.config.yaml.toConfigProperties
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
@@ -37,8 +36,9 @@ public fun createOpenTelemetry(
         cfg.config()
     }
     val resourceFactory = ResourceFactoryImpl(cfg.sdkErrorHandler)
-    val behavior = defaultBehaviorReader(sdkErrorHandler = cfg.sdkErrorHandler)
-        .read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
+    val behaviorReader = defaultBehaviorReader(sdkErrorHandler = cfg.sdkErrorHandler)
+    val configFilePath = cfg.configFilePath
+    val behavior = behaviorReader.read(configFilePath = configFilePath, dsl = cfg::toBehavior)
 
     // configFactory is legacy - use behavior to control SDK functionality instead
     val configFactory = SdkConfigFactory(cfg, behavior, resourceFactory)
@@ -69,7 +69,7 @@ public fun createOpenTelemetry(
             metricsConfig = metricsConfig,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior()
         ),
-        configProvider = ConfigProviderImpl(behavior.instrumentation.toConfigProperties()),
+        configProvider = ConfigProviderImpl { behaviorReader.readInstrumentation(configFilePath) },
         clock = clock,
         context = contextFactory,
         idGenerator = idGenerator,

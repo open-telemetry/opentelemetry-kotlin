@@ -17,8 +17,8 @@ internal fun interface CompatBehaviorReader {
 }
 
 /**
- * Reads every mechanism the platform supports. Declarative configuration files are read wherever
- * a real file system is available (the JVM and Android).
+ * Reads every mechanism the platform supports. Declarative configuration files are read on the JVM
+ * only.
  */
 @ExperimentalApi
 internal fun defaultCompatBehaviorReader(

@@ -20,7 +20,6 @@ internal class OpenTelemetryBehaviorTest {
         assertNull(behavior.attributeLimits)
         assertNull(behavior.tracerProvider)
         assertNull(behavior.loggerProvider)
-        assertNull(behavior.instrumentation)
     }
 
     @Test
@@ -241,19 +240,6 @@ internal class OpenTelemetryBehaviorTest {
         )
 
         assertEquals(layer, mergeBehaviors(layers))
-    }
-
-    @Test
-    fun instrumentationKeysUnionWithHigherLayerWinningOnCollision() {
-        val lower = OpenTelemetryBehavior(instrumentation = mapOf("http" to "lower", "db" to "lower"))
-        val higher = OpenTelemetryBehavior(instrumentation = mapOf("http" to "higher", "grpc" to "higher"))
-
-        val merged = lower.mergeWith(higher)
-
-        assertEquals(
-            mapOf("http" to "higher", "db" to "lower", "grpc" to "higher"),
-            merged.instrumentation,
-        )
     }
 
     private fun configWithSpanLimits(spanLimits: SpanLimitsBehavior) =

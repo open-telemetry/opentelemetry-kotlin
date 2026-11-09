@@ -72,6 +72,27 @@ internal class CreateOpenTelemetryConfigFileTest {
     }
 
     @Test
+    fun `the instrumentation config is read on first access rather than at init`() {
+        val file = File(writeConfigFile(CONFIG_FILE))
+        val otel = createOpenTelemetry { configFile(file.absolutePath) }
+        file.writeText(INSTRUMENTATION_CONFIG_FILE)
+        assertEquals("bar", otel.configProvider.instrumentationConfig.getString("foo"))
+    }
+
+    @Test
+    fun `an instrumentation config that cannot be read is reported and empty`() {
+        val handler = FakeSdkErrorHandler()
+        val file = File(writeConfigFile(INSTRUMENTATION_CONFIG_FILE))
+        val otel = createOpenTelemetry {
+            errorHandler(handler)
+            configFile(file.absolutePath)
+        }
+        file.delete()
+        assertEquals(emptySet(), otel.configProvider.instrumentationConfig.propertyKeys)
+        assertEquals("OTEL_CONFIG_FILE", handler.apiMisuses.single().api)
+    }
+
+    @Test
     fun `a config file supplies the global attribute limits`() {
         val cfg = OpenTelemetryConfigImpl(FakeClock()).apply {
             configFile(writeConfigFile(CONFIG_FILE))

@@ -5,7 +5,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 
 internal class PlatformDeclarativeConfigReaderTest {
 
@@ -18,17 +17,23 @@ internal class PlatformDeclarativeConfigReaderTest {
     }
 
     @Test
-    fun `should surface the instrumentation node on the returned behavior`() {
+    fun `should read the instrumentation node`() {
         val reader = assertNotNull(platformDeclarativeConfigReader())
-        val behavior = reader.read(writeConfigFile(CONFIG_FILE_WITH_INSTRUMENTATION))
-        assertEquals("bar", behavior.instrumentation?.get("foo"))
+        val instrumentation = reader.readInstrumentation(writeConfigFile(CONFIG_FILE_WITH_INSTRUMENTATION))
+        assertEquals("bar", instrumentation?.getString("foo"))
     }
 
     @Test
-    fun `should leave the instrumentation node null when absent`() {
+    fun `should read an absent instrumentation node as empty`() {
         val reader = assertNotNull(platformDeclarativeConfigReader())
-        val behavior = reader.read(writeConfigFile(CONFIG_FILE))
-        assertNull(behavior.instrumentation)
+        val instrumentation = reader.readInstrumentation(writeConfigFile(CONFIG_FILE))
+        assertEquals(emptySet(), instrumentation?.propertyKeys)
+    }
+
+    @Test
+    fun `should throw when reading the instrumentation node of a file that does not exist`() {
+        val reader = assertNotNull(platformDeclarativeConfigReader())
+        assertFailsWith<Exception> { reader.readInstrumentation("does-not-exist.yaml") }
     }
 
     @Test
