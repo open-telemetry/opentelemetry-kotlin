@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.init.config.MetricsConfig
 import io.opentelemetry.kotlin.resource.ResourceImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
+import kotlin.test.assertNotSame
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -26,23 +26,38 @@ internal class MeterInstrumentRegistrationTest {
 
     // Copilot Review Finding 1: Preserve conflicting instrument registrations
     @Test
-    fun testSameNameDifferentUnitOrDescriptionRetainsFirstDescriptor() {
+    fun testSameNameDifferentUnitOrDescriptionCreatesSeparateInstruments() {
         val handler = FakeSdkErrorHandler()
         val meter = newMeter(handler)
 
         val unit1 = meter.createLongUpDownCounter("unit.counter", unit = "1", description = "test")
         val unit2 = meter.createLongUpDownCounter("unit.counter", unit = "ms", description = "test")
-        assertSame(unit1, unit2)
+        assertNotSame(unit1, unit2)
+        assertTrue(unit1.enabled())
+        assertTrue(unit2.enabled())
+        assertEquals("1", unit1.unit)
+        assertEquals("ms", unit2.unit)
+        assertEquals("test", unit1.description)
+        assertEquals("test", unit2.description)
 
         val desc1 = meter.createLongUpDownCounter("desc.counter", unit = "1", description = "first")
         val desc2 = meter.createLongUpDownCounter("desc.counter", unit = "1", description = "second")
-        assertSame(desc1, desc2)
+        assertNotSame(desc1, desc2)
+        assertTrue(desc1.enabled())
+        assertTrue(desc2.enabled())
+        assertEquals("first", desc1.description)
+        assertEquals("second", desc2.description)
 
         assertEquals(2, handler.apiMisuses.size)
         handler.apiMisuses.forEach {
             assertTrue(it.message.contains("different unit or description"))
             assertTrue(it.severity == SdkErrorSeverity.WARNING)
         }
+
+        // Identical descriptors still reuse the existing instance.
+        assertSame(unit1, meter.createLongUpDownCounter("unit.counter", unit = "1", description = "test"))
+        assertSame(desc1, meter.createLongUpDownCounter("desc.counter", unit = "1", description = "first"))
+        assertEquals(2, handler.apiMisuses.size)
     }
 
     @Test
@@ -53,10 +68,10 @@ internal class MeterInstrumentRegistrationTest {
         val longCounter = meter.createLongUpDownCounter("my.counter", unit = "1", description = "test")
         val doubleCounter = meter.createDoubleUpDownCounter("my.counter", unit = "1", description = "test")
 
-        // Type mismatch: first stays functional, second is a noop per spec.
-        assertFalse(longCounter === doubleCounter)
+        // Type mismatch: both registrations stay functional with their own types.
+        assertTrue(longCounter !== doubleCounter)
         assertTrue(longCounter.enabled())
-        assertFalse(doubleCounter.enabled())
+        assertTrue(doubleCounter.enabled())
         assertEquals(1, handler.apiMisuses.size)
         val error = handler.apiMisuses.single()
         assertTrue(error.message.contains("already registered"))

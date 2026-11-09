@@ -136,13 +136,11 @@ internal class MeterWriteLockConflictTest {
         val conflict = conflictErrors.single() as SdkError.ApiMisuse
         assertTrue(conflict.message.contains(INSTRUMENT_NAME))
 
-        // The winner gets the real instrument; the loser gets a noop (type mismatch).
+        // Both registrations stay functional; the loser gets its own instrument.
         val longInstrument = assertNotNull(longResult.get())
         val doubleInstrument = assertNotNull(doubleResult.get())
-        assertTrue(
-            longInstrument.enabled() != doubleInstrument.enabled(),
-            "expected exactly one noop instrument from the type-mismatch conflict"
-        )
+        assertTrue(longInstrument.enabled())
+        assertTrue(doubleInstrument.enabled())
 
         // The error handler ran outside the registry lock, so the probe
         // registration inside it must have completed within the bound while the

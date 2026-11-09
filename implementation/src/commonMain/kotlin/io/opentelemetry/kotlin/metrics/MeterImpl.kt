@@ -18,7 +18,7 @@ internal class MeterImpl(
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Meter {
     private val lock = ReentrantReadWriteLock()
-    private val instrumentRegistry = mutableMapOf<String, InstrumentEntry>()
+    private val instrumentRegistry = mutableMapOf<String, MutableList<InstrumentEntry>>()
 
     /**
      * Test-only hook invoked after the read-lock lookup misses, immediately before the
@@ -69,10 +69,6 @@ internal class MeterImpl(
             create = {
                 DoubleUpDownCounterImpl(name, unit, description)
             },
-            createNoop = {
-                NoopOpenTelemetry.meterProvider.getMeter("")
-                    .createDoubleUpDownCounter(name, unit, description)
-            },
         )
     }
 
@@ -92,10 +88,6 @@ internal class MeterImpl(
             InstrumentValueType.LONG,
             create = {
                 LongUpDownCounterImpl(name, unit, description)
-            },
-            createNoop = {
-                NoopOpenTelemetry.meterProvider.getMeter("")
-                    .createLongUpDownCounter(name, unit, description)
             },
         )
     }
@@ -158,7 +150,6 @@ internal class MeterImpl(
         description: String?,
         valueType: InstrumentValueType,
         create: () -> T,
-        createNoop: () -> T,
     ): T {
         val requested = InstrumentDescriptor(
             name = name,
@@ -169,29 +160,71 @@ internal class MeterImpl(
         )
         val key = name.lowercase()
         var conflict: SdkError? = null
-        val entry = lock.read {
-            instrumentRegistry[key]?.also { conflict = checkForConflict(requested, it.descriptor) }
-        } ?: run {
+        // The read lookup reuses an existing registration when possible; anything else
+        // (new name or conflicting descriptor) takes the write lock to register.
+        val found = lock.read { instrumentRegistry[key]?.let { lookupEntry(it, requested) } }
+        val entry = if (found != null) {
+            conflict = found.second
+            found.first
+        } else {
             beforeWriteLock?.invoke(name)
             lock.write {
-                val existing = instrumentRegistry[key]
-                if (existing == null) {
-                    InstrumentEntry(create(), requested).also { instrumentRegistry[key] = it }
+                val entries = instrumentRegistry.getOrPut(key) { mutableListOf() }
+                val resolved = lookupEntry(entries, requested)
+                if (resolved != null) {
+                    conflict = resolved.second
+                    resolved.first
                 } else {
-                    conflict = checkForConflict(requested, existing.descriptor)
-                    existing
+                    conflict = entries.firstOrNull()?.let { conflictFor(entries, requested) }
+                    InstrumentEntry(create(), requested).also { entries += it }
                 }
             }
         }
         // Conflicts are reported only after the registry lock has been released so the
         // user-provided error handler never executes under the lock.
         conflict?.let(sdkErrorHandler::reportError)
-        // A type mismatch cannot reuse the registered instrument; return a noop instead.
-        if (entry.descriptor.valueType != valueType) {
-            return createNoop()
-        }
         @Suppress("UNCHECKED_CAST")
         return entry.instrument as T
+    }
+
+    /**
+     * Finds an existing [entries] registration reusable for [requested]. Returns the entry
+     * paired with the conflict to report, or `null` when a new instrument must be created.
+     * An identical descriptor reuses silently; a name differing only in case reuses the
+     * first-seen registration and reports the case difference.
+     */
+    private fun lookupEntry(
+        entries: List<InstrumentEntry>,
+        requested: InstrumentDescriptor,
+    ): Pair<InstrumentEntry, SdkError?>? {
+        // InstrumentDescriptor.equals is case-insensitive, so an exact-name match is
+        // checked first; a case-only variant then reuses the first-seen registration.
+        entries.firstOrNull { it.descriptor == requested && it.descriptor.name == requested.name }
+            ?.let { return it to null }
+        entries.firstOrNull { it.descriptor == requested }?.let { entry ->
+            return entry to SdkError.ApiMisuse(
+                api = "Meter",
+                message = "Instrument name '${requested.name}' differs only in case " +
+                    "from existing '${entry.descriptor.name}'. Using first-seen name.",
+                severity = SdkErrorSeverity.ERROR,
+            )
+        }
+        return null
+    }
+
+    /**
+     * Builds the conflict diagnostic for a registration that cannot reuse any existing
+     * entry. Prefers an entry with the same value type so unit/description mismatches are
+     * reported as warnings; otherwise reports the numeric-type conflict as an error.
+     */
+    private fun conflictFor(
+        entries: List<InstrumentEntry>,
+        requested: InstrumentDescriptor,
+    ): SdkError {
+        val baseline = entries.firstOrNull { it.descriptor.valueType == requested.valueType }
+            ?: entries.first()
+        return checkForConflict(requested, baseline.descriptor)
+            ?: error("conflictFor called for a descriptor with no conflict")
     }
 
     private fun checkForConflict(
