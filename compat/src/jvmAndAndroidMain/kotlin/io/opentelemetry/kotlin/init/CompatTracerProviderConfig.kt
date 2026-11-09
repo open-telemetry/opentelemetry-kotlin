@@ -18,8 +18,8 @@ import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
-import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
-import io.opentelemetry.kotlin.config.dsl.TraceExportConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.tracing.SpanLimitsConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.tracing.TraceExportConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.factory.CompatContextFactory
