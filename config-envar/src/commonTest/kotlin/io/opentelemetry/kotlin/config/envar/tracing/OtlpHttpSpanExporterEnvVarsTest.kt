@@ -41,9 +41,9 @@ internal class OtlpHttpSpanExporterEnvVarsTest {
         )
         configs.putAll(
             mapOf(
-                TracesExporterEnvVars.OTLP_TRACES_ENDPOINT to "http://localhost:4317/traces",
-                TracesExporterEnvVars.OTLP_TRACES_TIMEOUT to "2",
-                TracesExporterEnvVars.OTLP_TRACES_HEADERS to "key3=value3,key4=value4",
+                SpanExporterEnvVars.OTLP_TRACES_ENDPOINT to "http://localhost:4317/traces",
+                SpanExporterEnvVars.OTLP_TRACES_TIMEOUT to "2",
+                SpanExporterEnvVars.OTLP_TRACES_HEADERS to "key3=value3,key4=value4",
             )
         )
         assertEquals(
@@ -92,7 +92,7 @@ internal class OtlpHttpSpanExporterEnvVarsTest {
     fun `spec example 3 - mixing base endpoint with per-signal overrides`() {
         val configs = mapOf(
             OpenTelemetryEnvVars.OTLP_ENDPOINT to "http://collector:4318/mycollector/",
-            TracesExporterEnvVars.OTLP_TRACES_ENDPOINT to "https://collector.example.com/v1/traces/",
+            SpanExporterEnvVars.OTLP_TRACES_ENDPOINT to "https://collector.example.com/v1/traces/",
         )
         val behavior = toBehavior(configs::get)
         assertEquals("http://collector:4318/mycollector/", behavior.endpoint)

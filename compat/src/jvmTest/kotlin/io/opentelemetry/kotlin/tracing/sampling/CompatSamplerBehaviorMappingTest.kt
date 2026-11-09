@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -24,12 +25,12 @@ internal class CompatSamplerBehaviorMappingTest {
             this.isRemote = isRemote
         }
         val parentSpan = createNonRecordingSpan(parentSpanContext)
-        return contextFactory.root().storeSpan(parentSpan)
+        return contextFactory.rootContext().storeSpan(parentSpan)
     }
 
     private fun sample(
         sampler: Sampler,
-        context: Context = contextFactory.root(),
+        context: Context = contextFactory.rootContext(),
     ): SamplingResult = sampler.shouldSample(
         context = context,
         traceIdBytes = ZERO_TRACE_ID,
@@ -57,6 +58,14 @@ internal class CompatSamplerBehaviorMappingTest {
         val sampler = samplerDsl.toSampler(SamplerBehavior.AlwaysOff)
         assertEquals("AlwaysOffSampler", sampler.description)
         assertEquals(Decision.DROP, sample(sampler).decision)
+    }
+
+    /** Maps [SamplerBehavior.Probability] to a sampler that keeps every span at ratio 1.0. */
+    @Test
+    fun probabilityMapsToProbabilitySampler() {
+        val sampler = samplerDsl.toSampler(SamplerBehavior.Probability(1.0))
+        assertEquals(Decision.RECORD_AND_SAMPLE, sample(sampler).decision)
+        assertEquals(Decision.DROP, sample(samplerDsl.toSampler(SamplerBehavior.Probability(0.0))).decision)
     }
 
     /**

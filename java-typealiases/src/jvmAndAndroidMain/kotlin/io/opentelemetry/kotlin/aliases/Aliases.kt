@@ -8,6 +8,7 @@ import io.opentelemetry.api.baggage.BaggageBuilder
 import io.opentelemetry.api.baggage.BaggageEntry
 import io.opentelemetry.api.baggage.BaggageEntryMetadata
 import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.common.AttributeType
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.common.AttributesBuilder
 import io.opentelemetry.api.common.KeyValue
@@ -115,6 +116,7 @@ typealias OtelJavaBaggageEntry = BaggageEntry
 typealias OtelJavaBaggageEntryMetadata = BaggageEntryMetadata
 typealias OtelJavaAttributes = Attributes
 typealias OtelJavaAttributeKey<T> = AttributeKey<T>
+typealias OtelJavaAttributeType = AttributeType
 typealias OtelJavaSpan = Span
 typealias OtelJavaSpanContext = SpanContext
 typealias OtelJavaTraceFlags = TraceFlags

@@ -50,7 +50,7 @@ internal class CompatCurrentContextIntegrationTest {
     @Test
     fun `kotlin context value is visible to java`() {
         val key = createContextKey<String>("key")
-        val scope = otel.context.current().set(key, "value").attach()
+        val scope = otel.context.currentContext().set(key, "value").attach()
         try {
             assertEquals("value", OtelJavaContext.current().get(key.toOtelJavaContextKey()))
         } finally {
@@ -63,15 +63,15 @@ internal class CompatCurrentContextIntegrationTest {
     fun `java context value is visible to kotlin`() {
         val key = OtelJavaContextKey.named<String>("key")
         OtelJavaContext.current().with(key, "value").makeCurrent().use {
-            assertEquals("value", otel.context.current().toOtelJavaContext().get(key))
+            assertEquals("value", otel.context.currentContext().toOtelJavaContext().get(key))
         }
-        assertEquals(otel.context.root(), otel.context.current())
+        assertEquals(otel.context.rootContext(), otel.context.currentContext())
     }
 
     @Test
     fun `kotlin span is current in java`() {
         val span = tracer.startSpan("kotlin")
-        val scope = otel.context.current().storeSpan(span).attach()
+        val scope = otel.context.currentContext().storeSpan(span).attach()
         try {
             val javaSpan = OtelJavaSpan.current()
             assertEquals(span.spanContext.traceId, javaSpan.spanContext.traceId)
@@ -88,7 +88,7 @@ internal class CompatCurrentContextIntegrationTest {
         val parent = javaTracer.spanBuilder("java").startSpan()
         val child = try {
             parent.makeCurrent().use {
-                assertEquals(parent.spanContext.spanId, otel.context.current().extractSpan().spanContext.spanId)
+                assertEquals(parent.spanContext.spanId, otel.context.currentContext().extractSpan().spanContext.spanId)
                 tracer.startSpan("kotlin")
             }
         } finally {
@@ -102,7 +102,7 @@ internal class CompatCurrentContextIntegrationTest {
     @Test
     fun `kotlin span is parent of java span`() {
         val parent = tracer.startSpan("kotlin")
-        val scope = otel.context.current().storeSpan(parent).attach()
+        val scope = otel.context.currentContext().storeSpan(parent).attach()
         val child = try {
             javaTracer.spanBuilder("java").startSpan()
         } finally {
@@ -116,7 +116,7 @@ internal class CompatCurrentContextIntegrationTest {
     @Test
     fun `kotlin baggage is visible to java`() {
         val baggage = createBaggage { put("key", "value") }
-        val scope = otel.context.current().storeBaggage(baggage).attach()
+        val scope = otel.context.currentContext().storeBaggage(baggage).attach()
         try {
             assertEquals("value", OtelJavaBaggage.current().getEntryValue("key"))
         } finally {
@@ -128,9 +128,9 @@ internal class CompatCurrentContextIntegrationTest {
     @Test
     fun `java baggage is visible to kotlin`() {
         OtelJavaBaggage.builder().put("key", "value").build().makeCurrent().use {
-            assertEquals("value", otel.context.current().extractBaggage().getValue("key"))
+            assertEquals("value", otel.context.currentContext().extractBaggage().getValue("key"))
         }
-        assertTrue(otel.context.current().extractBaggage().asMap().isEmpty())
+        assertTrue(otel.context.currentContext().extractBaggage().asMap().isEmpty())
     }
 
     @Test
@@ -138,10 +138,10 @@ internal class CompatCurrentContextIntegrationTest {
         val kotlinKey = createContextKey<String>("kotlin")
         val javaKey = OtelJavaContextKey.named<String>("java")
 
-        val outer = otel.context.current().set(kotlinKey, "outer").attach()
+        val outer = otel.context.currentContext().set(kotlinKey, "outer").attach()
         try {
             OtelJavaContext.current().with(javaKey, "inner").makeCurrent().use {
-                val ctx = otel.context.current()
+                val ctx = otel.context.currentContext()
                 assertEquals("outer", ctx.get(kotlinKey))
                 assertEquals("inner", ctx.toOtelJavaContext().get(javaKey))
             }
@@ -181,7 +181,7 @@ internal class CompatCurrentContextIntegrationTest {
 
         val key = OtelJavaContextKey.named<String>("key")
         OtelJavaContext.current().with(key, "value").makeCurrent().use {
-            assertEquals("value", sdk.context.current().toOtelJavaContext().get(key))
+            assertEquals("value", sdk.context.currentContext().toOtelJavaContext().get(key))
         }
     }
 }

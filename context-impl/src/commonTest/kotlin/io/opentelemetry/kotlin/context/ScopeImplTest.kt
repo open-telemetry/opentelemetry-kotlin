@@ -26,7 +26,7 @@ internal class ScopeImplTest {
 
     @Test
     fun testCreateWithMatchingContextsReportsApiMisuse() {
-        val root = factory.root()
+        val root = factory.rootContext()
         val scope = ScopeImpl.create(root, root, storage, handler) {}
 
         assertTrue(scope.detach())
@@ -87,5 +87,5 @@ internal class ScopeImplTest {
     }
 
     private fun newContext(): Context =
-        factory.root().set(createContextKey<String>("key"), "value")
+        factory.rootContext().set(createContextKey<String>("key"), "value")
 }

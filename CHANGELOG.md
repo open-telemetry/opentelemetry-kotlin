@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 🐞 Bug fixes
+
+- Move new and updated trace-state entries to the front after protobuf deserialization.
+
 ## Version 0.10.0 (2026-11-05)
 
 ### Migration notes

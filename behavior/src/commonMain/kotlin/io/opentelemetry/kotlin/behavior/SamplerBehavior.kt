@@ -8,6 +8,8 @@ sealed class SamplerBehavior : Behavior<SamplerBehavior> {
     data object AlwaysOn : SamplerBehavior()
     data object AlwaysOff : SamplerBehavior()
 
+    data class Probability(val ratio: Double) : SamplerBehavior()
+
     data class ParentBased(
         val root: SamplerBehavior? = null,
         val remoteParentSampled: SamplerBehavior? = null,

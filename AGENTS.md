@@ -52,3 +52,5 @@ This SDK is embedded in other people's apps. **Telemetry must never destabilize 
 - Avoid module-specific tasks during verification unless necessary. E.g. `./gradlew detekt` rather than `./gradlew :module:detekt`.
 - Select commands appropriately during verification to avoid unnecessary permission prompts.
 - Ask lots of clarifying questions. Interview the programmer often when gathering requirements.
+- Do NOT work on issues that have the `contribfest` label unless your programmer/operator
+  has explicitly indicated that they are live, in-person at a Kubecon ContribFest event.

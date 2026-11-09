@@ -8,10 +8,10 @@ import io.opentelemetry.kotlin.aliases.OtelJavaScope
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaStatusCode
-import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
-import io.opentelemetry.kotlin.attributes.setTypedAttribute
-import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.attributes.setOtelJavaAttribute
+import io.opentelemetry.kotlin.attributes.setOtelJavaAttributes
+import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.tracing.Span
@@ -26,13 +26,13 @@ internal class OtelJavaSpanAdapter(
 ) : OtelJavaSpan, OtelJavaImplicitContextKeyed {
 
     override fun <T : Any?> setAttribute(key: OtelJavaAttributeKey<T?>, value: T?): OtelJavaSpan {
-        value?.let { span.setTypedAttribute(key.key, it) }
+        value?.let { span.setOtelJavaAttribute(key, it) }
         return this
     }
 
     override fun addEvent(name: String, attributes: OtelJavaAttributes): OtelJavaSpan {
         span.addEvent(name) {
-            setTypedAttributes(attributes.convertToMap())
+            setOtelJavaAttributes(attributes)
         }
         return this
     }
@@ -45,7 +45,7 @@ internal class OtelJavaSpanAdapter(
     ): OtelJavaSpan {
         val time = unit.toNanos(timestamp)
         span.addEvent(name, time) {
-            setTypedAttributes(attributes.convertToMap())
+            setOtelJavaAttributes(attributes)
         }
         return this
     }
@@ -55,7 +55,7 @@ internal class OtelJavaSpanAdapter(
         attributes: OtelJavaAttributes
     ): OtelJavaSpan {
         span.addLink(spanContext.toOtelKotlinSpanContext()) {
-            setTypedAttributes(attributes.convertToMap())
+            setOtelJavaAttributes(attributes)
         }
         return this
     }
@@ -71,7 +71,7 @@ internal class OtelJavaSpanAdapter(
     ): OtelJavaSpan {
         span.addEvent("exception") {
             setExceptionAttributes(exception)
-            setTypedAttributes(additionalAttributes.convertToMap())
+            setOtelJavaAttributes(additionalAttributes)
         }
         return this
     }
@@ -107,7 +107,7 @@ internal class OtelJavaSpanAdapter(
         return if ((span is OtelJavaImplicitContextKeyed)) {
             span.makeCurrent()
         } else {
-            val scope = contextFactory.current().storeSpan(span).attach()
+            val scope = contextFactory.currentContext().storeSpan(span).attach()
             OtelJavaScope { scope.detach() }
         }
     }

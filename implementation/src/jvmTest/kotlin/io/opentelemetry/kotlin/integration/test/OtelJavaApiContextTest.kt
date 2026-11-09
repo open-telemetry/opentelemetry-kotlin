@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.integration.test
 
 import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
+import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.toOtelJavaApi
 import io.opentelemetry.kotlin.tracing.Span
 import kotlinx.coroutines.test.runTest
@@ -104,20 +105,20 @@ internal class OtelJavaApiContextTest {
 
     @Test
     fun testJavaScopeCloseRestoresKotlinContext() = runTest {
-        val before = harness.kotlinApi.context.current()
+        val before = harness.kotlinApi.context.currentContext()
         val javaSpan = startJavaSpan("java_span")
         javaSpan.makeCurrent().use {
-            assertEquals(javaSpan.spanContext.spanId, harness.kotlinApi.context.current().extractSpan().spanContext.spanId)
+            assertEquals(javaSpan.spanContext.spanId, harness.kotlinApi.context.currentContext().extractSpan().spanContext.spanId)
         }
         javaSpan.end()
-        assertSame(before, harness.kotlinApi.context.current())
+        assertSame(before, harness.kotlinApi.context.currentContext())
     }
 
     private fun startJavaSpan(name: String): OtelJavaSpan =
         javaApi.tracerProvider.get("tracer").spanBuilder(name).startSpan()
 
     private fun withAttached(span: Span, action: () -> Unit) {
-        val scope = harness.kotlinApi.context.current().storeSpan(span).attach()
+        val scope = harness.kotlinApi.context.currentContext().storeSpan(span).attach()
         try {
             action()
         } finally {

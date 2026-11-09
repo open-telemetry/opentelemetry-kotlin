@@ -6,6 +6,8 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.guardOrDefault
@@ -33,7 +35,7 @@ internal class LoggerImpl(
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Logger {
 
-    private val root = contextFactory.root()
+    private val root = contextFactory.rootContext()
     private val invalidSpanContext = createInvalidSpanContext()
 
     override fun enabled(
@@ -45,7 +47,7 @@ internal class LoggerImpl(
             if (shutdownState.isShutdown || processor == null) {
                 false
             } else {
-                val ctx = context ?: contextFactory.current()
+                val ctx = context ?: contextFactory.currentContext()
                 when {
                     !allowedByConfig(severityNumber, spanContextFrom(ctx)) -> false
                     else -> sdkErrorHandler.guardOrDefault(true) {
@@ -92,7 +94,7 @@ internal class LoggerImpl(
     ) {
         sdkErrorHandler.sdkGuard("Logger.emit failed") {
             shutdownState.execute {
-                val ctx = context ?: contextFactory.current()
+                val ctx = context ?: contextFactory.currentContext()
                 val spanContext = spanContextFrom(ctx)
 
                 if (!allowedByConfig(severityNumber, spanContext)) {

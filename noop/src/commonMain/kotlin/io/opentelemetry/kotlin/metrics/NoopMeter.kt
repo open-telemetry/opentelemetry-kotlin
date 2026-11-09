@@ -62,6 +62,13 @@ internal object NoopMeter : Meter {
         vararg callbacks: (ObservableLongMeasurement) -> Unit,
     ): ObservableLongGauge = NoopObservableLongGauge(name, unit, description)
 
+    override fun createObservableDoubleGauge(
+        name: String,
+        unit: String?,
+        description: String?,
+        vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
+    ): ObservableDoubleGauge = NoopObservableDoubleGauge(name, unit, description)
+
     override fun batchCallback(
         measurement: ObservableMeasurement,
         vararg additionalMeasurements: ObservableMeasurement,

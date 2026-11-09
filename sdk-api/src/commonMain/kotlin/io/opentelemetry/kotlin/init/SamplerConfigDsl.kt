@@ -35,6 +35,14 @@ public interface SamplerConfigDsl {
     public fun alwaysRecord(root: Sampler): Sampler
 
     /**
+     * Configures sampling so that spans are sampled with the given probability [ratio], which must
+     * be between 0 and 1. An invalid ratio falls back to the default sampler.
+     *
+     * https://opentelemetry.io/docs/specs/otel/trace/sdk/#probabilitysampler
+     */
+    public fun probability(ratio: Double): Sampler
+
+    /**
      * Configures sampling based on the parent span's sampling decision.
      *
      * https://opentelemetry.io/docs/specs/otel/trace/sdk/#parentbased

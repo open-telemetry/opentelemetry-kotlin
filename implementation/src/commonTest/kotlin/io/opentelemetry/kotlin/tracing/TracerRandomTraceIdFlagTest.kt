@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
@@ -61,7 +62,7 @@ internal class TracerRandomTraceIdFlagTest {
         val propagator = createW3CTraceContextPropagator()
         val span = buildTracer(idGenerator).startSpan("test")
         val carrier = mutableMapOf<String, String>()
-        propagator.inject(ContextFactoryImpl().root().storeSpan(span), carrier, FakeTextMapSetter)
+        propagator.inject(ContextFactoryImpl().rootContext().storeSpan(span), carrier, FakeTextMapSetter)
 
         val spanContext = span.spanContext
         assertEquals("00-${spanContext.traceId}-${spanContext.spanId}-03", carrier["traceparent"])
@@ -87,7 +88,7 @@ internal class TracerRandomTraceIdFlagTest {
             isRandom = parentIsRandom
             isRemote = true
         }
-        val parentContext = ContextFactoryImpl().root().storeSpanContext(parent)
+        val parentContext = ContextFactoryImpl().rootContext().storeSpanContext(parent)
         return buildTracer(idGenerator).startSpan("test", parentContext = parentContext)
     }
 

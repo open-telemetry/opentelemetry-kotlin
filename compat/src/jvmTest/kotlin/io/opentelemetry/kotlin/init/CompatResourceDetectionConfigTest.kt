@@ -48,6 +48,17 @@ internal class CompatResourceDetectionConfigTest {
     }
 
     @Test
+    fun `resource map values keep their types`() {
+        val cfg = CompatOpenTelemetryConfig(clock)
+        cfg.resource(mapOf("d" to 1.0, "i" to 1, "dl" to listOf(1.0)))
+
+        val attrs = baseResource(cfg).attributes
+        assertEquals(1.0, attrs["d"])
+        assertEquals(1L, attrs["i"])
+        assertEquals(listOf(1.0), attrs["dl"])
+    }
+
+    @Test
     fun `explicit schema url overrides sdk default`() {
         val cfg = CompatOpenTelemetryConfig(clock)
         cfg.resource("https://example.com/schema") { }

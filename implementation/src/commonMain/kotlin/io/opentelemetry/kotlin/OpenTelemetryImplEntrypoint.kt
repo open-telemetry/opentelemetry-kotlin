@@ -15,7 +15,10 @@ import io.opentelemetry.kotlin.metrics.MeterProviderImpl
 import io.opentelemetry.kotlin.tracing.TracerProviderImpl
 
 /**
- * Constructs an [OpenTelemetry] instance that uses the opentelemetry-kotlin implementation.
+ * Constructs an [OpenTelemetrySdk] instance that uses the opentelemetry-kotlin implementation.
+ *
+ * The caller owns the returned instance and should call [OpenTelemetrySdk.shutdown] when telemetry
+ * is no longer needed.
  */
 @ExperimentalApi
 public fun createOpenTelemetry(
@@ -29,14 +32,16 @@ public fun createOpenTelemetry(
      * Defines configuration for OpenTelemetry.
      */
     config: OpenTelemetryConfigDsl.() -> Unit = {}
-): OpenTelemetry {
+): OpenTelemetrySdk {
     val cfg = OpenTelemetryConfigImpl(clock)
     cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
         cfg.config()
     }
     val resourceFactory = ResourceFactoryImpl(cfg.sdkErrorHandler)
-    val behavior = defaultBehaviorReader(sdkErrorHandler = cfg.sdkErrorHandler)
-        .read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
+    val behavior = defaultBehaviorReader(
+        sdkErrorHandler = cfg.sdkErrorHandler,
+        declarativeConfigReader = cfg.declarativeConfigReader,
+    ).read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
 
     // configFactory is legacy - use behavior to control SDK functionality instead
     val configFactory = SdkConfigFactory(cfg, behavior, resourceFactory)

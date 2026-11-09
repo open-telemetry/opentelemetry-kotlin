@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
@@ -117,12 +118,12 @@ internal class TracerInvalidIdTest {
 
         val child = tracer.startSpan(
             "child",
-            parentContext = contextFactory.root()
+            parentContext = contextFactory.rootContext()
                 .storeSpanContext(remoteParent()),
         )
         val grandchild = tracer.startSpan(
             "grandchild",
-            parentContext = contextFactory.root().storeSpan(child),
+            parentContext = contextFactory.rootContext().storeSpan(child),
         )
 
         assertFalse(child.spanContext.isRemote)
@@ -145,7 +146,7 @@ internal class TracerInvalidIdTest {
 
     private fun startChildOf(parent: SpanContext, idGenerator: IdGenerator): Span {
         val parentContext =
-            ContextFactoryImpl().root().storeSpanContext(parent)
+            ContextFactoryImpl().rootContext().storeSpanContext(parent)
         return buildTracer(idGenerator).startSpan("test", parentContext = parentContext)
     }
 

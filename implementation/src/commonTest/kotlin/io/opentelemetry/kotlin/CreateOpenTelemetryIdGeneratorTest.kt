@@ -23,7 +23,7 @@ internal class CreateOpenTelemetryIdGeneratorTest {
 
     @Test
     fun `default id generator is used when none is configured`() {
-        val api = createOpenTelemetry().also(sdks::track) as OpenTelemetrySdk
+        val api = createOpenTelemetry().also(sdks::track)
         assertIs<IdGeneratorImpl>(api.idGenerator)
     }
 
@@ -33,7 +33,7 @@ internal class CreateOpenTelemetryIdGeneratorTest {
         val api = createOpenTelemetry {
             idGenerator { custom }
             tracerProvider { export { FakeSpanProcessor() } }
-        }.also(sdks::track) as OpenTelemetrySdk
+        }.also(sdks::track)
 
         assertSame(custom, api.idGenerator)
 
@@ -49,7 +49,7 @@ internal class CreateOpenTelemetryIdGeneratorTest {
             errorHandler(handler)
             idGenerator { error("boom") }
             tracerProvider { export { FakeSpanProcessor() } }
-        } as OpenTelemetrySdk
+        }
 
         assertIs<IdGeneratorImpl>(api.idGenerator)
         assertTrue(api.tracerProvider.getTracer("test").startSpan("span").spanContext.isValid)

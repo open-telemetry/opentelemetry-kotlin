@@ -25,7 +25,7 @@ internal class OpenTelemetryConfigReaderTest {
 
     @Test
     fun `should use the default environment variable reader`() {
-        val reader = OpenTelemetryConfigReader(declarativeConfigReader = null)
+        val reader = OpenTelemetryConfigReader()
         val behavior = reader.read(dsl = logAttributeCountLimit(64))
         assertEquals(64, behavior.logRecordAttributeCountLimit())
     }
@@ -103,13 +103,44 @@ internal class OpenTelemetryConfigReaderTest {
     }
 
     @Test
-    fun `should not read a config file on platforms that do not support them`() {
+    fun `should report an error and apply the environment when no config file reader is registered`() {
+        val handler = FakeSdkErrorHandler()
         val reader = OpenTelemetryConfigReader(
             envVarReader = EnvVarReader(mapOf(CONFIG_FILE to PATH, LOGRECORD_COUNT to "64")::get),
             declarativeConfigReader = null,
+            sdkErrorHandler = handler,
         )
-        val behavior = reader.read(configFilePath = PATH)
+        val behavior = reader.read()
         assertEquals(64, behavior.logRecordAttributeCountLimit())
+        val misuse = handler.apiMisuses.single()
+        assertEquals(CONFIG_FILE, misuse.api)
+        assertTrue(misuse.message.contains(PATH))
+        assertEquals(SdkErrorSeverity.ERROR, misuse.severity)
+        assertEquals(1, handler.errors.size)
+    }
+
+    @Test
+    fun `should report an error for an explicit config file path when no reader is registered`() {
+        val handler = FakeSdkErrorHandler()
+        val reader = OpenTelemetryConfigReader(
+            envVarReader = null,
+            declarativeConfigReader = null,
+            sdkErrorHandler = handler,
+        )
+        val behavior = reader.read(dsl = logAttributeCountLimit(8), configFilePath = PATH)
+        assertEquals(8, behavior.logRecordAttributeCountLimit())
+        assertEquals(CONFIG_FILE, handler.apiMisuses.single().api)
+    }
+
+    @Test
+    fun `should not report an error when no reader is registered and no path was supplied`() {
+        val handler = FakeSdkErrorHandler()
+        OpenTelemetryConfigReader(
+            envVarReader = EnvVarReader(emptyMap<String, String>()::get),
+            declarativeConfigReader = null,
+            sdkErrorHandler = handler,
+        ).read()
+        assertTrue(handler.errors.isEmpty())
     }
 
     @Test
@@ -194,7 +225,10 @@ internal class OpenTelemetryConfigReaderTest {
             ),
             handler = handler,
         )
-        assertEquals(mapOf("key" to "value"), behavior.tracerProvider?.processor?.http?.headers)
+        assertEquals(
+            mapOf("key" to "value"),
+            behavior.tracerProvider?.processor?.batch?.exporter?.http?.headers
+        )
         assertTrue(handler.sdkCodeErrors.isEmpty())
     }
 
