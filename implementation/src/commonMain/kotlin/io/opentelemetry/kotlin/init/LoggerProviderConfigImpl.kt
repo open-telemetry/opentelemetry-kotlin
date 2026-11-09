@@ -3,8 +3,8 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
-import io.opentelemetry.kotlin.config.dsl.LogExportConfigDslImpl
-import io.opentelemetry.kotlin.config.dsl.LogLimitsConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.logging.LogExportConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.logging.LogLimitsConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
