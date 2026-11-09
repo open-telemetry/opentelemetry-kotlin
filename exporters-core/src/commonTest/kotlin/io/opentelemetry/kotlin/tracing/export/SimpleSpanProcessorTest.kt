@@ -131,6 +131,9 @@ internal class SimpleSpanProcessorTest {
             async { processor.forceFlush() },
             async { processor.forceFlush() },
         )
+        // Start the flushes first so each snapshots pending exports before the
+        // extra submissions below race the in-flight flushes.
+        runCurrent()
         repeat(10) { processor.onEnd(FakeReadWriteSpan(name = "extra_$it")) }
         advanceUntilIdle()
 

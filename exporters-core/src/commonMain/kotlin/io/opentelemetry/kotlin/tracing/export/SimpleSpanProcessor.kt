@@ -15,10 +15,10 @@ import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -38,9 +38,10 @@ internal class SimpleSpanProcessor(
     private val exportMutex = Mutex()
     private val shutdownState = MutableShutdownState()
 
-    // Tracks launched export jobs so forceFlush/shutdown can wait for them. The lock is
-    // needed because onEnd() is non-suspend and must register synchronously.
-    private val pendingExports = mutableSetOf<Job>()
+    // Tracks launched export jobs so forceFlush/shutdown can wait for them and collect
+    // their results. The lock is needed because onEnd() is non-suspend and must register
+    // synchronously.
+    private val pendingExports = mutableSetOf<Deferred<OperationResultCode>>()
     private val pendingExportsLock = ReentrantReadWriteLock()
 
     /** Test hook fired inside [pendingExportsLock] after registration, before the job starts. */
@@ -64,23 +65,24 @@ internal class SimpleSpanProcessor(
     }
 
     /** Atomically admits [span] under [pendingExportsLock]; the job starts after release. */
-    private fun admitExport(span: ReadableSpan): Job? = pendingExportsLock.write {
-        if (shutdownState.isShutdown) {
-            null
-        } else {
-            scope.launch(start = CoroutineStart.LAZY) {
-                exportMutex.withLock { exportSpan(span) }
-            }.also { newJob ->
-                pendingExports.add(newJob)
-                newJob.invokeOnCompletion {
-                    pendingExportsLock.write { pendingExports.remove(newJob) }
+    private fun admitExport(span: ReadableSpan): Deferred<OperationResultCode>? =
+        pendingExportsLock.write {
+            if (shutdownState.isShutdown) {
+                null
+            } else {
+                scope.async(start = CoroutineStart.LAZY) {
+                    exportMutex.withLock { exportSpan(span) }
+                }.also { deferred ->
+                    pendingExports.add(deferred)
+                    deferred.invokeOnCompletion {
+                        pendingExportsLock.write { pendingExports.remove(deferred) }
+                    }
+                    beforeJobStart?.invoke()
                 }
-                beforeJobStart?.invoke()
             }
         }
-    }
 
-    private suspend fun exportSpan(span: ReadableSpan) {
+    private suspend fun exportSpan(span: ReadableSpan): OperationResultCode =
         sdkErrorHandler.guardExporterCode("Export failed") {
             try {
                 val result = withTimeout(BatchTelemetryDefaults.EXPORT_TIMEOUT_MS) {
@@ -103,7 +105,6 @@ internal class SimpleSpanProcessor(
                 OperationResultCode.Failure
             }
         }
-    }
 
     override fun isStartRequired(): Boolean = false
     override fun isEndRequired(): Boolean = true
@@ -114,8 +115,14 @@ internal class SimpleSpanProcessor(
             return OperationResultCode.Success
         }
         return runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS) {
-            snapshotPendingExports().forEach { it.join() }
-            boundedExporterCall("Exporter forceFlush failed") { exporter.forceFlush() }
+            val exportResult = drainPendingExports()
+            // Recheck shutdown inside the mutex: a concurrent shutdown may have closed
+            // the exporter while this flush waited.
+            exportResult.combine(
+                boundedExporterCall("Exporter forceFlush failed", skipIfShutdown = true) {
+                    exporter.forceFlush()
+                }
+            )
         }
     }
 
@@ -128,14 +135,13 @@ internal class SimpleSpanProcessor(
             // export admitted before the snapshot is tracked and any later onEnd is rejected.
             val drainResult = shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS) {
                 ownsShutdown = true
-                snapshotPendingExports().forEach { it.join() }
-                OperationResultCode.Success
+                drainPendingExports()
             }
             completed = drainResult
-            // Phase 2 runs even when draining timed out or failed, so the exporter is always
-            // released. Losers of the shutdown race return Success without cleaning up again.
+            // Cleanup runs under NonCancellable so caller cancellation cannot skip the
+            // exporter's forceFlush/shutdown once this processor owns shutdown.
             return if (ownsShutdown) {
-                drainResult.combine(cleanupExporter())
+                drainResult.combine(withContext(NonCancellable) { cleanupExporter() })
             } else {
                 drainResult
             }
@@ -158,9 +164,31 @@ internal class SimpleSpanProcessor(
 
     private suspend fun boundedExporterCall(
         message: String,
+        skipIfShutdown: Boolean = false,
         call: suspend () -> OperationResultCode,
     ): OperationResultCode = runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS) {
-        exportMutex.withLock { sdkErrorHandler.guardExporterCode(message, call) }
+        exportMutex.withLock {
+            // skipIfShutdown: a delayed flush must not touch an exporter shutdown closed;
+            // shutdown's own cleanup passes false.
+            if (skipIfShutdown && shutdownState.isShutdown) {
+                OperationResultCode.Success
+            } else {
+                sdkErrorHandler.guardExporterCode(message, call)
+            }
+        }
+    }
+
+    /** Waits for a fresh snapshot of pending exports and folds their results into one code. */
+    private suspend fun drainPendingExports(): OperationResultCode {
+        val exports = snapshotPendingExports()
+        exports.forEach { it.join() }
+        var result: OperationResultCode = OperationResultCode.Success
+        exports.forEach { deferred ->
+            if (!deferred.isCancelled && deferred.await() == OperationResultCode.Failure) {
+                result = OperationResultCode.Failure
+            }
+        }
+        return result
     }
 
     private fun OperationResultCode.combine(other: OperationResultCode): OperationResultCode =
@@ -170,7 +198,7 @@ internal class SimpleSpanProcessor(
             OperationResultCode.Failure
         }
 
-    private fun snapshotPendingExports(): List<Job> =
+    private fun snapshotPendingExports(): List<Deferred<OperationResultCode>> =
         pendingExportsLock.read { pendingExports.toList() }
 }
 
