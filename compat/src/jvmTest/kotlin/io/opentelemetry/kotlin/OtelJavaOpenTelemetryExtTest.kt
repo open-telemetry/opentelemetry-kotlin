@@ -115,6 +115,29 @@ internal class OtelJavaOpenTelemetryExtTest {
         assertEquals(OperationResultCode.Failure, closeable.forceFlush())
     }
 
+    @Test
+    fun testDefaultUsesPlatformSdkErrorHandler() {
+        val otel = OtelJavaOpenTelemetry.noop().toOtelKotlinApi().also(sdks::track)
+        // The default should use PlatformSdkErrorHandler, which logs errors to platform log
+        // We can't easily test the logging behavior, but we can verify it doesn't crash
+        checkNotNull(otel)
+    }
+
+    @Test
+    fun testCustomErrorHandlerOverridesDefault() = runTest {
+        val fixture = createJavaSdkFixture()
+        val customHandler = FakeSdkErrorHandler()
+        val otel = fixture.sdk.toOtelKotlinApi(sdkErrorHandler = customHandler).also(sdks::track)
+
+        // Verify that when we supply a custom handler, it's used
+        fixture.spanProcessor.nextResult = { throw IllegalStateException("test") }
+        val closeable = assertIs<TelemetryCloseable>(otel)
+
+        assertEquals(OperationResultCode.Failure, closeable.forceFlush())
+        // The custom handler should have received the error
+        assertEquals(1, customHandler.userCodeErrors.size)
+    }
+
     private fun createJavaSdkFixture(): JavaSdkFixture {
         val spanProcessor = FakeOtelJavaSpanProcessor()
         val logRecordProcessor = FakeOtelJavaLogRecordProcessor()

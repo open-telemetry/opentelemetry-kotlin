@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetrySdk
 import io.opentelemetry.kotlin.aliases.OtelJavaTracerProvider
 import io.opentelemetry.kotlin.clock.ClockAdapter
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
@@ -30,12 +30,12 @@ import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
  *
  * @param clock the clock used to timestamp telemetry created via the Kotlin API.
  * @param sdkErrorHandler receives errors raised while delegating to the Java SDK, such as
- * exceptions thrown when flushing or shutting down its providers. Defaults to a no-op handler.
+ * exceptions thrown when flushing or shutting down its providers. Defaults to [PlatformSdkErrorHandler].
  */
 @ExperimentalApi
 public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
     clock: Clock = ClockAdapter(OtelJavaClock.getDefault()),
-    sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
+    sdkErrorHandler: SdkErrorHandler = PlatformSdkErrorHandler,
 ): OpenTelemetry {
     val errorHandler = GuardedSdkErrorHandler(sdkErrorHandler)
     val idGenerator = CompatIdGenerator()
