@@ -101,6 +101,21 @@ internal class MeterProviderImplTest {
         assertFalse(called)
     }
 
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testObservableDoubleGaugeIsNoopUntilMetricsCollectionIsImplemented() {
+        var called = false
+        val gauge = impl.getMeter("test").createObservableDoubleGauge(
+            name = "temperature",
+            callbacks = arrayOf<(ObservableDoubleMeasurement) -> Unit>({ called = true }),
+        )
+
+        assertEquals("temperature", gauge.name)
+        gauge.registerCallback { called = true }.close()
+        gauge.close()
+        assertFalse(called)
+    }
+
     @Test
     fun testLongGaugeExposesMetadata() {
         val gauge = impl.getMeter("test").createLongGauge(

@@ -12,13 +12,13 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProviderUtil
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.attrsFromMap
-import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.attributes.setAttributeMap
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
-import io.opentelemetry.kotlin.config.dsl.LogExportConfigDslImpl
-import io.opentelemetry.kotlin.config.dsl.LogLimitsConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.logging.LogExportConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.logging.LogLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.logging.LoggerConfigurator
 import io.opentelemetry.kotlin.logging.LoggerProvider
@@ -62,7 +62,7 @@ internal class CompatLoggerProviderConfig(
     }
 
     override fun resource(map: Map<String, Any>) {
-        resourceAttrs.apply { setTypedAttributes(map) }
+        resourceAttrs.apply { setAttributeMap(map) }
     }
 
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {

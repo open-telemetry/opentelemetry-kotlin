@@ -1,0 +1,39 @@
+package io.opentelemetry.kotlin.config.envar.tracing
+
+import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
+import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
+import io.opentelemetry.kotlin.config.envar.Exporter
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Invalid
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Value
+import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
+import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
+
+/**
+ * Maps `OTEL_TRACES_EXPORTER` onto processor behavior.
+ * Unrecognized exporter names are ignored and reported as warnings.
+ *
+ * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#exporter-selection
+ */
+@ExperimentalApi
+class SpanExporterEnvVars(
+    private val reader: ReportingEnvVarReader,
+) {
+    fun toBehavior(): SpanExporterBehavior? = reader.readStringAndTransform(TRACES_EXPORTER) { name ->
+        // TODO: Add support to multiple exporters being in use simultaneously once we have the SpanProcessor
+        //  fully implemented.
+        when (Exporter.fromValue(name.lowercase())) {
+            Exporter.CONSOLE -> Value(SpanExporterBehavior(console = ConsoleExporterBehavior()))
+            Exporter.OTLP -> Value(SpanExporterBehavior(http = OtlpHttpSpanExporterEnvVars(reader).toBehavior()))
+            null -> Invalid(EnvVarReadWarning(TRACES_EXPORTER, "Unknown value '$name'; ignoring"))
+            else -> Value(null) // Known exporter, but not yet supported.
+        }
+    }
+
+    internal companion object {
+        const val TRACES_EXPORTER = "OTEL_TRACES_EXPORTER"
+        const val OTLP_TRACES_ENDPOINT = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"
+        const val OTLP_TRACES_TIMEOUT = "OTEL_EXPORTER_OTLP_TRACES_TIMEOUT"
+        const val OTLP_TRACES_HEADERS = "OTEL_EXPORTER_OTLP_TRACES_HEADERS"
+    }
+}

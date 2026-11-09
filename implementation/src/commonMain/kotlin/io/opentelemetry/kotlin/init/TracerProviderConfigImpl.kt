@@ -5,8 +5,8 @@ import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.ResourceConfigDslImpl
-import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
-import io.opentelemetry.kotlin.config.dsl.TraceExportConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.tracing.SpanLimitsConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.tracing.TraceExportConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -72,7 +72,7 @@ internal class TracerProviderConfigImpl(
             processor = processor ?: processorFromBehavior(processorBehavior),
             resource = base.merge(resourceConfig.toBehavior().toResource()),
             sdkErrorHandler = sdkErrorHandler,
-            samplerFactory = { SamplerConfigImpl().action() },
+            samplerFactory = { SamplerConfigImpl(sdkErrorHandler).action() },
             tracerConfigurator = tracerConfigurator,
         )
     }

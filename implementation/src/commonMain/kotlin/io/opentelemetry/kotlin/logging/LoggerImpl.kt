@@ -6,6 +6,8 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.guardOrDefault
@@ -33,7 +35,7 @@ internal class LoggerImpl(
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Logger {
 
-    private val root = contextFactory.root()
+    private val root = contextFactory.rootContext()
     private val invalidSpanContext = createInvalidSpanContext()
 
     override fun enabled(
@@ -45,7 +47,7 @@ internal class LoggerImpl(
             if (shutdownState.isShutdown || processor == null) {
                 false
             } else {
-                val ctx = context ?: contextFactory.current()
+                val ctx = context ?: contextFactory.currentContext()
                 when {
                     !allowedByConfig(severityNumber, spanContextFrom(ctx)) -> false
                     else -> sdkErrorHandler.guardOrDefault(true) {
@@ -58,8 +60,8 @@ internal class LoggerImpl(
     override fun emit(
         body: Any?,
         eventName: String?,
-        timestamp: Long?,
-        observedTimestamp: Long?,
+        timestamp: Long,
+        observedTimestamp: Long,
         context: Context?,
         severityNumber: SeverityNumber?,
         severityText: String?,
@@ -81,8 +83,8 @@ internal class LoggerImpl(
 
     private fun processTelemetry(
         context: Context?,
-        timestamp: Long?,
-        observedTimestamp: Long?,
+        timestamp: Long,
+        observedTimestamp: Long,
         body: Any?,
         eventName: String?,
         severityText: String?,
@@ -92,7 +94,7 @@ internal class LoggerImpl(
     ) {
         sdkErrorHandler.sdkGuard("Logger.emit failed") {
             shutdownState.execute {
-                val ctx = context ?: contextFactory.current()
+                val ctx = context ?: contextFactory.currentContext()
                 val spanContext = spanContextFrom(ctx)
 
                 if (!allowedByConfig(severityNumber, spanContext)) {
@@ -103,8 +105,11 @@ internal class LoggerImpl(
                     resource = resource,
                     instrumentationScopeInfo = key,
                     // the spec leaves timestamp unset when unknown, but fills in observedTimestamp
-                    timestamp = timestamp?.takeIf { it > 0 },
-                    observedTimestamp = observedTimestamp?.takeIf { it > 0 } ?: userCode { clock.now() },
+                    timestamp = timestamp.takeIf { it > 0 },
+                    observedTimestamp = when {
+                        observedTimestamp > 0 -> observedTimestamp
+                        else -> userCode { clock.now() }
+                    },
                     body = body,
                     severityText = severityText,
                     severityNumber = severityNumber ?: SeverityNumber.UNKNOWN,
@@ -145,7 +150,7 @@ internal class LoggerImpl(
     ): Boolean {
         val severity = severityNumber ?: SeverityNumber.UNKNOWN
         val belowMinimumSeverity = severity != SeverityNumber.UNKNOWN &&
-            severity.severityNumber < loggerConfig.minimumSeverity.severityNumber
+            severity.value < loggerConfig.minimumSeverity.value
         if (belowMinimumSeverity) {
             return false
         }

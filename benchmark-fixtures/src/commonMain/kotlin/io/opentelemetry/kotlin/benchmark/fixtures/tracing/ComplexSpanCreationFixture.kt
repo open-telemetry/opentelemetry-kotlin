@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.benchmark.fixtures.tracing
 
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.benchmark.fixtures.BenchmarkFixture
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.tracing.SpanKind
 
 class ComplexSpanCreationFixture(
@@ -14,9 +15,9 @@ class ComplexSpanCreationFixture(
     override fun execute() {
         val span = tracer.startSpan(
             "new_span",
-            otel.context.root(),
+            otel.context.rootContext(),
             SpanKind.CLIENT,
-            null
+            0
         ) {
             repeat(100) { k ->
                 setStringAttribute("key_$k", "value")

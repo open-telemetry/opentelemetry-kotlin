@@ -12,7 +12,7 @@ internal class SpanStorageTest {
     @Test
     fun testSpanStorage() {
         val span = FakeSpan()
-        val root = contextFactory.root()
+        val root = contextFactory.rootContext()
         val newCtx = root.storeSpan(span)
         assertSame(span, newCtx.extractSpan())
     }
@@ -21,7 +21,7 @@ internal class SpanStorageTest {
     fun testStoringMultipleSpans() {
         val span = FakeSpan("a")
         val otherSpan = FakeSpan("b")
-        val root = contextFactory.root()
+        val root = contextFactory.rootContext()
         val newCtx = root.storeSpan(span)
 
         val finalCtx = newCtx.storeSpan(otherSpan)

@@ -13,9 +13,12 @@ import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 import io.opentelemetry.kotlin.init.defaultCompatBehaviorReader
 
 /**
- * Constructs an [OpenTelemetry] instance that exposes OpenTelemetry as a Kotlin API. The SDK is
+ * Constructs an [OpenTelemetrySdk] instance that exposes OpenTelemetry as a Kotlin API. The SDK is
  * configured entirely via the Kotlin DSL. Under the hood all calls to the Kotlin API will be
  * delegated to an OpenTelemetry Java SDK implementation that this SDK will construct internally.
+ *
+ * The caller owns the returned instance and should call [OpenTelemetrySdk.shutdown] when telemetry
+ * is no longer needed.
  *
  * It's not possible to obtain a reference to the Java API using this function. If this is a
  * requirement because you have existing instrumentation, it's recommended to call
@@ -25,7 +28,7 @@ import io.opentelemetry.kotlin.init.defaultCompatBehaviorReader
 public fun createCompatOpenTelemetry(
     clock: Clock = ClockAdapter(io.opentelemetry.sdk.common.Clock.getDefault()),
     config: OpenTelemetryConfigDsl.() -> Unit = {}
-): OpenTelemetry {
+): OpenTelemetrySdk {
     val contextFactory = CompatContextFactory()
 
     val cfg = CompatOpenTelemetryConfig(clock)
@@ -42,8 +45,10 @@ public fun createCompatOpenTelemetry(
             )
         )
     }
-    val behavior = defaultCompatBehaviorReader(sdkErrorHandler = cfg.sdkErrorHandler)
-        .read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
+    val behavior = defaultCompatBehaviorReader(
+        sdkErrorHandler = cfg.sdkErrorHandler,
+        declarativeConfigReader = cfg.declarativeConfigReader,
+    ).read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
 
     // configFactory is legacy - use behavior to control SDK functionality instead
     val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, contextFactory)

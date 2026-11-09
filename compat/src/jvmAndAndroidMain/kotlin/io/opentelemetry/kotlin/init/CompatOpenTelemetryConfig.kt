@@ -5,14 +5,16 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapPropagator
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
-import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.attributes.setAttributeMap
 import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
+import io.opentelemetry.kotlin.config.DeclarativeBehaviorReader
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
 import io.opentelemetry.kotlin.config.dsl.PropagatorConfigImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceDetectionConfigDslImpl
+import io.opentelemetry.kotlin.config.toBehaviorReader
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -44,7 +46,12 @@ internal class CompatOpenTelemetryConfig(
     @Volatile internal var configFilePath: String? = null
         private set
 
-    override fun configFile(path: String) {
+    @Volatile internal var declarativeConfigReader: DeclarativeBehaviorReader? = null
+        private set
+
+    override fun configFile(reader: DeclarativeConfigReader, path: String?) {
+        val behaviorReader = reader.toBehaviorReader(sdkErrorHandler) ?: return
+        declarativeConfigReader = behaviorReader
         configFilePath = path
     }
 
@@ -66,7 +73,7 @@ internal class CompatOpenTelemetryConfig(
     }
 
     override fun resource(map: Map<String, Any>) {
-        globalResourceAttrs.apply { setTypedAttributes(map) }
+        globalResourceAttrs.apply { setAttributeMap(map) }
     }
 
     internal val resourceDetectionConfig = ResourceDetectionConfigDslImpl()

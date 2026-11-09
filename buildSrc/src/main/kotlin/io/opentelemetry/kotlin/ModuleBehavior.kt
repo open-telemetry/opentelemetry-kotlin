@@ -3,13 +3,13 @@ package io.opentelemetry.kotlin
 import org.gradle.api.Project
 
 /**
- * Whether a module contains interfaces that form part of the public API. This is determined by the presence
- * of the property `io.opentelemetry.kotlin.containsPublicApi` in the module. This enables explicit API mode and binary
- * compatibility validation.
+ * Whether a module is a public entrypoint whose API consumers compile against. Modules opt in by setting
+ * `io.opentelemetry.kotlin.containsPublicApi=true` in their `gradle.properties`. This enables explicit API mode and
+ * binary compatibility validation. Defaults to false.
  */
 fun Project.containsPublicApi(): Boolean {
     return findProperty("io.opentelemetry.kotlin.containsPublicApi")?.toString()
-        ?.toBoolean() ?: true
+        ?.toBoolean() ?: false
 }
 
 /**

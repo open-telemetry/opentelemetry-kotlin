@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.smoketest
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.OpenTelemetry
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.createOpenTelemetry
 import io.opentelemetry.kotlin.framework.SdkTracker
@@ -91,7 +92,7 @@ internal class PropagationCrossCheckTest {
     }
 
     private fun roundTrip(otel: OpenTelemetry, seed: Map<String, String>): Map<String, String> {
-        val extracted = otel.propagator.extract(otel.context.root(), seed, FakeTextMapGetter)
+        val extracted = otel.propagator.extract(otel.context.rootContext(), seed, FakeTextMapGetter)
         val out = mutableMapOf<String, String>()
         otel.propagator.inject(extracted, out, FakeTextMapSetter)
         return out

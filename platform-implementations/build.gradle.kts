@@ -5,20 +5,3 @@ plugins {
     id("signing")
     id("com.vanniktech.maven.publish")
 }
-
-kotlin {
-    sourceSets {
-        commonMain {
-            dependencies {
-                implementation(project(":api"))
-                implementation(project(":error-handling"))
-                api(libs.kotlinx.coroutines)
-                api(libs.okio)
-            }
-        }
-        commonTest {
-            dependencies {
-            }
-        }
-    }
-}

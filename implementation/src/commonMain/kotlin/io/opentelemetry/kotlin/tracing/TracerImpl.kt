@@ -2,8 +2,11 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
-import io.opentelemetry.kotlin.attributes.copyTypedAttributes
+import io.opentelemetry.kotlin.attributes.copyAttributes
+import io.opentelemetry.kotlin.attributes.typedAttributesOrConvert
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
@@ -37,7 +40,7 @@ internal class TracerImpl(
 ) : Tracer {
 
     private val propagatingNoopTracer = PropagatingNoopTracer(contextFactory, sdkErrorHandler)
-    private val root = contextFactory.root()
+    private val root = contextFactory.rootContext()
     private val invalidSpanContext = createInvalidSpanContext()
     private val invalidSpan = createNonRecordingSpan(invalidSpanContext)
 
@@ -50,7 +53,7 @@ internal class TracerImpl(
         name: String,
         parentContext: Context?,
         spanKind: SpanKind,
-        startTimestamp: Long?,
+        startTimestamp: Long,
         action: (SpanCreationAction.() -> Unit)?
     ): Span =
         sdkErrorHandler.sdkGuardOrDefault(invalidSpan, "Tracer.startSpan failed") {
@@ -67,7 +70,7 @@ internal class TracerImpl(
                 return@sdkGuardOrDefault invalidSpan
             }
 
-            val ctx = parentContext ?: contextFactory.current()
+            val ctx = parentContext ?: contextFactory.currentContext()
 
             val parentSpanContext = when (ctx) {
                 root -> invalidSpanContext
@@ -120,7 +123,10 @@ internal class TracerImpl(
                 processor = processor,
                 name = name,
                 spanKind = spanKind,
-                startTimestamp = startTimestamp?.takeIf { it > 0 } ?: userCode { clock.now() },
+                startTimestamp = when {
+                    startTimestamp > 0 -> startTimestamp
+                    else -> userCode { clock.now() }
+                },
                 instrumentationScopeInfo = scope,
                 resource = resource,
                 parent = parentSpanContext,
@@ -131,8 +137,8 @@ internal class TracerImpl(
                 initialDroppedLinksCount = collector.droppedLinksCount,
                 sdkErrorHandler = sdkErrorHandler
             )
-            spanModel.copyTypedAttributes(collector.attributes.attributes)
-            spanModel.copyTypedAttributes(userCode { result.attributes.attributes })
+            spanModel.copyAttributes(collector.attributes)
+            spanModel.copyAttributes(userCode { result.attributes.typedAttributesOrConvert() })
             sdkErrorHandler.guard {
                 processor?.takeIf(SpanProcessor::isStartRequired)
                     ?.onStart(ReadWriteSpanImpl(spanModel), ctx)

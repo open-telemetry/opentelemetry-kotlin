@@ -21,6 +21,6 @@ public interface LongHistogram : SynchronousInstrument {
     public fun record(
         value: Long,
         context: Context? = null,
-        attributes: AttributesMutator.() -> Unit = {},
+        attributes: (AttributesMutator.() -> Unit)? = null,
     )
 }

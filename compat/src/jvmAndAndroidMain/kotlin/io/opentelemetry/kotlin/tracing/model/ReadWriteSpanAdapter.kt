@@ -1,12 +1,10 @@
 package io.opentelemetry.kotlin.tracing.model
 
-import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteSpan
-import io.opentelemetry.kotlin.aliases.OtelJavaValue
-import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.attributes.OtelJavaAttributesMutator
+import io.opentelemetry.kotlin.attributes.attributeSink
 import io.opentelemetry.kotlin.attributes.compatAttributes
-import io.opentelemetry.kotlin.attributes.toOtelJavaValue
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.tracing.SpanContext
@@ -19,7 +17,9 @@ internal class ReadWriteSpanAdapter(
     val impl: OtelJavaReadWriteSpan,
     private val sdkErrorHandler: SdkErrorHandler,
     private val readableSpan: ReadableSpanAdapter = ReadableSpanAdapter(impl)
-) : ReadWriteSpan, ReadableSpan by readableSpan {
+) : ReadWriteSpan,
+    ReadableSpan by readableSpan,
+    AttributesMutator by OtelJavaAttributesMutator(impl.attributeSink()) {
 
     override var spanContext: SpanContext = readableSpan.spanContext
 
@@ -60,54 +60,14 @@ internal class ReadWriteSpanAdapter(
 
     override fun addEvent(
         name: String,
-        timestamp: Long?,
+        timestamp: Long,
         attributes: (AttributesMutator.() -> Unit)?
     ) = sdkErrorHandler.sdkGuard("Span.addEvent failed") {
         val container = compatAttributes(attributes)
-        if (timestamp != null && timestamp > 0) {
+        if (timestamp > 0) {
             impl.addEvent(name, container.otelJavaAttributes(), timestamp, TimeUnit.NANOSECONDS)
         } else {
             impl.addEvent(name, container.otelJavaAttributes())
         }
-    }
-
-    override fun setBooleanAttribute(key: String, value: Boolean) {
-        impl.setAttribute(key, value)
-    }
-
-    override fun setStringAttribute(key: String, value: String) {
-        impl.setAttribute(key, value)
-    }
-
-    override fun setLongAttribute(key: String, value: Long) {
-        impl.setAttribute(key, value)
-    }
-
-    override fun setDoubleAttribute(key: String, value: Double) {
-        impl.setAttribute(key, value)
-    }
-
-    override fun setBooleanListAttribute(key: String, value: List<Boolean>) {
-        impl.setAttribute(OtelJavaAttributeKey.booleanArrayKey(key), value)
-    }
-
-    override fun setStringListAttribute(key: String, value: List<String>) {
-        impl.setAttribute(OtelJavaAttributeKey.stringArrayKey(key), value)
-    }
-
-    override fun setLongListAttribute(key: String, value: List<Long>) {
-        impl.setAttribute(OtelJavaAttributeKey.longArrayKey(key), value)
-    }
-
-    override fun setDoubleListAttribute(key: String, value: List<Double>) {
-        impl.setAttribute(OtelJavaAttributeKey.doubleArrayKey(key), value)
-    }
-
-    override fun setByteArrayAttribute(key: String, value: ByteArray) {
-        impl.setAttribute(OtelJavaAttributeKey.valueKey(key), OtelJavaValue.of(value))
-    }
-
-    override fun setAnyValueAttribute(key: String, value: AnyValue) {
-        impl.setAttribute(OtelJavaAttributeKey.valueKey(key), value.toOtelJavaValue())
     }
 }

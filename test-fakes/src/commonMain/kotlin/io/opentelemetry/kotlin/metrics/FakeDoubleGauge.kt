@@ -13,7 +13,7 @@ class FakeDoubleGauge(
 
     override fun enabled(): Boolean = enabledResult()
 
-    override fun record(value: Double, attributes: AttributesMutator.() -> Unit) {
-        records.add(value to FakeAttributesMutator().apply(attributes).attributes)
+    override fun record(value: Double, attributes: (AttributesMutator.() -> Unit)?) {
+        records.add(value to FakeAttributesMutator().apply { attributes?.invoke(this) }.attributes)
     }
 }

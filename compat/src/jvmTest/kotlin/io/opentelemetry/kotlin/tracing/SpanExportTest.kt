@@ -7,10 +7,11 @@ import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.createContextKey
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
-import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.ext.storeInContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceFlags
@@ -113,7 +114,7 @@ internal class SpanExportTest {
 
     @Test
     fun `test span context parent`() = runTest {
-        val root = harness.kotlinApi.context.root()
+        val root = harness.kotlinApi.context.rootContext()
 
         val a = harness.tracer.startSpan("a", parentContext = root)
         val ctxa = a.storeInContext(root)
@@ -166,7 +167,7 @@ internal class SpanExportTest {
 
     @Test
     fun `test span context parent for decorated span`() = runTest {
-        val root = harness.kotlinApi.context.root()
+        val root = harness.kotlinApi.context.rootContext()
 
         // a decorating Span is not a SpanAdapter, so storing it must still preserve its span context
         val parent = DecoratedSpan(harness.tracer.startSpan("decorated_parent"))
@@ -209,7 +210,7 @@ internal class SpanExportTest {
         // Test span creation with invalid parent
         val span = harness.tracer.startSpan(
             "test_span",
-            parentContext = harness.kotlinApi.context.root()
+            parentContext = harness.kotlinApi.context.rootContext()
         )
 
         // Child span should be created with a valid context
@@ -334,7 +335,7 @@ internal class SpanExportTest {
     fun `test trace and span id validation without sanitization`() = runTest {
         val span1 = harness.tracer.startSpan("validation_span_1")
         val span2 = harness.tracer.startSpan("validation_span_2")
-        val ctx = span1.storeInContext(harness.kotlinApi.context.root())
+        val ctx = span1.storeInContext(harness.kotlinApi.context.rootContext())
         val span3 = harness.tracer.startSpan("validation_span_3", ctx)
 
         span1.end()
@@ -441,7 +442,7 @@ internal class SpanExportTest {
         harness.config.spanProcessors.add(contextCapturingProcessor)
 
         // Create a context key and add a test value
-        val currentContext = harness.kotlinApi.context.current()
+        val currentContext = harness.kotlinApi.context.currentContext()
         val contextKey = createContextKey<String>("best_team")
         val testContextValue = "independiente"
         val testContext = currentContext.set(contextKey, testContextValue)
@@ -460,7 +461,7 @@ internal class SpanExportTest {
         val list = AnyValue.ListValue(listOf(AnyValue.LongValue(1), AnyValue.StringValue("a")))
         val map = AnyValue.MapValue(mapOf("k" to AnyValue.BoolValue(true)))
         val bytes = byteArrayOf(1, 2)
-        val span = harness.tracer.startSpan("span", null, SpanKind.INTERNAL, null, {
+        val span = harness.tracer.startSpan("span", null, SpanKind.INTERNAL, 0, {
             setAnyValueAttribute("start_list", list)
         })
         span.setAnyValueAttribute("map", map)
@@ -492,7 +493,7 @@ internal class SpanExportTest {
         }
         val a = harness.tracer.startSpan("a")
         val b = harness.tracer.startSpan("b")
-        val c = harness.tracer.startSpan("span", null, SpanKind.INTERNAL, null, {
+        val c = harness.tracer.startSpan("span", null, SpanKind.INTERNAL, 0, {
             addMultipleAttrs()
 
             addLink(a.spanContext) {
@@ -592,7 +593,6 @@ internal class SpanExportTest {
             OtelJavaSpan.getInvalid(),
             null,
             SpanKind.INTERNAL,
-            CompatSpanLimitsConfig(),
             NoopSdkErrorHandler,
         )
         span.setStringAttribute("key", "value")

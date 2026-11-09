@@ -285,6 +285,19 @@ internal class TracerProviderImplTest {
     }
 
     @Test
+    fun testInvalidProbabilityFallsBackToDefaultSampler() {
+        listOf(-0.1, 1.5, Double.NaN).forEach { ratio ->
+            val errorHandler = FakeSdkErrorHandler()
+            val provider = createProvider(errorHandler = errorHandler, samplerFactory = {
+                SamplerConfigImpl().probability(ratio)
+            })
+
+            assertTrue(provider.getTracer(name = "test").startSpan("test-span").isRecording())
+            assertIs<IllegalArgumentException>(errorHandler.userCodeErrors.single().cause)
+        }
+    }
+
+    @Test
     fun testThrowingErrorHandlerDoesNotEscapeForceFlush() = runTest {
         val provider = createProvider(
             processor = FakeSpanProcessor(flushCode = { error("boom") }),

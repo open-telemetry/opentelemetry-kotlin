@@ -16,6 +16,7 @@ kotlin {
                 implementation(project(":exporters-otlp"))
                 implementation(project(":exporters-protobuf"))
                 implementation(project(":platform-implementations"))
+                implementation(project(":platform-io"))
                 implementation(libs.kotlinx.coroutines)
             }
         }

@@ -49,7 +49,7 @@ internal class SpanEventBridgeLogRecordProcessor : LogRecordProcessor {
             return
         }
         val attributes = log.attributes
-        span.addEvent(eventName, log.timestamp ?: log.observedTimestamp) {
+        span.addEvent(eventName, log.timestamp ?: log.observedTimestamp ?: 0) {
             setAttributes(attributes)
         }
     }

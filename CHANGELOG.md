@@ -2,6 +2,159 @@
 
 ## Unreleased
 
+### 🐞 Bug fixes
+
+- Move new and updated trace-state entries to the front after protobuf deserialization.
+
+## Version 0.10.0 (2026-11-05)
+
+### Migration notes
+
+- "Implicit context" has been renamed to "current context". `ImplicitContextStorage` is now
+  `CurrentContextStorage` and absorbs `ScopedCurrentContextStorage`,
+  `ImplicitContextStorageMode` is now `CurrentContextStorageMode` (with `GLOBAL` renamed to
+  `SINGLE_SLOT`), `ContextFactory.implicit()` is now `current()`, and `asImplicitContext { }`
+  is now `asCurrentContext { }`.
+  ([#1294](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1294))
+  ([#1336](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1336))
+  ([#1428](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1428))
+- `SpanFactory` and the `OpenTelemetry.span` factory have been removed. Use
+  `createInvalidSpanContext()`, `createNonRecordingSpan()`, and `Context.storeSpanContext()`
+instead.
+  ([#1254](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1254))
+  ([#1296](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1296))
+- `ContextFactory.createKey()` has been removed in favour of `createContextKey()` in the `api`
+  module.
+  ([#1292](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1292))
+- `Baggage` no longer restricts which strings can be used as keys and values. Entries that are
+  not valid in the W3C header are instead skipped by the baggage propagator.
+  ([#1427](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1427))
+
+### 📈 Enhancements
+
+- Add Linux targets.
+  ([#1272](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1272))
+  ([#1273](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1273))
+  ([#1274](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1274))
+- Add gauges and observable instruments to the metrics API: `createLongGauge`,
+  `createDoubleGauge`, `createObservableLongCounter`, `createObservableDoubleCounter`,
+  `createObservableLongUpDownCounter`, `createObservableDoubleUpDownCounter`, and
+  `createObservableLongGauge`.
+  ([#1326](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1326))
+  ([#1341](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1341))
+  ([#1350](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1350))
+  ([#1359](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1359))
+  ([#1360](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1360))
+  ([#1365](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1365))
+  ([#1366](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1366))
+  ([#1439](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1439))
+- The W3C trace context and B3 propagators can be created from the `api` module via
+  `createW3CTraceContextPropagator()` and `createB3Propagator()`.
+  ([#1255](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1255))
+  ([#1258](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1258))
+  ([#1259](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1259))
+- Add `OpenTelemetry.configProvider`, which exposes the `.instrumentation` node of YAML config
+  to instrumentation libraries as per the Instrumentation Configuration API.
+  ([#1264](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1264))
+- The OTLP HTTP exporters can be configured with custom certificates and mTLS on JVM and
+  Android via `configureTls()`.
+  ([#1114](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1114))
+  ([#1372](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1372))
+- Add an initial `Entity` interface and `ResourceFactory.createEntity()`.
+  ([#1276](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1276))
+  ([#1377](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1377))
+- `Sampler` has a `shutdown()` function, which is called when the `TracerProvider` shuts down.
+  ([#1435](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1435))
+- Support the `OTEL_SDK_DISABLED` and `OTEL_LOG_LEVEL` environment variables.
+  ([#1318](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1318))
+  ([#1420](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1420))
+- Update semantic conventions to v1.45.0.
+  ([#1422](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1422))
+- Various improvements to configuration and how the DSL, YAML file, and envar configs are
+  processed, including span/log record processor and exporter configuration.
+  ([#1233](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1233))
+  ([#1235](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1235))
+  ([#1236](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1236))
+  ([#1246](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1246))
+  ([#1252](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1252))
+  ([#1257](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1257))
+  ([#1265](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1265))
+  ([#1266](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1266))
+  ([#1268](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1268))
+  ([#1269](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1269))
+  ([#1270](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1270))
+  ([#1275](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1275))
+  ([#1277](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1277))
+  ([#1281](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1281))
+  ([#1290](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1290))
+  ([#1295](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1295))
+  ([#1317](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1317))
+  ([#1346](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1346))
+  ([#1347](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1347))
+  ([#1358](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1358))
+  ([#1361](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1361))
+  ([#1362](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1362))
+  ([#1363](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1363))
+  ([#1364](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1364))
+  ([#1436](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1436))
+  ([#1437](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1437))
+  ([#1443](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1443))
+  ([#1444](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1444))
+  ([#1463](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1463))
+
+### 🛠️ Bug fixes
+
+- Improve SDK resilience by routing failures in user-supplied code and the SDK itself to
+  `SdkErrorHandler` rather than crashing or failing silently.
+  ([#1315](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1315))
+  ([#1316](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1316))
+  ([#1324](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1324))
+  ([#1345](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1345))
+  ([#1354](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1354))
+  ([#1416](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1416))
+  ([#1421](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1421))
+  ([#1431](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1431))
+  ([#1432](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1432))
+  ([#1442](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1442))
+  ([#1451](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1451))
+  ([#1458](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1458))
+  ([#1459](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1459))
+- Avoid hanging on shutdown, close OTLP HTTP clients that the SDK owns, and drop telemetry
+  rather than blocking when the exporter is under pressure.
+  ([#1355](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1355))
+  ([#1374](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1374))
+  ([#1393](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1393))
+- Bound the number of concurrent OTLP export coroutines, and obtain OTLP `headers()` with a
+  timeout.
+  ([#1016](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1016))
+  ([#1406](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1406))
+- Use `OTEL_EXPORTER_OTLP_<SIGNAL>_ENDPOINT` as-is and only append `v1/<signal>` to
+  `OTEL_EXPORTER_OTLP_ENDPOINT`, and percent-decode OTLP header envars.
+  ([#1445](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1445))
+- Read the correct environment variables for the batch log record processor, and clamp its
+  batch size to the maximum queue size.
+  ([#1373](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1373))
+  ([#1392](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1392))
+- Fix resource attribute parsing from environment variables.
+  ([#1376](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1376))
+- Truncate strings without splitting Unicode characters, bound recursion when copying
+  `AnyValue` attributes, and compare byte array scope attributes by content.
+  ([#1330](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1330))
+  ([#1332](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1332))
+  ([#1414](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1414))
+- Treat null and empty instrument metadata equally.
+  ([#1441](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1441))
+- The noop tracer propagates the parent context.
+  ([#1314](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1314))
+- In `compat`, enforce span attribute limits, improve dropped count calculations, pass links
+  to sampler predicates, and preserve multiple propagation header values.
+  ([#1325](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1325))
+  ([#1327](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1327))
+  ([#1331](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1331))
+  ([#1335](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1335))
+  ([#1349](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1349))
+  ([#1411](https://github.com/open-telemetry/opentelemetry-kotlin/pull/1411))
+
 ## Version 0.9.0 (2026-10-09)
 
 ### Migration notes

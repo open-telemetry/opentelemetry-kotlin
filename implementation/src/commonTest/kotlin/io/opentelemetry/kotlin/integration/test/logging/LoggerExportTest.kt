@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.integration.test.logging
 
 import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.semconv.ExceptionAttributes
@@ -73,7 +74,7 @@ internal class LoggerExportTest {
     fun testLogWithParentSpanInContext() = runTest {
         val span = harness.tracer.startSpan("span")
         val contextFactory = harness.kotlinApi.context
-        val ctx = contextFactory.root().storeSpan(span)
+        val ctx = contextFactory.rootContext().storeSpan(span)
         harness.logger.emit("test", context = ctx)
         harness.assertLogRecords(1, "log_span_context.json")
     }
@@ -81,7 +82,7 @@ internal class LoggerExportTest {
     @Test
     fun testLogWithRootContext() = runTest {
         val contextFactory = harness.kotlinApi.context
-        val ctx = contextFactory.root()
+        val ctx = contextFactory.rootContext()
         harness.logger.emit("test", context = ctx)
         harness.assertLogRecords(1, "log_root_context.json")
     }

@@ -2,15 +2,27 @@ package io.opentelemetry.kotlin.resource
 
 import io.opentelemetry.kotlin.SdkBuildKonfig
 import io.opentelemetry.kotlin.factory.ResourceFactory
+import io.opentelemetry.kotlin.getProcessExecutableName
 import io.opentelemetry.kotlin.semconv.SemconvBuildKonfig
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
 
+private const val UNKNOWN_SERVICE = "unknown_service"
+
 /**
- * The fallback value for `service.name` when none is supplied. Follows the `unknown_service:<name>`
- * convention used by other OTel SDKs.
+ * The fallback value for `service.name` when none is supplied: `unknown_service:` followed by the
+ * process executable name, or `unknown_service` when that name is not available.
+ *
+ * https://opentelemetry.io/docs/specs/semconv/resource/service/
  */
-public const val SDK_DEFAULT_SERVICE_NAME: String = "unknown_service:kotlin"
+public val SDK_DEFAULT_SERVICE_NAME: String = defaultServiceName(getProcessExecutableName())
+
+internal fun defaultServiceName(executableName: String?): String =
+    if (executableName.isNullOrBlank()) {
+        UNKNOWN_SERVICE
+    } else {
+        "$UNKNOWN_SERVICE:$executableName"
+    }
 
 /**
  * Resource attribute key recording which [SdkMode] produced the telemetry.
