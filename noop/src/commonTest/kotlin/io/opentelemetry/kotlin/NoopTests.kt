@@ -149,7 +149,7 @@ internal class NoopTests {
 
     @Test
     fun testNoopClockDefault() {
-        val otel = NoopOpenTelemetry as OpenTelemetrySdk
+        val otel = NoopOpenTelemetrySdk
         val clock = otel.clock
 
         // Noop clock always returns 0
@@ -200,11 +200,17 @@ internal class NoopTests {
         val span = NoopOpenTelemetry.context.root().extractSpan()
         assertTrue(span is NoopSpan)
         assertFalse(span.isRecording())
+        assertSame(NoopSpanContext, span.spanContext)
+        assertSame(NoopSpanContext, span.parent)
+        verifySpanOperationsAreNoop(span)
+        span.setByteArrayAttribute("bytes", byteArrayOf(1))
+        span.setName("name")
+        span.end()
     }
 
     @Test
     fun testNoopResource() {
-        val otel = NoopOpenTelemetry as OpenTelemetrySdk
+        val otel = NoopOpenTelemetrySdk
         val resourceFactory = otel.resource
 
         // empty resource has no attributes and no schemaUrl
@@ -346,6 +352,22 @@ internal class NoopTests {
         }.close()
         observableLongGauge.close()
         assertFalse(longGaugeCallbackInvoked)
+
+        var doubleGaugeCallbackInvoked = false
+        val doubleGaugeCreationCallback: (ObservableDoubleMeasurement) -> Unit = { measurement ->
+            doubleGaugeCallbackInvoked = true
+            measurement.record(21.5)
+        }
+        val observableDoubleGauge = meter.createObservableDoubleGauge(
+            name = "temperature",
+            callbacks = arrayOf(doubleGaugeCreationCallback),
+        )
+        observableDoubleGauge.registerCallback {
+            doubleGaugeCallbackInvoked = true
+            it.record(22.0)
+        }.close()
+        observableDoubleGauge.close()
+        assertFalse(doubleGaugeCallbackInvoked)
     }
 
     @OptIn(ExperimentalApi::class)
@@ -408,7 +430,7 @@ internal class NoopTests {
 
     @Test
     fun testNoopFlushAndShutdown() = runTest {
-        val otel = NoopOpenTelemetry as OpenTelemetrySdk
+        val otel = NoopOpenTelemetrySdk
         assertEquals(OperationResultCode.Success, otel.forceFlush())
         assertEquals(OperationResultCode.Success, otel.shutdown())
     }

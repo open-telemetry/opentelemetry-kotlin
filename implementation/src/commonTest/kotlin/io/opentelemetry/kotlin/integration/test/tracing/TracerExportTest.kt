@@ -41,7 +41,7 @@ internal class TracerExportTest {
             "test",
             null,
             SpanKind.INTERNAL,
-            null
+            0
         ) { setStringAttribute("foo", "bar") }
         span.end()
         harness.assertSpans(1, "span_minimal.json")
@@ -62,7 +62,7 @@ internal class TracerExportTest {
 
     @Test
     fun testAttributesExport() = runTest {
-        val span = harness.tracer.startSpan("test", null, SpanKind.INTERNAL, null, {
+        val span = harness.tracer.startSpan("test", null, SpanKind.INTERNAL, 0, {
             setStringAttribute("foo", "bar")
             setBooleanAttribute("experiment_enabled", true)
         })
@@ -83,7 +83,7 @@ internal class TracerExportTest {
 
     @Test
     fun testSpanEventExport() = runTest {
-        harness.tracer.startSpan("test", null, SpanKind.INTERNAL, null).apply {
+        harness.tracer.startSpan("test", null, SpanKind.INTERNAL, 0).apply {
             addEvent("my_event", 500) {
                 setStringAttribute("foo", "bar")
             }
@@ -107,7 +107,7 @@ internal class TracerExportTest {
         val linkName = "link"
         val otherName = "other"
         val link = harness.tracer.startSpan(linkName)
-        val other = harness.tracer.startSpan(otherName, null, SpanKind.INTERNAL, null) {
+        val other = harness.tracer.startSpan(otherName, null, SpanKind.INTERNAL, 0) {
             addLink(link.spanContext) {
                 setStringAttribute("foo", "bar")
             }
@@ -172,7 +172,7 @@ internal class TracerExportTest {
 
     @Test
     fun testSpanLimitExport() = runTest {
-        harness.tracer.startSpan("test", null, SpanKind.INTERNAL, null) {
+        harness.tracer.startSpan("test", null, SpanKind.INTERNAL, 0) {
             repeat(spanAttributeLimit + 1) {
                 setStringAttribute("key-$it", "value")
             }

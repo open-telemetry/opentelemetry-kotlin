@@ -15,8 +15,8 @@ import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.StatusData
-import io.opentelemetry.proto.trace.v1.Span
-import io.opentelemetry.proto.trace.v1.Status
+import io.opentelemetry.kotlin.proto.trace.v1.Span
+import io.opentelemetry.kotlin.proto.trace.v1.Status
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

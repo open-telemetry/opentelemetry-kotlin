@@ -5,3 +5,13 @@ plugins {
     id("signing")
     id("com.vanniktech.maven.publish")
 }
+
+kotlin {
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(project(":platform-implementations"))
+            }
+        }
+    }
+}

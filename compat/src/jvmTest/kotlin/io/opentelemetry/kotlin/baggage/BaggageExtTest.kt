@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaBaggage
 import io.opentelemetry.kotlin.aliases.OtelJavaBaggageEntryMetadata
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -67,14 +66,14 @@ internal class BaggageExtTest {
     }
 
     @Test
-    fun `java entries rejected by kotlin validation are dropped`() {
+    fun `java entries with non-token keys are preserved`() {
         val javaBaggage = OtelJavaBaggage.builder()
             .put("bad key", "v")
             .put("good", "g")
             .build()
 
         val converted = javaBaggage.toOtelKotlinBaggage()
-        assertNull(converted.getValue("bad key"))
+        assertEquals("v", converted.getValue("bad key"))
         assertEquals("g", converted.getValue("good"))
     }
 }

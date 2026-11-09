@@ -21,10 +21,14 @@ internal class DoubleUpDownCounterAdapter(
             impl.isEnabled()
         }
 
-    override fun add(value: Double, attributes: AttributesMutator.() -> Unit) {
+    override fun add(value: Double, attributes: (AttributesMutator.() -> Unit)?) {
         sdkErrorHandler.sdkGuard("DoubleUpDownCounter.add failed") {
-            val container = compatAttributes(attributes)
-            impl.add(value, container.otelJavaAttributes())
+            if (attributes == null) {
+                impl.add(value)
+            } else {
+                val container = compatAttributes(attributes)
+                impl.add(value, container.otelJavaAttributes())
+            }
         }
     }
 }

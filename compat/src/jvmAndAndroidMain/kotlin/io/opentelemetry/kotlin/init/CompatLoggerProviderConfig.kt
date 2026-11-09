@@ -12,13 +12,13 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProviderUtil
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.attrsFromMap
-import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.attributes.setAttributeMap
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
-import io.opentelemetry.kotlin.config.dsl.LogExportConfigDslImpl
-import io.opentelemetry.kotlin.config.dsl.LogLimitsConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.logging.LogExportConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.logging.LogLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.logging.LoggerConfigurator
 import io.opentelemetry.kotlin.logging.LoggerProvider
@@ -30,6 +30,8 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
 import io.opentelemetry.kotlin.scope.toOtelKotlinInstrumentationScopeInfo
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
+import java.util.concurrent.TimeUnit
+import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor as OtelJavaBatchLogRecordProcessor
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor as OtelJavaSimpleLogRecordProcessor
 
 @ExperimentalApi
@@ -60,7 +62,7 @@ internal class CompatLoggerProviderConfig(
     }
 
     override fun resource(map: Map<String, Any>) {
-        resourceAttrs.apply { setTypedAttributes(map) }
+        resourceAttrs.apply { setAttributeMap(map) }
     }
 
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
@@ -77,9 +79,20 @@ internal class CompatLoggerProviderConfig(
             return
         }
         exportConfigured = true
-        builder.addLogRecordProcessor(
-            OtelJavaSimpleLogRecordProcessor.create(SystemOutLogRecordExporter.create())
-        )
+        val exporter = SystemOutLogRecordExporter.create()
+        if (batch != null) {
+            val batchBuilder = OtelJavaBatchLogRecordProcessor.builder(exporter)
+            batch.scheduleDelay?.let { batchBuilder.setScheduleDelay(it, TimeUnit.MILLISECONDS) }
+            batch.exportTimeout?.let { batchBuilder.setExporterTimeout(it, TimeUnit.MILLISECONDS) }
+            batch.maxQueueSize?.let { batchBuilder.setMaxQueueSize(it) }
+            batch.maxExportBatchSize?.let { batchBuilder.setMaxExportBatchSize(it) }
+            builder.addLogRecordProcessor(batchBuilder.build())
+        }
+        if (simple != null) {
+            builder.addLogRecordProcessor(
+                OtelJavaSimpleLogRecordProcessor.create(exporter)
+            )
+        }
     }
 
     override fun logLimits(action: LogLimitsConfigDsl.() -> Unit) {

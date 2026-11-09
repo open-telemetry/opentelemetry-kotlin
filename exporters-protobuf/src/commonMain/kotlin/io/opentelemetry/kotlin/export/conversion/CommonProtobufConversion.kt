@@ -14,8 +14,8 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.TraceFlags
 import io.opentelemetry.kotlin.tracing.TraceState
-import io.opentelemetry.kotlin.tracing.model.hex
-import io.opentelemetry.proto.common.v1.InstrumentationScope
+import io.opentelemetry.kotlin.tracing.hex
+import io.opentelemetry.kotlin.proto.common.v1.InstrumentationScope
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 
@@ -32,7 +32,7 @@ fun InstrumentationScopeInfo.toProtobuf(): InstrumentationScope = Instrumentatio
 )
 
 internal fun Resource.toProtobuf() =
-    io.opentelemetry.proto.resource.v1.Resource(attributes = attributes.createKeyValues())
+    io.opentelemetry.kotlin.proto.resource.v1.Resource(attributes = attributes.createKeyValues())
 
 internal fun InstrumentationScope.toInstrumentationScopeInfo(
     schemaUrl: String?
@@ -43,7 +43,7 @@ internal fun InstrumentationScope.toInstrumentationScopeInfo(
     attributes = attributes.toAttributeMap()
 )
 
-internal fun io.opentelemetry.proto.resource.v1.Resource.toResource(
+internal fun io.opentelemetry.kotlin.proto.resource.v1.Resource.toResource(
     schemaUrl: String? = null,
 ): Resource =
     DeserializedResource(
@@ -53,7 +53,13 @@ internal fun io.opentelemetry.proto.resource.v1.Resource.toResource(
 
 internal fun TraceFlags.toFlagsInt(): Int = hex.toInt(16)
 
-internal fun TraceState.toW3CString(): String = W3CTraceStateCodec.encode(asMap())
+internal fun TraceState.toW3CString(): String = W3CTraceStateCodec.encode(
+    try {
+        asMap()
+    } catch (exc: Throwable) {
+        emptyMap()
+    }
+)
 
 private class DeserializedInstrumentationScopeInfo(
     override val name: String,
@@ -116,7 +122,7 @@ private class DeserializedTraceState(private val entries: Map<String, String>) :
     override fun asMap(): Map<String, String> = entries
     override fun put(key: String, value: String): TraceState = when {
         W3CTraceStateValidator.canPut(entries, key, value) ->
-            DeserializedTraceState(entries + (key to value))
+            DeserializedTraceState(mapOf(key to value) + (entries - key))
         else -> this
     }
 

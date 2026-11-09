@@ -1,5 +1,7 @@
 package io.opentelemetry.kotlin.error
 
+import io.opentelemetry.kotlin.AtomicReference
+
 /**
  * The maximum number of errors buffered while no delegate is set.
  */
@@ -20,12 +22,12 @@ internal class BufferingSdkErrorHandler : SdkErrorHandler {
         class Buffering(val errors: List<SdkError>, val dropped: Int) : State()
 
         class Delegating(val delegate: SdkErrorHandler) : State() {
-            val failure = ErrorSinkAtomicRef<Throwable?>(null)
+            val failure = AtomicReference<Throwable?>(null)
         }
     }
 
     private val empty = State.Buffering(emptyList(), 0)
-    private val state = ErrorSinkAtomicRef<State>(empty)
+    private val state = AtomicReference<State>(empty)
 
     override fun onError(error: SdkError) {
         try {

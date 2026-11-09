@@ -12,7 +12,7 @@ plugins {
 kotlin {
     jvmToolchain(11)
 
-    androidLibrary {
+    android {
         namespace = "io.opentelemetry.kotlin.example.app"
         compileSdk = 37
         minSdk = 21
@@ -20,7 +20,7 @@ kotlin {
 
     jvm()
 
-    js(IR) {
+    js {
         nodejs()
         binaries.executable()
     }
@@ -48,10 +48,10 @@ kotlin {
         val composeMain = create("composeMain") {
             dependsOn(commonMain.get())
             dependencies {
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.material3)
-                implementation(compose.ui)
+                implementation(libs.compose.runtime)
+                implementation(libs.compose.foundation)
+                implementation(libs.compose.material3)
+                implementation(libs.compose.ui)
             }
         }
 

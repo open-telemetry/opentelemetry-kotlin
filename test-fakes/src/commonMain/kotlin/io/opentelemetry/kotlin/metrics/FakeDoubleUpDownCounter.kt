@@ -14,7 +14,7 @@ class FakeDoubleUpDownCounter(
 
     override fun enabled(): Boolean = enabledResult()
 
-    override fun add(value: Double, attributes: AttributesMutator.() -> Unit) {
-        adds.add(value to FakeAttributesMutator().apply(attributes).attributes)
+    override fun add(value: Double, attributes: (AttributesMutator.() -> Unit)?) {
+        adds.add(value to FakeAttributesMutator().apply { attributes?.invoke(this) }.attributes)
     }
 }

@@ -59,6 +59,14 @@ internal class CompatSamplerBehaviorMappingTest {
         assertEquals(Decision.DROP, sample(sampler).decision)
     }
 
+    /** Maps [SamplerBehavior.Probability] to a sampler that keeps every span at ratio 1.0. */
+    @Test
+    fun probabilityMapsToProbabilitySampler() {
+        val sampler = samplerDsl.toSampler(SamplerBehavior.Probability(1.0))
+        assertEquals(Decision.RECORD_AND_SAMPLE, sample(sampler).decision)
+        assertEquals(Decision.DROP, sample(samplerDsl.toSampler(SamplerBehavior.Probability(0.0))).decision)
+    }
+
     /**
      * An empty [SamplerBehavior.ParentBased] fills each child with the spec default
      * (AlwaysOn for sampled/root, AlwaysOff for not-sampled).

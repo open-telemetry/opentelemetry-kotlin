@@ -28,6 +28,13 @@ internal class CompatSamplerConfig : SamplerConfigDsl {
     override fun alwaysRecord(root: Sampler): Sampler =
         SamplerAdapter(OtelJavaAlwaysRecordSampler.create(root.toOtelJavaSampler()))
 
+    override fun probability(ratio: Double): Sampler {
+        // opentelemetry-java does not reject out-of-range ratios, but silently drops spans.
+        // fail here so we can fallback to the default sampler.
+        require(ratio in 0.0..1.0) { "ratio must be between 0 and 1, got $ratio" }
+        return SamplerAdapter(OtelJavaCompositeSampler.wrap(OtelJavaComposableSampler.probability(ratio)))
+    }
+
     override fun parentBased(
         root: Sampler,
         remoteParentSampled: Sampler,

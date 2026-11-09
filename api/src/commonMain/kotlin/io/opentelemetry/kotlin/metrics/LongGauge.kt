@@ -16,5 +16,5 @@ public interface LongGauge : SynchronousInstrument {
      * Records the current [value], optionally associating attributes with the measurement.
      */
     @ThreadSafe
-    public fun record(value: Long, attributes: AttributesMutator.() -> Unit = {})
+    public fun record(value: Long, attributes: (AttributesMutator.() -> Unit)? = null)
 }

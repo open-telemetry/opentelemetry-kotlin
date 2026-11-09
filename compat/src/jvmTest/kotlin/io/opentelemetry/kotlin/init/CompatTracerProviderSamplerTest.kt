@@ -220,6 +220,55 @@ internal class CompatTracerProviderSamplerTest {
     }
 
     @Test
+    fun `probability 1_0 samples spans`() {
+        val clock = FakeClock()
+        val config = createConfig(clock).apply {
+            sampler { probability(1.0) }
+        }
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
+        assertTrue(span.isRecording())
+        assertTrue(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
+    fun `probability 0_0 drops spans`() {
+        listOf(0.0, 1e-20).forEach { ratio ->
+            val clock = FakeClock()
+            val config = createConfig(clock).apply {
+                sampler { probability(ratio) }
+            }
+            val span = config.build(
+                clock,
+                idGenerator,
+                spanLimits = noSpanLimits
+            ).getTracer("test").startSpan("span")
+            assertFalse(span.isRecording())
+            assertFalse(span.spanContext.traceFlags.isSampled)
+        }
+    }
+
+    @Test
+    fun `invalid probability falls back to default sampler`() {
+        val clock = FakeClock()
+        val errorHandler = FakeSdkErrorHandler()
+        val config = createConfig(clock, errorHandler).apply {
+            sampler { probability(1.5) }
+        }
+        val span = config.build(
+            clock,
+            idGenerator,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
+        assertTrue(span.isRecording())
+        assertTrue(span.spanContext.traceFlags.isSampled)
+        assertTrue(errorHandler.userCodeErrors.single().cause is IllegalArgumentException)
+    }
+
+    @Test
     fun `invalid composableProbability falls back to default sampler`() {
         val clock = FakeClock()
         val errorHandler = FakeSdkErrorHandler()

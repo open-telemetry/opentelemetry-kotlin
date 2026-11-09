@@ -16,6 +16,7 @@ kotlin {
                 implementation(project(":config"))
                 implementation(project(":context-impl"))
                 implementation(project(":config-dsl"))
+                implementation(project(":semconv"))
                 implementation(project(":model"))
                 implementation(project(":java-typealiases"))
                 implementation(project(":platform-implementations"))

@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.baggage.createBaggage
+import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.init.useOtelJavaContextStorage
 import io.opentelemetry.kotlin.toOtelJavaApi
@@ -84,6 +85,33 @@ internal class OtelJavaContextStorageTest {
         javaSpan.end()
 
         harness.assertSpans(2) { spans ->
+            val child = spans.single { it.name == "kotlin_span" }
+            assertEquals(javaSpan.spanContext.spanId, child.parent.spanId)
+        }
+    }
+
+    @Test
+    fun testJavaDerivedFromKotlinAttach() = runTest {
+        val key = createContextKey<String>("key")
+        val outer = harness.tracer.startSpan("outer")
+        val javaSpan = javaApi.tracerProvider.get("tracer").spanBuilder("java_span").startSpan()
+        val scope = harness.kotlinApi.context.current().set(key, "value").storeSpan(outer).attach()
+        try {
+            OtelJavaContext.current().with(javaSpan).makeCurrent().use {
+                val current = harness.kotlinApi.context.current()
+                assertEquals("value", current.get(key))
+                assertEquals(javaSpan.spanContext.spanId, current.extractSpan().spanContext.spanId)
+                assertTrue(current.set(key, "inner").attach().detach())
+                harness.tracer.startSpan("kotlin_span").end()
+            }
+        } finally {
+            assertTrue(scope.detach())
+        }
+        javaSpan.end()
+        outer.end()
+        assertTrue(errorHandler.apiMisuses.isEmpty())
+
+        harness.assertSpans(3) { spans ->
             val child = spans.single { it.name == "kotlin_span" }
             assertEquals(javaSpan.spanContext.spanId, child.parent.spanId)
         }

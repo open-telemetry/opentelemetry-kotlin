@@ -58,8 +58,8 @@ internal class LoggerImpl(
     override fun emit(
         body: Any?,
         eventName: String?,
-        timestamp: Long?,
-        observedTimestamp: Long?,
+        timestamp: Long,
+        observedTimestamp: Long,
         context: Context?,
         severityNumber: SeverityNumber?,
         severityText: String?,
@@ -81,8 +81,8 @@ internal class LoggerImpl(
 
     private fun processTelemetry(
         context: Context?,
-        timestamp: Long?,
-        observedTimestamp: Long?,
+        timestamp: Long,
+        observedTimestamp: Long,
         body: Any?,
         eventName: String?,
         severityText: String?,
@@ -103,8 +103,11 @@ internal class LoggerImpl(
                     resource = resource,
                     instrumentationScopeInfo = key,
                     // the spec leaves timestamp unset when unknown, but fills in observedTimestamp
-                    timestamp = timestamp?.takeIf { it > 0 },
-                    observedTimestamp = observedTimestamp?.takeIf { it > 0 } ?: userCode { clock.now() },
+                    timestamp = timestamp.takeIf { it > 0 },
+                    observedTimestamp = when {
+                        observedTimestamp > 0 -> observedTimestamp
+                        else -> userCode { clock.now() }
+                    },
                     body = body,
                     severityText = severityText,
                     severityNumber = severityNumber ?: SeverityNumber.UNKNOWN,
@@ -145,7 +148,7 @@ internal class LoggerImpl(
     ): Boolean {
         val severity = severityNumber ?: SeverityNumber.UNKNOWN
         val belowMinimumSeverity = severity != SeverityNumber.UNKNOWN &&
-            severity.severityNumber < loggerConfig.minimumSeverity.severityNumber
+            severity.value < loggerConfig.minimumSeverity.value
         if (belowMinimumSeverity) {
             return false
         }

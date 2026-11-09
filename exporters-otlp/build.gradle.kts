@@ -25,9 +25,8 @@ kotlin {
                 implementation(project(":exporters-json"))
                 implementation(project(":serializable-models"))
                 implementation(project(":platform-implementations"))
+                implementation(project(":platform-io"))
                 implementation(libs.ktor.client.core)
-                implementation(libs.ktor.client.cio)
-                implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.ktor.client.encoding)
             }
         }
@@ -41,6 +40,16 @@ kotlin {
         getByName("jvmAndAndroidMain") {
             dependencies {
                 implementation(libs.ktor.client.okhttp)
+            }
+        }
+        appleMain {
+            dependencies {
+                implementation(libs.ktor.client.darwin)
+            }
+        }
+        linuxMain {
+            dependencies {
+                implementation(libs.ktor.client.cio)
             }
         }
         linuxTest {

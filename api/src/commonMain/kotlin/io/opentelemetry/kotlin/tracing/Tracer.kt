@@ -33,7 +33,8 @@ public interface Tracer {
      * @param parentContext - a context object containing the parent span. If this is not set
      * explicitly, the current context via [io.opentelemetry.kotlin.factory.ContextFactory.current] will be used.
      * @param spanKind - the kind of span. Defaults to [SpanKind.INTERNAL].
-     * @param startTimestamp - the start time of the span in nanoseconds. Defaults to the current time if null or <= 0.
+     * @param startTimestamp - the start time of the span in nanoseconds since the Unix epoch. Defaults to 0,
+     * which means the current time. Any value <= 0 is treated as the current time.
      * @param action - an action that allows attributes, links, and events to be added to the span. It
      * is possible to add these after span creation too, but it is preferred to add them before if possible.
      *
@@ -44,7 +45,7 @@ public interface Tracer {
         name: String,
         parentContext: Context? = null,
         spanKind: SpanKind = SpanKind.INTERNAL,
-        startTimestamp: Long? = null,
+        startTimestamp: Long = 0,
         action: (SpanCreationAction.() -> Unit)? = null
     ): Span
 }
