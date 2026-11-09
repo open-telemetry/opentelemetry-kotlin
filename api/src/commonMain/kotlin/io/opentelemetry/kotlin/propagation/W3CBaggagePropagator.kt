@@ -24,6 +24,7 @@ internal object W3CBaggagePropagator : TextMapPropagator {
     private const val HTAB = '\t'
     private const val MAX_HEADER_BYTES = 8192
     private const val MAX_ENTRY_BYTES = 4096
+    private const val HEX_DIGITS = "0123456789ABCDEF"
 
     private val FIELDS = listOf(FIELD)
 
@@ -122,9 +123,11 @@ internal object W3CBaggagePropagator : TextMapPropagator {
                 while (pos < metadata.length && (metadata[pos] == SPACE || metadata[pos] == HTAB)) {
                     pos++
                 }
-                // Parse property value
+                // Parse property value. Printable ASCII is allowed so that
+                // percentEncodeProperty can encode non-octets like space; ',',
+                // CTLs and non-ASCII are rejected here.
                 val valueStart = pos
-                while (pos < metadata.length && isBaggageOctet(metadata[pos]) && metadata[pos] != ';') {
+                while (pos < metadata.length && isPropertyValueChar(metadata[pos])) {
                     pos++
                 }
                 val value = metadata.substring(valueStart, pos)
@@ -167,6 +170,15 @@ internal object W3CBaggagePropagator : TextMapPropagator {
     }
 
     /**
+     * Property values may contain any printable ASCII character except the property
+     * delimiter ';' and ','. Characters that are not baggage-octets (e.g. space, '"',
+     * backslash) are percent-encoded by [percentEncodeProperty]; everything else is
+     * rejected so comma/CTL/non-ASCII injection stays impossible.
+     */
+    private fun isPropertyValueChar(c: Char): Boolean =
+        c.code in 0x20..0x7E && c != METADATA_DELIMITER && c != ENTRY_DELIMITER
+
+    /**
      * Checks if a string is a valid token per RFC 7230.
      * Uses the same validation as isValidBaggageKey from BaggageValidation.kt
      */
@@ -191,9 +203,9 @@ internal object W3CBaggagePropagator : TextMapPropagator {
                 sb.append(c)
             } else {
                 // Percent-encode the character as UTF-8 bytes
-                val bytes = c.toString().encodeToByteArray()
-                for (b in bytes) {
-                    sb.append(String.format("%%%02X", b))
+                for (b in c.toString().encodeToByteArray()) {
+                    val v = b.toInt() and 0xFF
+                    sb.append('%').append(HEX_DIGITS[v shr 4]).append(HEX_DIGITS[v and 0xF])
                 }
             }
         }

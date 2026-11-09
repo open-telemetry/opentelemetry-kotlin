@@ -143,6 +143,20 @@ internal class W3CBaggagePropagatorTest {
     }
 
     @Test
+    fun `inject percent-encodes quote and backslash in property values`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("p=a\"b\\c"))
+        val carrier = injectInto(baggage)
+        assertEquals("k=v;p=a%22b%5Cc", carrier["baggage"])
+    }
+
+    @Test
+    fun `inject accepts empty property value`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("p="))
+        val carrier = injectInto(baggage)
+        assertEquals("k=v;p=", carrier["baggage"])
+    }
+
+    @Test
     fun `inject retains entry when metadata is invalid`() {
         val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("invalid,char"))
         val carrier = injectInto(baggage)
