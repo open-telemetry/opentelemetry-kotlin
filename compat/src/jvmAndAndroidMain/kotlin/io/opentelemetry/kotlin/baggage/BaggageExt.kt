@@ -18,6 +18,13 @@ public fun Baggage.toOtelJavaBaggage(): OtelJavaBaggage {
 }
 
 /**
+ * Copies opentelemetry-java baggage into opentelemetry-kotlin [Baggage], keeping each entry's
+ * value and metadata.
+ */
+@ExperimentalApi
+public fun OtelJavaBaggage.toOtelKotlinApi(): Baggage = toOtelKotlinBaggage()
+
+/**
  * Copies opentelemetry-java baggage into the Kotlin [Baggage] implementation.
  *
  * opentelemetry-java does not validate entries, so any entry that the Kotlin implementation

@@ -53,7 +53,7 @@ internal class BaggageExtTest {
             .put("region", "eu", OtelJavaBaggageEntryMetadata.create("meta"))
             .build()
 
-        val converted = javaBaggage.toOtelKotlinBaggage()
+        val converted = javaBaggage.toOtelKotlinApi()
         assertEquals(2, converted.asMap().size)
         assertEquals("alice", converted.getValue("user"))
         assertEquals("", converted.asMap().getValue("user").metadata.value)
@@ -62,7 +62,7 @@ internal class BaggageExtTest {
 
     @Test
     fun `empty java baggage converts to the shared empty baggage`() {
-        assertSame(createBaggage(), OtelJavaBaggage.empty().toOtelKotlinBaggage())
+        assertSame(createBaggage(), OtelJavaBaggage.empty().toOtelKotlinApi())
     }
 
     @Test
@@ -72,7 +72,7 @@ internal class BaggageExtTest {
             .put("good", "g")
             .build()
 
-        val converted = javaBaggage.toOtelKotlinBaggage()
+        val converted = javaBaggage.toOtelKotlinApi()
         assertEquals("v", converted.getValue("bad key"))
         assertEquals("g", converted.getValue("good"))
     }
