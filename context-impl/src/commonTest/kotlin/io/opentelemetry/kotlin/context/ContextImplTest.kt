@@ -25,7 +25,7 @@ internal class ContextImplTest {
 
     @Test
     fun testContextObtainRoot() {
-        assertSame(factory.root(), factory.root())
+        assertSame(factory.rootContext(), factory.rootContext())
     }
 
     @Test
@@ -37,7 +37,7 @@ internal class ContextImplTest {
     fun testContextSameNamedKeysAreNotInterchangeable() {
         val key = createContextKey<String>("my_key")
         val sameName = createContextKey<String>("my_key")
-        val ctx = factory.root().set(key, "my_value")
+        val ctx = factory.rootContext().set(key, "my_value")
 
         assertEquals("my_value", ctx.get(key))
         assertNull(ctx.get(sameName))
@@ -45,14 +45,14 @@ internal class ContextImplTest {
 
     @Test
     fun testContextGetAbsentValue() {
-        val ctx = factory.root()
+        val ctx = factory.rootContext()
         val key = createContextKey<String>("my_key")
         assertNull(ctx.get(key))
     }
 
     @Test
     fun testContextGetPresentValue() {
-        val ctx = factory.root()
+        val ctx = factory.rootContext()
         val key = createContextKey<String>("my_key")
         val value = "my_value"
         val newCtx = ctx.set(key, value)
@@ -63,7 +63,7 @@ internal class ContextImplTest {
 
     @Test
     fun testContextMultipleValues() {
-        val ctx = factory.root()
+        val ctx = factory.rootContext()
         val key1 = createContextKey<String>("my_key1")
         val key2 = createContextKey<String>("my_key2")
         val key3 = createContextKey<Int>("my_key3")
@@ -79,7 +79,7 @@ internal class ContextImplTest {
 
     @Test
     fun testContextOverrideExistingKey() {
-        val ctx = factory.root()
+        val ctx = factory.rootContext()
         val key = createContextKey<String>("my_key")
         val value1 = "my_value1"
         val value2 = "my_value2"
@@ -90,7 +90,7 @@ internal class ContextImplTest {
 
     @Test
     fun testContextKeyExplicitNull() {
-        val ctx = factory.root()
+        val ctx = factory.rootContext()
         val key = createContextKey<String>("key")
         val newCtx = ctx.set(key, null)
         assertNull(newCtx.get(key))
@@ -98,33 +98,33 @@ internal class ContextImplTest {
 
     @Test
     fun testAttach() {
-        val ctx = factory.root()
+        val ctx = factory.rootContext()
         ctx.attach()
-        assertSame(ctx, factory.current())
+        assertSame(ctx, factory.currentContext())
     }
 
     @Test
     fun testCurrentContext() {
-        val ctx = factory.root()
-        assertSame(ctx, factory.current())
+        val ctx = factory.rootContext()
+        assertSame(ctx, factory.currentContext())
     }
 
     @Test
     fun testExtractSpanFromRootReturnsInvalid() {
-        assertEquals(createInvalidSpanContext(), factory.root().extractSpan().spanContext)
+        assertEquals(createInvalidSpanContext(), factory.rootContext().extractSpan().spanContext)
     }
 
     @Test
     fun testStoreSpanRoundTrip() {
         val span = FakeSpan()
-        val ctx = factory.root().storeSpan(span)
+        val ctx = factory.rootContext().storeSpan(span)
         assertSame(span, ctx.extractSpan())
     }
 
     @Test
     fun testStoreSpanReturnsNewContext() {
         val span = FakeSpan()
-        val root = factory.root()
+        val root = factory.rootContext()
         val derived = root.storeSpan(span)
         assertNotSame(root, derived)
         assertEquals(createInvalidSpanContext(), root.extractSpan().spanContext)
@@ -137,7 +137,7 @@ internal class ContextImplTest {
             isSampled = true
             isRemote = true
         }
-        val root = ctxFactory.root()
+        val root = ctxFactory.rootContext()
         val ctx = root.storeSpanContext(spanContext)
 
         assertNotSame(root, ctx)
@@ -150,7 +150,7 @@ internal class ContextImplTest {
     fun testStoreSpanContextInvalidStoresInvalidSpan() {
         val ctxFactory = ContextFactoryImpl()
         val span = FakeSpan()
-        val ctx = ctxFactory.root().storeSpan(span).storeSpanContext(createInvalidSpanContext())
+        val ctx = ctxFactory.rootContext().storeSpan(span).storeSpanContext(createInvalidSpanContext())
         assertFalse(ctx.extractSpan().spanContext.isValid)
     }
 }

@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceFlags
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.tracing.ext.storeInContext
@@ -24,19 +25,19 @@ internal class SpanExtTest {
 
     @Test
     fun `test store span context valid`() {
-        val span = contextFactory.root().storeSpanContext(validSpanContext).extractSpan()
+        val span = contextFactory.rootContext().storeSpanContext(validSpanContext).extractSpan()
         assertSpanContextsMatch(validSpanContext, span.spanContext)
     }
 
     @Test
     fun `test store span context invalid`() {
-        val span = contextFactory.root().storeSpanContext(createInvalidSpanContext()).extractSpan()
+        val span = contextFactory.rootContext().storeSpanContext(createInvalidSpanContext()).extractSpan()
         assertFalse(span.spanContext.isValid)
     }
 
     @Test
     fun `test from context invalid`() {
-        val span = contextFactory.root().extractSpan()
+        val span = contextFactory.rootContext().extractSpan()
         assertSpanContextsMatch(createInvalidSpanContext(), span.spanContext)
     }
 
@@ -54,7 +55,7 @@ internal class SpanExtTest {
             SpanKind.INTERNAL,
             NoopSdkErrorHandler,
         )
-        val root = contextFactory.root()
+        val root = contextFactory.rootContext()
         val ctx = span.storeInContext(root)
         val observed = root.extractSpan().spanContext
         assertSpanContextsMatch(createInvalidSpanContext(), observed)
@@ -65,7 +66,7 @@ internal class SpanExtTest {
 
     @Test
     fun `test store span context round trip`() {
-        val root = contextFactory.root()
+        val root = contextFactory.rootContext()
         val ctx = root.storeSpanContext(validSpanContext)
         assertSpanContextsMatch(validSpanContext, ctx.extractSpan().spanContext)
         assertSpanContextsMatch(createInvalidSpanContext(), root.extractSpan().spanContext)
@@ -73,7 +74,7 @@ internal class SpanExtTest {
 
     @Test
     fun `test store invalid span context`() {
-        val ctx = contextFactory.root().storeSpanContext(createInvalidSpanContext())
+        val ctx = contextFactory.rootContext().storeSpanContext(createInvalidSpanContext())
         assertSpanContextsMatch(createInvalidSpanContext(), ctx.extractSpan().spanContext)
     }
 }

@@ -5,6 +5,8 @@ import io.opentelemetry.kotlin.config.NoopConfigProvider
 import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.context.NoopContext
 import io.opentelemetry.kotlin.context.createContextKey
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.metrics.NoopObservableDoubleMeasurement
@@ -163,7 +165,7 @@ internal class NoopTests {
 
         val key = createContextKey<String>("key")
 
-        val ctx = otel.context.root()
+        val ctx = otel.context.rootContext()
 
         val other = ctx.set(key, "value")
         assertSame(ctx, other)
@@ -174,30 +176,30 @@ internal class NoopTests {
     @Test
     fun testNoopCurrentContext() {
         val otel = NoopOpenTelemetry
-        val ctx = otel.context.root()
+        val ctx = otel.context.rootContext()
 
         // current context
         ctx.attach().detach()
-        assertNotNull(otel.context.current())
+        assertNotNull(otel.context.currentContext())
     }
 
     @Test
     fun testStoreSpan() {
         val otel = NoopOpenTelemetry
         val span = otel.tracerProvider.getTracer("tracer").startSpan("span")
-        val ctx = otel.context.root().storeSpan(span)
+        val ctx = otel.context.rootContext().storeSpan(span)
         assertTrue(ctx is NoopContext)
     }
 
     @Test
     fun testStoreSpanContext() {
-        val root = NoopOpenTelemetry.context.root()
+        val root = NoopOpenTelemetry.context.rootContext()
         assertSame(root, root.storeSpanContext(NoopSpanContext))
     }
 
     @Test
     fun testNoopSpan() {
-        val span = NoopOpenTelemetry.context.root().extractSpan()
+        val span = NoopOpenTelemetry.context.rootContext().extractSpan()
         assertTrue(span is NoopSpan)
         assertFalse(span.isRecording())
         assertSame(NoopSpanContext, span.spanContext)
@@ -234,7 +236,7 @@ internal class NoopTests {
     fun testNoopTextMapPropagator() {
         assertEquals(emptyList(), createNoopPropagator().fields())
 
-        val ctx = NoopOpenTelemetry.context.root()
+        val ctx = NoopOpenTelemetry.context.rootContext()
         val carrier = mutableMapOf("key" to "value")
 
         // inject is a no-op — setter must never be called

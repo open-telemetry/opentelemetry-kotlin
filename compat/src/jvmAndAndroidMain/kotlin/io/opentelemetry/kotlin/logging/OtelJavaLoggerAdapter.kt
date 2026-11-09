@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordBuilder
 import io.opentelemetry.kotlin.aliases.OtelJavaLogger
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
+import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import io.opentelemetry.kotlin.factory.ContextFactory
 
@@ -23,7 +24,7 @@ internal class OtelJavaLoggerAdapter(
 
     override fun isEnabled(severity: OtelJavaSeverity): Boolean =
         impl.enabled(
-            context = contextFactory.current(),
+            context = contextFactory.currentContext(),
             severityNumber = severity.toOtelKotlinSeverityNumber(),
         )
 }

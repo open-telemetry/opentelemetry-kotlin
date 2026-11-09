@@ -13,25 +13,25 @@ internal class ContextAdapterEqualityTest {
 
     @Test
     fun `root and current are equal across calls`() {
-        assertEquals(factory.root(), factory.root())
-        assertEquals(factory.root().hashCode(), factory.root().hashCode())
-        assertEquals(factory.root(), factory.current())
+        assertEquals(factory.rootContext(), factory.rootContext())
+        assertEquals(factory.rootContext().hashCode(), factory.rootContext().hashCode())
+        assertEquals(factory.rootContext(), factory.currentContext())
 
-        val ctx = factory.root().set(key, "value")
+        val ctx = factory.rootContext().set(key, "value")
         val scope = ctx.attach()
-        assertEquals(ctx, factory.current())
-        assertEquals(factory.current(), factory.current())
+        assertEquals(ctx, factory.currentContext())
+        assertEquals(factory.currentContext(), factory.currentContext())
         scope.detach()
     }
 
     @Test
     fun `contexts derived separately are not equal`() {
-        assertNotEquals(factory.root().set(key, "value"), factory.root().set(key, "value"))
+        assertNotEquals(factory.rootContext().set(key, "value"), factory.rootContext().set(key, "value"))
     }
 
     @Test
     fun `java adapter equality follows wrapped kotlin context`() {
-        val ctx = factory.root().set(key, "value")
+        val ctx = factory.rootContext().set(key, "value")
         assertEquals(OtelJavaContextAdapter(ctx), OtelJavaContextAdapter(ctx))
         assertEquals(OtelJavaContextAdapter(ctx).hashCode(), OtelJavaContextAdapter(ctx).hashCode())
 

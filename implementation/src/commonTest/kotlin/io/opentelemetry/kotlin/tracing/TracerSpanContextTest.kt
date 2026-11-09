@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.ContextFactory
@@ -57,7 +58,7 @@ internal class TracerSpanContextTest {
 
     @Test
     fun testExplicitParentContextOfInvalidSpan() {
-        val parentCtx = contextFactory.root().storeSpanContext(createInvalidSpanContext())
+        val parentCtx = contextFactory.rootContext().storeSpanContext(createInvalidSpanContext())
         val span = tracer.startSpan(
             "test",
             parentContext = parentCtx,
@@ -71,7 +72,7 @@ internal class TracerSpanContextTest {
     @Test
     fun testExplicitParentContextOfValidSpan() {
         val parentSpan = tracer.startSpan("parent")
-        val parentCtx = contextFactory.root().storeSpan(parentSpan)
+        val parentCtx = contextFactory.rootContext().storeSpan(parentSpan)
         val span = tracer.startSpan(
             "test",
             parentContext = parentCtx,
@@ -87,7 +88,7 @@ internal class TracerSpanContextTest {
     @Test
     fun testCurrentContext() {
         val span = tracer.startSpan("span")
-        val ctx = contextFactory.root().storeSpan(span)
+        val ctx = contextFactory.rootContext().storeSpan(span)
         val scope = ctx.attach()
 
         val first = tracer.startSpan("first")

@@ -21,8 +21,8 @@ internal class CurrentContextTest {
     @Test
     fun testSameContextsScopeIsAlreadyDetached() {
         val scope = ScopeImpl.create(
-            factory.root(),
-            factory.root(),
+            factory.rootContext(),
+            factory.rootContext(),
             SingleSlotCurrentContextStorage(factory::root),
             NoopSdkErrorHandler,
         ) {}
@@ -33,28 +33,28 @@ internal class CurrentContextTest {
     fun testDupeAttach() {
         val newCtx = newContext()
         newCtx.attach()
-        assertSame(newCtx, factory.current())
+        assertSame(newCtx, factory.currentContext())
 
         val next = newCtx.attach()
-        assertSame(newCtx, factory.current())
+        assertSame(newCtx, factory.currentContext())
 
         next.detach()
-        assertSame(newCtx, factory.current())
+        assertSame(newCtx, factory.currentContext())
     }
 
     @Test
     fun testDupeDetach() {
-        assertSame(factory.root(), factory.current())
+        assertSame(factory.rootContext(), factory.currentContext())
 
         val newCtx = newContext()
         val scope = newCtx.attach()
-        assertSame(newCtx, factory.current())
+        assertSame(newCtx, factory.currentContext())
 
         scope.detach()
-        assertSame(factory.root(), factory.current())
+        assertSame(factory.rootContext(), factory.currentContext())
 
         scope.detach()
-        assertSame(factory.root(), factory.current())
+        assertSame(factory.rootContext(), factory.currentContext())
     }
 
     @Test
@@ -89,32 +89,32 @@ internal class CurrentContextTest {
     @Test
     fun testCurrentContext() {
         // assert default is root
-        val root = factory.root()
-        assertSame(root, factory.current())
+        val root = factory.rootContext()
+        assertSame(root, factory.currentContext())
 
         // set first scope
         val ctx1 = newContext()
         val scope1 = ctx1.attach()
-        assertSame(ctx1, factory.current())
+        assertSame(ctx1, factory.currentContext())
 
         // set second scope
         val ctx2 = newContext()
         val scope2 = ctx2.attach()
-        assertSame(ctx2, factory.current())
+        assertSame(ctx2, factory.currentContext())
 
         // invalid call as not current context, ignore.
         scope1.detach()
-        assertSame(ctx2, factory.current())
+        assertSame(ctx2, factory.currentContext())
 
         // detach current context
         scope2.detach()
-        assertSame(ctx1, factory.current())
+        assertSame(ctx1, factory.currentContext())
 
         // detach current context
         scope1.detach()
-        assertSame(root, factory.current())
+        assertSame(root, factory.currentContext())
     }
 
     private fun newContext(): Context =
-        factory.root().set(createContextKey<String>("key"), "value")
+        factory.rootContext().set(createContextKey<String>("key"), "value")
 }

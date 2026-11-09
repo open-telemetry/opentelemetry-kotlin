@@ -5,6 +5,8 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.attributes.copyAttributes
 import io.opentelemetry.kotlin.attributes.typedAttributesOrConvert
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
@@ -38,7 +40,7 @@ internal class TracerImpl(
 ) : Tracer {
 
     private val propagatingNoopTracer = PropagatingNoopTracer(contextFactory, sdkErrorHandler)
-    private val root = contextFactory.root()
+    private val root = contextFactory.rootContext()
     private val invalidSpanContext = createInvalidSpanContext()
     private val invalidSpan = createNonRecordingSpan(invalidSpanContext)
 
@@ -68,7 +70,7 @@ internal class TracerImpl(
                 return@sdkGuardOrDefault invalidSpan
             }
 
-            val ctx = parentContext ?: contextFactory.current()
+            val ctx = parentContext ?: contextFactory.currentContext()
 
             val parentSpanContext = when (ctx) {
                 root -> invalidSpanContext

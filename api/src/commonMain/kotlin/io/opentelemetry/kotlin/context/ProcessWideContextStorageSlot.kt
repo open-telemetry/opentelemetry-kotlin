@@ -5,6 +5,7 @@
 
 package io.opentelemetry.kotlin.context
 
+import io.opentelemetry.kotlin.AtomicReference
 import io.opentelemetry.kotlin.ExperimentalApi
 
 /**
@@ -23,7 +24,7 @@ internal object ProcessWideContextStorageSlot {
         val effective: CurrentContextStorage,
     )
 
-    private val ref = ContextStorageAtomicRef<Installed?>(null)
+    private val ref = AtomicReference<Installed?>(null)
 
     /**
      * Installs [effective] if the slot is empty.

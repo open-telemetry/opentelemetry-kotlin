@@ -15,6 +15,7 @@ kotlin {
         }
         commonTest {
             dependencies {
+                implementation(project(":sdk-common"))
                 implementation(project(":test-fakes"))
                 implementation(libs.kotlinx.coroutines.test)
             }

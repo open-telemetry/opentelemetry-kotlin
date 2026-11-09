@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.integration.test.logging
 
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
 import io.opentelemetry.kotlin.logging.LoggerConfigImpl
 import io.opentelemetry.kotlin.logging.SeverityNumber
@@ -80,7 +81,7 @@ internal class LoggerConfigTest {
         }
 
         val logger = harness.loggerProvider.getLogger("test")
-        val unsampled = harness.kotlinApi.context.root()
+        val unsampled = harness.kotlinApi.context.rootContext()
             .storeSpan(harness.tracer.startSpan("unsampled"))
 
         assertFalse(logger.enabled(context = unsampled))

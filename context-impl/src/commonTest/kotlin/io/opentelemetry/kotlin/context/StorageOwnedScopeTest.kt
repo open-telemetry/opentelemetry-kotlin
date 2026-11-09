@@ -27,11 +27,11 @@ internal class StorageOwnedScopeTest {
     fun testAttachDelegatesToStorage() {
         val ctx = newContext()
         val scope = ctx.attach()
-        assertSame(ctx, factory.current())
+        assertSame(ctx, factory.currentContext())
         assertEquals(1, storage.attachCount)
 
         assertTrue(scope.detach())
-        assertSame(factory.root(), factory.current())
+        assertSame(factory.rootContext(), factory.currentContext())
         assertEquals(1, storage.restoreCount)
     }
 
@@ -63,11 +63,11 @@ internal class StorageOwnedScopeTest {
 
         assertTrue(scope2.detach())
         assertTrue(scope1.detach())
-        assertSame(factory.root(), factory.current())
+        assertSame(factory.rootContext(), factory.currentContext())
     }
 
     private fun newContext(): Context =
-        factory.root().set(createContextKey("key"), Any())
+        factory.rootContext().set(createContextKey("key"), Any())
 
     private class FakeStackCurrentContextStorage(
         rootSupplier: () -> Context,
