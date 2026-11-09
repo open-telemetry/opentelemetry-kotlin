@@ -15,6 +15,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /**
@@ -159,6 +160,81 @@ internal class MeterWriteLockConflictTest {
 
         // Sanity: the probe instrument is registered and usable.
         assertNotNull(meterInstance.createLongUpDownCounter(PROBE_INSTRUMENT))
+    }
+
+    /**
+     * Two concurrent registrations with identical descriptors must both miss the
+     * read-lock lookup, then the write-lock recheck must return the same instance
+     * to both callers without reporting API misuse.
+     */
+    @Test
+    fun sameDescriptorRaceReusesInstrumentThroughWriteLockRecheck() {
+        val errors = CopyOnWriteArrayList<SdkError>()
+        val handler = SdkErrorHandler { error -> errors += error }
+        val config = MetricsConfig(
+            resource = ResourceImpl(AttributesModel(), null),
+            sdkErrorHandler = handler,
+        )
+        val provider = MeterProviderImpl(config, AttributeLimitsBehavior())
+        val meter = provider.getMeter(name = "test")
+        val meterImpl = meter as MeterImpl
+
+        val readMissed = CountDownLatch(2)
+        val proceed = CountDownLatch(1)
+        meterImpl.beforeWriteLock = { instrumentName ->
+            if (instrumentName == INSTRUMENT_NAME) {
+                readMissed.countDown()
+                if (!proceed.await(LATCH_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                    throw AssertionError("timed out waiting for write-lock race release")
+                }
+            }
+        }
+
+        val first = AtomicReference<LongUpDownCounter?>()
+        val second = AtomicReference<LongUpDownCounter?>()
+        val callErrors = CopyOnWriteArrayList<Throwable>()
+
+        fun launch(block: () -> Unit): Thread = Thread {
+            try {
+                block()
+            } catch (t: Throwable) {
+                callErrors += t
+            }
+        }.apply { isDaemon = true }
+
+        val firstThread = launch {
+            first.set(meter.createLongUpDownCounter(INSTRUMENT_NAME, UNIT, DESCRIPTION))
+        }
+        val secondThread = launch {
+            second.set(meter.createLongUpDownCounter(INSTRUMENT_NAME, UNIT, DESCRIPTION))
+        }
+
+        try {
+            firstThread.start()
+            secondThread.start()
+
+            assertTrue(
+                readMissed.await(LATCH_TIMEOUT_MS, TimeUnit.MILLISECONDS),
+                "timed out waiting for both read-lock misses"
+            )
+            proceed.countDown()
+
+            firstThread.join(JOIN_TIMEOUT_MS)
+            secondThread.join(JOIN_TIMEOUT_MS)
+
+            assertFalse(firstThread.isAlive, "first registration thread did not finish")
+            assertFalse(secondThread.isAlive, "second registration thread did not finish")
+            assertTrue(callErrors.isEmpty(), "registration calls threw: $callErrors")
+        } finally {
+            proceed.countDown()
+            meterImpl.beforeWriteLock = null
+        }
+
+        val firstInstrument = assertNotNull(first.get())
+        val secondInstrument = assertNotNull(second.get())
+        assertSame(firstInstrument, secondInstrument)
+        assertTrue(firstInstrument.enabled())
+        assertTrue(errors.isEmpty(), "identical descriptors must not report API misuse: $errors")
     }
 
     private companion object {
