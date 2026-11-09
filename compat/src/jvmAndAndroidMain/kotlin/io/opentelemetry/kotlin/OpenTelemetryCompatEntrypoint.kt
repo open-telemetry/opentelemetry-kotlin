@@ -50,6 +50,10 @@ public fun createCompatOpenTelemetry(
         declarativeConfigReader = cfg.declarativeConfigReader,
     ).read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
 
+    if (behavior.disabled == true) {
+        return NoopOpenTelemetrySdk
+    }
+
     // configFactory is legacy - use behavior to control SDK functionality instead
     val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, contextFactory)
     return CompatOpenTelemetryImpl(
