@@ -29,6 +29,7 @@ include(
     ":sdk-common",
     ":behavior",
     ":config",
+    ":config-declarative",
     ":config-dsl",
     ":config-envar",
     ":config-schema",

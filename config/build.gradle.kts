@@ -17,11 +17,6 @@ kotlin {
                 implementation(project(":platform-implementations"))
             }
         }
-        jvmMain {
-            dependencies {
-                implementation(project(":config-yaml"))
-            }
-        }
         commonTest {
             dependencies {
                 implementation(project(":test-fakes"))

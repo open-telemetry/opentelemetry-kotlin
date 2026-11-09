@@ -87,13 +87,20 @@ public abstract interface annotation class io/opentelemetry/kotlin/init/ConfigDs
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/ConfigFileDsl {
-	public abstract fun configFile (Ljava/lang/String;)V
+	public abstract fun configFile (Lio/opentelemetry/kotlin/init/DeclarativeConfigReader;Ljava/lang/String;)V
+}
+
+public final class io/opentelemetry/kotlin/init/ConfigFileDsl$DefaultImpls {
+	public static synthetic fun configFile$default (Lio/opentelemetry/kotlin/init/ConfigFileDsl;Lio/opentelemetry/kotlin/init/DeclarativeConfigReader;Ljava/lang/String;ILjava/lang/Object;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/ContextConfigDsl {
 	public abstract fun getStorageMode ()Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
 	public abstract fun setStorageMode (Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;)V
 	public abstract fun storage (Lkotlin/jvm/functions/Function1;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/init/DeclarativeConfigReader {
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/LogExportConfigDsl {
