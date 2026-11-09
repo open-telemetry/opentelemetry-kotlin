@@ -205,33 +205,25 @@ private fun startSpan(otel: OpenTelemetry, form: SpanFormState): Pair<Span, Scop
 
     form.events.forEach { event ->
         if (event.name.isNotBlank()) {
-            val eventTs = event.timestamp.toLongOrNull()
-            if (eventTs != null) {
-                span.addEvent(name = event.name, timestamp = eventTs) {
-                    event.attributes.forEach { attr ->
-                        if (attr.key.isNotBlank()) {
-                            when (attr.type) {
-                                AttributeType.STRING -> setStringAttribute(
-                                    attr.key,
-                                    attr.value
-                                )
+            // timestamp = 0 lets the SDK stamp the event with the current time.
+            span.addEvent(name = event.name, timestamp = event.timestamp.toLongOrNull() ?: 0) {
+                event.attributes.forEach { attr ->
+                    if (attr.key.isNotBlank()) {
+                        when (attr.type) {
+                            AttributeType.STRING -> setStringAttribute(attr.key, attr.value)
+                            AttributeType.LONG -> attr.value.toLongOrNull()
+                                ?.let { setLongAttribute(attr.key, it) }
 
-                                AttributeType.LONG -> attr.value.toLongOrNull()
-                                    ?.let { setLongAttribute(attr.key, it) }
+                            AttributeType.DOUBLE -> attr.value.toDoubleOrNull()
+                                ?.let { setDoubleAttribute(attr.key, it) }
 
-                                AttributeType.DOUBLE -> attr.value.toDoubleOrNull()
-                                    ?.let { setDoubleAttribute(attr.key, it) }
-
-                                AttributeType.BOOLEAN -> setBooleanAttribute(
-                                    attr.key,
-                                    attr.value.toBoolean()
-                                )
-                            }
+                            AttributeType.BOOLEAN -> setBooleanAttribute(
+                                attr.key,
+                                attr.value.toBoolean()
+                            )
                         }
                     }
                 }
-            } else {
-                span.addEvent(event.name)
             }
         }
     }
