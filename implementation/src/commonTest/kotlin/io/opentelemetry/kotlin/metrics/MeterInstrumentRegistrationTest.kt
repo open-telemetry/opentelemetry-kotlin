@@ -80,6 +80,59 @@ internal class MeterInstrumentRegistrationTest {
         assertTrue(error.severity == SdkErrorSeverity.ERROR)
     }
 
+    // Copilot Review Finding: first-seen casing is preserved for conflicting registrations
+    @Test
+    fun testCaseVariantWithUnitOrDescriptionConflictKeepsFirstSeenName() {
+        val handler = FakeSdkErrorHandler()
+        val meter = newMeter(handler)
+
+        val first = meter.createLongUpDownCounter("My.Counter", unit = "1", description = "first")
+        val unitVariant = meter.createLongUpDownCounter("my.counter", unit = "ms", description = "first")
+        val descVariant = meter.createLongUpDownCounter("MY.COUNTER", unit = "1", description = "second")
+
+        assertTrue(first !== unitVariant)
+        assertTrue(first !== descVariant)
+        assertTrue(unitVariant.enabled())
+        assertTrue(descVariant.enabled())
+
+        // All registrations in the bucket keep the first-seen name casing.
+        assertEquals("My.Counter", first.name)
+        assertEquals("My.Counter", unitVariant.name)
+        assertEquals("My.Counter", descVariant.name)
+
+        // Each registration retains its own requested properties.
+        assertEquals("1", first.unit)
+        assertEquals("ms", unitVariant.unit)
+        assertEquals("first", first.description)
+        assertEquals("second", descVariant.description)
+
+        assertEquals(2, handler.apiMisuses.size)
+        handler.apiMisuses.forEach {
+            assertTrue(it.message.contains("differs only in case"))
+            assertTrue(it.severity == SdkErrorSeverity.ERROR)
+        }
+    }
+
+    @Test
+    fun testCaseVariantWithTypeConflictKeepsFirstSeenName() {
+        val handler = FakeSdkErrorHandler()
+        val meter = newMeter(handler)
+
+        val longCounter = meter.createLongUpDownCounter("My.Counter", unit = "1", description = "test")
+        val doubleCounter = meter.createDoubleUpDownCounter("my.counter", unit = "1", description = "test")
+
+        assertTrue(longCounter !== doubleCounter)
+        assertTrue(longCounter.enabled())
+        assertTrue(doubleCounter.enabled())
+        assertEquals("My.Counter", longCounter.name)
+        assertEquals("My.Counter", doubleCounter.name)
+
+        assertEquals(1, handler.apiMisuses.size)
+        val error = handler.apiMisuses.single()
+        assertTrue(error.message.contains("already registered"))
+        assertTrue(error.severity == SdkErrorSeverity.ERROR)
+    }
+
     @Test
     fun testIdenticalDescriptorsReuseExistingInstrumentWithoutError() {
         val handler = FakeSdkErrorHandler()

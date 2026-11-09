@@ -67,7 +67,7 @@ internal class MeterImpl(
             description,
             InstrumentValueType.DOUBLE,
             create = {
-                DoubleUpDownCounterImpl(name, unit, description)
+                DoubleUpDownCounterImpl(it, unit, description)
             },
         )
     }
@@ -87,7 +87,7 @@ internal class MeterImpl(
             description,
             InstrumentValueType.LONG,
             create = {
-                LongUpDownCounterImpl(name, unit, description)
+                LongUpDownCounterImpl(it, unit, description)
             },
         )
     }
@@ -149,7 +149,7 @@ internal class MeterImpl(
         unit: String?,
         description: String?,
         valueType: InstrumentValueType,
-        create: () -> T,
+        create: (resolvedName: String) -> T,
     ): T {
         val requested = InstrumentDescriptor(
             name = name,
@@ -175,8 +175,19 @@ internal class MeterImpl(
                     conflict = resolved.second
                     resolved.first
                 } else {
-                    conflict = entries.firstOrNull()?.let { conflictFor(entries, requested) }
-                    InstrumentEntry(create(), requested).also { entries += it }
+                    val baseline = entries.firstOrNull()
+                    conflict = baseline?.let { conflictFor(entries, requested) }
+                    // Conflicting registrations keep the bucket's first-seen name casing
+                    // while retaining their own unit, description, and value type.
+                    val resolvedName = baseline?.descriptor?.name ?: requested.name
+                    val resolvedDescriptor = InstrumentDescriptor(
+                        name = resolvedName,
+                        unit = unit,
+                        description = description,
+                        kind = InstrumentKind.HISTOGRAM,
+                        valueType = valueType,
+                    )
+                    InstrumentEntry(create(resolvedName), resolvedDescriptor).also { entries += it }
                 }
             }
         }
