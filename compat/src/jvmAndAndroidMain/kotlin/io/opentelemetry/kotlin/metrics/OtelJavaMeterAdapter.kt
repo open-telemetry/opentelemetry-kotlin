@@ -10,7 +10,7 @@ internal class OtelJavaMeterAdapter(
     private val javaMeterProvider: OtelJavaMeterProvider = OtelJavaMeterProvider.noop(),
 ) : OtelJavaMeter by javaMeterProvider.get("") {
     override fun gaugeBuilder(name: String): io.opentelemetry.kotlin.aliases.OtelJavaDoubleGaugeBuilder =
-        OtelJavaDoubleGaugeBuilderAdapter(impl, name, this)
+        OtelJavaDoubleGaugeBuilderAdapter(impl, name)
 
     override fun counterBuilder(name: String): OtelJavaLongCounterBuilder =
         OtelJavaLongCounterBuilderAdapter(impl, name, javaMeterProvider)
