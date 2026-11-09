@@ -7,11 +7,13 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 import org.jetbrains.kotlin.konan.target.Family
 
-fun Project.configureLinuxTests(kotlin: KotlinMultiplatformExtension) {
+/**
+ * Copies `src/commonTest/resources` next to every native test executable, where test fixture
+ * loaders expect to find it. Linux tests also run from that directory, as they resolve fixtures
+ * relative to the working directory.
+ */
+fun Project.configureNativeTests(kotlin: KotlinMultiplatformExtension) {
     kotlin.targets.withType(KotlinNativeTarget::class.java).configureEach {
-        if (konanTarget.family != Family.LINUX) {
-            return@configureEach
-        }
         val targetName = name
         val capitalizedName = targetName.replaceFirstChar { it.uppercase() }
         val testDirectory = layout.buildDirectory.dir("bin/$targetName/debugTest")
@@ -22,9 +24,11 @@ fun Project.configureLinuxTests(kotlin: KotlinMultiplatformExtension) {
         tasks.named("linkDebugTest$capitalizedName").configure {
             dependsOn(copyResources)
         }
-        tasks.withType(KotlinNativeTest::class.java).configureEach {
-            if (name == "${targetName}Test") {
-                workingDir = testDirectory.get().asFile.absolutePath
+        if (konanTarget.family == Family.LINUX) {
+            tasks.withType(KotlinNativeTest::class.java).configureEach {
+                if (name == "${targetName}Test") {
+                    workingDir = testDirectory.get().asFile.absolutePath
+                }
             }
         }
     }
