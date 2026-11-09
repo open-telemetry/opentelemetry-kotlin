@@ -42,6 +42,7 @@ internal class OpenTelemetryEnvVarsTest {
                 ),
                 tracerProvider = TracerProviderBehavior(
                     spanLimits = SpanLimitsBehavior(),
+                    processor = SpanProcessorBehavior()
                 ),
             ),
             behavior,
@@ -112,7 +113,6 @@ internal class OpenTelemetryEnvVarsTest {
                     attributeCountPerLinkLimit = 8,
                 ),
                 processor = SpanProcessorBehavior(
-                    console = ConsoleExporterBehavior(),
                     batch = BatchSpanProcessorBehavior(
                         exporter = SpanExporterBehavior(
                             console = ConsoleExporterBehavior()
@@ -140,7 +140,10 @@ internal class OpenTelemetryEnvVarsTest {
         val expected = OpenTelemetryBehavior(
             disabled = false,
             attributeLimits = AttributeLimitsBehavior(),
-            tracerProvider = TracerProviderBehavior(spanLimits = SpanLimitsBehavior()),
+            tracerProvider = TracerProviderBehavior(
+                spanLimits = SpanLimitsBehavior(),
+                processor = SpanProcessorBehavior()
+            ),
             loggerProvider = LoggerProviderBehavior(
                 logLimits = LogLimitsBehavior(),
                 processor = LogRecordProcessorBehavior()
