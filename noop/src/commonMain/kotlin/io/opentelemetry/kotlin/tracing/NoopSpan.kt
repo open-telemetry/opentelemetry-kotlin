@@ -59,7 +59,4 @@ internal object NoopSpan : Span {
 
     override fun setAnyValueAttribute(key: String, value: AnyValue) {
     }
-
-    override fun removeAttribute(key: String) {
-    }
 }

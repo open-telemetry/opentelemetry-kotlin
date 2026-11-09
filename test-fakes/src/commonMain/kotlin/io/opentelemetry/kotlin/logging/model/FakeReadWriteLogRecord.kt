@@ -55,6 +55,10 @@ class FakeReadWriteLogRecord private constructor(
 
     override val attributes: Map<String, Any> get() = attrs.attributes
 
+    override fun removeAttribute(key: String) {
+        attrs.removeAttribute(key)
+    }
+
     override fun toLogRecordData(): LogRecordData = FakeLogRecordData(
         timestamp = timestamp,
         observedTimestamp = observedTimestamp,

@@ -109,7 +109,8 @@ internal class ReadWriteLogRecordAdapter(
     }
 
     override fun removeAttribute(key: String) {
-        impl.removeAttribute(OtelJavaAttributeKey.stringKey(key))
+        // The OTel Java ReadWriteLogRecord API does not support attribute removal.
+        unsupportedWrites.report("attributes")
     }
 
     override val attributes: Map<String, Any>

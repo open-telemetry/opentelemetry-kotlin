@@ -55,7 +55,7 @@ class FakeAttributesMutator(
         map[key] = value
     }
 
-    override fun removeAttribute(key: String) {
+    fun removeAttribute(key: String) {
         map.remove(key)
     }
 

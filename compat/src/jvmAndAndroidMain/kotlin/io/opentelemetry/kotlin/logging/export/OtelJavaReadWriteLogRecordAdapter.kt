@@ -48,9 +48,4 @@ internal class OtelJavaReadWriteLogRecordAdapter(
     override fun <T> getAttribute(key: OtelJavaAttributeKey<T>): T? = log.attributes.getOtelJavaAttribute(key)
 
     override fun getAttributes(): OtelJavaAttributes = attrsFromMap(log.attributes)
-
-    override fun <T> removeAttribute(key: OtelJavaAttributeKey<T>): OtelJavaReadWriteLogRecord {
-        log.removeAttribute(key.key)
-        return this
-    }
 }

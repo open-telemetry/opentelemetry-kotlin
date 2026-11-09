@@ -13,9 +13,4 @@ internal class OtelJavaReadWriteSpanAdapter(
     OtelJavaReadableSpan by readableSpan {
 
     override fun getSpanContext(): OtelJavaSpanContext = readableSpan.spanContext
-
-    override fun removeAttribute(key: String): OtelJavaReadWriteSpan {
-        span.removeAttribute(key)
-        return this
-    }
 }
