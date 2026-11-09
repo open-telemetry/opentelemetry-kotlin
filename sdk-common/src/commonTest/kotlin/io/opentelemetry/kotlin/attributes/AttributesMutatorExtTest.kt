@@ -74,4 +74,42 @@ internal class AttributesMutatorExtTest {
         assertNotNull(mutator.attributes[ExceptionAttributes.EXCEPTION_STACKTRACE])
         assertNotNull(mutator.attributes[ExceptionAttributes.EXCEPTION_TYPE])
     }
+
+    @Test
+    fun testSetExceptionAttributesPreservesUserProvidedTypeAndStacktrace() {
+        val mutator = FakeAttributesMutator()
+        val exception = IllegalStateException("exception message")
+
+        mutator.setStringAttribute(ExceptionAttributes.EXCEPTION_TYPE, "user.type")
+        mutator.setStringAttribute(ExceptionAttributes.EXCEPTION_STACKTRACE, "user stack")
+        mutator.setExceptionAttributes(exception)
+
+        assertEquals("user.type", mutator.attributes[ExceptionAttributes.EXCEPTION_TYPE])
+        assertEquals("user stack", mutator.attributes[ExceptionAttributes.EXCEPTION_STACKTRACE])
+        assertEquals("exception message", mutator.attributes[ExceptionAttributes.EXCEPTION_MESSAGE])
+    }
+
+    @Test
+    fun testSetExceptionAttributesKeepsUnrelatedAttributes() {
+        val mutator = FakeAttributesMutator()
+        val exception = IllegalStateException("exception message")
+
+        mutator.setStringAttribute("user.key", "user value")
+        mutator.setExceptionAttributes(exception)
+
+        assertEquals("user value", mutator.attributes["user.key"])
+        assertEquals("exception message", mutator.attributes[ExceptionAttributes.EXCEPTION_MESSAGE])
+    }
+
+    @Test
+    fun testSetExceptionAttributesIsIdempotentForExistingValues() {
+        val mutator = FakeAttributesMutator()
+        val exception = IllegalStateException("exception message")
+
+        mutator.setStringAttribute(ExceptionAttributes.EXCEPTION_MESSAGE, "user message")
+        mutator.setExceptionAttributes(exception)
+        mutator.setExceptionAttributes(IllegalArgumentException("other message"))
+
+        assertEquals("user message", mutator.attributes[ExceptionAttributes.EXCEPTION_MESSAGE])
+    }
 }
