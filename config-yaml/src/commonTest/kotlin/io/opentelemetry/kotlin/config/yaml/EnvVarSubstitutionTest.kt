@@ -42,6 +42,7 @@ internal class EnvVarSubstitutionTest {
             "\"\${FLOAT_VALUE}\"" to "1.1",
             "\${env:STRING_VALUE}" to "value",
             "foo \${STRING_VALUE} \${FLOAT_VALUE}" to "foo value 1.1",
+            "a \${STRING_VALUE}\n  b" to "a value b",
             "\${UNDEFINED_KEY}" to null,
             "\"\${UNDEFINED_KEY}\"" to "",
             "\${UNDEFINED_KEY:-fallback}" to "fallback",
@@ -57,6 +58,7 @@ internal class EnvVarSubstitutionTest {
             "\${VALUE_WITH_ESCAPE}" to "value\$\$",
             "a \$\$ b" to "a \$ b",
             "a \$ b" to "a \$ b",
+            "\"\${}\"" to "\${}",
         )
 
         cases.forEach { (input, expected) ->
@@ -80,6 +82,40 @@ internal class EnvVarSubstitutionTest {
     fun ignoresReferencesInComments() {
         val yaml = "# \${STRING_VALUE:?required}\nkey: \"#\${STRING_VALUE}\" # example: \${1API_KEY}"
         assertEquals(mapOf("key" to "#value"), parser.parse(yaml))
+    }
+
+    @Test
+    fun keepsReferencesInMappingKeys() {
+        val yaml = "map: {\"\${STRING_VALUE}\": \"\${STRING_VALUE}\", \"\$\$\${1API_KEY}\": 1}"
+        val expected = mapOf("\${STRING_VALUE}" to "value", "\$\$\${1API_KEY}" to 1)
+        assertEquals(mapOf("map" to expected), parser.parse(yaml))
+    }
+
+    @Test
+    fun undefinedReferenceIsNullOnlyAsWholePlainScalar() {
+        assertEquals(mapOf("key" to "a\n\nb\n"), parser.parse("key: |\n  a\n  \${UNDEFINED_KEY}\n  b\n"))
+        assertEquals(
+            parser.parse("key: \"a\n  \n  b\""),
+            parser.parse("key: \"a\n  \${UNDEFINED_KEY}\n  b\""),
+        )
+    }
+
+    @Test
+    fun substitutesAfterHashInScalars() {
+        val cases = listOf(
+            "'it''s # \${STRING_VALUE}'" to "it's # value",
+            "\"a\n  # \${STRING_VALUE}\"" to "a # value",
+            "|\n  # \${STRING_VALUE}\n" to "# value\n",
+        )
+
+        cases.forEach { (input, expected) ->
+            assertEquals(mapOf("key" to expected), parser.parse("key: $input"), "substituting <$input>")
+        }
+    }
+
+    @Test
+    fun decodesQuotedDefaultLikeTheScalar() {
+        assertEquals(mapOf("key" to "a\tb"), parser.parse("key: \"\${UNDEFINED_KEY:-a\\tb}\""))
     }
 
     @Test
