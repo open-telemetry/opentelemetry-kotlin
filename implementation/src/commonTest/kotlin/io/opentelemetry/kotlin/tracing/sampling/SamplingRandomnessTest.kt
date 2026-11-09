@@ -3,8 +3,58 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 internal class SamplingRandomnessTest {
+
+    @Test
+    fun testDefaultThresholdPrecisionMatchesSpecificationExamples() {
+        val thresholds = mapOf(
+            1.0 to "0",
+            0.5 to "8",
+            1.0 / 3 to "aaab",
+            0.25 to "c",
+            0.2 to "cccd",
+            0.125 to "e",
+            0.1 to "e666",
+            0.0625 to "f",
+            0.01 to "fd70a",
+            0.001 to "ffbe77",
+            0.0001 to "fff9724",
+            0.00001 to "ffff583a",
+            0.000001 to "ffffef39",
+        )
+        for ((ratio, expected) in thresholds) {
+            val traceState = OtelTraceState.parse(null)
+            traceState.setThreshold(thresholdFromRatio(ratio))
+            assertEquals("th:$expected", traceState.encode(), "ratio=$ratio")
+        }
+    }
+
+    @Test
+    fun testThresholdKeepsMinimumSamplingProbabilities() {
+        val maxThreshold = 1L shl 56
+        assertEquals(maxThreshold - 1, thresholdFromRatio(MIN_SAMPLING_RATIO))
+        assertEquals(maxThreshold - 2, thresholdFromRatio(2 * MIN_SAMPLING_RATIO))
+    }
+
+    @Test
+    fun testThresholdSupportsDifferentPrecisions() {
+        assertEquals(0xe6600000000000L, thresholdFromRatio(0.1, precision = 3))
+        assertEquals(0xe6666000000000L, thresholdFromRatio(0.1, precision = 5))
+        assertEquals(0xfd710000000000L, thresholdFromRatio(0.01, precision = 3))
+        assertEquals(0xfd70a400000000L, thresholdFromRatio(0.01, precision = 5))
+        assertEquals(0xffffffffffffffL, thresholdFromRatio(MIN_SAMPLING_RATIO, precision = 1))
+    }
+
+    @Test
+    fun testThresholdRejectsInvalidPrecision() {
+        for (precision in listOf(0, 15)) {
+            assertFailsWith<IllegalArgumentException> {
+                thresholdFromRatio(0.1, precision)
+            }
+        }
+    }
 
     @Test
     fun testRandomnessUsesLeastSignificant7Bytes() {

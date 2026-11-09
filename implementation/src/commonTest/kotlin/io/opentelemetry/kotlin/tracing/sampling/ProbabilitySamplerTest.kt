@@ -20,6 +20,27 @@ internal class ProbabilitySamplerTest {
     private val contextFactory = ContextFactoryImpl()
     private val sdkErrorHandler = NoopSdkErrorHandler
 
+    @Test
+    fun testDecisionUsesEncodedThresholdPrecision() {
+        val sampler = ProbabilitySampler(0.1, sdkErrorHandler)
+        val cases = mapOf(
+            "000000000000000000e6660000000000" to SamplingResult.Decision.RECORD_AND_SAMPLE,
+            "000000000000000000e665ffffffffff" to SamplingResult.Decision.DROP,
+        )
+        for ((traceId, expected) in cases) {
+            val result = sampler.shouldSample(
+                context = contextFactory.root(),
+                traceIdBytes = traceId.hexToByteArray(),
+                name = "span",
+                spanKind = SpanKind.INTERNAL,
+                attributes = AttributesModel(),
+                links = emptyList(),
+            )
+            assertEquals(expected, result.decision)
+            assertEquals("th:e666", result.traceState.get("ot"))
+        }
+    }
+
     private fun createParentContext(traceId: String, otTraceStateValue: String): Context {
         val parentSpanContext = createSpanContext(traceId.hexToByteArray(), idGenerator.generateSpanIdBytes()) {
             isSampled = true
