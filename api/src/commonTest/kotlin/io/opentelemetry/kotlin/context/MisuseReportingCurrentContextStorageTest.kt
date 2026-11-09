@@ -14,7 +14,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalApi::class)
 internal class MisuseReportingCurrentContextStorageTest {
 
-    private val root: Context = FakeContext()
+    private val root: Context = ContextValue()
     private lateinit var errors: MutableList<SdkError>
     private lateinit var delegate: StackStorage
     private lateinit var storage: MisuseReportingCurrentContextStorage
@@ -28,8 +28,8 @@ internal class MisuseReportingCurrentContextStorageTest {
 
     @Test
     fun testInOrderAttachDetachReportsNothing() {
-        val ctx1 = FakeContext()
-        val ctx2 = FakeContext()
+        val ctx1 = ContextValue()
+        val ctx2 = ContextValue()
         val scope1 = storage.attach(ctx1)
         val scope2 = storage.attach(ctx2)
         assertSame(ctx2, storage.current())
@@ -43,7 +43,7 @@ internal class MisuseReportingCurrentContextStorageTest {
 
     @Test
     fun testAttachingCurrentContextReportsButStillAttaches() {
-        val ctx = FakeContext()
+        val ctx = ContextValue()
         val outer = storage.attach(ctx)
         val inner = storage.attach(ctx)
 
@@ -60,7 +60,7 @@ internal class MisuseReportingCurrentContextStorageTest {
 
     @Test
     fun testDoubleDetachReportsAndSkipsDelegate() {
-        val scope = storage.attach(FakeContext())
+        val scope = storage.attach(ContextValue())
         assertTrue(scope.detach())
         assertFalse(scope.detach())
 
@@ -73,8 +73,8 @@ internal class MisuseReportingCurrentContextStorageTest {
 
     @Test
     fun testOutOfOrderDetachReportsButStillDetaches() {
-        val scope1 = storage.attach(FakeContext())
-        val ctx2 = FakeContext()
+        val scope1 = storage.attach(ContextValue())
+        val ctx2 = ContextValue()
         val scope2 = storage.attach(ctx2)
 
         assertTrue(scope1.detach())
@@ -90,7 +90,7 @@ internal class MisuseReportingCurrentContextStorageTest {
     @Test
     fun testDelegateDetachResultIsReturned() {
         delegate.detachResult = false
-        assertFalse(storage.attach(FakeContext()).detach())
+        assertFalse(storage.attach(ContextValue()).detach())
         assertTrue(errors.isEmpty())
     }
 
@@ -106,7 +106,7 @@ internal class MisuseReportingCurrentContextStorageTest {
     @Test
     fun testThrowingAttachReturnsFallbackScope() {
         val storage = MisuseReportingCurrentContextStorage(ThrowingStorage(), { root }, errors::add)
-        val scope = storage.attach(FakeContext())
+        val scope = storage.attach(ContextValue())
 
         assertSame(FallbackScope, scope)
         assertTrue(scope.detach())
@@ -127,7 +127,7 @@ internal class MisuseReportingCurrentContextStorageTest {
         }
         val storage = MisuseReportingCurrentContextStorage(throwingScopeStorage, { root }, errors::add)
 
-        assertFalse(storage.attach(FakeContext()).detach())
+        assertFalse(storage.attach(ContextValue()).detach())
         val error = assertIs<SdkError.UserCodeError>(errors.single())
         assertEquals("Scope.detach threw", error.message)
     }
@@ -136,8 +136,8 @@ internal class MisuseReportingCurrentContextStorageTest {
     fun testPrecedenceStorageAttachLowWhileHighIsSet() {
         val layered = PrecedenceStorage(root)
         val storage = MisuseReportingCurrentContextStorage(layered, { root }, errors::add)
-        val high = FakeContext()
-        val low = FakeContext()
+        val high = ContextValue()
+        val low = ContextValue()
 
         layered.target = Layer.HIGH
         val highScope = storage.attach(high)
@@ -158,8 +158,8 @@ internal class MisuseReportingCurrentContextStorageTest {
     fun testPrecedenceStorageInOrderNestedDetachReportsNothing() {
         val layered = PrecedenceStorage(root)
         val storage = MisuseReportingCurrentContextStorage(layered, { root }, errors::add)
-        val low = FakeContext()
-        val high = FakeContext()
+        val low = ContextValue()
+        val high = ContextValue()
 
         layered.target = Layer.LOW
         val lowScope = storage.attach(low)
@@ -179,9 +179,9 @@ internal class MisuseReportingCurrentContextStorageTest {
         val storage = MisuseReportingCurrentContextStorage(layered, { root }, errors::add)
 
         layered.target = Layer.LOW
-        val lowScope = storage.attach(FakeContext())
+        val lowScope = storage.attach(ContextValue())
         layered.target = Layer.HIGH
-        val high = FakeContext()
+        val high = ContextValue()
         val highScope = storage.attach(high)
 
         assertTrue(lowScope.detach())
