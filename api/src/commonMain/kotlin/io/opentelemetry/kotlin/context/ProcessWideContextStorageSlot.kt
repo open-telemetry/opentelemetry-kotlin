@@ -17,7 +17,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * dispatch to.
  */
 @OptIn(ExperimentalApi::class)
-internal object ProcessWideContextStorageSlot {
+internal object ProcessWideContextStorageSlot : CurrentContextStorageSource {
 
     internal class Installed(
         val original: CurrentContextStorage,
@@ -54,7 +54,7 @@ internal object ProcessWideContextStorageSlot {
     /**
      * Returns the effective storage that is installed, or null if the slot is empty.
      */
-    fun installed(): CurrentContextStorage? = ref.get()?.effective
+    override fun installed(): CurrentContextStorage? = ref.get()?.effective
 
     /**
      * Empties the slot regardless of owner.
