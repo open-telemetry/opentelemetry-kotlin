@@ -16,7 +16,7 @@ import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpan
+import io.opentelemetry.kotlin.tracing.ext.asOtelJavaSpan
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
 
@@ -160,7 +160,7 @@ internal object OtelJavaContextBridge {
     }
 
     private fun Span.toJavaSpanOrNull(): OtelJavaSpan? = when {
-        spanContext.isValid -> toOtelJavaSpan()
+        spanContext.isValid -> asOtelJavaSpan()
         else -> null
     }
 

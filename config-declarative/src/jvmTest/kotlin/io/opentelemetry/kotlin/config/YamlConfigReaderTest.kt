@@ -17,6 +17,26 @@ internal class YamlConfigReaderTest {
     }
 
     @Test
+    fun `should read the instrumentation node`() {
+        val reader = assertIs<DeclarativeBehaviorReader>(yamlConfigReader())
+        val instrumentation = reader.readInstrumentation(writeConfigFile(CONFIG_FILE_WITH_INSTRUMENTATION))
+        assertEquals("bar", instrumentation?.getString("foo"))
+    }
+
+    @Test
+    fun `should read an absent instrumentation node as empty`() {
+        val reader = assertIs<DeclarativeBehaviorReader>(yamlConfigReader())
+        val instrumentation = reader.readInstrumentation(writeConfigFile(CONFIG_FILE))
+        assertEquals(emptySet(), instrumentation?.propertyKeys)
+    }
+
+    @Test
+    fun `should throw when reading the instrumentation node of a file that does not exist`() {
+        val reader = assertIs<DeclarativeBehaviorReader>(yamlConfigReader())
+        assertFailsWith<Exception> { reader.readInstrumentation("does-not-exist.yaml") }
+    }
+
+    @Test
     fun `should throw when the file is not a valid configuration`() {
         val reader = assertIs<DeclarativeBehaviorReader>(yamlConfigReader())
         val path = writeConfigFile("file_format: [not, a, string")
@@ -39,6 +59,12 @@ internal class YamlConfigReaderTest {
               processors: []
               limits:
                 attribute_count_limit: 256
+        """.trimIndent()
+
+        val CONFIG_FILE_WITH_INSTRUMENTATION = """
+            file_format: "1.0"
+            instrumentation:
+              foo: bar
         """.trimIndent()
     }
 }
