@@ -117,7 +117,7 @@ internal class CreateOpenTelemetryErrorHandlerTest {
                 export { processor }
             }
             error("boom")
-        }
+        }.also(sdks::track)
 
         api.tracerProvider.getTracer("test").startSpan("span").end()
 

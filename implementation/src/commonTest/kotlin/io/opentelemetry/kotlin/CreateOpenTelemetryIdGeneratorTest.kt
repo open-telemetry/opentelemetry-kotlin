@@ -49,7 +49,7 @@ internal class CreateOpenTelemetryIdGeneratorTest {
             errorHandler(handler)
             idGenerator { error("boom") }
             tracerProvider { export { FakeSpanProcessor() } }
-        }
+        }.also(sdks::track)
 
         assertIs<IdGeneratorImpl>(api.idGenerator)
         assertTrue(api.tracerProvider.getTracer("test").startSpan("span").spanContext.isValid)

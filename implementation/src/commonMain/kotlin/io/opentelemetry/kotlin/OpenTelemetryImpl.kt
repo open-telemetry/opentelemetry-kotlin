@@ -1,6 +1,10 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.config.ConfigProvider
+import io.opentelemetry.kotlin.context.CurrentContextStorage
+import io.opentelemetry.kotlin.context.TempContextStandInApi
+import io.opentelemetry.kotlin.context.internalUninstallContextStorage
+import io.opentelemetry.kotlin.error.setProcessSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
@@ -25,6 +29,8 @@ internal class OpenTelemetryImpl(
     override val idGenerator: IdGenerator,
     override val resource: ResourceFactory,
     override val propagator: TextMapPropagator,
+    private val installedStorage: CurrentContextStorage? = null,
+    private val ownsErrorSink: Boolean = false,
     private val timeoutMs: Long = 3000,
 ) : OpenTelemetrySdk {
 
@@ -62,8 +68,16 @@ internal class OpenTelemetryImpl(
                     else -> Success
                 }
                 combineResults(tracerResult, loggerResult, meterResult)
-            }
+            }.also { releaseProcessWideState() }
         }
+
+    @OptIn(TempContextStandInApi::class)
+    private fun releaseProcessWideState() {
+        installedStorage?.let(::internalUninstallContextStorage)
+        if (ownsErrorSink) {
+            setProcessSdkErrorHandler(null)
+        }
+    }
 
     private suspend fun withOverallTimeout(action: suspend () -> OperationResultCode): OperationResultCode =
         runWithTimeout(timeoutMs, action)
