@@ -38,7 +38,6 @@ internal class BuiltInSamplersTest {
     private fun buildTracer(sampler: Sampler) = TracerImpl(
         clock = clock,
         processor = FakeSpanProcessor(),
-        contextFactory = contextFactory,
         scope = scope,
         resource = FakeResource(),
         spanLimitConfig = fakeSpanLimitsConfig,

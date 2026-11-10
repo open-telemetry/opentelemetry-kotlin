@@ -4,8 +4,6 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
-import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
@@ -27,7 +25,6 @@ internal class TracerSamplerTest {
     private val key = InstrumentationScopeInfoImpl("key", null, null, emptyMap())
     private lateinit var clock: FakeClock
     private lateinit var processor: FakeSpanProcessor
-    private lateinit var contextFactory: ContextFactory
     private lateinit var idGenerator: IdGenerator
 
     @BeforeTest
@@ -35,7 +32,6 @@ internal class TracerSamplerTest {
         clock = FakeClock()
         processor = FakeSpanProcessor()
         idGenerator = IdGeneratorImpl()
-        contextFactory = ContextFactoryImpl()
     }
 
     private fun buildTracer(
@@ -44,7 +40,6 @@ internal class TracerSamplerTest {
     ) = TracerImpl(
         clock = clock,
         processor = processor,
-        contextFactory = contextFactory,
         scope = key,
         resource = FakeResource(),
         spanLimitConfig = limitsCfg,
