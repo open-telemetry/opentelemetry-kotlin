@@ -56,15 +56,22 @@ public fun createCompatOpenTelemetry(
 
     // configFactory is legacy - use behavior to control SDK functionality instead
     val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, contextFactory)
+    val tracerProvider = configFactory.buildTracerProvider()
+    val loggerProvider = configFactory.buildLoggerProvider()
+    val meterProvider = configFactory.buildMeterProvider()
+
+    // claim process-wide state last, so that a failure earlier in init doesn't leave it claimed.
+    val processWideState = claimCompatProcessWideState("createCompatOpenTelemetry", cfg.sdkErrorHandler)
     return CompatOpenTelemetryImpl(
-        tracerProvider = configFactory.buildTracerProvider(),
-        loggerProvider = configFactory.buildLoggerProvider(),
-        meterProvider = configFactory.buildMeterProvider(),
+        tracerProvider = tracerProvider,
+        loggerProvider = loggerProvider,
+        meterProvider = meterProvider,
         clock = clock,
         context = contextFactory,
         idGenerator = configFactory.idGenerator,
         resource = CompatResourceFactory,
         propagator = cfg.propagator,
         sdkErrorHandler = cfg.sdkErrorHandler,
+        processWideState = processWideState,
     )
 }
