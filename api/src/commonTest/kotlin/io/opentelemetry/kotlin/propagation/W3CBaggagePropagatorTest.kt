@@ -92,7 +92,7 @@ internal class W3CBaggagePropagatorTest {
         val carrier = injectInto(baggage)
         val header = carrier["baggage"]
         assertNotNull(header)
-        assertTrue(header!!.length > 4096)
+        assertTrue(header.length > 4096)
         assertEquals(largeValue, baggage.getValue("big"))
     }
 
