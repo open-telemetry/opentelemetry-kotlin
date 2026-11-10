@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 internal class OpenTelemetryConfigReaderTest {
@@ -277,6 +278,86 @@ internal class OpenTelemetryConfigReaderTest {
         assertEquals(dsl, behavior)
         assertEquals(1, handler.sdkCodeErrors.size)
     }
+
+    @Test
+    fun `should read the instrumentation config from the config file`() {
+        val instrumentation = FakeConfigProperties()
+        var requested: String? = null
+        val result = instrumentationReader(
+            env = mapOf(CONFIG_FILE to "from-env.yaml"),
+            onReadInstrumentation = {
+                requested = it
+                instrumentation
+            },
+        ).readInstrumentation(configFilePath = PATH)
+        assertEquals(PATH, requested)
+        assertSame(instrumentation, result)
+    }
+
+    @Test
+    fun `should read the instrumentation config file path from the environment`() {
+        var requested: String? = null
+        instrumentationReader(
+            env = mapOf(CONFIG_FILE to PATH),
+            onReadInstrumentation = {
+                requested = it
+                FakeConfigProperties()
+            },
+        ).readInstrumentation()
+        assertEquals(PATH, requested)
+    }
+
+    @Test
+    fun `should not read the instrumentation config when no path was supplied`() {
+        var read = false
+        val result = instrumentationReader(
+            onReadInstrumentation = {
+                read = true
+                FakeConfigProperties()
+            },
+        ).readInstrumentation()
+        assertNull(result)
+        assertTrue(!read, "no path was supplied, so no file should have been read")
+    }
+
+    @Test
+    fun `should not read or report the instrumentation config when no reader is registered`() {
+        val handler = FakeSdkErrorHandler()
+        val reader = OpenTelemetryConfigReader(
+            envVarReader = EnvVarReader(mapOf(CONFIG_FILE to PATH)::get),
+            declarativeConfigReader = null,
+            sdkErrorHandler = handler,
+        )
+        assertNull(reader.readInstrumentation(configFilePath = PATH))
+        assertTrue(handler.errors.isEmpty(), "a missing reader is reported by read(), not here")
+    }
+
+    @Test
+    fun `should treat an unreadable instrumentation config as unset`() {
+        val handler = FakeSdkErrorHandler()
+        val result = instrumentationReader(
+            onReadInstrumentation = { error("cannot read $it") },
+            handler = handler,
+        ).readInstrumentation(configFilePath = PATH)
+        assertNull(result)
+        val misuse = handler.apiMisuses.single()
+        assertEquals("OTEL_CONFIG_FILE", misuse.api)
+        assertTrue(misuse.message.contains("cannot read $PATH"))
+        assertEquals(1, handler.errors.size)
+    }
+
+    private fun instrumentationReader(
+        env: Map<String, String> = emptyMap(),
+        onReadInstrumentation: (String) -> ConfigProperties?,
+        handler: SdkErrorHandler = NoopSdkErrorHandler,
+    ) = OpenTelemetryConfigReader(
+        envVarReader = EnvVarReader(env::get),
+        declarativeConfigReader = object : DeclarativeBehaviorReader {
+            override fun read(path: String) = OpenTelemetryBehavior()
+            override fun readInstrumentation(path: String) = onReadInstrumentation(path)
+        },
+        sdkErrorHandler = handler,
+    )
 
     private fun read(
         env: Map<String, String>? = emptyMap(),
