@@ -57,6 +57,35 @@ internal class SamplingRandomnessTest {
     }
 
     @Test
+    fun testThresholdQuantizesOriginalProbabilityAroundMidpoints() {
+        val maxThreshold = 1L shl 56
+        for (precision in 1..12) {
+            val midpoint = (1L shl (4 * precision)) + 8
+            for ((offset, sampledCount) in mapOf(-0.25 to midpoint - 8, 0.0 to midpoint - 8, 0.25 to midpoint + 8)) {
+                val ratio = (midpoint + offset) / maxThreshold
+                assertEquals(
+                    maxThreshold - sampledCount,
+                    thresholdFromRatio(ratio, precision),
+                    "precision=$precision, offset=$offset",
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testFullPrecisionRoundsOnceAndPreservesWholeCounts() {
+        val maxThreshold = 1L shl 56
+        for ((sampledCount, expectedCount) in mapOf(1.25 to 1L, 1.5 to 1L, 1.75 to 2L)) {
+            assertEquals(
+                maxThreshold - expectedCount,
+                thresholdFromRatio(sampledCount / maxThreshold, precision = 14),
+            )
+        }
+        val wholeCount = (1L shl 52) + 1
+        assertEquals(maxThreshold - wholeCount, thresholdFromRatio(wholeCount.toDouble() / maxThreshold, precision = 14))
+    }
+
+    @Test
     fun testRandomnessUsesLeastSignificant7Bytes() {
         // bytes 9..15 of the trace ID supply the 56-bit randomness value
         assertEquals(

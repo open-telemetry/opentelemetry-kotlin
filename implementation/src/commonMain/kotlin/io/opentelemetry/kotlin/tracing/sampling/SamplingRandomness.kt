@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_BYTES
-import kotlin.math.roundToLong
 
 /** Index of the first of the 7 least-significant bytes that supply the 56-bit randomness value. */
 private const val RANDOMNESS_OFFSET = 9
@@ -54,14 +53,13 @@ internal fun validateRatio(ratio: Double) {
  */
 internal fun thresholdFromRatio(ratio: Double, precision: Int = DEFAULT_THRESHOLD_PRECISION): Long {
     require(precision in 1..THRESHOLD_HEX_DIGITS) { "precision must be between 1 and 14, got $precision" }
-    val sampledCount = (ratio * MAX_THRESHOLD).roundToLong()
-    val threshold = MAX_THRESHOLD - sampledCount
+    val sampledCount = ratio * MAX_THRESHOLD
     val unusedBits = Long.SIZE_BITS - THRESHOLD_HEX_DIGITS * BITS_PER_HEX_DIGIT
-    val leadingDigits = ((sampledCount.countLeadingZeroBits() - unusedBits) / BITS_PER_HEX_DIGIT).coerceAtLeast(0)
+    val leadingDigits = ((sampledCount.toLong().countLeadingZeroBits() - unusedBits) / BITS_PER_HEX_DIGIT).coerceAtLeast(0)
     val discardedBits = (THRESHOLD_HEX_DIGITS - precision - leadingDigits).coerceAtLeast(0) * BITS_PER_HEX_DIGIT
-    if (discardedBits == 0) {
-        return threshold
-    }
-    val half = 1L shl (discardedBits - 1)
-    return ((threshold + half) ushr discardedBits) shl discardedBits
+    val sampledUnits = sampledCount / (1L shl discardedBits)
+    val wholeUnits = sampledUnits.toLong()
+    // Round sampled units down on a tie so the rejection threshold rounds up.
+    val roundedUnits = wholeUnits + if (sampledUnits - wholeUnits > 0.5) 1L else 0L
+    return MAX_THRESHOLD - (roundedUnits shl discardedBits)
 }
