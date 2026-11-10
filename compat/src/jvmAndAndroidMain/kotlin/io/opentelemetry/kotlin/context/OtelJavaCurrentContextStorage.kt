@@ -17,7 +17,6 @@ internal class OtelJavaCurrentContextStorage(
 
     override fun attach(context: Context): Scope {
         val java = when {
-            context is ContextAdapter -> context.impl
             context === root -> OtelJavaContext.root()
             else -> OtelJavaContextBridge.toJava(context, layerOverRoot = true)
         }
@@ -27,7 +26,7 @@ internal class OtelJavaCurrentContextStorage(
     override fun current(): Context {
         return when (val current = OtelJavaContext.current()) {
             OtelJavaContext.root() -> root
-            else -> OtelJavaContextBridge.toKotlin(current, cacheAdapter = true)
+            else -> OtelJavaContextBridge.toKotlin(current)
         }
     }
 }
