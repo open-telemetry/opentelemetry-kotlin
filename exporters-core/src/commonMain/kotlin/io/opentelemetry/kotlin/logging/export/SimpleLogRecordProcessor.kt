@@ -15,6 +15,7 @@ import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -129,7 +130,12 @@ internal class SimpleLogRecordProcessor(
             // Phase 2 runs even when draining timed out or failed, so the exporter is always
             // released. Losers of the shutdown race return Success without cleaning up again.
             return if (ownsShutdown) {
-                drainResult.combine(cleanupExporter())
+                // Run cleanup in NonCancellable so caller cancellation cannot interrupt
+                // exporter shutdown, then re-enter the caller context so cancellation
+                // still propagates to the caller afterwards.
+                val callerContext = coroutineContext
+                val cleanupResult = withContext(NonCancellable) { cleanupExporter() }
+                withContext(callerContext) { drainResult.combine(cleanupResult) }
             } else {
                 drainResult
             }

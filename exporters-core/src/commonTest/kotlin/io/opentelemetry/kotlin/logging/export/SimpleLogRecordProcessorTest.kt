@@ -341,6 +341,35 @@ internal class SimpleLogRecordProcessorTest {
         assertTrue(errorHandler.userCodeErrors.isEmpty())
     }
 
+    @Test
+    fun testCancellationDuringShutdownFlushStillShutsDownExporter() = runTest {
+        val flushGate = CompletableDeferred<Unit>()
+        val exporter = TestLogRecordExporter(flushGate = flushGate)
+        val processor = newProcessor(exporter, testScheduler = testScheduler)
+
+        val shutdownJob = async { processor.shutdown() }
+        runCurrent()
+
+        // Cleanup's exporter forceFlush is suspended on the gate; exporter
+        // shutdown must not have run yet.
+        assertTrue(exporter.events.contains("forceFlush"))
+        assertFalse(exporter.events.contains("shutdown"))
+
+        // Cancelling the shutdown caller must not interrupt exporter cleanup.
+        shutdownJob.cancel()
+        flushGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(1, exporter.shutdownCalls)
+        assertEquals(listOf("forceFlush", "shutdown"), exporter.events)
+        // Cancellation still propagates to the original caller.
+        assertTrue(shutdownJob.isCancelled)
+
+        // A repeated shutdown does not run cleanup a second time.
+        assertEquals(OperationResultCode.Success, processor.shutdown())
+        assertEquals(1, exporter.shutdownCalls)
+    }
+
     private class SuspendingLogRecordExporter : LogRecordExporter {
         val exports: MutableList<String> = mutableListOf()
         var observedConcurrentExport: Boolean = false
