@@ -29,6 +29,8 @@ public interface TextMapGetter<C> {
      * The default implementation returns the single value supplied by [get]. Carriers with
      * multiple values per key should override this method to return all values.
      */
-    public fun getAll(carrier: C, key: String): List<String> =
-        get(carrier, key)?.let { listOf(it) } ?: emptyList()
+    public fun getAll(carrier: C, key: String): List<String> {
+        val value = get(carrier, key) ?: return emptyList()
+        return listOf(value)
+    }
 }
