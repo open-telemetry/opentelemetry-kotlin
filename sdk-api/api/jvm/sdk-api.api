@@ -19,14 +19,6 @@ public abstract interface class io/opentelemetry/kotlin/attributes/AttributeCont
 	public abstract fun getAttributes ()Ljava/util/Map;
 }
 
-public final class io/opentelemetry/kotlin/context/CurrentContextStorageMode : java/lang/Enum {
-	public static final field SINGLE_SLOT Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
-	public static final field THREAD_LOCAL Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
-	public static fun values ()[Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
-}
-
 public abstract class io/opentelemetry/kotlin/export/OperationResultCode {
 }
 
@@ -95,9 +87,8 @@ public final class io/opentelemetry/kotlin/init/ConfigFileDsl$DefaultImpls {
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/ContextConfigDsl {
-	public abstract fun getStorageMode ()Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
-	public abstract fun setStorageMode (Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;)V
-	public abstract fun storage (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun getStorage ()Lio/opentelemetry/kotlin/context/CurrentContextStorage;
+	public abstract fun setStorage (Lio/opentelemetry/kotlin/context/CurrentContextStorage;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/DeclarativeConfigReader {

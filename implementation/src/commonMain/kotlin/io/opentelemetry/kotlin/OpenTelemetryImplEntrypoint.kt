@@ -51,7 +51,7 @@ public fun createOpenTelemetry(
     val configFactory = SdkConfigFactory(cfg, behavior, resourceFactory)
     val idGenerator = configFactory.idGenerator
 
-    val contextFactory = ContextFactoryImpl(cfg.sdkErrorHandler, cfg.contextConfig::generateStorage)
+    val contextFactory = ContextFactoryImpl(cfg.sdkErrorHandler, cfg.contextConfig.generateStorage())
 
     val tracingConfig = configFactory.generateTracingConfig()
     val loggingConfig = configFactory.generateLoggingConfig()

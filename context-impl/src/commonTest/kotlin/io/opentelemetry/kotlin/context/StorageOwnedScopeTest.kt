@@ -18,9 +18,8 @@ internal class StorageOwnedScopeTest {
     @BeforeTest
     fun setUp() {
         handler = FakeSdkErrorHandler()
-        factory = ContextFactoryImpl(handler) { rootSupplier ->
-            FakeStackCurrentContextStorage(rootSupplier).also { storage = it }
-        }
+        storage = FakeStackCurrentContextStorage()
+        factory = ContextFactoryImpl(handler, storage)
     }
 
     @Test
@@ -69,11 +68,9 @@ internal class StorageOwnedScopeTest {
     private fun newContext(): Context =
         factory.rootContext().set(createContextKey("key"), Any())
 
-    private class FakeStackCurrentContextStorage(
-        rootSupplier: () -> Context,
-    ) : CurrentContextStorage {
+    @OptIn(TempContextStandInApi::class)
+    private class FakeStackCurrentContextStorage : CurrentContextStorage {
 
-        private val root by lazy { rootSupplier() }
         private val stack = ArrayDeque<Context>()
 
         var attachCount = 0
@@ -91,6 +88,6 @@ internal class StorageOwnedScopeTest {
             }
         }
 
-        override fun current(): Context = stack.lastOrNull() ?: root
+        override fun current(): Context = stack.lastOrNull() ?: internalRootContext()
     }
 }

@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.framework.SdkTracker
+import io.opentelemetry.kotlin.init.useOtelJavaContextStorage
 import io.opentelemetry.kotlin.toOtelJavaApi
 import io.opentelemetry.kotlin.toOtelKotlinApi
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -175,7 +176,7 @@ internal class CompatCurrentContextIntegrationTest {
         val handler = FakeSdkErrorHandler()
         val sdk = createCompatOpenTelemetry {
             errorHandler(handler)
-            context { storageMode = CurrentContextStorageMode.SINGLE_SLOT }
+            context { useOtelJavaContextStorage() }
         }.also(sdks::track)
         assertEquals(1, handler.apiMisuses.size)
 
