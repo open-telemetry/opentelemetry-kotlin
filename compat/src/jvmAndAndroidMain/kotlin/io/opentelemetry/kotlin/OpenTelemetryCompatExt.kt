@@ -51,7 +51,9 @@ private val warnedContextFactories: MutableSet<ContextFactory> =
 
 private fun warnIfNotUsingOtelJavaContextStorage(context: ContextFactory) {
     val factory = context as? ContextFactoryImpl ?: return
-    if (factory.storage is OtelJavaCurrentContextStorage || !warnedContextFactories.add(factory)) {
+    // only warn about a storage this SDK installed
+    val storage = factory.installedStorage ?: return
+    if (storage is OtelJavaCurrentContextStorage || !warnedContextFactories.add(factory)) {
         return
     }
     factory.sdkErrorHandler.reportError(

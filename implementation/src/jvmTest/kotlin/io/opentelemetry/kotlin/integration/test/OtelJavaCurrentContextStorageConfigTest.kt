@@ -24,6 +24,6 @@ internal class OtelJavaCurrentContextStorageConfigTest {
         val api = createOpenTelemetry {
             context { this.storage = storage }
         }.also(sdks::track)
-        assertSame(storage, assertIs<ContextFactoryImpl>(api.context).storage)
+        assertSame(storage, assertIs<ContextFactoryImpl>(api.context).installedStorage)
     }
 }
