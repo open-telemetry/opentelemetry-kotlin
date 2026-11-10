@@ -43,6 +43,10 @@ public fun createOpenTelemetry(
         declarativeConfigReader = cfg.declarativeConfigReader,
     ).read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
 
+    if (behavior.disabled == true) {
+        return NoopOpenTelemetrySdk
+    }
+
     // configFactory is legacy - use behavior to control SDK functionality instead
     val configFactory = SdkConfigFactory(cfg, behavior, resourceFactory)
     val idGenerator = configFactory.idGenerator
