@@ -178,7 +178,4 @@ internal object W3CBaggagePropagator : TextMapPropagator {
 
     /** Returns the UTF-8 byte length of this string. */
     private fun String.utf8ByteLength(): Int = encodeToByteArray().size
-
-    /** Returns the UTF-8 byte length of this StringBuilder's current content. */
-    private fun StringBuilder.utf8ByteLength(): Int = toString().utf8ByteLength()
 }
