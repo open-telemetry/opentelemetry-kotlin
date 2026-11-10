@@ -129,11 +129,10 @@ internal class MeterImpl(
         measurement: ObservableMeasurement,
         vararg additionalMeasurements: ObservableMeasurement,
         callback: () -> Unit,
-    ): AutoCloseable = NoopOpenTelemetry.meterProvider.getMeter("").batchCallback(
-        measurement,
-        *additionalMeasurements,
-        callback = callback,
-    )
+    ): AutoCloseable {
+        val noopMeter = getNoopMeter()
+        return noopMeter.batchCallback(measurement, *additionalMeasurements, callback = callback)
+    }
 
     /**
      * Returns a noop meter if [name] is not a valid
