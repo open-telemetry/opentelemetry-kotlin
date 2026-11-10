@@ -8,7 +8,7 @@ internal class ClockImplTest {
 
     @Test
     fun `anchored clock preserves sub-millisecond elapsed precision`() {
-        var wallMillis = 1_700_000_000_000L
+        val wallMillis = 1_700_000_000_000L
         var monoNanos = 1_000_000_000L
         val clock = AnchoredClock(
             wallClockMillis = { wallMillis },
@@ -24,7 +24,7 @@ internal class ClockImplTest {
 
     @Test
     fun `anchored clock accepts timestamps exactly on a millisecond boundary`() {
-        var wallMillis = 1_700_000_000_000L
+        val wallMillis = 1_700_000_000_000L
         var monoNanos = 5_000_000_000L
         val clock = AnchoredClock(
             wallClockMillis = { wallMillis },
@@ -63,7 +63,7 @@ internal class ClockImplTest {
         )
 
         monoNanos += 500_000_000L // 500 ms elapsed
-        wallMillis += 60_000L    // wall clock jumps forward a minute
+        wallMillis += 60_000L // wall clock jumps forward a minute
         assertEquals(
             1_700_000_000_000L * 1_000_000L + 500_000_000L,
             clock.getNanos(),
