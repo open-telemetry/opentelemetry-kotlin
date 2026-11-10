@@ -33,6 +33,8 @@ public final class io/opentelemetry/kotlin/init/ContextConfigDslExtKt {
 }
 
 public final class io/opentelemetry/kotlin/logging/export/LogRecordExporterExtKt {
+	public static final fun toOtelJavaLogRecordExporter (Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;Lio/opentelemetry/kotlin/error/SdkErrorHandler;)Lio/opentelemetry/sdk/logs/export/LogRecordExporter;
+	public static synthetic fun toOtelJavaLogRecordExporter$default (Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;Lio/opentelemetry/kotlin/error/SdkErrorHandler;ILjava/lang/Object;)Lio/opentelemetry/sdk/logs/export/LogRecordExporter;
 	public static final fun toOtelKotlinLogRecordExporter (Lio/opentelemetry/sdk/logs/export/LogRecordExporter;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
 }
 
