@@ -1,14 +1,22 @@
 package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.aliases.OtelJavaContextKey
+import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.factory.CompatContextFactory
+import io.opentelemetry.kotlin.framework.SdkTracker
 import org.junit.Test
+import kotlin.test.AfterTest
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
 internal class ContextAdapterEqualityTest {
 
     private val factory = CompatContextFactory()
+
+    private val sdks = SdkTracker().also { createCompatOpenTelemetry().also(it::track) }
+
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
     private val key = createContextKey<String>("key")
 
     @Test

@@ -3,9 +3,12 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanProcessor
+import io.opentelemetry.kotlin.framework.SdkTracker
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -23,6 +26,11 @@ internal class TracerAdapterParentTest {
         contextFactory,
         NoopSdkErrorHandler,
     ).getTracer("test")
+
+    private val sdks = SdkTracker().also { createCompatOpenTelemetry().also(it::track) }
+
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
 
     @Test
     fun `kotlin span inherits active java span as parent`() {
