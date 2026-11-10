@@ -60,6 +60,10 @@ internal fun thresholdFromRatio(ratio: Double, precision: Int = DEFAULT_THRESHOL
     val sampledUnits = sampledCount / (1L shl discardedBits)
     val wholeUnits = sampledUnits.toLong()
     // Round sampled units down on a tie so the rejection threshold rounds up.
-    val roundedUnits = wholeUnits + if (sampledUnits - wholeUnits > 0.5) 1L else 0L
+    val roundedUnits = wholeUnits + if (sampledUnits - wholeUnits > 0.5) {
+        1L
+    } else {
+        0L
+    }
     return MAX_THRESHOLD - (roundedUnits shl discardedBits)
 }
