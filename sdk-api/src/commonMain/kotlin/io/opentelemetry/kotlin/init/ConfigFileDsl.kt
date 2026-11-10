@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * https://opentelemetry.io/docs/specs/otel/configuration/
  */
 @ExperimentalApi
+@ConfigDsl
 public interface ConfigFileDsl {
 
     /**

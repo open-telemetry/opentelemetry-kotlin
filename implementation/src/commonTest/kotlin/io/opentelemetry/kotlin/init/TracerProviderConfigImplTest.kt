@@ -22,11 +22,11 @@ import io.opentelemetry.kotlin.sdkDefaultAttributes
 import io.opentelemetry.kotlin.sdkDefaultSchemaUrl
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
+import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
 import io.opentelemetry.kotlin.tracing.createSpanContext
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
-import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.export.compositeSpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
 import io.opentelemetry.kotlin.tracing.sampling.ParentBasedSampler
@@ -35,9 +35,9 @@ import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
-import kotlin.test.assertNotSame
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
@@ -209,35 +209,23 @@ internal class TracerProviderConfigImplTest {
     }
 
     @Test
-    fun testDoubleExportConfigKeepsFirst() {
-        var first: SpanProcessor? = null
-        var second: SpanProcessor? = null
-        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
-            export {
-                compositeSpanProcessor(FakeSpanProcessor()).apply {
-                    first = this
-                }
-            }
-            export {
-                compositeSpanProcessor(FakeSpanProcessor()).apply {
-                    second = this
-                }
-            }
-        }.generateTracingConfig(base)
-        assertSame(first, cfg.processor)
-        assertNotSame(second, cfg.processor)
-    }
-
-    @Test
-    fun testDoubleExportReportsApiMisuse() {
+    fun testRepeatedExportCallsProcessorsInRegistrationOrder() {
         val handler = FakeSdkErrorHandler()
-        TracerProviderConfigImpl(clock, handler).apply {
-            export { compositeSpanProcessor(FakeSpanProcessor()) }
-            export { compositeSpanProcessor(FakeSpanProcessor()) }
+        val calls = mutableListOf<String>()
+        val first = FakeSpanProcessor(endAction = { calls.add("first") })
+        val second = FakeSpanProcessor(endAction = { calls.add("second") })
+        val cfg = TracerProviderConfigImpl(clock, handler).apply {
+            export { first }
+            export { second }
         }.generateTracingConfig(base)
-        assertEquals(1, handler.apiMisuses.size)
-        assertEquals("TracerProviderConfigDsl.export", handler.apiMisuses.single().api)
-        assertEquals("export() should only be called once.", handler.apiMisuses.single().message)
+        val span = FakeReadWriteSpan()
+
+        assertNotNull(cfg.processor).onEnd(span)
+
+        assertEquals(listOf("first", "second"), calls)
+        assertSame(span, first.endCalls.single())
+        assertSame(span, second.endCalls.single())
+        assertFalse(handler.hasErrors())
     }
 
     @Test

@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.config.ConfigProperties
 import io.opentelemetry.kotlin.config.DeclarativeBehaviorReader
 import io.opentelemetry.kotlin.config.OpenTelemetryConfigReader
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
@@ -11,8 +12,14 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 /**
  * Reads the behavior supplied by every configuration mechanism, then resolves their precedence.
  */
-internal fun interface BehaviorReader {
+internal interface BehaviorReader {
     fun read(configFilePath: String?, dsl: () -> OpenTelemetryBehavior): OpenTelemetryBehavior
+
+    /**
+     * Reads the `.instrumentation` node of the declarative config file, or returns `null` if there
+     * is none.
+     */
+    fun readInstrumentation(configFilePath: String?): ConfigProperties?
 }
 
 /**
@@ -29,7 +36,11 @@ internal fun defaultBehaviorReader(
         declarativeConfigReader = declarativeConfigReader,
         sdkErrorHandler = sdkErrorHandler,
     )
-    return BehaviorReader { configFilePath, dsl ->
-        configReader.read(dsl = dsl, configFilePath = configFilePath)
+    return object : BehaviorReader {
+        override fun read(configFilePath: String?, dsl: () -> OpenTelemetryBehavior): OpenTelemetryBehavior =
+            configReader.read(dsl = dsl, configFilePath = configFilePath)
+
+        override fun readInstrumentation(configFilePath: String?): ConfigProperties? =
+            configReader.readInstrumentation(configFilePath)
     }
 }
