@@ -19,7 +19,7 @@ private const val HIDDEN = 0xF000
 private const val ASCII = 128
 private val WHITESPACE = Regex("""\s+""")
 private val NULL_VALUES = setOf("", "~", "null", "NULL")
-private val ENV_SUBSTITUTION = Regex("""(?:env:)?([a-zA-Z_][a-zA-Z0-9_]*)(?::-(.*))?""")
+private val ENV_SUBSTITUTION = Regex("""(?:env:)?([a-zA-Z_][a-zA-Z0-9_]*)(?::-([\s\S]*))?""")
 
 /**
  * Substitutes environment variable references in the scalar values of [yaml], so that node types
