@@ -274,7 +274,7 @@ internal class MeterProviderImplTest {
         val counter = meter.createLongUpDownCounter("invalid-name!", unit = "1", description = "test")
 
         // Should return a noop instrument
-        assertNotNull(counter)
+        assertFalse(counter.enabled())
         assertEquals(1, handler.apiMisuses.size)
         assertTrue(handler.apiMisuses.single().message.contains("invalid"))
     }
