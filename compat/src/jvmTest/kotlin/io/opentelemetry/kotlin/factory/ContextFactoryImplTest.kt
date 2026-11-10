@@ -1,11 +1,11 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
+import io.opentelemetry.kotlin.context.TempContextStandInApi
 import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.internalRootContext
 import io.opentelemetry.kotlin.context.rootContext
-import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.framework.SdkTracker
 import org.junit.Test
@@ -14,6 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
+@OptIn(TempContextStandInApi::class)
 internal class ContextFactoryImplTest {
 
     private val sdks = SdkTracker()
@@ -25,7 +26,7 @@ internal class ContextFactoryImplTest {
 
     @Test
     fun `test root`() {
-        assertSame(OtelJavaContext.root(), contextFactory.rootContext().toOtelJavaContext())
+        assertSame(internalRootContext(), contextFactory.rootContext())
     }
 
     @Test
@@ -49,6 +50,13 @@ internal class ContextFactoryImplTest {
 
     @Test
     fun `test current`() {
-        assertSame(OtelJavaContext.current(), contextFactory.currentContext().toOtelJavaContext())
+        createCompatOpenTelemetry().also(sdks::track)
+        val ctx = contextFactory.rootContext().set(createContextKey("key"), "value")
+        val scope = ctx.attach()
+        try {
+            assertSame(ctx, contextFactory.currentContext())
+        } finally {
+            scope.detach()
+        }
     }
 }
