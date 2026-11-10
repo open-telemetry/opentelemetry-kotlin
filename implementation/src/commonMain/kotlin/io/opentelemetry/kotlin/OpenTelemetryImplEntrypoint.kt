@@ -71,7 +71,6 @@ public fun createOpenTelemetry(
         tracerProvider = TracerProviderImpl(
             clock = clock,
             tracingConfig = tracingConfig,
-            contextFactory = contextFactory,
             idGenerator = idGenerator,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior(),
             spanLimits = behavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior(),
@@ -79,7 +78,6 @@ public fun createOpenTelemetry(
         loggerProvider = LoggerProviderImpl(
             clock = clock,
             loggingConfig = loggingConfig,
-            contextFactory = contextFactory,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior(),
             logLimits = behavior.loggerProvider?.logLimits ?: LogLimitsBehavior(),
         ),

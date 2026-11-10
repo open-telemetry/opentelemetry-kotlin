@@ -10,7 +10,6 @@ import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.export.MutableShutdownState
-import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -98,7 +97,6 @@ internal class TracerErrorHandlingTest {
     ) = TracerImpl(
         clock = case.clock,
         processor = processor,
-        contextFactory = FakeContextFactory(),
         scope = key,
         resource = FakeResource(),
         spanLimitConfig = fakeSpanLimitsConfig,
