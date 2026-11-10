@@ -2,6 +2,10 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.context.TempContextStandInApi
+import io.opentelemetry.kotlin.context.createSingleSlotCurrentContextStorage
+import io.opentelemetry.kotlin.context.internalInstallContextStorage
+import io.opentelemetry.kotlin.context.internalUninstallContextStorage
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -12,6 +16,7 @@ import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -20,7 +25,10 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
+@OptIn(TempContextStandInApi::class)
 internal class TracerSpanContextTest {
+
+    private val storage = createSingleSlotCurrentContextStorage()
 
     private val key = InstrumentationScopeInfoImpl("key", null, null, emptyMap())
     private lateinit var tracer: TracerImpl
@@ -31,6 +39,7 @@ internal class TracerSpanContextTest {
 
     @BeforeTest
     fun setUp() {
+        internalInstallContextStorage(storage)
         clock = FakeClock()
         processor = FakeSpanProcessor()
         idGenerator = IdGeneratorImpl()
@@ -46,6 +55,11 @@ internal class TracerSpanContextTest {
             shutdownState = MutableShutdownState(),
             sdkErrorHandler = NoopSdkErrorHandler,
         )
+    }
+
+    @AfterTest
+    fun tearDown() {
+        internalUninstallContextStorage(storage)
     }
 
     @Test
