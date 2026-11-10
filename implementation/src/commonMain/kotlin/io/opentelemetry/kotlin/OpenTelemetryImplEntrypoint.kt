@@ -7,7 +7,6 @@ import io.opentelemetry.kotlin.config.ConfigProviderImpl
 import io.opentelemetry.kotlin.context.CurrentContextStorage
 import io.opentelemetry.kotlin.context.TempContextStandInApi
 import io.opentelemetry.kotlin.context.internalInstallContextStorage
-import io.opentelemetry.kotlin.context.internalRootContext
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -107,7 +106,7 @@ public fun createOpenTelemetry(
 @OptIn(TempContextStandInApi::class)
 private fun installContextStorage(cfg: OpenTelemetryConfigImpl): CurrentContextStorage? {
     val contextConfig = cfg.contextConfig
-    val storage = contextConfig.generateStorage(::internalRootContext)
+    val storage = contextConfig.generateStorage()
     if (internalInstallContextStorage(storage)) {
         return storage
     }
