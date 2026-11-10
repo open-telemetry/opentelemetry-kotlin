@@ -5,12 +5,10 @@ import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.TempContextStandInApi
 import io.opentelemetry.kotlin.context.createSingleSlotCurrentContextStorage
 import io.opentelemetry.kotlin.context.internalInstallContextStorage
+import io.opentelemetry.kotlin.context.internalRootContext
 import io.opentelemetry.kotlin.context.internalUninstallContextStorage
-import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
-import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -35,14 +33,12 @@ internal class LogContextTest {
     private lateinit var tracer: TracerImpl
     private lateinit var clock: FakeClock
     private lateinit var processor: FakeLogRecordProcessor
-    private lateinit var contextFactory: ContextFactory
 
     @BeforeTest
     fun setUp() {
         internalInstallContextStorage(storage)
         clock = FakeClock()
         processor = FakeLogRecordProcessor()
-        contextFactory = ContextFactoryImpl()
         logger = LoggerImpl(
             clock,
             processor,
@@ -79,7 +75,7 @@ internal class LogContextTest {
     @Test
     fun testOverrideContext() {
         val span = tracer.startSpan("span")
-        val ctx = contextFactory.rootContext().storeSpan(span)
+        val ctx = internalRootContext().storeSpan(span)
         logger.emit(
             context = ctx,
         )
@@ -91,7 +87,7 @@ internal class LogContextTest {
     @Test
     fun testCurrentContext() {
         val span = tracer.startSpan("span")
-        val ctx = contextFactory.rootContext().storeSpan(span)
+        val ctx = internalRootContext().storeSpan(span)
         val scope = ctx.attach()
         logger.emit()
 

@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.integration.test.tracing
 
-import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.context.TempContextStandInApi
+import io.opentelemetry.kotlin.context.internalRootContext
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
@@ -14,6 +15,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+@OptIn(TempContextStandInApi::class)
 internal class TracerConfigTest {
 
     private lateinit var harness: IntegrationTestHarness
@@ -57,7 +59,7 @@ internal class TracerConfigTest {
         harness.config.tracerProvider = {
             tracerConfigurator { TracerConfigImpl(false) }
         }
-        val parent = harness.kotlinApi.context.rootContext().storeSpanContext(FakeSpanContext.VALID)
+        val parent = internalRootContext().storeSpanContext(FakeSpanContext.VALID)
 
         val span = harness.tracerProvider.getTracer("disabled").startSpan("span", parentContext = parent)
         assertSameSpanContext(FakeSpanContext.VALID, span.spanContext)
@@ -66,7 +68,7 @@ internal class TracerConfigTest {
 
     @Test
     fun testTracerPropagatesParentAfterShutdown() = runTest {
-        val parent = harness.kotlinApi.context.rootContext().storeSpanContext(FakeSpanContext.VALID)
+        val parent = internalRootContext().storeSpanContext(FakeSpanContext.VALID)
         val existing = harness.tracerProvider.getTracer("existing")
         (harness.tracerProvider as TelemetryCloseable).shutdown()
 

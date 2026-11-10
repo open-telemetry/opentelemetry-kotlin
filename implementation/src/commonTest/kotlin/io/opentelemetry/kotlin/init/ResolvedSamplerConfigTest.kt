@@ -3,11 +3,11 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
-import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.context.TempContextStandInApi
+import io.opentelemetry.kotlin.context.internalRootContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
@@ -20,11 +20,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertSame
 
-@OptIn(ExperimentalStdlibApi::class)
+@OptIn(ExperimentalStdlibApi::class, TempContextStandInApi::class)
 internal class ResolvedSamplerConfigTest {
 
     private val clock = FakeClock()
-    private val contextFactory = ContextFactoryImpl()
 
     private fun tracingConfig(
         getEnvVar: (String) -> String? = { null },
@@ -58,7 +57,7 @@ internal class ResolvedSamplerConfigTest {
     }
 
     private fun Sampler.shouldSampleRoot(): Decision = shouldSample(
-        context = contextFactory.rootContext(),
+        context = internalRootContext(),
         traceIdBytes = ZERO_TRACE_ID,
         name = "root",
         spanKind = SpanKind.INTERNAL,

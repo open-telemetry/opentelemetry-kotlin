@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.integration.test.tracing
 
-import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.context.TempContextStandInApi
+import io.opentelemetry.kotlin.context.internalRootContext
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.StatusData
@@ -12,6 +13,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
+@OptIn(TempContextStandInApi::class)
 internal class TracerExportTest {
 
     private val spanAttributeLimit = 5
@@ -153,8 +155,7 @@ internal class TracerExportTest {
         val parentName = "parent"
         val childName = "child"
         val parentSpan = harness.tracer.startSpan(parentName)
-        val contextFactory = harness.kotlinApi.context
-        val parentCtx = contextFactory.rootContext().storeSpan(parentSpan)
+        val parentCtx = internalRootContext().storeSpan(parentSpan)
         val childSpan = harness.tracer.startSpan(childName, parentContext = parentCtx)
         parentSpan.end()
         childSpan.end()
