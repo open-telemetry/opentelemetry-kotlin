@@ -14,7 +14,8 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.CurrentContextStorageMode
 import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.context.FakeCurrentContextStorage
-import io.opentelemetry.kotlin.context.SingleSlotCurrentContextStorage
+import io.opentelemetry.kotlin.context.TempContextStandInApi
+import io.opentelemetry.kotlin.context.internalRootContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -287,14 +288,15 @@ internal class OpenTelemetryConfigImplTest {
         }
     }
 
+    @OptIn(TempContextStandInApi::class)
     @Test
     fun testDefaultStorage() {
         val cfg = OpenTelemetryConfigImpl(clock)
-        val rootContext = FakeContext()
-        val storage = cfg.contextConfig.generateStorage { rootContext }
-        assertTrue(storage is SingleSlotCurrentContextStorage)
+        val storage = cfg.contextConfig.generateStorage(::FakeContext)
+        assertSame(internalRootContext(), storage.current())
     }
 
+    @OptIn(TempContextStandInApi::class)
     @Test
     fun testThreadLocalStorage() {
         val cfg = OpenTelemetryConfigImpl(clock).apply {
@@ -303,10 +305,7 @@ internal class OpenTelemetryConfigImplTest {
             }
         }
         val storage = cfg.contextConfig.generateStorage(::FakeContext)
-        val root = FakeContext()
-        val rootStorage = cfg.contextConfig.generateStorage { root }
-        assertNotNull(storage)
-        assertSame(root, rootStorage.current())
+        assertSame(internalRootContext(), storage.current())
     }
 
     @Test
@@ -340,13 +339,12 @@ internal class OpenTelemetryConfigImplTest {
             context {
                 storage { rootSupplier ->
                     captured = rootSupplier
-                    SingleSlotCurrentContextStorage(rootSupplier)
+                    FakeCurrentContextStorage()
                 }
             }
         }
-        val storage = cfg.contextConfig.generateStorage { root }
+        cfg.contextConfig.generateStorage { root }
         assertSame(root, captured?.invoke())
-        assertSame(root, storage.current())
     }
 
     @Test

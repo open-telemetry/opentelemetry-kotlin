@@ -5,6 +5,7 @@ import kotlin.test.Test
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
+@OptIn(TempContextStandInApi::class)
 internal class SingleSlotCurrentContextStorageTest {
 
     private lateinit var root: Context
@@ -12,8 +13,8 @@ internal class SingleSlotCurrentContextStorageTest {
 
     @BeforeTest
     fun setUp() {
-        root = FakeContext()
-        storage = SingleSlotCurrentContextStorage { root }
+        root = internalRootContext()
+        storage = SingleSlotCurrentContextStorage()
     }
 
     @Test
