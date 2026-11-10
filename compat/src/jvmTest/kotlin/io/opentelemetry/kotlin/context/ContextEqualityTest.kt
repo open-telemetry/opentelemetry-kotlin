@@ -9,7 +9,7 @@ import kotlin.test.AfterTest
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-internal class ContextAdapterEqualityTest {
+internal class ContextEqualityTest {
 
     private val factory = CompatContextFactory()
 

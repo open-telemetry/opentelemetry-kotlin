@@ -167,11 +167,13 @@ internal class OtelJavaCurrentContextStorageTest {
     }
 
     @Test
-    fun `adapter path - java-built contexts keep java keys and are identity-stable`() {
+    fun `foreign java contexts keep java keys and are identity-stable`() {
         OtelJavaContext.root().with(javaKey, "java").with(javaSpan).makeCurrent().use {
             val current = storage.current()
             assertEquals(JAVA_SPAN_ID, current.extractSpan().spanContext.spanId)
             assertSame(current, storage.current())
+            assertSame(current, OtelJavaContext.current().toOtelKotlinContext())
+            assertSame(OtelJavaContext.current(), current.toOtelJavaContext())
             storage.attach(current.set(key, "value")).use {
                 assertEquals("java", OtelJavaContext.current().get(javaKey))
                 assertEquals("value", storage.current().get(key))
@@ -195,7 +197,7 @@ internal class OtelJavaCurrentContextStorageTest {
     }
 
     @Test
-    fun `failing user code falls back to lazy adapters and is reported once`() {
+    fun `failing user code falls back and is reported once`() {
         val failsOnAttach = MapContext(failOn = setOf("extractSpan"))
         storage.attach(failsOnAttach).use {
             assertIs<OtelJavaContextAdapter>(OtelJavaContext.current())
@@ -207,7 +209,7 @@ internal class OtelJavaCurrentContextStorageTest {
         storage.attach(MapContext(failOn = setOf("storeSpan")).set(key, "value")).use {
             OtelJavaContext.current().with(javaSpan).makeCurrent().use {
                 val current = storage.current()
-                assertIs<ContextAdapter>(current)
+                assertNull(current.get(key))
                 assertSame(current, storage.current())
                 assertEquals(JAVA_SPAN_ID, current.extractSpan().spanContext.spanId)
             }

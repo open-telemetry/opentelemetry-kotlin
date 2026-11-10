@@ -32,7 +32,7 @@ internal class PropagatingNoopTracerTest {
 
     private val contextFactory = ContextFactoryImpl()
     private val errorHandler = FakeSdkErrorHandler()
-    private val tracer = PropagatingNoopTracer(contextFactory, errorHandler)
+    private val tracer = PropagatingNoopTracer(errorHandler)
     private val contextWithSpan = contextFactory.rootContext().storeSpanContext(FakeSpanContext.VALID)
 
     @Test

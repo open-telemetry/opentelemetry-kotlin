@@ -17,7 +17,6 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.runWithTimeout
-import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.init.config.DefaultSampler
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
@@ -28,7 +27,6 @@ import io.opentelemetry.kotlin.tracing.sampling.SamplerCloseable
 internal class TracerProviderImpl(
     private val clock: Clock,
     tracingConfig: TracingConfig,
-    contextFactory: ContextFactory,
     private val idGenerator: IdGenerator,
     private val attributeLimits: AttributeLimitsBehavior,
     spanLimits: SpanLimitsBehavior,
@@ -46,7 +44,7 @@ internal class TracerProviderImpl(
         listOfNotNull(tracingConfig.processor, SamplerCloseable(sampler)),
         sdkErrorHandler,
     )
-    private val noopTracer = PropagatingNoopTracer(contextFactory, sdkErrorHandler)
+    private val noopTracer = PropagatingNoopTracer(sdkErrorHandler)
     private val spanLimitConfig = SpanLimitConfig(spanLimits)
 
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
@@ -60,7 +58,6 @@ internal class TracerProviderImpl(
             TracerImpl(
                 clock = clock,
                 processor = tracingConfig.processor,
-                contextFactory = contextFactory,
                 scope = key,
                 resource = tracingConfig.resource,
                 spanLimitConfig = spanLimitConfig,

@@ -46,7 +46,6 @@ internal class LogContextTest {
         logger = LoggerImpl(
             clock,
             processor,
-            contextFactory,
             key,
             FakeResource(),
             fakeLogLimitsConfig,
@@ -56,7 +55,6 @@ internal class LogContextTest {
         tracer = TracerImpl(
             clock = clock,
             processor = FakeSpanProcessor(),
-            contextFactory = contextFactory,
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

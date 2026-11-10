@@ -47,7 +47,6 @@ internal class TracerSpanContextTest {
         tracer = TracerImpl(
             clock = clock,
             processor = processor,
-            contextFactory = contextFactory,
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

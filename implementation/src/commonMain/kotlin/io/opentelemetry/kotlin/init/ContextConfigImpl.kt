@@ -7,7 +7,7 @@ internal class ContextConfigImpl : ContextConfigDsl {
     override var storage: CurrentContextStorage? = null
 
     /**
-     * True if a custom storage was configured.
+     * True if a storage was configured.
      */
     internal val explicitlyConfigured: Boolean
         get() = storage != null
