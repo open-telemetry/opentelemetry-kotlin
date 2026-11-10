@@ -1,21 +1,26 @@
 package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.ContextImpl
 import io.opentelemetry.kotlin.context.CurrentContextStorage
-import io.opentelemetry.kotlin.context.SingleSlotCurrentContextStorage
+import io.opentelemetry.kotlin.context.TempContextStandInApi
+import io.opentelemetry.kotlin.context.internalCurrentContext
+import io.opentelemetry.kotlin.context.internalRootContext
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 
+/**
+ * Returns contexts from the process-wide context storage.
+ *
+ * [installedStorage] is the storage that the owning SDK installed into the process-wide slot, or
+ * null if it didn't install one.
+ */
+@OptIn(TempContextStandInApi::class)
 public class ContextFactoryImpl(
     public val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
-    storageFactory: (supplier: () -> Context) -> CurrentContextStorage = ::SingleSlotCurrentContextStorage,
+    public val installedStorage: CurrentContextStorage? = null,
 ) : ContextFactory {
 
-    public val storage: CurrentContextStorage = storageFactory { root }
-    private val root by lazy { ContextImpl(storage, sdkErrorHandler) }
+    override fun root(): Context = internalRootContext()
 
-    override fun root(): Context = root
-
-    override fun current(): Context = storage.current()
+    override fun current(): Context = internalCurrentContext()
 }

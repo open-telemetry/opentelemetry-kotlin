@@ -3,7 +3,16 @@ package io.opentelemetry.kotlin
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.config.ConfigProviderImpl
+import io.opentelemetry.kotlin.context.CurrentContextStorage
+import io.opentelemetry.kotlin.context.TempContextStandInApi
+import io.opentelemetry.kotlin.context.internalInstallContextStorage
+import io.opentelemetry.kotlin.context.internalRootContext
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guard
+import io.opentelemetry.kotlin.error.setProcessSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
@@ -38,20 +47,29 @@ public fun createOpenTelemetry(
         cfg.config()
     }
     val resourceFactory = ResourceFactoryImpl(cfg.sdkErrorHandler)
-    val behavior = defaultBehaviorReader(
+    val behaviorReader = defaultBehaviorReader(
         sdkErrorHandler = cfg.sdkErrorHandler,
         declarativeConfigReader = cfg.declarativeConfigReader,
-    ).read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
+    )
+    val configFilePath = cfg.configFilePath
+    val behavior = behaviorReader.read(configFilePath = configFilePath, dsl = cfg::toBehavior)
+
+    if (behavior.disabled == true) {
+        return NoopOpenTelemetrySdk
+    }
 
     // configFactory is legacy - use behavior to control SDK functionality instead
     val configFactory = SdkConfigFactory(cfg, behavior, resourceFactory)
     val idGenerator = configFactory.idGenerator
 
-    val contextFactory = ContextFactoryImpl(cfg.sdkErrorHandler, cfg.contextConfig::generateStorage)
-
     val tracingConfig = configFactory.generateTracingConfig()
     val loggingConfig = configFactory.generateLoggingConfig()
     val metricsConfig = configFactory.generateMetricsConfig()
+
+    // Claim process-wide state last, so that a failure earlier in init doesn't leave it claimed.
+    val installedStorage = installContextStorage(cfg)
+    val ownsErrorSink = setProcessSdkErrorHandler(cfg.sdkErrorHandler)
+    val contextFactory = ContextFactoryImpl(cfg.sdkErrorHandler, installedStorage)
     return OpenTelemetryImpl(
         tracerProvider = TracerProviderImpl(
             clock = clock,
@@ -72,11 +90,42 @@ public fun createOpenTelemetry(
             metricsConfig = metricsConfig,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior()
         ),
-        configProvider = NoopOpenTelemetry.configProvider,
+        configProvider = ConfigProviderImpl { behaviorReader.readInstrumentation(configFilePath) },
         clock = clock,
         context = contextFactory,
         idGenerator = idGenerator,
         resource = resourceFactory,
         propagator = cfg.propagator,
+        installedStorage = installedStorage,
+        ownsErrorSink = ownsErrorSink,
+    )
+}
+
+/**
+ * Installs the configured storage (or the single-slot default) as the process-wide storage.
+ * If another storage is already installed it is used instead, and a warning is reported only if
+ * a storage was explicitly configured.
+ */
+@OptIn(TempContextStandInApi::class)
+private fun installContextStorage(cfg: OpenTelemetryConfigImpl): CurrentContextStorage? {
+    val contextConfig = cfg.contextConfig
+    val storage = contextConfig.generateStorage(::internalRootContext)
+    if (internalInstallContextStorage(storage)) {
+        return storage
+    }
+    if (contextConfig.explicitlyConfigured) {
+        cfg.sdkErrorHandler.reportStorageAlreadyInstalled()
+    }
+    return null
+}
+
+private fun SdkErrorHandler.reportStorageAlreadyInstalled() {
+    onError(
+        SdkError.ApiMisuse(
+            api = "context",
+            message = "A CurrentContextStorage is already installed for this process, so the " +
+                "configured storage is ignored and the installed one is used instead.",
+            severity = SdkErrorSeverity.WARNING,
+        )
     )
 }

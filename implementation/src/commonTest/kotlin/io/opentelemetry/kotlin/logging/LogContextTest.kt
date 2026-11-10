@@ -2,6 +2,10 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.context.TempContextStandInApi
+import io.opentelemetry.kotlin.context.createSingleSlotCurrentContextStorage
+import io.opentelemetry.kotlin.context.internalInstallContextStorage
+import io.opentelemetry.kotlin.context.internalUninstallContextStorage
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -15,12 +19,16 @@ import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
 import io.opentelemetry.kotlin.tracing.fakeSpanLimitsConfig
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
+@OptIn(TempContextStandInApi::class)
 internal class LogContextTest {
+
+    private val storage = createSingleSlotCurrentContextStorage()
 
     private val key = InstrumentationScopeInfoImpl("key", null, null, emptyMap())
     private lateinit var logger: LoggerImpl
@@ -31,6 +39,7 @@ internal class LogContextTest {
 
     @BeforeTest
     fun setUp() {
+        internalInstallContextStorage(storage)
         clock = FakeClock()
         processor = FakeLogRecordProcessor()
         contextFactory = ContextFactoryImpl()
@@ -55,6 +64,11 @@ internal class LogContextTest {
             shutdownState = MutableShutdownState(),
             sdkErrorHandler = NoopSdkErrorHandler,
         )
+    }
+
+    @AfterTest
+    fun tearDown() {
+        internalUninstallContextStorage(storage)
     }
 
     @Test

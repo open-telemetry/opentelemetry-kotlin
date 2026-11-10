@@ -1,6 +1,4 @@
-public final class io/opentelemetry/kotlin/context/ThreadLocalCurrentContextStorage : io/opentelemetry/kotlin/context/CurrentContextStorage {
-	public fun <init> (Lkotlin/jvm/functions/Function0;)V
-	public fun attach (Lio/opentelemetry/kotlin/context/Context;)Lio/opentelemetry/kotlin/context/Scope;
-	public fun current ()Lio/opentelemetry/kotlin/context/Context;
+public final class io/opentelemetry/kotlin/context/ThreadLocalCurrentContextStorageKt {
+	public static final fun createThreadLocalCurrentContextStorage ()Lio/opentelemetry/kotlin/context/CurrentContextStorage;
 }
 

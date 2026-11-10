@@ -24,6 +24,7 @@ internal class CompatOpenTelemetryImpl(
     override val resource: ResourceFactory,
     override val propagator: TextMapPropagator,
     sdkErrorHandler: SdkErrorHandler,
+    private val processWideState: CompatProcessWideState? = null,
 ) : OpenTelemetrySdk {
 
     // TODO: delegate to opentelemetry-java once it ships the Instrumentation Configuration API.
@@ -45,5 +46,11 @@ internal class CompatOpenTelemetryImpl(
         else -> closeable.forceFlush()
     }
 
-    override suspend fun shutdown(): OperationResultCode = shutdownState.shutdown { closeable.shutdown() }
+    override suspend fun shutdown(): OperationResultCode = shutdownState.shutdown {
+        try {
+            closeable.shutdown()
+        } finally {
+            processWideState?.release()
+        }
+    }
 }

@@ -52,7 +52,7 @@ internal class CompatCurrentContextIntegrationTest {
         val key = createContextKey<String>("key")
         val scope = otel.context.currentContext().set(key, "value").attach()
         try {
-            assertEquals("value", OtelJavaContext.current().get(key.toOtelJavaContextKey()))
+            assertEquals("value", OtelJavaContext.current().toOtelKotlinContext().get(key))
         } finally {
             scope.detach()
         }
@@ -145,7 +145,7 @@ internal class CompatCurrentContextIntegrationTest {
                 assertEquals("outer", ctx.get(kotlinKey))
                 assertEquals("inner", ctx.toOtelJavaContext().get(javaKey))
             }
-            assertEquals("outer", OtelJavaContext.current().get(kotlinKey.toOtelJavaContextKey()))
+            assertEquals("outer", OtelJavaContext.current().toOtelKotlinContext().get(kotlinKey))
             assertEquals(null, OtelJavaContext.current().get(javaKey))
         } finally {
             outer.detach()
@@ -177,7 +177,8 @@ internal class CompatCurrentContextIntegrationTest {
             errorHandler(handler)
             context { storageMode = CurrentContextStorageMode.SINGLE_SLOT }
         }.also(sdks::track)
-        assertEquals(1, handler.apiMisuses.size)
+        assertEquals(1, handler.apiMisuses.count { it.api == "OpenTelemetryConfigDsl.context" })
+        assertEquals(1, handler.apiMisuses.count { it.api == "createCompatOpenTelemetry" })
 
         val key = OtelJavaContextKey.named<String>("key")
         OtelJavaContext.current().with(key, "value").makeCurrent().use {
