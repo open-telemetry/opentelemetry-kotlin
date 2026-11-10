@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaTracer
 import io.opentelemetry.kotlin.aliases.OtelJavaTracerProvider
 import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.ContextAdapter
+import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
@@ -368,7 +368,7 @@ internal class OtelJavaSpanExportTest {
         var capturedJavaContext: OtelJavaContext? = null
 
         override fun onStart(span: ReadWriteSpan, parentContext: Context) {
-            capturedJavaContext = (parentContext as ContextAdapter).impl
+            capturedJavaContext = parentContext.toOtelJavaContext()
         }
 
         override fun onEnding(span: ReadWriteSpan) {

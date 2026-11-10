@@ -92,7 +92,7 @@ internal class OtelJavaContextAdapterTest {
 
     private class MapContext(
         private val values: Map<ContextKey<*>, Any?>
-    ) : Context by ContextAdapter(OtelJavaContext.root()) {
+    ) : Context by internalRootContext() {
         override fun <T> set(key: ContextKey<T>, value: T?): Context = MapContext(values + (key to value))
 
         @Suppress("UNCHECKED_CAST")
