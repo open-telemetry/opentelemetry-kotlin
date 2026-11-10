@@ -163,8 +163,18 @@ public abstract interface class io/opentelemetry/kotlin/context/CurrentContextSt
 	public abstract fun current ()Lio/opentelemetry/kotlin/context/Context;
 }
 
+public final class io/opentelemetry/kotlin/context/InternalContextAccessKt {
+	public static final fun internalCurrentContext ()Lio/opentelemetry/kotlin/context/Context;
+	public static final fun internalInstallContextStorage (Lio/opentelemetry/kotlin/context/CurrentContextStorage;)Z
+	public static final fun internalRootContext ()Lio/opentelemetry/kotlin/context/Context;
+	public static final fun internalUninstallContextStorage (Lio/opentelemetry/kotlin/context/CurrentContextStorage;)Z
+}
+
 public abstract interface class io/opentelemetry/kotlin/context/Scope {
 	public abstract fun detach ()Z
+}
+
+public abstract interface annotation class io/opentelemetry/kotlin/context/TempContextStandInApi : java/lang/annotation/Annotation {
 }
 
 public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
