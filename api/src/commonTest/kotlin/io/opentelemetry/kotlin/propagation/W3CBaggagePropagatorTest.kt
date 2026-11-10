@@ -212,6 +212,31 @@ internal class W3CBaggagePropagatorTest {
     }
 
     @Test
+    fun `extract accepts multibyte value at exact 8192 byte boundary`() {
+        // "key=" is 4 ASCII bytes; each 'é' is 2 UTF-8 bytes.
+        // 4 + (4094 * 2) = 8192 bytes exactly.
+        val value = "é".repeat(4094)
+        val header = "key=$value"
+        assertEquals(8192, header.utf8ByteLength())
+        assertEquals(4098, header.length) // character count differs from byte count
+
+        val baggage = extract(header)
+        assertEquals(value, baggage.getValue("key"))
+    }
+
+    @Test
+    fun `extract rejects multibyte value exceeding 8192 byte boundary`() {
+        // 4 + (4095 * 2) = 8194 bytes, over the limit.
+        val value = "é".repeat(4095)
+        val header = "key=$value"
+        assertEquals(8194, header.utf8ByteLength())
+
+        val baggage = extract(header)
+        assertNull(baggage.getValue("key"))
+        assertTrue(baggage.asMap().isEmpty())
+    }
+
+    @Test
     fun `inject and extract round-trip with multi-byte UTF-8 characters`() {
         val baggage = createBaggage().set("key", "café").set("empty", "")
         val carrier = injectInto(baggage)
@@ -248,12 +273,16 @@ internal class W3CBaggagePropagatorTest {
     fun `inject accepts header at exactly 8192 bytes`() {
         val first = "a=" + "x".repeat(4094)
         val second = "b=" + "y".repeat(4093)
+        val expectedHeader = "$first,$second"
+        assertEquals(8192, expectedHeader.utf8ByteLength())
         val baggage = createBaggage().set("a", "x".repeat(4094)).set("b", "y".repeat(4093))
         val carrier = injectInto(baggage)
         val header = carrier["baggage"]
         assertNotNull(header)
-        assertEquals("x".repeat(4094), baggage.getValue("a"))
-        assertEquals("y".repeat(4093), baggage.getValue("b"))
+        assertEquals(8192, header!!.utf8ByteLength())
+        assertEquals(expectedHeader, header)
+        assertTrue(header.contains("a="))
+        assertTrue(header.contains(",b="))
     }
 
     @Test

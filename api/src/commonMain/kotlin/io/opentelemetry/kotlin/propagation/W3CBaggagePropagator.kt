@@ -50,36 +50,34 @@ internal object W3CBaggagePropagator : TextMapPropagator {
 
     private fun encode(entries: Map<String, BaggageEntry>): String? {
         val builder = StringBuilder()
+        var usedBytes = 0
         var memberCount = 0
         for ((name, entry) in entries) {
             if (memberCount >= MAX_MEMBERS) {
                 break
             }
-            val piece = encodeIfFits(name, entry, builder.utf8ByteLength()) ?: continue
-            if (builder.isNotEmpty()) {
+            val piece = encodeIfValid(name, entry) ?: continue
+            val separatorBytes = if (builder.isEmpty()) 0 else 1
+            val pieceByteLength = piece.utf8ByteLength()
+            if (usedBytes + separatorBytes + pieceByteLength > MAX_HEADER_BYTES) {
+                continue
+            }
+            if (separatorBytes == 1) {
                 builder.append(ENTRY_DELIMITER)
             }
             builder.append(piece)
+            usedBytes += separatorBytes + pieceByteLength
             memberCount++
         }
         return builder.takeIf(StringBuilder::isNotEmpty)?.toString()
     }
 
-    private fun encodeIfFits(name: String, entry: BaggageEntry, currentByteLength: Int): String? {
-        if (!isValidBaggageKey(name)) {
-            return null
+    private fun encodeIfValid(name: String, entry: BaggageEntry): String? =
+        if (isValidBaggageKey(name)) {
+            encodeEntry(name, entry.value, entry.metadata.value)
+        } else {
+            null
         }
-        val piece = encodeEntry(name, entry.value, entry.metadata.value)
-        val pieceByteLength = piece.utf8ByteLength()
-        val separator = when (currentByteLength) {
-            0 -> 0
-            else -> 1
-        }
-        if (currentByteLength + separator + pieceByteLength > MAX_HEADER_BYTES) {
-            return null
-        }
-        return piece
-    }
 
     private fun encodeEntry(key: String, value: String, metadata: String): String {
         val sb = StringBuilder()
