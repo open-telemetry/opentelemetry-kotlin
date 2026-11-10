@@ -158,6 +158,22 @@ internal class MeterAdapterErrorHandlingTest {
         )
     }
 
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testThrowingBuildObserverReturnsNoopMeasurementHandle() {
+        val javaMeter = object : OtelJavaMeter by OtelJavaMeterProvider.noop().get("") {
+            override fun counterBuilder(name: String): OtelJavaLongCounterBuilder =
+                object : OtelJavaLongCounterBuilder by OtelJavaMeterProvider.noop().get("").counterBuilder(name) {
+                    override fun buildObserver(): OtelJavaObservableLongMeasurement = error("boom")
+                }
+        }
+        val counter = MeterAdapter(javaMeter, errorHandler).createObservableLongCounter("long.counter")
+
+        counter.measurement.record(1)
+
+        assertSdkErrors(listOf("ObservableLongCounter.measurement failed"))
+    }
+
     @Test
     fun testThrowingAttributesDoesNotEscapeRecord() {
         val longMeasurement = ThrowingJavaLongMeasurement(throws = false)

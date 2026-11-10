@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -78,6 +79,26 @@ internal class ObservableMeasurementHandleAdapterTest {
 
         longInstruments.forEach { assertSame(it.measurement, it.measurement) }
         doubleInstruments.forEach { assertSame(it.measurement, it.measurement) }
+        assertTrue(errorHandler.sdkCodeErrors.isEmpty())
+    }
+
+    @Test
+    fun observersWithMetadataCanBeBuiltByTheJavaSdk() {
+        val errorHandler = FakeSdkErrorHandler()
+        val meter = MeterAdapter(OtelJavaSdkMeterProvider.builder().build().get("test"), errorHandler)
+
+        assertIs<ObservableDoubleMeasurementAdapter>(
+            meter.createObservableDoubleCounter("double.counter", "1", "Double counter").measurement,
+        )
+        assertIs<ObservableDoubleMeasurementAdapter>(
+            meter.createObservableDoubleUpDownCounter("double.up_down_counter", "{item}", "Queue size").measurement,
+        )
+        assertIs<ObservableLongMeasurementAdapter>(
+            meter.createObservableLongGauge("long.gauge", "By", "Memory usage").measurement,
+        )
+        assertIs<ObservableLongMeasurementAdapter>(
+            meter.createObservableLongUpDownCounter("long.up_down_counter", "{item}", "Queue size").measurement,
+        )
         assertTrue(errorHandler.sdkCodeErrors.isEmpty())
     }
 
