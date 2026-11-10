@@ -20,10 +20,6 @@ public final class io/opentelemetry/kotlin/context/ContextExtKt {
 	public static final fun toOtelJavaContext (Lio/opentelemetry/kotlin/context/Context;)Lio/opentelemetry/context/Context;
 }
 
-public final class io/opentelemetry/kotlin/context/ContextKeyExtKt {
-	public static final fun toOtelJavaContextKey (Lio/opentelemetry/kotlin/context/ContextKey;)Lio/opentelemetry/context/ContextKey;
-}
-
 public final class io/opentelemetry/kotlin/context/OtelJavaContextExtKt {
 	public static final fun toOtelKotlinContext (Lio/opentelemetry/context/Context;)Lio/opentelemetry/kotlin/context/Context;
 }
