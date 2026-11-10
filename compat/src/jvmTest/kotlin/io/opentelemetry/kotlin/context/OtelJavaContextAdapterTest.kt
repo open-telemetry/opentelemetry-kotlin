@@ -14,6 +14,8 @@ import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
 import io.opentelemetry.kotlin.tracing.createSpanContext
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
 import org.junit.Test
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotSame
@@ -21,7 +23,20 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
+@OptIn(TempContextStandInApi::class)
 internal class OtelJavaContextAdapterTest {
+
+    private val storage = createSingleSlotCurrentContextStorage()
+
+    @BeforeTest
+    fun setUp() {
+        internalInstallContextStorage(storage)
+    }
+
+    @AfterTest
+    fun tearDown() {
+        internalUninstallContextStorage(storage)
+    }
 
     private val contextFactory = CompatContextFactory()
     private val kotlinContextFactory = ContextFactoryImpl()

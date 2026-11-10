@@ -17,6 +17,12 @@ internal class ContextConfigImpl : ContextConfigDsl {
         customStorage = action
     }
 
+    /**
+     * True if a storage mode or custom storage was configured.
+     */
+    internal val explicitlyConfigured: Boolean
+        get() = customStorage != null || storageMode != null
+
     internal fun generateStorage(rootSupplier: () -> Context): CurrentContextStorage {
         customStorage?.let { return it(rootSupplier) }
         return when (storageMode ?: DEFAULT_STORAGE_MODE) {

@@ -1,19 +1,33 @@
 package io.opentelemetry.kotlin.factory
 
+import io.opentelemetry.kotlin.context.TempContextStandInApi
+import io.opentelemetry.kotlin.context.createSingleSlotCurrentContextStorage
 import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.internalInstallContextStorage
+import io.opentelemetry.kotlin.context.internalUninstallContextStorage
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.tracing.FakeSpan
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertSame
 
+@OptIn(TempContextStandInApi::class)
 internal class MakeCurrentTest {
+
+    private val storage = createSingleSlotCurrentContextStorage()
 
     private lateinit var contextFactory: ContextFactoryImpl
 
     @BeforeTest
     fun setUp() {
+        internalInstallContextStorage(storage)
         contextFactory = ContextFactoryImpl()
+    }
+
+    @AfterTest
+    fun tearDown() {
+        internalUninstallContextStorage(storage)
     }
 
     @Test

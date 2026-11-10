@@ -14,7 +14,6 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -142,12 +141,17 @@ internal class OtelJavaContextStorageTest {
 
     @Test
     fun testOutOfOrderDetachReportsMisuse() {
-        val outerScope = harness.kotlinApi.context.root().storeSpan(harness.tracer.startSpan("outer")).attach()
-        val innerScope = harness.kotlinApi.context.current().storeSpan(harness.tracer.startSpan("inner")).attach()
-        assertFalse(outerScope.detach())
+        val outer = harness.kotlinApi.context.root().storeSpan(harness.tracer.startSpan("outer"))
+        val outerScope = outer.attach()
+        val inner = harness.kotlinApi.context.current().storeSpan(harness.tracer.startSpan("inner"))
+        val innerScope = inner.attach()
+
+        assertTrue(outerScope.detach())
         assertEquals("Scope.detach", errorHandler.apiMisuses.single().api)
+        assertSame(inner, harness.kotlinApi.context.current())
 
         assertTrue(innerScope.detach())
-        assertTrue(outerScope.detach())
+        assertSame(outer, harness.kotlinApi.context.current())
+        OtelJavaContext.root().makeCurrent()
     }
 }
