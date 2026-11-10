@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.config.ConfigProviderImpl
 import io.opentelemetry.kotlin.context.CurrentContextStorage
 import io.opentelemetry.kotlin.context.TempContextStandInApi
 import io.opentelemetry.kotlin.context.internalInstallContextStorage
@@ -46,10 +47,12 @@ public fun createOpenTelemetry(
         cfg.config()
     }
     val resourceFactory = ResourceFactoryImpl(cfg.sdkErrorHandler)
-    val behavior = defaultBehaviorReader(
+    val behaviorReader = defaultBehaviorReader(
         sdkErrorHandler = cfg.sdkErrorHandler,
         declarativeConfigReader = cfg.declarativeConfigReader,
-    ).read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
+    )
+    val configFilePath = cfg.configFilePath
+    val behavior = behaviorReader.read(configFilePath = configFilePath, dsl = cfg::toBehavior)
 
     if (behavior.disabled == true) {
         return NoopOpenTelemetrySdk
@@ -85,7 +88,7 @@ public fun createOpenTelemetry(
             metricsConfig = metricsConfig,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior()
         ),
-        configProvider = NoopOpenTelemetry.configProvider,
+        configProvider = ConfigProviderImpl { behaviorReader.readInstrumentation(configFilePath) },
         clock = clock,
         context = contextFactory,
         idGenerator = idGenerator,

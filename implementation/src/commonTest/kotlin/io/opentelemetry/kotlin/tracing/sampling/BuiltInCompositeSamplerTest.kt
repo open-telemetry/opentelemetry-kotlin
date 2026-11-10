@@ -27,6 +27,30 @@ internal class BuiltInCompositeSamplerTest {
 
     private val traceId = "000000000000000000ffffffffffffff"
 
+    @Test
+    fun `composable probability quantizes original probability for decisions and tracestate`() {
+        val sampler = samplerDsl.composite { composableProbability(65544.25 / (1L shl 56)) }
+        val sampled = sampler.sample(traceId = "000000000000000000fffffffffefff0")
+        assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, sampled.decision)
+        assertEquals("th:fffffffffefff", sampled.traceState.get("ot"))
+
+        val dropped = sampler.sample(traceId = "000000000000000000fffffffffeffef")
+        assertEquals(SamplingResult.Decision.DROP, dropped.decision)
+        assertNull(dropped.traceState.get("ot"))
+    }
+
+    @Test
+    fun `composable probability uses rounded threshold for decisions and tracestate`() {
+        val sampler = samplerDsl.composite { composableProbability(0.1) }
+        val sampled = sampler.sample(traceId = "000000000000000000e6660000000000")
+        assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, sampled.decision)
+        assertEquals("th:e666", sampled.traceState.get("ot"))
+
+        val dropped = sampler.sample(traceId = "000000000000000000e665ffffffffff")
+        assertEquals(SamplingResult.Decision.DROP, dropped.decision)
+        assertNull(dropped.traceState.get("ot"))
+    }
+
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean, otValue: String? = null): Context {
         val parentSpanContext = createSpanContext("12345678901234567890123456789012", "1234567890123456") {
             isSampled = sampled

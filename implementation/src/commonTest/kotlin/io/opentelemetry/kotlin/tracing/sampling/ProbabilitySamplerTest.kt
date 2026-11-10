@@ -20,6 +20,48 @@ internal class ProbabilitySamplerTest {
     private val idGenerator = IdGeneratorImpl()
     private val sdkErrorHandler = NoopSdkErrorHandler
 
+    @Test
+    fun testDecisionUsesThresholdQuantizedFromOriginalProbability() {
+        val sampler = ProbabilitySampler(65544.25 / (1L shl 56), sdkErrorHandler)
+        val cases = mapOf(
+            "000000000000000000fffffffffefff0" to SamplingResult.Decision.RECORD_AND_SAMPLE,
+            "000000000000000000fffffffffeffef" to SamplingResult.Decision.DROP,
+        )
+        for ((traceId, expected) in cases) {
+            val result = sampler.shouldSample(
+                context = internalRootContext(),
+                traceIdBytes = traceId.hexToByteArray(),
+                name = "span",
+                spanKind = SpanKind.INTERNAL,
+                attributes = AttributesModel(),
+                links = emptyList(),
+            )
+            assertEquals(expected, result.decision)
+            assertEquals("th:fffffffffefff", result.traceState.get("ot"))
+        }
+    }
+
+    @Test
+    fun testDecisionUsesEncodedThresholdPrecision() {
+        val sampler = ProbabilitySampler(0.1, sdkErrorHandler)
+        val cases = mapOf(
+            "000000000000000000e6660000000000" to SamplingResult.Decision.RECORD_AND_SAMPLE,
+            "000000000000000000e665ffffffffff" to SamplingResult.Decision.DROP,
+        )
+        for ((traceId, expected) in cases) {
+            val result = sampler.shouldSample(
+                context = internalRootContext(),
+                traceIdBytes = traceId.hexToByteArray(),
+                name = "span",
+                spanKind = SpanKind.INTERNAL,
+                attributes = AttributesModel(),
+                links = emptyList(),
+            )
+            assertEquals(expected, result.decision)
+            assertEquals("th:e666", result.traceState.get("ot"))
+        }
+    }
+
     private fun createParentContext(traceId: String, otTraceStateValue: String): Context {
         val parentSpanContext = createSpanContext(traceId.hexToByteArray(), idGenerator.generateSpanIdBytes()) {
             isSampled = true
