@@ -121,6 +121,9 @@ internal class EnvVarSubstitutionTest {
     @Test
     fun keepsWhitespaceValue() {
         assertEquals(mapOf("key" to " "), parser.parse("key: \"\${WHITESPACE_VALUE:-fallback}\""))
+        // a plain scalar trims to empty, which YAML reads as null
+        assertEquals(mapOf("key" to null), parser.parse("key: \${WHITESPACE_VALUE:-fallback}"))
+        assertEquals(mapOf("key" to null), parser.parse("key: \${UNDEFINED_KEY:- }"))
     }
 
     @Test

@@ -33,6 +33,7 @@ private val ENV_SUBSTITUTION = Regex("""(?:env:)?([a-zA-Z_][a-zA-Z0-9_]*)(?::-(.
 // by a marker, and the parsed marker document tells which matches sit in values, keys or comments.
 // The values are then substituted into the text, so a reference alone on a line of a multi-line
 // flow scalar leaves an empty line, and an unset reference that is a whole `|-` block reads as null.
+// yamlkt also cannot read a null flow sequence item, so an unset reference that is a whole item fails.
 // Needs a parser that exposes scalar nodes.
 internal fun substituteEnvVars(yaml: String, getEnvVar: (String) -> String?): String {
     val matches = ESCAPE_OR_REFERENCE.findAll(yaml).toList()
@@ -70,9 +71,12 @@ internal fun substituteEnvVars(yaml: String, getEnvVar: (String) -> String?): St
             val value = runCatching { getEnvVar(envVar.groupValues[1]) }.getOrNull().orEmpty()
             values[index] = value.ifEmpty { envVar.groupValues[2] }
             // the raw default decodes in place to the default the marker document decoded
-            texts[index] = value.ifEmpty { match.groupValues[1].substringAfter(":-", "") }.ifEmpty {
-                // yamlkt misreads an empty plain value, so write the null it resolves to.
-                "null".takeIf { marker.value == scalar && !scalar.endsWith(' ') }.orEmpty()
+            val text = value.ifEmpty { match.groupValues[1].substringAfter(":-", "") }
+            // yamlkt misreads a blank plain value, so write the null it resolves to.
+            val wholePlainScalar = marker.value == scalar && !scalar.endsWith(' ')
+            texts[index] = when {
+                text.isBlank() && wholePlainScalar -> "null"
+                else -> text
             }
         }
     }
