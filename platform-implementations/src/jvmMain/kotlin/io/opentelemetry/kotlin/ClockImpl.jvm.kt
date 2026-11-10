@@ -15,7 +15,10 @@ public actual fun getCurrentTimeNanos(): Long {
  *
  * This pattern is used by opentelemetry-java for better timing precision.
  */
-private object AnchoredClock {
+internal class AnchoredClock(
+    private val wallClockMillis: () -> Long = System::currentTimeMillis,
+    private val monoClockNanos: () -> Long = System::nanoTime,
+) {
     @Volatile
     private var anchorMillis: Long = 0L
 
@@ -28,12 +31,12 @@ private object AnchoredClock {
 
     @Synchronized
     private fun updateAnchor() {
-        anchorMillis = System.currentTimeMillis()
-        anchorNanos = System.nanoTime()
+        anchorMillis = wallClockMillis()
+        anchorNanos = monoClockNanos()
     }
 
     fun getNanos(): Long {
-        val currentNanos = System.nanoTime()
+        val currentNanos = monoClockNanos()
         val elapsedNanos = currentNanos - anchorNanos
 
         // Update anchor if we're getting close to overflow
@@ -47,4 +50,6 @@ private object AnchoredClock {
     }
 }
 
-private fun getAnchoredClockNanos(): Long = AnchoredClock.getNanos()
+private val defaultAnchoredClock = AnchoredClock()
+
+private fun getAnchoredClockNanos(): Long = defaultAnchoredClock.getNanos()
