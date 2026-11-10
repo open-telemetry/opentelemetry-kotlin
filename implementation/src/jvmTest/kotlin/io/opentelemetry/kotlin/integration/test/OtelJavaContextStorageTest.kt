@@ -6,8 +6,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.context.createContextKey
+import io.opentelemetry.kotlin.context.createOtelJavaCurrentContextStorage
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
-import io.opentelemetry.kotlin.init.useOtelJavaContextStorage
 import io.opentelemetry.kotlin.toOtelJavaApi
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
@@ -33,7 +33,7 @@ internal class OtelJavaContextStorageTest {
         errorHandler = FakeSdkErrorHandler()
         harness = IntegrationTestHarness(testScheduler) {
             errorHandler(errorHandler)
-            context { useOtelJavaContextStorage() }
+            context { storage = createOtelJavaCurrentContextStorage() }
         }
         javaApi = harness.kotlinApi.toOtelJavaApi()
     }
