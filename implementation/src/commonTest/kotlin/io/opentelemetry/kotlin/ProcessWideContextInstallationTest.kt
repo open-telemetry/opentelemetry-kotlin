@@ -56,7 +56,7 @@ internal class ProcessWideContextInstallationTest {
         try {
             val child = tracer.startSpan("child")
             assertEquals(parent.spanContext.traceId, child.spanContext.traceId)
-            assertSame(parent, otel.context.current().extractSpan())
+            assertSame(parent, internalCurrentContext().extractSpan())
         } finally {
             scope.detach()
         }
@@ -75,10 +75,11 @@ internal class ProcessWideContextInstallationTest {
         assertEquals("context", error.api)
         assertEquals(SdkErrorSeverity.WARNING, error.severity)
 
-        val ctx = second.context.root().storeSpan(FakeSpan())
-        val scope = ctx.attach()
+        val parent = second.tracerProvider.getTracer("test").startSpan("parent")
+        val scope = internalRootContext().storeSpan(parent).attach()
         try {
-            assertSame(ctx, first.context.current())
+            val child = first.tracerProvider.getTracer("test").startSpan("child")
+            assertEquals(parent.spanContext.traceId, child.spanContext.traceId)
         } finally {
             scope.detach()
         }
@@ -111,7 +112,7 @@ internal class ProcessWideContextInstallationTest {
 
         val errorHandler = FakeSdkErrorHandler()
         val otel = createOpenTelemetry { errorHandler(errorHandler) }.also(sdks::track)
-        val ctx = otel.context.root().storeSpan(FakeSpan())
+        val ctx = internalRootContext().storeSpan(FakeSpan())
         val scope = ctx.attach()
         try {
             assertSame(ctx, storage.current())
@@ -128,8 +129,8 @@ internal class ProcessWideContextInstallationTest {
     fun testOutOfOrderDetachReachesOwningSdkHandler() {
         val errorHandler = FakeSdkErrorHandler()
         val otel = createOpenTelemetry { errorHandler(errorHandler) }.also(sdks::track)
-        val outer = otel.context.root().storeSpan(FakeSpan()).attach()
-        val inner = otel.context.current().storeSpan(FakeSpan()).attach()
+        val outer = internalRootContext().storeSpan(FakeSpan()).attach()
+        val inner = internalCurrentContext().storeSpan(FakeSpan()).attach()
 
         outer.detach()
         inner.detach()
