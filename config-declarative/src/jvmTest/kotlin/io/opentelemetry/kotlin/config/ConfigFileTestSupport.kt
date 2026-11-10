@@ -75,6 +75,14 @@ attribute_limits:
   attribute_count_limit: 64
 """
 
+internal const val INSTRUMENTATION_CONFIG_FILE = """
+file_format: "1.0"
+instrumentation:
+  foo: bar
+  nested:
+    count: 42
+"""
+
 internal const val CONSOLE_CONFIG_FILE = """
 file_format: "1.0"
 tracer_provider:

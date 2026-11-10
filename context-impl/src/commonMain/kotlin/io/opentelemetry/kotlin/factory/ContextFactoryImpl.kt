@@ -15,9 +15,9 @@ public class ContextFactoryImpl(
     public val storage: CurrentContextStorage = createSingleSlotCurrentContextStorage(),
 ) : ContextFactory {
 
-    // SHIM (drop when rebasing onto 3c): storages return the :api root when empty, but until 3c
-    // the SDK's root is a ContextImpl bound to this storage. Map one to the other so that
-    // current() and the ContextImpl/ScopeImpl identity checks keep seeing the SDK root.
+    // Temp SHIM the built-in storages return the :api root when empty, but until
+    // the SDK's root is a ContextImpl bound to this storage, they need mapping to each other so
+    // current() and the ContextImpl/ScopeImpl identity checks see the SDK root.
     private val rootMappingStorage: CurrentContextStorage = object : CurrentContextStorage {
         @OptIn(TempContextStandInApi::class)
         override fun current(): Context {

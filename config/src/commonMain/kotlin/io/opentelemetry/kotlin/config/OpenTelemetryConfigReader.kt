@@ -70,10 +70,32 @@ class OpenTelemetryConfigReader(
         }
     }
 
-    private fun readDeclarativeFile(configFilePath: String?): OpenTelemetryBehavior? {
-        val path = guard("read $CONFIG_FILE", fallback = null) {
+    /**
+     * Reads the `.instrumentation` node of the declarative config file, which is located as in
+     * [read]. Returns `null` if no file is set or no reader is registered. A missing reader is
+     * reported by [read], not here.
+     *
+     * This function never throws. A file that cannot be read is reported and treated as unset.
+     */
+    fun readInstrumentation(configFilePath: String? = null): ConfigProperties? {
+        val reader = declarativeConfigReader ?: return null
+        val path = resolveConfigFilePath(configFilePath) ?: return null
+        return guard(
+            "read the instrumentation config from '$path'",
+            fallback = null,
+            toError = ::configFileError,
+        ) {
+            reader.readInstrumentation(path)
+        }
+    }
+
+    private fun resolveConfigFilePath(configFilePath: String?): String? =
+        guard("read $CONFIG_FILE", fallback = null) {
             configFilePath ?: reportingEnvVarReader?.readString(CONFIG_FILE)
-        } ?: return null
+        }
+
+    private fun readDeclarativeFile(configFilePath: String?): OpenTelemetryBehavior? {
+        val path = resolveConfigFilePath(configFilePath) ?: return null
         val reader = declarativeConfigReader
         if (reader == null) {
             reportError(
