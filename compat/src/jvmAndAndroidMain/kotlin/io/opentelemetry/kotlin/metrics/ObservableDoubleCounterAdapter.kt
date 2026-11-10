@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.aliases.OtelJavaMeter
 import io.opentelemetry.kotlin.aliases.OtelJavaObservableDoubleCounter
@@ -22,6 +23,15 @@ internal class ObservableDoubleCounterAdapter(
     private val lock = Any()
     private val callbackHandles = mutableSetOf<OtelJavaObservableDoubleCounter>()
     private var closed = false
+
+    override val measurement: ObservableDoubleMeasurement by lazy {
+        sdkErrorHandler.sdkGuardOrDefault(null, "ObservableDoubleCounter.measurement failed") {
+            val builder = impl.counterBuilder(name).ofDoubles()
+            unit?.let(builder::setUnit)
+            description?.let(builder::setDescription)
+            ObservableDoubleMeasurementAdapter(builder.buildObserver(), sdkErrorHandler)
+        } ?: NoopOpenTelemetry.meterProvider.getMeter("").createObservableDoubleCounter(name).measurement
+    }
 
     init {
         callbacks.forEach { registerCallback(it) }

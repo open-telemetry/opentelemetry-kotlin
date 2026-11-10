@@ -134,6 +134,30 @@ internal class MeterAdapterErrorHandlingTest {
         assertSdkErrors(listOf("ObservableDoubleGauge.registerCallback failed"))
     }
 
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testThrowingObservableBuildersReturnNoopMeasurementHandles() {
+        val meter = MeterAdapter(ThrowingJavaMeter(), errorHandler)
+
+        meter.createObservableLongCounter("long.counter").measurement.record(1)
+        meter.createObservableDoubleCounter("double.counter").measurement.record(1.5)
+        meter.createObservableLongUpDownCounter("long.up_down_counter").measurement.record(-1)
+        meter.createObservableDoubleUpDownCounter("double.up_down_counter").measurement.record(-1.5)
+        meter.createObservableLongGauge("long.gauge").measurement.record(2)
+        meter.createObservableDoubleGauge("double.gauge").measurement.record(2.5)
+
+        assertSdkErrors(
+            listOf(
+                "ObservableLongCounter.measurement failed",
+                "ObservableDoubleCounter.measurement failed",
+                "ObservableLongUpDownCounter.measurement failed",
+                "ObservableDoubleUpDownCounter.measurement failed",
+                "ObservableLongGauge.measurement failed",
+                "ObservableDoubleGauge.measurement failed",
+            ),
+        )
+    }
+
     @Test
     fun testThrowingAttributesDoesNotEscapeRecord() {
         val longMeasurement = ThrowingJavaLongMeasurement(throws = false)
