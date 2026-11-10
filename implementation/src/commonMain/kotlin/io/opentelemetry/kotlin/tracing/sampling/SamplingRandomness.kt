@@ -27,6 +27,9 @@ internal fun randomnessFromTraceIdBytes(traceIdBytes: ByteArray): Long {
 }
 
 private const val MAX_THRESHOLD: Long = 1L shl 56
+private const val THRESHOLD_HEX_DIGITS = 14
+private const val BITS_PER_HEX_DIGIT = 4
+private const val DEFAULT_THRESHOLD_PRECISION = 4
 
 /** The smallest sampling probability that can be represented as a threshold, `2^-56`. */
 internal const val MIN_SAMPLING_RATIO: Double = 1.0 / MAX_THRESHOLD
@@ -42,8 +45,25 @@ internal fun validateRatio(ratio: Double) {
 
 /**
  * Converts a sampling probability [ratio] into its equivalent rejection threshold (T).
+ * Rounds to [precision] significant hexadecimal digits, retaining additional digits for
+ * small probabilities so that leading `f` digits do not consume the requested precision.
  *
  * https://opentelemetry.io/docs/specs/otel/trace/tracestate-probability-sampling/#rejection-threshold-t
  * https://opentelemetry.io/docs/specs/otel/trace/tracestate-probability-sampling/#converting-floating-point-probability-to-threshold-value
  */
-internal fun thresholdFromRatio(ratio: Double) = MAX_THRESHOLD - (ratio * MAX_THRESHOLD).toLong()
+internal fun thresholdFromRatio(ratio: Double, precision: Int = DEFAULT_THRESHOLD_PRECISION): Long {
+    require(precision in 1..THRESHOLD_HEX_DIGITS) { "precision must be between 1 and 14, got $precision" }
+    val sampledCount = ratio * MAX_THRESHOLD
+    val unusedBits = Long.SIZE_BITS - THRESHOLD_HEX_DIGITS * BITS_PER_HEX_DIGIT
+    val leadingDigits = ((sampledCount.toLong().countLeadingZeroBits() - unusedBits) / BITS_PER_HEX_DIGIT).coerceAtLeast(0)
+    val discardedBits = (THRESHOLD_HEX_DIGITS - precision - leadingDigits).coerceAtLeast(0) * BITS_PER_HEX_DIGIT
+    val sampledUnits = sampledCount / (1L shl discardedBits)
+    val wholeUnits = sampledUnits.toLong()
+    // Round sampled units down on a tie so the rejection threshold rounds up.
+    val roundedUnits = wholeUnits + if (sampledUnits - wholeUnits > 0.5) {
+        1L
+    } else {
+        0L
+    }
+    return MAX_THRESHOLD - (roundedUnits shl discardedBits)
+}

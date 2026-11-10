@@ -13,7 +13,7 @@ import io.opentelemetry.kotlin.baggage.toOtelKotlinBaggage
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpan
+import io.opentelemetry.kotlin.tracing.ext.asOtelJavaSpan
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
 
@@ -57,7 +57,7 @@ internal class OtelJavaContextAdapter(
         if (!span.spanContext.isValid) {
             return null
         }
-        return span.toOtelJavaSpan()
+        return span.asOtelJavaSpan()
     }
 
     private fun getBaggage(): OtelJavaBaggage? {
