@@ -6,6 +6,7 @@ import kotlin.test.assertNotSame
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
+@OptIn(TempContextStandInApi::class)
 internal class ThreadLocalCurrentContextStorageTest {
 
     private lateinit var root: Context
@@ -13,8 +14,8 @@ internal class ThreadLocalCurrentContextStorageTest {
 
     @BeforeTest
     fun setUp() {
-        root = FakeContext()
-        storage = ThreadLocalCurrentContextStorage { root }
+        root = internalRootContext()
+        storage = createThreadLocalCurrentContextStorage()
     }
 
     @Test
@@ -47,8 +48,9 @@ internal class ThreadLocalCurrentContextStorageTest {
     fun testSeparateInstancesAreIndependent() {
         val first = FakeContext()
         val second = FakeContext()
-        val otherStorage = ThreadLocalCurrentContextStorage { root }
+        val otherStorage = createThreadLocalCurrentContextStorage()
         storage.attach(first)
+        assertSame(root, otherStorage.current())
         otherStorage.attach(second)
         assertSame(first, storage.current())
         assertSame(second, otherStorage.current())

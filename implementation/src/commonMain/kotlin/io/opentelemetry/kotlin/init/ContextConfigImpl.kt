@@ -3,8 +3,8 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.CurrentContextStorage
 import io.opentelemetry.kotlin.context.CurrentContextStorageMode
-import io.opentelemetry.kotlin.context.SingleSlotCurrentContextStorage
-import io.opentelemetry.kotlin.context.ThreadLocalCurrentContextStorage
+import io.opentelemetry.kotlin.context.createSingleSlotCurrentContextStorage
+import io.opentelemetry.kotlin.context.createThreadLocalCurrentContextStorage
 
 internal val DEFAULT_STORAGE_MODE = CurrentContextStorageMode.SINGLE_SLOT
 
@@ -20,10 +20,8 @@ internal class ContextConfigImpl : ContextConfigDsl {
     internal fun generateStorage(rootSupplier: () -> Context): CurrentContextStorage {
         customStorage?.let { return it(rootSupplier) }
         return when (storageMode ?: DEFAULT_STORAGE_MODE) {
-            CurrentContextStorageMode.SINGLE_SLOT -> SingleSlotCurrentContextStorage(rootSupplier)
-            CurrentContextStorageMode.THREAD_LOCAL -> ThreadLocalCurrentContextStorage(
-                rootSupplier
-            )
+            CurrentContextStorageMode.SINGLE_SLOT -> createSingleSlotCurrentContextStorage()
+            CurrentContextStorageMode.THREAD_LOCAL -> createThreadLocalCurrentContextStorage()
         }
     }
 }

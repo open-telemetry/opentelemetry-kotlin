@@ -23,7 +23,7 @@ internal class CurrentContextTest {
         val scope = ScopeImpl.create(
             factory.rootContext(),
             factory.rootContext(),
-            SingleSlotCurrentContextStorage(factory::root),
+            createSingleSlotCurrentContextStorage(),
             NoopSdkErrorHandler,
         ) {}
         assertTrue(scope.detach())
