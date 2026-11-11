@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetrySdk
 import io.opentelemetry.kotlin.aliases.OtelJavaTracerProvider
 import io.opentelemetry.kotlin.clock.ClockAdapter
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
-import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
@@ -19,7 +19,7 @@ import io.opentelemetry.kotlin.propagation.TextMapPropagatorAdapter
 import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
 
 /**
- * Constructs an [OpenTelemetry] instance that exposes OpenTelemetry as a Kotlin API.
+ * Constructs an [OpenTelemetrySdk] instance that exposes OpenTelemetry as a Kotlin API.
  * Callers must pass a reference to an OpenTelemetry Java SDK instance. Under the hood calls to the
  * Kotlin API will be delegated to the Java SDK implementation.
  *
@@ -28,18 +28,24 @@ import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
  * both the Kotlin and Java APIs throughout the lifecycle of your application, although it would
  * generally be encouraged to migrate to [createCompatOpenTelemetry] as a long-term goal.
  *
+ * The returned instance stores the current context in opentelemetry-java's `ContextStorage`, so the
+ * Kotlin and Java APIs share one current context. Errors that `:api` reports go to [sdkErrorHandler]
+ * unless another SDK already receives them. Calling [OpenTelemetrySdk.shutdown] shuts down the Java
+ * SDK's providers and releases that process-wide state.
+ *
  * @param clock the clock used to timestamp telemetry created via the Kotlin API.
  * @param sdkErrorHandler receives errors raised while delegating to the Java SDK, such as
- * exceptions thrown when flushing or shutting down its providers. Defaults to a no-op handler.
+ * exceptions thrown when flushing or shutting down its providers. Defaults to [PlatformSdkErrorHandler].
  */
 @ExperimentalApi
 public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
     clock: Clock = ClockAdapter(OtelJavaClock.getDefault()),
-    sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
-): OpenTelemetry {
+    sdkErrorHandler: SdkErrorHandler = PlatformSdkErrorHandler,
+): OpenTelemetrySdk {
     val errorHandler = GuardedSdkErrorHandler(sdkErrorHandler)
     val idGenerator = CompatIdGenerator()
     val contextFactory = CompatContextFactory()
+    val processWideState = claimCompatProcessWideState("toOtelKotlinApi", errorHandler)
     return CompatOpenTelemetryImpl(
         tracerProvider = TracerProviderAdapter(
             unobfuscatedTracerProvider(),
@@ -54,6 +60,7 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
         resource = CompatResourceFactory,
         propagator = TextMapPropagatorAdapter(propagators.textMapPropagator),
         sdkErrorHandler = errorHandler,
+        processWideState = processWideState,
     )
 }
 

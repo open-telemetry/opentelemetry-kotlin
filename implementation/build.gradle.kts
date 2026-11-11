@@ -17,7 +17,6 @@ kotlin {
                 implementation(project(":config"))
                 implementation(project(":context-impl"))
                 implementation(project(":context-single-slot"))
-                implementation(project(":context-threadlocal"))
                 implementation(project(":propagation-utils"))
                 implementation(project(":config-dsl"))
                 implementation(project(":model"))
@@ -34,6 +33,7 @@ kotlin {
             dependencies {
                 implementation(project(":api-ext"))
                 implementation(project(":test-fakes"))
+                implementation(project(":context-threadlocal"))
                 implementation(project(":integration-test"))
                 implementation(project(":serializable-models"))
                 implementation(libs.kotlinx.coroutines.test)
@@ -55,22 +55,4 @@ kotlin {
             }
         }
     }
-}
-
-tasks.register<Copy>("copyiOSTestResources") {
-    from("src/commonTest/resources")
-    into("build/bin/iosSimulatorArm64/debugTest/resources")
-}
-
-tasks.named("iosSimulatorArm64Test").configure {
-    dependsOn("copyiOSTestResources")
-}
-
-tasks.register<Copy>("copyTvOSTestResources") {
-    from("src/commonTest/resources")
-    into("build/bin/tvosSimulatorArm64/debugTest/resources")
-}
-
-tasks.named("tvosSimulatorArm64Test").configure {
-    dependsOn("copyTvOSTestResources")
 }

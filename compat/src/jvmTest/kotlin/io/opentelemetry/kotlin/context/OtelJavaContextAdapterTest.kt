@@ -14,6 +14,8 @@ import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
 import io.opentelemetry.kotlin.tracing.createSpanContext
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
 import org.junit.Test
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotSame
@@ -22,6 +24,18 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 internal class OtelJavaContextAdapterTest {
+
+    private val storage = createSingleSlotCurrentContextStorage()
+
+    @BeforeTest
+    fun setUp() {
+        installContextStorage(storage)
+    }
+
+    @AfterTest
+    fun tearDown() {
+        uninstallContextStorage(storage)
+    }
 
     private val contextFactory = CompatContextFactory()
     private val kotlinContextFactory = ContextFactoryImpl()
@@ -77,7 +91,7 @@ internal class OtelJavaContextAdapterTest {
 
     private class MapContext(
         private val values: Map<ContextKey<*>, Any?>
-    ) : Context by ContextAdapter(OtelJavaContext.root()) {
+    ) : Context by rootContext() {
         override fun <T> set(key: ContextKey<T>, value: T?): Context = MapContext(values + (key to value))
 
         @Suppress("UNCHECKED_CAST")

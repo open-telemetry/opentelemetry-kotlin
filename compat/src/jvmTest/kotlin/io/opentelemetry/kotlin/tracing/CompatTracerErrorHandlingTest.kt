@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -45,7 +46,7 @@ internal class CompatTracerErrorHandlingTest {
         val otel = createOtel(FakeSpanProcessor())
         val tracer = otel.tracerProvider.getTracer("test")
         val parent = tracer.startSpan("parent")
-        val parentCtx = otel.context.root().storeSpan(parent)
+        val parentCtx = otel.context.rootContext().storeSpan(parent)
         val span = tracer.startSpan("child", parentContext = parentCtx) { boom() }
 
         assertFalse(span.isRecording())

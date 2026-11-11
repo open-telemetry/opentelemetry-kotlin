@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.propagation.FakeTextMapPropagator
 import org.junit.Test
@@ -10,6 +11,21 @@ import kotlin.test.assertSame
 internal class CompatOpenTelemetryConfigTest {
 
     private val clock = FakeClock()
+
+    @Test
+    fun `shutdown timeout accepts positive values and rejects nonpositive values`() {
+        val errors = FakeSdkErrorHandler()
+        val cfg = CompatOpenTelemetryConfig(clock).apply { errorHandler(errors) }
+        assertEquals(5000L, cfg.shutdownTimeoutMs)
+        cfg.shutdownTimeout(6000)
+        assertEquals(6000L, cfg.shutdownTimeoutMs)
+        assertEquals(0, errors.apiMisuses.size)
+        listOf(0L, -1L).forEach { timeout ->
+            cfg.shutdownTimeout(timeout)
+            assertEquals(6000L, cfg.shutdownTimeoutMs)
+        }
+        assertEquals(2, errors.apiMisuses.size)
+    }
 
     @Test
     fun `propagator dsl uses a custom propagator returned from the lambda`() {

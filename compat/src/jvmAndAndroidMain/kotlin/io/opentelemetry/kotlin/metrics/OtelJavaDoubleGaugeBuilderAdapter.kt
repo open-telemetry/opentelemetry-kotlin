@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.aliases.OtelJavaDoubleGauge
 import io.opentelemetry.kotlin.aliases.OtelJavaDoubleGaugeBuilder
-import io.opentelemetry.kotlin.aliases.OtelJavaMeter
+import io.opentelemetry.kotlin.aliases.OtelJavaLongGaugeBuilder
 import io.opentelemetry.kotlin.aliases.OtelJavaObservableDoubleGauge
 import io.opentelemetry.kotlin.aliases.OtelJavaObservableDoubleMeasurement
 import java.util.function.Consumer
@@ -10,7 +10,6 @@ import java.util.function.Consumer
 internal class OtelJavaDoubleGaugeBuilderAdapter(
     private val meter: Meter,
     private val name: String,
-    private val javaMeter: OtelJavaMeter,
     private var unit: String? = null,
     private var description: String? = null,
 ) : OtelJavaDoubleGaugeBuilder {
@@ -24,20 +23,26 @@ internal class OtelJavaDoubleGaugeBuilderAdapter(
         return this
     }
 
-    override fun ofLongs(): io.opentelemetry.kotlin.aliases.OtelJavaLongGaugeBuilder =
-        javaMeter.gaugeBuilder(name).ofLongs().also { builder ->
-            unit?.let(builder::setUnit)
-            description?.let(builder::setDescription)
-        }
+    override fun ofLongs(): OtelJavaLongGaugeBuilder =
+        OtelJavaLongGaugeBuilderAdapter(meter, name, unit, description)
 
     override fun build(): OtelJavaDoubleGauge =
         OtelJavaDoubleGaugeAdapter(meter.createDoubleGauge(name, unit, description))
 
+    override fun buildObserver(): OtelJavaObservableDoubleMeasurement =
+        OtelJavaObservableDoubleMeasurementAdapter(
+            meter.createObservableDoubleGauge(name, unit, description).measurement
+        )
+
     override fun buildWithCallback(
         callback: Consumer<OtelJavaObservableDoubleMeasurement>,
-    ): OtelJavaObservableDoubleGauge =
-        javaMeter.gaugeBuilder(name).also { builder ->
-            unit?.let(builder::setUnit)
-            description?.let(builder::setDescription)
-        }.buildWithCallback(callback)
+    ): OtelJavaObservableDoubleGauge {
+        val measurementCallback: (ObservableDoubleMeasurement) -> Unit = { measurement ->
+            callback.accept(OtelJavaObservableDoubleMeasurementAdapter(measurement))
+        }
+        val gauge = meter.createObservableDoubleGauge(name, unit, description, measurementCallback)
+        return object : OtelJavaObservableDoubleGauge {
+            override fun close() = gauge.close()
+        }
+    }
 }

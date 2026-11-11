@@ -19,19 +19,6 @@ public abstract interface class io/opentelemetry/kotlin/attributes/AttributeCont
 	public abstract fun getAttributes ()Ljava/util/Map;
 }
 
-public abstract interface class io/opentelemetry/kotlin/context/CurrentContextStorage {
-	public abstract fun attach (Lio/opentelemetry/kotlin/context/Context;)Lio/opentelemetry/kotlin/context/Scope;
-	public abstract fun current ()Lio/opentelemetry/kotlin/context/Context;
-}
-
-public final class io/opentelemetry/kotlin/context/CurrentContextStorageMode : java/lang/Enum {
-	public static final field SINGLE_SLOT Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
-	public static final field THREAD_LOCAL Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
-	public static fun values ()[Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
-}
-
 public abstract class io/opentelemetry/kotlin/export/OperationResultCode {
 }
 
@@ -92,13 +79,19 @@ public abstract interface annotation class io/opentelemetry/kotlin/init/ConfigDs
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/ConfigFileDsl {
-	public abstract fun configFile (Ljava/lang/String;)V
+	public abstract fun configFile (Lio/opentelemetry/kotlin/init/DeclarativeConfigReader;Ljava/lang/String;)V
+}
+
+public final class io/opentelemetry/kotlin/init/ConfigFileDsl$DefaultImpls {
+	public static synthetic fun configFile$default (Lio/opentelemetry/kotlin/init/ConfigFileDsl;Lio/opentelemetry/kotlin/init/DeclarativeConfigReader;Ljava/lang/String;ILjava/lang/Object;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/ContextConfigDsl {
-	public abstract fun getStorageMode ()Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;
-	public abstract fun setStorageMode (Lio/opentelemetry/kotlin/context/CurrentContextStorageMode;)V
-	public abstract fun storage (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun getStorage ()Lio/opentelemetry/kotlin/context/CurrentContextStorage;
+	public abstract fun setStorage (Lio/opentelemetry/kotlin/context/CurrentContextStorage;)V
+}
+
+public abstract interface class io/opentelemetry/kotlin/init/DeclarativeConfigReader {
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/LogExportConfigDsl {
@@ -127,6 +120,7 @@ public abstract interface class io/opentelemetry/kotlin/init/OpenTelemetryConfig
 	public abstract fun meterProvider (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun propagator (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun resourceDetection (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun shutdownTimeout (J)V
 	public abstract fun tracerProvider (Lkotlin/jvm/functions/Function1;)V
 }
 

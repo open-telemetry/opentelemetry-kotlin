@@ -20,7 +20,7 @@ import io.opentelemetry.kotlin.error.SdkErrorSeverity
 @ExperimentalApi
 class OpenTelemetryConfigReader(
     envVarReader: EnvVarReader? = platformEnvVarReader(),
-    private val declarativeConfigReader: DeclarativeConfigReader? = platformDeclarativeConfigReader(),
+    private val declarativeConfigReader: DeclarativeBehaviorReader? = null,
     private val behaviorResolver: BehaviorResolver = BehaviorResolverImpl(),
     private val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
 ) {
@@ -33,8 +33,8 @@ class OpenTelemetryConfigReader(
      * The YAML file is read from [configFilePath], or `OTEL_CONFIG_FILE`. If it is not present it
      * has no effect.
      *
-     * A `null` [declarativeConfigReader] means this platform does not read declarative config
-     * files at all, so neither [configFilePath] nor `OTEL_CONFIG_FILE` is acted on.
+     * A `null` [declarativeConfigReader] means no reader was registered. Supplying a path through
+     * [configFilePath] or `OTEL_CONFIG_FILE` then reports an error, and the file layer is unset.
      *
      * A `null` `envVarReader` means this platform does not read envars, so the envar layer is unset
      * and `OTEL_CONFIG_FILE` is not read.
@@ -70,11 +70,44 @@ class OpenTelemetryConfigReader(
         }
     }
 
-    private fun readDeclarativeFile(configFilePath: String?): OpenTelemetryBehavior? {
+    /**
+     * Reads the `.instrumentation` node of the declarative config file, which is located as in
+     * [read]. Returns `null` if no file is set or no reader is registered. A missing reader is
+     * reported by [read], not here.
+     *
+     * This function never throws. A file that cannot be read is reported and treated as unset.
+     */
+    fun readInstrumentation(configFilePath: String? = null): ConfigProperties? {
         val reader = declarativeConfigReader ?: return null
-        val path = guard("read $CONFIG_FILE", fallback = null) {
+        val path = resolveConfigFilePath(configFilePath) ?: return null
+        return guard(
+            "read the instrumentation config from '$path'",
+            fallback = null,
+            toError = ::configFileError,
+        ) {
+            reader.readInstrumentation(path)
+        }
+    }
+
+    private fun resolveConfigFilePath(configFilePath: String?): String? =
+        guard("read $CONFIG_FILE", fallback = null) {
             configFilePath ?: reportingEnvVarReader?.readString(CONFIG_FILE)
-        } ?: return null
+        }
+
+    private fun readDeclarativeFile(configFilePath: String?): OpenTelemetryBehavior? {
+        val path = resolveConfigFilePath(configFilePath) ?: return null
+        val reader = declarativeConfigReader
+        if (reader == null) {
+            reportError(
+                SdkError.ApiMisuse(
+                    api = CONFIG_FILE,
+                    message = "Ignoring declarative config file '$path': no reader is registered. Add the " +
+                        "config-declarative artifact and call configFile(yamlConfigReader()).",
+                    severity = SdkErrorSeverity.ERROR,
+                )
+            )
+            return null
+        }
         return guard(
             "read declarative config file '$path'",
             fallback = OpenTelemetryBehavior(),

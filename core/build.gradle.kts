@@ -14,7 +14,7 @@ kotlin {
                 api(project(":api-ext"))
                 api(project(":noop"))
                 api(project(":exporters-core"))
-                api(project(":semconv"))
+                implementation(project(":semconv"))
                 implementation(project(":model"))
             }
         }

@@ -158,6 +158,25 @@ public final class io/opentelemetry/kotlin/context/ContextKeyEntrypointKt {
 	public static final fun createContextKey (Ljava/lang/String;)Lio/opentelemetry/kotlin/context/ContextKey;
 }
 
+public final class io/opentelemetry/kotlin/context/ContextStorageEntrypointKt {
+	public static final fun installContextStorage (Lio/opentelemetry/kotlin/context/CurrentContextStorage;)Z
+	public static final fun uninstallContextStorage (Lio/opentelemetry/kotlin/context/CurrentContextStorage;)Z
+}
+
+public final class io/opentelemetry/kotlin/context/CurrentContextEntrypointKt {
+	public static final fun currentContext ()Lio/opentelemetry/kotlin/context/Context;
+	public static final fun runWithContext (Lio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public abstract interface class io/opentelemetry/kotlin/context/CurrentContextStorage {
+	public abstract fun attach (Lio/opentelemetry/kotlin/context/Context;)Lio/opentelemetry/kotlin/context/Scope;
+	public abstract fun current ()Lio/opentelemetry/kotlin/context/Context;
+}
+
+public final class io/opentelemetry/kotlin/context/RootContextEntrypointKt {
+	public static final fun rootContext ()Lio/opentelemetry/kotlin/context/Context;
+}
+
 public abstract interface class io/opentelemetry/kotlin/context/Scope {
 	public abstract fun detach ()Z
 }
@@ -231,6 +250,7 @@ public final class io/opentelemetry/kotlin/logging/SeverityNumber$Companion {
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/AsynchronousInstrument : io/opentelemetry/kotlin/metrics/Instrument, java/lang/AutoCloseable {
+	public abstract fun getMeasurement ()Lio/opentelemetry/kotlin/metrics/ObservableMeasurement;
 	public abstract fun registerCallback (Lkotlin/jvm/functions/Function1;)Ljava/lang/AutoCloseable;
 }
 
@@ -294,6 +314,7 @@ public abstract interface class io/opentelemetry/kotlin/metrics/Meter {
 	public abstract fun createLongGauge (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/LongGauge;
 	public abstract fun createLongUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/LongUpDownCounter;
 	public abstract fun createObservableDoubleCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleCounter;
+	public abstract fun createObservableDoubleGauge (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleGauge;
 	public abstract fun createObservableDoubleUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleUpDownCounter;
 	public abstract fun createObservableLongCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableLongCounter;
 	public abstract fun createObservableLongGauge (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableLongGauge;
@@ -306,6 +327,7 @@ public final class io/opentelemetry/kotlin/metrics/Meter$DefaultImpls {
 	public static synthetic fun createLongGauge$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/LongGauge;
 	public static synthetic fun createLongUpDownCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/LongUpDownCounter;
 	public static synthetic fun createObservableDoubleCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleCounter;
+	public static synthetic fun createObservableDoubleGauge$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleGauge;
 	public static synthetic fun createObservableDoubleUpDownCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleUpDownCounter;
 	public static synthetic fun createObservableLongCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableLongCounter;
 	public static synthetic fun createObservableLongGauge$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableLongGauge;
@@ -321,6 +343,9 @@ public final class io/opentelemetry/kotlin/metrics/MeterProvider$DefaultImpls {
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/ObservableDoubleCounter : io/opentelemetry/kotlin/metrics/AsynchronousInstrument {
+}
+
+public abstract interface class io/opentelemetry/kotlin/metrics/ObservableDoubleGauge : io/opentelemetry/kotlin/metrics/AsynchronousInstrument {
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/ObservableDoubleMeasurement : io/opentelemetry/kotlin/metrics/ObservableMeasurement {
@@ -356,6 +381,11 @@ public abstract interface class io/opentelemetry/kotlin/metrics/ObservableMeasur
 
 public abstract interface class io/opentelemetry/kotlin/metrics/SynchronousInstrument : io/opentelemetry/kotlin/metrics/Instrument {
 	public abstract fun enabled ()Z
+}
+
+public final class io/opentelemetry/kotlin/propagation/MapTextMapCarriersKt {
+	public static final fun createMapTextMapGetter ()Lio/opentelemetry/kotlin/propagation/TextMapGetter;
+	public static final fun createMutableMapTextMapSetter ()Lio/opentelemetry/kotlin/propagation/TextMapSetter;
 }
 
 public final class io/opentelemetry/kotlin/propagation/PropagatorEntrypointsKt {

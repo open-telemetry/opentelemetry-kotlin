@@ -11,6 +11,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(project(":error-handling"))
+                implementation(project(":platform-implementations"))
                 implementation(project(":propagation-utils"))
             }
         }

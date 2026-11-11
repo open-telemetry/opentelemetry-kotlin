@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.export
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
+import kotlinx.coroutines.async
+import kotlinx.coroutines.supervisorScope
 
 /**
  * Performs an export operation on each element in a List and returns a success code if each
@@ -27,6 +29,24 @@ public fun <T> batchExportOperation(
     return when {
         success -> OperationResultCode.Success
         else -> OperationResultCode.Failure
+    }
+}
+
+public suspend fun <T> batchExportOperationConcurrent(
+    elements: List<T>,
+    sdkErrorHandler: SdkErrorHandler,
+    timeoutMs: Long,
+    action: suspend (T) -> OperationResultCode,
+): OperationResultCode = runWithTimeout(timeoutMs) {
+    supervisorScope {
+        val results = elements.map { element ->
+            async {
+                sdkErrorHandler.guardOrDefaultSuspend(OperationResultCode.Failure, "Export operation failed") {
+                    action(element)
+                }
+            }
+        }
+        batchExportOperationSuspend(results, sdkErrorHandler) { it.await() }
     }
 }
 
