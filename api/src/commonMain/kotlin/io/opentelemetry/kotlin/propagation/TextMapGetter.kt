@@ -26,11 +26,6 @@ public interface TextMapGetter<C> {
     /**
      * Returns all values associated with [key] in [carrier], in the order they appear,
      * or an empty list if absent.
-     * The default implementation returns the single value supplied by [get]. Carriers with
-     * multiple values per key should override this method to return all values.
      */
-    public fun getAll(carrier: C, key: String): List<String> {
-        val value = get(carrier, key) ?: return emptyList()
-        return listOf(value)
-    }
+    public fun getAll(carrier: C, key: String): List<String>
 }

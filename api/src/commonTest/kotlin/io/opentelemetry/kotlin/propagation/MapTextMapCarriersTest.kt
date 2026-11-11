@@ -13,26 +13,13 @@ import kotlin.test.assertTrue
 internal class MapTextMapCarriersTest {
 
     @Test
-    fun defaultGetAllSupportsSingleValueCarriers() {
-        val getter = object : TextMapGetter<Map<String, String>> {
-            override fun keys(carrier: Map<String, String>): Collection<String> = carrier.keys
-            override fun get(carrier: Map<String, String>, key: String): String? = carrier[key]
-        }
-        val carrier = mapOf("present" to "value", "empty" to "")
-
-        assertEquals(listOf("value"), getter.getAll(carrier, "present"))
-        assertEquals(listOf(""), getter.getAll(carrier, "empty"))
-        assertEquals(emptyList(), getter.getAll(carrier, "absent"))
-    }
-
-    @Test
     fun getterSupportsHttpHeaderCasingAndAllKeys() {
         val getter = createMapTextMapGetter()
         val carrier = linkedMapOf("TraceParent" to "first", "traceparent" to "second", "Baggage" to "")
 
         assertEquals(carrier.keys, getter.keys(carrier))
         assertEquals("first", getter.get(carrier, "TRACEPARENT"))
-        assertEquals(listOf("first"), getter.getAll(carrier, "traceparent"))
+        assertEquals(listOf("first", "second"), getter.getAll(carrier, "traceparent"))
         assertEquals(listOf(""), getter.getAll(carrier, "baggage"))
         assertNull(getter.get(carrier, "missing"))
         assertEquals(emptyList(), getter.getAll(carrier, "missing"))

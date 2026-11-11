@@ -388,10 +388,6 @@ public abstract interface class io/opentelemetry/kotlin/propagation/TextMapGette
 	public abstract fun keys (Ljava/lang/Object;)Ljava/util/Collection;
 }
 
-public final class io/opentelemetry/kotlin/propagation/TextMapGetter$DefaultImpls {
-	public static fun getAll (Lio/opentelemetry/kotlin/propagation/TextMapGetter;Ljava/lang/Object;Ljava/lang/String;)Ljava/util/List;
-}
-
 public abstract interface class io/opentelemetry/kotlin/propagation/TextMapPropagator {
 	public abstract fun extract (Lio/opentelemetry/kotlin/context/Context;Ljava/lang/Object;Lio/opentelemetry/kotlin/propagation/TextMapGetter;)Lio/opentelemetry/kotlin/context/Context;
 	public abstract fun fields ()Ljava/util/Collection;

@@ -4,7 +4,8 @@ import io.opentelemetry.kotlin.ExperimentalApi
 
 /**
  * Returns a shared, stateless getter for single-value maps, with case-insensitive key lookup.
- * If multiple keys differ only in case, the first matching entry in iteration order is used.
+ * When keys differ only in case, [TextMapGetter.get] returns the first matching value
+ * and [TextMapGetter.getAll] returns all matching values in iteration order.
  */
 @ExperimentalApi
 public fun createMapTextMapGetter(): TextMapGetter<Map<String, String>> = MapTextMapGetter
@@ -22,6 +23,9 @@ internal object MapTextMapGetter : TextMapGetter<Map<String, String>> {
 
     override fun get(carrier: Map<String, String>, key: String): String? =
         carrier.entries.firstOrNull { it.key.equals(key, ignoreCase = true) }?.value
+
+    override fun getAll(carrier: Map<String, String>, key: String): List<String> =
+        carrier.entries.filter { it.key.equals(key, ignoreCase = true) }.map { it.value }
 }
 
 @OptIn(ExperimentalApi::class)
