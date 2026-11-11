@@ -20,7 +20,6 @@ public fun createThreadLocalCurrentContextStorage(): CurrentContextStorage =
  * if none is set. On single-threaded targets (JS) the backing [ThreadLocal] degrades to a single
  * shared slot.
  */
-@OptIn(TempContextStandInApi::class)
 internal class ThreadLocalCurrentContextStorage : CurrentContextStorage {
 
     private val current = ThreadLocal<Context>()
@@ -36,5 +35,5 @@ internal class ThreadLocalCurrentContextStorage : CurrentContextStorage {
         }
     }
 
-    override fun current(): Context = current.get() ?: internalRootContext()
+    override fun current(): Context = current.get() ?: rootContext()
 }

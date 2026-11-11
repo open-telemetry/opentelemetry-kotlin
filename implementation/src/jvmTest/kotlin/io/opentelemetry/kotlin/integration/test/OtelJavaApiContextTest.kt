@@ -2,8 +2,7 @@ package io.opentelemetry.kotlin.integration.test
 
 import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
-import io.opentelemetry.kotlin.context.TempContextStandInApi
-import io.opentelemetry.kotlin.context.internalCurrentContext
+import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.toOtelJavaApi
 import io.opentelemetry.kotlin.tracing.Span
 import kotlinx.coroutines.test.runTest
@@ -18,7 +17,6 @@ import kotlin.test.assertSame
  * Verifies that the Java API returned by toOtelJavaApi() shares current context with the
  * Kotlin API.
  */
-@OptIn(TempContextStandInApi::class)
 internal class OtelJavaApiContextTest {
 
     private lateinit var harness: IntegrationTestHarness
@@ -107,20 +105,20 @@ internal class OtelJavaApiContextTest {
 
     @Test
     fun testJavaScopeCloseRestoresKotlinContext() = runTest {
-        val before = internalCurrentContext()
+        val before = currentContext()
         val javaSpan = startJavaSpan("java_span")
         javaSpan.makeCurrent().use {
-            assertEquals(javaSpan.spanContext.spanId, internalCurrentContext().extractSpan().spanContext.spanId)
+            assertEquals(javaSpan.spanContext.spanId, currentContext().extractSpan().spanContext.spanId)
         }
         javaSpan.end()
-        assertSame(before, internalCurrentContext())
+        assertSame(before, currentContext())
     }
 
     private fun startJavaSpan(name: String): OtelJavaSpan =
         javaApi.tracerProvider.get("tracer").spanBuilder(name).startSpan()
 
     private fun withAttached(span: Span, action: () -> Unit) {
-        val scope = internalCurrentContext().storeSpan(span).attach()
+        val scope = currentContext().storeSpan(span).attach()
         try {
             action()
         } finally {

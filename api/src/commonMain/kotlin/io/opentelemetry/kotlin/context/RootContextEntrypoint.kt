@@ -16,4 +16,4 @@ private val ROOT_CONTEXT: Context = ContextValue(ProcessWideContextStorageSlot)
  * https://opentelemetry.io/docs/specs/otel/context/
  */
 @ExperimentalApi
-internal fun rootContext(): Context = ROOT_CONTEXT
+public fun rootContext(): Context = ROOT_CONTEXT

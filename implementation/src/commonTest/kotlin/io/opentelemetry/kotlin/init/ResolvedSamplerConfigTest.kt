@@ -3,8 +3,7 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
-import io.opentelemetry.kotlin.context.TempContextStandInApi
-import io.opentelemetry.kotlin.context.internalRootContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -20,7 +19,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertSame
 
-@OptIn(ExperimentalStdlibApi::class, TempContextStandInApi::class)
+@OptIn(ExperimentalStdlibApi::class)
 internal class ResolvedSamplerConfigTest {
 
     private val clock = FakeClock()
@@ -57,7 +56,7 @@ internal class ResolvedSamplerConfigTest {
     }
 
     private fun Sampler.shouldSampleRoot(): Decision = shouldSample(
-        context = internalRootContext(),
+        context = rootContext(),
         traceIdBytes = ZERO_TRACE_ID,
         name = "root",
         spanKind = SpanKind.INTERNAL,

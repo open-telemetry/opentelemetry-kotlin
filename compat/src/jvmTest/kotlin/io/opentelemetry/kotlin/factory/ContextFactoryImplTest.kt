@@ -1,10 +1,8 @@
 package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
-import io.opentelemetry.kotlin.context.TempContextStandInApi
 import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.context.currentContext
-import io.opentelemetry.kotlin.context.internalRootContext
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.framework.SdkTracker
@@ -14,7 +12,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
-@OptIn(TempContextStandInApi::class)
 internal class ContextFactoryImplTest {
 
     private val sdks = SdkTracker()
@@ -26,7 +23,7 @@ internal class ContextFactoryImplTest {
 
     @Test
     fun `test root`() {
-        assertSame(internalRootContext(), contextFactory.rootContext())
+        assertSame(rootContext(), contextFactory.rootContext())
     }
 
     @Test

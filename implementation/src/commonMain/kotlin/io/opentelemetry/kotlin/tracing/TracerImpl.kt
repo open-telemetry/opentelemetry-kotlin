@@ -5,9 +5,8 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.attributes.copyAttributes
 import io.opentelemetry.kotlin.attributes.typedAttributesOrConvert
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.TempContextStandInApi
-import io.opentelemetry.kotlin.context.internalCurrentContext
-import io.opentelemetry.kotlin.context.internalRootContext
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
@@ -26,7 +25,6 @@ import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
 
-@OptIn(TempContextStandInApi::class)
 internal class TracerImpl(
     private val clock: Clock,
     private val processor: SpanProcessor?,
@@ -40,7 +38,7 @@ internal class TracerImpl(
 ) : Tracer {
 
     private val propagatingNoopTracer = PropagatingNoopTracer(sdkErrorHandler)
-    private val root = internalRootContext()
+    private val root = rootContext()
     private val invalidSpanContext = createInvalidSpanContext()
     private val invalidSpan = createNonRecordingSpan(invalidSpanContext)
 
@@ -70,7 +68,7 @@ internal class TracerImpl(
                 return@sdkGuardOrDefault invalidSpan
             }
 
-            val ctx = parentContext ?: internalCurrentContext()
+            val ctx = parentContext ?: currentContext()
 
             val parentSpanContext = when (ctx) {
                 root -> invalidSpanContext

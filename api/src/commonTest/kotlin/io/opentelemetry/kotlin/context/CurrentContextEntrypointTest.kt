@@ -19,7 +19,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class, TempContextStandInApi::class)
+@OptIn(ExperimentalApi::class)
 internal class CurrentContextEntrypointTest {
 
     private class SlotStorage : CurrentContextStorage {
@@ -163,19 +163,5 @@ internal class CurrentContextEntrypointTest {
         val error = assertIs<SdkError.ApiMisuse>(handler.errors.single())
         inner.detach()
         assertEquals("Scope.detach", error.api)
-    }
-
-    @Test
-    fun testStandIns() {
-        assertSame(rootContext(), internalRootContext())
-        assertSame(rootContext(), internalCurrentContext())
-
-        val storage = SlotStorage()
-        assertTrue(internalInstallContextStorage(storage))
-        val ctx = rootContext().set(key, "value")
-        ctx.attach()
-        assertSame(ctx, internalCurrentContext())
-        assertTrue(internalUninstallContextStorage(storage))
-        assertSame(rootContext(), internalCurrentContext())
     }
 }

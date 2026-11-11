@@ -2,11 +2,10 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
-import io.opentelemetry.kotlin.context.TempContextStandInApi
 import io.opentelemetry.kotlin.context.createSingleSlotCurrentContextStorage
-import io.opentelemetry.kotlin.context.internalInstallContextStorage
-import io.opentelemetry.kotlin.context.internalRootContext
-import io.opentelemetry.kotlin.context.internalUninstallContextStorage
+import io.opentelemetry.kotlin.context.installContextStorage
+import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.context.uninstallContextStorage
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
@@ -23,7 +22,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
-@OptIn(TempContextStandInApi::class)
 internal class LogContextTest {
 
     private val storage = createSingleSlotCurrentContextStorage()
@@ -36,7 +34,7 @@ internal class LogContextTest {
 
     @BeforeTest
     fun setUp() {
-        internalInstallContextStorage(storage)
+        installContextStorage(storage)
         clock = FakeClock()
         processor = FakeLogRecordProcessor()
         logger = LoggerImpl(
@@ -62,7 +60,7 @@ internal class LogContextTest {
 
     @AfterTest
     fun tearDown() {
-        internalUninstallContextStorage(storage)
+        uninstallContextStorage(storage)
     }
 
     @Test
@@ -75,7 +73,7 @@ internal class LogContextTest {
     @Test
     fun testOverrideContext() {
         val span = tracer.startSpan("span")
-        val ctx = internalRootContext().storeSpan(span)
+        val ctx = rootContext().storeSpan(span)
         logger.emit(
             context = ctx,
         )
@@ -87,7 +85,7 @@ internal class LogContextTest {
     @Test
     fun testCurrentContext() {
         val span = tracer.startSpan("span")
-        val ctx = internalRootContext().storeSpan(span)
+        val ctx = rootContext().storeSpan(span)
         val scope = ctx.attach()
         logger.emit()
 

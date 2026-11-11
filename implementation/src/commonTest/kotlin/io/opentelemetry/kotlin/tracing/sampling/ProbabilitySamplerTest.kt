@@ -3,8 +3,7 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.TempContextStandInApi
-import io.opentelemetry.kotlin.context.internalRootContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
@@ -14,7 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-@OptIn(ExperimentalApi::class, TempContextStandInApi::class)
+@OptIn(ExperimentalApi::class)
 internal class ProbabilitySamplerTest {
 
     private val idGenerator = IdGeneratorImpl()
@@ -29,7 +28,7 @@ internal class ProbabilitySamplerTest {
         )
         for ((traceId, expected) in cases) {
             val result = sampler.shouldSample(
-                context = internalRootContext(),
+                context = rootContext(),
                 traceIdBytes = traceId.hexToByteArray(),
                 name = "span",
                 spanKind = SpanKind.INTERNAL,
@@ -50,7 +49,7 @@ internal class ProbabilitySamplerTest {
         )
         for ((traceId, expected) in cases) {
             val result = sampler.shouldSample(
-                context = internalRootContext(),
+                context = rootContext(),
                 traceIdBytes = traceId.hexToByteArray(),
                 name = "span",
                 spanKind = SpanKind.INTERNAL,
@@ -68,13 +67,13 @@ internal class ProbabilitySamplerTest {
             isRemote = true
             traceState { put("ot", otTraceStateValue) }
         }
-        return internalRootContext().storeSpanContext(parentSpanContext)
+        return rootContext().storeSpanContext(parentSpanContext)
     }
 
     @Test
     fun testRecordsAndSamplesSpan() {
         val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
-            context = internalRootContext(),
+            context = rootContext(),
             traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
@@ -87,7 +86,7 @@ internal class ProbabilitySamplerTest {
     @Test
     fun testDropsSpan() {
         val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
-            context = internalRootContext(),
+            context = rootContext(),
             traceIdBytes = "ffffffffffffffffff00000000000000".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
@@ -101,7 +100,7 @@ internal class ProbabilitySamplerTest {
     fun testRecordsAndSamplesSpanAtMinimumRatio() {
         val ratio = 1.0 / (1L shl 56).toDouble()
         val result = ProbabilitySampler(ratio, sdkErrorHandler).shouldSample(
-            context = internalRootContext(),
+            context = rootContext(),
             traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
@@ -115,7 +114,7 @@ internal class ProbabilitySamplerTest {
     fun testDropsSpanAtMinimumRatio() {
         val ratio = 1.0 / (1L shl 56).toDouble()
         val result = ProbabilitySampler(ratio, sdkErrorHandler).shouldSample(
-            context = internalRootContext(),
+            context = rootContext(),
             traceIdBytes = "000000000000000000fffffffffffffe".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,

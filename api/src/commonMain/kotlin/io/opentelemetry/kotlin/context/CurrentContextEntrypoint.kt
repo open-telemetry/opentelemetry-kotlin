@@ -16,7 +16,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * https://opentelemetry.io/docs/specs/otel/context/#get-current-context
  */
 @ExperimentalApi
-internal fun currentContext(): Context = ProcessWideContextStorageSlot.installed()?.current() ?: rootContext()
+public fun currentContext(): Context = ProcessWideContextStorageSlot.installed()?.current() ?: rootContext()
 
 /**
  * Makes this [Context] current while [block] runs, then restores the previous context, even if
@@ -26,7 +26,7 @@ internal fun currentContext(): Context = ProcessWideContextStorageSlot.installed
  * is installed, but [block] still runs.
  */
 @ExperimentalApi
-internal inline fun <T> Context.runWithContext(block: () -> T): T {
+public inline fun <T> Context.runWithContext(block: () -> T): T {
     val scope = attach()
     try {
         return block()

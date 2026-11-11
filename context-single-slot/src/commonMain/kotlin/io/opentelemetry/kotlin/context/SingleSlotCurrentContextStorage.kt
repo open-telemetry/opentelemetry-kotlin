@@ -18,7 +18,6 @@ public fun createSingleSlotCurrentContextStorage(): CurrentContextStorage =
  * A simple implementation of [CurrentContextStorage] that only allows one context at any time,
  * and doesn't use thread locals/coroutine context to distinguish between what is current.
  */
-@OptIn(TempContextStandInApi::class)
 internal class SingleSlotCurrentContextStorage : CurrentContextStorage {
 
     @Volatile
@@ -35,5 +34,5 @@ internal class SingleSlotCurrentContextStorage : CurrentContextStorage {
         }
     }
 
-    override fun current(): Context = current ?: internalRootContext()
+    override fun current(): Context = current ?: rootContext()
 }

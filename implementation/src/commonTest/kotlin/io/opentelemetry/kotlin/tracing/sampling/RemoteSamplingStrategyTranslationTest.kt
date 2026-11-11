@@ -2,8 +2,7 @@ package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesModel
-import io.opentelemetry.kotlin.context.TempContextStandInApi
-import io.opentelemetry.kotlin.context.internalRootContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -14,12 +13,12 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class, TempContextStandInApi::class)
+@OptIn(ExperimentalApi::class)
 internal class RemoteSamplingStrategyTranslationTest {
 
     private fun Sampler.sample(name: String): SamplingResult.Decision =
         shouldSample(
-            context = internalRootContext(),
+            context = rootContext(),
             traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = name,
             spanKind = SpanKind.INTERNAL,
