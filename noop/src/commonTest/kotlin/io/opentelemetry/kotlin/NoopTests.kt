@@ -2,10 +2,14 @@ package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.config.NoopConfigProperties
 import io.opentelemetry.kotlin.config.NoopConfigProvider
+import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.context.FakeCurrentContextStorage
 import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.installContextStorage
 import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.context.uninstallContextStorage
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.metrics.NoopObservableDoubleMeasurement
@@ -22,7 +26,9 @@ import io.opentelemetry.kotlin.tracing.FakeSpan
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.NoopSpan
 import io.opentelemetry.kotlin.tracing.NoopSpanContext
+import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanKind
+import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -91,6 +97,44 @@ internal class NoopTests {
         val tracer = NoopOpenTelemetry.tracerProvider.getTracer("test-tracer")
         val span = tracer.startSpan("span", parentContext = FakeContext())
         assertTrue(span is NoopSpan)
+    }
+
+    @Test
+    fun testNoopTracerPropagatesImplicitParent() {
+        val tracer = NoopOpenTelemetry.tracerProvider.getTracer("test-tracer")
+        val remoteParent = rootContext().storeSpanContext(FakeSpanContext.VALID)
+        val storage = FakeCurrentContextStorage()
+        assertTrue(installContextStorage(storage))
+        try {
+            val scope = remoteParent.attach()
+            val span = try {
+                tracer.startSpan("span")
+            } finally {
+                scope.detach()
+            }
+            assertEquals(FakeSpanContext.VALID.traceId, span.spanContext.traceId)
+            assertEquals(FakeSpanContext.VALID.spanId, span.spanContext.spanId)
+            assertFalse(span.isRecording())
+        } finally {
+            uninstallContextStorage(storage)
+        }
+    }
+
+    @Test
+    fun testNoopTracerReturnsNonRecordingParentDirectly() {
+        val tracer = NoopOpenTelemetry.tracerProvider.getTracer("test-tracer")
+        val parentSpan = createNonRecordingSpan(FakeSpanContext.VALID)
+        val span = tracer.startSpan("span", parentContext = rootContext().storeSpan(parentSpan))
+        assertSame(parentSpan, span)
+    }
+
+    @Test
+    fun testNoopTracerSurvivesThrowingParentContext() {
+        val tracer = NoopOpenTelemetry.tracerProvider.getTracer("test-tracer")
+        val parent = object : Context by rootContext() {
+            override fun extractSpan(): Span = error("hostile")
+        }
+        assertSame(NoopSpan, tracer.startSpan("span", parentContext = parent))
     }
 
     @Test
