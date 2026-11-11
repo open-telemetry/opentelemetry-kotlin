@@ -5,15 +5,24 @@ import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaContextStorage
 
 /**
- * Stores the current context in opentelemetry-java's `ContextStorage`, so that Kotlin and Java
- * code can share a single current context.
+ * Creates a [CurrentContextStorage] that stores the current context in opentelemetry-java's
+ * `ContextStorage`, so that Kotlin and Java code share one current context. Use it if you call
+ * [io.opentelemetry.kotlin.toOtelJavaApi], by passing it to `context { storage = … }` when
+ * creating the SDK. It respects any `ContextStorage` wrappers that are installed (e.g. by the
+ * Java agent).
+ *
+ * Each call returns a new instance, but every instance reads and writes opentelemetry-java's
+ * single process-wide `ContextStorage`, so contexts attached through one are visible through all
+ * of them.
  */
 @ExperimentalApi
-internal class OtelJavaCurrentContextStorage(
-    rootSupplier: () -> Context,
-) : CurrentContextStorage {
+public fun createOtelJavaCurrentContextStorage(): CurrentContextStorage = OtelJavaCurrentContextStorage()
 
-    private val root by lazy { rootSupplier() }
+@ExperimentalApi
+@OptIn(TempContextStandInApi::class)
+internal class OtelJavaCurrentContextStorage : CurrentContextStorage {
+
+    private val root = internalRootContext()
 
     override fun attach(context: Context): Scope {
         val java = when {

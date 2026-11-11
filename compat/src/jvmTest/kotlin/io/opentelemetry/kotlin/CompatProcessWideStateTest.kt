@@ -111,7 +111,7 @@ internal class CompatProcessWideStateTest {
 
         first.shutdown()
 
-        assertFalse(internalInstallContextStorage(OtelJavaCurrentContextStorage(::internalRootContext)))
+        assertFalse(internalInstallContextStorage(OtelJavaCurrentContextStorage()))
         val error = SdkError.ApiMisuse("api", "message", SdkErrorSeverity.WARNING)
         reportError(error)
         assertSame(error, errorHandler.errors.last())
@@ -119,7 +119,7 @@ internal class CompatProcessWideStateTest {
 
     @Test
     fun `taken slot warns and uses the installed storage`() {
-        val storage = OtelJavaCurrentContextStorage(::internalRootContext).also { preinstalled = it }
+        val storage = OtelJavaCurrentContextStorage().also { preinstalled = it }
         assertTrue(internalInstallContextStorage(storage))
 
         val errorHandler = FakeSdkErrorHandler()
@@ -141,7 +141,7 @@ internal class CompatProcessWideStateTest {
     private suspend fun assertClaimsAndReleases(otel: OpenTelemetrySdk) {
         val other = createCompatOpenTelemetry().also(sdks::track)
         other.shutdown()
-        assertFalse(internalInstallContextStorage(OtelJavaCurrentContextStorage(::internalRootContext)))
+        assertFalse(internalInstallContextStorage(OtelJavaCurrentContextStorage()))
         assertFalse(setProcessSdkErrorHandler(FakeSdkErrorHandler()))
 
         otel.shutdown()
@@ -149,7 +149,7 @@ internal class CompatProcessWideStateTest {
     }
 
     private fun assertSlotAndSinkFree() {
-        val storage = OtelJavaCurrentContextStorage(::internalRootContext)
+        val storage = OtelJavaCurrentContextStorage()
         assertTrue(internalInstallContextStorage(storage))
         assertTrue(internalUninstallContextStorage(storage))
         assertTrue(setProcessSdkErrorHandler(FakeSdkErrorHandler()))

@@ -1,11 +1,11 @@
 package io.opentelemetry.kotlin.integration.test
 
+import io.opentelemetry.kotlin.context.createOtelJavaCurrentContextStorage
 import io.opentelemetry.kotlin.createOpenTelemetry
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.framework.shutdownForTest
-import io.opentelemetry.kotlin.init.useOtelJavaContextStorage
 import io.opentelemetry.kotlin.toOtelJavaApi
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -54,7 +54,7 @@ internal class OtelJavaApiContextWarningTest {
         val errorHandler = FakeSdkErrorHandler()
         createOpenTelemetry {
             errorHandler(errorHandler)
-            context { useOtelJavaContextStorage() }
+            context { storage = createOtelJavaCurrentContextStorage() }
         }.also(sdks::track).toOtelJavaApi()
         assertTrue(errorHandler.apiMisuses.isEmpty())
     }

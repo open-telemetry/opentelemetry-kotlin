@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.context.CurrentContextStorage
 import io.opentelemetry.kotlin.context.OtelJavaCurrentContextStorage
 import io.opentelemetry.kotlin.context.TempContextStandInApi
 import io.opentelemetry.kotlin.context.internalInstallContextStorage
-import io.opentelemetry.kotlin.context.internalRootContext
 import io.opentelemetry.kotlin.context.internalUninstallContextStorage
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -38,7 +37,7 @@ internal class CompatProcessWideState(
  */
 @OptIn(ExperimentalApi::class, TempContextStandInApi::class)
 internal fun claimCompatProcessWideState(api: String, errorHandler: SdkErrorHandler): CompatProcessWideState {
-    val storage = OtelJavaCurrentContextStorage(::internalRootContext)
+    val storage = OtelJavaCurrentContextStorage()
     val installed = internalInstallContextStorage(storage)
     if (!installed) {
         errorHandler.onError(
