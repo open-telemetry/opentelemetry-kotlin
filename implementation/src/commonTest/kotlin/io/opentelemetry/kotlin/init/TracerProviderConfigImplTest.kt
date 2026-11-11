@@ -157,8 +157,13 @@ internal class TracerProviderConfigImplTest {
             "SimpleSpanProcessor",
             processorClassName(
                 SpanProcessorBehavior(
-                    simple = SimpleSpanProcessorBehavior(),
-                    batch = BatchSpanProcessorBehavior(scheduleDelay = 100),
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(console = ConsoleExporterBehavior())
+                    ),
+                    batch = BatchSpanProcessorBehavior(
+                        scheduleDelay = 100,
+                        exporter = SpanExporterBehavior(console = ConsoleExporterBehavior())
+                    ),
                 ),
             ),
         )
