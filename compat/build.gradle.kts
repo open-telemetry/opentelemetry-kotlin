@@ -32,6 +32,7 @@ kotlin {
         jvmTest {
             dependencies {
                 implementation(project(":context-single-slot"))
+                implementation(project(":propagator-b3"))
                 implementation(project(":test-fakes"))
                 implementation(project(":integration-test"))
                 implementation(libs.kotlinx.coroutines.test)
