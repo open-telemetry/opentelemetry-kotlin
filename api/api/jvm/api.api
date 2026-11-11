@@ -378,6 +378,11 @@ public abstract interface class io/opentelemetry/kotlin/metrics/SynchronousInstr
 	public abstract fun enabled ()Z
 }
 
+public final class io/opentelemetry/kotlin/propagation/MapTextMapCarriersKt {
+	public static final fun createMapTextMapGetter ()Lio/opentelemetry/kotlin/propagation/TextMapGetter;
+	public static final fun createMutableMapTextMapSetter ()Lio/opentelemetry/kotlin/propagation/TextMapSetter;
+}
+
 public final class io/opentelemetry/kotlin/propagation/PropagatorEntrypointsKt {
 	public static final fun createB3Propagator (Lio/opentelemetry/kotlin/init/B3Format;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public static synthetic fun createB3Propagator$default (Lio/opentelemetry/kotlin/init/B3Format;ILjava/lang/Object;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
