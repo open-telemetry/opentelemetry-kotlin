@@ -11,7 +11,6 @@ internal class BehaviorResolverImplTest {
 
     @Test
     fun dslRefinesDeclarativeBatchSettingsAndPreservesExporter() {
-        val http = OtlpHttpLogsExporterBehavior(endpoint = "https://example.com")
         val resolved = resolver.resolve(
             envars = OpenTelemetryBehavior(
                 fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
