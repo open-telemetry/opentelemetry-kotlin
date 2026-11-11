@@ -31,19 +31,15 @@ import io.opentelemetry.kotlin.tracing.TracerProviderImpl
 public fun createOpenTelemetry(
 
     /**
-     * Defines the [Clock] implementation used by OpenTelemetry.
-     */
-    clock: Clock = ClockImpl(),
-
-    /**
      * Defines configuration for OpenTelemetry.
      */
     config: OpenTelemetryConfigDsl.() -> Unit = {}
 ): OpenTelemetrySdk {
-    val cfg = OpenTelemetryConfigImpl(clock)
+    val cfg = OpenTelemetryConfigImpl()
     cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
         cfg.config()
     }
+    val clock = cfg.clock
     val resourceFactory = ResourceFactoryImpl(cfg.sdkErrorHandler)
     val behaviorReader = defaultBehaviorReader(
         sdkErrorHandler = cfg.sdkErrorHandler,

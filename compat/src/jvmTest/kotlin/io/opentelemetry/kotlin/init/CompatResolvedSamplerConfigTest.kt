@@ -30,7 +30,7 @@ internal class CompatResolvedSamplerConfigTest {
         errorHandler: SdkErrorHandler? = null,
         configure: TracerProviderConfigDsl.() -> Unit = {},
     ): Span {
-        val cfg = CompatOpenTelemetryConfig(clock).apply {
+        val cfg = CompatOpenTelemetryConfig().apply {
             if (errorHandler != null) {
                 errorHandler(errorHandler)
             }

@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
-import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
@@ -22,14 +21,12 @@ import kotlin.test.assertSame
 @OptIn(ExperimentalStdlibApi::class)
 internal class ResolvedSamplerConfigTest {
 
-    private val clock = FakeClock()
-
     private fun tracingConfig(
         getEnvVar: (String) -> String? = { null },
         errorHandler: SdkErrorHandler? = null,
         configure: TracerProviderConfigDsl.() -> Unit,
     ): TracingConfig {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             if (errorHandler != null) {
                 errorHandler(errorHandler)
             }

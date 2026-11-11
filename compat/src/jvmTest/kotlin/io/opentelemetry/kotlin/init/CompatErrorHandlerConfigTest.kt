@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.init
 
-import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -11,8 +10,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 internal class CompatErrorHandlerConfigTest {
-
-    private val clock = FakeClock()
 
     @Test
     fun `configured error handler receives reports`() {
@@ -57,7 +54,7 @@ internal class CompatErrorHandlerConfigTest {
         configure: CompatOpenTelemetryConfig.() -> Unit,
     ): SdkErrorHandler {
         var captured: SdkErrorHandler? = null
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         if (configureHandlerFirst) {
             cfg.configure()
         }

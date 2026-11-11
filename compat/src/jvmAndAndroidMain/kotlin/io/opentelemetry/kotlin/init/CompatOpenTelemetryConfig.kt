@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.COMPAT_DEFAULT_TIMEOUT_MS
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.aliases.OtelJavaClock
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapPropagator
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
@@ -10,6 +11,7 @@ import io.opentelemetry.kotlin.attributes.setAttributeMap
 import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
+import io.opentelemetry.kotlin.clock.ClockAdapter
 import io.opentelemetry.kotlin.config.DeclarativeBehaviorReader
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
@@ -27,9 +29,7 @@ import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import kotlin.concurrent.Volatile
 
 @ExperimentalApi
-internal class CompatOpenTelemetryConfig(
-    clock: Clock,
-) : OpenTelemetryConfigDsl, BehaviorSupplier<OpenTelemetryBehavior> {
+internal class CompatOpenTelemetryConfig : OpenTelemetryConfigDsl, BehaviorSupplier<OpenTelemetryBehavior> {
 
     @Volatile private var configuredErrorHandler: SdkErrorHandler = PlatformSdkErrorHandler
     internal val sdkErrorHandler = GuardedSdkErrorHandler { configuredErrorHandler.onError(it) }
@@ -47,8 +47,17 @@ internal class CompatOpenTelemetryConfig(
         ) { it > 0 }
     }
 
-    internal val tracerProviderConfig = CompatTracerProviderConfig(clock, sdkErrorHandler)
-    internal val loggerProviderConfig = CompatLoggerProviderConfig(clock, sdkErrorHandler)
+    @Volatile internal var clock: Clock = ClockAdapter(OtelJavaClock.getDefault())
+        private set
+
+    /**
+     * Export configs are evaluated eagerly, possibly before [clock] is called, so they receive a
+     * forwarder that resolves the configured clock on each reading instead.
+     */
+    private val forwardingClock = Clock { clock.now() }
+
+    internal val tracerProviderConfig = CompatTracerProviderConfig(forwardingClock, sdkErrorHandler)
+    internal val loggerProviderConfig = CompatLoggerProviderConfig(forwardingClock, sdkErrorHandler)
     internal val meterProviderConfig = CompatMeterProviderConfig(sdkErrorHandler)
     private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
     private val propagatorCfg = PropagatorConfigImpl()
@@ -126,6 +135,10 @@ internal class CompatOpenTelemetryConfig(
 
     override fun idGenerator(action: () -> IdGenerator) {
         idGeneratorBehavior = IdGeneratorBehavior.Custom(action)
+    }
+
+    override fun clock(clock: Clock) {
+        this.clock = clock
     }
 
     override fun errorHandler(handler: SdkErrorHandler) {
