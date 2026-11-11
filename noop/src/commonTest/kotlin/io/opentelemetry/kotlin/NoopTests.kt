@@ -399,6 +399,33 @@ internal class NoopTests {
 
     @OptIn(ExperimentalApi::class)
     @Test
+    fun testNoopObservableMeasurementHandles() {
+        val meter = NoopOpenTelemetry.meterProvider.getMeter("test-meter")
+        val longInstruments = listOf(
+            meter.createObservableLongCounter("long.counter"),
+            meter.createObservableLongUpDownCounter("long.up_down_counter"),
+            meter.createObservableLongGauge("long.gauge"),
+        )
+        val doubleInstruments = listOf(
+            meter.createObservableDoubleCounter("double.counter"),
+            meter.createObservableDoubleUpDownCounter("double.up_down_counter"),
+            meter.createObservableDoubleGauge("double.gauge"),
+        )
+
+        longInstruments.forEach {
+            assertSame(it.measurement, it.measurement)
+            it.measurement.record(1)
+            it.close()
+        }
+        doubleInstruments.forEach {
+            assertSame(it.measurement, it.measurement)
+            it.measurement.record(1.5)
+            it.close()
+        }
+    }
+
+    @OptIn(ExperimentalApi::class)
+    @Test
     fun testNoopObservableLongMeasurement() {
         val noopObservableLongMeasurement = NoopObservableLongMeasurement()
         var attributesCalled = false

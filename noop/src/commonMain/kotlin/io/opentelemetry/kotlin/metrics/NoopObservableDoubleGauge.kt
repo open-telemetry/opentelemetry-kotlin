@@ -11,6 +11,8 @@ internal class NoopObservableDoubleGauge(
     override val unit: String?,
     override val description: String?,
 ) : ObservableDoubleGauge {
+    override val measurement: ObservableDoubleMeasurement = NoopObservableDoubleMeasurement()
+
     override fun registerCallback(callback: (ObservableDoubleMeasurement) -> Unit): AutoCloseable =
         NoopCallbackHandle
 

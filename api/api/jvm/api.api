@@ -246,6 +246,7 @@ public final class io/opentelemetry/kotlin/logging/SeverityNumber$Companion {
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/AsynchronousInstrument : io/opentelemetry/kotlin/metrics/Instrument, java/lang/AutoCloseable {
+	public abstract fun getMeasurement ()Lio/opentelemetry/kotlin/metrics/ObservableMeasurement;
 	public abstract fun registerCallback (Lkotlin/jvm/functions/Function1;)Ljava/lang/AutoCloseable;
 }
 
