@@ -4,10 +4,9 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.TempContextStandInApi
 import io.opentelemetry.kotlin.context.createSingleSlotCurrentContextStorage
 import io.opentelemetry.kotlin.context.internalInstallContextStorage
+import io.opentelemetry.kotlin.context.internalRootContext
 import io.opentelemetry.kotlin.context.internalUninstallContextStorage
-import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -30,10 +29,9 @@ internal class PropagatingNoopTracerTest {
         internalUninstallContextStorage(storage)
     }
 
-    private val contextFactory = ContextFactoryImpl()
     private val errorHandler = FakeSdkErrorHandler()
     private val tracer = PropagatingNoopTracer(errorHandler)
-    private val contextWithSpan = contextFactory.rootContext().storeSpanContext(FakeSpanContext.VALID)
+    private val contextWithSpan = internalRootContext().storeSpanContext(FakeSpanContext.VALID)
 
     @Test
     fun `tracer is not enabled`() {
@@ -42,7 +40,7 @@ internal class PropagatingNoopTracerTest {
 
     @Test
     fun `root span has invalid span context`() {
-        val span = tracer.startSpan("span", parentContext = contextFactory.rootContext())
+        val span = tracer.startSpan("span", parentContext = internalRootContext())
         assertFalse(span.spanContext.isValid)
         assertFalse(span.isRecording())
     }

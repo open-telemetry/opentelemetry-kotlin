@@ -10,10 +10,10 @@ import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.context.TempContextStandInApi
+import io.opentelemetry.kotlin.context.internalRootContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.resource.SdkMode
@@ -41,12 +41,11 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
+@OptIn(TempContextStandInApi::class)
 internal class TracerProviderConfigImplTest {
 
     private val clock = FakeClock()
     private val base = ResourceFactoryImpl(NoopSdkErrorHandler).sdkDefaultResource(SdkMode.REGULAR)
-
-    private val contextFactory = ContextFactoryImpl()
 
     @Test
     fun testDefaultSamplerParentBased() {
@@ -57,7 +56,7 @@ internal class TracerProviderConfigImplTest {
 
     @Test
     fun testDefaultSamplerRootSamples() {
-        assertEquals(Decision.RECORD_AND_SAMPLE, defaultSampler().decisionFor(contextFactory.rootContext()))
+        assertEquals(Decision.RECORD_AND_SAMPLE, defaultSampler().decisionFor(internalRootContext()))
     }
 
     @Test
@@ -309,7 +308,7 @@ internal class TracerProviderConfigImplTest {
             this.isRemote = isRemote
         }
         val parentSpan = createNonRecordingSpan(parentSpanContext)
-        return contextFactory.rootContext().storeSpan(parentSpan)
+        return internalRootContext().storeSpan(parentSpan)
     }
 
     private fun Sampler.decisionFor(context: Context): Decision = shouldSample(

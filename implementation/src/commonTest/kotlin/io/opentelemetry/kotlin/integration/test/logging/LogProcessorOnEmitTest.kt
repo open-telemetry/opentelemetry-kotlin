@@ -1,7 +1,8 @@
 package io.opentelemetry.kotlin.integration.test.logging
 
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.context.TempContextStandInApi
+import io.opentelemetry.kotlin.context.internalRootContext
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
 import io.opentelemetry.kotlin.logging.SeverityNumber
@@ -16,6 +17,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@OptIn(TempContextStandInApi::class)
 internal class LogProcessorOnEmitTest {
 
     private lateinit var harness: IntegrationTestHarness
@@ -60,8 +62,7 @@ internal class LogProcessorOnEmitTest {
 
     private fun prepareContext(): Context {
         val span = harness.tracer.startSpan("span")
-        val contextFactory = harness.kotlinApi.context
-        val ctx = contextFactory.rootContext().storeSpan(span)
+        val ctx = internalRootContext().storeSpan(span)
         return ctx
     }
 
