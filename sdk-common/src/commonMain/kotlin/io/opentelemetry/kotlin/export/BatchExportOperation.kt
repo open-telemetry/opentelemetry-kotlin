@@ -39,7 +39,13 @@ public suspend fun <T> batchExportOperationConcurrent(
     action: suspend (T) -> OperationResultCode,
 ): OperationResultCode = runWithTimeout(timeoutMs) {
     supervisorScope {
-        val results = elements.map { element -> async { action(element) } }
+        val results = elements.map { element ->
+            async {
+                sdkErrorHandler.guardOrDefaultSuspend(OperationResultCode.Failure, "Export operation failed") {
+                    action(element)
+                }
+            }
+        }
         batchExportOperationSuspend(results, sdkErrorHandler) { it.await() }
     }
 }
