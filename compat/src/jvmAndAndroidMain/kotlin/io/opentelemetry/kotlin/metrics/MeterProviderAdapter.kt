@@ -18,7 +18,7 @@ import io.opentelemetry.kotlin.scope.scopeCacheKey
 import java.util.concurrent.ConcurrentHashMap
 
 @ThreadSafe
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class MeterProviderAdapter(
     private val impl: OtelJavaMeterProvider,
     private val sdkErrorHandler: SdkErrorHandler,

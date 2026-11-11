@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 
 /** Reads the standard batch span processor environment variables. */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class BatchSpanProcessorEnvVars(private val reader: ReportingEnvVarReader) {
     fun toBehavior(): BatchSpanProcessorBehavior? = BatchSpanProcessorBehavior(
         scheduleDelay = reader.readNonNegativeLong(SCHEDULE_DELAY),

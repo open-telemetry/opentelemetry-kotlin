@@ -24,7 +24,7 @@ import java.util.WeakHashMap
  * Java's span and baggage keys map onto the Kotlin span and baggage. Any other Java key maps to a
  * Kotlin key that is created on first use and held for as long as the Java key is reachable.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class OtelJavaContextAdapter(
     internal val impl: Context,
 ) : OtelJavaContext {

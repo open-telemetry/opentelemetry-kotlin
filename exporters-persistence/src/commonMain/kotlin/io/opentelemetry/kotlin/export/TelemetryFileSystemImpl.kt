@@ -6,7 +6,7 @@ import okio.FileSystem
 import okio.Path
 import okio.buffer
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class TelemetryFileSystemImpl(
     private val fileSystem: FileSystem,
     private val directory: Path,

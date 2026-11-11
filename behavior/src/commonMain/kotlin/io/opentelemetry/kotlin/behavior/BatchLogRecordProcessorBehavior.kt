@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  *
  * https://opentelemetry.io/docs/specs/otel/logs/sdk/#batching-processor
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class BatchLogRecordProcessorBehavior(
     /** Delay between consecutive exports, in milliseconds. Must be non-negative. */
     val scheduleDelay: Long? = null,

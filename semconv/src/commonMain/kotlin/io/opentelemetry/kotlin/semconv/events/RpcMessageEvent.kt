@@ -18,7 +18,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 *
 * In the lifetime of an RPC stream, an event for each message sent/received on client and server spans SHOULD be created. In case of unary calls message events SHOULD NOT be recorded.
 */
-@ExperimentalApi
 @IncubatingApi
 @Deprecated("Deprecated, no replacement at this time.")
 public class RpcMessageEvent(
@@ -44,6 +43,7 @@ public class RpcMessageEvent(
     public val rpcMessageUncompressedSize: Long? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

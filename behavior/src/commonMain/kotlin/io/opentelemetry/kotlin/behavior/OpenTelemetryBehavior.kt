@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  *
  * https://opentelemetry.io/docs/specs/otel/configuration/
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class OpenTelemetryBehavior(
     /**
      * The file format version.
@@ -121,7 +121,7 @@ data class OpenTelemetryBehavior(
  * Combines [layers] into a single behavior, where each layer takes precedence over the ones before
  * it.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun mergeBehaviors(layers: List<OpenTelemetryBehavior>): OpenTelemetryBehavior =
     layers.fold(OpenTelemetryBehavior(fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION)) {
             merged, layer ->

@@ -17,7 +17,7 @@ import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.scope.scopeCacheKey
 import java.util.concurrent.ConcurrentHashMap
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class LoggerProviderAdapter(
     private val impl: OtelJavaLoggerProvider,
     private val sdkErrorHandler: SdkErrorHandler,

@@ -10,7 +10,7 @@ import okio.Path.Companion.toPath
 /**
  * Reads the declarative config file from the platform's file system.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class ConfigFileReaderImpl(
     private val fileSystem: Lazy<FileSystem> = lazy { getFileSystem() },
     private val parser: OpenTelemetryConfigurationParser = OpenTelemetryConfigurationParser(),

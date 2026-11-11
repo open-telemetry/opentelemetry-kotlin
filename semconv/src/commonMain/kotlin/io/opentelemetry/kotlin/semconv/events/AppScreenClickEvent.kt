@@ -18,7 +18,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 *
 * The `app.screen.click` event can be used to indicate that a user has clicked or tapped on the screen portion of an application. Clicks outside of an application's active area SHOULD NOT generate this event. This event does not differentiate between touch/mouse down and touch/mouse up. Implementations SHOULD give preference to generating this event at the time the click is complete, typically on touch release or mouse up. The location of the click event MUST be provided in absolute screen pixels.
 */
-@ExperimentalApi
 @IncubatingApi
 public class AppScreenClickEvent(
     /**
@@ -47,6 +46,7 @@ public class AppScreenClickEvent(
     public val appScreenName: String? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

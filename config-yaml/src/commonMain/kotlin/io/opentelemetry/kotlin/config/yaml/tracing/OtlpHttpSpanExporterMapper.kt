@@ -10,7 +10,7 @@ import kotlin.collections.plus
 /**
  * Maps `tracer_provider.processors.exporter.otlp_http` onto its behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun OtlpHttpExporter.toBehavior(): OtlpHttpSpanExporterBehavior {
     // if there are duplicate keys, the last one wins.
     // The spec says that in the case of duplicate keys, [headers] have a higher precedence.

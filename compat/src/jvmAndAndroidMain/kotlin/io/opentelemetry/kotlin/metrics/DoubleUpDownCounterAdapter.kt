@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class DoubleUpDownCounterAdapter(
     private val impl: OtelJavaDoubleUpDownCounter,
     override val name: String,

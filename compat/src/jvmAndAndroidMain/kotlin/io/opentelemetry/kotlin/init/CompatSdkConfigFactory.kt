@@ -27,7 +27,7 @@ import io.opentelemetry.kotlin.tracing.TracerProvider
 /**
  * [OpenTelemetryBehavior] should be preferred to using this class. This will be removed eventually.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class CompatSdkConfigFactory(
     private val cfg: CompatOpenTelemetryConfig,
     behavior: OpenTelemetryBehavior,

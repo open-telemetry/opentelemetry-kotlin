@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.factory.toHexString
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal object NoopSpanContext : SpanContext {
     override val traceIdBytes: ByteArray = ByteArray(16)
     override val spanIdBytes: ByteArray = ByteArray(8)

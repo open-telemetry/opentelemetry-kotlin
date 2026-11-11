@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal object NoopTraceState : TraceState {
     override fun get(key: String): String? = null
     override fun asMap(): Map<String, String> = emptyMap()

@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class LongGaugeAdapter(
     private val impl: OtelJavaLongGauge,
     override val name: String,

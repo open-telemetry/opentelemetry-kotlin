@@ -176,7 +176,7 @@ fun SpanScreen(
     }
 }
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 private fun startSpan(otel: OpenTelemetry, form: SpanFormState): Pair<Span, Scope?> {
     val startTs = form.startTimestamp.toLongOrNull() ?: 0
     val span = otel.tracerProvider.getTracer(AppConfig.APP_NAME).startSpan(

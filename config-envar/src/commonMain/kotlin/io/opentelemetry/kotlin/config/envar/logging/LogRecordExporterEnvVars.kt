@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Value
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class LogRecordExporterEnvVars(private val reader: ReportingEnvVarReader) {
     fun toBehavior(): LogRecordExporterBehavior? {
         return reader.readStringAndTransform(LOGS_EXPORTER) { name ->

@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.propagation.createCompositePropagator
 import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
 import io.opentelemetry.kotlin.propagation.createW3CTraceContextPropagator
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class PropagatorConfigImpl : PropagatorConfigDsl {
 
     override fun composite(vararg propagators: TextMapPropagator): TextMapPropagator =

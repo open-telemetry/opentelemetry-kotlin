@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.config
 
 import io.opentelemetry.kotlin.ExperimentalApi
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal object NoopConfigProperties : ConfigProperties {
     override fun getString(name: String): String? = null
     override fun getBoolean(name: String): Boolean? = null

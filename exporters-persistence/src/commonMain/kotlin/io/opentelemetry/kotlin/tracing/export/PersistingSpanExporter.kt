@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.export.TelemetryRepository
 import io.opentelemetry.kotlin.tracing.data.SpanData
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class PersistingSpanExporter(
     private val exporter: SpanExporter,
     private val repository: TelemetryRepository<SpanData>,

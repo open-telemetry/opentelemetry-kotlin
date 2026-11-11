@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 /**
  * Captures tracer provider configuration and maps it onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class TracerProviderConfigDslImpl : BehaviorSupplier<TracerProviderBehavior> {
 
     private var processor: SpanProcessorBehavior? = null

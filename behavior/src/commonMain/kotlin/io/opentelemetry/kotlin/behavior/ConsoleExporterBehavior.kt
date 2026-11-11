@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * https://opentelemetry.io/docs/specs/otel/trace/sdk_exporters/stdout/
  * https://opentelemetry.io/docs/specs/otel/logs/sdk_exporters/stdout/
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class ConsoleExporterBehavior : Behavior<ConsoleExporterBehavior> {
 
     override fun mergeWith(higher: ConsoleExporterBehavior): ConsoleExporterBehavior = higher

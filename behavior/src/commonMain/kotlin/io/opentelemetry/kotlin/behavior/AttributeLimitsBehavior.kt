@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  *
  * https://opentelemetry.io/docs/specs/otel/common/#attribute-limits
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class AttributeLimitsBehavior(
 
     /**

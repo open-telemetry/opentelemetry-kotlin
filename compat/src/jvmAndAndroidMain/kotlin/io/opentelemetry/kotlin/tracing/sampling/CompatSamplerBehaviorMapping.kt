@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.init.SamplerConfigDsl
 /**
  * Binds [mapToSampler] to this SDK's built-in sampler factories.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal fun SamplerConfigDsl.toSampler(behavior: SamplerBehavior): Sampler =
     behavior.mapToSampler(
         alwaysOn = { alwaysOn() },

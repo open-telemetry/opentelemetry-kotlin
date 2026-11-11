@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 @ThreadSafe
 internal class ObservableLongUpDownCounterAdapter(
     private val impl: OtelJavaMeter,

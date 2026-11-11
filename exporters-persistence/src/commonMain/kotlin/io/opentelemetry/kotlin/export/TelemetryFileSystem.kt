@@ -6,7 +6,7 @@ import okio.BufferedSource
 /**
  * Abstracts away file system operations that are used to persist telemetry.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal interface TelemetryFileSystem {
 
     /**

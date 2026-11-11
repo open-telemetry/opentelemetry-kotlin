@@ -18,7 +18,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 *
 * none
 */
-@ExperimentalApi
 @IncubatingApi
 public class BrowserWebVitalEvent(
     /**
@@ -47,6 +46,7 @@ public class BrowserWebVitalEvent(
     public val browserWebVitalValue: Double,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

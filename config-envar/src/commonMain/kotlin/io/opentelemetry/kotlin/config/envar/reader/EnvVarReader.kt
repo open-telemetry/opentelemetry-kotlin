@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Value
  * [getEnvVar] is supplied by the platform, so it is treated as hostile: a failure to read a
  * variable is treated the same way as an unset variable.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class EnvVarReader(private val getEnvVar: (String) -> String?) {
 
     /**
@@ -58,7 +58,7 @@ class EnvVarReader(private val getEnvVar: (String) -> String?) {
 }
 
 /** Reads a non-negative integer value from [name]. */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal fun EnvVarReader.readNonNegativeInt(name: String): EnvVarReadResult<Int> =
     readInt(name).flatMap { value ->
         if (value >= 0) {
@@ -69,7 +69,7 @@ internal fun EnvVarReader.readNonNegativeInt(name: String): EnvVarReadResult<Int
     }
 
 /** Reads a non-negative long value from [name]. */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal fun EnvVarReader.readNonNegativeLong(name: String): EnvVarReadResult<Long> =
     readLong(name).flatMap { value ->
         if (value >= 0) {

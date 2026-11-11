@@ -18,7 +18,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 *
 * Jank happens when the UI is rendered slowly enough for the user to experience some disruption or sluggishness.
 */
-@ExperimentalApi
 @IncubatingApi
 public class AppJankEvent(
     /**
@@ -39,6 +38,7 @@ public class AppJankEvent(
     public val appJankThreshold: Double? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

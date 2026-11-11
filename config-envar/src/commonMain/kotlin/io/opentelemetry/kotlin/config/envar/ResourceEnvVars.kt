@@ -14,7 +14,7 @@ import io.opentelemetry.kotlin.propagation.utils.parseResourceAttributes
  *
  * https://opentelemetry.io/docs/specs/otel/resource/sdk/#specifying-resource-information-via-an-environment-variable
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class ResourceEnvVars(
     private val reader: ReportingEnvVarReader,
 ) {
