@@ -2,8 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
-import io.opentelemetry.kotlin.context.TempContextStandInApi
-import io.opentelemetry.kotlin.context.internalRootContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.IdGenerator
@@ -22,7 +21,6 @@ import kotlin.test.assertTrue
  * [SpanContext] can report itself as valid while carrying malformed IDs. This contains assertions
  * that those scenarios are handled.
  */
-@OptIn(TempContextStandInApi::class)
 internal class TracerInvalidIdTest {
 
     private val key = InstrumentationScopeInfoImpl("key", null, null, emptyMap())
@@ -118,12 +116,12 @@ internal class TracerInvalidIdTest {
 
         val child = tracer.startSpan(
             "child",
-            parentContext = internalRootContext()
+            parentContext = rootContext()
                 .storeSpanContext(remoteParent()),
         )
         val grandchild = tracer.startSpan(
             "grandchild",
-            parentContext = internalRootContext().storeSpan(child),
+            parentContext = rootContext().storeSpan(child),
         )
 
         assertFalse(child.spanContext.isRemote)
@@ -146,7 +144,7 @@ internal class TracerInvalidIdTest {
 
     private fun startChildOf(parent: SpanContext, idGenerator: IdGenerator): Span {
         val parentContext =
-            internalRootContext().storeSpanContext(parent)
+            rootContext().storeSpanContext(parent)
         return buildTracer(idGenerator).startSpan("test", parentContext = parentContext)
     }
 

@@ -2,14 +2,13 @@ package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.TempContextStandInApi
-import io.opentelemetry.kotlin.context.internalCurrentContext
-import io.opentelemetry.kotlin.context.internalRootContext
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.rootContext
 
-@OptIn(ExperimentalApi::class, TempContextStandInApi::class)
+@OptIn(ExperimentalApi::class)
 internal object NoopContextFactory : ContextFactory {
 
-    override fun root(): Context = internalRootContext()
+    override fun root(): Context = rootContext()
 
-    override fun current(): Context = internalCurrentContext()
+    override fun current(): Context = currentContext()
 }

@@ -4,8 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.TempContextStandInApi
-import io.opentelemetry.kotlin.context.internalRootContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -21,7 +20,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class, TempContextStandInApi::class)
+@OptIn(ExperimentalApi::class)
 internal class ComposableRuleBasedSamplerTest {
 
     private val samplerDsl = SamplerConfigImpl()
@@ -83,7 +82,7 @@ internal class ComposableRuleBasedSamplerTest {
                 rule({ _, name, _, _, _ -> name == "other" }) { composableAlwaysOn() }
             }
         }.shouldSample(
-            context = internalRootContext(),
+            context = rootContext(),
             traceIdBytes = traceId.hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
@@ -102,7 +101,7 @@ internal class ComposableRuleBasedSamplerTest {
                 rule({ _, name, _, _, _ -> name == "span" }) { composableAlwaysOn() }
             }
         }.shouldSample(
-            context = internalRootContext(),
+            context = rootContext(),
             traceIdBytes = traceId.hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
@@ -243,11 +242,11 @@ internal class ComposableRuleBasedSamplerTest {
             }
         }
         val parentSpan = createNonRecordingSpan(parentSpanContext)
-        return internalRootContext().storeSpan(parentSpan)
+        return rootContext().storeSpan(parentSpan)
     }
 
     private fun ComposableSampler.intentFor(
-        context: Context = internalRootContext(),
+        context: Context = rootContext(),
         name: String = "span",
         spanKind: SpanKind = SpanKind.INTERNAL,
         attributes: AttributeContainer = AttributesModel(),

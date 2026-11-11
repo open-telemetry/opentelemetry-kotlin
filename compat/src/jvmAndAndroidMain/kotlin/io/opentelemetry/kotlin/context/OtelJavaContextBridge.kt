@@ -37,7 +37,7 @@ import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
  * derived from the root, holding the Java context's span and baggage, with the Java context as
  * its origin. Java-only keys stay on the origin and aren't copied into Kotlin.
  */
-@OptIn(ExperimentalApi::class, TempContextStandInApi::class)
+@OptIn(ExperimentalApi::class)
 internal object OtelJavaContextBridge {
 
     /**
@@ -117,14 +117,14 @@ internal object OtelJavaContextBridge {
             try {
                 overlayOnRoot(java)
             } catch (ignored: Throwable) {
-                internalRootContext()
+                rootContext()
             }
         }
         return cache.getOrPut(java, context)
     }
 
     private fun overlayOnRoot(java: OtelJavaContext): Context =
-        overlay(java, Mirror(internalRootContext(), null, null))
+        overlay(java, Mirror(rootContext(), null, null))
 
     /**
      * Applies the span and baggage Java changed since [mirror] was built, and records [java] as

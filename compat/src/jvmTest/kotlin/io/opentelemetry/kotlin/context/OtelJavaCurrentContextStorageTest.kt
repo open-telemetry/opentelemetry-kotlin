@@ -33,8 +33,7 @@ private const val JAVA_SPAN_ID = "00f067aa0ba902b7"
 
 internal class OtelJavaCurrentContextStorageTest {
 
-    @OptIn(TempContextStandInApi::class)
-    private val root = internalRootContext()
+    private val root = rootContext()
     private val storage = createOtelJavaCurrentContextStorage()
     private val key = createContextKey<String>("kotlin-key")
     private val javaKey = OtelJavaContextKey.named<String>("java-key")

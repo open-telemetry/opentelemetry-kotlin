@@ -2,11 +2,10 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
-import io.opentelemetry.kotlin.context.TempContextStandInApi
 import io.opentelemetry.kotlin.context.createSingleSlotCurrentContextStorage
-import io.opentelemetry.kotlin.context.internalInstallContextStorage
-import io.opentelemetry.kotlin.context.internalRootContext
-import io.opentelemetry.kotlin.context.internalUninstallContextStorage
+import io.opentelemetry.kotlin.context.installContextStorage
+import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.context.uninstallContextStorage
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.IdGenerator
@@ -23,7 +22,6 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-@OptIn(TempContextStandInApi::class)
 internal class TracerSpanContextTest {
 
     private val storage = createSingleSlotCurrentContextStorage()
@@ -36,7 +34,7 @@ internal class TracerSpanContextTest {
 
     @BeforeTest
     fun setUp() {
-        internalInstallContextStorage(storage)
+        installContextStorage(storage)
         clock = FakeClock()
         processor = FakeSpanProcessor()
         idGenerator = IdGeneratorImpl()
@@ -54,7 +52,7 @@ internal class TracerSpanContextTest {
 
     @AfterTest
     fun tearDown() {
-        internalUninstallContextStorage(storage)
+        uninstallContextStorage(storage)
     }
 
     @Test
@@ -67,7 +65,7 @@ internal class TracerSpanContextTest {
 
     @Test
     fun testExplicitParentContextOfInvalidSpan() {
-        val parentCtx = internalRootContext().storeSpanContext(createInvalidSpanContext())
+        val parentCtx = rootContext().storeSpanContext(createInvalidSpanContext())
         val span = tracer.startSpan(
             "test",
             parentContext = parentCtx,
@@ -81,7 +79,7 @@ internal class TracerSpanContextTest {
     @Test
     fun testExplicitParentContextOfValidSpan() {
         val parentSpan = tracer.startSpan("parent")
-        val parentCtx = internalRootContext().storeSpan(parentSpan)
+        val parentCtx = rootContext().storeSpan(parentSpan)
         val span = tracer.startSpan(
             "test",
             parentContext = parentCtx,
@@ -97,7 +95,7 @@ internal class TracerSpanContextTest {
     @Test
     fun testCurrentContext() {
         val span = tracer.startSpan("span")
-        val ctx = internalRootContext().storeSpan(span)
+        val ctx = rootContext().storeSpan(span)
         val scope = ctx.attach()
 
         val first = tracer.startSpan("first")

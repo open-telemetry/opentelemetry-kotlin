@@ -1,12 +1,11 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.context.CurrentContextStorage
-import io.opentelemetry.kotlin.context.TempContextStandInApi
 import io.opentelemetry.kotlin.context.createSingleSlotCurrentContextStorage
-import io.opentelemetry.kotlin.context.internalCurrentContext
-import io.opentelemetry.kotlin.context.internalInstallContextStorage
-import io.opentelemetry.kotlin.context.internalRootContext
-import io.opentelemetry.kotlin.context.internalUninstallContextStorage
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.installContextStorage
+import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.context.uninstallContextStorage
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -22,7 +21,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class, TempContextStandInApi::class)
+@OptIn(ExperimentalApi::class)
 internal class ProcessWideContextInstallationTest {
 
     private val sdks = SdkTracker()
@@ -31,20 +30,20 @@ internal class ProcessWideContextInstallationTest {
     @AfterTest
     fun tearDown() {
         sdks.shutdownAll()
-        preinstalled?.let(::internalUninstallContextStorage)
+        preinstalled?.let(::uninstallContextStorage)
     }
 
     @Test
     fun testCurrentContextReflectsAttachAfterInit() {
         createOpenTelemetry().also(sdks::track)
-        val ctx = internalRootContext().storeSpan(FakeSpan())
+        val ctx = rootContext().storeSpan(FakeSpan())
         val scope = ctx.attach()
         try {
-            assertSame(ctx, internalCurrentContext())
+            assertSame(ctx, currentContext())
         } finally {
             scope.detach()
         }
-        assertSame(internalRootContext(), internalCurrentContext())
+        assertSame(rootContext(), currentContext())
     }
 
     @Test
@@ -52,11 +51,11 @@ internal class ProcessWideContextInstallationTest {
         val otel = createOpenTelemetry().also(sdks::track)
         val tracer = otel.tracerProvider.getTracer("test")
         val parent = tracer.startSpan("parent")
-        val scope = internalRootContext().storeSpan(parent).attach()
+        val scope = rootContext().storeSpan(parent).attach()
         try {
             val child = tracer.startSpan("child")
             assertEquals(parent.spanContext.traceId, child.spanContext.traceId)
-            assertSame(parent, internalCurrentContext().extractSpan())
+            assertSame(parent, currentContext().extractSpan())
         } finally {
             scope.detach()
         }
@@ -76,7 +75,7 @@ internal class ProcessWideContextInstallationTest {
         assertEquals(SdkErrorSeverity.WARNING, error.severity)
 
         val parent = second.tracerProvider.getTracer("test").startSpan("parent")
-        val scope = internalRootContext().storeSpan(parent).attach()
+        val scope = rootContext().storeSpan(parent).attach()
         try {
             val child = first.tracerProvider.getTracer("test").startSpan("child")
             assertEquals(parent.spanContext.traceId, child.spanContext.traceId)
@@ -108,11 +107,11 @@ internal class ProcessWideContextInstallationTest {
     @Test
     fun testPreinstalledStorageWinsSilently() = runTest {
         val storage = createSingleSlotCurrentContextStorage().also { preinstalled = it }
-        assertTrue(internalInstallContextStorage(storage))
+        assertTrue(installContextStorage(storage))
 
         val errorHandler = FakeSdkErrorHandler()
         val otel = createOpenTelemetry { errorHandler(errorHandler) }.also(sdks::track)
-        val ctx = internalRootContext().storeSpan(FakeSpan())
+        val ctx = rootContext().storeSpan(FakeSpan())
         val scope = ctx.attach()
         try {
             assertSame(ctx, storage.current())
@@ -122,15 +121,15 @@ internal class ProcessWideContextInstallationTest {
         assertFalse(errorHandler.hasErrors())
 
         otel.shutdown()
-        assertFalse(internalInstallContextStorage(createSingleSlotCurrentContextStorage()))
+        assertFalse(installContextStorage(createSingleSlotCurrentContextStorage()))
     }
 
     @Test
     fun testOutOfOrderDetachReachesOwningSdkHandler() {
         val errorHandler = FakeSdkErrorHandler()
         val otel = createOpenTelemetry { errorHandler(errorHandler) }.also(sdks::track)
-        val outer = internalRootContext().storeSpan(FakeSpan()).attach()
-        val inner = internalCurrentContext().storeSpan(FakeSpan()).attach()
+        val outer = rootContext().storeSpan(FakeSpan()).attach()
+        val inner = currentContext().storeSpan(FakeSpan()).attach()
 
         outer.detach()
         inner.detach()
@@ -151,14 +150,14 @@ internal class ProcessWideContextInstallationTest {
     }
 
     private fun assertSlotAndSinkTaken() {
-        assertFalse(internalInstallContextStorage(createSingleSlotCurrentContextStorage()))
+        assertFalse(installContextStorage(createSingleSlotCurrentContextStorage()))
         assertFalse(setProcessSdkErrorHandler(FakeSdkErrorHandler()))
     }
 
     private fun assertSlotAndSinkFree() {
         val storage = createSingleSlotCurrentContextStorage()
-        assertTrue(internalInstallContextStorage(storage))
-        assertTrue(internalUninstallContextStorage(storage))
+        assertTrue(installContextStorage(storage))
+        assertTrue(uninstallContextStorage(storage))
         assertTrue(setProcessSdkErrorHandler(FakeSdkErrorHandler()))
         setProcessSdkErrorHandler(null)
     }

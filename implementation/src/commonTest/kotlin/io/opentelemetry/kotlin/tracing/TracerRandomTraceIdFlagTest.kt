@@ -2,8 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
-import io.opentelemetry.kotlin.context.TempContextStandInApi
-import io.opentelemetry.kotlin.context.internalRootContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.IdGenerator
@@ -25,7 +24,6 @@ import kotlin.test.assertTrue
  * The SDK sets the W3C Trace Context Level 2 random flag when the [IdGenerator] declares that its
  * trace IDs meet the randomness requirements.
  */
-@OptIn(TempContextStandInApi::class)
 internal class TracerRandomTraceIdFlagTest {
 
     private val key = InstrumentationScopeInfoImpl("key", null, null, emptyMap())
@@ -63,7 +61,7 @@ internal class TracerRandomTraceIdFlagTest {
         val propagator = createW3CTraceContextPropagator()
         val span = buildTracer(idGenerator).startSpan("test")
         val carrier = mutableMapOf<String, String>()
-        propagator.inject(internalRootContext().storeSpan(span), carrier, FakeTextMapSetter)
+        propagator.inject(rootContext().storeSpan(span), carrier, FakeTextMapSetter)
 
         val spanContext = span.spanContext
         assertEquals("00-${spanContext.traceId}-${spanContext.spanId}-03", carrier["traceparent"])
@@ -89,7 +87,7 @@ internal class TracerRandomTraceIdFlagTest {
             isRandom = parentIsRandom
             isRemote = true
         }
-        val parentContext = internalRootContext().storeSpanContext(parent)
+        val parentContext = rootContext().storeSpanContext(parent)
         return buildTracer(idGenerator).startSpan("test", parentContext = parentContext)
     }
 

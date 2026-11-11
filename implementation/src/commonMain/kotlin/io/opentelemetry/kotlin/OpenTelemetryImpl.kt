@@ -2,8 +2,7 @@ package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.config.ConfigProvider
 import io.opentelemetry.kotlin.context.CurrentContextStorage
-import io.opentelemetry.kotlin.context.TempContextStandInApi
-import io.opentelemetry.kotlin.context.internalUninstallContextStorage
+import io.opentelemetry.kotlin.context.uninstallContextStorage
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.setProcessSdkErrorHandler
@@ -55,9 +54,8 @@ internal class OpenTelemetryImpl(
             }
         }
 
-    @OptIn(TempContextStandInApi::class)
     private fun releaseProcessWideState() {
-        installedStorage?.let(::internalUninstallContextStorage)
+        installedStorage?.let(::uninstallContextStorage)
         if (ownsErrorSink) {
             setProcessSdkErrorHandler(null)
         }

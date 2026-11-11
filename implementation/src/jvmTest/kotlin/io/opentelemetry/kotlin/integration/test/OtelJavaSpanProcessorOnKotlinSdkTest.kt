@@ -14,8 +14,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.aliases.OtelJavaStatusCode
 import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.TempContextStandInApi
-import io.opentelemetry.kotlin.context.internalRootContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.toOtelJavaApi
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -39,7 +38,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalCoroutinesApi::class, TempContextStandInApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class OtelJavaSpanProcessorOnKotlinSdkTest {
 
     private val stringKey = OtelJavaAttributeKey.stringKey("key")
@@ -107,7 +106,7 @@ internal class OtelJavaSpanProcessorOnKotlinSdkTest {
         val processor = RecordingOtelJavaSpanProcessor()
         harness.config.spanProcessors.add(processor.toOtelKotlinSpanProcessor())
         val parent = harness.tracer.startSpan("parent")
-        val parentContext = internalRootContext()
+        val parentContext = rootContext()
             .storeSpan(parent)
             .storeBaggage(createBaggage { put("key", "value") })
         harness.tracer.startSpan("child", parentContext = parentContext).end()

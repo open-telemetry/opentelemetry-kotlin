@@ -1,38 +1,36 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.context.TempContextStandInApi
 import io.opentelemetry.kotlin.context.createSingleSlotCurrentContextStorage
-import io.opentelemetry.kotlin.context.internalCurrentContext
-import io.opentelemetry.kotlin.context.internalInstallContextStorage
-import io.opentelemetry.kotlin.context.internalRootContext
-import io.opentelemetry.kotlin.context.internalUninstallContextStorage
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.installContextStorage
+import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.context.uninstallContextStorage
 import io.opentelemetry.kotlin.tracing.FakeSpan
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertSame
 
-@OptIn(TempContextStandInApi::class)
 internal class MakeCurrentTest {
 
     private val storage = createSingleSlotCurrentContextStorage()
 
     @BeforeTest
     fun setUp() {
-        internalInstallContextStorage(storage)
+        installContextStorage(storage)
     }
 
     @AfterTest
     fun tearDown() {
-        internalUninstallContextStorage(storage)
+        uninstallContextStorage(storage)
     }
 
     @Test
     fun testMakeCurrent() {
         val span = FakeSpan()
-        val scope = internalCurrentContext().storeSpan(span).attach()
+        val scope = currentContext().storeSpan(span).attach()
         try {
-            assertSame(span, internalCurrentContext().extractSpan())
+            assertSame(span, currentContext().extractSpan())
         } finally {
             scope.detach()
         }
@@ -40,11 +38,11 @@ internal class MakeCurrentTest {
 
     @Test
     fun testMakeCurrentDetach() {
-        val root = internalRootContext()
+        val root = rootContext()
         val span = FakeSpan()
-        val scope = internalCurrentContext().storeSpan(span).attach()
+        val scope = currentContext().storeSpan(span).attach()
         scope.detach()
-        assertSame(root, internalCurrentContext())
+        assertSame(root, currentContext())
     }
 
     @Test
@@ -52,16 +50,16 @@ internal class MakeCurrentTest {
         val span1 = FakeSpan("a")
         val span2 = FakeSpan("b")
 
-        val scope1 = internalCurrentContext().storeSpan(span1).attach()
-        assertSame(span1, internalCurrentContext().extractSpan())
+        val scope1 = currentContext().storeSpan(span1).attach()
+        assertSame(span1, currentContext().extractSpan())
 
-        val scope2 = internalCurrentContext().storeSpan(span2).attach()
-        assertSame(span2, internalCurrentContext().extractSpan())
+        val scope2 = currentContext().storeSpan(span2).attach()
+        assertSame(span2, currentContext().extractSpan())
 
         scope2.detach()
-        assertSame(span1, internalCurrentContext().extractSpan())
+        assertSame(span1, currentContext().extractSpan())
 
         scope1.detach()
-        assertSame(internalRootContext(), internalCurrentContext())
+        assertSame(rootContext(), currentContext())
     }
 }

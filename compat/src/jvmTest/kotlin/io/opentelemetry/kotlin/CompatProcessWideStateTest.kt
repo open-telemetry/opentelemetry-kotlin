@@ -8,12 +8,11 @@ import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.config.DeclarativeBehaviorReader
 import io.opentelemetry.kotlin.context.CurrentContextStorage
 import io.opentelemetry.kotlin.context.OtelJavaCurrentContextStorage
-import io.opentelemetry.kotlin.context.TempContextStandInApi
 import io.opentelemetry.kotlin.context.createContextKey
-import io.opentelemetry.kotlin.context.internalCurrentContext
-import io.opentelemetry.kotlin.context.internalInstallContextStorage
-import io.opentelemetry.kotlin.context.internalRootContext
-import io.opentelemetry.kotlin.context.internalUninstallContextStorage
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.installContextStorage
+import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.context.uninstallContextStorage
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -30,7 +29,7 @@ import kotlin.test.assertNotSame
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalApi::class, TempContextStandInApi::class)
+@OptIn(ExperimentalApi::class)
 internal class CompatProcessWideStateTest {
 
     private val sdks = SdkTracker()
@@ -39,14 +38,14 @@ internal class CompatProcessWideStateTest {
     @AfterTest
     fun tearDown() {
         sdks.shutdownAll()
-        preinstalled?.let(::internalUninstallContextStorage)
+        preinstalled?.let(::uninstallContextStorage)
     }
 
     @Test
     fun `root-derived context attached from kotlin parents a java span`() {
         val otel = createCompatOpenTelemetry().also(sdks::track)
         val parent = otel.tracerProvider.getTracer("kotlin").startSpan("parent")
-        val scope = internalRootContext().storeSpan(parent).attach()
+        val scope = rootContext().storeSpan(parent).attach()
         val child = try {
             otel.toOtelJavaApi().tracerProvider.get("java").spanBuilder("child").startSpan()
         } finally {
@@ -75,10 +74,10 @@ internal class CompatProcessWideStateTest {
             .build()
         javaSdk.toOtelKotlinApi().also(sdks::track)
         val key = createContextKey<String>("key")
-        val ctx = internalRootContext().set(key, "value")
+        val ctx = rootContext().set(key, "value")
         val scope = ctx.attach()
         try {
-            assertSame(ctx, internalCurrentContext())
+            assertSame(ctx, currentContext())
             assertNotSame(OtelJavaContext.root(), OtelJavaContext.current())
         } finally {
             scope.detach()
@@ -111,7 +110,7 @@ internal class CompatProcessWideStateTest {
 
         first.shutdown()
 
-        assertFalse(internalInstallContextStorage(OtelJavaCurrentContextStorage()))
+        assertFalse(installContextStorage(OtelJavaCurrentContextStorage()))
         val error = SdkError.ApiMisuse("api", "message", SdkErrorSeverity.WARNING)
         reportError(error)
         assertSame(error, errorHandler.errors.last())
@@ -120,7 +119,7 @@ internal class CompatProcessWideStateTest {
     @Test
     fun `taken slot warns and uses the installed storage`() {
         val storage = OtelJavaCurrentContextStorage().also { preinstalled = it }
-        assertTrue(internalInstallContextStorage(storage))
+        assertTrue(installContextStorage(storage))
 
         val errorHandler = FakeSdkErrorHandler()
         createCompatOpenTelemetry { errorHandler(errorHandler) }.also(sdks::track)
@@ -141,7 +140,7 @@ internal class CompatProcessWideStateTest {
     private suspend fun assertClaimsAndReleases(otel: OpenTelemetrySdk) {
         val other = createCompatOpenTelemetry().also(sdks::track)
         other.shutdown()
-        assertFalse(internalInstallContextStorage(OtelJavaCurrentContextStorage()))
+        assertFalse(installContextStorage(OtelJavaCurrentContextStorage()))
         assertFalse(setProcessSdkErrorHandler(FakeSdkErrorHandler()))
 
         otel.shutdown()
@@ -150,8 +149,8 @@ internal class CompatProcessWideStateTest {
 
     private fun assertSlotAndSinkFree() {
         val storage = OtelJavaCurrentContextStorage()
-        assertTrue(internalInstallContextStorage(storage))
-        assertTrue(internalUninstallContextStorage(storage))
+        assertTrue(installContextStorage(storage))
+        assertTrue(uninstallContextStorage(storage))
         assertTrue(setProcessSdkErrorHandler(FakeSdkErrorHandler()))
         setProcessSdkErrorHandler(null)
     }
