@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.rootContext
-import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
@@ -15,8 +14,6 @@ import kotlin.test.assertEquals
 
 internal class CompatSamplerBehaviorMappingTest {
 
-    private val contextFactory = CompatContextFactory()
-
     private val samplerDsl = CompatSamplerConfig()
 
     private fun contextWithParent(sampled: Boolean, isRemote: Boolean): Context {
@@ -25,12 +22,12 @@ internal class CompatSamplerBehaviorMappingTest {
             this.isRemote = isRemote
         }
         val parentSpan = createNonRecordingSpan(parentSpanContext)
-        return contextFactory.rootContext().storeSpan(parentSpan)
+        return rootContext().storeSpan(parentSpan)
     }
 
     private fun sample(
         sampler: Sampler,
-        context: Context = contextFactory.rootContext(),
+        context: Context = rootContext(),
     ): SamplingResult = sampler.shouldSample(
         context = context,
         traceIdBytes = ZERO_TRACE_ID,

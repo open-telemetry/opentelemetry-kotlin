@@ -11,7 +11,6 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.setProcessSdkErrorHandler
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
@@ -67,7 +66,6 @@ public fun createOpenTelemetry(
     // Claim process-wide state last, so that a failure earlier in init doesn't leave it claimed.
     val installedStorage = installContextStorage(cfg)
     val ownsErrorSink = setProcessSdkErrorHandler(cfg.sdkErrorHandler)
-    val contextFactory = ContextFactoryImpl(cfg.sdkErrorHandler, installedStorage)
     return OpenTelemetryImpl(
         tracerProvider = TracerProviderImpl(
             clock = clock,
@@ -88,7 +86,6 @@ public fun createOpenTelemetry(
         ),
         configProvider = ConfigProviderImpl { behaviorReader.readInstrumentation(configFilePath) },
         clock = clock,
-        context = contextFactory,
         idGenerator = idGenerator,
         resource = resourceFactory,
         propagator = cfg.propagator,

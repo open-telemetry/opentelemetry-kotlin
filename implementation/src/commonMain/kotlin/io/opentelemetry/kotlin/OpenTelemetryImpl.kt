@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.config.ConfigProvider
+import io.opentelemetry.kotlin.context.ContextStorageOwner
 import io.opentelemetry.kotlin.context.CurrentContextStorage
 import io.opentelemetry.kotlin.context.uninstallContextStorage
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -10,7 +11,6 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.batchExportOperationConcurrent
-import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.ResourceFactory
 import io.opentelemetry.kotlin.logging.LoggerProvider
@@ -24,15 +24,14 @@ internal class OpenTelemetryImpl(
     override val meterProvider: MeterProvider,
     override val configProvider: ConfigProvider,
     override val clock: Clock,
-    override val context: ContextFactory,
     override val idGenerator: IdGenerator,
     override val resource: ResourceFactory,
     override val propagator: TextMapPropagator,
-    private val installedStorage: CurrentContextStorage? = null,
+    override val installedStorage: CurrentContextStorage? = null,
     private val ownsErrorSink: Boolean = false,
     private val timeoutMs: Long = 3000,
-    private val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
-) : OpenTelemetrySdk {
+    override val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
+) : OpenTelemetrySdk, ContextStorageOwner {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
 
