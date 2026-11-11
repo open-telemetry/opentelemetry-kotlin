@@ -86,10 +86,6 @@ internal class TracerProviderConfigImpl(
     private fun processorFromBehavior(behavior: SpanProcessorBehavior?): SpanProcessor? {
         val simple = behavior?.simple
         val batch = behavior?.batch
-        val console = batch?.exporter?.console ?: simple?.exporter?.console
-        if (console == null) {
-            return null
-        }
         return TraceExportConfigDslImpl(clock, sdkErrorHandler).run {
             val exporter = stdoutSpanExporter()
             // An explicit simple processor wins when batch settings were merged from a lower layer.
