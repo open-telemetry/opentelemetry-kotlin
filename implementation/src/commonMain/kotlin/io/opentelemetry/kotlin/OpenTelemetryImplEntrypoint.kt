@@ -95,6 +95,8 @@ public fun createOpenTelemetry(
         propagator = cfg.propagator,
         installedStorage = installedStorage,
         ownsErrorSink = ownsErrorSink,
+        timeoutMs = cfg.shutdownTimeoutMs,
+        sdkErrorHandler = cfg.sdkErrorHandler,
     )
 }
 

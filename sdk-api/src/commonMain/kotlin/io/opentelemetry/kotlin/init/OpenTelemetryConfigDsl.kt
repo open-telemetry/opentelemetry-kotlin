@@ -12,6 +12,8 @@ import io.opentelemetry.kotlin.propagation.TextMapPropagator
 @ConfigDsl
 public interface OpenTelemetryConfigDsl : ResourceConfigDsl, ConfigFileDsl {
 
+    public fun shutdownTimeout(timeoutMs: Long)
+
     /**
      * Defines global attribute limits. This can be overridden on individual signals.
      * https://opentelemetry.io/docs/specs/otel/common/#attribute-limits

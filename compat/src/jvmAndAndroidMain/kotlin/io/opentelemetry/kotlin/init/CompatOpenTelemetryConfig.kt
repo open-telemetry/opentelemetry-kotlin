@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.init
 
+import io.opentelemetry.kotlin.COMPAT_DEFAULT_TIMEOUT_MS
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapPropagator
@@ -15,6 +16,7 @@ import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
 import io.opentelemetry.kotlin.config.dsl.PropagatorConfigImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceDetectionConfigDslImpl
 import io.opentelemetry.kotlin.config.toBehaviorReader
+import io.opentelemetry.kotlin.config.validateOrUseDefault
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -31,6 +33,19 @@ internal class CompatOpenTelemetryConfig(
 
     @Volatile private var configuredErrorHandler: SdkErrorHandler = PlatformSdkErrorHandler
     internal val sdkErrorHandler = GuardedSdkErrorHandler { configuredErrorHandler.onError(it) }
+
+    internal var shutdownTimeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS
+        private set
+
+    override fun shutdownTimeout(timeoutMs: Long) {
+        shutdownTimeoutMs = validateOrUseDefault(
+            sdkErrorHandler = sdkErrorHandler,
+            api = "OpenTelemetryConfigDsl.shutdownTimeout",
+            configParameterName = "timeoutMs",
+            value = timeoutMs,
+            default = shutdownTimeoutMs,
+        ) { it > 0 }
+    }
 
     internal val tracerProviderConfig = CompatTracerProviderConfig(clock, sdkErrorHandler)
     internal val loggerProviderConfig = CompatLoggerProviderConfig(clock, sdkErrorHandler)

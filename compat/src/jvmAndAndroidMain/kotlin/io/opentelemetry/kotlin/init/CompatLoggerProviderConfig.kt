@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.exporter.logging.SystemOutLogRecordExporter
+import io.opentelemetry.kotlin.COMPAT_DEFAULT_TIMEOUT_MS
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaLoggerConfig
@@ -54,6 +55,7 @@ internal class CompatLoggerProviderConfig(
     private val resourceAttrs = CompatAttributesModel()
     private var resourceSchemaUrl: String? = null
     private val logLimitsDsl = LogLimitsConfigDslImpl()
+    private val processors = mutableListOf<LogRecordProcessor>()
     private var exportConfigured = false
 
     override fun resource(schemaUrl: String?, attributes: AttributesMutator.() -> Unit) {
@@ -68,7 +70,7 @@ internal class CompatLoggerProviderConfig(
     override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
         exportConfigured = true
         val processor = LogExportConfigDslImpl(clock, sdkErrorHandler).action()
-        builder.addLogRecordProcessor(OtelJavaLogRecordProcessorAdapter(processor, sdkErrorHandler))
+        processors.add(processor)
     }
 
     internal fun applyResolvedProcessor(behavior: LogRecordProcessorBehavior?) {
@@ -120,6 +122,7 @@ internal class CompatLoggerProviderConfig(
         clock: Clock,
         baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build()),
         logLimits: LogLimitsBehavior,
+        timeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS,
     ): LoggerProvider {
         this.logLimits = logLimits
         val otelJavaLogLimits = logLimits.toOtelJavaLogLimits()
@@ -134,7 +137,10 @@ internal class CompatLoggerProviderConfig(
             builder.setResource(OtelJavaResource.create(attrs, merged.schemaUrl))
         }
         builder.setClock(clock.toOtelJavaClock())
-        return LoggerProviderAdapter(builder.build(), sdkErrorHandler)
+        processors.forEach {
+            builder.addLogRecordProcessor(OtelJavaLogRecordProcessorAdapter(it, sdkErrorHandler, timeoutMs))
+        }
+        return LoggerProviderAdapter(builder.build(), sdkErrorHandler, timeoutMs)
     }
 
     fun toBehavior(): LoggerProviderBehavior =

@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.config.dsl.PropagatorConfigImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceDetectionConfigDslImpl
 import io.opentelemetry.kotlin.config.toBehaviorReader
+import io.opentelemetry.kotlin.config.validateOrUseDefault
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -32,6 +33,19 @@ internal class OpenTelemetryConfigImpl(
      * forwarder that resolves the configured handler on each report instead.
      */
     internal val sdkErrorHandler = GuardedSdkErrorHandler { configuredErrorHandler.onError(it) }
+
+    internal var shutdownTimeoutMs: Long = 3000
+        private set
+
+    override fun shutdownTimeout(timeoutMs: Long) {
+        shutdownTimeoutMs = validateOrUseDefault(
+            sdkErrorHandler = sdkErrorHandler,
+            api = "OpenTelemetryConfigDsl.shutdownTimeout",
+            configParameterName = "timeoutMs",
+            value = timeoutMs,
+            default = shutdownTimeoutMs,
+        ) { it > 0 }
+    }
 
     internal val tracingConfig: TracerProviderConfigImpl = TracerProviderConfigImpl(clock, sdkErrorHandler)
     internal val loggingConfig: LoggerProviderConfigImpl = LoggerProviderConfigImpl(clock, sdkErrorHandler)

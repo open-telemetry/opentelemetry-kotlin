@@ -58,12 +58,12 @@ internal class CompatSdkConfigFactory(
     fun buildTracerProvider(): TracerProvider {
         cfg.tracerProviderConfig.applyResolvedSampler(sampler)
         cfg.tracerProviderConfig.applyResolvedProcessor(spanProcessor)
-        return cfg.tracerProviderConfig.build(clock, idGenerator, baseResource, spanLimits, contextFactory)
+        return cfg.tracerProviderConfig.build(clock, idGenerator, baseResource, spanLimits, contextFactory, cfg.shutdownTimeoutMs)
     }
 
     fun buildLoggerProvider(): LoggerProvider {
         cfg.loggerProviderConfig.applyResolvedProcessor(logProcessor)
-        return cfg.loggerProviderConfig.build(clock, baseResource, logLimits)
+        return cfg.loggerProviderConfig.build(clock, baseResource, logLimits, cfg.shutdownTimeoutMs)
     }
 
     fun buildMeterProvider(): MeterProvider = cfg.meterProviderConfig.build()
