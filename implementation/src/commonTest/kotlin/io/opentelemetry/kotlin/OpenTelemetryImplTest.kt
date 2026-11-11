@@ -14,12 +14,13 @@ import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.FakeMeterProvider
 import io.opentelemetry.kotlin.tracing.FakeTracerProvider
 import io.opentelemetry.kotlin.tracing.TracerProvider
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalApi::class)
+@OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
 internal class OpenTelemetryImplTest {
 
     @Test
@@ -112,6 +113,7 @@ internal class OpenTelemetryImplTest {
 
         val result = api.forceFlush()
         assertEquals(Success, result)
+        assertEquals(10L, testScheduler.currentTime)
         assertEquals(1, tracerProvider.flushCount)
         assertEquals(1, loggerProvider.flushCount)
     }
@@ -124,6 +126,7 @@ internal class OpenTelemetryImplTest {
 
         val result = api.shutdown()
         assertEquals(Success, result)
+        assertEquals(10L, testScheduler.currentTime)
         assertEquals(1, tracerProvider.shutdownCount)
         assertEquals(1, loggerProvider.shutdownCount)
     }

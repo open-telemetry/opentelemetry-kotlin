@@ -2,10 +2,10 @@ package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.config.ConfigProvider
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
+import io.opentelemetry.kotlin.export.batchExportOperationConcurrent
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.ResourceFactory
@@ -23,8 +23,9 @@ internal class CompatOpenTelemetryImpl(
     override val idGenerator: IdGenerator,
     override val resource: ResourceFactory,
     override val propagator: TextMapPropagator,
-    sdkErrorHandler: SdkErrorHandler,
+    private val sdkErrorHandler: SdkErrorHandler,
     private val processWideState: CompatProcessWideState? = null,
+    private val timeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS,
 ) : OpenTelemetrySdk {
 
     // TODO: delegate to opentelemetry-java once it ships the Instrumentation Configuration API.
@@ -32,23 +33,20 @@ internal class CompatOpenTelemetryImpl(
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
 
-    private val closeable = CompositeTelemetryCloseable(
-        closeables = listOfNotNull(
-            tracerProvider as? TelemetryCloseable,
-            loggerProvider as? TelemetryCloseable,
-            meterProvider as? TelemetryCloseable,
-        ),
-        sdkErrorHandler = sdkErrorHandler,
+    private val closeables = listOfNotNull(
+        tracerProvider as? TelemetryCloseable,
+        loggerProvider as? TelemetryCloseable,
+        meterProvider as? TelemetryCloseable,
     )
 
     override suspend fun forceFlush(): OperationResultCode = when {
         shutdownState.isShutdown -> OperationResultCode.Success
-        else -> closeable.forceFlush()
+        else -> batchExportOperationConcurrent(closeables, sdkErrorHandler, timeoutMs, TelemetryCloseable::forceFlush)
     }
 
-    override suspend fun shutdown(): OperationResultCode = shutdownState.shutdown {
+    override suspend fun shutdown(): OperationResultCode = shutdownState.shutdown(timeoutMs) {
         try {
-            closeable.shutdown()
+            batchExportOperationConcurrent(closeables, sdkErrorHandler, timeoutMs, TelemetryCloseable::shutdown)
         } finally {
             processWideState?.release()
         }

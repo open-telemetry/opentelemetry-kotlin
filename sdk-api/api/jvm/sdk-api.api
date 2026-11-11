@@ -120,6 +120,7 @@ public abstract interface class io/opentelemetry/kotlin/init/OpenTelemetryConfig
 	public abstract fun meterProvider (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun propagator (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun resourceDetection (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun shutdownTimeout (J)V
 	public abstract fun tracerProvider (Lkotlin/jvm/functions/Function1;)V
 }
 

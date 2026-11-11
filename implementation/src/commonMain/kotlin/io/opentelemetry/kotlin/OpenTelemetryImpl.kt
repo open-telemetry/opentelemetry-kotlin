@@ -4,13 +4,13 @@ import io.opentelemetry.kotlin.config.ConfigProvider
 import io.opentelemetry.kotlin.context.CurrentContextStorage
 import io.opentelemetry.kotlin.context.TempContextStandInApi
 import io.opentelemetry.kotlin.context.internalUninstallContextStorage
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.setProcessSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.export.OperationResultCode.Failure
-import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.export.TelemetryCloseable
-import io.opentelemetry.kotlin.export.runWithTimeout
+import io.opentelemetry.kotlin.export.batchExportOperationConcurrent
 import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.ResourceFactory
@@ -32,43 +32,27 @@ internal class OpenTelemetryImpl(
     private val installedStorage: CurrentContextStorage? = null,
     private val ownsErrorSink: Boolean = false,
     private val timeoutMs: Long = 3000,
+    private val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
 ) : OpenTelemetrySdk {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
 
-    override suspend fun forceFlush(): OperationResultCode = withOverallTimeout {
-        val tracerResult = when (tracerProvider) {
-            is TelemetryCloseable -> tracerProvider.forceFlush()
-            else -> Success
-        }
-        val loggerResult = when (loggerProvider) {
-            is TelemetryCloseable -> loggerProvider.forceFlush()
-            else -> Success
-        }
-        val meterResult = when (meterProvider) {
-            is TelemetryCloseable -> meterProvider.forceFlush()
-            else -> Success
-        }
-        combineResults(tracerResult, loggerResult, meterResult)
-    }
+    private val closeables = listOfNotNull(
+        tracerProvider as? TelemetryCloseable,
+        loggerProvider as? TelemetryCloseable,
+        meterProvider as? TelemetryCloseable,
+    )
+
+    override suspend fun forceFlush(): OperationResultCode =
+        batchExportOperationConcurrent(closeables, sdkErrorHandler, timeoutMs, TelemetryCloseable::forceFlush)
 
     override suspend fun shutdown(): OperationResultCode =
-        shutdownState.shutdown {
-            withOverallTimeout {
-                val tracerResult = when (tracerProvider) {
-                    is TelemetryCloseable -> tracerProvider.shutdown()
-                    else -> Success
-                }
-                val loggerResult = when (loggerProvider) {
-                    is TelemetryCloseable -> loggerProvider.shutdown()
-                    else -> Success
-                }
-                val meterResult = when (meterProvider) {
-                    is TelemetryCloseable -> meterProvider.shutdown()
-                    else -> Success
-                }
-                combineResults(tracerResult, loggerResult, meterResult)
-            }.also { releaseProcessWideState() }
+        shutdownState.shutdown(timeoutMs) {
+            try {
+                batchExportOperationConcurrent(closeables, sdkErrorHandler, timeoutMs, TelemetryCloseable::shutdown)
+            } finally {
+                releaseProcessWideState()
+            }
         }
 
     @OptIn(TempContextStandInApi::class)
@@ -78,13 +62,4 @@ internal class OpenTelemetryImpl(
             setProcessSdkErrorHandler(null)
         }
     }
-
-    private suspend fun withOverallTimeout(action: suspend () -> OperationResultCode): OperationResultCode =
-        runWithTimeout(timeoutMs, action)
-
-    private fun combineResults(vararg results: OperationResultCode): OperationResultCode =
-        when {
-            results.all { it == Success } -> Success
-            else -> Failure
-        }
 }
