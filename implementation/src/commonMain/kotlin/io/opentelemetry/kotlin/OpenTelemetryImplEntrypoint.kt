@@ -106,7 +106,7 @@ public fun createOpenTelemetry(
  */
 private fun installContextStorage(cfg: OpenTelemetryConfigImpl): CurrentContextStorage? {
     val contextConfig = cfg.contextConfig
-    val storage = contextConfig.generateStorage()
+    val storage = contextConfig.generateStorage(cfg.sdkErrorHandler)
     if (installContextStorage(storage)) {
         return storage
     }

@@ -34,7 +34,7 @@ internal class OtelJavaContextStorageTest {
         errorHandler = FakeSdkErrorHandler()
         harness = IntegrationTestHarness(testScheduler) {
             errorHandler(errorHandler)
-            context { storage = createOtelJavaCurrentContextStorage() }
+            context { storage { createOtelJavaCurrentContextStorage() } }
         }
         javaApi = harness.kotlinApi.toOtelJavaApi()
     }

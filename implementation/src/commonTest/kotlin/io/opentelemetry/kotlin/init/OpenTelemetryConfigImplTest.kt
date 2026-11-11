@@ -24,6 +24,7 @@ import io.opentelemetry.kotlin.propagation.createW3CTraceContextPropagator
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -56,7 +57,7 @@ internal class OpenTelemetryConfigImplTest {
         val resolver = SdkConfigFactory(cfg, behavior)
         assertNull(resolver.generateTracingConfig().processor)
         assertNull(resolver.generateLoggingConfig().processor)
-        assertNull(cfg.contextConfig.storage)
+        assertFalse(cfg.contextConfig.explicitlyConfigured)
         assertSame(NoopOpenTelemetry.propagator, cfg.propagator)
     }
 
@@ -106,9 +107,6 @@ internal class OpenTelemetryConfigImplTest {
         }
         cfg.tracerProvider {
             export { FakeSpanProcessor() }
-        }
-        cfg.context {
-            assertNull(storage)
         }
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)

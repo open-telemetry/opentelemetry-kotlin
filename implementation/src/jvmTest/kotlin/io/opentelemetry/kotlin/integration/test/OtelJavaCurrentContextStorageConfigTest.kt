@@ -22,7 +22,7 @@ internal class OtelJavaCurrentContextStorageConfigTest {
     fun `java bridge storage passed to the DSL is used by the SDK`() {
         val storage = createOtelJavaCurrentContextStorage()
         val api = createOpenTelemetry {
-            context { this.storage = storage }
+            context { storage { storage } }
         }.also(sdks::track)
         assertSame(storage, assertIs<ContextFactoryImpl>(api.context).installedStorage)
     }

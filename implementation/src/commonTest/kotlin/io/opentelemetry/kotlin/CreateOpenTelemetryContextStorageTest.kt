@@ -4,11 +4,14 @@ import io.opentelemetry.kotlin.context.CurrentContextStorage
 import io.opentelemetry.kotlin.context.FakeCurrentContextStorage
 import io.opentelemetry.kotlin.context.createSingleSlotCurrentContextStorage
 import io.opentelemetry.kotlin.context.createThreadLocalCurrentContextStorage
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.framework.SdkTracker
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertSame
 
 @OptIn(ExperimentalApi::class)
@@ -34,9 +37,20 @@ internal class CreateOpenTelemetryContextStorageTest {
         assertStorageUsed(FakeCurrentContextStorage())
     }
 
+    @Test
+    fun `throwing storage supplier falls back to the default storage`() {
+        val handler = FakeSdkErrorHandler()
+        val api = createOpenTelemetry {
+            errorHandler(handler)
+            context { storage { error("boom") } }
+        }.also(sdks::track)
+        assertNotNull(assertIs<ContextFactoryImpl>(api.context).installedStorage)
+        assertEquals("boom", handler.userCodeErrors.single().cause.message)
+    }
+
     private fun assertStorageUsed(storage: CurrentContextStorage) {
         val api = createOpenTelemetry {
-            context { this.storage = storage }
+            context { storage { storage } }
         }.also(sdks::track)
         assertSame(storage, assertIs<ContextFactoryImpl>(api.context).installedStorage)
     }

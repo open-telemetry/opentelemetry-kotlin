@@ -67,7 +67,7 @@ internal class ProcessWideContextInstallationTest {
         val errorHandler = FakeSdkErrorHandler()
         val second = createOpenTelemetry {
             errorHandler(errorHandler)
-            context { storage = createSingleSlotCurrentContextStorage() }
+            context { storage { createSingleSlotCurrentContextStorage() } }
         }.also(sdks::track)
 
         val error = errorHandler.apiMisuses.single()
