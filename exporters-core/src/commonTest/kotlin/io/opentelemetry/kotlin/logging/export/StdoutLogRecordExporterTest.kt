@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
-import io.opentelemetry.kotlin.export.FakeLogExportConfig
+import io.opentelemetry.kotlin.export.FakeExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.loadTestFixture
 import io.opentelemetry.kotlin.logging.SeverityNumber
@@ -17,7 +17,7 @@ internal class StdoutLogRecordExporterTest {
     @Test
     fun testExportLogRecordMinimal() = runTest {
         val output = mutableListOf<String>()
-        val exporter = FakeLogExportConfig().stdoutLogRecordExporter {
+        val exporter = FakeExportConfig().stdoutLogRecordExporter {
             output.add(it)
         }
 
@@ -43,7 +43,7 @@ internal class StdoutLogRecordExporterTest {
     @Test
     fun testExportLogRecord() = runTest {
         val output = mutableListOf<String>()
-        val exporter = FakeLogExportConfig().stdoutLogRecordExporter {
+        val exporter = FakeExportConfig().stdoutLogRecordExporter {
             output.add(it)
         }
 

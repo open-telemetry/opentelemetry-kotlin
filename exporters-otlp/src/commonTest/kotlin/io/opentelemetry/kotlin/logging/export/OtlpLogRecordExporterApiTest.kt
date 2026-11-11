@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.init.LogExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import kotlinx.coroutines.test.runTest
 import okio.blackholeSink
@@ -38,7 +38,7 @@ internal class OtlpLogRecordExporterApiTest {
     }
 }
 
-private fun fakeConfig(): LogExportConfigDsl = object : LogExportConfigDsl {
+private fun fakeConfig(): ExportConfigDsl = object : ExportConfigDsl {
     override val clock: Clock = FakeClock()
     override val sdkErrorHandler = NoopSdkErrorHandler
 }

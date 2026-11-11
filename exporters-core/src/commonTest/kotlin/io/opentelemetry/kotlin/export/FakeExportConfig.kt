@@ -4,9 +4,9 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 
-internal class FakeTraceExportConfig(
+internal class FakeExportConfig(
     override val clock: Clock = FakeClock(),
     override val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
-) : TraceExportConfigDsl
+) : ExportConfigDsl

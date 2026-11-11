@@ -9,13 +9,13 @@ import io.opentelemetry.kotlin.export.OtlpFileExporterConfigDsl
 import io.opentelemetry.kotlin.export.OtlpHttpExporterConfigDsl
 import io.opentelemetry.kotlin.export.createOtlpFileExporter
 import io.opentelemetry.kotlin.export.createOtlpHttpClient
-import io.opentelemetry.kotlin.init.LogExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 
 /**
  * Creates a log record exporter that sends telemetry over OTLP HTTP.
  */
 @ExperimentalApi
-public fun LogExportConfigDsl.otlpHttpLogRecordExporter(
+public fun ExportConfigDsl.otlpHttpLogRecordExporter(
     block: OtlpHttpExporterConfigDsl.() -> Unit = {},
 ): LogRecordExporter =
     OtlpHttpLogRecordExporter(
@@ -30,7 +30,7 @@ public fun LogExportConfigDsl.otlpHttpLogRecordExporter(
  * Creates a log record exporter that writes telemetry to a file.
  */
 @ExperimentalApi
-internal fun LogExportConfigDsl.otlpFileLogRecordExporter(
+internal fun ExportConfigDsl.otlpFileLogRecordExporter(
     block: OtlpFileExporterConfigDsl.() -> Unit
 ): LogRecordExporter =
     OtlpFileLogRecordExporter(

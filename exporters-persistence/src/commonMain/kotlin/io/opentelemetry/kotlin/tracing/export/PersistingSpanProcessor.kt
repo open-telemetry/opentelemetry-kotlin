@@ -16,7 +16,7 @@ import io.opentelemetry.kotlin.export.TelemetryRepositoryImpl
 import io.opentelemetry.kotlin.export.TimeoutTelemetryCloseable
 import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
-import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
@@ -45,7 +45,7 @@ internal class PersistingSpanProcessor(
     processor: SpanProcessor,
     private val exporter: SpanExporter,
     fileSystem: TelemetryFileSystem,
-    dsl: TraceExportConfigDsl,
+    dsl: ExportConfigDsl,
     config: PersistedTelemetryConfig,
     serializer: (List<SpanData>) -> ByteArray,
     deserializer: (ByteArray) -> List<SpanData>,
