@@ -35,6 +35,21 @@ internal class OpenTelemetryConfigImplTest {
     private val clock = FakeClock()
 
     @Test
+    fun testShutdownTimeoutValidation() {
+        val errors = FakeSdkErrorHandler()
+        val cfg = OpenTelemetryConfigImpl(clock).apply { errorHandler(errors) }
+        assertEquals(3000L, cfg.shutdownTimeoutMs)
+        cfg.shutdownTimeout(6000)
+        assertEquals(6000L, cfg.shutdownTimeoutMs)
+        assertEquals(0, errors.apiMisuses.size)
+        listOf(0L, -1L).forEach { timeout ->
+            cfg.shutdownTimeout(timeout)
+            assertEquals(6000L, cfg.shutdownTimeoutMs)
+        }
+        assertEquals(2, errors.apiMisuses.size)
+    }
+
+    @Test
     fun testDefaultConfig() {
         val cfg = OpenTelemetryConfigImpl(clock)
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
