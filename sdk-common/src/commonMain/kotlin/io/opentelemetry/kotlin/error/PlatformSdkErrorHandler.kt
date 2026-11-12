@@ -23,7 +23,7 @@ public object PlatformSdkErrorHandler : SdkErrorHandler {
                     }
                 }
                 DefaultErrorLogLimiter.Decision.Skip -> {
-                    Unit
+                    return
                 }
                 is DefaultErrorLogLimiter.Decision.Repeated -> {
                     platformLog(
