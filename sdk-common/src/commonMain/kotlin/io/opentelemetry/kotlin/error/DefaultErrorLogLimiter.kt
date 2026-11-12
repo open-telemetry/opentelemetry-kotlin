@@ -36,9 +36,23 @@ internal class DefaultErrorLogLimiter(
     ) {
         var repeats: Long = 0
 
+        fun matchesShape(kind: Int, details: String, api: String?): Boolean =
+            this.kind == kind && this.details == details && this.api == api
+
+        fun matchesType(
+            severity: SdkErrorSeverity,
+            exceptionClass: KClass<out Throwable>?,
+        ): Boolean = this.severity == severity && this.exceptionClass == exceptionClass
+
         fun recordRepeat(): Decision {
-            if (repeats < Long.MAX_VALUE) repeats++
-            return if (repeats.isPowerOfTwo()) Decision.Repeated(repeats) else Decision.Skip
+            if (repeats < Long.MAX_VALUE) {
+                repeats++
+            }
+            return if (repeats.isPowerOfTwo()) {
+                Decision.Repeated(repeats)
+            } else {
+                Decision.Skip
+            }
         }
     }
 
@@ -76,9 +90,8 @@ internal class DefaultErrorLogLimiter(
             var i = 0
             while (i < entries.size) {
                 val entry = entries[i]
-                if (entry.kind == kind && entry.details == details && entry.api == api &&
-                    entry.severity == severity && entry.exceptionClass == exceptionClass &&
-                    entry.lastCause === cause
+                if (entry.matchesShape(kind, details, api) &&
+                    entry.matchesType(severity, exceptionClass) && entry.lastCause === cause
                 ) {
                     return@write entry.recordRepeat()
                 }
@@ -94,9 +107,8 @@ internal class DefaultErrorLogLimiter(
             i = 0
             while (i < entries.size) {
                 val entry = entries[i]
-                if (entry.kind == kind && entry.details == details && entry.api == api &&
-                    entry.severity == severity && entry.exceptionClass == exceptionClass &&
-                    entry.frame == frame
+                if (entry.matchesShape(kind, details, api) &&
+                    entry.matchesType(severity, exceptionClass) && entry.frame == frame
                 ) {
                     entry.lastCause = cause
                     return@write entry.recordRepeat()
@@ -105,9 +117,14 @@ internal class DefaultErrorLogLimiter(
             }
 
             if (entries.size >= maxKeys) {
-                if (overflows < Long.MAX_VALUE) overflows++
-                return@write if (overflows.isPowerOfTwo()) Decision.Overflow(overflows)
-                else Decision.Skip
+                if (overflows < Long.MAX_VALUE) {
+                    overflows++
+                }
+                return@write if (overflows.isPowerOfTwo()) {
+                    Decision.Overflow(overflows)
+                } else {
+                    Decision.Skip
+                }
             }
 
             entries.add(Entry(kind, details, api, severity, exceptionClass, frame, cause))
