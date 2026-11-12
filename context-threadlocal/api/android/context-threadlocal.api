@@ -1,0 +1,4 @@
+public final class io/opentelemetry/kotlin/context/ThreadLocalCurrentContextStorageKt {
+	public static final fun createThreadLocalCurrentContextStorage ()Lio/opentelemetry/kotlin/context/CurrentContextStorage;
+}
+

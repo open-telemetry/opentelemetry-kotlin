@@ -1,0 +1,20 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, tvosArm64, tvosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <opentelemetry-kotlin:exporters-in-memory>
+abstract interface io.opentelemetry.kotlin.logging.export/InMemoryLogRecordExporter : io.opentelemetry.kotlin.logging.export/LogRecordExporter { // io.opentelemetry.kotlin.logging.export/InMemoryLogRecordExporter|null[0]
+    abstract val exportedLogRecords // io.opentelemetry.kotlin.logging.export/InMemoryLogRecordExporter.exportedLogRecords|{}exportedLogRecords[0]
+        abstract fun <get-exportedLogRecords>(): kotlin.collections/List<io.opentelemetry.kotlin.logging.data/LogRecordData> // io.opentelemetry.kotlin.logging.export/InMemoryLogRecordExporter.exportedLogRecords.<get-exportedLogRecords>|<get-exportedLogRecords>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing.export/InMemorySpanExporter : io.opentelemetry.kotlin.tracing.export/SpanExporter { // io.opentelemetry.kotlin.tracing.export/InMemorySpanExporter|null[0]
+    abstract val exportedSpans // io.opentelemetry.kotlin.tracing.export/InMemorySpanExporter.exportedSpans|{}exportedSpans[0]
+        abstract fun <get-exportedSpans>(): kotlin.collections/List<io.opentelemetry.kotlin.tracing.data/SpanData> // io.opentelemetry.kotlin.tracing.export/InMemorySpanExporter.exportedSpans.<get-exportedSpans>|<get-exportedSpans>(){}[0]
+}
+
+final fun (io.opentelemetry.kotlin.init/LogExportConfigDsl).io.opentelemetry.kotlin.logging.export/inMemoryLogRecordExporter(): io.opentelemetry.kotlin.logging.export/InMemoryLogRecordExporter // io.opentelemetry.kotlin.logging.export/inMemoryLogRecordExporter|inMemoryLogRecordExporter@io.opentelemetry.kotlin.init.LogExportConfigDsl(){}[0]
+final fun (io.opentelemetry.kotlin.init/TraceExportConfigDsl).io.opentelemetry.kotlin.tracing.export/inMemorySpanExporter(): io.opentelemetry.kotlin.tracing.export/InMemorySpanExporter // io.opentelemetry.kotlin.tracing.export/inMemorySpanExporter|inMemorySpanExporter@io.opentelemetry.kotlin.init.TraceExportConfigDsl(){}[0]

@@ -1,0 +1,34 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, tvosArm64, tvosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <opentelemetry-kotlin:exporters-otlp>
+abstract interface io.opentelemetry.kotlin.export/OtlpFileExporterConfigDsl { // io.opentelemetry.kotlin.export/OtlpFileExporterConfigDsl|null[0]
+    abstract var sink // io.opentelemetry.kotlin.export/OtlpFileExporterConfigDsl.sink|{}sink[0]
+        abstract fun <get-sink>(): okio/Sink // io.opentelemetry.kotlin.export/OtlpFileExporterConfigDsl.sink.<get-sink>|<get-sink>(){}[0]
+        abstract fun <set-sink>(okio/Sink) // io.opentelemetry.kotlin.export/OtlpFileExporterConfigDsl.sink.<set-sink>|<set-sink>(okio.Sink){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl { // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl|null[0]
+    abstract var endpoint // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl.endpoint|{}endpoint[0]
+        abstract fun <get-endpoint>(): kotlin/String // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl.endpoint.<get-endpoint>|<get-endpoint>(){}[0]
+        abstract fun <set-endpoint>(kotlin/String) // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl.endpoint.<set-endpoint>|<set-endpoint>(kotlin.String){}[0]
+    abstract var headers // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl.headers|{}headers[0]
+        abstract fun <get-headers>(): kotlin.coroutines/SuspendFunction0<kotlin.collections/Map<kotlin/String, kotlin/String>> // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl.headers.<get-headers>|<get-headers>(){}[0]
+        abstract fun <set-headers>(kotlin.coroutines/SuspendFunction0<kotlin.collections/Map<kotlin/String, kotlin/String>>) // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl.headers.<set-headers>|<set-headers>(kotlin.coroutines.SuspendFunction0<kotlin.collections.Map<kotlin.String,kotlin.String>>){}[0]
+    abstract var httpClient // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl.httpClient|{}httpClient[0]
+        abstract fun <get-httpClient>(): io.ktor.client/HttpClient? // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl.httpClient.<get-httpClient>|<get-httpClient>(){}[0]
+        abstract fun <set-httpClient>(io.ktor.client/HttpClient?) // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl.httpClient.<set-httpClient>|<set-httpClient>(io.ktor.client.HttpClient?){}[0]
+    abstract var httpClientEngine // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl.httpClientEngine|{}httpClientEngine[0]
+        abstract fun <get-httpClientEngine>(): io.ktor.client.engine/HttpClientEngine? // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl.httpClientEngine.<get-httpClientEngine>|<get-httpClientEngine>(){}[0]
+        abstract fun <set-httpClientEngine>(io.ktor.client.engine/HttpClientEngine?) // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl.httpClientEngine.<set-httpClientEngine>|<set-httpClientEngine>(io.ktor.client.engine.HttpClientEngine?){}[0]
+    abstract var timeoutMs // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl.timeoutMs|{}timeoutMs[0]
+        abstract fun <get-timeoutMs>(): kotlin/Long // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl.timeoutMs.<get-timeoutMs>|<get-timeoutMs>(){}[0]
+        abstract fun <set-timeoutMs>(kotlin/Long) // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl.timeoutMs.<set-timeoutMs>|<set-timeoutMs>(kotlin.Long){}[0]
+}
+
+final fun (io.opentelemetry.kotlin.init/LogExportConfigDsl).io.opentelemetry.kotlin.logging.export/otlpHttpLogRecordExporter(kotlin/Function1<io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl, kotlin/Unit> = ...): io.opentelemetry.kotlin.logging.export/LogRecordExporter // io.opentelemetry.kotlin.logging.export/otlpHttpLogRecordExporter|otlpHttpLogRecordExporter@io.opentelemetry.kotlin.init.LogExportConfigDsl(kotlin.Function1<io.opentelemetry.kotlin.export.OtlpHttpExporterConfigDsl,kotlin.Unit>){}[0]
+final fun (io.opentelemetry.kotlin.init/TraceExportConfigDsl).io.opentelemetry.kotlin.tracing.export/otlpHttpSpanExporter(kotlin/Function1<io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl, kotlin/Unit> = ...): io.opentelemetry.kotlin.tracing.export/SpanExporter // io.opentelemetry.kotlin.tracing.export/otlpHttpSpanExporter|otlpHttpSpanExporter@io.opentelemetry.kotlin.init.TraceExportConfigDsl(kotlin.Function1<io.opentelemetry.kotlin.export.OtlpHttpExporterConfigDsl,kotlin.Unit>){}[0]
