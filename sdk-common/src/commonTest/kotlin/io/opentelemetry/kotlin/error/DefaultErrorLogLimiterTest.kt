@@ -27,7 +27,10 @@ internal class DefaultErrorLogLimiterTest {
     @Test
     fun repeatedThrowableSkipsRepeatedStackInspection() {
         var frameReads = 0
-        val limiter = DefaultErrorLogLimiter(frameExtractor = { frameReads++; "where" })
+        val limiter = DefaultErrorLogLimiter(frameExtractor = {
+            frameReads++
+            "where"
+        })
         val error = SdkError.UserCodeError(IllegalArgumentException("error"), "action", warning)
         assertEquals(DefaultErrorLogLimiter.Decision.Full, limiter.record(error))
         repeat(1000) { limiter.record(error) }
@@ -55,20 +58,19 @@ internal class DefaultErrorLogLimiterTest {
     @Test
     fun keyIncludesSubtypeDetailsApiClassAndSeverity() {
         val limiter = DefaultErrorLogLimiter(frameExtractor = { "frame" })
-        assertEquals(DefaultErrorLogLimiter.Decision.Full,
-            limiter.record(SdkError.UserCodeError(IllegalStateException(), "operation", warning)))
-        assertEquals(DefaultErrorLogLimiter.Decision.Full,
-            limiter.record(SdkError.SdkCodeError(IllegalStateException(), "operation", warning)))
-        assertEquals(DefaultErrorLogLimiter.Decision.Full,
-            limiter.record(SdkError.UserCodeError(IllegalArgumentException(), "operation", warning)))
-        assertEquals(DefaultErrorLogLimiter.Decision.Full,
-            limiter.record(SdkError.UserCodeError(IllegalStateException(), "different", warning)))
-        assertEquals(DefaultErrorLogLimiter.Decision.Full,
-            limiter.record(SdkError.UserCodeError(IllegalStateException(), "operation", SdkErrorSeverity.ERROR)))
-        assertEquals(DefaultErrorLogLimiter.Decision.Full,
-            limiter.record(SdkError.ApiMisuse("Tracer", "operation", warning)))
-        assertEquals(DefaultErrorLogLimiter.Decision.Full,
-            limiter.record(SdkError.ApiMisuse("Meter", "operation", warning)))
+        val uniqueErrors = listOf(
+            SdkError.UserCodeError(IllegalStateException(), "operation", warning),
+            SdkError.SdkCodeError(IllegalStateException(), "operation", warning),
+            SdkError.UserCodeError(IllegalArgumentException(), "operation", warning),
+            SdkError.UserCodeError(IllegalStateException(), "different", warning),
+            SdkError.UserCodeError(IllegalStateException(), "operation", SdkErrorSeverity.ERROR),
+            SdkError.ApiMisuse("Tracer", "operation", warning),
+            SdkError.ApiMisuse("Meter", "operation", warning),
+        )
+
+        uniqueErrors.forEach { error ->
+            assertEquals(DefaultErrorLogLimiter.Decision.Full, limiter.record(error))
+        }
     }
 
     @Test
