@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### 📈 Enhancements
+
+- Add an `io.opentelemetry.kotlin:bom` BOM that aligns the versions of all published
+  opentelemetry-kotlin artifacts. `compat-bom` now imports it, along with the
+  opentelemetry-java alpha BOM.
+  ([#1513](https://github.com/open-telemetry/opentelemetry-kotlin/issues/1513))
+
 ### 🐞 Bug fixes
 
 - Move new and updated trace-state entries to the front after protobuf deserialization.
