@@ -106,7 +106,7 @@ internal class OtelJavaSpanProcessorOnKotlinSdkTest {
         val processor = RecordingOtelJavaSpanProcessor()
         harness.config.spanProcessors.add(processor.toOtelKotlinSpanProcessor())
         val parent = harness.tracer.startSpan("parent")
-        val parentContext = harness.kotlinApi.context.rootContext()
+        val parentContext = rootContext()
             .storeSpan(parent)
             .storeBaggage(createBaggage { put("key", "value") })
         harness.tracer.startSpan("child", parentContext = parentContext).end()

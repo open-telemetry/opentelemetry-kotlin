@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
+import io.opentelemetry.kotlin.COMPAT_DEFAULT_TIMEOUT_MS
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.NoopOpenTelemetry
@@ -22,6 +23,7 @@ internal class TracerProviderAdapter(
     private val tracerProvider: OtelJavaTracerProvider,
     private val contextFactory: ContextFactory,
     private val sdkErrorHandler: SdkErrorHandler,
+    private val timeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS,
 ) : TracerProvider, TelemetryCloseable {
 
     private val map = ConcurrentHashMap<InstrumentationScopeInfo, TracerAdapter>()
@@ -49,7 +51,7 @@ internal class TracerProviderAdapter(
             OperationResultCode.Failure,
             "TracerProvider.forceFlush failed",
         ) {
-            awaitOperationResultCode { tracerProvider.forceFlush() }
+            awaitOperationResultCode(timeoutMs) { tracerProvider.forceFlush() }
         }
         else -> OperationResultCode.Failure
     }
@@ -59,7 +61,7 @@ internal class TracerProviderAdapter(
             OperationResultCode.Failure,
             "TracerProvider.shutdown failed",
         ) {
-            awaitOperationResultCode { tracerProvider.shutdown() }
+            awaitOperationResultCode(timeoutMs) { tracerProvider.shutdown() }
         }
         else -> OperationResultCode.Failure
     }

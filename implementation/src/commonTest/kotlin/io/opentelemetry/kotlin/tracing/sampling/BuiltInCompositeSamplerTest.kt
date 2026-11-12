@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.rootContext
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -22,8 +21,6 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
 internal class BuiltInCompositeSamplerTest {
-
-    private val contextFactory = ContextFactoryImpl()
 
     private val samplerDsl = SamplerConfigImpl()
 
@@ -62,16 +59,16 @@ internal class BuiltInCompositeSamplerTest {
             }
         }
         val parentSpan = createNonRecordingSpan(parentSpanContext)
-        return contextFactory.rootContext().storeSpan(parentSpan)
+        return rootContext().storeSpan(parentSpan)
     }
 
     private fun Sampler.sample(
-        context: Context = contextFactory.rootContext(),
+        context: Context = rootContext(),
         traceId: String = this@BuiltInCompositeSamplerTest.traceId,
     ): SamplingResult =
         shouldSample(context, traceId.hexToByteArray(), "span", SpanKind.INTERNAL, AttributesModel(), emptyList())
 
-    private fun ComposableSampler.intent(context: Context = contextFactory.rootContext()): SamplingIntent =
+    private fun ComposableSampler.intent(context: Context = rootContext()): SamplingIntent =
         getSamplingIntent(context, "span", SpanKind.INTERNAL, AttributesModel(), emptyList())
 
     private fun fakeComposableSampler(intent: SamplingIntent): ComposableSampler =

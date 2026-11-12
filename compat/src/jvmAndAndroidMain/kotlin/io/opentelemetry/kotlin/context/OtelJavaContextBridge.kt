@@ -26,15 +26,16 @@ import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
  *
  * Java's context can't be iterated, so a Kotlin context is stored whole under a private Java key.
  * Its span and baggage are mirrored into Java's own keys, because Java instrumentation reads
- * those. A [ContextAdapter] unwraps to the Java context it wraps. Any other Kotlin context with
- * no Java origin is layered over Java's root.
+ * those. A Kotlin context with no Java origin is layered over Java's root.
  *
  * When Java derives a new context from a bridged one, converting it back applies any span or
  * baggage that Java changed, and records the Java context as the Kotlin context's origin. A
  * later conversion back to Java builds on that origin.
  *
  * Converting the same Java context twice returns the same Kotlin context, for as long as that
- * Kotlin context is reachable.
+ * Kotlin context is reachable. A Java context this bridge didn't build becomes a Kotlin context
+ * derived from the root, holding the Java context's span and baggage, with the Java context as
+ * its origin. Java-only keys stay on the origin and aren't copied into Kotlin.
  */
 @OptIn(ExperimentalApi::class)
 internal object OtelJavaContextBridge {
@@ -69,9 +70,6 @@ internal object OtelJavaContextBridge {
      * root or is otherwise wrapped in [OtelJavaContextAdapter].
      */
     fun toJava(context: Context, layerOverRoot: Boolean): OtelJavaContext {
-        if (context is ContextAdapter) {
-            return context.impl
-        }
         return try {
             val origin = context.get(JAVA_ORIGIN) as? Origin
             when {
@@ -102,29 +100,31 @@ internal object OtelJavaContextBridge {
     }
 
     /**
-     * Converts [java] to a Kotlin context. A Java context this bridge didn't build becomes a
-     * [ContextAdapter], which is cached only when [cacheAdapter] is set.
+     * Converts [java] to a Kotlin context.
      */
-    fun toKotlin(java: OtelJavaContext, cacheAdapter: Boolean): Context {
+    fun toKotlin(java: OtelJavaContext): Context {
         if (java is OtelJavaContextAdapter) {
             return java.impl
         }
         val context = try {
-            val mirror = java[KOTLIN_CONTEXT] as? Mirror
-            if (mirror == null && !cacheAdapter) {
-                return ContextAdapter(java)
-            }
             cache.get(java)?.let { return it }
-            when (mirror) {
-                null -> ContextAdapter(java)
+            when (val mirror = java[KOTLIN_CONTEXT] as? Mirror) {
+                null -> overlayOnRoot(java)
                 else -> overlay(java, mirror)
             }
         } catch (e: Throwable) {
             report(e, "Converting an opentelemetry-java context to Kotlin failed")
-            ContextAdapter(java)
+            try {
+                overlayOnRoot(java)
+            } catch (ignored: Throwable) {
+                rootContext()
+            }
         }
         return cache.getOrPut(java, context)
     }
+
+    private fun overlayOnRoot(java: OtelJavaContext): Context =
+        overlay(java, Mirror(rootContext(), null, null))
 
     /**
      * Applies the span and baggage Java changed since [mirror] was built, and records [java] as

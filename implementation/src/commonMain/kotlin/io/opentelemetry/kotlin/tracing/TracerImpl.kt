@@ -12,7 +12,6 @@ import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.export.ShutdownState
-import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.propagation.utils.isValidTraceIdBytes
@@ -29,7 +28,6 @@ import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
 internal class TracerImpl(
     private val clock: Clock,
     private val processor: SpanProcessor?,
-    private val contextFactory: ContextFactory,
     private val idGenerator: IdGenerator,
     private val scope: InstrumentationScopeInfo,
     private val resource: Resource,
@@ -39,8 +37,8 @@ internal class TracerImpl(
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Tracer {
 
-    private val propagatingNoopTracer = PropagatingNoopTracer(contextFactory, sdkErrorHandler)
-    private val root = contextFactory.rootContext()
+    private val propagatingNoopTracer = PropagatingNoopTracer(sdkErrorHandler)
+    private val root = rootContext()
     private val invalidSpanContext = createInvalidSpanContext()
     private val invalidSpan = createNonRecordingSpan(invalidSpanContext)
 
@@ -70,7 +68,7 @@ internal class TracerImpl(
                 return@sdkGuardOrDefault invalidSpan
             }
 
-            val ctx = parentContext ?: contextFactory.currentContext()
+            val ctx = parentContext ?: currentContext()
 
             val parentSpanContext = when (ctx) {
                 root -> invalidSpanContext

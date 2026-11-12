@@ -11,6 +11,8 @@ internal class NoopObservableLongGauge(
     override val unit: String?,
     override val description: String?,
 ) : ObservableLongGauge {
+    override val measurement: ObservableLongMeasurement = NoopObservableLongMeasurement()
+
     override fun registerCallback(callback: (ObservableLongMeasurement) -> Unit): AutoCloseable =
         NoopCallbackHandle
 

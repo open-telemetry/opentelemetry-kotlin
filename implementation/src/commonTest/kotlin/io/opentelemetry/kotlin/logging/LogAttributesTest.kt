@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
-import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
@@ -37,7 +36,6 @@ internal class LogAttributesTest {
         logger = LoggerImpl(
             clock = FakeClock(),
             processor = processor,
-            contextFactory = FakeContextFactory(),
             key = key,
             resource = FakeResource(),
             logLimits = AttributeLimitsBehavior(
@@ -146,7 +144,6 @@ internal class LogAttributesTest {
     private fun loggerWithValueLengthLimit(limit: Int): LoggerImpl = LoggerImpl(
         clock = FakeClock(),
         processor = processor,
-        contextFactory = FakeContextFactory(),
         key = key,
         resource = FakeResource(),
         logLimits = AttributeLimitsBehavior(

@@ -58,8 +58,7 @@ internal class LogProcessorNaughtyExportTest {
 
     private fun prepareContext(): Context {
         val span = harness.tracer.startSpan("span")
-        val contextFactory = harness.kotlinApi.context
-        val ctx = contextFactory.rootContext().storeSpan(span)
+        val ctx = rootContext().storeSpan(span)
         return ctx
     }
 

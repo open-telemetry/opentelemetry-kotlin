@@ -10,12 +10,6 @@ import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
-import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.CurrentContextStorageMode
-import io.opentelemetry.kotlin.context.FakeContext
-import io.opentelemetry.kotlin.context.FakeCurrentContextStorage
-import io.opentelemetry.kotlin.context.TempContextStandInApi
-import io.opentelemetry.kotlin.context.internalRootContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -41,13 +35,28 @@ internal class OpenTelemetryConfigImplTest {
     private val clock = FakeClock()
 
     @Test
+    fun testShutdownTimeoutValidation() {
+        val errors = FakeSdkErrorHandler()
+        val cfg = OpenTelemetryConfigImpl(clock).apply { errorHandler(errors) }
+        assertEquals(3000L, cfg.shutdownTimeoutMs)
+        cfg.shutdownTimeout(6000)
+        assertEquals(6000L, cfg.shutdownTimeoutMs)
+        assertEquals(0, errors.apiMisuses.size)
+        listOf(0L, -1L).forEach { timeout ->
+            cfg.shutdownTimeout(timeout)
+            assertEquals(6000L, cfg.shutdownTimeoutMs)
+        }
+        assertEquals(2, errors.apiMisuses.size)
+    }
+
+    @Test
     fun testDefaultConfig() {
         val cfg = OpenTelemetryConfigImpl(clock)
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         assertNull(resolver.generateTracingConfig().processor)
         assertNull(resolver.generateLoggingConfig().processor)
-        assertNull(cfg.contextConfig.storageMode)
+        assertNull(cfg.contextConfig.storage)
         assertSame(NoopOpenTelemetry.propagator, cfg.propagator)
     }
 
@@ -99,7 +108,7 @@ internal class OpenTelemetryConfigImplTest {
             export { FakeSpanProcessor() }
         }
         cfg.context {
-            assertNull(storageMode)
+            assertNull(storage)
         }
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
@@ -286,65 +295,6 @@ internal class OpenTelemetryConfigImplTest {
             assertNull(attributeCountLimit)
             assertNull(attributeValueLengthLimit)
         }
-    }
-
-    @OptIn(TempContextStandInApi::class)
-    @Test
-    fun testDefaultStorage() {
-        val cfg = OpenTelemetryConfigImpl(clock)
-        val storage = cfg.contextConfig.generateStorage(::FakeContext)
-        assertSame(internalRootContext(), storage.current())
-    }
-
-    @OptIn(TempContextStandInApi::class)
-    @Test
-    fun testThreadLocalStorage() {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
-            context {
-                storageMode = CurrentContextStorageMode.THREAD_LOCAL
-            }
-        }
-        val storage = cfg.contextConfig.generateStorage(::FakeContext)
-        assertSame(internalRootContext(), storage.current())
-    }
-
-    @Test
-    fun testCustomStorage() {
-        val custom = FakeCurrentContextStorage()
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
-            context {
-                storage { custom }
-            }
-        }
-        assertSame(custom, cfg.contextConfig.generateStorage(::FakeContext))
-    }
-
-    @Test
-    fun testCustomStorageOverridesStorageMode() {
-        val custom = FakeCurrentContextStorage()
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
-            context {
-                storageMode = CurrentContextStorageMode.SINGLE_SLOT
-                storage { custom }
-            }
-        }
-        assertSame(custom, cfg.contextConfig.generateStorage(::FakeContext))
-    }
-
-    @Test
-    fun testCustomStorageReceivesRootSupplier() {
-        val root = FakeContext()
-        var captured: (() -> Context)? = null
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
-            context {
-                storage { rootSupplier ->
-                    captured = rootSupplier
-                    FakeCurrentContextStorage()
-                }
-            }
-        }
-        cfg.contextConfig.generateStorage { root }
-        assertSame(root, captured?.invoke())
     }
 
     @Test

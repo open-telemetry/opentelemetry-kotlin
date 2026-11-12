@@ -13,7 +13,6 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.resource.SdkMode
@@ -46,8 +45,6 @@ internal class TracerProviderConfigImplTest {
     private val clock = FakeClock()
     private val base = ResourceFactoryImpl(NoopSdkErrorHandler).sdkDefaultResource(SdkMode.REGULAR)
 
-    private val contextFactory = ContextFactoryImpl()
-
     @Test
     fun testDefaultSamplerParentBased() {
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).generateTracingConfig(base)
@@ -57,7 +54,7 @@ internal class TracerProviderConfigImplTest {
 
     @Test
     fun testDefaultSamplerRootSamples() {
-        assertEquals(Decision.RECORD_AND_SAMPLE, defaultSampler().decisionFor(contextFactory.rootContext()))
+        assertEquals(Decision.RECORD_AND_SAMPLE, defaultSampler().decisionFor(rootContext()))
     }
 
     @Test
@@ -115,7 +112,13 @@ internal class TracerProviderConfigImplTest {
     fun testConsoleBehaviorInstallsProcessor() {
         assertEquals(
             "SimpleSpanProcessor",
-            processorClassName(SpanProcessorBehavior(console = ConsoleExporterBehavior())),
+            processorClassName(
+                SpanProcessorBehavior(
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(console = ConsoleExporterBehavior()),
+                    ),
+                )
+            ),
         )
     }
 
@@ -154,9 +157,13 @@ internal class TracerProviderConfigImplTest {
             "SimpleSpanProcessor",
             processorClassName(
                 SpanProcessorBehavior(
-                    console = ConsoleExporterBehavior(),
-                    simple = SimpleSpanProcessorBehavior(),
-                    batch = BatchSpanProcessorBehavior(scheduleDelay = 100),
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(console = ConsoleExporterBehavior())
+                    ),
+                    batch = BatchSpanProcessorBehavior(
+                        scheduleDelay = 100,
+                        exporter = SpanExporterBehavior(console = ConsoleExporterBehavior())
+                    ),
                 ),
             ),
         )
@@ -178,7 +185,13 @@ internal class TracerProviderConfigImplTest {
             export { dslProcessor }
         }.generateTracingConfig(
             base,
-            SpanProcessorBehavior(console = ConsoleExporterBehavior()),
+            SpanProcessorBehavior(
+                simple = SimpleSpanProcessorBehavior(
+                    exporter = SpanExporterBehavior(
+                        console = ConsoleExporterBehavior(),
+                    ),
+                )
+            ),
         )
         assertSame(dslProcessor, cfg.processor)
     }
@@ -309,7 +322,7 @@ internal class TracerProviderConfigImplTest {
             this.isRemote = isRemote
         }
         val parentSpan = createNonRecordingSpan(parentSpanContext)
-        return contextFactory.rootContext().storeSpan(parentSpan)
+        return rootContext().storeSpan(parentSpan)
     }
 
     private fun Sampler.decisionFor(context: Context): Decision = shouldSample(

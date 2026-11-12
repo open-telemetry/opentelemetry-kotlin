@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
@@ -114,16 +113,15 @@ internal class TracerInvalidIdTest {
     fun testDescendantOfRemoteParentIsNotRemote() {
         val idGenerator = IdGeneratorImpl()
         val tracer = buildTracer(idGenerator)
-        val contextFactory = ContextFactoryImpl()
 
         val child = tracer.startSpan(
             "child",
-            parentContext = contextFactory.rootContext()
+            parentContext = rootContext()
                 .storeSpanContext(remoteParent()),
         )
         val grandchild = tracer.startSpan(
             "grandchild",
-            parentContext = contextFactory.rootContext().storeSpan(child),
+            parentContext = rootContext().storeSpan(child),
         )
 
         assertFalse(child.spanContext.isRemote)
@@ -146,7 +144,7 @@ internal class TracerInvalidIdTest {
 
     private fun startChildOf(parent: SpanContext, idGenerator: IdGenerator): Span {
         val parentContext =
-            ContextFactoryImpl().rootContext().storeSpanContext(parent)
+            rootContext().storeSpanContext(parent)
         return buildTracer(idGenerator).startSpan("test", parentContext = parentContext)
     }
 
@@ -154,7 +152,6 @@ internal class TracerInvalidIdTest {
         return TracerImpl(
             clock = FakeClock(),
             processor = FakeSpanProcessor(),
-            contextFactory = ContextFactoryImpl(),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

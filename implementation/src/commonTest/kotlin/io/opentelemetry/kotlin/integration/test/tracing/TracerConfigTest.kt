@@ -57,7 +57,7 @@ internal class TracerConfigTest {
         harness.config.tracerProvider = {
             tracerConfigurator { TracerConfigImpl(false) }
         }
-        val parent = harness.kotlinApi.context.rootContext().storeSpanContext(FakeSpanContext.VALID)
+        val parent = rootContext().storeSpanContext(FakeSpanContext.VALID)
 
         val span = harness.tracerProvider.getTracer("disabled").startSpan("span", parentContext = parent)
         assertSameSpanContext(FakeSpanContext.VALID, span.spanContext)
@@ -66,7 +66,7 @@ internal class TracerConfigTest {
 
     @Test
     fun testTracerPropagatesParentAfterShutdown() = runTest {
-        val parent = harness.kotlinApi.context.rootContext().storeSpanContext(FakeSpanContext.VALID)
+        val parent = rootContext().storeSpanContext(FakeSpanContext.VALID)
         val existing = harness.tracerProvider.getTracer("existing")
         (harness.tracerProvider as TelemetryCloseable).shutdown()
 

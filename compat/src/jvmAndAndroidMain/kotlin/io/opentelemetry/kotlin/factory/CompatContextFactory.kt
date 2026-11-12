@@ -1,17 +1,14 @@
 package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.TempContextStandInApi
-import io.opentelemetry.kotlin.context.internalCurrentContext
-import io.opentelemetry.kotlin.context.internalRootContext
 
 /**
  * Returns contexts from the process-wide context storage.
  */
-@OptIn(TempContextStandInApi::class)
 internal class CompatContextFactory : ContextFactory {
 
-    override fun root(): Context = internalRootContext()
+    // fully qualified so these don't resolve to the ContextFactory extensions on `this`
+    override fun root(): Context = io.opentelemetry.kotlin.context.rootContext()
 
-    override fun current(): Context = internalCurrentContext()
+    override fun current(): Context = io.opentelemetry.kotlin.context.currentContext()
 }

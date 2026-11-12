@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.aliases.OtelJavaMeter
 import io.opentelemetry.kotlin.aliases.OtelJavaObservableLongGauge
@@ -22,6 +23,15 @@ internal class ObservableLongGaugeAdapter(
     private val lock = Any()
     private val callbackHandles = mutableSetOf<OtelJavaObservableLongGauge>()
     private var closed = false
+
+    override val measurement: ObservableLongMeasurement by lazy {
+        sdkErrorHandler.sdkGuardOrDefault(null, "ObservableLongGauge.measurement failed") {
+            val builder = impl.gaugeBuilder(name).ofLongs()
+            unit?.let(builder::setUnit)
+            description?.let(builder::setDescription)
+            ObservableLongMeasurementAdapter(builder.buildObserver(), sdkErrorHandler)
+        } ?: NoopOpenTelemetry.meterProvider.getMeter("").createObservableLongGauge(name).measurement
+    }
 
     init {
         callbacks.forEach { registerCallback(it) }

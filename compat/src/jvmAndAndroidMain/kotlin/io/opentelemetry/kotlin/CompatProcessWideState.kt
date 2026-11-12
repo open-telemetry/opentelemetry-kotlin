@@ -2,10 +2,8 @@ package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.context.CurrentContextStorage
 import io.opentelemetry.kotlin.context.OtelJavaCurrentContextStorage
-import io.opentelemetry.kotlin.context.TempContextStandInApi
-import io.opentelemetry.kotlin.context.internalInstallContextStorage
-import io.opentelemetry.kotlin.context.internalRootContext
-import io.opentelemetry.kotlin.context.internalUninstallContextStorage
+import io.opentelemetry.kotlin.context.installContextStorage
+import io.opentelemetry.kotlin.context.uninstallContextStorage
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -19,9 +17,8 @@ internal class CompatProcessWideState(
     private val ownsErrorSink: Boolean,
 ) {
 
-    @OptIn(TempContextStandInApi::class)
     fun release() {
-        installedStorage?.let(::internalUninstallContextStorage)
+        installedStorage?.let(::uninstallContextStorage)
         if (ownsErrorSink) {
             setProcessSdkErrorHandler(null)
         }
@@ -36,10 +33,10 @@ internal class CompatProcessWideState(
  * the Kotlin current context may then not be shared with opentelemetry-java. [api] names the
  * entrypoint in that warning.
  */
-@OptIn(ExperimentalApi::class, TempContextStandInApi::class)
+@OptIn(ExperimentalApi::class)
 internal fun claimCompatProcessWideState(api: String, errorHandler: SdkErrorHandler): CompatProcessWideState {
-    val storage = OtelJavaCurrentContextStorage(::internalRootContext)
-    val installed = internalInstallContextStorage(storage)
+    val storage = OtelJavaCurrentContextStorage()
+    val installed = installContextStorage(storage)
     if (!installed) {
         errorHandler.onError(
             SdkError.ApiMisuse(

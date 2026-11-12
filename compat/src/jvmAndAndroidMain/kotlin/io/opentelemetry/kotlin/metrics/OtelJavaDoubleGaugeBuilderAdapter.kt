@@ -29,6 +29,11 @@ internal class OtelJavaDoubleGaugeBuilderAdapter(
     override fun build(): OtelJavaDoubleGauge =
         OtelJavaDoubleGaugeAdapter(meter.createDoubleGauge(name, unit, description))
 
+    override fun buildObserver(): OtelJavaObservableDoubleMeasurement =
+        OtelJavaObservableDoubleMeasurementAdapter(
+            meter.createObservableDoubleGauge(name, unit, description).measurement
+        )
+
     override fun buildWithCallback(
         callback: Consumer<OtelJavaObservableDoubleMeasurement>,
     ): OtelJavaObservableDoubleGauge {

@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.exporter.logging.LoggingSpanExporter
+import io.opentelemetry.kotlin.COMPAT_DEFAULT_TIMEOUT_MS
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaIdGenerator
@@ -57,6 +58,7 @@ internal class CompatTracerProviderConfig(
     private var resourceSchemaUrl: String? = null
     private val spanLimitsDsl = SpanLimitsConfigDslImpl()
     private var sampler: Sampler? = null
+    private val processors = mutableListOf<SpanProcessor>()
     private var exportConfigured = false
 
     override var serviceName: String? = null
@@ -81,7 +83,7 @@ internal class CompatTracerProviderConfig(
     override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
         exportConfigured = true
         val processor = TraceExportConfigDslImpl(clock, sdkErrorHandler).action()
-        builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(processor, sdkErrorHandler))
+        processors.add(processor)
     }
 
     override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
@@ -155,6 +157,7 @@ internal class CompatTracerProviderConfig(
         baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build()),
         spanLimits: SpanLimitsBehavior,
         contextFactory: ContextFactory = CompatContextFactory(),
+        timeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS,
     ): TracerProvider {
         builder.setIdGenerator(
             when (idGenerator) {
@@ -180,7 +183,10 @@ internal class CompatTracerProviderConfig(
         }
         builder.setClock(clock.toOtelJavaClock())
         sampler?.let(::setSampler)
-        return TracerProviderAdapter(builder.build(), contextFactory, sdkErrorHandler)
+        processors.forEach {
+            builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(it, sdkErrorHandler, timeoutMs))
+        }
+        return TracerProviderAdapter(builder.build(), contextFactory, sdkErrorHandler, timeoutMs)
     }
 
     fun toBehavior(): TracerProviderBehavior =

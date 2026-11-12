@@ -13,6 +13,7 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.contentType
 import io.ktor.http.encodedPath
 import io.ktor.http.fromHttpToGmtDate
+import io.ktor.util.AttributeKey
 import io.ktor.utils.io.readRemaining
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
@@ -89,6 +90,7 @@ internal class OtlpClient(
             emptyMap()
         }
         val response = httpClient.post(url) {
+            attributes.put(suppressInstrumentationAttribute, true)
             if (supportsHttpCompression) {
                 compress("gzip")
             }
@@ -159,5 +161,9 @@ internal class OtlpClient(
 
     private companion object {
         const val MAX_RESPONSE_BODY_BYTES: Long = 4 * 1024 * 1024
+
+        // Keep in sync with OpenTelemetryKtorClientPluginApi.kt
+        val suppressInstrumentationAttribute: AttributeKey<Boolean> =
+            AttributeKey("opentelemetry-kotlin.suppress-instrumentation")
     }
 }

@@ -6,7 +6,6 @@ import kotlin.test.assertNotSame
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-@OptIn(TempContextStandInApi::class)
 internal class ThreadLocalCurrentContextStorageTest {
 
     private lateinit var root: Context
@@ -14,7 +13,7 @@ internal class ThreadLocalCurrentContextStorageTest {
 
     @BeforeTest
     fun setUp() {
-        root = internalRootContext()
+        root = rootContext()
         storage = createThreadLocalCurrentContextStorage()
     }
 

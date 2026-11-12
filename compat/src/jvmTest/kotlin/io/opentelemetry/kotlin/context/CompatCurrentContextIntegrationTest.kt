@@ -175,7 +175,7 @@ internal class CompatCurrentContextIntegrationTest {
         val handler = FakeSdkErrorHandler()
         val sdk = createCompatOpenTelemetry {
             errorHandler(handler)
-            context { storageMode = CurrentContextStorageMode.SINGLE_SLOT }
+            context { storage = createOtelJavaCurrentContextStorage() }
         }.also(sdks::track)
         assertEquals(1, handler.apiMisuses.count { it.api == "OpenTelemetryConfigDsl.context" })
         assertEquals(1, handler.apiMisuses.count { it.api == "createCompatOpenTelemetry" })

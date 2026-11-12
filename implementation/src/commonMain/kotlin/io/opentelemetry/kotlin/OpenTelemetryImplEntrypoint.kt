@@ -5,9 +5,7 @@ import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.config.ConfigProviderImpl
 import io.opentelemetry.kotlin.context.CurrentContextStorage
-import io.opentelemetry.kotlin.context.TempContextStandInApi
-import io.opentelemetry.kotlin.context.internalInstallContextStorage
-import io.opentelemetry.kotlin.context.internalRootContext
+import io.opentelemetry.kotlin.context.installContextStorage
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -74,7 +72,6 @@ public fun createOpenTelemetry(
         tracerProvider = TracerProviderImpl(
             clock = clock,
             tracingConfig = tracingConfig,
-            contextFactory = contextFactory,
             idGenerator = idGenerator,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior(),
             spanLimits = behavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior(),
@@ -82,7 +79,6 @@ public fun createOpenTelemetry(
         loggerProvider = LoggerProviderImpl(
             clock = clock,
             loggingConfig = loggingConfig,
-            contextFactory = contextFactory,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior(),
             logLimits = behavior.loggerProvider?.logLimits ?: LogLimitsBehavior(),
         ),
@@ -98,6 +94,8 @@ public fun createOpenTelemetry(
         propagator = cfg.propagator,
         installedStorage = installedStorage,
         ownsErrorSink = ownsErrorSink,
+        timeoutMs = cfg.shutdownTimeoutMs,
+        sdkErrorHandler = cfg.sdkErrorHandler,
     )
 }
 
@@ -106,11 +104,10 @@ public fun createOpenTelemetry(
  * If another storage is already installed it is used instead, and a warning is reported only if
  * a storage was explicitly configured.
  */
-@OptIn(TempContextStandInApi::class)
 private fun installContextStorage(cfg: OpenTelemetryConfigImpl): CurrentContextStorage? {
     val contextConfig = cfg.contextConfig
-    val storage = contextConfig.generateStorage(::internalRootContext)
-    if (internalInstallContextStorage(storage)) {
+    val storage = contextConfig.generateStorage()
+    if (installContextStorage(storage)) {
         return storage
     }
     if (contextConfig.explicitlyConfigured) {

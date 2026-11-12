@@ -7,7 +7,6 @@ import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
@@ -24,7 +23,6 @@ import kotlin.test.assertSame
 internal class ResolvedSamplerConfigTest {
 
     private val clock = FakeClock()
-    private val contextFactory = ContextFactoryImpl()
 
     private fun tracingConfig(
         getEnvVar: (String) -> String? = { null },
@@ -58,7 +56,7 @@ internal class ResolvedSamplerConfigTest {
     }
 
     private fun Sampler.shouldSampleRoot(): Decision = shouldSample(
-        context = contextFactory.rootContext(),
+        context = rootContext(),
         traceIdBytes = ZERO_TRACE_ID,
         name = "root",
         spanKind = SpanKind.INTERNAL,

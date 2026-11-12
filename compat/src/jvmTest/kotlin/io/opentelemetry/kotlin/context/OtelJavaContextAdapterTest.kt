@@ -23,19 +23,18 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-@OptIn(TempContextStandInApi::class)
 internal class OtelJavaContextAdapterTest {
 
     private val storage = createSingleSlotCurrentContextStorage()
 
     @BeforeTest
     fun setUp() {
-        internalInstallContextStorage(storage)
+        installContextStorage(storage)
     }
 
     @AfterTest
     fun tearDown() {
-        internalUninstallContextStorage(storage)
+        uninstallContextStorage(storage)
     }
 
     private val contextFactory = CompatContextFactory()
@@ -92,7 +91,7 @@ internal class OtelJavaContextAdapterTest {
 
     private class MapContext(
         private val values: Map<ContextKey<*>, Any?>
-    ) : Context by ContextAdapter(OtelJavaContext.root()) {
+    ) : Context by rootContext() {
         override fun <T> set(key: ContextKey<T>, value: T?): Context = MapContext(values + (key to value))
 
         @Suppress("UNCHECKED_CAST")

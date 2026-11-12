@@ -18,6 +18,12 @@ import io.opentelemetry.kotlin.ThreadSafe
 public interface AsynchronousInstrument<out M : ObservableMeasurement> : Instrument, AutoCloseable {
 
     /**
+     * A stable measurement handle for callbacks that observe multiple instruments.
+     * Record through this handle only while the registered callback is running.
+     */
+    public val measurement: M
+
+    /**
      * Registers a callback that reports measurements for this instrument.
      *
      * The callback is invoked when metrics are collected. It should be reentrant-safe and should

@@ -5,12 +5,11 @@ import kotlin.test.Test
 import kotlin.test.assertNotSame
 import kotlin.test.assertSame
 
-@OptIn(TempContextStandInApi::class)
 internal class JvmThreadLocalCurrentContextStorageTest {
 
     @Test
     fun testContextIsIsolatedPerThread() {
-        val root = internalRootContext()
+        val root = rootContext()
         val storage = ThreadLocalCurrentContextStorage()
 
         val mainContext = FakeContext()

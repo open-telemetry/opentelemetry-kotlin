@@ -1,33 +1,17 @@
 package io.opentelemetry.kotlin.init
 
-import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.CurrentContextStorage
-import io.opentelemetry.kotlin.context.CurrentContextStorageMode
 import io.opentelemetry.kotlin.context.createSingleSlotCurrentContextStorage
-import io.opentelemetry.kotlin.context.createThreadLocalCurrentContextStorage
-
-internal val DEFAULT_STORAGE_MODE = CurrentContextStorageMode.SINGLE_SLOT
 
 internal class ContextConfigImpl : ContextConfigDsl {
-    override var storageMode: CurrentContextStorageMode? = null
-
-    private var customStorage: ((() -> Context) -> CurrentContextStorage)? = null
-
-    override fun storage(action: (rootSupplier: () -> Context) -> CurrentContextStorage) {
-        customStorage = action
-    }
+    override var storage: CurrentContextStorage? = null
 
     /**
-     * True if a storage mode or custom storage was configured.
+     * True if a storage was configured.
      */
     internal val explicitlyConfigured: Boolean
-        get() = customStorage != null || storageMode != null
+        get() = storage != null
 
-    internal fun generateStorage(rootSupplier: () -> Context): CurrentContextStorage {
-        customStorage?.let { return it(rootSupplier) }
-        return when (storageMode ?: DEFAULT_STORAGE_MODE) {
-            CurrentContextStorageMode.SINGLE_SLOT -> createSingleSlotCurrentContextStorage()
-            CurrentContextStorageMode.THREAD_LOCAL -> createThreadLocalCurrentContextStorage()
-        }
-    }
+    internal fun generateStorage(): CurrentContextStorage =
+        storage ?: createSingleSlotCurrentContextStorage()
 }

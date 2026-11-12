@@ -2,7 +2,7 @@
 
 package io.opentelemetry.kotlin
 
-import io.opentelemetry.kotlin.context.CurrentContextStorageMode
+import io.opentelemetry.kotlin.context.createThreadLocalCurrentContextStorage
 import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
@@ -31,7 +31,7 @@ internal class LinuxSdkSmokeTest {
         val api = createOpenTelemetry {
             serviceName = "linux-smoke-test"
             errorHandler(errors)
-            context { storageMode = CurrentContextStorageMode.THREAD_LOCAL }
+            context { storage = createThreadLocalCurrentContextStorage() }
             resourceDetection {
                 detector(hostResourceDetector())
                 detector(deviceResourceDetector())
@@ -53,13 +53,13 @@ internal class LinuxSdkSmokeTest {
         val key = createContextKey<String>("thread-isolation")
         try {
             val parent = tracer.startSpan("parent")
-            val scope = api.context.currentContext().storeSpan(parent).set(key, "attached").attach()
+            val scope = currentContext().storeSpan(parent).set(key, "attached").attach()
             try {
-                assertEquals("attached", api.context.currentContext().get(key))
+                assertEquals("attached", currentContext().get(key))
                 val worker = Worker.start()
                 try {
-                    val otherThread = worker.execute(TransferMode.SAFE, { api.context to key }) { (contexts, key) ->
-                        contexts.current().get(key)
+                    val otherThread = worker.execute(TransferMode.SAFE, { key }) { key ->
+                        currentContext().get(key)
                     }.result
                     assertNull(otherThread)
                 } finally {
@@ -71,7 +71,7 @@ internal class LinuxSdkSmokeTest {
                 scope.detach()
                 parent.end()
             }
-            assertNull(api.context.currentContext().get(key))
+            assertNull(currentContext().get(key))
             assertEquals(OperationResultCode.Success, api.forceFlush())
             val exported = spans.exportedSpans
             assertEquals(setOf("parent", "child"), exported.map { it.name }.toSet())
