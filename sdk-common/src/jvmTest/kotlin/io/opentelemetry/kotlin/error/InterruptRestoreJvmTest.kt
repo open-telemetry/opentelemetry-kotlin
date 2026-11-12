@@ -61,6 +61,30 @@ internal class InterruptRestoreJvmTest {
     }
 
     @Test
+    fun testGuardedSdkErrorHandlerRestoresInterrupt() {
+        val handler = GuardedSdkErrorHandler { throw InterruptedException("stop") }
+        try {
+            Thread.interrupted()
+            handler.onError(SdkError.ApiMisuse("test", "test", SdkErrorSeverity.WARNING))
+            assertTrue(Thread.currentThread().isInterrupted)
+        } finally {
+            Thread.interrupted()
+        }
+    }
+
+    @Test
+    fun testGuardedSdkErrorHandlerDoesNotInterruptForOtherFailures() {
+        val handler = GuardedSdkErrorHandler { throw IllegalStateException("other") }
+        try {
+            Thread.interrupted()
+            handler.onError(SdkError.ApiMisuse("test", "test", SdkErrorSeverity.WARNING))
+            assertFalse(Thread.currentThread().isInterrupted)
+        } finally {
+            Thread.interrupted()
+        }
+    }
+
+    @Test
     fun testNonInterruptFailureDoesNotChangeFlag() {
         val handler = SdkErrorHandler { }
         try {
