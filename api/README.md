@@ -108,7 +108,7 @@ Usually the SDK installs a storage for you when it's created:
 
 ```kotlin
 val otel = createOpenTelemetry {
-    context { storage { createThreadLocalCurrentContextStorage() } }
+    context { storage = createThreadLocalCurrentContextStorage() }
 }
 ```
 
