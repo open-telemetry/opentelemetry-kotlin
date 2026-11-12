@@ -1,7 +1,9 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
+import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.IdGenerator
@@ -9,6 +11,7 @@ import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import io.opentelemetry.kotlin.tracing.model.SpanLink
 import io.opentelemetry.kotlin.tracing.sampling.AlwaysOnSampler
 import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
@@ -247,5 +250,56 @@ internal class TracerSamplerTest {
 
         assertEquals(1, sampler.lastLinks.size)
         assertEquals(ctxA.spanId, sampler.lastLinks[0].spanContext.spanId)
+    }
+
+    @Test
+    fun testSamplerWritesToLinkWithoutAttributesHonourLinkLimits() {
+        // distinct limits so that applying the wrong one is caught
+        val cfg = SpanLimitConfig(
+            attributeCountLimit = 4,
+            attributeValueLengthLimit = 2,
+            linkCountLimit = 10,
+            eventCountLimit = 10,
+            attributeCountPerEventLimit = 3,
+            attributeCountPerLinkLimit = 1,
+        )
+        val sampler = object : Sampler by AlwaysOnSampler {
+            override fun shouldSample(
+                context: Context,
+                traceIdBytes: ByteArray,
+                name: String,
+                spanKind: SpanKind,
+                attributes: AttributeContainer,
+                links: List<SpanLink>,
+            ): SamplingResult {
+                links.single().apply {
+                    setStringAttribute("a", "long")
+                    setStringAttribute("b", "long")
+                }
+                return AlwaysOnSampler.shouldSample(context, traceIdBytes, name, spanKind, attributes, links)
+            }
+        }
+        val span = buildTracer(sampler, cfg).startSpan("test") {
+            addLink(FakeSpanContext.VALID)
+        }
+        span.addLink(FakeSpanContext.VALID) {
+            setStringAttribute("c", "long")
+            setStringAttribute("d", "long")
+        }
+        span.addEvent("event") {
+            repeat(5) { setStringAttribute("e$it", "long") }
+        }
+
+        val readable = span.toReadableSpan()
+        val links = readable.links
+        assertEquals(2, links.size)
+        assertEquals(mapOf("a" to "lo"), links[0].attributes)
+        assertEquals(1, links[0].droppedAttributesCount)
+        assertEquals(mapOf("c" to "lo"), links[1].attributes)
+        assertEquals(1, links[1].droppedAttributesCount)
+
+        val event = readable.events.single()
+        assertEquals(mapOf("e0" to "lo", "e1" to "lo", "e2" to "lo"), event.attributes)
+        assertEquals(2, event.droppedAttributesCount)
     }
 }

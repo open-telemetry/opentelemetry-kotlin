@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
+import io.opentelemetry.kotlin.attributes.EmptyAttributeContainer
 import io.opentelemetry.kotlin.attributes.copyAttributes
 import io.opentelemetry.kotlin.attributes.typedAttributesOrConvert
 import io.opentelemetry.kotlin.context.Context
@@ -88,8 +89,9 @@ internal class TracerImpl(
             }
             val spanIdBytes = userCode { idGenerator.generateSpanIdBytes() }
 
-            val collector = SpanCreationCollector(spanLimitConfig)
-            userCode { action?.invoke(collector) }
+            val collector = action?.let { block ->
+                SpanCreationCollector(spanLimitConfig).also { userCode { block(it) } }
+            }
 
             val result = userCode {
                 sampler.shouldSample(
@@ -97,8 +99,8 @@ internal class TracerImpl(
                     traceIdBytes = traceIdBytes,
                     name = name,
                     spanKind = spanKind,
-                    attributes = collector.attributes,
-                    links = collector.links
+                    attributes = collector?.attributes ?: EmptyAttributeContainer,
+                    links = collector?.links.orEmpty()
                 )
             }
 
@@ -130,12 +132,12 @@ internal class TracerImpl(
                 parent = parentSpanContext,
                 spanContext = spanContext,
                 spanLimitConfig = spanLimitConfig,
-                initialLinks = collector.links,
-                initialDroppedAttributesCount = collector.droppedAttributesCount,
-                initialDroppedLinksCount = collector.droppedLinksCount,
+                initialLinks = collector?.links.orEmpty(),
+                initialDroppedAttributesCount = collector?.droppedAttributesCount ?: 0,
+                initialDroppedLinksCount = collector?.droppedLinksCount ?: 0,
                 sdkErrorHandler = sdkErrorHandler
             )
-            spanModel.copyAttributes(collector.attributes)
+            collector?.let { spanModel.copyAttributes(it.attributes) }
             spanModel.copyAttributes(userCode { result.attributes.typedAttributesOrConvert() })
             sdkErrorHandler.guard {
                 processor?.takeIf(SpanProcessor::isStartRequired)

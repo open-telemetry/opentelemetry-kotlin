@@ -39,13 +39,14 @@ internal class ApiProviderImpl<T>(
         attributes: (AttributesMutator.() -> Unit)?,
         attributeLimits: AttributeLimitsBehavior,
     ): InstrumentationScopeInfo {
+        if (attributes == null) {
+            return InstrumentationScopeInfoImpl(name, version, schemaUrl, emptyMap())
+        }
         val container = AttributesModel(
             attributeLimit = attributeLimits.attributeCountLimit ?: DEFAULT_ATTRIBUTE_LIMIT,
             attributeValueLengthLimit = attributeLimits.attributeValueLengthLimit ?: DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
         )
-        if (attributes != null) {
-            userCode { attributes(container) }
-        }
+        userCode { attributes(container) }
         return InstrumentationScopeInfoImpl(name, version, schemaUrl, container.attributes)
     }
 }
