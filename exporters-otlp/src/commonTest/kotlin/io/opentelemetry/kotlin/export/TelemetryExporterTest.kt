@@ -4,12 +4,14 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.currentTime
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.random.Random
@@ -325,6 +327,252 @@ internal class TelemetryExporterTest {
         val start = testScheduler.currentTime
         assertEquals(OperationResultCode.Failure, exporter.shutdown())
         assertEquals(start + 5000, testScheduler.currentTime)
+    }
+
+    @Test
+    fun testForceFlushWithEmptyQueueReturnsImmediately() = runTest {
+        initTelemetryExporter().withShutdown { exporter ->
+            val start = currentTime
+            assertEquals(OperationResultCode.Success, exporter.forceFlush())
+            assertEquals(start, currentTime)
+        }
+    }
+
+    @Test
+    fun testForceFlushWaitsForSlowExport() = runTest {
+        var delivered = false
+        val exporter = initTelemetryExporter {
+            delay(2000)
+            delivered = true
+            OtlpResponse.Success
+        }
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            val start = currentTime
+            assertEquals(OperationResultCode.Success, exporter.forceFlush())
+            assertTrue(delivered)
+            assertEquals(start + 2000, currentTime)
+        }
+    }
+
+    @Test
+    fun testForceFlushFailsAtDeadlineWhenEndpointKeepsFailing() = runTest {
+        val exporter = initTelemetryExporter(maxAttemptIntervalMs = 500, maxAttempts = 1000) {
+            OtlpResponse.RetryableError(503, retryAfterMs = null, errorMessage = null)
+        }
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            val start = currentTime
+            assertEquals(OperationResultCode.Failure, exporter.forceFlush())
+            assertEquals(start + 5000, currentTime)
+        }
+    }
+
+    @Test
+    fun testForceFlushFailsWhenRetriesAreExhausted() = runTest {
+        val exporter = initTelemetryExporter(maxAttempts = 3) {
+            OtlpResponse.RetryableError(503, retryAfterMs = null, errorMessage = null)
+        }
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            val start = currentTime
+            assertEquals(OperationResultCode.Failure, exporter.forceFlush())
+            assertTrue(currentTime < start + 5000)
+        }
+    }
+
+    @Test
+    fun testForceFlushFailsOnTerminalError() = runTest {
+        val exporter = initTelemetryExporter { OtlpResponse.ClientError(400, null) }
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            val start = currentTime
+            assertEquals(OperationResultCode.Failure, exporter.forceFlush())
+            assertEquals(start, currentTime)
+        }
+    }
+
+    @Test
+    fun testForceFlushFailsImmediatelyWhenBlockedPastDeadline() = runTest {
+        val exporter = initTelemetryExporter(maxAttemptIntervalMs = 60_000, maxAttempts = 5) {
+            OtlpResponse.RetryableError(503, retryAfterMs = 30_000, errorMessage = null)
+        }
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            advanceTimeBy(100)
+            val start = currentTime
+            assertEquals(OperationResultCode.Failure, exporter.forceFlush())
+            assertEquals(start, currentTime)
+        }
+    }
+
+    @Test
+    fun testForceFlushDoesNotWaitForLaterEntries() = runTest {
+        val exporter = initTelemetryExporter { batch ->
+            val delayMs = when (batch) {
+                listOf("early") -> 1000L
+                else -> 4000L
+            }
+            delay(delayMs)
+            when (batch) {
+                listOf("early") -> OtlpResponse.Success
+                else -> OtlpResponse.ClientError(400, null)
+            }
+        }
+        exporter.withShutdown {
+            exporter.export(listOf("early"))
+            val start = currentTime
+            val flush = async { exporter.forceFlush() }
+            runCurrent()
+            exporter.export(listOf("late"))
+            assertEquals(OperationResultCode.Success, flush.await())
+            assertEquals(start + 1000, currentTime)
+        }
+    }
+
+    @Test
+    fun testForceFlushWaitsForEntriesFinishingOutOfOrder() = runTest {
+        val exporter = initTelemetryExporter { batch ->
+            val delayMs = when (batch) {
+                listOf("slow") -> 3000L
+                else -> 100L
+            }
+            delay(delayMs)
+            OtlpResponse.Success
+        }
+        exporter.withShutdown {
+            exporter.export(listOf("slow"))
+            exporter.export(listOf("fast"))
+            val start = currentTime
+            assertEquals(OperationResultCode.Success, exporter.forceFlush())
+            assertEquals(start + 3000, currentTime)
+        }
+    }
+
+    @Test
+    fun testForceFlushFailsWhenOneOfSeveralEntriesFails() = runTest {
+        val exporter = initTelemetryExporter { batch ->
+            when (batch) {
+                listOf("fails") -> {
+                    delay(100)
+                    OtlpResponse.ClientError(400, null)
+                }
+
+                else -> {
+                    delay(1000)
+                    OtlpResponse.Success
+                }
+            }
+        }
+        exporter.withShutdown {
+            exporter.export(listOf("fails"))
+            exporter.export(listOf("succeeds"))
+            val start = currentTime
+            assertEquals(OperationResultCode.Failure, exporter.forceFlush())
+            assertEquals(start + 1000, currentTime)
+        }
+    }
+
+    @Test
+    fun testConcurrentForceFlushesTrackTheirOwnEntries() = runTest {
+        val exporter = initTelemetryExporter { batch ->
+            when (batch) {
+                listOf("first") -> {
+                    delay(1000)
+                    OtlpResponse.Success
+                }
+
+                else -> {
+                    delay(2000)
+                    OtlpResponse.ClientError(400, null)
+                }
+            }
+        }
+        exporter.withShutdown {
+            exporter.export(listOf("first"))
+            val firstFlush = async { exporter.forceFlush() }
+            runCurrent()
+            exporter.export(listOf("second"))
+            val secondFlush = async { exporter.forceFlush() }
+            assertEquals(OperationResultCode.Success, firstFlush.await())
+            assertEquals(OperationResultCode.Failure, secondFlush.await())
+        }
+    }
+
+    @Test
+    fun testForceFlushWaitsForBackoffEndingBeforeDeadline() = runTest {
+        var attempts = 0
+        val exporter = initTelemetryExporter(maxAttemptIntervalMs = 60_000, random = Random(0)) {
+            if (attempts++ == 0) {
+                OtlpResponse.RetryableError(503, retryAfterMs = 4000, errorMessage = null)
+            } else {
+                OtlpResponse.Success
+            }
+        }
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            advanceTimeBy(100)
+            assertEquals(OperationResultCode.Success, exporter.forceFlush())
+            assertEquals(2, attempts)
+        }
+    }
+
+    @Test
+    fun testForceFlushWaitsForInFlightEntryWhileBlocked() = runTest {
+        val exporter = initTelemetryExporter(maxAttemptIntervalMs = 60_000, maxAttempts = 1) { batch ->
+            when (batch) {
+                listOf("blocks") -> {
+                    delay(50)
+                    OtlpResponse.RetryableError(503, retryAfterMs = 30_000, errorMessage = null)
+                }
+
+                else -> {
+                    delay(2000)
+                    OtlpResponse.Success
+                }
+            }
+        }
+        exporter.withShutdown {
+            exporter.export(listOf("blocks"))
+            exporter.export(listOf("in-flight"))
+            advanceTimeBy(100)
+            val start = currentTime
+            assertEquals(OperationResultCode.Success, exporter.forceFlush())
+            assertTrue(currentTime > start)
+        }
+    }
+
+    @Test
+    fun testForceFlushFailsWhenShutdownDiscardsEntries() = runTest {
+        val exporter = initTelemetryExporter(maxAttemptIntervalMs = 60_000, maxAttempts = 5) {
+            delay(100)
+            OtlpResponse.RetryableError(503, retryAfterMs = 30_000, errorMessage = null)
+        }
+        exporter.export(listOf("data"))
+        runCurrent()
+        val start = currentTime
+        val flush = async { exporter.forceFlush() }
+        runCurrent()
+        advanceTimeBy(150)
+
+        assertEquals(OperationResultCode.Failure, exporter.shutdown())
+        assertEquals(OperationResultCode.Failure, flush.await())
+        assertTrue(currentTime < start + 5000)
+    }
+
+    @Test
+    fun testForceFlushSucceedsWhenShutdownDrains() = runTest {
+        val exporter = initTelemetryExporter {
+            delay(1000)
+            OtlpResponse.Success
+        }
+        exporter.export(listOf("data"))
+        runCurrent()
+        val flush = async { exporter.forceFlush() }
+        runCurrent()
+
+        assertEquals(OperationResultCode.Success, exporter.shutdown())
+        assertEquals(OperationResultCode.Success, flush.await())
     }
 
     @Test
