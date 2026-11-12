@@ -1,9 +1,13 @@
 package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.NoopOpenTelemetry
+import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaObservableLongMeasurement
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
+import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.toOtelJavaApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -83,17 +87,21 @@ internal class OtelJavaMeterAdapterBatchCallbackTest {
     }
 
     @Test
-    fun callbackFailureIsReportedWithoutEscaping() {
-        val meter = FakeMeter("test-meter")
+    fun callbackFailureFromPublicConversionUsesConfiguredHandler() {
         val errorHandler = FakeSdkErrorHandler()
-        val adapter = OtelJavaMeterAdapter(meter, sdkErrorHandler = errorHandler)
+        val provider = FakeMeterProvider()
+        val sdk = object : OpenTelemetry by NoopOpenTelemetry {
+            override val context = ContextFactoryImpl(errorHandler)
+            override val meterProvider = provider
+        }
+        val adapter = sdk.toOtelJavaApi().meterProvider.get("test-meter")
         val measurement = adapter.counterBuilder("long.counter").buildObserver()
         adapter.batchCallback(
             { error("callback failed") },
             measurement,
         )
 
-        meter.batchCallbacks.single().collect()
+        provider.map.getValue("test-meter").batchCallbacks.single().collect()
 
         assertEquals("callback failed", errorHandler.userCodeErrors.single().cause.message)
     }

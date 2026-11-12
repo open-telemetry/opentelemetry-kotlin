@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin
 import io.opentelemetry.kotlin.aliases.OtelJavaContextPropagators
 import io.opentelemetry.kotlin.aliases.OtelJavaOpenTelemetry
 import io.opentelemetry.kotlin.context.OtelJavaCurrentContextStorage
+import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.reportError
@@ -37,11 +38,15 @@ public fun OpenTelemetry.toOtelJavaApi(): OtelJavaOpenTelemetry {
     if (this == NoopOpenTelemetry) {
         return OtelJavaOpenTelemetry.noop()
     }
+    val sdkErrorHandler = when (this) {
+        is CompatOpenTelemetryImpl -> this.sdkErrorHandler
+        else -> (context as? ContextFactoryImpl)?.sdkErrorHandler ?: PlatformSdkErrorHandler
+    }
     warnIfNotUsingOtelJavaContextStorage(context)
     return OtelJavaOpenTelemetrySdk(
         OtelJavaTracerProviderAdapter(tracerProvider, context),
         OtelJavaLoggerProviderAdapter(loggerProvider, context),
-        OtelJavaMeterProviderAdapter(meterProvider),
+        OtelJavaMeterProviderAdapter(meterProvider, sdkErrorHandler),
         OtelJavaContextPropagators.create(propagator.toOtelJavaTextMapPropagator()),
     )
 }
