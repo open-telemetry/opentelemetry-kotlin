@@ -38,6 +38,9 @@ jobs:
         with:
           cache-disabled: true
 
+      - name: Build logic tests
+        run: ./gradlew :buildSrc:test --warn
+
       - name: Gradle Build
         run: ./gradlew ciBuild -x :gradle-integration-test:test --warn
 

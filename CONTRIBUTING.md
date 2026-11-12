@@ -47,6 +47,32 @@ coverage report locally, run:
 ./gradlew koverXmlReport -Pio.opentelemetry.kotlin.coverage=true   # writes build/reports/kover/report.xml
 ```
 
+### Code samples in docs
+
+Code samples in `docs/` and the module READMEs are copied from the `docs-snippets` module, which is
+compiled as part of `verify`. This means that an API change that breaks a doc sample fails the build.
+
+To add or change a sample:
+
+1. Create one file per sample in `docs-snippets/src/<sourceSet>/kotlin/...`. Use `commonMain` unless
+   the sample is platform-specific. Put the lines to show between `// region <snippet-id>` and
+   `// end-region`, both at the start of a line. Keep the package and imports outside the region.
+2. In the markdown, add the id after the language on the opening line of a code fence, e.g.
+   ```` ```kotlin <snippet-id> ````. GitHub only uses the first word to highlight the code.
+3. Run `./gradlew syncDocSnippets` to copy the sample into the fence.
+
+The lines between the tags are copied as they are, so write the sample at the top level of the file
+rather than indented inside a function. The only substitution is `{{otelKotlinVersion}}`, which
+becomes `io.opentelemetry.kotlin.latestReleaseVersion` from `gradle.properties`. The "Prepare release
+branch" workflow sets that property to the version being released.
+
+`./gradlew checkDocSnippets` (part of `verify`) fails if any markdown is out of date, if a fence
+names an unknown snippet, if a file doesn't contain exactly one snippet, or if two files use the same
+snippet id. Edit the sample, not the markdown: the next sync overwrites edits made inside a synced
+fence.
+
+The snippet task's own tests live in `buildSrc` and run with `./gradlew :buildSrc:test`.
+
 ### Running the full build including the integration test
 
 The `gradle-integration-test` module verifies that the library's published artifacts are consumable
