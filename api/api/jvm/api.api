@@ -10,6 +10,9 @@ public abstract interface class io/opentelemetry/kotlin/OpenTelemetry {
 	public abstract fun getTracerProvider ()Lio/opentelemetry/kotlin/tracing/TracerProvider;
 }
 
+public abstract interface annotation class io/opentelemetry/kotlin/OpenTelemetryDsl : java/lang/annotation/Annotation {
+}
+
 public abstract interface annotation class io/opentelemetry/kotlin/ThreadSafe : java/lang/annotation/Annotation {
 }
 
@@ -548,8 +551,5 @@ public abstract interface class io/opentelemetry/kotlin/tracing/TracerProvider {
 
 public final class io/opentelemetry/kotlin/tracing/TracerProvider$DefaultImpls {
 	public static synthetic fun getTracer$default (Lio/opentelemetry/kotlin/tracing/TracerProvider;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/Tracer;
-}
-
-public abstract interface annotation class io/opentelemetry/kotlin/tracing/TracingDsl : java/lang/annotation/Annotation {
 }
 

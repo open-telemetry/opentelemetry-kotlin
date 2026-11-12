@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
  *
  * https://opentelemetry.io/docs/specs/otel/trace/api/#span
  */
-@TracingDsl
 @ExperimentalApi
 @ThreadSafe
 public interface Span : AttributesMutator, SpanLinkCreator, SpanEventCreator {

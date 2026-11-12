@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.attributes
 
+import io.opentelemetry.kotlin.OpenTelemetryDsl
 import io.opentelemetry.kotlin.ThreadSafe
 
 /**
@@ -7,6 +8,7 @@ import io.opentelemetry.kotlin.ThreadSafe
  *
  * https://opentelemetry.io/docs/specs/otel/common/#attribute
  */
+@OpenTelemetryDsl
 @ThreadSafe
 public interface AttributesMutator {
 
