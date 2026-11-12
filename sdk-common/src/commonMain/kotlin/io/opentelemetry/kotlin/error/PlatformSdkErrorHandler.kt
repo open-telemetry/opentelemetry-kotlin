@@ -22,15 +22,21 @@ public object PlatformSdkErrorHandler : SdkErrorHandler {
                         is SdkError.SdkCodeError -> platformLog(error.toLogMessage(), level, error.cause)
                     }
                 }
-                DefaultErrorLogLimiter.Decision.Skip -> Unit
-                is DefaultErrorLogLimiter.Decision.Repeated -> platformLog(
-                    "${error.toLogMessage()} (repeated ${decision.count} times; subsequent occurrences suppressed)",
-                    error.severity.toPlatformLogLevel(),
-                )
-                is DefaultErrorLogLimiter.Decision.Overflow -> platformLog(
-                    "SDK error logger reached its 64-pattern limit; ${decision.count} additional errors suppressed",
-                    PlatformLogLevel.WARNING,
-                )
+                DefaultErrorLogLimiter.Decision.Skip -> {
+                    Unit
+                }
+                is DefaultErrorLogLimiter.Decision.Repeated -> {
+                    platformLog(
+                        "${error.toLogMessage()} (repeated ${decision.count} times; subsequent occurrences suppressed)",
+                        error.severity.toPlatformLogLevel(),
+                    )
+                }
+                is DefaultErrorLogLimiter.Decision.Overflow -> {
+                    platformLog(
+                        "SDK error logger reached its 64-pattern limit; ${decision.count} additional errors suppressed",
+                        PlatformLogLevel.WARNING,
+                    )
+                }
             }
         } catch (ignored: Throwable) {
             ignored.restoreInterruptIfNeeded()
