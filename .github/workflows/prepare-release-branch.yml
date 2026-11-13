@@ -56,6 +56,18 @@ jobs:
 
       - name: Update version in README
         run: sed -Ei "s/(val otelKotlinVersion = \").*\"/\1${VERSION}\"/" README.md
+
+      - name: Setup Java
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: |
+            17
+            21
+
+      - name: Update version in docs
+        run: .github/scripts/update-docs-version.sh $VERSION
+
       - name: Update the change log with the approximate release date
         run: |
           date=$(date "+%Y-%m-%d")
@@ -126,6 +138,17 @@ jobs:
 
       - name: Update version in README
         run: sed -Ei "s/(val otelKotlinVersion = \").*\"/\1${VERSION}\"/" README.md
+
+      - name: Setup Java
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: |
+            17
+            21
+
+      - name: Update version in docs
+        run: .github/scripts/update-docs-version.sh $VERSION
 
       - name: Update the change log on main
         run: |

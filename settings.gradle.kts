@@ -59,6 +59,7 @@ include(
     "examples:example-app",
     "examples:example-app-android",
     ":smoke-test",
+    ":docs-snippets",
     ":gradle-integration-test",
     ":serializable-models"
 )

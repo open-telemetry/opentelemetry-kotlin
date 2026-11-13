@@ -64,7 +64,7 @@ essentially it composes of these parts:
 
 A code sample makes this easier to understand:
 
-```kotlin
+```kotlin context-usage
 // Declare keys once and share the instance with whatever needs to read the value back.
 // A key with a matching name is a different key - see the ContextKey docs.
 private val USER_ID: ContextKey<String> = createContextKey("user.id")
@@ -106,9 +106,9 @@ Each factory call returns a new, independent storage.
 
 Usually the SDK installs a storage for you when it's created:
 
-```kotlin
+```kotlin context-storage-dsl
 val otel = createOpenTelemetry {
-    context { storage { createThreadLocalCurrentContextStorage() } }
+    context { storage = createThreadLocalCurrentContextStorage() }
 }
 ```
 
@@ -119,15 +119,15 @@ val otel = createOpenTelemetry {
 
 You can also install a storage yourself, before creating an SDK:
 
-```kotlin
-val storage = createThreadLocalCurrentContextStorage()
-installContextStorage(storage) // false if a storage is already installed
-// ...
-uninstallContextStorage(storage) // only removes the storage if it's this instance
+```kotlin context-storage-manual
+fun installStorage() {
+    val storage = createThreadLocalCurrentContextStorage()
+    installContextStorage(storage) // false if a storage is already installed
+    // ...
+    uninstallContextStorage(storage) // only removes the storage if it's this instance
+}
 ```
 
 The first install wins. `installContextStorage` wraps the storage so that misuse, such as
 detaching scopes out of order, and anything the storage throws are reported instead of
 propagating.
-
-```
