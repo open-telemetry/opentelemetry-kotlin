@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
-import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanProcessor
 import io.opentelemetry.kotlin.framework.SdkTracker
 import kotlin.test.AfterTest
@@ -20,10 +19,8 @@ internal class TracerAdapterParentTest {
     private val javaTracerProvider = OtelJavaSdkTracerProvider.builder()
         .addSpanProcessor(FakeOtelJavaSpanProcessor())
         .build()
-    private val contextFactory = CompatContextFactory()
     private val tracer = TracerProviderAdapter(
         javaTracerProvider,
-        contextFactory,
         NoopSdkErrorHandler,
     ).getTracer("test")
 
@@ -51,7 +48,7 @@ internal class TracerAdapterParentTest {
     @Test
     fun `kotlin span inherits attached kotlin span as parent`() {
         val parent = tracer.startSpan("parent")
-        val scope = contextFactory.currentContext().storeSpan(parent).attach()
+        val scope = currentContext().storeSpan(parent).attach()
         val child = try {
             tracer.startSpan("child")
         } finally {
@@ -69,7 +66,7 @@ internal class TracerAdapterParentTest {
         val parent = javaTracerProvider.get("java").spanBuilder("parent").startSpan()
         val scope = parent.makeCurrent()
         val child = try {
-            tracer.startSpan("child", parentContext = contextFactory.rootContext())
+            tracer.startSpan("child", parentContext = rootContext())
         } finally {
             scope.close()
             parent.end()

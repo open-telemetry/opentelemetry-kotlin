@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.factory.CompatContextFactory
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -12,7 +11,7 @@ internal class OtelJavaSpanBuilderAdapterTimestampTest {
 
     @Test
     fun `negative start timestamp is ignored`() {
-        OtelJavaSpanBuilderAdapter(tracer, "span", CompatContextFactory())
+        OtelJavaSpanBuilderAdapter(tracer, "span")
             .setStartTimestamp(42, TimeUnit.NANOSECONDS)
             .setStartTimestamp(-1, TimeUnit.NANOSECONDS)
             .startSpan()
@@ -21,7 +20,7 @@ internal class OtelJavaSpanBuilderAdapterTimestampTest {
 
     @Test
     fun `zero start timestamp is ignored`() {
-        OtelJavaSpanBuilderAdapter(tracer, "span", CompatContextFactory())
+        OtelJavaSpanBuilderAdapter(tracer, "span")
             .setStartTimestamp(42, TimeUnit.NANOSECONDS)
             .setStartTimestamp(0, TimeUnit.NANOSECONDS)
             .startSpan()

@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanProcessor
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -20,7 +19,6 @@ internal class TracerProviderAdapterTest {
 
     private val adapter = TracerProviderAdapter(
         OtelJavaSdkTracerProvider.builder().build(),
-        CompatContextFactory(),
         NoopSdkErrorHandler,
     )
 
@@ -57,7 +55,6 @@ internal class TracerProviderAdapterTest {
     fun testForceFlushAndShutdownFailForNonSdkProvider() = runTest {
         val adapter = TracerProviderAdapter(
             OtelJavaOpenTelemetry.noop().tracerProvider,
-            CompatContextFactory(),
             NoopSdkErrorHandler,
         )
 
@@ -73,7 +70,6 @@ internal class TracerProviderAdapterTest {
             .build()
         val adapter = TracerProviderAdapter(
             provider,
-            CompatContextFactory(),
             NoopSdkErrorHandler,
         )
 
@@ -90,7 +86,6 @@ internal class TracerProviderAdapterTest {
         val errorHandler = FakeSdkErrorHandler()
         val adapter = TracerProviderAdapter(
             OtelJavaSdkTracerProvider.builder().addSpanProcessor(processor).build(),
-            CompatContextFactory(),
             errorHandler,
         )
 
@@ -109,7 +104,6 @@ internal class TracerProviderAdapterTest {
         val errorHandler = FakeSdkErrorHandler()
         val adapter = TracerProviderAdapter(
             OtelJavaSdkTracerProvider.builder().addSpanProcessor(processor).build(),
-            CompatContextFactory(),
             errorHandler,
         )
 

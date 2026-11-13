@@ -3,7 +3,6 @@ public abstract interface annotation class io/opentelemetry/kotlin/ExperimentalA
 
 public abstract interface class io/opentelemetry/kotlin/OpenTelemetry {
 	public abstract fun getConfigProvider ()Lio/opentelemetry/kotlin/config/ConfigProvider;
-	public abstract fun getContext ()Lio/opentelemetry/kotlin/factory/ContextFactory;
 	public abstract fun getLoggerProvider ()Lio/opentelemetry/kotlin/logging/LoggerProvider;
 	public abstract fun getMeterProvider ()Lio/opentelemetry/kotlin/metrics/MeterProvider;
 	public abstract fun getPropagator ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
@@ -179,11 +178,6 @@ public final class io/opentelemetry/kotlin/context/RootContextEntrypointKt {
 
 public abstract interface class io/opentelemetry/kotlin/context/Scope {
 	public abstract fun detach ()Z
-}
-
-public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
-	public abstract fun current ()Lio/opentelemetry/kotlin/context/Context;
-	public abstract fun root ()Lio/opentelemetry/kotlin/context/Context;
 }
 
 public final class io/opentelemetry/kotlin/init/B3Format : java/lang/Enum {
