@@ -15,7 +15,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "opentelemetry-kotlin"
 include(
-    ":core",
     ":api",
     ":error-handling",
     ":propagation-utils",
