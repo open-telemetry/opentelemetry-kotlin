@@ -1,8 +1,8 @@
 package io.opentelemetry.kotlin.config.dsl
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.init.B3Format
 import io.opentelemetry.kotlin.init.PropagatorConfigDsl
+import io.opentelemetry.kotlin.propagation.B3Format
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.propagation.createB3Propagator
 import io.opentelemetry.kotlin.propagation.createCompositePropagator

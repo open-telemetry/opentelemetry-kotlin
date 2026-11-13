@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Migration notes
+
+- `Context.asCurrentContext { }` has been removed from `api-ext`. Use `Context.runWithContext { }`
+  from `api` instead, which behaves identically.
+- `Span.storeInContext(context)` has been removed from `compat`. Use `context.storeSpan(span)` instead.
+- `B3Format` has moved from `io.opentelemetry.kotlin.init` to `io.opentelemetry.kotlin.propagation`, alongside
+  `createB3Propagator()`. Update the import.
+- `AnyValue.ListValue.values` and `AnyValue.MapValue.values` have been renamed to `value`, matching the other
+  `AnyValue` variants.
+
 ### 🐞 Bug fixes
 
 - Move new and updated trace-state entries to the front after protobuf deserialization.

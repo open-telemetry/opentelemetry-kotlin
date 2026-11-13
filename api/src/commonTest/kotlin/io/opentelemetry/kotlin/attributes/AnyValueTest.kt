@@ -179,13 +179,13 @@ internal class AnyValueTest {
             AnyValue.StringValue("a"),
             AnyValue.LongValue(1L)
         )
-        assertEquals(list, AnyValue.ListValue(list).values)
+        assertEquals(list, AnyValue.ListValue(list).value)
     }
 
     @Test
     fun listValueEmptyIsPreserved() {
         val empty = AnyValue.ListValue(emptyList())
-        assertEquals(0, empty.values.size)
+        assertEquals(0, empty.value.size)
         assertEquals(AnyValue.ListValue(emptyList()), empty)
     }
 
@@ -269,13 +269,13 @@ internal class AnyValueTest {
             "name" to AnyValue.StringValue("alice"),
             "age" to AnyValue.LongValue(30L)
         )
-        assertEquals(map, AnyValue.MapValue(map).values)
+        assertEquals(map, AnyValue.MapValue(map).value)
     }
 
     @Test
     fun mapValueEmptyIsPreserved() {
         val empty = AnyValue.MapValue(emptyMap())
-        assertEquals(0, empty.values.size)
+        assertEquals(0, empty.value.size)
         assertEquals(AnyValue.MapValue(emptyMap()), empty)
     }
 

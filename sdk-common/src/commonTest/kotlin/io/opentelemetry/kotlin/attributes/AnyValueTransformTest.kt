@@ -124,7 +124,7 @@ internal class AnyValueTransformTest {
         var observed = this
         var depth = 0
         while (observed is AnyValue.ListValue) {
-            observed = observed.values.single()
+            observed = observed.value.single()
             depth++
         }
         assertSame(AnyValue.NullValue, observed)

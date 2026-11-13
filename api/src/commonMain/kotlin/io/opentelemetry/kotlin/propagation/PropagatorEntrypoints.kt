@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.init.B3Format
 
 /**
  * Returns a [TextMapPropagator] that sequentially delegates to each of [propagators]. Injection

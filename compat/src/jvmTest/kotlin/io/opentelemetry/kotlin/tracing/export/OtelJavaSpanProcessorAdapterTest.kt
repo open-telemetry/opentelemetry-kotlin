@@ -11,7 +11,6 @@ import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanKind
-import io.opentelemetry.kotlin.tracing.ext.storeInContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
@@ -130,7 +129,7 @@ internal class OtelJavaSpanProcessorAdapterTest {
             parentSpan = tracer.startSpan("parent")
             val childSpan = tracer.startSpan(
                 name = "name",
-                parentContext = parentSpan.storeInContext(rootContext)
+                parentContext = rootContext.storeSpan(parentSpan)
             )
             childSpan.end()
 

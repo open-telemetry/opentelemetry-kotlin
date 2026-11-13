@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.RecordingSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
-import io.opentelemetry.kotlin.init.B3Format
 import io.opentelemetry.kotlin.tracing.createSpanContext
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
