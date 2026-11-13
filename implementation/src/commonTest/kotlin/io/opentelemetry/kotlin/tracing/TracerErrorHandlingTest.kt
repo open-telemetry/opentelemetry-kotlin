@@ -136,9 +136,6 @@ internal class TracerErrorHandlingTest {
                 randomness -> boom()
                 else -> false
             }
-
-        override val invalidTraceId: ByteArray = delegate.invalidTraceId
-        override val invalidSpanId: ByteArray = delegate.invalidSpanId
     }
 
     /**

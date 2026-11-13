@@ -171,8 +171,6 @@ internal class TracerInvalidIdTest {
     ) : IdGenerator {
         override fun generateTraceIdBytes(): ByteArray = traceIdBytes ?: impl.generateTraceIdBytes()
         override fun generateSpanIdBytes(): ByteArray = spanIdBytes ?: impl.generateSpanIdBytes()
-        override val invalidTraceId: ByteArray = impl.invalidTraceId
-        override val invalidSpanId: ByteArray = impl.invalidSpanId
         override val generatesRandomTraceIds: Boolean = impl.generatesRandomTraceIds
     }
 }
