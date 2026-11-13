@@ -26,11 +26,13 @@ import io.opentelemetry.kotlin.init.defaultCompatBehaviorReader
 @ExperimentalApi
 public fun createCompatOpenTelemetry(
     clock: Clock = ClockAdapter(io.opentelemetry.sdk.common.Clock.getDefault()),
-    config: OpenTelemetryConfigDsl.() -> Unit = {}
+    config: (OpenTelemetryConfigDsl.() -> Unit)? = null
 ): OpenTelemetrySdk {
     val cfg = CompatOpenTelemetryConfig(clock)
-    cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
-        cfg.config()
+    if (config != null) {
+        cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
+            cfg.config()
+        }
     }
     if (cfg.contextConfigured) {
         cfg.sdkErrorHandler.reportError(

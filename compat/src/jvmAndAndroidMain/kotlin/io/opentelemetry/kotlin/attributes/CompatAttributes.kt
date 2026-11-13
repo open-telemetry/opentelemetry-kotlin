@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.attributes
 
+import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.error.userCode
 
 /**
@@ -12,4 +13,13 @@ internal fun compatAttributes(block: (AttributesMutator.() -> Unit)?): CompatAtt
         userCode { block(container) }
     }
     return container
+}
+
+/**
+ * Builds [OtelJavaAttributes] from the user-supplied [block], returning the shared empty instance
+ * without allocating a container when [block] is null.
+ */
+internal fun compatOtelJavaAttributes(block: (AttributesMutator.() -> Unit)?): OtelJavaAttributes = when (block) {
+    null -> OtelJavaAttributes.empty()
+    else -> compatAttributes(block).otelJavaAttributes()
 }

@@ -37,11 +37,13 @@ public fun createOpenTelemetry(
     /**
      * Defines configuration for OpenTelemetry.
      */
-    config: OpenTelemetryConfigDsl.() -> Unit = {}
+    config: (OpenTelemetryConfigDsl.() -> Unit)? = null
 ): OpenTelemetrySdk {
     val cfg = OpenTelemetryConfigImpl(clock)
-    cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
-        cfg.config()
+    if (config != null) {
+        cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
+            cfg.config()
+        }
     }
     val resourceFactory = ResourceFactoryImpl(cfg.sdkErrorHandler)
     val behaviorReader = defaultBehaviorReader(
