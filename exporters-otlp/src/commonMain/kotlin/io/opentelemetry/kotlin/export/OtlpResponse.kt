@@ -85,6 +85,16 @@ internal sealed class OtlpResponse(val statusCode: Int) {
     }
 
     /**
+     * The telemetry could not be encoded, so no request was sent. Encoding would fail the same way
+     * on every attempt, so this MUST NOT be retried.
+     */
+    object EncodingFailed : UnretryableError(0) {
+        override fun toString(): String {
+            return "EncodingFailed(statusCode=$statusCode)"
+        }
+    }
+
+    /**
      * No HTTP response was received (e.g. a network failure or timeout). This SHOULD be retried.
      */
     object Unknown : OtlpResponse(-1) {

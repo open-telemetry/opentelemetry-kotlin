@@ -1,5 +1,7 @@
 package io.opentelemetry.kotlin.tracing.export
 
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.platformLog
@@ -10,17 +12,25 @@ import io.opentelemetry.kotlin.tracing.data.SpanData
  * A [SpanExporter] that outputs span data to stdout.
  */
 internal class StdoutSpanExporter(
-    private val logger: (String) -> Unit = ::platformLog
+    private val sdkErrorHandler: SdkErrorHandler,
+    private val logger: (String) -> Unit = ::platformLog,
 ) : SpanExporter {
 
     private val shutdownState = MutableShutdownState()
 
     override suspend fun export(telemetry: List<SpanData>): OperationResultCode =
         shutdownState.ifActive {
-            telemetry.forEach { span ->
-                logger(formatSpan(span))
+            val failures = telemetry.count { span ->
+                !sdkErrorHandler.guardOrDefault(false, "Failed to write span to stdout") {
+                    logger(formatSpan(span))
+                    true
+                }
             }
-            OperationResultCode.Success
+            if (failures == 0) {
+                OperationResultCode.Success
+            } else {
+                OperationResultCode.Failure
+            }
         }
 
     override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success

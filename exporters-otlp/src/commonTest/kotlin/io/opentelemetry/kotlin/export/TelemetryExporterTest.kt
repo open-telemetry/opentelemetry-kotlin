@@ -90,6 +90,7 @@ internal class TelemetryExporterTest {
             OtlpResponse.UnexpectedStatus(301),
             OtlpResponse.ResponseTooLarge(503),
             OtlpResponse.PartialSuccess(1, null),
+            OtlpResponse.EncodingFailed,
         ).forEach { response ->
             var attempts = 0
             val exporter = initTelemetryExporter {
