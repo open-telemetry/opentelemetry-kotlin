@@ -4,6 +4,8 @@ package io.opentelemetry.kotlin.error
  * Handles errors and misuse of the SDK.
  *
  * Telemetry must never destabilize the host application, so implementations should not throw.
+ * Custom handlers receive every reported error; only the SDK's default platform logger
+ * deduplicates and rate-limits repetitive diagnostics.
  * https://opentelemetry.io/docs/specs/otel/error-handling/
  */
 public fun interface SdkErrorHandler {
