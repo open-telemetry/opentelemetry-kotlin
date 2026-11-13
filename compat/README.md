@@ -14,6 +14,11 @@ This can be useful if it's necessary to access certain exporters that are only d
 example. However, generally speaking library users would be encouraged to avoid mixing & matching in
 the long term as this use-case has less focused testing compared to using each module individually.
 
+`opentelemetry-api` and `opentelemetry-sdk` are exported transitively, so there is no need to add
+opentelemetry-java as a separate dependency to use the `toOtelJava<Token>()` and
+`toOtelKotlin<Token>()` conversions. Use `compat-bom` to align opentelemetry-java with the version
+`compat` was built against.
+
 ## Context
 
 The Kotlin and Java APIs must agree on a single current context, otherwise spans and logs lose their
