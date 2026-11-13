@@ -17,14 +17,12 @@ internal class IntegrationTestHarness(
     private val extraConfig: OpenTelemetryConfigDsl.() -> Unit = {},
 ) : OtelKotlinTestRule(scheduler) {
     override val kotlinApi: OpenTelemetry by lazy {
-        createOpenTelemetry(
-            clock = fakeClock,
-            config = {
-                idGenerator { IdGeneratorImpl(Random(0)) }
-                tracerProvider { tracerProviderConfig() }
-                loggerProvider { loggerProviderConfig() }
-                extraConfig()
-            },
-        ).also(sdks::track)
+        createOpenTelemetry {
+            clock(fakeClock)
+            idGenerator { IdGeneratorImpl(Random(0)) }
+            tracerProvider { tracerProviderConfig() }
+            loggerProvider { loggerProviderConfig() }
+            extraConfig()
+        }.also(sdks::track)
     }
 }

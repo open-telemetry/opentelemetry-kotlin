@@ -23,7 +23,7 @@ internal class CompatIdGeneratorConfigTest {
 
     @Test
     fun usesDefaultIdGeneratorWhenBehaviorIsUnset() {
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         val idGenerator =
             CompatSdkConfigFactory(cfg, OpenTelemetryBehavior(), clock, CompatContextFactory()).idGenerator
 
@@ -32,7 +32,7 @@ internal class CompatIdGeneratorConfigTest {
 
     @Test
     fun usesDefaultIdGeneratorWhenTracerProviderIdGeneratorIsUnset() {
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         val behavior = OpenTelemetryBehavior(tracerProvider = TracerProviderBehavior())
         val idGenerator = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory()).idGenerator
 
@@ -41,7 +41,7 @@ internal class CompatIdGeneratorConfigTest {
 
     @Test
     fun usesIdGeneratorFromResolvedBehavior() {
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         val idGenerator = CompatSdkConfigFactory(cfg, randomBehavior, clock, CompatContextFactory()).idGenerator
 
         assertIs<CompatIdGenerator>(idGenerator)
@@ -50,7 +50,7 @@ internal class CompatIdGeneratorConfigTest {
     @Test
     fun dslCustomIdGeneratorTakesPrecedenceOverResolvedBehavior() {
         val custom = FakeIdGenerator()
-        val cfg = CompatOpenTelemetryConfig(clock).apply {
+        val cfg = CompatOpenTelemetryConfig().apply {
             idGenerator { custom }
         }
         val behavior = BehaviorResolverImpl().resolve(
@@ -66,7 +66,7 @@ internal class CompatIdGeneratorConfigTest {
     @Test
     fun throwingCustomIdGeneratorSupplierFallsBackToDefault() {
         val handler = FakeSdkErrorHandler()
-        val cfg = CompatOpenTelemetryConfig(clock).apply {
+        val cfg = CompatOpenTelemetryConfig().apply {
             errorHandler(handler)
             idGenerator { error("boom") }
         }

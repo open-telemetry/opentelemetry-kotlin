@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.init
 
-import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -14,7 +13,7 @@ internal class DeclarativeConfigReaderRegistrationTest {
     @Test
     fun `OTEL_CONFIG_FILE without a registered reader reports one error and falls back to the environment`() {
         val handler = FakeSdkErrorHandler()
-        val cfg = OpenTelemetryConfigImpl(FakeClock()).apply { errorHandler(handler) }
+        val cfg = OpenTelemetryConfigImpl().apply { errorHandler(handler) }
         val env = mapOf(
             "OTEL_CONFIG_FILE" to "otel.yaml",
             "OTEL_ATTRIBUTE_COUNT_LIMIT" to "64",
@@ -36,7 +35,7 @@ internal class DeclarativeConfigReaderRegistrationTest {
     @Test
     fun `an unsupported reader is reported and the declaration ignored`() {
         val handler = FakeSdkErrorHandler()
-        val cfg = OpenTelemetryConfigImpl(FakeClock()).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             errorHandler(handler)
             configFile(object : DeclarativeConfigReader {}, "otel.yaml")
         }

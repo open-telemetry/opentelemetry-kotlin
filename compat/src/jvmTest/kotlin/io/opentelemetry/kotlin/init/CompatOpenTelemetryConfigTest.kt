@@ -15,7 +15,7 @@ internal class CompatOpenTelemetryConfigTest {
     @Test
     fun `shutdown timeout accepts positive values and rejects nonpositive values`() {
         val errors = FakeSdkErrorHandler()
-        val cfg = CompatOpenTelemetryConfig(clock).apply { errorHandler(errors) }
+        val cfg = CompatOpenTelemetryConfig().apply { errorHandler(errors) }
         assertEquals(5000L, cfg.shutdownTimeoutMs)
         cfg.shutdownTimeout(6000)
         assertEquals(6000L, cfg.shutdownTimeoutMs)
@@ -30,14 +30,14 @@ internal class CompatOpenTelemetryConfigTest {
     @Test
     fun `propagator dsl uses a custom propagator returned from the lambda`() {
         val custom = FakeTextMapPropagator()
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.propagator { custom }
         assertSame(custom, cfg.propagator)
     }
 
     @Test
     fun `propagator dsl uses the lambda return value rather than the last builder call`() {
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.propagator {
             val traceContext = w3cTraceContext()
             w3cBaggage()
@@ -48,12 +48,12 @@ internal class CompatOpenTelemetryConfigTest {
 
     @Test
     fun `propagator defaults to noop`() {
-        assertEquals(emptyList(), CompatOpenTelemetryConfig(clock).propagator.fields().toList())
+        assertEquals(emptyList(), CompatOpenTelemetryConfig().propagator.fields().toList())
     }
 
     @Test
     fun `span limits dsl is reflected in resolved behavior`() {
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.tracerProvider {
             spanLimits {
                 attributeCountLimit = 8
@@ -78,7 +78,7 @@ internal class CompatOpenTelemetryConfigTest {
 
     @Test
     fun `log limits dsl is reflected in resolved behavior`() {
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.loggerProvider {
             logLimits {
                 attributeCountLimit = 8

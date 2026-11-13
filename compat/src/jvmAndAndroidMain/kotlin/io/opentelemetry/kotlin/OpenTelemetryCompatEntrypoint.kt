@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin
 
-import io.opentelemetry.kotlin.clock.ClockAdapter
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guard
@@ -26,15 +25,15 @@ import io.opentelemetry.kotlin.init.defaultCompatBehaviorReader
  */
 @ExperimentalApi
 public fun createCompatOpenTelemetry(
-    clock: Clock = ClockAdapter(io.opentelemetry.sdk.common.Clock.getDefault()),
     config: OpenTelemetryConfigDsl.() -> Unit = {}
 ): OpenTelemetrySdk {
     val contextFactory = CompatContextFactory()
 
-    val cfg = CompatOpenTelemetryConfig(clock)
+    val cfg = CompatOpenTelemetryConfig()
     cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
         cfg.config()
     }
+    val clock = cfg.clock
     if (cfg.contextConfigured) {
         cfg.sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
