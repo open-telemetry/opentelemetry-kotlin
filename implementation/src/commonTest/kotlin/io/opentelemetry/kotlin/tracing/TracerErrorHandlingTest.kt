@@ -137,8 +137,6 @@ internal class TracerErrorHandlingTest {
                 else -> false
             }
 
-        override val invalidTraceId: ByteArray = delegate.invalidTraceId
-        override val invalidSpanId: ByteArray = delegate.invalidSpanId
     }
 
     /**

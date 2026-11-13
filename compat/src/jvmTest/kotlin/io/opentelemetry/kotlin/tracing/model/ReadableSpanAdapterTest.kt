@@ -76,7 +76,7 @@ internal class ReadableSpanAdapterTest {
     private fun ReadableSpanAdapter.assertMutableProperties(expected: OtelJavaSpanData) {
         assertEquals(expected.name, name)
         assertEquals(expected.status, status.toOtelJavaStatusData())
-        assertEquals(expected.hasEnded(), hasEnded)
+        assertEquals(expected.hasEnded(), isEnded)
         assertEquals(expected.endEpochNanos.takeIf { expected.hasEnded() }, endTimestamp)
         assertEquals(expected.attributes.convertToMap(), attributes)
         assertEquals(expected.events, events.map { it.toOtelJavaEventData() })

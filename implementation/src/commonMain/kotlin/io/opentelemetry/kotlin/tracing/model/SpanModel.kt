@@ -319,7 +319,7 @@ internal class SpanModel(
     override val endTimestamp: Long?
         get() = lock.read { endTimestampImpl }
 
-    override val hasEnded: Boolean
+    override val isEnded: Boolean
         get() = lock.read { state == State.ENDED }
 
     private val attrs by lazy {

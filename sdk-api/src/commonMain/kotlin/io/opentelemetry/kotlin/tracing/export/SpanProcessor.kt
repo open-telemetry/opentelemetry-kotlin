@@ -31,17 +31,20 @@ public interface SpanProcessor : TelemetryCloseable {
     public fun onEnd(span: ReadableSpan)
 
     /**
-     * Determines whether this span processor is required when a span starts.
+     * Determines whether [onStart] should be invoked when a span starts. Defaults to `true`; override
+     * and return `false` if [onStart] does nothing, so the SDK can skip the call.
      */
-    public fun isStartRequired(): Boolean
+    public fun isStartRequired(): Boolean = true
 
     /**
-     * Determines whether this span processor is required when a span ends.
+     * Determines whether [onEnd] should be invoked when a span ends. Defaults to `true`; override
+     * and return `false` if [onEnd] does nothing, so the SDK can skip the call.
      */
-    public fun isEndRequired(): Boolean
+    public fun isEndRequired(): Boolean = true
 
     /**
-     * Determines whether this span processor is required when a span is ending.
+     * Determines whether [onEnding] should be invoked when a span is ending. Defaults to `true`;
+     * override and return `false` if [onEnding] does nothing, so the SDK can skip the call.
      */
-    public fun isOnEndingRequired(): Boolean
+    public fun isOnEndingRequired(): Boolean = true
 }

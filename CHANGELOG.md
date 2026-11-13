@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Migration notes
+
+- `OpenTelemetrySdk.idGenerator` and `OpenTelemetrySdk.resource` have been removed. Configure the ID
+  generator with `idGenerator { }`. Resource detectors still receive a `ResourceFactory` via `detect(factory)`.
+- `IdGenerator.invalidTraceId` and `IdGenerator.invalidSpanId` have been removed, so custom generators no longer
+  implement them. Use `createInvalidSpanContext()` for the invalid IDs.
+- `SpanData.hasEnded` has been renamed to `isEnded`, matching `isRecording()`, `isValid` and `isRemote`. On
+  the JVM, the getter is now `isEnded()` instead of `getHasEnded()`.
+
+### 📈 Enhancements
+
+- `SpanProcessor.isStartRequired()`, `isEndRequired()` and `isOnEndingRequired()` now default to `true`, so
+  custom processors only override them to opt out of a callback.
+
 ### 🐞 Bug fixes
 
 - Move new and updated trace-state entries to the front after protobuf deserialization.

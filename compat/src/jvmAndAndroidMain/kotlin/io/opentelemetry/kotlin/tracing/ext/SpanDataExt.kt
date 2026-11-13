@@ -45,6 +45,6 @@ private fun SpanData.convertToOtelJavaSpanData(): OtelJavaSpanData {
         totalRecordedEventsImpl = events.size + droppedEventsCount,
         linksImpl = links.map { it.toOtelJavaLinkData() },
         totalRecordedLinksImpl = links.size + droppedLinksCount,
-        hasEndedImpl = hasEnded
+        hasEndedImpl = isEnded
     )
 }

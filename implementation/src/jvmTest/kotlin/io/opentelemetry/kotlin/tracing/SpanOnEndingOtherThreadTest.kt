@@ -28,7 +28,7 @@ internal class SpanOnEndingOtherThreadTest {
         with(processor.endCalls.single()) {
             assertEquals("test", name)
             assertEquals(mapOf("key" to "value"), attributes)
-            assertTrue(hasEnded)
+            assertTrue(isEnded)
         }
     }
 
@@ -111,7 +111,7 @@ internal class SpanOnEndingOtherThreadTest {
 
         with(processor.endCalls.single()) {
             assertEquals("test", name)
-            assertTrue(hasEnded)
+            assertTrue(isEnded)
         }
     }
 

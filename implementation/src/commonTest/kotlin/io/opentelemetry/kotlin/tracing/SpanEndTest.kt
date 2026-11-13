@@ -111,7 +111,7 @@ internal class SpanEndTest {
         }
         processor.endAction = { rSpan ->
             endCallCount++
-            assertTrue(rSpan.hasEnded)
+            assertTrue(rSpan.isEnded)
         }
 
         val span = tracer.startSpan("test")
