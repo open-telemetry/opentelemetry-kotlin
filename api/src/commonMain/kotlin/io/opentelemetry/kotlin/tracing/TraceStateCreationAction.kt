@@ -1,12 +1,13 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.OpenTelemetryDsl
 
 /**
  * Configures the entries of a [TraceState].
  */
 @ExperimentalApi
-@TracingDsl
+@OpenTelemetryDsl
 public interface TraceStateCreationAction {
 
     /**
