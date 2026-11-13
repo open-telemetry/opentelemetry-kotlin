@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.propagation.B3Format
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 
 /**

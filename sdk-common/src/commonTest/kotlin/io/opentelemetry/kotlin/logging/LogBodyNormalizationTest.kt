@@ -102,7 +102,7 @@ internal class LogBodyNormalizationTest {
         var observed = normalizeLogBody(body)
         var depth = 0
         while (observed is AnyValue.ListValue) {
-            observed = observed.values.single()
+            observed = observed.value.single()
             depth++
         }
         assertEquals(16, depth)
@@ -118,7 +118,7 @@ internal class LogBodyNormalizationTest {
         var observed = normalizeLogBody(body)
         var depth = 0
         while (observed is AnyValue.ListValue) {
-            observed = observed.values.single()
+            observed = observed.value.single()
             depth++
         }
         assertEquals(16, depth)

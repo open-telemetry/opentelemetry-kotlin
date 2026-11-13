@@ -27,8 +27,8 @@ internal fun AnyValue.toOtelJavaValue(): OtelJavaValue<*> = when (this) {
     is AnyValue.LongValue -> OtelJavaValue.of(value)
     is AnyValue.DoubleValue -> OtelJavaValue.of(value)
     is AnyValue.BytesValue -> OtelJavaValue.of(value)
-    is AnyValue.ListValue -> OtelJavaValue.of(values.map { it.toOtelJavaValue() })
-    is AnyValue.MapValue -> OtelJavaValue.of(values.mapValues { it.value.toOtelJavaValue() })
+    is AnyValue.ListValue -> OtelJavaValue.of(value.map { it.toOtelJavaValue() })
+    is AnyValue.MapValue -> OtelJavaValue.of(value.mapValues { it.value.toOtelJavaValue() })
 }
 
 /**

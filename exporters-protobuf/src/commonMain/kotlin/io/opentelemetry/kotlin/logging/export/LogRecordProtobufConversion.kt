@@ -100,7 +100,7 @@ private fun AnyValue.toAny(): Any? = when {
     double_value != null -> double_value
     bytes_value  != null -> KotlinAnyValue.BytesValue(bytes_value.toByteArray())
     array_value  != null -> KotlinAnyValue.ListValue(
-        values = array_value.values.map { it.toNestedAnyValue() }
+        value = array_value.values.map { it.toNestedAnyValue() }
     )
     kvlist_value != null -> kvlist_value.toMapValue()
     else                 -> null

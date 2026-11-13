@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.config.dsl
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.FakeContext
-import io.opentelemetry.kotlin.init.B3Format
+import io.opentelemetry.kotlin.propagation.B3Format
 import io.opentelemetry.kotlin.propagation.FakeTextMapPropagator
 import io.opentelemetry.kotlin.propagation.FakeTextMapSetter
 import io.opentelemetry.kotlin.propagation.createB3Propagator

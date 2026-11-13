@@ -193,7 +193,7 @@ internal class AttributeValueTest {
         val value = AttributeValue.Value(AnyValue.MapValue(mapOf("list" to AnyValue.ListValue(items))), 2)
         items.add(AnyValue.StringValue("extra"))
         source[0] = 9
-        val stored = ((value.value as AnyValue.MapValue).values["list"] as AnyValue.ListValue).values
+        val stored = ((value.value as AnyValue.MapValue).value["list"] as AnyValue.ListValue).value
         assertEquals(2, stored.size)
         assertEquals(AnyValue.StringValue("ab"), stored[0])
         assertContentEquals(byteArrayOf(1, 2), (stored[1] as AnyValue.BytesValue).value)
