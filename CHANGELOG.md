@@ -5,6 +5,8 @@
 ### 🐞 Bug fixes
 
 - Move new and updated trace-state entries to the front after protobuf deserialization.
+- Include `X-B3-Flags` in the multi-header B3 propagator's `fields()`, since inject writes it
+  for debug spans.
 
 ## Version 0.10.0 (2026-11-05)
 
