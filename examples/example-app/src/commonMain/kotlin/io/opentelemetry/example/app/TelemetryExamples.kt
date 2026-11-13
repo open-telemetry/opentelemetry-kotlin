@@ -15,7 +15,6 @@ import io.opentelemetry.kotlin.semconv.UrlAttributes
 import io.opentelemetry.kotlin.semconv.UserAttributes
 import io.opentelemetry.kotlin.tracing.Tracer
 import io.opentelemetry.kotlin.tracing.SpanKind
-import kotlinx.coroutines.delay
 
 /**
  * Runs platform-independent examples demonstrating how to use opentelemetry-kotlin's API.
@@ -42,10 +41,6 @@ suspend fun runAllExamples(platform: String) {
 
     // flush all pending telemetry before terminating
     otel.forceFlush()
-
-    // give HTTP client time to complete requests before process exits.
-    // in future the SDK needs to be updated to handle this automatically.
-    delay(500)
 
     otel.shutdown()
 }
