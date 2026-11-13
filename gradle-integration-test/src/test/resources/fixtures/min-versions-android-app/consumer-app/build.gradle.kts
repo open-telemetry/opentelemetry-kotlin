@@ -46,7 +46,6 @@ kotlin {
 dependencies {
     implementation("io.opentelemetry.kotlin:api:$otelKotlinVersion")
     implementation("io.opentelemetry.kotlin:sdk-api:$otelKotlinVersion")
-    implementation("io.opentelemetry.kotlin:core:$otelKotlinVersion")
     implementation("io.opentelemetry.kotlin:implementation:$otelKotlinVersion")
     implementation("io.opentelemetry.kotlin:exporters-core:$otelKotlinVersion")
 }

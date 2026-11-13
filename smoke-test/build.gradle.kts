@@ -8,7 +8,6 @@ kotlin {
     sourceSets {
         commonTest {
             dependencies {
-                implementation(project(":core"))
                 implementation(project(":implementation"))
                 implementation(project(":exporters-otlp"))
                 implementation(project(":exporters-core"))

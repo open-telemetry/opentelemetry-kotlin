@@ -42,7 +42,6 @@ dependencies {
     androidTestImplementation(project.dependencies.platform(libs.opentelemetry.bom))
     androidTestImplementation(libs.opentelemetry.api)
     androidTestImplementation(libs.opentelemetry.sdk)
-    androidTestImplementation(project(":core"))
     androidTestImplementation(project(":compat"))
     androidTestImplementation(project(":implementation"))
     androidTestImplementation(project(":benchmark-fixtures"))

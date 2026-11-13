@@ -37,7 +37,6 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(project(":core"))
                 implementation(project(":implementation"))
                 implementation(project(":semconv"))
                 implementation(libs.kotlinx.coroutines)

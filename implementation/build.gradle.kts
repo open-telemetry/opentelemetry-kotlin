@@ -10,10 +10,11 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(project(":sdk-api"))
+                api(project(":sdk-api"))
+                api(project(":api-ext"))
+                api(project(":noop"))
+                api(project(":exporters-core"))
                 implementation(project(":sdk-common"))
-                implementation(project(":api-ext"))
-                implementation(project(":sdk-api"))
                 implementation(project(":config"))
                 implementation(project(":context-impl"))
                 implementation(project(":context-single-slot"))
@@ -22,16 +23,12 @@ kotlin {
                 implementation(project(":model"))
                 implementation(project(":platform-implementations"))
                 implementation(project(":semconv"))
-                implementation(project(":exporters-core"))
-                implementation(project(":noop"))
-                implementation(project(":semconv"))
                 implementation(libs.kotlinx.coroutines)
                 implementation(libs.kotlin.serialization)
             }
         }
         commonTest {
             dependencies {
-                implementation(project(":api-ext"))
                 implementation(project(":test-fakes"))
                 implementation(project(":context-threadlocal"))
                 implementation(project(":integration-test"))
