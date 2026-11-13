@@ -23,7 +23,7 @@ import io.opentelemetry.kotlin.export.createTestHttpClient
 import io.opentelemetry.kotlin.export.decodeOtlpRequestBody
 import io.opentelemetry.kotlin.export.testMockEngine
 import io.opentelemetry.kotlin.export.withShutdown
-import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -285,7 +285,7 @@ internal class OtlpHttpSpanExporterTest {
         assertContentEquals(telemetry.toProtobufByteArray(), bytes)
     }
 
-    private fun fakeConfig(): TraceExportConfigDsl = object : TraceExportConfigDsl {
+    private fun fakeConfig(): ExportConfigDsl = object : ExportConfigDsl {
         override val clock: Clock = FakeClock()
         override val sdkErrorHandler = NoopSdkErrorHandler
     }

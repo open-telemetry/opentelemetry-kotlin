@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
-import io.opentelemetry.kotlin.export.FakeTraceExportConfig
+import io.opentelemetry.kotlin.export.FakeExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import kotlinx.coroutines.test.runTest
@@ -12,7 +12,7 @@ import kotlin.test.assertSame
 
 internal class CoreSpanExporterApiTest {
 
-    private val config = FakeTraceExportConfig()
+    private val config = FakeExportConfig()
     private val fakeSpan = FakeReadWriteSpan()
     private val fakeContext = FakeContext()
 
@@ -42,11 +42,11 @@ internal class CoreSpanExporterApiTest {
     @Test
     fun compositeSpanProcessorEmptyReportsApiMisuse() {
         val handler = FakeSdkErrorHandler()
-        val config = FakeTraceExportConfig(sdkErrorHandler = handler)
+        val config = FakeExportConfig(sdkErrorHandler = handler)
         config.compositeSpanProcessor()
         assertEquals(1, handler.apiMisuses.size)
         assertEquals(
-            "TraceExportConfigDsl.compositeSpanProcessor",
+            "ExportConfigDsl.compositeSpanProcessor",
             handler.apiMisuses.single().api,
         )
     }
@@ -54,11 +54,11 @@ internal class CoreSpanExporterApiTest {
     @Test
     fun compositeSpanExporterEmptyReportsApiMisuse() {
         val handler = FakeSdkErrorHandler()
-        val config = FakeTraceExportConfig(sdkErrorHandler = handler)
+        val config = FakeExportConfig(sdkErrorHandler = handler)
         config.compositeSpanExporter()
         assertEquals(1, handler.apiMisuses.size)
         assertEquals(
-            "TraceExportConfigDsl.compositeSpanExporter",
+            "ExportConfigDsl.compositeSpanExporter",
             handler.apiMisuses.single().api,
         )
     }

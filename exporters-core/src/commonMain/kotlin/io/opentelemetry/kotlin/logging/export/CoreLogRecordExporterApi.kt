@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
-import io.opentelemetry.kotlin.init.LogExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.platformLog
 import kotlinx.coroutines.CoroutineDispatcher
@@ -18,11 +18,11 @@ import kotlinx.coroutines.SupervisorJob
  * Creates a composite log record processor that delegates to a list of processors.
  */
 @ExperimentalApi
-public fun LogExportConfigDsl.compositeLogRecordProcessor(vararg processors: LogRecordProcessor): LogRecordProcessor {
+public fun ExportConfigDsl.compositeLogRecordProcessor(vararg processors: LogRecordProcessor): LogRecordProcessor {
     if (processors.isEmpty()) {
         sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
-                api = "LogExportConfigDsl.compositeLogRecordProcessor",
+                api = "ExportConfigDsl.compositeLogRecordProcessor",
                 message = "At least one processor must be provided",
                 severity = SdkErrorSeverity.WARNING,
             )
@@ -36,7 +36,7 @@ public fun LogExportConfigDsl.compositeLogRecordProcessor(vararg processors: Log
  * Creates a simple log record processor that immediately sends any telemetry to its exporter.
  */
 @ExperimentalApi
-public fun LogExportConfigDsl.simpleLogRecordProcessor(exporter: LogRecordExporter): LogRecordProcessor {
+public fun ExportConfigDsl.simpleLogRecordProcessor(exporter: LogRecordExporter): LogRecordProcessor {
     val scope = CoroutineScope(
         SupervisorJob() + ioDispatcher + telemetryExceptionHandler("Simple log record processor", sdkErrorHandler)
     )
@@ -47,11 +47,11 @@ public fun LogExportConfigDsl.simpleLogRecordProcessor(exporter: LogRecordExport
  * Creates a composite log record exporter that delegates to a list of exporters.
  */
 @ExperimentalApi
-public fun LogExportConfigDsl.compositeLogRecordExporter(vararg exporters: LogRecordExporter): LogRecordExporter {
+public fun ExportConfigDsl.compositeLogRecordExporter(vararg exporters: LogRecordExporter): LogRecordExporter {
     if (exporters.isEmpty()) {
         sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
-                api = "LogExportConfigDsl.compositeLogRecordExporter",
+                api = "ExportConfigDsl.compositeLogRecordExporter",
                 message = "At least one exporter must be provided",
                 severity = SdkErrorSeverity.WARNING,
             )
@@ -66,7 +66,7 @@ public fun LogExportConfigDsl.compositeLogRecordExporter(vararg exporters: LogRe
  * See https://opentelemetry.io/docs/specs/otel/logs/sdk/#batching-processor
  */
 @ExperimentalApi
-public fun LogExportConfigDsl.batchLogRecordProcessor(
+public fun ExportConfigDsl.batchLogRecordProcessor(
     exporter: LogRecordExporter,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     scheduleDelayMs: Long = BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS,
@@ -91,6 +91,6 @@ public fun LogExportConfigDsl.batchLogRecordProcessor(
  * production use. The output format is not standardized and can change at any time.
  */
 @ExperimentalApi
-public fun LogExportConfigDsl.stdoutLogRecordExporter(
+public fun ExportConfigDsl.stdoutLogRecordExporter(
     logger: (String) -> Unit = ::platformLog
 ): LogRecordExporter = StdoutLogRecordExporter(logger)

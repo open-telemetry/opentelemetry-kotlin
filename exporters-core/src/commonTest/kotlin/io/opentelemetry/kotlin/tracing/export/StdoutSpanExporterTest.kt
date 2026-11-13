@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
-import io.opentelemetry.kotlin.export.FakeTraceExportConfig
+import io.opentelemetry.kotlin.export.FakeExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.loadTestFixture
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -17,7 +17,7 @@ import kotlin.test.assertEquals
 
 internal class StdoutSpanExporterTest {
 
-    private val exportConfig = FakeTraceExportConfig()
+    private val exportConfig = FakeExportConfig()
 
     @Test
     fun testExportMinimalSpan() = runTest {

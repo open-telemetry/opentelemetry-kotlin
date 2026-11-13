@@ -17,7 +17,7 @@ import io.opentelemetry.kotlin.export.TelemetryRepositoryImpl
 import io.opentelemetry.kotlin.export.TimeoutTelemetryCloseable
 import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
-import io.opentelemetry.kotlin.init.LogExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.LogRecordData
@@ -46,7 +46,7 @@ internal class PersistingLogRecordProcessor(
     processor: LogRecordProcessor,
     private val exporter: LogRecordExporter,
     fileSystem: TelemetryFileSystem,
-    dsl: LogExportConfigDsl,
+    dsl: ExportConfigDsl,
     config: PersistedTelemetryConfig,
     serializer: (List<LogRecordData>) -> ByteArray,
     deserializer: (ByteArray) -> List<LogRecordData>,

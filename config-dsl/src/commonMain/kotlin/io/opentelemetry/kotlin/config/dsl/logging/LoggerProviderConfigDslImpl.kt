@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
-import io.opentelemetry.kotlin.init.LogExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 
 /**
@@ -16,7 +16,7 @@ class LoggerProviderConfigDslImpl : BehaviorSupplier<LoggerProviderBehavior> {
     private var processor: LogRecordProcessorBehavior? = null
 
     @Suppress("UnusedParameter")
-    fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
+    fun export(action: ExportConfigDsl.() -> LogRecordProcessor) {
         if (processor == null) {
             processor = LogRecordProcessorBehavior()
         }

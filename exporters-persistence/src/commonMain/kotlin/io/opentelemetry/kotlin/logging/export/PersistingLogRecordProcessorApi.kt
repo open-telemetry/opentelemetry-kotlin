@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.export.PersistedTelemetryConfig
 import io.opentelemetry.kotlin.export.TelemetryFileSystem
 import io.opentelemetry.kotlin.export.TelemetryFileSystemImpl
 import io.opentelemetry.kotlin.getFileSystem
-import io.opentelemetry.kotlin.init.LogExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.ioDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import okio.Path
@@ -27,7 +27,7 @@ import okio.Path
  * This processor is not supported on JS platforms currently.
  */
 @ExperimentalApi
-public fun LogExportConfigDsl.persistingLogRecordProcessor(
+public fun ExportConfigDsl.persistingLogRecordProcessor(
     processor: LogRecordProcessor,
     exporter: LogRecordExporter,
     cacheDirectory: Path,
@@ -48,7 +48,7 @@ public fun LogExportConfigDsl.persistingLogRecordProcessor(
 }
 
 @ExperimentalApi
-internal fun LogExportConfigDsl.persistingLogRecordProcessorImpl(
+internal fun ExportConfigDsl.persistingLogRecordProcessorImpl(
     processor: LogRecordProcessor,
     exporter: LogRecordExporter,
     fileSystem: TelemetryFileSystem,

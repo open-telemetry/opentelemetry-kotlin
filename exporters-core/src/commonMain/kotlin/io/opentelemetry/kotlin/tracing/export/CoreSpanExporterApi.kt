@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.telemetryExceptionHandler
-import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.platformLog
 import kotlinx.coroutines.CoroutineDispatcher
@@ -17,11 +17,11 @@ import kotlinx.coroutines.SupervisorJob
  * Creates a composite span processor that delegates to a list of processors.
  */
 @ExperimentalApi
-public fun TraceExportConfigDsl.compositeSpanProcessor(vararg processors: SpanProcessor): SpanProcessor {
+public fun ExportConfigDsl.compositeSpanProcessor(vararg processors: SpanProcessor): SpanProcessor {
     if (processors.isEmpty()) {
         sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
-                api = "TraceExportConfigDsl.compositeSpanProcessor",
+                api = "ExportConfigDsl.compositeSpanProcessor",
                 message = "At least one processor must be provided",
                 severity = SdkErrorSeverity.WARNING,
             )
@@ -35,7 +35,7 @@ public fun TraceExportConfigDsl.compositeSpanProcessor(vararg processors: SpanPr
  * Creates a simple span processor that immediately sends any telemetry to its exporter.
  */
 @ExperimentalApi
-public fun TraceExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): SpanProcessor {
+public fun ExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): SpanProcessor {
     val scope = CoroutineScope(
         SupervisorJob() + ioDispatcher + telemetryExceptionHandler("Simple span processor", sdkErrorHandler)
     )
@@ -46,11 +46,11 @@ public fun TraceExportConfigDsl.simpleSpanProcessor(exporter: SpanExporter): Spa
  * Creates a composite span exporter that delegates to a list of exporters.
  */
 @ExperimentalApi
-public fun TraceExportConfigDsl.compositeSpanExporter(vararg exporters: SpanExporter): SpanExporter {
+public fun ExportConfigDsl.compositeSpanExporter(vararg exporters: SpanExporter): SpanExporter {
     if (exporters.isEmpty()) {
         sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
-                api = "TraceExportConfigDsl.compositeSpanExporter",
+                api = "ExportConfigDsl.compositeSpanExporter",
                 message = "At least one exporter must be provided",
                 severity = SdkErrorSeverity.WARNING,
             )
@@ -65,7 +65,7 @@ public fun TraceExportConfigDsl.compositeSpanExporter(vararg exporters: SpanExpo
  * See https://opentelemetry.io/docs/specs/otel/trace/sdk/#batching-processor
  */
 @ExperimentalApi
-public fun TraceExportConfigDsl.batchSpanProcessor(
+public fun ExportConfigDsl.batchSpanProcessor(
     exporter: SpanExporter,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     scheduleDelayMs: Long = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS,
@@ -90,6 +90,6 @@ public fun TraceExportConfigDsl.batchSpanProcessor(
  * production use. The output format is not standardized and can change at any time.
  */
 @ExperimentalApi
-public fun TraceExportConfigDsl.stdoutSpanExporter(
+public fun ExportConfigDsl.stdoutSpanExporter(
     logger: (String) -> Unit = ::platformLog
 ): SpanExporter = StdoutSpanExporter(logger)

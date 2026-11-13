@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.FakeContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
-import io.opentelemetry.kotlin.export.FakeLogExportConfig
+import io.opentelemetry.kotlin.export.FakeExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
 import kotlinx.coroutines.test.runTest
@@ -14,7 +14,7 @@ import kotlin.test.assertSame
 
 internal class CoreLogRecordExporterApiTest {
 
-    private val config = FakeLogExportConfig()
+    private val config = FakeExportConfig()
     private val fakeLogRecord = FakeReadWriteLogRecord()
     private val fakeContext = FakeContext()
     private val scopeInfo = FakeInstrumentationScopeInfo()
@@ -44,11 +44,11 @@ internal class CoreLogRecordExporterApiTest {
     @Test
     fun compositeLogRecordProcessorEmptyReportsApiMisuse() {
         val handler = FakeSdkErrorHandler()
-        val config = FakeLogExportConfig(sdkErrorHandler = handler)
+        val config = FakeExportConfig(sdkErrorHandler = handler)
         config.compositeLogRecordProcessor()
         assertEquals(1, handler.apiMisuses.size)
         assertEquals(
-            "LogExportConfigDsl.compositeLogRecordProcessor",
+            "ExportConfigDsl.compositeLogRecordProcessor",
             handler.apiMisuses.single().api,
         )
     }
@@ -56,11 +56,11 @@ internal class CoreLogRecordExporterApiTest {
     @Test
     fun compositeLogRecordExporterEmptyReportsApiMisuse() {
         val handler = FakeSdkErrorHandler()
-        val config = FakeLogExportConfig(sdkErrorHandler = handler)
+        val config = FakeExportConfig(sdkErrorHandler = handler)
         config.compositeLogRecordExporter()
         assertEquals(1, handler.apiMisuses.size)
         assertEquals(
-            "LogExportConfigDsl.compositeLogRecordExporter",
+            "ExportConfigDsl.compositeLogRecordExporter",
             handler.apiMisuses.single().api,
         )
     }

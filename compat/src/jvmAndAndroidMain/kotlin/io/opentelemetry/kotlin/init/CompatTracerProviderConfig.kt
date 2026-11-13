@@ -19,8 +19,8 @@ import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.config.dsl.ExportConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.tracing.SpanLimitsConfigDslImpl
-import io.opentelemetry.kotlin.config.dsl.tracing.TraceExportConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.factory.CompatContextFactory
@@ -80,9 +80,9 @@ internal class CompatTracerProviderConfig(
         spanLimitsDsl.action()
     }
 
-    override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
+    override fun export(action: ExportConfigDsl.() -> SpanProcessor) {
         exportConfigured = true
-        val processor = TraceExportConfigDslImpl(clock, sdkErrorHandler).action()
+        val processor = ExportConfigDslImpl(clock, sdkErrorHandler).action()
         processors.add(processor)
     }
 

@@ -21,7 +21,7 @@ public interface TracerProviderConfigDsl : ResourceConfigDsl {
     /**
      * Configures how spans should be processed and exported.
      */
-    public fun export(action: TraceExportConfigDsl.() -> SpanProcessor)
+    public fun export(action: ExportConfigDsl.() -> SpanProcessor)
 
     /**
      * Configures the strategy that should be used for sampling.
