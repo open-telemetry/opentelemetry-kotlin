@@ -22,11 +22,11 @@ internal class SpanExporterExtTest {
     }
 
     @Test
-    fun toOtelJavaApi() {
+    fun toOtelJavaSpanExporter() {
         val impl = FakeSpanExporter()
         val spans = mutableListOf<OtelJavaSpanData>(FakeOtelJavaSpanData(implName = "java-span"))
 
-        val result = impl.toOtelJavaApi()
+        val result = impl.toOtelJavaSpanExporter()
             .export(spans)
             .join(5, TimeUnit.SECONDS)
 

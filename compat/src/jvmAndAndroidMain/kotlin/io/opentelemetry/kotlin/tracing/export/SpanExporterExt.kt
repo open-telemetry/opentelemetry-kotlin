@@ -21,6 +21,6 @@ public fun OtelJavaSpanExporter.toOtelKotlinSpanExporter(): SpanExporter = SpanE
  * Defaults to [PlatformSdkErrorHandler].
  */
 @ExperimentalApi
-public fun SpanExporter.toOtelJavaApi(
+public fun SpanExporter.toOtelJavaSpanExporter(
     sdkErrorHandler: SdkErrorHandler = PlatformSdkErrorHandler,
 ): OtelJavaSpanExporter = OtelJavaSpanExporterAdapter(this, GuardedSdkErrorHandler(sdkErrorHandler))

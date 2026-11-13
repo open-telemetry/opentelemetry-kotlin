@@ -41,8 +41,8 @@ public final class io/opentelemetry/kotlin/logging/export/LogRecordProcessorExtK
 }
 
 public final class io/opentelemetry/kotlin/tracing/export/SpanExporterExtKt {
-	public static final fun toOtelJavaApi (Lio/opentelemetry/kotlin/tracing/export/SpanExporter;Lio/opentelemetry/kotlin/error/SdkErrorHandler;)Lio/opentelemetry/sdk/trace/export/SpanExporter;
-	public static synthetic fun toOtelJavaApi$default (Lio/opentelemetry/kotlin/tracing/export/SpanExporter;Lio/opentelemetry/kotlin/error/SdkErrorHandler;ILjava/lang/Object;)Lio/opentelemetry/sdk/trace/export/SpanExporter;
+	public static final fun toOtelJavaSpanExporter (Lio/opentelemetry/kotlin/tracing/export/SpanExporter;Lio/opentelemetry/kotlin/error/SdkErrorHandler;)Lio/opentelemetry/sdk/trace/export/SpanExporter;
+	public static synthetic fun toOtelJavaSpanExporter$default (Lio/opentelemetry/kotlin/tracing/export/SpanExporter;Lio/opentelemetry/kotlin/error/SdkErrorHandler;ILjava/lang/Object;)Lio/opentelemetry/sdk/trace/export/SpanExporter;
 	public static final fun toOtelKotlinSpanExporter (Lio/opentelemetry/sdk/trace/export/SpanExporter;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
 }
 
