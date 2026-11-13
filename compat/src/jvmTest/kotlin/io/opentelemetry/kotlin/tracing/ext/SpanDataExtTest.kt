@@ -26,7 +26,7 @@ internal class SpanDataExtTest {
     fun testConversion() {
         val input = FakeSpanData()
         val observed = input.toOtelJavaSpan()
-        assertEquals(input.hasEnded, observed.hasEnded())
+        assertEquals(input.isEnded, observed.hasEnded())
         assertEquals(input.endTimestamp, observed.endEpochNanos)
         assertEquals(input.events.size, observed.totalRecordedEvents)
         assertEquals(input.links.size, observed.totalRecordedLinks)

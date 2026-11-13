@@ -57,7 +57,7 @@ internal class SpanProcessOnStartOverrideTest {
             // assert properties can be read
             assertEquals("span", name)
             assertEquals(StatusData.Unset, status)
-            assertFalse(hasEnded)
+            assertFalse(isEnded)
             assertEquals(SpanKind.INTERNAL, spanKind)
             assertEquals(0, startTimestamp)
             assertNull(endTimestamp)

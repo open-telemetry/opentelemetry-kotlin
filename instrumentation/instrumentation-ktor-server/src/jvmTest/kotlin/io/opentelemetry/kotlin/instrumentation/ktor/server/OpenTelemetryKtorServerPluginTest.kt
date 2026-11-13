@@ -54,7 +54,7 @@ internal class OpenTelemetryKtorServerPluginTest {
 
         // single() also asserts the span was not ended, and so recorded, more than once.
         val span = spans.single()
-        assertTrue(span.hasEnded)
+        assertTrue(span.isEnded)
     }
 
     private fun openTelemetry(): OpenTelemetry =

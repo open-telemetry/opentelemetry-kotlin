@@ -99,7 +99,7 @@ public interface SpanData : AttributeContainer {
      * Returns true if this span has ended.
      */
     @ThreadSafe
-    public val hasEnded: Boolean
+    public val isEnded: Boolean
 
     /**
      * The number of attributes that were dropped because the span's attribute limit was exceeded.

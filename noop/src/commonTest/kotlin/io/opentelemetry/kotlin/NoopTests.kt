@@ -236,28 +236,6 @@ internal class NoopTests {
     }
 
     @Test
-    fun testNoopResource() {
-        val otel = NoopOpenTelemetrySdk
-        val resourceFactory = otel.resource
-
-        // empty resource has no attributes and no schemaUrl
-        val empty = resourceFactory.empty
-        assertTrue(empty.attributes.isEmpty())
-        assertNull(empty.schemaUrl)
-
-        // created resource is also noop — attributes and schemaUrl are ignored
-        val created = resourceFactory.create(schemaUrl = "https://example.com") {
-            setStringAttribute("service.name", "test")
-        }
-        assertTrue(created.attributes.isEmpty())
-        assertNull(created.schemaUrl)
-
-        // merge and asNewResource return the same noop instance
-        assertSame(empty, empty.merge(created))
-        assertSame(empty, empty.asNewResource { attributes["k"] = "v" })
-    }
-
-    @Test
     fun testNoopTextMapPropagator() {
         assertEquals(emptyList(), createNoopPropagator().fields())
 

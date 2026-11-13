@@ -67,7 +67,7 @@ internal class SpanProcessNaughtyOnEndTest {
             // assert properties can be read
             assertEquals("span", name)
             assertEquals(StatusData.Unset, status)
-            assertTrue(hasEnded)
+            assertTrue(isEnded)
             assertEquals(SpanKind.INTERNAL, spanKind)
             assertEquals(0, startTimestamp)
             assertEquals(500L, endTimestamp)

@@ -61,7 +61,7 @@ internal class SpanProcessorErrorHandlingTest {
 
         assertSingleError()
 
-        assertTrue(processor.endCalls.single().hasEnded)
+        assertTrue(processor.endCalls.single().isEnded)
         assertFalse(span.isRecording())
     }
 

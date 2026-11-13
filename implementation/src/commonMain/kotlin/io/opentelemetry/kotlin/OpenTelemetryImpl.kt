@@ -11,8 +11,6 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.batchExportOperationConcurrent
 import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.factory.IdGenerator
-import io.opentelemetry.kotlin.factory.ResourceFactory
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.MeterProvider
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
@@ -25,8 +23,6 @@ internal class OpenTelemetryImpl(
     override val configProvider: ConfigProvider,
     override val clock: Clock,
     override val context: ContextFactory,
-    override val idGenerator: IdGenerator,
-    override val resource: ResourceFactory,
     override val propagator: TextMapPropagator,
     private val installedStorage: CurrentContextStorage? = null,
     private val ownsErrorSink: Boolean = false,
