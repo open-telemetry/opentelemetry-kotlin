@@ -12,7 +12,7 @@ import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.TraceState
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaLinkData
+import io.opentelemetry.kotlin.tracing.data.toOtelJavaLinkData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinTraceState
 import io.opentelemetry.kotlin.tracing.model.SpanLink

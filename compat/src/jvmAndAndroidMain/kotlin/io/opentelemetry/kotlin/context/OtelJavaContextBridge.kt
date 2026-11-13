@@ -17,8 +17,8 @@ import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
 import io.opentelemetry.kotlin.tracing.ext.asOtelJavaSpan
-import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
+import io.opentelemetry.kotlin.tracing.toOtelKotlinSpanContext
 
 /**
  * Converts Kotlin [Context]s to and from opentelemetry-java contexts, so the two APIs can share

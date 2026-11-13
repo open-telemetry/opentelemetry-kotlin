@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Migration notes
+
+- compat's `SpanData.toOtelJavaSpan()` has been renamed to `toOtelJavaSpanData()`, since it returns
+  opentelemetry-java `SpanData` rather than a `Span`.
+- compat's public tracing converters have moved out of `io.opentelemetry.kotlin.tracing.ext` into the package
+  of the type they convert. `toOtelJavaSpanContext()`/`toOtelKotlinSpanContext()` now live in
+  `io.opentelemetry.kotlin.tracing`, and `toOtelJavaSpanData()`, `toOtelJavaEventData()` and
+  `toOtelJavaLinkData()` in `io.opentelemetry.kotlin.tracing.data`. Update the imports.
+
 ### 🐞 Bug fixes
 
 - Move new and updated trace-state entries to the front after protobuf deserialization.

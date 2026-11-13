@@ -20,9 +20,9 @@ import io.opentelemetry.kotlin.tracing.SpanCreationAction
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusData
-import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
+import io.opentelemetry.kotlin.tracing.toOtelJavaSpanContext
+import io.opentelemetry.kotlin.tracing.toOtelKotlinSpanContext
 import java.util.concurrent.TimeUnit
 
 internal class SpanAdapter(
