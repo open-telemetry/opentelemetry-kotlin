@@ -19,14 +19,22 @@ the long term as this use-case has less focused testing compared to using each m
 The Kotlin and Java APIs must agree on a single current context, otherwise spans and logs lose their
 parent or their trace/span IDs.
 
-`createCompatOpenTelemetry()` and `toOtelKotlinApi()` always store the current context in whichever
-`ContextStorage` is configured on opentelemetry-java (thread-local by default), so the Kotlin and Java
-Context APIs can be used interchangeably. Configuration supplied via `context { ... }` to
-`createCompatOpenTelemetry()` is ignored and reported as a warning to the `SdkErrorHandler`. To customize
-storage, configure opentelemetry-java's `ContextStorage` instead.
+There is one `CurrentContextStorage` per process (see the `api` README). `createCompatOpenTelemetry()`
+and `toOtelKotlinApi()` install a storage that keeps the current context in whichever `ContextStorage`
+is configured on opentelemetry-java (thread-local by default). `currentContext()`, `Context.attach()`
+and the Java `Context.current()`/`makeCurrent()` then all read and write the same current context, so
+the Kotlin and Java Context APIs can be used interchangeably.
+
+- Configuration supplied via `context { ... }` to `createCompatOpenTelemetry()` is ignored and
+  reported as a warning to the `SdkErrorHandler`. To customize storage, configure opentelemetry-java's
+  `ContextStorage` instead.
+- If a `CurrentContextStorage` is already installed (e.g. by an earlier SDK, or by a call to
+  `installContextStorage()`), the compat SDK uses it instead and reports a warning, because the Kotlin
+  and Java current contexts may then not be shared.
+- `shutdown()` uninstalls the storage, but only if that SDK installed it.
 
 When using `implementation` together with `toOtelJavaApi()`, opt in to storing the current context in
-opentelemetry-java's `ContextStorage` when creating the SDK:
+opentelemetry-java's `ContextStorage` with `createOtelJavaCurrentContextStorage()` when creating the SDK:
 
 ```kotlin
 val otel = createOpenTelemetry {
@@ -44,10 +52,17 @@ respects any `ContextStorage` wrappers that are installed (e.g. by the Java agen
 
 Without the option, do not read or set the opentelemetry-java current context directly through
 the APIs above. They use a separate store that the Kotlin SDK never sees. Use
-`OpenTelemetry.context.current()` and `Context.attach()` instead, or call `makeCurrent()` on a span
-obtained from the Java API.
+`currentContext()` and `Context.attach()` instead, or call `makeCurrent()` on a span obtained from
+the Java API.
 
 This module only ships a JVM artifact because it depends on the `opentelemetry-java` library.
+
+## Error handling
+
+A compat SDK reports its errors to the `SdkErrorHandler` configured on it. The first SDK created in
+the process also receives errors reported by code that has no SDK instance, such as the `api` module.
+Those errors are buffered until an SDK starts (at most 128, the earliest kept) and are then replayed
+to its handler in order. That SDK stops receiving them on `shutdown()`.
 
 ## Log record processors
 
