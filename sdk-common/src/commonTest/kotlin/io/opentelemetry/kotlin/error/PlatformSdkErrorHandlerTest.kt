@@ -28,4 +28,13 @@ internal class PlatformSdkErrorHandlerTest {
     fun logsWithoutThrowing() {
         PlatformSdkErrorHandler.onError(SdkError.UserCodeError(exc, "export", SdkErrorSeverity.WARNING))
     }
+
+    @Test
+    fun toleratesThrowableWhoseToStringThrows() {
+        val hostile = object : IllegalStateException("boom") {
+            override fun toString(): String = throw IllegalStateException("hostile toString")
+        }
+
+        PlatformSdkErrorHandler.onError(SdkError.UserCodeError(hostile, "export", SdkErrorSeverity.WARNING))
+    }
 }

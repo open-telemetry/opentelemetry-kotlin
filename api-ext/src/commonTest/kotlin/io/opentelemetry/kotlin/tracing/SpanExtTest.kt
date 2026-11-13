@@ -90,4 +90,23 @@ internal class SpanExtTest {
         assertEquals("Whoops", attrs["exception.message"])
         assertNotNull(attrs["exception.stacktrace"])
     }
+
+    @Test
+    fun testSpanWrapOperationToleratesHostileThrowable() {
+        val span = FakeSpan("span")
+        val exception = object : IllegalStateException("unused") {
+            override val message: String?
+                get() = throw IllegalStateException("hostile message")
+
+            override fun toString(): String = throw IllegalStateException("hostile toString")
+        }
+
+        val thrown = assertFailsWith<IllegalStateException> {
+            span.wrapOperation { throw exception }
+        }
+
+        assertSame(exception, thrown)
+        assertNotNull((span.status as StatusData.Error).description)
+        assertNotNull(span.events.single().attributes["exception.stacktrace"])
+    }
 }
