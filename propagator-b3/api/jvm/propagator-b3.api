@@ -1,0 +1,13 @@
+public final class io/opentelemetry/kotlin/init/B3Format : java/lang/Enum {
+	public static final field MULTI Lio/opentelemetry/kotlin/init/B3Format;
+	public static final field SINGLE Lio/opentelemetry/kotlin/init/B3Format;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/init/B3Format;
+	public static fun values ()[Lio/opentelemetry/kotlin/init/B3Format;
+}
+
+public final class io/opentelemetry/kotlin/propagation/B3PropagatorEntrypointKt {
+	public static final fun createB3Propagator (Lio/opentelemetry/kotlin/init/B3Format;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
+	public static synthetic fun createB3Propagator$default (Lio/opentelemetry/kotlin/init/B3Format;ILjava/lang/Object;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
+}
+
