@@ -11,8 +11,6 @@ public abstract interface class io/opentelemetry/kotlin/InstrumentationScopeInfo
 
 public abstract interface class io/opentelemetry/kotlin/OpenTelemetrySdk : io/opentelemetry/kotlin/OpenTelemetry, io/opentelemetry/kotlin/export/TelemetryCloseable {
 	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
-	public abstract fun getIdGenerator ()Lio/opentelemetry/kotlin/factory/IdGenerator;
-	public abstract fun getResource ()Lio/opentelemetry/kotlin/factory/ResourceFactory;
 }
 
 public abstract interface class io/opentelemetry/kotlin/attributes/AttributeContainer {
@@ -39,8 +37,6 @@ public abstract interface class io/opentelemetry/kotlin/factory/IdGenerator {
 	public abstract fun generateSpanIdBytes ()[B
 	public abstract fun generateTraceIdBytes ()[B
 	public abstract fun getGeneratesRandomTraceIds ()Z
-	public abstract fun getInvalidSpanId ()[B
-	public abstract fun getInvalidTraceId ()[B
 }
 
 public final class io/opentelemetry/kotlin/factory/IdGenerator$DefaultImpls {

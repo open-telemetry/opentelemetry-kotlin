@@ -114,7 +114,5 @@ internal class TracerRandomTraceIdFlagTest {
     private class NonRandomIdGenerator(private val impl: IdGenerator = IdGeneratorImpl()) : IdGenerator {
         override fun generateSpanIdBytes(): ByteArray = impl.generateSpanIdBytes()
         override fun generateTraceIdBytes(): ByteArray = impl.generateTraceIdBytes()
-        override val invalidTraceId: ByteArray = impl.invalidTraceId
-        override val invalidSpanId: ByteArray = impl.invalidSpanId
     }
 }

@@ -11,8 +11,6 @@ import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatContextFactory
-import io.opentelemetry.kotlin.factory.CompatIdGenerator
-import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.logging.LoggerProviderAdapter
 import io.opentelemetry.kotlin.metrics.MeterProviderAdapter
 import io.opentelemetry.kotlin.propagation.TextMapPropagatorAdapter
@@ -43,7 +41,6 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
     sdkErrorHandler: SdkErrorHandler = PlatformSdkErrorHandler,
 ): OpenTelemetrySdk {
     val errorHandler = GuardedSdkErrorHandler(sdkErrorHandler)
-    val idGenerator = CompatIdGenerator()
     val contextFactory = CompatContextFactory()
     val processWideState = claimCompatProcessWideState("toOtelKotlinApi", errorHandler)
     return CompatOpenTelemetryImpl(
@@ -56,8 +53,6 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
         meterProvider = MeterProviderAdapter(unobfuscatedMeterProvider(), errorHandler),
         clock = clock,
         context = contextFactory,
-        idGenerator = idGenerator,
-        resource = CompatResourceFactory,
         propagator = TextMapPropagatorAdapter(propagators.textMapPropagator),
         sdkErrorHandler = errorHandler,
         processWideState = processWideState,
