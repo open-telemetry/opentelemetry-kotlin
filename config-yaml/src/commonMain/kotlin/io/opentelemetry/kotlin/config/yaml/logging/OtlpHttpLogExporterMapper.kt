@@ -11,7 +11,7 @@ import kotlin.collections.plus
 /**
  * Maps `logger_provider.processors.exporter.otlpHttpExporter` onto its behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun OtlpHttpExporter.toBehavior(): OtlpHttpLogsExporterBehavior {
     // if there are duplicate keys, the last one wins.
     // The spec says that in the case of duplicate keys, [headers] have a higher precedence.

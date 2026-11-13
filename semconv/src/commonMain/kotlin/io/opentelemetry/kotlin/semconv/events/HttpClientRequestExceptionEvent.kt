@@ -21,7 +21,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * Some HTTP client frameworks generate artificial exceptions for non-successful HTTP status codes (e.g., 404 Not Found). When possible, instrumentations SHOULD NOT record these artificial exceptions, or SHOULD set the severity to DEBUG (severity number 5).
 * Instrumentations MAY provide a configuration option to populate exception events with the attributes captured on the corresponding HTTP client span.
 */
-@ExperimentalApi
 @IncubatingApi
 public class HttpClientRequestExceptionEvent(
     /**
@@ -50,6 +49,7 @@ public class HttpClientRequestExceptionEvent(
     public val exceptionType: String? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

@@ -18,7 +18,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 *
 * none
 */
-@ExperimentalApi
 @IncubatingApi
 @Deprecated("Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).")
 public class GenAiEvaluationResultEvent(
@@ -64,6 +63,7 @@ public class GenAiEvaluationResultEvent(
     public val genAiResponseId: String? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.baggage
 
 import io.opentelemetry.kotlin.ExperimentalApi
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal object NoopBaggage : Baggage {
     override fun getValue(name: String): String? = null
     override fun asMap(): Map<String, BaggageEntry> = emptyMap()

@@ -18,7 +18,7 @@ import io.opentelemetry.kotlin.propagation.createNoopPropagator
 import io.opentelemetry.kotlin.tracing.NoopTracerProvider
 import io.opentelemetry.kotlin.tracing.TracerProvider
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal object NoopOpenTelemetryImpl : OpenTelemetrySdk {
     override val tracerProvider: TracerProvider = NoopTracerProvider
     override val loggerProvider: LoggerProvider = NoopLoggerProvider

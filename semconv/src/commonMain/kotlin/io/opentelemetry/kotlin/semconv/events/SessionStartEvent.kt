@@ -19,7 +19,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * For instrumentation that tracks user behavior during user sessions, a `session.start` event MUST be emitted every time a session is created. When a new session is created as a continuation of a prior session, the `session.previous_id` MUST be included in the event. The values of `session.id` and `session.previous_id` MUST be different.
 * When the `session.start` event contains both `session.id` and `session.previous_id` fields, the event indicates that the previous session has ended. If the session ID in `session.previous_id` has not yet ended via explicit `session.end` event, then the consumer SHOULD treat this continuation event as semantically equivalent to `session.end(session.previous_id)` and `session.start(session.id)`.
 */
-@ExperimentalApi
 @IncubatingApi
 public class SessionStartEvent(
     /**
@@ -32,6 +31,7 @@ public class SessionStartEvent(
     public val sessionPreviousId: String? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

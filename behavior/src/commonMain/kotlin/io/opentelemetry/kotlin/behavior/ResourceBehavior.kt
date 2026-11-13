@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  *
  * https://opentelemetry.io/docs/specs/otel/resource/sdk/
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class ResourceBehavior(
 
     /**

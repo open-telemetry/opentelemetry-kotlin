@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode.Success
  * Shared persistence logic for exporters. Stores telemetry before exporting and deletes it only
  * when the export succeeds, ensuring no data loss if the process terminates mid-export.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class PersistingExporter<T>(
     private val delegateExport: suspend (List<T>) -> OperationResultCode,
     private val closeable: TelemetryCloseable,

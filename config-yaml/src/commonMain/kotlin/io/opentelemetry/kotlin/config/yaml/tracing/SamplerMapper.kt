@@ -24,7 +24,7 @@ internal const val MAX_PARENT_BASED_DEPTH = 10
  * than partly honored, so the SDK falls back to its default instead of using a sampler the file
  * never described.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun Sampler.toBehavior(): SamplerBehavior? {
     if (nestsDeeperThan(MAX_PARENT_BASED_DEPTH)) {
         return null

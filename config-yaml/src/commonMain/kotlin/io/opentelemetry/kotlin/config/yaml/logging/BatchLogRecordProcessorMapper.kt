@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.config.schema.model.BatchLogRecordProcessor
 /**
  * Maps `logger_provider.processors.batch` onto batch log record processor behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun BatchLogRecordProcessor.toBehavior(): BatchLogRecordProcessorBehavior {
     val scheduleDelay = scheduleDelay?.takeIf { value -> value >= 0 }
     val exportTimeout = exportTimeout?.takeIf { value -> value >= 0 }

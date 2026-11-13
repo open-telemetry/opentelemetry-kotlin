@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
  *
  * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#span-limits
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class SpanLimitsEnvVars(
     private val reader: ReportingEnvVarReader,
 ) {

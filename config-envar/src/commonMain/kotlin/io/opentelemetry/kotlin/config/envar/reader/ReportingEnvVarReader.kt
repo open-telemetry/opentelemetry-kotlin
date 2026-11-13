@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Value
  * Reads environment variables through [delegate], reports invalid values, and applies the fallback
  * required by each type.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class ReportingEnvVarReader(
     private val delegate: EnvVarReader,
     private val onWarning: (EnvVarReadWarning) -> Unit,

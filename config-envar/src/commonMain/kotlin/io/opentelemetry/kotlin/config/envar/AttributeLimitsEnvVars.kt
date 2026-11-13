@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
  *
  * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#attribute-limits
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class AttributeLimitsEnvVars(
     private val reader: ReportingEnvVarReader,
 ) {

@@ -13,7 +13,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 /**
  * Maps a declarative config file onto the behavior it supplies, as one layer.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun OpenTelemetryConfiguration.toBehavior(
     sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
 ): OpenTelemetryBehavior = OpenTelemetryBehavior(
@@ -27,7 +27,7 @@ fun OpenTelemetryConfiguration.toBehavior(
     tracerProvider = tracerProvider?.toBehavior(),
 )
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal fun SeverityNumber.toSeverityLevel(): SeverityLevel? = when (this) {
     SeverityNumber.TRACE -> SeverityLevel.TRACE
     SeverityNumber.TRACE2 -> SeverityLevel.TRACE2

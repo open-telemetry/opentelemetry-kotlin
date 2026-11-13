@@ -13,7 +13,7 @@ import okio.Path
  * scalars), or `null` for an empty document. Environment variable references in scalar values are
  * substituted from [getEnvVar].
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class YamlConfigParser(
     private val getEnvVar: (String) -> String? = ::getEnvVarValue,
 ) {

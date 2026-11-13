@@ -18,7 +18,7 @@ import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.scope.scopeCacheKey
 import java.util.concurrent.ConcurrentHashMap
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class TracerProviderAdapter(
     private val tracerProvider: OtelJavaTracerProvider,
     private val contextFactory: ContextFactory,

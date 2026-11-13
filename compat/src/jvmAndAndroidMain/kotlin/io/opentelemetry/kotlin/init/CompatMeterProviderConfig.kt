@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.metrics.MeterProvider
 import io.opentelemetry.kotlin.metrics.MeterProviderAdapter
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class CompatMeterProviderConfig(
     private val sdkErrorHandler: SdkErrorHandler,
 ) : MeterProviderConfigDsl {

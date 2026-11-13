@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * Resolves the configuration supplied by each mechanism into the single behavior the SDK is
  * initialized with.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 interface BehaviorResolver {
 
     /**

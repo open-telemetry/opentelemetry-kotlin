@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.behavior.SimpleLogRecordProcessorBehavior
 /**
  * Captures the log record processor configured programmatically, and maps it onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class LogRecordProcessorConfigDslImpl {
 
     private var simple: SimpleLogRecordProcessorBehavior? = null

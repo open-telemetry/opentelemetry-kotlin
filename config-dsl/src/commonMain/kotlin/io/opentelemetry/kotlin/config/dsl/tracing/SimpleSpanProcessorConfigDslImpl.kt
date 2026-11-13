@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
 /**
  * Captures the simple span processor configured programmatically and maps it onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class SimpleSpanProcessorConfigDslImpl : BehaviorSupplier<SimpleSpanProcessorBehavior> {
     private var exporter: SpanExporterBehavior? = null
 

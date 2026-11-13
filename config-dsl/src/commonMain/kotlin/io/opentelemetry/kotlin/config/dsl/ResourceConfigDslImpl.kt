@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.init.ResourceConfigDsl
 /**
  * Captures the resource configured programmatically, and maps it onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class ResourceConfigDslImpl : ResourceConfigDsl, BehaviorSupplier<ResourceBehavior> {
 
     private val attributes = ResourceAttributesMutator()

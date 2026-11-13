@@ -28,7 +28,7 @@ public fun TraceExportConfigDsl.otlpHttpSpanExporter(
 /**
  * Creates a span exporter that writes telemetry to a file.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal fun TraceExportConfigDsl.otlpFileSpanExporter(
     block: OtlpFileExporterConfigDsl.() -> Unit = {},
 ): SpanExporter =

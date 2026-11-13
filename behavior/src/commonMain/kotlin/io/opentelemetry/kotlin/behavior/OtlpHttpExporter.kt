@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.behavior
 
 import io.opentelemetry.kotlin.ExperimentalApi
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class OtlpHttpExporter(
     override val endpoint: String? = null,
     val signalEndpoint: String? = null,

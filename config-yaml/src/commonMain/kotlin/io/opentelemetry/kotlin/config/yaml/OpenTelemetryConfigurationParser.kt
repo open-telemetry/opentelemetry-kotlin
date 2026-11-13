@@ -14,7 +14,7 @@ import okio.Path
  * types generated from the `opentelemetry-configuration` JSON schema. Environment variable
  * references in scalar values are substituted from [getEnvVar] before the document is mapped.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class OpenTelemetryConfigurationParser(
     private val getEnvVar: (String) -> String? = ::getEnvVarValue,
 ) {

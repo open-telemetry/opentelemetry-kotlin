@@ -20,7 +20,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * Instrumentations SHOULD set the severity to ERROR (severity number 17) when recording this event.
 * Instrumentations MAY provide a configuration option to populate exception events with the attributes captured on the corresponding HTTP server span.
 */
-@ExperimentalApi
 @IncubatingApi
 public class HttpServerRequestExceptionEvent(
     /**
@@ -49,6 +48,7 @@ public class HttpServerRequestExceptionEvent(
     public val exceptionType: String? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

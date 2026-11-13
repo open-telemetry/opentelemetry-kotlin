@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * Behavior supplied by one configuration mechanism, which can be combined with the behavior
  * supplied by another.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 interface Behavior<T : Behavior<T>> {
 
     /**

@@ -18,7 +18,7 @@ import io.opentelemetry.sdk.extension.incubator.trace.samplers.SamplingPredicate
 /**
  * Provides the built-in samplers backed by opentelemetry-java.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class CompatSamplerConfig : SamplerConfigDsl {
 
     override fun alwaysOn(): Sampler = SamplerAdapter(OtelJavaSampler.alwaysOn())
@@ -83,7 +83,7 @@ internal class CompatSamplerConfig : SamplerConfigDsl {
         OtelJavaBackedComposableSampler(CompatComposableRuleBasedConfig(this).apply(block).build())
 }
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 private class CompatComposableRuleBasedConfig(
     private val dsl: SamplerConfigDsl,
 ) : ComposableRuleBasedConfigDsl, SamplerConfigDsl by dsl {

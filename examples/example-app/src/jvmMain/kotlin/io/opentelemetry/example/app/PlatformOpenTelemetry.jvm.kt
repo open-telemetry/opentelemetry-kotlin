@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.createOpenTelemetry
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal actual fun createPlatformOpenTelemetry(
     sdkMode: AppConfig.SdkMode,
     config: OpenTelemetryConfigDsl.() -> Unit

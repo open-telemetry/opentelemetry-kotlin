@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor as OtelJavaBatchSpanProcessor
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor as OtelJavaSimpleSpanProcessor
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class CompatTracerProviderConfig(
     private val clock: Clock,
     private val sdkErrorHandler: SdkErrorHandler,

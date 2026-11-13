@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 /**
  * No-op implementation of [LongUpDownCounter].
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class NoopLongUpDownCounter(
     override val name: String,
     override val unit: String?,

@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  *
  * https://opentelemetry.io/docs/specs/otel/logs/sdk/#simple-processor
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class SimpleLogRecordProcessorBehavior(
 
     /**

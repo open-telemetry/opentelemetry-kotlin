@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaMeter
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class MeterAdapter(
     private val impl: OtelJavaMeter,
     private val sdkErrorHandler: SdkErrorHandler,
