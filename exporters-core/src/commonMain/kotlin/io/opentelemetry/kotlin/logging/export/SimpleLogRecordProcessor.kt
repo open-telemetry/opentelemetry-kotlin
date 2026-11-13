@@ -2,9 +2,11 @@ package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.export.guardExporterCode
 import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
@@ -21,6 +23,7 @@ import kotlinx.coroutines.sync.withLock
 internal class SimpleLogRecordProcessor(
     private val exporter: LogRecordExporter,
     private val scope: CoroutineScope,
+    private val sdkErrorHandler: SdkErrorHandler,
 ) : LogRecordProcessor {
 
     private val exportMutex = Mutex()
@@ -34,7 +37,9 @@ internal class SimpleLogRecordProcessor(
             val data = log.toLogRecordData()
             scope.launch {
                 exportMutex.withLock {
-                    exporter.export(listOf(data))
+                    sdkErrorHandler.guardExporterCode("Log record export failed") {
+                        exporter.export(listOf(data))
+                    }
                 }
             }
         }
@@ -48,8 +53,12 @@ internal class SimpleLogRecordProcessor(
     ): Boolean = !shutdownState.isShutdown
 
     override suspend fun forceFlush(): OperationResultCode =
-        runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS) { exporter.forceFlush() }
+        runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS) {
+            sdkErrorHandler.guardExporterCode("Exporter forceFlush failed") { exporter.forceFlush() }
+        }
 
     override suspend fun shutdown(): OperationResultCode =
-        shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS, exporter::shutdown)
+        shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS) {
+            sdkErrorHandler.guardExporterCode("Exporter shutdown failed") { exporter.shutdown() }
+        }
 }

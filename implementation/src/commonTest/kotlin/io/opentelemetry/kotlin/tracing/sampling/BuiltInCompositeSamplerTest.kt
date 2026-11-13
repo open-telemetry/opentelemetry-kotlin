@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -157,7 +158,7 @@ internal class BuiltInCompositeSamplerTest {
         val unreliableDelegate = fakeComposableSampler(
             SamplingIntentImpl(threshold = threshold, adjustedCountReliable = false)
         )
-        val result = CompositeSampler(unreliableDelegate, random = Random(seed)).sample()
+        val result = CompositeSampler(unreliableDelegate, FakeSdkErrorHandler(), random = Random(seed)).sample()
 
         assertEquals(expectedDecision, result.decision)
         assertNull(result.traceState.get("ot"))
@@ -217,6 +218,41 @@ internal class BuiltInCompositeSamplerTest {
     }
 
     @Test
+    fun `keeps sampled decision without attributes when attributesProvider throws`() {
+        val errorHandler = FakeSdkErrorHandler()
+        val delegate = fakeComposableSampler(
+            SamplingIntentImpl(
+                threshold = 0,
+                adjustedCountReliable = true,
+                attributesProvider = { error("boom") },
+            )
+        )
+        val result = CompositeSampler(delegate, errorHandler).sample()
+        assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, result.decision)
+        assertEquals("th:0", result.traceState.get("ot"))
+        assertTrue(result.attributes.attributes.isEmpty())
+        assertEquals("boom", errorHandler.userCodeErrors.single().cause.message)
+    }
+
+    @Test
+    fun `keeps existing ot value when traceStateProvider throws`() {
+        val errorHandler = FakeSdkErrorHandler()
+        val delegate = fakeComposableSampler(
+            SamplingIntentImpl(
+                threshold = 0,
+                adjustedCountReliable = false,
+                traceStateProvider = { _, _ -> error("boom") },
+            )
+        )
+        val result = CompositeSampler(delegate, errorHandler).sample(
+            context = contextWithParent(sampled = true, isRemote = true, otValue = "rv:a0000000000000"),
+        )
+        assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, result.decision)
+        assertEquals("rv:a0000000000000", result.traceState.get("ot"))
+        assertEquals("boom", errorHandler.userCodeErrors.single().cause.message)
+    }
+
+    @Test
     fun `merges delegate attributes via composableAnnotating`() {
         val traceStateProvider: (TraceState, SamplingResult.Decision) -> TraceState =
             { traceState, _ -> traceState.put("vendor", "value") }
@@ -236,7 +272,7 @@ internal class BuiltInCompositeSamplerTest {
         val annotating = ComposableAnnotatingSampler(delegate) {
             setStringAttribute("sampling.rule", "from-annotation")
         }
-        val result = CompositeSampler(annotating).sample()
+        val result = CompositeSampler(annotating, FakeSdkErrorHandler()).sample()
 
         assertEquals(
             mapOf("sampling.rule" to "from-annotation", "delegate.only" to "kept"),
@@ -259,7 +295,7 @@ internal class BuiltInCompositeSamplerTest {
         val annotating = ComposableAnnotatingSampler(delegate) {
             setDoubleListAttribute("annotation.doubles", listOf(1.0, 2.0))
         }
-        val result = CompositeSampler(annotating).sample()
+        val result = CompositeSampler(annotating, FakeSdkErrorHandler()).sample()
         assertEquals(
             mapOf("delegate.double" to 2.0, "annotation.doubles" to listOf(1.0, 2.0)),
             result.attributes.attributes,

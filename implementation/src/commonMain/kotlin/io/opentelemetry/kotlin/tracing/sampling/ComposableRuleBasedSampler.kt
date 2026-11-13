@@ -2,6 +2,8 @@ package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 
@@ -20,7 +22,10 @@ internal data class SamplingRule(
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composablerulebased
  */
-internal class ComposableRuleBasedSampler(rules: List<SamplingRule>) : ComposableSampler {
+internal class ComposableRuleBasedSampler(
+    rules: List<SamplingRule>,
+    private val sdkErrorHandler: SdkErrorHandler,
+) : ComposableSampler {
 
     private val rules: List<SamplingRule> = rules.toList()
     private val noMatch = ComposableAlwaysOffSampler
@@ -33,7 +38,9 @@ internal class ComposableRuleBasedSampler(rules: List<SamplingRule>) : Composabl
         links: List<SpanLink>
     ): SamplingIntent {
         val match = rules.firstOrNull {
-            it.predicate.matches(context, name, spanKind, attributes, links)
+            sdkErrorHandler.guardOrDefault(false, "Sampling rule predicate failed") {
+                it.predicate.matches(context, name, spanKind, attributes, links)
+            }
         }
         return (match?.sampler ?: noMatch).getSamplingIntent(context, name, spanKind, attributes, links)
     }

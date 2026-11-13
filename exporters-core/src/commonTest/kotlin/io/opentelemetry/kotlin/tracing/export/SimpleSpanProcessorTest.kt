@@ -1,14 +1,17 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.export.FakeTraceExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.FakeTraceFlags
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -36,7 +39,7 @@ internal class SimpleSpanProcessorTest {
     fun testSpanProcessorExport() = runTest {
         val exporter = FakeSpanExporter()
         val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
-        val processor = SimpleSpanProcessor(exporter, scope)
+        val processor = SimpleSpanProcessor(exporter, scope, FakeSdkErrorHandler())
         val span = FakeReadWriteSpan()
         processor.onStart(span, FakeContext())
         processor.onEnd(span)
@@ -50,7 +53,7 @@ internal class SimpleSpanProcessorTest {
     fun testSpanProcessorSkipsUnsampledSpan() = runTest {
         val exporter = FakeSpanExporter()
         val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
-        val processor = SimpleSpanProcessor(exporter, scope)
+        val processor = SimpleSpanProcessor(exporter, scope, FakeSdkErrorHandler())
         val span = FakeReadWriteSpan(
             spanContext = FakeSpanContext(traceFlags = FakeTraceFlags(isSampled = false))
         )
@@ -65,7 +68,7 @@ internal class SimpleSpanProcessorTest {
     fun testOnEndNoOpAfterShutdown() = runTest {
         val exporter = FakeSpanExporter()
         val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
-        val processor = SimpleSpanProcessor(exporter, scope)
+        val processor = SimpleSpanProcessor(exporter, scope, FakeSdkErrorHandler())
         processor.shutdown()
 
         val span = FakeReadWriteSpan()
@@ -78,7 +81,7 @@ internal class SimpleSpanProcessorTest {
     fun testShutdownReturnsSuccessOnSecondCall() = runTest {
         val exporter = FakeSpanExporter()
         val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
-        val processor = SimpleSpanProcessor(exporter, scope)
+        val processor = SimpleSpanProcessor(exporter, scope, FakeSdkErrorHandler())
 
         assertEquals(OperationResultCode.Success, processor.shutdown())
         assertEquals(OperationResultCode.Success, processor.shutdown())
@@ -89,7 +92,7 @@ internal class SimpleSpanProcessorTest {
     fun testForceFlushWorksAfterShutdown() = runTest {
         val exporter = FakeSpanExporter()
         val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
-        val processor = SimpleSpanProcessor(exporter, scope)
+        val processor = SimpleSpanProcessor(exporter, scope, FakeSdkErrorHandler())
         processor.shutdown()
 
         assertEquals(OperationResultCode.Success, processor.forceFlush())
@@ -100,13 +103,61 @@ internal class SimpleSpanProcessorTest {
     fun testConcurrentExportsAreSerialized() = runTest {
         val exporter = SuspendingSpanExporter()
         val scope = CoroutineScope(StandardTestDispatcher(testScheduler))
-        val processor = SimpleSpanProcessor(exporter, scope)
+        val processor = SimpleSpanProcessor(exporter, scope, FakeSdkErrorHandler())
 
         repeat(5) { processor.onEnd(FakeReadWriteSpan(name = "span_$it")) }
         advanceUntilIdle()
 
         assertFalse(exporter.observedConcurrentExport)
         assertEquals(List(5) { "span_$it" }, exporter.exports)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testExportFailureIsContained() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        var exportCount = 0
+        val exporter = FakeSpanExporter(exportReturnValue = {
+            if (exportCount++ == 0) {
+                error("export failed")
+            }
+            OperationResultCode.Success
+        })
+        val scope = CoroutineScope(
+            SupervisorJob() +
+                UnconfinedTestDispatcher(testScheduler) +
+                telemetryExceptionHandler("test", errorHandler)
+        )
+        val processor = SimpleSpanProcessor(exporter, scope, errorHandler)
+
+        processor.onEnd(FakeReadWriteSpan(name = "first"))
+        processor.onEnd(FakeReadWriteSpan(name = "second"))
+
+        assertEquals(listOf("first", "second"), exporter.exports.map(SpanData::name))
+        assertEquals("export failed", errorHandler.userCodeErrors.single().cause.message)
+        assertTrue(errorHandler.sdkCodeErrors.isEmpty())
+    }
+
+    @Test
+    fun testForceFlushFailureIsContained() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val exporter = FakeSpanExporter(forceFlushReturnValue = { error("flush failed") })
+        val processor = SimpleSpanProcessor(exporter, this, errorHandler)
+
+        assertEquals(OperationResultCode.Failure, processor.forceFlush())
+        assertEquals("flush failed", errorHandler.userCodeErrors.single().cause.message)
+        assertTrue(errorHandler.sdkCodeErrors.isEmpty())
+    }
+
+    @Test
+    fun testShutdownFailureIsContained() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val exporter = FakeSpanExporter(shutdownReturnValue = { error("shutdown failed") })
+        val processor = SimpleSpanProcessor(exporter, this, errorHandler)
+
+        assertEquals(OperationResultCode.Failure, processor.shutdown())
+        assertEquals("shutdown failed", errorHandler.userCodeErrors.single().cause.message)
+        assertTrue(errorHandler.sdkCodeErrors.isEmpty())
     }
 
     private class SuspendingSpanExporter : SpanExporter {
