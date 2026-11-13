@@ -15,12 +15,13 @@ import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.IdGenerator
+import io.opentelemetry.kotlin.guarded
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.propagation.createNoopPropagator
 import kotlin.concurrent.Volatile
 
 internal class OpenTelemetryConfigImpl(
-    clock: Clock,
+    userClock: Clock,
     internal val globalResourceConfig: ResourceConfigDslImpl = ResourceConfigDslImpl(),
 ) : OpenTelemetryConfigDsl,
     ResourceConfigDsl by globalResourceConfig,
@@ -33,6 +34,8 @@ internal class OpenTelemetryConfigImpl(
      * forwarder that resolves the configured handler on each report instead.
      */
     internal val sdkErrorHandler = GuardedSdkErrorHandler { configuredErrorHandler.onError(it) }
+
+    internal val clock: Clock = userClock.guarded(sdkErrorHandler)
 
     internal var shutdownTimeoutMs: Long = 3000
         private set

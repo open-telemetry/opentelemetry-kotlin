@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.ResourceFactory
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
+import io.opentelemetry.kotlin.factory.guarded
 import io.opentelemetry.kotlin.factory.toIdGenerator
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.init.config.MetricsConfig
@@ -26,8 +27,8 @@ internal class SdkConfigFactory(
 ) {
 
     val idGenerator: IdGenerator =
-        behavior.tracerProvider?.idGenerator?.toIdGenerator(cfg.sdkErrorHandler)
-            ?: IdGeneratorImpl()
+        (behavior.tracerProvider?.idGenerator?.toIdGenerator(cfg.sdkErrorHandler) ?: IdGeneratorImpl())
+            .guarded(cfg.sdkErrorHandler)
 
     private val sampler: SamplerBehavior? = behavior.tracerProvider?.sampler
 
