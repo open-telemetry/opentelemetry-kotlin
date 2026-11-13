@@ -78,6 +78,7 @@ jobs:
 
   # Runs on macOS because the klib fixture consumes the library's iOS klibs, which KGP only
   # publishes from a macOS host. The rest of the suite is host-independent, so it all runs here.
+  # Apple simulator tests also run here since they need a macOS host.
   integration-test:
     runs-on: macos-latest
     timeout-minutes: 60
@@ -99,6 +100,9 @@ jobs:
         uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
         with:
           cache-disabled: true
+
+      - name: iOS/tvOS simulator tests
+        run: ./gradlew iosSimulatorArm64Test tvosSimulatorArm64Test -Pio.opentelemetry.kotlin.enableTvosTests=true --warn
 
       - name: Publish snapshot to Maven local
         run: ./gradlew publishToMavenLocal -PsnapshotPublish=true --warn
