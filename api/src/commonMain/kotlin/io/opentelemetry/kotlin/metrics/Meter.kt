@@ -184,4 +184,21 @@ public interface Meter {
         description: String? = null,
         vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
     ): ObservableDoubleGauge
+
+    /**
+     * Registers one [callback] to observe several asynchronous instruments during collection.
+     * [measurement] and [additionalMeasurements] declare which measurements the callback may record.
+     * They must belong to this [Meter]. SDK implementations ignore observations on undeclared measurements.
+     *
+     * The callback should finish promptly and be safe to invoke repeatedly, including from different threads.
+     * Closing the returned registration prevents the callback from running on future collections.
+     *
+     * https://opentelemetry.io/docs/specs/otel/metrics/api/#multiple-instrument-callbacks
+     */
+    @ThreadSafe
+    public fun batchCallback(
+        measurement: ObservableMeasurement,
+        vararg additionalMeasurements: ObservableMeasurement,
+        callback: () -> Unit,
+    ): AutoCloseable
 }

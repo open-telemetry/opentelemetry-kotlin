@@ -20,6 +20,7 @@ import io.opentelemetry.api.logs.Logger
 import io.opentelemetry.api.logs.LoggerBuilder
 import io.opentelemetry.api.logs.LoggerProvider
 import io.opentelemetry.api.logs.Severity
+import io.opentelemetry.api.metrics.BatchCallback
 import io.opentelemetry.api.metrics.DoubleCounter
 import io.opentelemetry.api.metrics.DoubleCounterBuilder
 import io.opentelemetry.api.metrics.DoubleGauge
@@ -159,6 +160,7 @@ typealias OtelJavaScopeConfigurator<T> = ScopeConfigurator<T>
 typealias OtelJavaMeterProvider = MeterProvider
 typealias OtelJavaMeterBuilder = MeterBuilder
 typealias OtelJavaMeter = Meter
+typealias OtelJavaBatchCallback = BatchCallback
 typealias OtelJavaDoubleCounter = DoubleCounter
 typealias OtelJavaLongCounter = LongCounter
 typealias OtelJavaDoubleCounterBuilder = DoubleCounterBuilder

@@ -23,7 +23,7 @@ internal class CompatOpenTelemetryImpl(
     override val idGenerator: IdGenerator,
     override val resource: ResourceFactory,
     override val propagator: TextMapPropagator,
-    private val sdkErrorHandler: SdkErrorHandler,
+    internal val sdkErrorHandler: SdkErrorHandler,
     private val processWideState: CompatProcessWideState? = null,
     private val timeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS,
 ) : OpenTelemetrySdk {

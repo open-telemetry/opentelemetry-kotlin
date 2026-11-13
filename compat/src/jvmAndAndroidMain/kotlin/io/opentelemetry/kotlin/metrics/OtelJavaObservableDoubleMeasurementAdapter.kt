@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaObservableDoubleMeasurement
 import io.opentelemetry.kotlin.attributes.setOtelJavaAttributes
 
 internal class OtelJavaObservableDoubleMeasurementAdapter(
-    private val impl: ObservableDoubleMeasurement,
+    internal val impl: ObservableDoubleMeasurement,
 ) : OtelJavaObservableDoubleMeasurement {
     override fun record(value: Double) {
         impl.record(value)
