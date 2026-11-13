@@ -140,6 +140,7 @@ public fun SdkErrorHandler.reportError(error: SdkError) {
     try {
         onError(error)
     } catch (ignored: Throwable) {
+        ignored.restoreInterruptIfNeeded()
         // swallow
     }
 }
@@ -149,6 +150,7 @@ public fun SdkErrorHandler.reportError(error: SdkError) {
  * must not take down the guard that called it, so any such failure is swallowed.
  */
 public fun SdkErrorHandler.reportUserCodeError(exc: Throwable, details: String?) {
+    exc.unwrapUserCode().restoreInterruptIfNeeded()
     reportError(
         SdkError.UserCodeError(
             exc.unwrapUserCode(),
@@ -164,6 +166,7 @@ public fun SdkErrorHandler.reportUserCodeError(exc: Throwable, details: String?)
  * must not take down the guard that called it, so any such failure is swallowed.
  */
 public fun SdkErrorHandler.reportSdkCodeError(exc: Throwable, details: String?) {
+    exc.unwrapUserCode().restoreInterruptIfNeeded()
     if (exc is UserCodeException) {
         reportUserCodeError(exc, details)
         return

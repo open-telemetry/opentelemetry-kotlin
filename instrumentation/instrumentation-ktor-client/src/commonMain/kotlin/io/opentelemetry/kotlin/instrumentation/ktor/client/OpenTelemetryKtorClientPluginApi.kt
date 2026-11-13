@@ -27,10 +27,9 @@ public fun openTelemetryKtorClientPlugin(openTelemetry: OpenTelemetry): ClientPl
             if (tracer.enabled() &&
                 request.attributes.getOrNull(suppressInstrumentationAttribute) != true
             ) {
-                val parentContext = currentContext()
                 val span = tracer.startSpan(
                     name = request.method.value,
-                    parentContext = parentContext,
+                    parentContext = currentContext(),
                     spanKind = SpanKind.CLIENT,
                 )
                 try {
