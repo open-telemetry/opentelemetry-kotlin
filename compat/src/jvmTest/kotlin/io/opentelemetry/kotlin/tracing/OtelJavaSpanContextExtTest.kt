@@ -1,4 +1,4 @@
-package io.opentelemetry.kotlin.tracing.ext
+package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceFlags

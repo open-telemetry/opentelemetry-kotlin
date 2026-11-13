@@ -1,9 +1,7 @@
-package io.opentelemetry.kotlin.tracing.ext
+package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
-import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.kotlin.tracing.createSpanContext
 
 private const val SAMPLED_BIT = 0b01
 private const val RANDOM_BIT = 0b10

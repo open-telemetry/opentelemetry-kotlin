@@ -9,8 +9,8 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.StatusData
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusData
+import io.opentelemetry.kotlin.tracing.toOtelJavaSpanContext
 import java.util.concurrent.TimeUnit
 
 internal class ReadWriteSpanAdapter(

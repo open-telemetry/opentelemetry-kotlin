@@ -1,6 +1,5 @@
-package io.opentelemetry.kotlin.tracing.ext
+package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

@@ -14,7 +14,7 @@ import io.opentelemetry.kotlin.attributes.setOtelJavaAttribute
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import io.opentelemetry.kotlin.logging.toOtelJavaSeverityNumber
 import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
+import io.opentelemetry.kotlin.tracing.toOtelJavaSpanContext
 
 internal class OtelJavaReadWriteLogRecordAdapter(
     private val log: ReadWriteLogRecord
