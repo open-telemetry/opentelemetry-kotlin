@@ -14,6 +14,7 @@ public final class io/opentelemetry/kotlin/OtelJavaOpenTelemetryExtKt {
 
 public final class io/opentelemetry/kotlin/baggage/BaggageExtKt {
 	public static final fun toOtelJavaBaggage (Lio/opentelemetry/kotlin/baggage/Baggage;)Lio/opentelemetry/api/baggage/Baggage;
+	public static final fun toOtelKotlinBaggage (Lio/opentelemetry/api/baggage/Baggage;)Lio/opentelemetry/kotlin/baggage/Baggage;
 }
 
 public final class io/opentelemetry/kotlin/context/ContextExtKt {
