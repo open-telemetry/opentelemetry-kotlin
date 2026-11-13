@@ -19,8 +19,8 @@ import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.propagation.FakeTextMapPropagator
+import io.opentelemetry.kotlin.propagation.createCompositePropagator
 import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
-import io.opentelemetry.kotlin.propagation.createW3CTraceContextPropagator
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -57,23 +57,23 @@ internal class OpenTelemetryConfigImplTest {
         assertNull(resolver.generateTracingConfig().processor)
         assertNull(resolver.generateLoggingConfig().processor)
         assertNull(cfg.contextConfig.storage)
-        assertSame(NoopOpenTelemetry.propagator, cfg.propagator)
+        assertSame(NoopOpenTelemetry.propagator, cfg.createPropagator())
     }
 
     @Test
     fun testPropagatorOverride() {
         val cfg = OpenTelemetryConfigImpl(clock).apply {
-            propagator { w3cBaggage() }
+            propagator { createW3CBaggagePropagator() }
         }
-        assertSame(createW3CBaggagePropagator(), cfg.propagator)
+        assertSame(createW3CBaggagePropagator(), cfg.createPropagator())
     }
 
     @Test
     fun testCompositePropagatorOverride() {
         val cfg = OpenTelemetryConfigImpl(clock).apply {
-            propagator { composite(w3cBaggage()) }
+            propagator { createCompositePropagator(createW3CBaggagePropagator()) }
         }
-        val composite = cfg.propagator
+        val composite = cfg.createPropagator()
         assertEquals(listOf("baggage"), composite.fields().toList())
     }
 
@@ -83,19 +83,32 @@ internal class OpenTelemetryConfigImplTest {
         val cfg = OpenTelemetryConfigImpl(clock).apply {
             propagator { custom }
         }
-        assertSame(custom, cfg.propagator)
+        assertSame(custom, cfg.createPropagator())
     }
 
     @Test
-    fun testPropagatorUsesReturnValueNotLastBuilderCall() {
+    fun testPropagatorSupplierIsInvokedLazily() {
+        var calls = 0
         val cfg = OpenTelemetryConfigImpl(clock).apply {
             propagator {
-                val traceContext = w3cTraceContext()
-                w3cBaggage()
-                traceContext
+                calls++
+                createW3CBaggagePropagator()
             }
         }
-        assertSame(createW3CTraceContextPropagator(), cfg.propagator)
+        assertEquals(0, calls)
+        assertSame(createW3CBaggagePropagator(), cfg.createPropagator())
+        assertEquals(1, calls)
+    }
+
+    @Test
+    fun testThrowingPropagatorSupplierFallsBackToNoop() {
+        val errors = FakeSdkErrorHandler()
+        val cfg = OpenTelemetryConfigImpl(clock).apply {
+            errorHandler(errors)
+            propagator { error("boom") }
+        }
+        assertSame(NoopOpenTelemetry.propagator, cfg.createPropagator())
+        assertEquals(1, errors.userCodeErrors.size)
     }
 
     @Test

@@ -70,7 +70,7 @@ public fun createCompatOpenTelemetry(
         context = contextFactory,
         idGenerator = configFactory.idGenerator,
         resource = CompatResourceFactory,
-        propagator = cfg.propagator,
+        propagator = cfg.createPropagator(),
         sdkErrorHandler = cfg.sdkErrorHandler,
         processWideState = processWideState,
         timeoutMs = cfg.shutdownTimeoutMs,

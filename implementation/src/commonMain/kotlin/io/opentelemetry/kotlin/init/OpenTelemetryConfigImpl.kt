@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.config.DeclarativeBehaviorReader
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
-import io.opentelemetry.kotlin.config.dsl.PropagatorConfigImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceDetectionConfigDslImpl
 import io.opentelemetry.kotlin.config.toBehaviorReader
@@ -14,6 +13,7 @@ import io.opentelemetry.kotlin.config.validateOrUseDefault
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.propagation.createNoopPropagator
@@ -51,12 +51,10 @@ internal class OpenTelemetryConfigImpl(
     internal val loggingConfig: LoggerProviderConfigImpl = LoggerProviderConfigImpl(clock, sdkErrorHandler)
     internal val metricsConfig: MeterProviderConfigImpl = MeterProviderConfigImpl(sdkErrorHandler)
     internal val contextConfig: ContextConfigImpl = ContextConfigImpl()
-    private val propagatorCfg: PropagatorConfigImpl = PropagatorConfigImpl()
     private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
     internal val resourceDetectionConfig = ResourceDetectionConfigDslImpl()
 
-    @Volatile internal var propagator: TextMapPropagator = createNoopPropagator()
-        private set
+    @Volatile private var propagatorSupplier: (() -> TextMapPropagator)? = null
 
     @Volatile private var idGeneratorBehavior: IdGeneratorBehavior? = null
 
@@ -96,8 +94,19 @@ internal class OpenTelemetryConfigImpl(
         contextConfig.action()
     }
 
-    override fun propagator(action: PropagatorConfigDsl.() -> TextMapPropagator) {
-        propagator = propagatorCfg.action()
+    override fun propagator(action: () -> TextMapPropagator) {
+        propagatorSupplier = action
+    }
+
+    /**
+     * Invokes the supplier configured via [propagator], falling back to a noop propagator if none
+     * was configured or the supplier throws.
+     */
+    internal fun createPropagator(): TextMapPropagator {
+        val supplier = propagatorSupplier ?: return createNoopPropagator()
+        return sdkErrorHandler.guardOrDefault(createNoopPropagator(), "Failed to create TextMapPropagator, using noop") {
+            supplier()
+        }
     }
 
     override fun idGenerator(action: () -> IdGenerator) {

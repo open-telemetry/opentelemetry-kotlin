@@ -8,6 +8,8 @@ import io.opentelemetry.kotlin.createOpenTelemetry
 import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.propagation.FakeTextMapGetter
 import io.opentelemetry.kotlin.propagation.FakeTextMapSetter
+import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
+import io.opentelemetry.kotlin.propagation.createW3CTraceContextPropagator
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -71,13 +73,13 @@ internal class PropagationCrossCheckTest {
     }
 
     private fun w3cTraceContextOtels(): OtelRefs = OtelRefs(
-        impl = createOpenTelemetry { propagator { w3cTraceContext() } }.also(sdks::track),
-        compat = createCompatOpenTelemetry { propagator { w3cTraceContext() } }.also(sdks::track)
+        impl = createOpenTelemetry { propagator { createW3CTraceContextPropagator() } }.also(sdks::track),
+        compat = createCompatOpenTelemetry { propagator { createW3CTraceContextPropagator() } }.also(sdks::track)
     )
 
     private fun w3cBaggageOtels(): OtelRefs = OtelRefs(
-        impl = createOpenTelemetry { propagator { w3cBaggage() } }.also(sdks::track),
-        compat = createCompatOpenTelemetry { propagator { w3cBaggage() } }.also(sdks::track)
+        impl = createOpenTelemetry { propagator { createW3CBaggagePropagator() } }.also(sdks::track),
+        compat = createCompatOpenTelemetry { propagator { createW3CBaggagePropagator() } }.also(sdks::track)
     )
 
     private fun assertRoundTripParity(

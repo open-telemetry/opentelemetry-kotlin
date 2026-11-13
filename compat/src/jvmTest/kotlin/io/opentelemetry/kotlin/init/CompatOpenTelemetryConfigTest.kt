@@ -28,27 +28,38 @@ internal class CompatOpenTelemetryConfigTest {
     }
 
     @Test
-    fun `propagator dsl uses a custom propagator returned from the lambda`() {
+    fun `propagator uses the supplied custom propagator`() {
         val custom = FakeTextMapPropagator()
         val cfg = CompatOpenTelemetryConfig(clock)
         cfg.propagator { custom }
-        assertSame(custom, cfg.propagator)
+        assertSame(custom, cfg.createPropagator())
     }
 
     @Test
-    fun `propagator dsl uses the lambda return value rather than the last builder call`() {
+    fun `propagator supplier is invoked lazily`() {
+        var calls = 0
         val cfg = CompatOpenTelemetryConfig(clock)
         cfg.propagator {
-            val traceContext = w3cTraceContext()
-            w3cBaggage()
-            traceContext
+            calls++
+            FakeTextMapPropagator()
         }
-        assertEquals(listOf("traceparent", "tracestate"), cfg.propagator.fields().toList())
+        assertEquals(0, calls)
+        cfg.createPropagator()
+        assertEquals(1, calls)
+    }
+
+    @Test
+    fun `throwing propagator supplier falls back to noop`() {
+        val errors = FakeSdkErrorHandler()
+        val cfg = CompatOpenTelemetryConfig(clock).apply { errorHandler(errors) }
+        cfg.propagator { error("boom") }
+        assertEquals(emptyList(), cfg.createPropagator().fields().toList())
+        assertEquals(1, errors.userCodeErrors.size)
     }
 
     @Test
     fun `propagator defaults to noop`() {
-        assertEquals(emptyList(), CompatOpenTelemetryConfig(clock).propagator.fields().toList())
+        assertEquals(emptyList(), CompatOpenTelemetryConfig(clock).createPropagator().fields().toList())
     }
 
     @Test

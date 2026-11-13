@@ -1,10 +1,10 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.config.dsl.PropagatorConfigImpl
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.propagation.FakeTextMapGetter
 import io.opentelemetry.kotlin.propagation.FakeTextMapSetter
+import io.opentelemetry.kotlin.propagation.createW3CTraceContextPropagator
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -18,7 +18,7 @@ internal class W3CTraceContextRoundTripTest {
 
     @Test
     fun `w3cTraceContext injects and extracts`() {
-        val propagator = PropagatorConfigImpl().w3cTraceContext()
+        val propagator = createW3CTraceContextPropagator()
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
 
         val carrier = mutableMapOf<String, String>()
