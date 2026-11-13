@@ -31,7 +31,7 @@ opentelemetry-java's `ContextStorage` when creating the SDK:
 ```kotlin
 val otel = createOpenTelemetry {
     context {
-        storage = createOtelJavaCurrentContextStorage()
+        storage { createOtelJavaCurrentContextStorage() }
     }
 }
 val javaApi = otel.toOtelJavaApi()

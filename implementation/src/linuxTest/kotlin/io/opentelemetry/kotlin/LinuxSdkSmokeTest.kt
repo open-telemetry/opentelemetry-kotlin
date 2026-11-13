@@ -31,7 +31,7 @@ internal class LinuxSdkSmokeTest {
         val api = createOpenTelemetry {
             serviceName = "linux-smoke-test"
             errorHandler(errors)
-            context { storage = createThreadLocalCurrentContextStorage() }
+            context { storage { createThreadLocalCurrentContextStorage() } }
             resourceDetection {
                 detector(hostResourceDetector())
                 detector(deviceResourceDetector())
