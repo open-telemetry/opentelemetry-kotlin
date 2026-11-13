@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.baggage
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.OpenTelemetryDsl
 
 /**
  * DSL receiver for assembling a [Baggage] instance.
@@ -11,6 +12,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * https://opentelemetry.io/docs/specs/otel/baggage/api/#baggage-builder
  */
 @ExperimentalApi
+@OpenTelemetryDsl
 public interface BaggageCreationAction {
 
     /**

@@ -5,15 +5,12 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
 import io.opentelemetry.kotlin.context.createContextKey
 import io.opentelemetry.kotlin.context.rootContext
-import io.opentelemetry.kotlin.factory.CompatContextFactory
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
 internal class CompatPropagatorApiTest {
-
-    private val contextFactory = CompatContextFactory()
 
     @Test
     fun `composite of zero propagators returns a working noop`() {
@@ -22,7 +19,7 @@ internal class CompatPropagatorApiTest {
         assertTrue(composite.fields().isEmpty())
 
         val carrier = mutableMapOf<String, String>()
-        val seeded = contextFactory.rootContext().set(key, "value")
+        val seeded = rootContext().set(key, "value")
         composite.inject(seeded, carrier, FakeTextMapSetter)
         assertTrue(carrier.isEmpty())
 
@@ -36,11 +33,11 @@ internal class CompatPropagatorApiTest {
         val composite = createCompositePropagator(recording)
 
         val carrier = mutableMapOf<String, String>()
-        composite.inject(contextFactory.rootContext(), carrier, FakeTextMapSetter)
+        composite.inject(rootContext(), carrier, FakeTextMapSetter)
         assertTrue(recording.injectCalled)
         assertEquals(mapOf("foo" to "set-by-foo"), carrier)
 
-        composite.extract(contextFactory.rootContext(), carrier, FakeTextMapGetter)
+        composite.extract(rootContext(), carrier, FakeTextMapGetter)
         assertTrue(recording.extractCalled)
     }
 
@@ -51,7 +48,7 @@ internal class CompatPropagatorApiTest {
         val composite = createCompositePropagator(a, b)
 
         val carrier = linkedMapOf<String, String>()
-        composite.inject(contextFactory.rootContext(), carrier, FakeTextMapSetter)
+        composite.inject(rootContext(), carrier, FakeTextMapSetter)
 
         assertEquals(listOf("a", "b"), carrier.keys.toList())
         assertTrue(a.injectCalled)
@@ -67,7 +64,7 @@ internal class CompatPropagatorApiTest {
             ContextWritingPropagator(keyB, "beta"),
         )
 
-        val result = composite.extract(contextFactory.rootContext(), emptyMap(), FakeTextMapGetter)
+        val result = composite.extract(rootContext(), emptyMap(), FakeTextMapGetter)
 
         assertEquals("alpha", result.get(keyA))
         assertEquals("beta", result.get(keyB))
@@ -92,7 +89,7 @@ internal class CompatPropagatorApiTest {
             "traceparent" to "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01",
             "tracestate" to "vendor=value",
         )
-        val extracted = propagator.extract(contextFactory.rootContext(), incoming, FakeTextMapGetter)
+        val extracted = propagator.extract(rootContext(), incoming, FakeTextMapGetter)
 
         val outgoing = mutableMapOf<String, String>()
         propagator.inject(extracted, outgoing, FakeTextMapSetter)

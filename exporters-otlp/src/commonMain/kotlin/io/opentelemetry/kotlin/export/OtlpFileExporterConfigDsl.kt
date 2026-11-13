@@ -17,9 +17,10 @@ internal class OtlpFileExporterConfig : OtlpFileExporterConfigDsl {
 }
 
 internal fun createOtlpFileExporter(
-    block: OtlpFileExporterConfigDsl.() -> Unit,
+    block: (OtlpFileExporterConfigDsl.() -> Unit)?,
 ): OtlpFileExporter {
-    val config = OtlpFileExporterConfig().apply(block)
+    val config = OtlpFileExporterConfig()
+    block?.invoke(config)
     return OtlpFileExporter(
         sink = config.sink.buffer()
     )

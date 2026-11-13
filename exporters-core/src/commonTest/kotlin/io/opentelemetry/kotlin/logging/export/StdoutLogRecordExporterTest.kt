@@ -1,16 +1,20 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.FakeLogExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.loadTestFixture
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
+import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 internal class StdoutLogRecordExporterTest {
 
@@ -73,20 +77,20 @@ internal class StdoutLogRecordExporterTest {
 
     @Test
     fun testForceFlush() = runTest {
-        val exporter = StdoutLogRecordExporter()
+        val exporter = StdoutLogRecordExporter(NoopSdkErrorHandler)
         assertEquals(OperationResultCode.Success, exporter.forceFlush())
     }
 
     @Test
     fun testShutdown() = runTest {
-        val exporter = StdoutLogRecordExporter()
+        val exporter = StdoutLogRecordExporter(NoopSdkErrorHandler)
         assertEquals(OperationResultCode.Success, exporter.shutdown())
     }
 
     @Test
     fun testExportReturnsFailureAfterShutdown() = runTest {
         val output = mutableListOf<String>()
-        val exporter = StdoutLogRecordExporter(output::add)
+        val exporter = StdoutLogRecordExporter(NoopSdkErrorHandler, output::add)
         exporter.shutdown()
 
         val logRecord = FakeLogRecordData()
@@ -97,15 +101,36 @@ internal class StdoutLogRecordExporterTest {
 
     @Test
     fun testShutdownReturnsSuccessOnSecondCall() = runTest {
-        val exporter = StdoutLogRecordExporter()
+        val exporter = StdoutLogRecordExporter(NoopSdkErrorHandler)
         assertEquals(OperationResultCode.Success, exporter.shutdown())
         assertEquals(OperationResultCode.Success, exporter.shutdown())
     }
 
     @Test
     fun testForceFlushWorksAfterShutdown() = runTest {
-        val exporter = StdoutLogRecordExporter()
+        val exporter = StdoutLogRecordExporter(NoopSdkErrorHandler)
         exporter.shutdown()
         assertEquals(OperationResultCode.Success, exporter.forceFlush())
+    }
+
+    @Test
+    fun testItemThatFailsToFormatDoesNotStopTheBatch() = runTest {
+        val output = mutableListOf<String>()
+        val errorHandler = FakeSdkErrorHandler()
+        val exporter = FakeLogExportConfig(sdkErrorHandler = errorHandler).stdoutLogRecordExporter(output::add)
+        val throwingLogRecord = object : LogRecordData by FakeLogRecordData() {
+            override val severityText: String get() = error("boom")
+        }
+
+        val result = exporter.export(
+            listOf(FakeLogRecordData(body = "first"), throwingLogRecord, FakeLogRecordData(body = "third"))
+        )
+
+        assertEquals(OperationResultCode.Failure, result)
+        assertEquals(2, output.size)
+        assertTrue(output[0].contains("Body: first"))
+        assertTrue(output[1].contains("Body: third"))
+        assertEquals(1, errorHandler.errors.size)
+        assertEquals(1, errorHandler.userCodeErrors.size)
     }
 }

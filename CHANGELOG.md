@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### 📈 Enhancements
+
+- `compat` now exports `opentelemetry-api` and `opentelemetry-sdk` (and the `opentelemetry-bom`
+  platform that versions them), so calls such as `toOtelJavaApi()` compile without adding
+  opentelemetry-java as a separate dependency.
+
 ### 🐞 Bug fixes
 
 - Move new and updated trace-state entries to the front after protobuf deserialization.

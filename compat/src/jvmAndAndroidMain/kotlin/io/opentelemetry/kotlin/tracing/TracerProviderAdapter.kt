@@ -14,14 +14,12 @@ import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
-import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.scope.scopeCacheKey
 import java.util.concurrent.ConcurrentHashMap
 
 @ExperimentalApi
 internal class TracerProviderAdapter(
     private val tracerProvider: OtelJavaTracerProvider,
-    private val contextFactory: ContextFactory,
     private val sdkErrorHandler: SdkErrorHandler,
     private val timeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS,
 ) : TracerProvider, TelemetryCloseable {
@@ -42,7 +40,7 @@ internal class TracerProviderAdapter(
             schemaUrl?.let(tracerBuilder::setSchemaUrl)
             version?.let(tracerBuilder::setInstrumentationVersion)
             val tracer = tracerBuilder.build()
-            TracerAdapter(tracer, contextFactory, sdkErrorHandler)
+            TracerAdapter(tracer, sdkErrorHandler)
         }
     }
 

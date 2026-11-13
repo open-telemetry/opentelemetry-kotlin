@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.aliases.OtelJavaContextPropagators
-import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.logging.FakeLoggerProvider
 import io.opentelemetry.kotlin.logging.OtelJavaLoggerProviderAdapter
 import io.opentelemetry.kotlin.metrics.FakeMeterProvider
@@ -15,8 +14,8 @@ internal class OtelJavaOpenTelemetrySdkTest {
 
     @Test
     fun `test entrypoint`() {
-        val tracerProvider = OtelJavaTracerProviderAdapter(FakeTracerProvider(), CompatContextFactory())
-        val loggerProvider = OtelJavaLoggerProviderAdapter(FakeLoggerProvider(), CompatContextFactory())
+        val tracerProvider = OtelJavaTracerProviderAdapter(FakeTracerProvider())
+        val loggerProvider = OtelJavaLoggerProviderAdapter(FakeLoggerProvider())
         val meterProvider = OtelJavaMeterProviderAdapter(FakeMeterProvider())
 
         val propagators = OtelJavaContextPropagators.noop()

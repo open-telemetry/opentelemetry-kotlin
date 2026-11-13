@@ -18,7 +18,9 @@ import io.ktor.utils.io.readRemaining
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.error.reportUserCodeError
+import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.export.OtlpResponse.ClientError
+import io.opentelemetry.kotlin.export.OtlpResponse.EncodingFailed
 import io.opentelemetry.kotlin.export.OtlpResponse.PartialSuccess
 import io.opentelemetry.kotlin.export.OtlpResponse.ResponseTooLarge
 import io.opentelemetry.kotlin.export.OtlpResponse.RetryableError
@@ -69,6 +71,17 @@ internal class OtlpClient(
         endpoint: OtlpEndpoint,
         requestSerializer: () -> ByteArray,
         parsePartialSuccess: (body: ByteArray) -> OtlpPartialSuccess?,
+    ): OtlpResponse {
+        val body = sdkErrorHandler.sdkGuardOrDefault(null, "OTLP request encoding failed") {
+            requestSerializer()
+        } ?: return EncodingFailed
+        return sendRequest(endpoint, body, parsePartialSuccess)
+    }
+
+    private suspend fun sendRequest(
+        endpoint: OtlpEndpoint,
+        body: ByteArray,
+        parsePartialSuccess: (body: ByteArray) -> OtlpPartialSuccess?,
     ): OtlpResponse = sdkErrorHandler.guardOrDefaultSuspend(Unknown, "OTLP export failed") {
         val url = signalEndpoint?.let {
             val builder = URLBuilder(it)
@@ -97,7 +110,7 @@ internal class OtlpClient(
             contentType(contentType)
             header(HttpHeaders.UserAgent, userAgent)
             requestHeaders.forEach { (name, value) -> header(name, value) }
-            setBody(requestSerializer())
+            setBody(body)
         }
         classifyResponse(response, parsePartialSuccess)
     }

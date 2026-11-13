@@ -1,5 +1,7 @@
 package io.opentelemetry.kotlin.logging.export
 
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.data.LogRecordData
@@ -9,17 +11,25 @@ import io.opentelemetry.kotlin.platformLog
  * A [LogRecordExporter] that outputs log records to stdout.
  */
 internal class StdoutLogRecordExporter(
-    private val logger: (String) -> Unit = ::platformLog
+    private val sdkErrorHandler: SdkErrorHandler,
+    private val logger: (String) -> Unit = ::platformLog,
 ) : LogRecordExporter {
 
     private val shutdownState = MutableShutdownState()
 
     override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode =
         shutdownState.ifActive {
-            telemetry.forEach { logRecord ->
-                logger(formatLogRecord(logRecord))
+            val failures = telemetry.count { logRecord ->
+                !sdkErrorHandler.guardOrDefault(false, "Failed to write log record to stdout") {
+                    logger(formatLogRecord(logRecord))
+                    true
+                }
             }
-            OperationResultCode.Success
+            if (failures == 0) {
+                OperationResultCode.Success
+            } else {
+                OperationResultCode.Failure
+            }
         }
 
     override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success

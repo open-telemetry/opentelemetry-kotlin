@@ -269,6 +269,30 @@ internal class OtlpClientTest {
     }
 
     @Test
+    fun testTraceEncodingFailureIsNotSent() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        val throwingSpan = object : SpanData by FakeSpanData() {
+            override val name: String get() = error("boom")
+        }
+
+        assertEquals(OtlpResponse.EncodingFailed, client.exportTraces(listOf(throwingSpan)))
+        assertEquals(1, errorHandler.sdkCodeErrors.size)
+        assertEquals(0, server.requestHistory.size)
+    }
+
+    @Test
+    fun testLogEncodingFailureIsNotSent() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        val throwingLogRecord = object : LogRecordData by FakeLogRecordData() {
+            override val severityText: String get() = error("boom")
+        }
+
+        assertEquals(OtlpResponse.EncodingFailed, client.exportLogs(listOf(throwingLogRecord)))
+        assertEquals(1, errorHandler.sdkCodeErrors.size)
+        assertEquals(0, server.requestHistory.size)
+    }
+
+    @Test
     fun testHeaderProviderFailureIsReportedWithoutSending() = runTest {
         client = createOtlpHttpClient(errorHandler, OtlpEndpoint.Traces, getEnvVar = { null }) {
             httpClient = createDefaultHttpClient(INFINITE_TIMEOUT_MS, server)

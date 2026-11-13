@@ -255,14 +255,15 @@ internal class SpanModel(
                 timestamp > 0 -> timestamp
                 else -> userCode { clock.now() }
             }
-            val container = AttributesModel(
+            val event = SpanEventImpl(
+                name = name,
+                timestamp = eventTimestamp,
                 attributeLimit = spanLimitConfig.attributeCountPerEventLimit,
-                attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
+                attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit,
             )
             if (attributes != null) {
-                userCode { attributes(container) }
+                userCode { attributes(event) }
             }
-            val event = SpanEventImpl(name, eventTimestamp, container)
             mutate("Span.addEvent failed") {
                 if (eventsList.size < spanLimitConfig.eventCountLimit) {
                     eventsList.add(event)
