@@ -90,7 +90,7 @@ public fun createOpenTelemetry(
         clock = clock,
         idGenerator = idGenerator,
         resource = resourceFactory,
-        propagator = cfg.propagator,
+        propagator = cfg.createPropagator(),
         installedStorage = installedStorage,
         ownsErrorSink = ownsErrorSink,
         timeoutMs = cfg.shutdownTimeoutMs,

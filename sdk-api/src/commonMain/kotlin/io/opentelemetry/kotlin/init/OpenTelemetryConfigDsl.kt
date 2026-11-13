@@ -49,9 +49,13 @@ public interface OpenTelemetryConfigDsl : ResourceConfigDsl, ConfigFileDsl {
 
     /**
      * Configures the [TextMapPropagator] used to inject and extract context across process boundaries.
+     * [action] is invoked when the SDK is created and should return a propagator built with the
+     * `create*Propagator()` functions in [io.opentelemetry.kotlin.propagation], e.g.
+     * [io.opentelemetry.kotlin.propagation.createW3CTraceContextPropagator]. If this is not set, or
+     * [action] throws, the SDK uses a noop propagator.
      * https://opentelemetry.io/docs/specs/otel/context/api-propagators/
      */
-    public fun propagator(action: PropagatorConfigDsl.() -> TextMapPropagator)
+    public fun propagator(action: () -> TextMapPropagator)
 
     /**
      * Configures a custom [IdGenerator] that is used to generate trace and span IDs. If this is

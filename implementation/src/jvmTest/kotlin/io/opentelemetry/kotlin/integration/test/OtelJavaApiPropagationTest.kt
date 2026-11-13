@@ -7,6 +7,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaTextMapGetter
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapSetter
 import io.opentelemetry.kotlin.createOpenTelemetry
 import io.opentelemetry.kotlin.framework.SdkTracker
+import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
+import io.opentelemetry.kotlin.propagation.createW3CTraceContextPropagator
 import io.opentelemetry.kotlin.toOtelJavaApi
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.AfterTest
@@ -31,7 +33,7 @@ internal class OtelJavaApiPropagationTest {
 
     @Test
     fun `java api round trips w3cTraceContext`() {
-        val otel = createOpenTelemetry { propagator { w3cTraceContext() } }.also(sdks::track)
+        val otel = createOpenTelemetry { propagator { createW3CTraceContextPropagator() } }.also(sdks::track)
         val propagator = otel.toOtelJavaApi().propagators.textMapPropagator
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
 
@@ -44,7 +46,7 @@ internal class OtelJavaApiPropagationTest {
     @Test
     fun `java api propagates remote parent to child span`() {
         val otel = createOpenTelemetry {
-            propagator { w3cTraceContext() }
+            propagator { createW3CTraceContextPropagator() }
             tracerProvider { export { FakeSpanProcessor() } }
         }.also(sdks::track)
         val javaApi = otel.toOtelJavaApi()
@@ -67,7 +69,7 @@ internal class OtelJavaApiPropagationTest {
 
     @Test
     fun `java api round trips w3cBaggage`() {
-        val otel = createOpenTelemetry { propagator { w3cBaggage() } }.also(sdks::track)
+        val otel = createOpenTelemetry { propagator { createW3CBaggagePropagator() } }.also(sdks::track)
         val propagator = otel.toOtelJavaApi().propagators.textMapPropagator
         val carrier = mapOf("baggage" to "userId=alice")
 

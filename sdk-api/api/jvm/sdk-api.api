@@ -118,21 +118,10 @@ public abstract interface class io/opentelemetry/kotlin/init/OpenTelemetryConfig
 	public abstract fun idGenerator (Lkotlin/jvm/functions/Function0;)V
 	public abstract fun loggerProvider (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun meterProvider (Lkotlin/jvm/functions/Function1;)V
-	public abstract fun propagator (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun propagator (Lkotlin/jvm/functions/Function0;)V
 	public abstract fun resourceDetection (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun shutdownTimeout (J)V
 	public abstract fun tracerProvider (Lkotlin/jvm/functions/Function1;)V
-}
-
-public abstract interface class io/opentelemetry/kotlin/init/PropagatorConfigDsl {
-	public abstract fun b3 (Lio/opentelemetry/kotlin/init/B3Format;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
-	public abstract fun composite ([Lio/opentelemetry/kotlin/propagation/TextMapPropagator;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
-	public abstract fun w3cBaggage ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
-	public abstract fun w3cTraceContext ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
-}
-
-public final class io/opentelemetry/kotlin/init/PropagatorConfigDsl$DefaultImpls {
-	public static synthetic fun b3$default (Lio/opentelemetry/kotlin/init/PropagatorConfigDsl;Lio/opentelemetry/kotlin/init/B3Format;ILjava/lang/Object;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/ResourceConfigDsl {

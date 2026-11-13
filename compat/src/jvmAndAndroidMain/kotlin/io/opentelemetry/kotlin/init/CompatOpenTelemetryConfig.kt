@@ -13,13 +13,13 @@ import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.config.DeclarativeBehaviorReader
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
-import io.opentelemetry.kotlin.config.dsl.PropagatorConfigImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceDetectionConfigDslImpl
 import io.opentelemetry.kotlin.config.toBehaviorReader
 import io.opentelemetry.kotlin.config.validateOrUseDefault
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.propagation.TextMapPropagatorAdapter
@@ -51,10 +51,8 @@ internal class CompatOpenTelemetryConfig(
     internal val loggerProviderConfig = CompatLoggerProviderConfig(clock, sdkErrorHandler)
     internal val meterProviderConfig = CompatMeterProviderConfig(sdkErrorHandler)
     private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
-    private val propagatorCfg = PropagatorConfigImpl()
 
-    @Volatile internal var propagator: TextMapPropagator = TextMapPropagatorAdapter(OtelJavaTextMapPropagator.noop())
-        private set
+    @Volatile private var propagatorSupplier: (() -> TextMapPropagator)? = null
 
     @Volatile private var idGeneratorBehavior: IdGeneratorBehavior? = null
 
@@ -120,8 +118,18 @@ internal class CompatOpenTelemetryConfig(
         meterProviderConfig.action()
     }
 
-    override fun propagator(action: PropagatorConfigDsl.() -> TextMapPropagator) {
-        propagator = propagatorCfg.action()
+    override fun propagator(action: () -> TextMapPropagator) {
+        propagatorSupplier = action
+    }
+
+    /**
+     * Invokes the supplier configured via [propagator], falling back to a noop propagator if none
+     * was configured or the supplier throws.
+     */
+    internal fun createPropagator(): TextMapPropagator {
+        val noop = TextMapPropagatorAdapter(OtelJavaTextMapPropagator.noop())
+        val supplier = propagatorSupplier ?: return noop
+        return sdkErrorHandler.guardOrDefault(noop, "Failed to create TextMapPropagator, using noop") { supplier() }
     }
 
     override fun idGenerator(action: () -> IdGenerator) {
