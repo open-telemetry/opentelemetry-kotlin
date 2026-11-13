@@ -25,9 +25,9 @@ import io.opentelemetry.kotlin.propagation.createW3CTraceContextPropagator
 import io.opentelemetry.kotlin.tracing.FakeSpan
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.NoopSpan
-import io.opentelemetry.kotlin.tracing.NoopSpanContext
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanKind
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -76,7 +76,8 @@ internal class NoopTests {
         assertTrue(traceState.asMap().isEmpty())
         assertEquals(null, traceState.get("any-key"))
 
-        assertSame(traceState, traceState.put("key", "value"))
+        assertEquals(mapOf("key" to "value"), traceState.put("key", "value").asMap())
+        assertTrue(traceState.asMap().isEmpty())
         assertSame(traceState, traceState.remove("key"))
     }
 
@@ -271,8 +272,8 @@ internal class NoopTests {
         val span = NoopOpenTelemetry.tracerProvider.getTracer("tracer").startSpan("span")
         assertTrue(span is NoopSpan)
         assertFalse(span.isRecording())
-        assertSame(NoopSpanContext, span.spanContext)
-        assertSame(NoopSpanContext, span.parent)
+        assertSame(createInvalidSpanContext(), span.spanContext)
+        assertSame(createInvalidSpanContext(), span.parent)
         verifySpanOperationsAreNoop(span)
         span.setByteArrayAttribute("bytes", byteArrayOf(1))
         span.setName("name")

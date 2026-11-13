@@ -15,7 +15,7 @@ class ComplexSpanCreationFixture(
     override fun execute() {
         val span = tracer.startSpan(
             "new_span",
-            otel.context.rootContext(),
+            rootContext(),
             SpanKind.CLIENT,
             0
         ) {
