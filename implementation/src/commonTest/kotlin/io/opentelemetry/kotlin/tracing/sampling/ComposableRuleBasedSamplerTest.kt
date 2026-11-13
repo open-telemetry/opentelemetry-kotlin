@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -55,6 +56,20 @@ internal class ComposableRuleBasedSamplerTest {
 
         sampler.intentFor()
         assertFalse(laterPredicateEvaluated)
+    }
+
+    @Test
+    fun `throwing predicate is treated as no match and the next rule is tried`() {
+        val errorHandler = FakeSdkErrorHandler()
+        val sampler = SamplerConfigImpl(errorHandler).composableRuleBased {
+            rule({ _, _, _, _, _ -> error("boom") }) { composableAlwaysOff() }
+            rule(matchesEverything) { composableAlwaysOn() }
+        }
+
+        val intent = sampler.intentFor()
+        assertEquals(0L, intent.threshold)
+        assertTrue(intent.adjustedCountReliable)
+        assertEquals("boom", errorHandler.userCodeErrors.single().cause.message)
     }
 
     @Test

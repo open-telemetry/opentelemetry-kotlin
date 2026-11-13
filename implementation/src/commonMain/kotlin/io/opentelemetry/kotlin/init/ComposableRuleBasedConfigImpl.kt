@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.init
 
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.tracing.sampling.ComposableRuleBasedSampler
 import io.opentelemetry.kotlin.tracing.sampling.ComposableSampler
 import io.opentelemetry.kotlin.tracing.sampling.SamplingPredicate
@@ -7,6 +8,7 @@ import io.opentelemetry.kotlin.tracing.sampling.SamplingRule
 
 internal class ComposableRuleBasedConfigImpl(
     private val dsl: SamplerConfigDsl,
+    private val sdkErrorHandler: SdkErrorHandler,
 ) : ComposableRuleBasedConfigDsl, SamplerConfigDsl by dsl {
 
     private val rules = mutableListOf<SamplingRule>()
@@ -15,5 +17,5 @@ internal class ComposableRuleBasedConfigImpl(
         rules.add(SamplingRule(predicate, dsl.sampler()))
     }
 
-    internal fun buildSampler(): ComposableSampler = ComposableRuleBasedSampler(rules.toList())
+    internal fun buildSampler(): ComposableSampler = ComposableRuleBasedSampler(rules.toList(), sdkErrorHandler)
 }
