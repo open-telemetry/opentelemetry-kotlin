@@ -1,12 +1,14 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.toOtelKotlinContext
 
+/**
+ * Returns contexts from the process-wide context storage.
+ */
 internal class CompatContextFactory : ContextFactory {
 
-    override fun root(): Context = OtelJavaContext.root().toOtelKotlinContext()
+    // fully qualified so these don't resolve to the ContextFactory extensions on `this`
+    override fun root(): Context = io.opentelemetry.kotlin.context.rootContext()
 
-    override fun current(): Context = OtelJavaContext.current().toOtelKotlinContext()
+    override fun current(): Context = io.opentelemetry.kotlin.context.currentContext()
 }

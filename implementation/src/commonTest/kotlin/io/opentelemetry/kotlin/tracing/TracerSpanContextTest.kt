@@ -2,15 +2,18 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.context.createSingleSlotCurrentContextStorage
+import io.opentelemetry.kotlin.context.installContextStorage
+import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.context.uninstallContextStorage
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
-import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,23 +24,23 @@ import kotlin.test.assertTrue
 
 internal class TracerSpanContextTest {
 
+    private val storage = createSingleSlotCurrentContextStorage()
+
     private val key = InstrumentationScopeInfoImpl("key", null, null, emptyMap())
     private lateinit var tracer: TracerImpl
     private lateinit var clock: FakeClock
     private lateinit var processor: FakeSpanProcessor
-    private lateinit var contextFactory: ContextFactory
     private lateinit var idGenerator: IdGenerator
 
     @BeforeTest
     fun setUp() {
+        installContextStorage(storage)
         clock = FakeClock()
         processor = FakeSpanProcessor()
         idGenerator = IdGeneratorImpl()
-        contextFactory = ContextFactoryImpl()
         tracer = TracerImpl(
             clock = clock,
             processor = processor,
-            contextFactory = contextFactory,
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,
@@ -45,6 +48,11 @@ internal class TracerSpanContextTest {
             shutdownState = MutableShutdownState(),
             sdkErrorHandler = NoopSdkErrorHandler,
         )
+    }
+
+    @AfterTest
+    fun tearDown() {
+        uninstallContextStorage(storage)
     }
 
     @Test
@@ -57,7 +65,7 @@ internal class TracerSpanContextTest {
 
     @Test
     fun testExplicitParentContextOfInvalidSpan() {
-        val parentCtx = contextFactory.root().storeSpanContext(createInvalidSpanContext())
+        val parentCtx = rootContext().storeSpanContext(createInvalidSpanContext())
         val span = tracer.startSpan(
             "test",
             parentContext = parentCtx,
@@ -71,7 +79,7 @@ internal class TracerSpanContextTest {
     @Test
     fun testExplicitParentContextOfValidSpan() {
         val parentSpan = tracer.startSpan("parent")
-        val parentCtx = contextFactory.root().storeSpan(parentSpan)
+        val parentCtx = rootContext().storeSpan(parentSpan)
         val span = tracer.startSpan(
             "test",
             parentContext = parentCtx,
@@ -87,7 +95,7 @@ internal class TracerSpanContextTest {
     @Test
     fun testCurrentContext() {
         val span = tracer.startSpan("span")
-        val ctx = contextFactory.root().storeSpan(span)
+        val ctx = rootContext().storeSpan(span)
         val scope = ctx.attach()
 
         val first = tracer.startSpan("first")

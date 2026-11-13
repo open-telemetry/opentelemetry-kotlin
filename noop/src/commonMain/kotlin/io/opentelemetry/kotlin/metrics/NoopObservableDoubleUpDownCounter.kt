@@ -11,6 +11,8 @@ internal class NoopObservableDoubleUpDownCounter(
     override val unit: String?,
     override val description: String?,
 ) : ObservableDoubleUpDownCounter {
+    override val measurement: ObservableDoubleMeasurement = NoopObservableDoubleMeasurement()
+
     override fun registerCallback(callback: (ObservableDoubleMeasurement) -> Unit): AutoCloseable =
         NoopCallbackHandle
 

@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.aliases.OtelJavaMeter
 import io.opentelemetry.kotlin.aliases.OtelJavaObservableLongUpDownCounter
@@ -22,6 +23,15 @@ internal class ObservableLongUpDownCounterAdapter(
     private val lock = Any()
     private val callbackHandles = mutableSetOf<OtelJavaObservableLongUpDownCounter>()
     private var closed = false
+
+    override val measurement: ObservableLongMeasurement by lazy {
+        sdkErrorHandler.sdkGuardOrDefault(null, "ObservableLongUpDownCounter.measurement failed") {
+            val builder = impl.upDownCounterBuilder(name)
+            unit?.let(builder::setUnit)
+            description?.let(builder::setDescription)
+            ObservableLongMeasurementAdapter(builder.buildObserver(), sdkErrorHandler)
+        } ?: NoopOpenTelemetry.meterProvider.getMeter("").createObservableLongUpDownCounter(name).measurement
+    }
 
     init {
         callbacks.forEach { registerCallback(it) }

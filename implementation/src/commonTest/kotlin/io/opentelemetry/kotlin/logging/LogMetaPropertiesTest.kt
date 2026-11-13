@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
-import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
@@ -27,7 +26,6 @@ internal class LogMetaPropertiesTest {
         logger = LoggerImpl(
             clock = clock,
             processor = processor,
-            contextFactory = FakeContextFactory(),
             key = key,
             resource = fakeResource,
             logLimits = fakeLogLimitsConfig,

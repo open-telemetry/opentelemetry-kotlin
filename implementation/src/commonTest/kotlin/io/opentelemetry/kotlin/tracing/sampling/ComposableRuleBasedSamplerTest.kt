@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -22,8 +22,6 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
 internal class ComposableRuleBasedSamplerTest {
-
-    private val contextFactory = ContextFactoryImpl()
 
     private val samplerDsl = SamplerConfigImpl()
 
@@ -84,7 +82,7 @@ internal class ComposableRuleBasedSamplerTest {
                 rule({ _, name, _, _, _ -> name == "other" }) { composableAlwaysOn() }
             }
         }.shouldSample(
-            context = contextFactory.root(),
+            context = rootContext(),
             traceIdBytes = traceId.hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
@@ -103,7 +101,7 @@ internal class ComposableRuleBasedSamplerTest {
                 rule({ _, name, _, _, _ -> name == "span" }) { composableAlwaysOn() }
             }
         }.shouldSample(
-            context = contextFactory.root(),
+            context = rootContext(),
             traceIdBytes = traceId.hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
@@ -244,11 +242,11 @@ internal class ComposableRuleBasedSamplerTest {
             }
         }
         val parentSpan = createNonRecordingSpan(parentSpanContext)
-        return contextFactory.root().storeSpan(parentSpan)
+        return rootContext().storeSpan(parentSpan)
     }
 
     private fun ComposableSampler.intentFor(
-        context: Context = contextFactory.root(),
+        context: Context = rootContext(),
         name: String = "span",
         spanKind: SpanKind = SpanKind.INTERNAL,
         attributes: AttributeContainer = AttributesModel(),

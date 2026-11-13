@@ -2,6 +2,8 @@ package io.opentelemetry.kotlin.config
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
+import io.opentelemetry.kotlin.getEnvVarValue
+import io.opentelemetry.kotlin.supportsEnvVars
 
 /**
  * The reader for envars on the platform the SDK is running on, or `null` where the SDK does not
@@ -9,4 +11,8 @@ import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
  * platforms.
  */
 @ExperimentalApi
-expect fun platformEnvVarReader(): EnvVarReader?
+fun platformEnvVarReader(): EnvVarReader? = if (supportsEnvVars) {
+    EnvVarReader(::getEnvVarValue)
+} else {
+    null
+}

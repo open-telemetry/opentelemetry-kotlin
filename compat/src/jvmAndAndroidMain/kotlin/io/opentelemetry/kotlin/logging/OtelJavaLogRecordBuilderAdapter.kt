@@ -1,16 +1,17 @@
 package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
+import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordBuilder
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
 import io.opentelemetry.kotlin.aliases.OtelJavaValue
-import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.attributes.setOtelJavaAttributes
 import io.opentelemetry.kotlin.attributes.toOtelKotlinBody
+import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import io.opentelemetry.kotlin.factory.ContextFactory
 import java.time.Instant
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
 internal class OtelJavaLogRecordBuilderAdapter(
@@ -26,7 +27,7 @@ internal class OtelJavaLogRecordBuilderAdapter(
     private var body: Any? = null
     private var eventName: String? = null
     private var exception: Throwable? = null
-    private val attrs = ConcurrentHashMap<String, Any>()
+    private val attrs = OtelJavaAttributes.builder()
 
     override fun setTimestamp(timestamp: Long, unit: TimeUnit): OtelJavaLogRecordBuilder {
         this.timestamp = unit.toNanos(timestamp)
@@ -91,7 +92,7 @@ internal class OtelJavaLogRecordBuilderAdapter(
         key: OtelJavaAttributeKey<T>,
         value: T?
     ): OtelJavaLogRecordBuilder {
-        value?.let { attrs[key.key] = it }
+        value?.let { attrs.put(key, it) }
         return this
     }
 
@@ -101,11 +102,11 @@ internal class OtelJavaLogRecordBuilderAdapter(
             eventName = eventName,
             timestamp = timestamp,
             observedTimestamp = observedTimestamp,
-            context = context?.toOtelKotlinContext() ?: contextFactory.current(),
+            context = context?.toOtelKotlinContext() ?: contextFactory.currentContext(),
             severityNumber = severity?.toOtelKotlinSeverityNumber(),
             severityText = severityText,
             exception = exception,
-            attributes = { setTypedAttributes(attrs) }
+            attributes = { setOtelJavaAttributes(attrs.build()) }
         )
     }
 

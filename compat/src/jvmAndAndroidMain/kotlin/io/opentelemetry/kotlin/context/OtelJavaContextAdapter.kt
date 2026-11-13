@@ -13,13 +13,16 @@ import io.opentelemetry.kotlin.baggage.toOtelKotlinBaggage
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpan
+import io.opentelemetry.kotlin.tracing.ext.asOtelJavaSpan
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
+import java.util.WeakHashMap
 
 /**
- * Java keys are wrapped in a fresh [ContextKeyAdapter] on each access. Adapters compare equality
- * by the Java key they wrap, so values are retrievable without a global key mapping.
+ * A Java view of a Kotlin [Context], so that `makeCurrent()` from Java reaches the installed Kotlin storage.
+ *
+ * Java's span and baggage keys map onto the Kotlin span and baggage. Any other Java key maps to a
+ * Kotlin key that is created on first use and held for as long as the Java key is reachable.
  */
 @ExperimentalApi
 internal class OtelJavaContextAdapter(
@@ -31,7 +34,7 @@ internal class OtelJavaContextAdapter(
         return when {
             key === otelJavaSpanContextKey -> getSpan() as V?
             key === otelJavaBaggageContextKey -> getBaggage() as V?
-            else -> impl.get(ContextKeyAdapter(key))
+            else -> impl.get(key.toKotlinKey())
         }
     }
 
@@ -42,7 +45,7 @@ internal class OtelJavaContextAdapter(
                 is OtelJavaBaggage -> impl.storeBaggage(value.toOtelKotlinBaggage())
                 else -> impl.clearBaggage()
             }
-            else -> impl.set(ContextKeyAdapter(key), value)
+            else -> impl.set(key.toKotlinKey(), value)
         }
         return OtelJavaContextAdapter(ctx)
     }
@@ -57,7 +60,7 @@ internal class OtelJavaContextAdapter(
         if (!span.spanContext.isValid) {
             return null
         }
-        return span.toOtelJavaSpan()
+        return span.asOtelJavaSpan()
     }
 
     private fun getBaggage(): OtelJavaBaggage? {
@@ -77,4 +80,14 @@ internal class OtelJavaContextAdapter(
     override fun equals(other: Any?): Boolean = other is OtelJavaContextAdapter && other.impl == impl
 
     override fun hashCode(): Int = impl.hashCode()
+
+    private companion object {
+        // java context keys compare by identity, and the Kotlin keys don't reference them
+        private val keys = WeakHashMap<OtelJavaContextKey<*>, ContextKey<*>>()
+
+        @Suppress("UNCHECKED_CAST")
+        fun <V> OtelJavaContextKey<V>.toKotlinKey(): ContextKey<V> = synchronized(keys) {
+            keys.getOrPut(this) { createContextKey<V>(toString()) }
+        } as ContextKey<V>
+    }
 }

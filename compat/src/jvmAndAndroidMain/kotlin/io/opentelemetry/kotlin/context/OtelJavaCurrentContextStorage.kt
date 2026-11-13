@@ -5,25 +5,36 @@ import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaContextStorage
 
 /**
- * Stores the current context in opentelemetry-java's `ContextStorage`, so that Kotlin and Java
- * code can share a single current context. This is only relevant when using [toOtelJavaApi].
+ * Creates a [CurrentContextStorage] that stores the current context in opentelemetry-java's
+ * `ContextStorage`, so that Kotlin and Java code share one current context. Use it if you call
+ * [io.opentelemetry.kotlin.toOtelJavaApi], by passing it to `context { storage = … }` when
+ * creating the SDK. It respects any `ContextStorage` wrappers that are installed (e.g. by the
+ * Java agent).
+ *
+ * Each call returns a new instance, but every instance reads and writes opentelemetry-java's
+ * single process-wide `ContextStorage`, so contexts attached through one are visible through all
+ * of them.
  */
 @ExperimentalApi
-internal class OtelJavaCurrentContextStorage(
-    rootSupplier: () -> Context,
-) : CurrentContextStorage {
+public fun createOtelJavaCurrentContextStorage(): CurrentContextStorage = OtelJavaCurrentContextStorage()
 
-    private val root by lazy { rootSupplier() }
+@ExperimentalApi
+internal class OtelJavaCurrentContextStorage : CurrentContextStorage {
+
+    private val root = rootContext()
 
     override fun attach(context: Context): Scope {
-        val scope = OtelJavaContextStorage.get().attach(context.toOtelJavaContext())
-        return ScopeAdapter(scope)
+        val java = when {
+            context === root -> OtelJavaContext.root()
+            else -> OtelJavaContextBridge.toJava(context, layerOverRoot = true)
+        }
+        return ScopeAdapter(OtelJavaContextStorage.get().attach(java))
     }
 
     override fun current(): Context {
         return when (val current = OtelJavaContext.current()) {
             OtelJavaContext.root() -> root
-            else -> current.toOtelKotlinContext()
+            else -> OtelJavaContextBridge.toKotlin(current)
         }
     }
 }

@@ -4,6 +4,8 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ClockProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
+import io.opentelemetry.kotlin.aliases.OtelJavaValue
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
@@ -37,6 +39,19 @@ internal class OtelJavaReadableSpanAdapterTest {
         assertEquals(5L, adapter.getAttribute(OtelJavaAttributeKey.longKey("long")))
         assertNull(adapter.getAttribute(OtelJavaAttributeKey.stringKey("missing")))
         assertEquals(2, adapter.attributes.size())
+    }
+
+    @Test
+    fun testGetAttributeWithMismatchedTypeReturnsNull() {
+        val data = FakeSpanData(
+            attributes = mapOf("x" to "str", "d" to 1.0, "bytes" to AnyValue.BytesValue(byteArrayOf(1))),
+        )
+        val adapter = OtelJavaReadableSpanAdapter(FakeReadableSpan(data))
+        assertNull(adapter.getAttribute(OtelJavaAttributeKey.longKey("x")))
+        assertNull(adapter.getAttribute(OtelJavaAttributeKey.stringArrayKey("x")))
+        assertNull(adapter.getAttribute(OtelJavaAttributeKey.longKey("d")))
+        assertEquals(1.0, adapter.getAttribute(OtelJavaAttributeKey.doubleKey("d")))
+        assertEquals(OtelJavaValue.of(byteArrayOf(1)), adapter.getAttribute(OtelJavaAttributeKey.valueKey("bytes")))
     }
 
     @Test

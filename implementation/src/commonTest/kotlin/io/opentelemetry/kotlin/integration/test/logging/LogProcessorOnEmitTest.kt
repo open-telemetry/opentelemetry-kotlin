@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.integration.test.logging
 
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.integration.test.IntegrationTestHarness
 import io.opentelemetry.kotlin.logging.SeverityNumber
@@ -59,8 +60,7 @@ internal class LogProcessorOnEmitTest {
 
     private fun prepareContext(): Context {
         val span = harness.tracer.startSpan("span")
-        val contextFactory = harness.kotlinApi.context
-        val ctx = contextFactory.root().storeSpan(span)
+        val ctx = rootContext().storeSpan(span)
         return ctx
     }
 

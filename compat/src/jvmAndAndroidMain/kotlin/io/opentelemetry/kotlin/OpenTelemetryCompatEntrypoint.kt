@@ -45,20 +45,34 @@ public fun createCompatOpenTelemetry(
             )
         )
     }
-    val behavior = defaultCompatBehaviorReader(sdkErrorHandler = cfg.sdkErrorHandler)
-        .read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
+    val behavior = defaultCompatBehaviorReader(
+        sdkErrorHandler = cfg.sdkErrorHandler,
+        declarativeConfigReader = cfg.declarativeConfigReader,
+    ).read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
+
+    if (behavior.disabled == true) {
+        return NoopOpenTelemetrySdk
+    }
 
     // configFactory is legacy - use behavior to control SDK functionality instead
     val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, contextFactory)
+    val tracerProvider = configFactory.buildTracerProvider()
+    val loggerProvider = configFactory.buildLoggerProvider()
+    val meterProvider = configFactory.buildMeterProvider()
+
+    // claim process-wide state last, so that a failure earlier in init doesn't leave it claimed.
+    val processWideState = claimCompatProcessWideState("createCompatOpenTelemetry", cfg.sdkErrorHandler)
     return CompatOpenTelemetryImpl(
-        tracerProvider = configFactory.buildTracerProvider(),
-        loggerProvider = configFactory.buildLoggerProvider(),
-        meterProvider = configFactory.buildMeterProvider(),
+        tracerProvider = tracerProvider,
+        loggerProvider = loggerProvider,
+        meterProvider = meterProvider,
         clock = clock,
         context = contextFactory,
         idGenerator = configFactory.idGenerator,
         resource = CompatResourceFactory,
         propagator = cfg.propagator,
         sdkErrorHandler = cfg.sdkErrorHandler,
+        processWideState = processWideState,
+        timeoutMs = cfg.shutdownTimeoutMs,
     )
 }

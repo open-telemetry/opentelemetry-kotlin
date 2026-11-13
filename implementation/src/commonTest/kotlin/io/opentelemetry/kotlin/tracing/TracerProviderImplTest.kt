@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.init.config.DefaultSampler
@@ -46,7 +45,6 @@ internal class TracerProviderImplTest {
         impl = TracerProviderImpl(
             clock = FakeClock(),
             tracingConfig = tracingConfig,
-            contextFactory = FakeContextFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
             spanLimits = SpanLimitsBehavior(),
@@ -69,7 +67,6 @@ internal class TracerProviderImplTest {
         val provider = TracerProviderImpl(
             clock = FakeClock(),
             tracingConfig = config,
-            contextFactory = FakeContextFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
             spanLimits = SpanLimitsBehavior(),
@@ -182,7 +179,6 @@ internal class TracerProviderImplTest {
         val provider = TracerProviderImpl(
             clock = FakeClock(),
             tracingConfig = config,
-            contextFactory = FakeContextFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
             spanLimits = SpanLimitsBehavior(),
@@ -211,7 +207,6 @@ internal class TracerProviderImplTest {
         val provider = TracerProviderImpl(
             clock = FakeClock(),
             tracingConfig = config,
-            contextFactory = FakeContextFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
             spanLimits = SpanLimitsBehavior(),
@@ -395,7 +390,6 @@ internal class TracerProviderImplTest {
             errorHandler,
             samplerFactory = samplerFactory,
         ),
-        contextFactory = FakeContextFactory(),
         idGenerator = FakeIdGenerator(),
         attributeLimits = AttributeLimitsBehavior(),
         spanLimits = SpanLimitsBehavior(),

@@ -1,5 +1,7 @@
 package io.opentelemetry.kotlin.error
 
+import io.opentelemetry.kotlin.AtomicReference
+
 /**
  * The maximum number of errors buffered while no delegate is set.
  */
@@ -20,17 +22,18 @@ internal class BufferingSdkErrorHandler : SdkErrorHandler {
         class Buffering(val errors: List<SdkError>, val dropped: Int) : State()
 
         class Delegating(val delegate: SdkErrorHandler) : State() {
-            val failure = ErrorSinkAtomicRef<Throwable?>(null)
+            val failure = AtomicReference<Throwable?>(null)
         }
     }
 
     private val empty = State.Buffering(emptyList(), 0)
-    private val state = ErrorSinkAtomicRef<State>(empty)
+    private val state = AtomicReference<State>(empty)
 
     override fun onError(error: SdkError) {
         try {
             route(error)
         } catch (ignored: Throwable) {
+            ignored.restoreCaughtInterruptIfNeeded()
         }
     }
 
@@ -47,6 +50,7 @@ internal class BufferingSdkErrorHandler : SdkErrorHandler {
                 else -> claim(installed)
             }
         } catch (ignored: Throwable) {
+            ignored.restoreCaughtInterruptIfNeeded()
             null
         } ?: return false
 
@@ -103,6 +107,7 @@ internal class BufferingSdkErrorHandler : SdkErrorHandler {
         try {
             deliver(target, error())
         } catch (ignored: Throwable) {
+            ignored.restoreCaughtInterruptIfNeeded()
         }
     }
 
@@ -114,6 +119,7 @@ internal class BufferingSdkErrorHandler : SdkErrorHandler {
         try {
             target.delegate.onError(error)
         } catch (thrown: Throwable) {
+            thrown.restoreCaughtInterruptIfNeeded()
             reportDelegateFailure(target, thrown)
         } finally {
             DeliveryReentrancyGuard.setActive(false)
@@ -134,6 +140,7 @@ internal class BufferingSdkErrorHandler : SdkErrorHandler {
                 )
             )
         } catch (ignored: Throwable) {
+            ignored.restoreCaughtInterruptIfNeeded()
         }
     }
 

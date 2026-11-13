@@ -16,6 +16,7 @@ kotlin {
                 implementation(project(":config"))
                 implementation(project(":context-impl"))
                 implementation(project(":config-dsl"))
+                implementation(project(":semconv"))
                 implementation(project(":model"))
                 implementation(project(":java-typealiases"))
                 implementation(project(":platform-implementations"))
@@ -30,6 +31,7 @@ kotlin {
         }
         jvmTest {
             dependencies {
+                implementation(project(":context-single-slot"))
                 implementation(project(":test-fakes"))
                 implementation(project(":integration-test"))
                 implementation(libs.kotlinx.coroutines.test)

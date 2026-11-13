@@ -4,6 +4,8 @@ import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.createContextKey
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
@@ -154,7 +156,7 @@ internal class LogExportTest {
         harness.config.logRecordProcessors.add(contextCapturingProcessor)
 
         // Create a context key and add a test value
-        val currentContext = harness.kotlinApi.context.current()
+        val currentContext = harness.kotlinApi.context.currentContext()
         val contextKey = createContextKey<String>("best_team")
         val testContextValue = "independiente"
         val testContext = currentContext.set(contextKey, testContextValue)
@@ -229,7 +231,7 @@ internal class LogExportTest {
     fun `test log with decorated parent span in context`() = runTest {
         // a decorating Span is not a SpanAdapter, so storing it must still correlate the log
         val span = DecoratedSpan(harness.tracer.startSpan("span"))
-        val ctx = harness.kotlinApi.context.root().storeSpan(span)
+        val ctx = harness.kotlinApi.context.rootContext().storeSpan(span)
         harness.logger.emit("test", context = ctx)
 
         harness.assertLogRecords(1, "log_decorated_span_context.json") { logs ->

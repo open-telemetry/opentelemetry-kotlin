@@ -13,8 +13,8 @@ internal class ThreadLocalCurrentContextStorageTest {
 
     @BeforeTest
     fun setUp() {
-        root = FakeContext()
-        storage = ThreadLocalCurrentContextStorage { root }
+        root = rootContext()
+        storage = createThreadLocalCurrentContextStorage()
     }
 
     @Test
@@ -47,8 +47,9 @@ internal class ThreadLocalCurrentContextStorageTest {
     fun testSeparateInstancesAreIndependent() {
         val first = FakeContext()
         val second = FakeContext()
-        val otherStorage = ThreadLocalCurrentContextStorage { root }
+        val otherStorage = createThreadLocalCurrentContextStorage()
         storage.attach(first)
+        assertSame(root, otherStorage.current())
         otherStorage.attach(second)
         assertSame(first, storage.current())
         assertSame(second, otherStorage.current())

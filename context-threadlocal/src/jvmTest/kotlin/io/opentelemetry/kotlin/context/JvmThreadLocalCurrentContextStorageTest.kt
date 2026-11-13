@@ -9,8 +9,8 @@ internal class JvmThreadLocalCurrentContextStorageTest {
 
     @Test
     fun testContextIsIsolatedPerThread() {
-        val root = FakeContext()
-        val storage = ThreadLocalCurrentContextStorage { root }
+        val root = rootContext()
+        val storage = ThreadLocalCurrentContextStorage()
 
         val mainContext = FakeContext()
         storage.attach(mainContext)

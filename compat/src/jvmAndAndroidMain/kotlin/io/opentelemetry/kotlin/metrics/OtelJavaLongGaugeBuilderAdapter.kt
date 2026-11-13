@@ -25,6 +25,11 @@ internal class OtelJavaLongGaugeBuilderAdapter(
     override fun build(): OtelJavaLongGauge =
         OtelJavaLongGaugeAdapter(meter.createLongGauge(name, unit, description))
 
+    override fun buildObserver(): OtelJavaObservableLongMeasurement =
+        OtelJavaObservableLongMeasurementAdapter(
+            meter.createObservableLongGauge(name, unit, description).measurement
+        )
+
     override fun buildWithCallback(
         callback: Consumer<OtelJavaObservableLongMeasurement>,
     ): OtelJavaObservableLongGauge {

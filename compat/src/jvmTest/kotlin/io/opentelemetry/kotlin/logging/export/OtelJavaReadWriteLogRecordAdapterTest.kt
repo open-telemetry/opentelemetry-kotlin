@@ -1,11 +1,14 @@
 package io.opentelemetry.kotlin.logging.export
 
+import io.opentelemetry.api.common.Value
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -36,6 +39,28 @@ internal class OtelJavaReadWriteLogRecordAdapterTest {
         assertNull(adapter.getAttribute(OtelJavaAttributeKey.stringKey("missing")))
         assertEquals(2, adapter.attributes.size())
         assertEquals("my_log", adapter.bodyValue?.asString())
+    }
+
+    @Test
+    fun testSetAttributeKeepsTypes() {
+        val log = FakeReadWriteLogRecord()
+        val adapter = OtelJavaReadWriteLogRecordAdapter(log)
+        adapter.setAttribute(OtelJavaAttributeKey.doubleKey("d"), 1.0)
+        adapter.setAttribute(OtelJavaAttributeKey.longArrayKey("ll"), listOf(1L, 2L))
+        adapter.setAttribute(OtelJavaAttributeKey.valueKey("v"), Value.of(listOf(Value.of(true))))
+        adapter.setAttribute(OtelJavaAttributeKey.stringKey("nullable"), null)
+
+        assertEquals(1.0, log.attributes["d"])
+        assertEquals(listOf(1L, 2L), log.attributes["ll"])
+        assertEquals(AnyValue.ListValue(listOf(AnyValue.BoolValue(true))), log.attributes["v"])
+        assertFalse(log.attributes.containsKey("nullable"))
+    }
+
+    @Test
+    fun testGetAttributeWithMismatchedTypeReturnsNull() {
+        val adapter = OtelJavaReadWriteLogRecordAdapter(FakeReadWriteLogRecord(attributes = mapOf("x" to "str")))
+        assertNull(adapter.getAttribute(OtelJavaAttributeKey.longKey("x")))
+        assertEquals("str", adapter.getAttribute(OtelJavaAttributeKey.stringKey("x")))
     }
 
     @Test

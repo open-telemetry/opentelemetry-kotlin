@@ -1,9 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.CurrentContextStorage
-import io.opentelemetry.kotlin.context.CurrentContextStorageMode
 
 /**
  * Defines configuration for Context. This is ignored in compat mode.
@@ -13,18 +11,12 @@ import io.opentelemetry.kotlin.context.CurrentContextStorageMode
 public interface ContextConfigDsl {
 
     /**
-     * Selects among the built-in [CurrentContextStorage] implementations. Ignored when a custom
-     * implementation is supplied via [storage].
-     */
-    public var storageMode: CurrentContextStorageMode?
-
-    /**
-     * Plugs in a custom [CurrentContextStorage] implementation. When set, this takes precedence
-     * over [storageMode]. May only be called once.
+     * The [CurrentContextStorage] that holds the current context. When `null` (the default), the
+     * SDK uses single-slot storage, shared by every thread.
      *
-     * The [action] receives a `rootSupplier` that provides the root [Context]. The custom
-     * implementation's [CurrentContextStorage.current] must return that instance when nothing is
-     * attached.
+     * Use a factory such as `createThreadLocalCurrentContextStorage()`, or supply your own
+     * implementation. A custom implementation's [CurrentContextStorage.current] must return the
+     * root context when nothing is attached.
      */
-    public fun storage(action: (rootSupplier: () -> Context) -> CurrentContextStorage)
+    public var storage: CurrentContextStorage?
 }
