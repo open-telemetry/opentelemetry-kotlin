@@ -10,7 +10,6 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
-import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
@@ -34,8 +33,6 @@ internal class CreateOpenTelemetryIdGeneratorTest {
             idGenerator { custom }
             tracerProvider { export { FakeSpanProcessor() } }
         }.also(sdks::track)
-
-        assertSame(custom, api.idGenerator)
 
         val span = api.tracerProvider.getTracer("test").startSpan("span")
         assertEquals(custom.generateTraceIdBytes().toHexString(), span.spanContext.traceId)

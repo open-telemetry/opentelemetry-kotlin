@@ -23,6 +23,7 @@ import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
 import io.opentelemetry.kotlin.propagation.createW3CTraceContextPropagator
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -145,7 +146,8 @@ internal class OpenTelemetryConfigImplTest {
             dsl = cfg.toBehavior(),
         )
 
-        assertSame(custom, SdkConfigFactory(cfg, behavior).idGenerator)
+        val idGenerator = SdkConfigFactory(cfg, behavior).idGenerator
+        assertContentEquals(custom.generateTraceIdBytes(), idGenerator.generateTraceIdBytes())
     }
 
     @Test

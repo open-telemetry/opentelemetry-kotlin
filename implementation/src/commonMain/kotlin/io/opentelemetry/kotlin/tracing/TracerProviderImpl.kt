@@ -23,6 +23,7 @@ import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
 import io.opentelemetry.kotlin.tracing.sampling.SamplerCloseable
+import io.opentelemetry.kotlin.tracing.sampling.guarded
 
 internal class TracerProviderImpl(
     private val clock: Clock,
@@ -36,7 +37,7 @@ internal class TracerProviderImpl(
     private val shutdownState: MutableShutdownState = MutableShutdownState()
     private val sampler = sdkErrorHandler.guardOrDefault(DefaultSampler, "Failed to create sampler, using default") {
         tracingConfig.samplerFactory()
-    }
+    }.guarded(sdkErrorHandler)
 
     // Processors shut down first so that any spans still in flight finish before the sampler
     // releases its resources.
