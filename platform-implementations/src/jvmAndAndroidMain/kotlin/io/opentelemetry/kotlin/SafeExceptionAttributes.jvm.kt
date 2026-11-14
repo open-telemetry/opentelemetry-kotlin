@@ -37,7 +37,9 @@ public actual fun safeExceptionAttributes(throwable: Throwable): SafeExceptionAt
 
         val message = safeMessage(current)
         output.append(indent).append(relation.orEmpty()).append(name)
-        if (message != null) output.append(": ").append(message)
+        if (message != null) {
+            output.append(": ").append(message)
+        }
         output.append('\n')
 
         val frames = try {

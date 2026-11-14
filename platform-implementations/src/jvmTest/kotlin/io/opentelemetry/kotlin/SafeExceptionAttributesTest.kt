@@ -11,16 +11,16 @@ internal class SafeExceptionAttributesTest {
     fun toleratesThrowingThrowableAccessors() {
         val exception = object : RuntimeException("unused") {
             override val message: String?
-                get() = throw IllegalStateException("hostile message")
+                get() = error("hostile message")
 
             override fun getStackTrace(): Array<StackTraceElement> =
-                throw IllegalStateException("hostile stack trace")
+                error("hostile stack trace")
 
-            override fun toString(): String = throw IllegalStateException("hostile toString")
+            override fun toString(): String = error("hostile toString")
 
-            override fun equals(other: Any?): Boolean = throw IllegalStateException("hostile equals")
+            override fun equals(other: Any?): Boolean = error("hostile equals")
 
-            override fun hashCode(): Int = throw IllegalStateException("hostile hashCode")
+            override fun hashCode(): Int = error("hostile hashCode")
         }
 
         val attributes = safeExceptionAttributes(exception)

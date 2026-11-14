@@ -26,6 +26,10 @@ internal fun safeExceptionAttributesFallback(throwable: Throwable): SafeExceptio
     } catch (_: Throwable) {
         className
     }
-    val header = if (message == null) className else "$className: $message"
+    val header = if (message == null) {
+        className
+    } else {
+        "$className: $message"
+    }
     return SafeExceptionAttributes(type, message, header)
 }
