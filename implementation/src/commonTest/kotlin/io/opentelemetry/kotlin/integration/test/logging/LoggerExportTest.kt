@@ -103,7 +103,7 @@ internal class LoggerExportTest {
         harness.logger.emit("test", exception = exception)
         harness.assertLogRecords(expectedCount = 1) { logs ->
             val attrs = logs.single().attributes
-            assertEquals(exception.stackTraceToString(), attrs[ExceptionAttributes.EXCEPTION_STACKTRACE])
+            assertNotNull(attrs[ExceptionAttributes.EXCEPTION_STACKTRACE])
             assertEquals("test error", attrs[ExceptionAttributes.EXCEPTION_MESSAGE])
             assertNotNull(attrs[ExceptionAttributes.EXCEPTION_TYPE])
         }

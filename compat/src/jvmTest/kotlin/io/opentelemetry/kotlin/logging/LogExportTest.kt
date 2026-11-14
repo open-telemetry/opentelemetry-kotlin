@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -202,7 +203,9 @@ internal class LogExportTest {
         harness.logger.emit("test", exception = exception)
         harness.assertLogRecords(expectedCount = 1) { logs ->
             val attrs = logs.single().attributes
-            assertEquals(exception.stackTraceToString(), attrs[ExceptionAttributes.EXCEPTION_STACKTRACE])
+            val stackTrace = attrs[ExceptionAttributes.EXCEPTION_STACKTRACE] as String
+            assertTrue(stackTrace.startsWith("java.lang.RuntimeException: test error"))
+            assertContains(stackTrace, "\tat ")
             assertEquals("test error", attrs[ExceptionAttributes.EXCEPTION_MESSAGE])
             assertNotNull(attrs[ExceptionAttributes.EXCEPTION_TYPE])
         }

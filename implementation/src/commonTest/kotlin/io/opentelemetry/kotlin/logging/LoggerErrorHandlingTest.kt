@@ -49,9 +49,10 @@ internal class LoggerErrorHandlingTest {
                 }
                 "exception message throws" -> {
                     assertEquals(1, processor.logs.size, case.name)
-                    val error = errorHandler.userCodeErrors.single()
-                    assertEquals("LogRecord.exception attributes failed", error.message, case.name)
-                    assertEquals("boom", error.cause.message, case.name)
+                    assertTrue(errorHandler.userCodeErrors.isEmpty(), case.name)
+                    val log = processor.logs.single()
+                    assertNotNull(log.attributes[ExceptionAttributes.EXCEPTION_MESSAGE], case.name)
+                    assertNotNull(log.attributes[ExceptionAttributes.EXCEPTION_STACKTRACE], case.name)
                 }
                 else -> {
                     assertTrue(processor.logs.isEmpty(), case.name)
@@ -66,7 +67,7 @@ internal class LoggerErrorHandlingTest {
     }
 
     @Test
-    fun testExceptionAttributeFailureDoesNotPreventUserAttributesOrEmit() {
+    fun testHostileExceptionDoesNotPreventUserAttributesOrEmit() {
         val errorHandler = FakeSdkErrorHandler()
         val processor = FakeLogRecordProcessor()
         val logger = createLogger(Case("healthy"), processor, errorHandler)
@@ -75,12 +76,19 @@ internal class LoggerErrorHandlingTest {
         logger.emit(
             "message",
             exception = HostileThrowable(),
-            attributes = { attributesApplied = true },
+            attributes = {
+                attributesApplied = true
+                setStringAttribute("user.key", "value")
+            },
         )
 
         assertTrue(attributesApplied)
         assertEquals(1, processor.logs.size)
-        assertEquals("LogRecord.exception attributes failed", errorHandler.userCodeErrors.single().message)
+        assertTrue(errorHandler.userCodeErrors.isEmpty())
+        val log = processor.logs.single()
+        assertEquals("value", log.attributes["user.key"])
+        assertNotNull(log.attributes[ExceptionAttributes.EXCEPTION_MESSAGE])
+        assertNotNull(log.attributes[ExceptionAttributes.EXCEPTION_STACKTRACE])
     }
 
     @Test

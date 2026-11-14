@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.error
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertSame
 
 internal class PlatformSdkErrorHandlerTest {
 
@@ -27,5 +28,30 @@ internal class PlatformSdkErrorHandlerTest {
     @Test
     fun logsWithoutThrowing() {
         PlatformSdkErrorHandler.onError(SdkError.UserCodeError(exc, "export", SdkErrorSeverity.WARNING))
+    }
+
+    @Test
+    fun toleratesThrowableWhoseToStringThrows() {
+        val hostile = object : IllegalStateException("boom") {
+            override fun toString(): String = error("hostile toString")
+        }
+
+        PlatformSdkErrorHandler.onError(SdkError.UserCodeError(hostile, "export", SdkErrorSeverity.WARNING))
+    }
+
+    @Test
+    fun toleratesCyclicCauseChain() {
+        class CyclicException(message: String) : IllegalStateException(message) {
+            override var cause: Throwable? = null
+        }
+
+        val first = CyclicException("first")
+        val second = CyclicException("second")
+        first.cause = second
+        second.cause = first
+        assertSame(second, first.cause)
+        assertSame(first, second.cause)
+
+        PlatformSdkErrorHandler.onError(SdkError.UserCodeError(first, "export", SdkErrorSeverity.WARNING))
     }
 }
