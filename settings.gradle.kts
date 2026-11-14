@@ -35,6 +35,7 @@ include(
     ":config-yaml",
     ":noop",
     ":implementation",
+    ":sampler-remote",
     ":model",
     ":compat",
     ":platform-implementations",

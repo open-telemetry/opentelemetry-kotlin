@@ -76,17 +76,4 @@ internal class SamplerShutdownTest {
         assertEquals(OperationResultCode.Failure, AlwaysRecordSampler(root).shutdown())
         assertEquals(1, root.shutdownCount)
     }
-
-    @Test
-    fun testPerOperationShutsDownDefaultAndOperationSamplers() = runTest {
-        val default = FakeSampler()
-        val opA = FakeSampler()
-        val opB = FakeSampler()
-        val sampler = PerOperationSampler(default, mapOf("a" to opA, "b" to opB, "c" to default))
-
-        assertEquals(OperationResultCode.Success, sampler.shutdown())
-        assertEquals(1, default.shutdownCount)
-        assertEquals(1, opA.shutdownCount)
-        assertEquals(1, opB.shutdownCount)
-    }
 }
