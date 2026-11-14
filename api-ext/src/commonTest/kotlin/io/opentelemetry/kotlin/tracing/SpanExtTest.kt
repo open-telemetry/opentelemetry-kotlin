@@ -96,9 +96,9 @@ internal class SpanExtTest {
         val span = FakeSpan("span")
         val exception = object : IllegalStateException("unused") {
             override val message: String?
-                get() = throw IllegalStateException("hostile message")
+                get() = error("hostile message")
 
-            override fun toString(): String = throw IllegalStateException("hostile toString")
+            override fun toString(): String = error("hostile toString")
         }
 
         val thrown = assertFailsWith<IllegalStateException> {
