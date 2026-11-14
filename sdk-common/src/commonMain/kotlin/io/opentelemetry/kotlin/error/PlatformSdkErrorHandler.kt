@@ -27,10 +27,10 @@ public object PlatformSdkErrorHandler : SdkErrorHandler {
         val message = error.toLogMessage()
         val fallbackMessage = safeStackTrace?.let { "$message\n$it" } ?: message
         try {
-            platformLog(message, level, cause)
+            platformLog(fallbackMessage, level)
         } catch (_: Throwable) {
             try {
-                platformLog(fallbackMessage, level)
+                platformLog(message, level)
             } catch (_: Throwable) {
                 // Logging must not let an error destabilize the host application.
             }

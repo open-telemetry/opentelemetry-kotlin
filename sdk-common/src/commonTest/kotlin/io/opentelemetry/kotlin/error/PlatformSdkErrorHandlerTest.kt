@@ -37,4 +37,14 @@ internal class PlatformSdkErrorHandlerTest {
 
         PlatformSdkErrorHandler.onError(SdkError.UserCodeError(hostile, "export", SdkErrorSeverity.WARNING))
     }
+
+    @Test
+    fun toleratesCyclicCauseChain() {
+        val first = IllegalStateException("first")
+        val second = IllegalStateException("second")
+        first.initCause(second)
+        second.initCause(first)
+
+        PlatformSdkErrorHandler.onError(SdkError.UserCodeError(first, "export", SdkErrorSeverity.WARNING))
+    }
 }
