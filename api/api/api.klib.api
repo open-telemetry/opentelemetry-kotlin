@@ -1,0 +1,510 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, tvosArm64, tvosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <opentelemetry-kotlin:api>
+open annotation class io.opentelemetry.kotlin.tracing/TracingDsl : kotlin/Annotation { // io.opentelemetry.kotlin.tracing/TracingDsl|null[0]
+    constructor <init>() // io.opentelemetry.kotlin.tracing/TracingDsl.<init>|<init>(){}[0]
+}
+
+open annotation class io.opentelemetry.kotlin/ExperimentalApi : kotlin/Annotation { // io.opentelemetry.kotlin/ExperimentalApi|null[0]
+    constructor <init>() // io.opentelemetry.kotlin/ExperimentalApi.<init>|<init>(){}[0]
+}
+
+open annotation class io.opentelemetry.kotlin/ThreadSafe : kotlin/Annotation { // io.opentelemetry.kotlin/ThreadSafe|null[0]
+    constructor <init>() // io.opentelemetry.kotlin/ThreadSafe.<init>|<init>(){}[0]
+}
+
+final enum class io.opentelemetry.kotlin.init/B3Format : kotlin/Enum<io.opentelemetry.kotlin.init/B3Format> { // io.opentelemetry.kotlin.init/B3Format|null[0]
+    enum entry MULTI // io.opentelemetry.kotlin.init/B3Format.MULTI|null[0]
+    enum entry SINGLE // io.opentelemetry.kotlin.init/B3Format.SINGLE|null[0]
+
+    final val entries // io.opentelemetry.kotlin.init/B3Format.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.opentelemetry.kotlin.init/B3Format> // io.opentelemetry.kotlin.init/B3Format.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.opentelemetry.kotlin.init/B3Format // io.opentelemetry.kotlin.init/B3Format.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.opentelemetry.kotlin.init/B3Format> // io.opentelemetry.kotlin.init/B3Format.values|values#static(){}[0]
+}
+
+final enum class io.opentelemetry.kotlin.logging/SeverityNumber : kotlin/Enum<io.opentelemetry.kotlin.logging/SeverityNumber> { // io.opentelemetry.kotlin.logging/SeverityNumber|null[0]
+    enum entry DEBUG // io.opentelemetry.kotlin.logging/SeverityNumber.DEBUG|null[0]
+    enum entry DEBUG2 // io.opentelemetry.kotlin.logging/SeverityNumber.DEBUG2|null[0]
+    enum entry DEBUG3 // io.opentelemetry.kotlin.logging/SeverityNumber.DEBUG3|null[0]
+    enum entry DEBUG4 // io.opentelemetry.kotlin.logging/SeverityNumber.DEBUG4|null[0]
+    enum entry ERROR // io.opentelemetry.kotlin.logging/SeverityNumber.ERROR|null[0]
+    enum entry ERROR2 // io.opentelemetry.kotlin.logging/SeverityNumber.ERROR2|null[0]
+    enum entry ERROR3 // io.opentelemetry.kotlin.logging/SeverityNumber.ERROR3|null[0]
+    enum entry ERROR4 // io.opentelemetry.kotlin.logging/SeverityNumber.ERROR4|null[0]
+    enum entry FATAL // io.opentelemetry.kotlin.logging/SeverityNumber.FATAL|null[0]
+    enum entry FATAL2 // io.opentelemetry.kotlin.logging/SeverityNumber.FATAL2|null[0]
+    enum entry FATAL3 // io.opentelemetry.kotlin.logging/SeverityNumber.FATAL3|null[0]
+    enum entry FATAL4 // io.opentelemetry.kotlin.logging/SeverityNumber.FATAL4|null[0]
+    enum entry INFO // io.opentelemetry.kotlin.logging/SeverityNumber.INFO|null[0]
+    enum entry INFO2 // io.opentelemetry.kotlin.logging/SeverityNumber.INFO2|null[0]
+    enum entry INFO3 // io.opentelemetry.kotlin.logging/SeverityNumber.INFO3|null[0]
+    enum entry INFO4 // io.opentelemetry.kotlin.logging/SeverityNumber.INFO4|null[0]
+    enum entry TRACE // io.opentelemetry.kotlin.logging/SeverityNumber.TRACE|null[0]
+    enum entry TRACE2 // io.opentelemetry.kotlin.logging/SeverityNumber.TRACE2|null[0]
+    enum entry TRACE3 // io.opentelemetry.kotlin.logging/SeverityNumber.TRACE3|null[0]
+    enum entry TRACE4 // io.opentelemetry.kotlin.logging/SeverityNumber.TRACE4|null[0]
+    enum entry UNKNOWN // io.opentelemetry.kotlin.logging/SeverityNumber.UNKNOWN|null[0]
+    enum entry WARN // io.opentelemetry.kotlin.logging/SeverityNumber.WARN|null[0]
+    enum entry WARN2 // io.opentelemetry.kotlin.logging/SeverityNumber.WARN2|null[0]
+    enum entry WARN3 // io.opentelemetry.kotlin.logging/SeverityNumber.WARN3|null[0]
+    enum entry WARN4 // io.opentelemetry.kotlin.logging/SeverityNumber.WARN4|null[0]
+
+    final val entries // io.opentelemetry.kotlin.logging/SeverityNumber.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.opentelemetry.kotlin.logging/SeverityNumber> // io.opentelemetry.kotlin.logging/SeverityNumber.entries.<get-entries>|<get-entries>#static(){}[0]
+    final val value // io.opentelemetry.kotlin.logging/SeverityNumber.value|{}value[0]
+        final fun <get-value>(): kotlin/Int // io.opentelemetry.kotlin.logging/SeverityNumber.value.<get-value>|<get-value>(){}[0]
+
+    final fun valueOf(kotlin/String): io.opentelemetry.kotlin.logging/SeverityNumber // io.opentelemetry.kotlin.logging/SeverityNumber.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.opentelemetry.kotlin.logging/SeverityNumber> // io.opentelemetry.kotlin.logging/SeverityNumber.values|values#static(){}[0]
+
+    final object Companion { // io.opentelemetry.kotlin.logging/SeverityNumber.Companion|null[0]
+        final fun fromValue(kotlin/Int): io.opentelemetry.kotlin.logging/SeverityNumber // io.opentelemetry.kotlin.logging/SeverityNumber.Companion.fromValue|fromValue(kotlin.Int){}[0]
+    }
+}
+
+final enum class io.opentelemetry.kotlin.tracing/SpanKind : kotlin/Enum<io.opentelemetry.kotlin.tracing/SpanKind> { // io.opentelemetry.kotlin.tracing/SpanKind|null[0]
+    enum entry CLIENT // io.opentelemetry.kotlin.tracing/SpanKind.CLIENT|null[0]
+    enum entry CONSUMER // io.opentelemetry.kotlin.tracing/SpanKind.CONSUMER|null[0]
+    enum entry INTERNAL // io.opentelemetry.kotlin.tracing/SpanKind.INTERNAL|null[0]
+    enum entry PRODUCER // io.opentelemetry.kotlin.tracing/SpanKind.PRODUCER|null[0]
+    enum entry SERVER // io.opentelemetry.kotlin.tracing/SpanKind.SERVER|null[0]
+
+    final val entries // io.opentelemetry.kotlin.tracing/SpanKind.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.opentelemetry.kotlin.tracing/SpanKind> // io.opentelemetry.kotlin.tracing/SpanKind.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.opentelemetry.kotlin.tracing/SpanKind // io.opentelemetry.kotlin.tracing/SpanKind.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.opentelemetry.kotlin.tracing/SpanKind> // io.opentelemetry.kotlin.tracing/SpanKind.values|values#static(){}[0]
+}
+
+final enum class io.opentelemetry.kotlin.tracing/StatusCode : kotlin/Enum<io.opentelemetry.kotlin.tracing/StatusCode> { // io.opentelemetry.kotlin.tracing/StatusCode|null[0]
+    enum entry ERROR // io.opentelemetry.kotlin.tracing/StatusCode.ERROR|null[0]
+    enum entry OK // io.opentelemetry.kotlin.tracing/StatusCode.OK|null[0]
+    enum entry UNSET // io.opentelemetry.kotlin.tracing/StatusCode.UNSET|null[0]
+
+    final val entries // io.opentelemetry.kotlin.tracing/StatusCode.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.opentelemetry.kotlin.tracing/StatusCode> // io.opentelemetry.kotlin.tracing/StatusCode.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.opentelemetry.kotlin.tracing/StatusCode // io.opentelemetry.kotlin.tracing/StatusCode.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.opentelemetry.kotlin.tracing/StatusCode> // io.opentelemetry.kotlin.tracing/StatusCode.values|values#static(){}[0]
+}
+
+abstract fun interface <#A: in kotlin/Any?> io.opentelemetry.kotlin.propagation/TextMapSetter { // io.opentelemetry.kotlin.propagation/TextMapSetter|null[0]
+    abstract fun set(#A, kotlin/String, kotlin/String) // io.opentelemetry.kotlin.propagation/TextMapSetter.set|set(1:0;kotlin.String;kotlin.String){}[0]
+}
+
+abstract interface <#A: kotlin/Any?> io.opentelemetry.kotlin.context/ContextKey // io.opentelemetry.kotlin.context/ContextKey|null[0]
+
+abstract interface <#A: kotlin/Any?> io.opentelemetry.kotlin.propagation/TextMapGetter { // io.opentelemetry.kotlin.propagation/TextMapGetter|null[0]
+    abstract fun get(#A, kotlin/String): kotlin/String? // io.opentelemetry.kotlin.propagation/TextMapGetter.get|get(1:0;kotlin.String){}[0]
+    abstract fun getAll(#A, kotlin/String): kotlin.collections/List<kotlin/String> // io.opentelemetry.kotlin.propagation/TextMapGetter.getAll|getAll(1:0;kotlin.String){}[0]
+    abstract fun keys(#A): kotlin.collections/Collection<kotlin/String> // io.opentelemetry.kotlin.propagation/TextMapGetter.keys|keys(1:0){}[0]
+}
+
+abstract interface <#A: out io.opentelemetry.kotlin.metrics/ObservableMeasurement> io.opentelemetry.kotlin.metrics/AsynchronousInstrument : io.opentelemetry.kotlin.metrics/Instrument, kotlin/AutoCloseable { // io.opentelemetry.kotlin.metrics/AsynchronousInstrument|null[0]
+    abstract val measurement // io.opentelemetry.kotlin.metrics/AsynchronousInstrument.measurement|{}measurement[0]
+        abstract fun <get-measurement>(): #A // io.opentelemetry.kotlin.metrics/AsynchronousInstrument.measurement.<get-measurement>|<get-measurement>(){}[0]
+
+    abstract fun registerCallback(kotlin/Function1<#A, kotlin/Unit>): kotlin/AutoCloseable // io.opentelemetry.kotlin.metrics/AsynchronousInstrument.registerCallback|registerCallback(kotlin.Function1<1:0,kotlin.Unit>){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.attributes/AttributesMutator { // io.opentelemetry.kotlin.attributes/AttributesMutator|null[0]
+    abstract fun setAnyValueAttribute(kotlin/String, io.opentelemetry.kotlin.attributes/AnyValue) // io.opentelemetry.kotlin.attributes/AttributesMutator.setAnyValueAttribute|setAnyValueAttribute(kotlin.String;io.opentelemetry.kotlin.attributes.AnyValue){}[0]
+    abstract fun setBooleanAttribute(kotlin/String, kotlin/Boolean) // io.opentelemetry.kotlin.attributes/AttributesMutator.setBooleanAttribute|setBooleanAttribute(kotlin.String;kotlin.Boolean){}[0]
+    abstract fun setBooleanListAttribute(kotlin/String, kotlin.collections/List<kotlin/Boolean>) // io.opentelemetry.kotlin.attributes/AttributesMutator.setBooleanListAttribute|setBooleanListAttribute(kotlin.String;kotlin.collections.List<kotlin.Boolean>){}[0]
+    abstract fun setByteArrayAttribute(kotlin/String, kotlin/ByteArray) // io.opentelemetry.kotlin.attributes/AttributesMutator.setByteArrayAttribute|setByteArrayAttribute(kotlin.String;kotlin.ByteArray){}[0]
+    abstract fun setDoubleAttribute(kotlin/String, kotlin/Double) // io.opentelemetry.kotlin.attributes/AttributesMutator.setDoubleAttribute|setDoubleAttribute(kotlin.String;kotlin.Double){}[0]
+    abstract fun setDoubleListAttribute(kotlin/String, kotlin.collections/List<kotlin/Double>) // io.opentelemetry.kotlin.attributes/AttributesMutator.setDoubleListAttribute|setDoubleListAttribute(kotlin.String;kotlin.collections.List<kotlin.Double>){}[0]
+    abstract fun setLongAttribute(kotlin/String, kotlin/Long) // io.opentelemetry.kotlin.attributes/AttributesMutator.setLongAttribute|setLongAttribute(kotlin.String;kotlin.Long){}[0]
+    abstract fun setLongListAttribute(kotlin/String, kotlin.collections/List<kotlin/Long>) // io.opentelemetry.kotlin.attributes/AttributesMutator.setLongListAttribute|setLongListAttribute(kotlin.String;kotlin.collections.List<kotlin.Long>){}[0]
+    abstract fun setStringAttribute(kotlin/String, kotlin/String) // io.opentelemetry.kotlin.attributes/AttributesMutator.setStringAttribute|setStringAttribute(kotlin.String;kotlin.String){}[0]
+    abstract fun setStringListAttribute(kotlin/String, kotlin.collections/List<kotlin/String>) // io.opentelemetry.kotlin.attributes/AttributesMutator.setStringListAttribute|setStringListAttribute(kotlin.String;kotlin.collections.List<kotlin.String>){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.baggage/Baggage { // io.opentelemetry.kotlin.baggage/Baggage|null[0]
+    abstract fun asMap(): kotlin.collections/Map<kotlin/String, io.opentelemetry.kotlin.baggage/BaggageEntry> // io.opentelemetry.kotlin.baggage/Baggage.asMap|asMap(){}[0]
+    abstract fun getValue(kotlin/String): kotlin/String? // io.opentelemetry.kotlin.baggage/Baggage.getValue|getValue(kotlin.String){}[0]
+    abstract fun remove(kotlin/String): io.opentelemetry.kotlin.baggage/Baggage // io.opentelemetry.kotlin.baggage/Baggage.remove|remove(kotlin.String){}[0]
+    abstract fun set(kotlin/String, kotlin/String): io.opentelemetry.kotlin.baggage/Baggage // io.opentelemetry.kotlin.baggage/Baggage.set|set(kotlin.String;kotlin.String){}[0]
+    abstract fun set(kotlin/String, kotlin/String, io.opentelemetry.kotlin.baggage/BaggageEntryMetadata): io.opentelemetry.kotlin.baggage/Baggage // io.opentelemetry.kotlin.baggage/Baggage.set|set(kotlin.String;kotlin.String;io.opentelemetry.kotlin.baggage.BaggageEntryMetadata){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.baggage/BaggageCreationAction { // io.opentelemetry.kotlin.baggage/BaggageCreationAction|null[0]
+    abstract fun put(kotlin/String, kotlin/String, kotlin/String = ...) // io.opentelemetry.kotlin.baggage/BaggageCreationAction.put|put(kotlin.String;kotlin.String;kotlin.String){}[0]
+    abstract fun remove(kotlin/String) // io.opentelemetry.kotlin.baggage/BaggageCreationAction.remove|remove(kotlin.String){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.baggage/BaggageEntry { // io.opentelemetry.kotlin.baggage/BaggageEntry|null[0]
+    abstract val metadata // io.opentelemetry.kotlin.baggage/BaggageEntry.metadata|{}metadata[0]
+        abstract fun <get-metadata>(): io.opentelemetry.kotlin.baggage/BaggageEntryMetadata // io.opentelemetry.kotlin.baggage/BaggageEntry.metadata.<get-metadata>|<get-metadata>(){}[0]
+    abstract val value // io.opentelemetry.kotlin.baggage/BaggageEntry.value|{}value[0]
+        abstract fun <get-value>(): kotlin/String // io.opentelemetry.kotlin.baggage/BaggageEntry.value.<get-value>|<get-value>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.baggage/BaggageEntryMetadata { // io.opentelemetry.kotlin.baggage/BaggageEntryMetadata|null[0]
+    abstract val value // io.opentelemetry.kotlin.baggage/BaggageEntryMetadata.value|{}value[0]
+        abstract fun <get-value>(): kotlin/String // io.opentelemetry.kotlin.baggage/BaggageEntryMetadata.value.<get-value>|<get-value>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.config/ConfigProperties { // io.opentelemetry.kotlin.config/ConfigProperties|null[0]
+    abstract val propertyKeys // io.opentelemetry.kotlin.config/ConfigProperties.propertyKeys|{}propertyKeys[0]
+        abstract fun <get-propertyKeys>(): kotlin.collections/Set<kotlin/String> // io.opentelemetry.kotlin.config/ConfigProperties.propertyKeys.<get-propertyKeys>|<get-propertyKeys>(){}[0]
+
+    abstract fun getBoolean(kotlin/String): kotlin/Boolean? // io.opentelemetry.kotlin.config/ConfigProperties.getBoolean|getBoolean(kotlin.String){}[0]
+    abstract fun getBooleanList(kotlin/String): kotlin.collections/List<kotlin/Boolean>? // io.opentelemetry.kotlin.config/ConfigProperties.getBooleanList|getBooleanList(kotlin.String){}[0]
+    abstract fun getDouble(kotlin/String): kotlin/Double? // io.opentelemetry.kotlin.config/ConfigProperties.getDouble|getDouble(kotlin.String){}[0]
+    abstract fun getDoubleList(kotlin/String): kotlin.collections/List<kotlin/Double>? // io.opentelemetry.kotlin.config/ConfigProperties.getDoubleList|getDoubleList(kotlin.String){}[0]
+    abstract fun getLong(kotlin/String): kotlin/Long? // io.opentelemetry.kotlin.config/ConfigProperties.getLong|getLong(kotlin.String){}[0]
+    abstract fun getLongList(kotlin/String): kotlin.collections/List<kotlin/Long>? // io.opentelemetry.kotlin.config/ConfigProperties.getLongList|getLongList(kotlin.String){}[0]
+    abstract fun getString(kotlin/String): kotlin/String? // io.opentelemetry.kotlin.config/ConfigProperties.getString|getString(kotlin.String){}[0]
+    abstract fun getStringList(kotlin/String): kotlin.collections/List<kotlin/String>? // io.opentelemetry.kotlin.config/ConfigProperties.getStringList|getStringList(kotlin.String){}[0]
+    abstract fun getStructured(kotlin/String): io.opentelemetry.kotlin.config/ConfigProperties? // io.opentelemetry.kotlin.config/ConfigProperties.getStructured|getStructured(kotlin.String){}[0]
+    abstract fun getStructuredList(kotlin/String): kotlin.collections/List<io.opentelemetry.kotlin.config/ConfigProperties>? // io.opentelemetry.kotlin.config/ConfigProperties.getStructuredList|getStructuredList(kotlin.String){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.config/ConfigProvider { // io.opentelemetry.kotlin.config/ConfigProvider|null[0]
+    abstract val instrumentationConfig // io.opentelemetry.kotlin.config/ConfigProvider.instrumentationConfig|{}instrumentationConfig[0]
+        abstract fun <get-instrumentationConfig>(): io.opentelemetry.kotlin.config/ConfigProperties // io.opentelemetry.kotlin.config/ConfigProvider.instrumentationConfig.<get-instrumentationConfig>|<get-instrumentationConfig>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.context/Context { // io.opentelemetry.kotlin.context/Context|null[0]
+    abstract fun <#A1: kotlin/Any?> get(io.opentelemetry.kotlin.context/ContextKey<#A1>): #A1? // io.opentelemetry.kotlin.context/Context.get|get(io.opentelemetry.kotlin.context.ContextKey<0:0>){0§<kotlin.Any?>}[0]
+    abstract fun <#A1: kotlin/Any?> set(io.opentelemetry.kotlin.context/ContextKey<#A1>, #A1?): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.context/Context.set|set(io.opentelemetry.kotlin.context.ContextKey<0:0>;0:0?){0§<kotlin.Any?>}[0]
+    abstract fun attach(): io.opentelemetry.kotlin.context/Scope // io.opentelemetry.kotlin.context/Context.attach|attach(){}[0]
+    abstract fun clearBaggage(): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.context/Context.clearBaggage|clearBaggage(){}[0]
+    abstract fun extractBaggage(): io.opentelemetry.kotlin.baggage/Baggage // io.opentelemetry.kotlin.context/Context.extractBaggage|extractBaggage(){}[0]
+    abstract fun extractSpan(): io.opentelemetry.kotlin.tracing/Span // io.opentelemetry.kotlin.context/Context.extractSpan|extractSpan(){}[0]
+    abstract fun storeBaggage(io.opentelemetry.kotlin.baggage/Baggage): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.context/Context.storeBaggage|storeBaggage(io.opentelemetry.kotlin.baggage.Baggage){}[0]
+    abstract fun storeSpan(io.opentelemetry.kotlin.tracing/Span): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.context/Context.storeSpan|storeSpan(io.opentelemetry.kotlin.tracing.Span){}[0]
+    abstract fun storeSpanContext(io.opentelemetry.kotlin.tracing/SpanContext): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.context/Context.storeSpanContext|storeSpanContext(io.opentelemetry.kotlin.tracing.SpanContext){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.context/CurrentContextStorage { // io.opentelemetry.kotlin.context/CurrentContextStorage|null[0]
+    abstract fun attach(io.opentelemetry.kotlin.context/Context): io.opentelemetry.kotlin.context/Scope // io.opentelemetry.kotlin.context/CurrentContextStorage.attach|attach(io.opentelemetry.kotlin.context.Context){}[0]
+    abstract fun current(): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.context/CurrentContextStorage.current|current(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.context/Scope { // io.opentelemetry.kotlin.context/Scope|null[0]
+    abstract fun detach(): kotlin/Boolean // io.opentelemetry.kotlin.context/Scope.detach|detach(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.factory/ContextFactory { // io.opentelemetry.kotlin.factory/ContextFactory|null[0]
+    abstract fun current(): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.factory/ContextFactory.current|current(){}[0]
+    abstract fun root(): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.factory/ContextFactory.root|root(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.logging/Logger { // io.opentelemetry.kotlin.logging/Logger|null[0]
+    abstract fun emit(kotlin/Any? = ..., kotlin/String? = ..., kotlin/Long = ..., kotlin/Long = ..., io.opentelemetry.kotlin.context/Context? = ..., io.opentelemetry.kotlin.logging/SeverityNumber? = ..., kotlin/String? = ..., kotlin/Throwable? = ..., kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>? = ...) // io.opentelemetry.kotlin.logging/Logger.emit|emit(kotlin.Any?;kotlin.String?;kotlin.Long;kotlin.Long;io.opentelemetry.kotlin.context.Context?;io.opentelemetry.kotlin.logging.SeverityNumber?;kotlin.String?;kotlin.Throwable?;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>?){}[0]
+    abstract fun enabled(io.opentelemetry.kotlin.context/Context? = ..., io.opentelemetry.kotlin.logging/SeverityNumber? = ..., kotlin/String? = ...): kotlin/Boolean // io.opentelemetry.kotlin.logging/Logger.enabled|enabled(io.opentelemetry.kotlin.context.Context?;io.opentelemetry.kotlin.logging.SeverityNumber?;kotlin.String?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.logging/LoggerProvider { // io.opentelemetry.kotlin.logging/LoggerProvider|null[0]
+    abstract fun getLogger(kotlin/String, kotlin/String? = ..., kotlin/String? = ..., kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>? = ...): io.opentelemetry.kotlin.logging/Logger // io.opentelemetry.kotlin.logging/LoggerProvider.getLogger|getLogger(kotlin.String;kotlin.String?;kotlin.String?;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics/DoubleGauge : io.opentelemetry.kotlin.metrics/SynchronousInstrument { // io.opentelemetry.kotlin.metrics/DoubleGauge|null[0]
+    abstract fun record(kotlin/Double, kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>? = ...) // io.opentelemetry.kotlin.metrics/DoubleGauge.record|record(kotlin.Double;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics/DoubleHistogram : io.opentelemetry.kotlin.metrics/SynchronousInstrument { // io.opentelemetry.kotlin.metrics/DoubleHistogram|null[0]
+    abstract fun record(kotlin/Double, io.opentelemetry.kotlin.context/Context? = ..., kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>? = ...) // io.opentelemetry.kotlin.metrics/DoubleHistogram.record|record(kotlin.Double;io.opentelemetry.kotlin.context.Context?;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics/DoubleUpDownCounter : io.opentelemetry.kotlin.metrics/SynchronousInstrument { // io.opentelemetry.kotlin.metrics/DoubleUpDownCounter|null[0]
+    abstract fun add(kotlin/Double, kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>? = ...) // io.opentelemetry.kotlin.metrics/DoubleUpDownCounter.add|add(kotlin.Double;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics/Instrument { // io.opentelemetry.kotlin.metrics/Instrument|null[0]
+    abstract val description // io.opentelemetry.kotlin.metrics/Instrument.description|{}description[0]
+        abstract fun <get-description>(): kotlin/String? // io.opentelemetry.kotlin.metrics/Instrument.description.<get-description>|<get-description>(){}[0]
+    abstract val name // io.opentelemetry.kotlin.metrics/Instrument.name|{}name[0]
+        abstract fun <get-name>(): kotlin/String // io.opentelemetry.kotlin.metrics/Instrument.name.<get-name>|<get-name>(){}[0]
+    abstract val unit // io.opentelemetry.kotlin.metrics/Instrument.unit|{}unit[0]
+        abstract fun <get-unit>(): kotlin/String? // io.opentelemetry.kotlin.metrics/Instrument.unit.<get-unit>|<get-unit>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics/LongGauge : io.opentelemetry.kotlin.metrics/SynchronousInstrument { // io.opentelemetry.kotlin.metrics/LongGauge|null[0]
+    abstract fun record(kotlin/Long, kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>? = ...) // io.opentelemetry.kotlin.metrics/LongGauge.record|record(kotlin.Long;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics/LongHistogram : io.opentelemetry.kotlin.metrics/SynchronousInstrument { // io.opentelemetry.kotlin.metrics/LongHistogram|null[0]
+    abstract fun record(kotlin/Long, io.opentelemetry.kotlin.context/Context? = ..., kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>? = ...) // io.opentelemetry.kotlin.metrics/LongHistogram.record|record(kotlin.Long;io.opentelemetry.kotlin.context.Context?;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics/LongUpDownCounter : io.opentelemetry.kotlin.metrics/SynchronousInstrument { // io.opentelemetry.kotlin.metrics/LongUpDownCounter|null[0]
+    abstract fun add(kotlin/Long, kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>? = ...) // io.opentelemetry.kotlin.metrics/LongUpDownCounter.add|add(kotlin.Long;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics/Meter { // io.opentelemetry.kotlin.metrics/Meter|null[0]
+    abstract fun createDoubleGauge(kotlin/String, kotlin/String? = ..., kotlin/String? = ...): io.opentelemetry.kotlin.metrics/DoubleGauge // io.opentelemetry.kotlin.metrics/Meter.createDoubleGauge|createDoubleGauge(kotlin.String;kotlin.String?;kotlin.String?){}[0]
+    abstract fun createDoubleUpDownCounter(kotlin/String, kotlin/String? = ..., kotlin/String? = ...): io.opentelemetry.kotlin.metrics/DoubleUpDownCounter // io.opentelemetry.kotlin.metrics/Meter.createDoubleUpDownCounter|createDoubleUpDownCounter(kotlin.String;kotlin.String?;kotlin.String?){}[0]
+    abstract fun createLongGauge(kotlin/String, kotlin/String? = ..., kotlin/String? = ...): io.opentelemetry.kotlin.metrics/LongGauge // io.opentelemetry.kotlin.metrics/Meter.createLongGauge|createLongGauge(kotlin.String;kotlin.String?;kotlin.String?){}[0]
+    abstract fun createLongUpDownCounter(kotlin/String, kotlin/String? = ..., kotlin/String? = ...): io.opentelemetry.kotlin.metrics/LongUpDownCounter // io.opentelemetry.kotlin.metrics/Meter.createLongUpDownCounter|createLongUpDownCounter(kotlin.String;kotlin.String?;kotlin.String?){}[0]
+    abstract fun createObservableDoubleCounter(kotlin/String, kotlin/String? = ..., kotlin/String? = ..., kotlin/Array<out kotlin/Function1<io.opentelemetry.kotlin.metrics/ObservableDoubleMeasurement, kotlin/Unit>>...): io.opentelemetry.kotlin.metrics/ObservableDoubleCounter // io.opentelemetry.kotlin.metrics/Meter.createObservableDoubleCounter|createObservableDoubleCounter(kotlin.String;kotlin.String?;kotlin.String?;kotlin.Array<out|kotlin.Function1<io.opentelemetry.kotlin.metrics.ObservableDoubleMeasurement,kotlin.Unit>>...){}[0]
+    abstract fun createObservableDoubleGauge(kotlin/String, kotlin/String? = ..., kotlin/String? = ..., kotlin/Array<out kotlin/Function1<io.opentelemetry.kotlin.metrics/ObservableDoubleMeasurement, kotlin/Unit>>...): io.opentelemetry.kotlin.metrics/ObservableDoubleGauge // io.opentelemetry.kotlin.metrics/Meter.createObservableDoubleGauge|createObservableDoubleGauge(kotlin.String;kotlin.String?;kotlin.String?;kotlin.Array<out|kotlin.Function1<io.opentelemetry.kotlin.metrics.ObservableDoubleMeasurement,kotlin.Unit>>...){}[0]
+    abstract fun createObservableDoubleUpDownCounter(kotlin/String, kotlin/String? = ..., kotlin/String? = ..., kotlin/Array<out kotlin/Function1<io.opentelemetry.kotlin.metrics/ObservableDoubleMeasurement, kotlin/Unit>>...): io.opentelemetry.kotlin.metrics/ObservableDoubleUpDownCounter // io.opentelemetry.kotlin.metrics/Meter.createObservableDoubleUpDownCounter|createObservableDoubleUpDownCounter(kotlin.String;kotlin.String?;kotlin.String?;kotlin.Array<out|kotlin.Function1<io.opentelemetry.kotlin.metrics.ObservableDoubleMeasurement,kotlin.Unit>>...){}[0]
+    abstract fun createObservableLongCounter(kotlin/String, kotlin/String? = ..., kotlin/String? = ..., kotlin/Array<out kotlin/Function1<io.opentelemetry.kotlin.metrics/ObservableLongMeasurement, kotlin/Unit>>...): io.opentelemetry.kotlin.metrics/ObservableLongCounter // io.opentelemetry.kotlin.metrics/Meter.createObservableLongCounter|createObservableLongCounter(kotlin.String;kotlin.String?;kotlin.String?;kotlin.Array<out|kotlin.Function1<io.opentelemetry.kotlin.metrics.ObservableLongMeasurement,kotlin.Unit>>...){}[0]
+    abstract fun createObservableLongGauge(kotlin/String, kotlin/String? = ..., kotlin/String? = ..., kotlin/Array<out kotlin/Function1<io.opentelemetry.kotlin.metrics/ObservableLongMeasurement, kotlin/Unit>>...): io.opentelemetry.kotlin.metrics/ObservableLongGauge // io.opentelemetry.kotlin.metrics/Meter.createObservableLongGauge|createObservableLongGauge(kotlin.String;kotlin.String?;kotlin.String?;kotlin.Array<out|kotlin.Function1<io.opentelemetry.kotlin.metrics.ObservableLongMeasurement,kotlin.Unit>>...){}[0]
+    abstract fun createObservableLongUpDownCounter(kotlin/String, kotlin/String? = ..., kotlin/String? = ..., kotlin/Array<out kotlin/Function1<io.opentelemetry.kotlin.metrics/ObservableLongMeasurement, kotlin/Unit>>...): io.opentelemetry.kotlin.metrics/ObservableLongUpDownCounter // io.opentelemetry.kotlin.metrics/Meter.createObservableLongUpDownCounter|createObservableLongUpDownCounter(kotlin.String;kotlin.String?;kotlin.String?;kotlin.Array<out|kotlin.Function1<io.opentelemetry.kotlin.metrics.ObservableLongMeasurement,kotlin.Unit>>...){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics/MeterProvider { // io.opentelemetry.kotlin.metrics/MeterProvider|null[0]
+    abstract fun getMeter(kotlin/String, kotlin/String? = ..., kotlin/String? = ..., kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>? = ...): io.opentelemetry.kotlin.metrics/Meter // io.opentelemetry.kotlin.metrics/MeterProvider.getMeter|getMeter(kotlin.String;kotlin.String?;kotlin.String?;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics/ObservableDoubleCounter : io.opentelemetry.kotlin.metrics/AsynchronousInstrument<io.opentelemetry.kotlin.metrics/ObservableDoubleMeasurement> // io.opentelemetry.kotlin.metrics/ObservableDoubleCounter|null[0]
+
+abstract interface io.opentelemetry.kotlin.metrics/ObservableDoubleGauge : io.opentelemetry.kotlin.metrics/AsynchronousInstrument<io.opentelemetry.kotlin.metrics/ObservableDoubleMeasurement> // io.opentelemetry.kotlin.metrics/ObservableDoubleGauge|null[0]
+
+abstract interface io.opentelemetry.kotlin.metrics/ObservableDoubleMeasurement : io.opentelemetry.kotlin.metrics/ObservableMeasurement { // io.opentelemetry.kotlin.metrics/ObservableDoubleMeasurement|null[0]
+    abstract fun record(kotlin/Double, kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>? = ...) // io.opentelemetry.kotlin.metrics/ObservableDoubleMeasurement.record|record(kotlin.Double;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics/ObservableDoubleUpDownCounter : io.opentelemetry.kotlin.metrics/AsynchronousInstrument<io.opentelemetry.kotlin.metrics/ObservableDoubleMeasurement> // io.opentelemetry.kotlin.metrics/ObservableDoubleUpDownCounter|null[0]
+
+abstract interface io.opentelemetry.kotlin.metrics/ObservableLongCounter : io.opentelemetry.kotlin.metrics/AsynchronousInstrument<io.opentelemetry.kotlin.metrics/ObservableLongMeasurement> // io.opentelemetry.kotlin.metrics/ObservableLongCounter|null[0]
+
+abstract interface io.opentelemetry.kotlin.metrics/ObservableLongGauge : io.opentelemetry.kotlin.metrics/AsynchronousInstrument<io.opentelemetry.kotlin.metrics/ObservableLongMeasurement> // io.opentelemetry.kotlin.metrics/ObservableLongGauge|null[0]
+
+abstract interface io.opentelemetry.kotlin.metrics/ObservableLongMeasurement : io.opentelemetry.kotlin.metrics/ObservableMeasurement { // io.opentelemetry.kotlin.metrics/ObservableLongMeasurement|null[0]
+    abstract fun record(kotlin/Long, kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>? = ...) // io.opentelemetry.kotlin.metrics/ObservableLongMeasurement.record|record(kotlin.Long;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics/ObservableLongUpDownCounter : io.opentelemetry.kotlin.metrics/AsynchronousInstrument<io.opentelemetry.kotlin.metrics/ObservableLongMeasurement> // io.opentelemetry.kotlin.metrics/ObservableLongUpDownCounter|null[0]
+
+abstract interface io.opentelemetry.kotlin.metrics/ObservableMeasurement // io.opentelemetry.kotlin.metrics/ObservableMeasurement|null[0]
+
+abstract interface io.opentelemetry.kotlin.metrics/SynchronousInstrument : io.opentelemetry.kotlin.metrics/Instrument { // io.opentelemetry.kotlin.metrics/SynchronousInstrument|null[0]
+    abstract fun enabled(): kotlin/Boolean // io.opentelemetry.kotlin.metrics/SynchronousInstrument.enabled|enabled(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.propagation/TextMapPropagator { // io.opentelemetry.kotlin.propagation/TextMapPropagator|null[0]
+    abstract fun <#A1: kotlin/Any?> extract(io.opentelemetry.kotlin.context/Context, #A1, io.opentelemetry.kotlin.propagation/TextMapGetter<#A1>): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.propagation/TextMapPropagator.extract|extract(io.opentelemetry.kotlin.context.Context;0:0;io.opentelemetry.kotlin.propagation.TextMapGetter<0:0>){0§<kotlin.Any?>}[0]
+    abstract fun <#A1: kotlin/Any?> inject(io.opentelemetry.kotlin.context/Context, #A1, io.opentelemetry.kotlin.propagation/TextMapSetter<#A1>) // io.opentelemetry.kotlin.propagation/TextMapPropagator.inject|inject(io.opentelemetry.kotlin.context.Context;0:0;io.opentelemetry.kotlin.propagation.TextMapSetter<0:0>){0§<kotlin.Any?>}[0]
+    abstract fun fields(): kotlin.collections/Collection<kotlin/String> // io.opentelemetry.kotlin.propagation/TextMapPropagator.fields|fields(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing/Span : io.opentelemetry.kotlin.attributes/AttributesMutator, io.opentelemetry.kotlin.tracing/SpanEventCreator, io.opentelemetry.kotlin.tracing/SpanLinkCreator { // io.opentelemetry.kotlin.tracing/Span|null[0]
+    abstract val parent // io.opentelemetry.kotlin.tracing/Span.parent|{}parent[0]
+        abstract fun <get-parent>(): io.opentelemetry.kotlin.tracing/SpanContext // io.opentelemetry.kotlin.tracing/Span.parent.<get-parent>|<get-parent>(){}[0]
+    abstract val spanContext // io.opentelemetry.kotlin.tracing/Span.spanContext|{}spanContext[0]
+        abstract fun <get-spanContext>(): io.opentelemetry.kotlin.tracing/SpanContext // io.opentelemetry.kotlin.tracing/Span.spanContext.<get-spanContext>|<get-spanContext>(){}[0]
+
+    abstract fun end() // io.opentelemetry.kotlin.tracing/Span.end|end(){}[0]
+    abstract fun end(kotlin/Long) // io.opentelemetry.kotlin.tracing/Span.end|end(kotlin.Long){}[0]
+    abstract fun isRecording(): kotlin/Boolean // io.opentelemetry.kotlin.tracing/Span.isRecording|isRecording(){}[0]
+    abstract fun setName(kotlin/String) // io.opentelemetry.kotlin.tracing/Span.setName|setName(kotlin.String){}[0]
+    abstract fun setStatus(io.opentelemetry.kotlin.tracing/StatusData) // io.opentelemetry.kotlin.tracing/Span.setStatus|setStatus(io.opentelemetry.kotlin.tracing.StatusData){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing/SpanContext { // io.opentelemetry.kotlin.tracing/SpanContext|null[0]
+    abstract val isRemote // io.opentelemetry.kotlin.tracing/SpanContext.isRemote|{}isRemote[0]
+        abstract fun <get-isRemote>(): kotlin/Boolean // io.opentelemetry.kotlin.tracing/SpanContext.isRemote.<get-isRemote>|<get-isRemote>(){}[0]
+    abstract val isValid // io.opentelemetry.kotlin.tracing/SpanContext.isValid|{}isValid[0]
+        abstract fun <get-isValid>(): kotlin/Boolean // io.opentelemetry.kotlin.tracing/SpanContext.isValid.<get-isValid>|<get-isValid>(){}[0]
+    abstract val spanId // io.opentelemetry.kotlin.tracing/SpanContext.spanId|{}spanId[0]
+        abstract fun <get-spanId>(): kotlin/String // io.opentelemetry.kotlin.tracing/SpanContext.spanId.<get-spanId>|<get-spanId>(){}[0]
+    abstract val spanIdBytes // io.opentelemetry.kotlin.tracing/SpanContext.spanIdBytes|{}spanIdBytes[0]
+        abstract fun <get-spanIdBytes>(): kotlin/ByteArray // io.opentelemetry.kotlin.tracing/SpanContext.spanIdBytes.<get-spanIdBytes>|<get-spanIdBytes>(){}[0]
+    abstract val traceFlags // io.opentelemetry.kotlin.tracing/SpanContext.traceFlags|{}traceFlags[0]
+        abstract fun <get-traceFlags>(): io.opentelemetry.kotlin.tracing/TraceFlags // io.opentelemetry.kotlin.tracing/SpanContext.traceFlags.<get-traceFlags>|<get-traceFlags>(){}[0]
+    abstract val traceId // io.opentelemetry.kotlin.tracing/SpanContext.traceId|{}traceId[0]
+        abstract fun <get-traceId>(): kotlin/String // io.opentelemetry.kotlin.tracing/SpanContext.traceId.<get-traceId>|<get-traceId>(){}[0]
+    abstract val traceIdBytes // io.opentelemetry.kotlin.tracing/SpanContext.traceIdBytes|{}traceIdBytes[0]
+        abstract fun <get-traceIdBytes>(): kotlin/ByteArray // io.opentelemetry.kotlin.tracing/SpanContext.traceIdBytes.<get-traceIdBytes>|<get-traceIdBytes>(){}[0]
+    abstract val traceState // io.opentelemetry.kotlin.tracing/SpanContext.traceState|{}traceState[0]
+        abstract fun <get-traceState>(): io.opentelemetry.kotlin.tracing/TraceState // io.opentelemetry.kotlin.tracing/SpanContext.traceState.<get-traceState>|<get-traceState>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing/SpanContextCreationAction { // io.opentelemetry.kotlin.tracing/SpanContextCreationAction|null[0]
+    abstract var isRandom // io.opentelemetry.kotlin.tracing/SpanContextCreationAction.isRandom|{}isRandom[0]
+        abstract fun <get-isRandom>(): kotlin/Boolean // io.opentelemetry.kotlin.tracing/SpanContextCreationAction.isRandom.<get-isRandom>|<get-isRandom>(){}[0]
+        abstract fun <set-isRandom>(kotlin/Boolean) // io.opentelemetry.kotlin.tracing/SpanContextCreationAction.isRandom.<set-isRandom>|<set-isRandom>(kotlin.Boolean){}[0]
+    abstract var isRemote // io.opentelemetry.kotlin.tracing/SpanContextCreationAction.isRemote|{}isRemote[0]
+        abstract fun <get-isRemote>(): kotlin/Boolean // io.opentelemetry.kotlin.tracing/SpanContextCreationAction.isRemote.<get-isRemote>|<get-isRemote>(){}[0]
+        abstract fun <set-isRemote>(kotlin/Boolean) // io.opentelemetry.kotlin.tracing/SpanContextCreationAction.isRemote.<set-isRemote>|<set-isRemote>(kotlin.Boolean){}[0]
+    abstract var isSampled // io.opentelemetry.kotlin.tracing/SpanContextCreationAction.isSampled|{}isSampled[0]
+        abstract fun <get-isSampled>(): kotlin/Boolean // io.opentelemetry.kotlin.tracing/SpanContextCreationAction.isSampled.<get-isSampled>|<get-isSampled>(){}[0]
+        abstract fun <set-isSampled>(kotlin/Boolean) // io.opentelemetry.kotlin.tracing/SpanContextCreationAction.isSampled.<set-isSampled>|<set-isSampled>(kotlin.Boolean){}[0]
+
+    abstract fun traceState(kotlin/Function1<io.opentelemetry.kotlin.tracing/TraceStateCreationAction, kotlin/Unit>) // io.opentelemetry.kotlin.tracing/SpanContextCreationAction.traceState|traceState(kotlin.Function1<io.opentelemetry.kotlin.tracing.TraceStateCreationAction,kotlin.Unit>){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing/SpanCreationAction : io.opentelemetry.kotlin.attributes/AttributesMutator, io.opentelemetry.kotlin.tracing/SpanLinkCreator // io.opentelemetry.kotlin.tracing/SpanCreationAction|null[0]
+
+abstract interface io.opentelemetry.kotlin.tracing/SpanEventCreator { // io.opentelemetry.kotlin.tracing/SpanEventCreator|null[0]
+    abstract fun addEvent(kotlin/String, kotlin/Long = ..., kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>? = ...) // io.opentelemetry.kotlin.tracing/SpanEventCreator.addEvent|addEvent(kotlin.String;kotlin.Long;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing/SpanLinkCreator { // io.opentelemetry.kotlin.tracing/SpanLinkCreator|null[0]
+    abstract fun addLink(io.opentelemetry.kotlin.tracing/SpanContext, kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>? = ...) // io.opentelemetry.kotlin.tracing/SpanLinkCreator.addLink|addLink(io.opentelemetry.kotlin.tracing.SpanContext;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing/TraceFlags { // io.opentelemetry.kotlin.tracing/TraceFlags|null[0]
+    abstract val isRandom // io.opentelemetry.kotlin.tracing/TraceFlags.isRandom|{}isRandom[0]
+        abstract fun <get-isRandom>(): kotlin/Boolean // io.opentelemetry.kotlin.tracing/TraceFlags.isRandom.<get-isRandom>|<get-isRandom>(){}[0]
+    abstract val isSampled // io.opentelemetry.kotlin.tracing/TraceFlags.isSampled|{}isSampled[0]
+        abstract fun <get-isSampled>(): kotlin/Boolean // io.opentelemetry.kotlin.tracing/TraceFlags.isSampled.<get-isSampled>|<get-isSampled>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing/TraceState { // io.opentelemetry.kotlin.tracing/TraceState|null[0]
+    abstract fun asMap(): kotlin.collections/Map<kotlin/String, kotlin/String> // io.opentelemetry.kotlin.tracing/TraceState.asMap|asMap(){}[0]
+    abstract fun get(kotlin/String): kotlin/String? // io.opentelemetry.kotlin.tracing/TraceState.get|get(kotlin.String){}[0]
+    abstract fun put(kotlin/String, kotlin/String): io.opentelemetry.kotlin.tracing/TraceState // io.opentelemetry.kotlin.tracing/TraceState.put|put(kotlin.String;kotlin.String){}[0]
+    abstract fun remove(kotlin/String): io.opentelemetry.kotlin.tracing/TraceState // io.opentelemetry.kotlin.tracing/TraceState.remove|remove(kotlin.String){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing/TraceStateCreationAction { // io.opentelemetry.kotlin.tracing/TraceStateCreationAction|null[0]
+    abstract fun put(kotlin/String, kotlin/String) // io.opentelemetry.kotlin.tracing/TraceStateCreationAction.put|put(kotlin.String;kotlin.String){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing/Tracer { // io.opentelemetry.kotlin.tracing/Tracer|null[0]
+    abstract fun enabled(): kotlin/Boolean // io.opentelemetry.kotlin.tracing/Tracer.enabled|enabled(){}[0]
+    abstract fun startSpan(kotlin/String, io.opentelemetry.kotlin.context/Context? = ..., io.opentelemetry.kotlin.tracing/SpanKind = ..., kotlin/Long = ..., kotlin/Function1<io.opentelemetry.kotlin.tracing/SpanCreationAction, kotlin/Unit>? = ...): io.opentelemetry.kotlin.tracing/Span // io.opentelemetry.kotlin.tracing/Tracer.startSpan|startSpan(kotlin.String;io.opentelemetry.kotlin.context.Context?;io.opentelemetry.kotlin.tracing.SpanKind;kotlin.Long;kotlin.Function1<io.opentelemetry.kotlin.tracing.SpanCreationAction,kotlin.Unit>?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing/TracerProvider { // io.opentelemetry.kotlin.tracing/TracerProvider|null[0]
+    abstract fun getTracer(kotlin/String, kotlin/String? = ..., kotlin/String? = ..., kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>? = ...): io.opentelemetry.kotlin.tracing/Tracer // io.opentelemetry.kotlin.tracing/TracerProvider.getTracer|getTracer(kotlin.String;kotlin.String?;kotlin.String?;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin/OpenTelemetry { // io.opentelemetry.kotlin/OpenTelemetry|null[0]
+    abstract val configProvider // io.opentelemetry.kotlin/OpenTelemetry.configProvider|{}configProvider[0]
+        abstract fun <get-configProvider>(): io.opentelemetry.kotlin.config/ConfigProvider // io.opentelemetry.kotlin/OpenTelemetry.configProvider.<get-configProvider>|<get-configProvider>(){}[0]
+    abstract val context // io.opentelemetry.kotlin/OpenTelemetry.context|{}context[0]
+        abstract fun <get-context>(): io.opentelemetry.kotlin.factory/ContextFactory // io.opentelemetry.kotlin/OpenTelemetry.context.<get-context>|<get-context>(){}[0]
+    abstract val loggerProvider // io.opentelemetry.kotlin/OpenTelemetry.loggerProvider|{}loggerProvider[0]
+        abstract fun <get-loggerProvider>(): io.opentelemetry.kotlin.logging/LoggerProvider // io.opentelemetry.kotlin/OpenTelemetry.loggerProvider.<get-loggerProvider>|<get-loggerProvider>(){}[0]
+    abstract val meterProvider // io.opentelemetry.kotlin/OpenTelemetry.meterProvider|{}meterProvider[0]
+        abstract fun <get-meterProvider>(): io.opentelemetry.kotlin.metrics/MeterProvider // io.opentelemetry.kotlin/OpenTelemetry.meterProvider.<get-meterProvider>|<get-meterProvider>(){}[0]
+    abstract val propagator // io.opentelemetry.kotlin/OpenTelemetry.propagator|{}propagator[0]
+        abstract fun <get-propagator>(): io.opentelemetry.kotlin.propagation/TextMapPropagator // io.opentelemetry.kotlin/OpenTelemetry.propagator.<get-propagator>|<get-propagator>(){}[0]
+    abstract val tracerProvider // io.opentelemetry.kotlin/OpenTelemetry.tracerProvider|{}tracerProvider[0]
+        abstract fun <get-tracerProvider>(): io.opentelemetry.kotlin.tracing/TracerProvider // io.opentelemetry.kotlin/OpenTelemetry.tracerProvider.<get-tracerProvider>|<get-tracerProvider>(){}[0]
+}
+
+sealed class io.opentelemetry.kotlin.attributes/AnyValue { // io.opentelemetry.kotlin.attributes/AnyValue|null[0]
+    final class BoolValue : io.opentelemetry.kotlin.attributes/AnyValue { // io.opentelemetry.kotlin.attributes/AnyValue.BoolValue|null[0]
+        constructor <init>(kotlin/Boolean) // io.opentelemetry.kotlin.attributes/AnyValue.BoolValue.<init>|<init>(kotlin.Boolean){}[0]
+
+        final val value // io.opentelemetry.kotlin.attributes/AnyValue.BoolValue.value|{}value[0]
+            final fun <get-value>(): kotlin/Boolean // io.opentelemetry.kotlin.attributes/AnyValue.BoolValue.value.<get-value>|<get-value>(){}[0]
+
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.opentelemetry.kotlin.attributes/AnyValue.BoolValue.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.opentelemetry.kotlin.attributes/AnyValue.BoolValue.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.opentelemetry.kotlin.attributes/AnyValue.BoolValue.toString|toString(){}[0]
+    }
+
+    final class BytesValue : io.opentelemetry.kotlin.attributes/AnyValue { // io.opentelemetry.kotlin.attributes/AnyValue.BytesValue|null[0]
+        constructor <init>(kotlin/ByteArray) // io.opentelemetry.kotlin.attributes/AnyValue.BytesValue.<init>|<init>(kotlin.ByteArray){}[0]
+
+        final val value // io.opentelemetry.kotlin.attributes/AnyValue.BytesValue.value|{}value[0]
+            final fun <get-value>(): kotlin/ByteArray // io.opentelemetry.kotlin.attributes/AnyValue.BytesValue.value.<get-value>|<get-value>(){}[0]
+
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.opentelemetry.kotlin.attributes/AnyValue.BytesValue.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.opentelemetry.kotlin.attributes/AnyValue.BytesValue.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.opentelemetry.kotlin.attributes/AnyValue.BytesValue.toString|toString(){}[0]
+    }
+
+    final class DoubleValue : io.opentelemetry.kotlin.attributes/AnyValue { // io.opentelemetry.kotlin.attributes/AnyValue.DoubleValue|null[0]
+        constructor <init>(kotlin/Double) // io.opentelemetry.kotlin.attributes/AnyValue.DoubleValue.<init>|<init>(kotlin.Double){}[0]
+
+        final val value // io.opentelemetry.kotlin.attributes/AnyValue.DoubleValue.value|{}value[0]
+            final fun <get-value>(): kotlin/Double // io.opentelemetry.kotlin.attributes/AnyValue.DoubleValue.value.<get-value>|<get-value>(){}[0]
+
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.opentelemetry.kotlin.attributes/AnyValue.DoubleValue.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.opentelemetry.kotlin.attributes/AnyValue.DoubleValue.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.opentelemetry.kotlin.attributes/AnyValue.DoubleValue.toString|toString(){}[0]
+    }
+
+    final class ListValue : io.opentelemetry.kotlin.attributes/AnyValue { // io.opentelemetry.kotlin.attributes/AnyValue.ListValue|null[0]
+        constructor <init>(kotlin.collections/List<io.opentelemetry.kotlin.attributes/AnyValue>) // io.opentelemetry.kotlin.attributes/AnyValue.ListValue.<init>|<init>(kotlin.collections.List<io.opentelemetry.kotlin.attributes.AnyValue>){}[0]
+
+        final val values // io.opentelemetry.kotlin.attributes/AnyValue.ListValue.values|{}values[0]
+            final fun <get-values>(): kotlin.collections/List<io.opentelemetry.kotlin.attributes/AnyValue> // io.opentelemetry.kotlin.attributes/AnyValue.ListValue.values.<get-values>|<get-values>(){}[0]
+
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.opentelemetry.kotlin.attributes/AnyValue.ListValue.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.opentelemetry.kotlin.attributes/AnyValue.ListValue.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.opentelemetry.kotlin.attributes/AnyValue.ListValue.toString|toString(){}[0]
+    }
+
+    final class LongValue : io.opentelemetry.kotlin.attributes/AnyValue { // io.opentelemetry.kotlin.attributes/AnyValue.LongValue|null[0]
+        constructor <init>(kotlin/Long) // io.opentelemetry.kotlin.attributes/AnyValue.LongValue.<init>|<init>(kotlin.Long){}[0]
+
+        final val value // io.opentelemetry.kotlin.attributes/AnyValue.LongValue.value|{}value[0]
+            final fun <get-value>(): kotlin/Long // io.opentelemetry.kotlin.attributes/AnyValue.LongValue.value.<get-value>|<get-value>(){}[0]
+
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.opentelemetry.kotlin.attributes/AnyValue.LongValue.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.opentelemetry.kotlin.attributes/AnyValue.LongValue.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.opentelemetry.kotlin.attributes/AnyValue.LongValue.toString|toString(){}[0]
+    }
+
+    final class MapValue : io.opentelemetry.kotlin.attributes/AnyValue { // io.opentelemetry.kotlin.attributes/AnyValue.MapValue|null[0]
+        constructor <init>(kotlin.collections/Map<kotlin/String, io.opentelemetry.kotlin.attributes/AnyValue>) // io.opentelemetry.kotlin.attributes/AnyValue.MapValue.<init>|<init>(kotlin.collections.Map<kotlin.String,io.opentelemetry.kotlin.attributes.AnyValue>){}[0]
+
+        final val values // io.opentelemetry.kotlin.attributes/AnyValue.MapValue.values|{}values[0]
+            final fun <get-values>(): kotlin.collections/Map<kotlin/String, io.opentelemetry.kotlin.attributes/AnyValue> // io.opentelemetry.kotlin.attributes/AnyValue.MapValue.values.<get-values>|<get-values>(){}[0]
+
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.opentelemetry.kotlin.attributes/AnyValue.MapValue.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.opentelemetry.kotlin.attributes/AnyValue.MapValue.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.opentelemetry.kotlin.attributes/AnyValue.MapValue.toString|toString(){}[0]
+    }
+
+    final class StringValue : io.opentelemetry.kotlin.attributes/AnyValue { // io.opentelemetry.kotlin.attributes/AnyValue.StringValue|null[0]
+        constructor <init>(kotlin/String) // io.opentelemetry.kotlin.attributes/AnyValue.StringValue.<init>|<init>(kotlin.String){}[0]
+
+        final val value // io.opentelemetry.kotlin.attributes/AnyValue.StringValue.value|{}value[0]
+            final fun <get-value>(): kotlin/String // io.opentelemetry.kotlin.attributes/AnyValue.StringValue.value.<get-value>|<get-value>(){}[0]
+
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.opentelemetry.kotlin.attributes/AnyValue.StringValue.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.opentelemetry.kotlin.attributes/AnyValue.StringValue.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.opentelemetry.kotlin.attributes/AnyValue.StringValue.toString|toString(){}[0]
+    }
+
+    final object NullValue : io.opentelemetry.kotlin.attributes/AnyValue { // io.opentelemetry.kotlin.attributes/AnyValue.NullValue|null[0]
+        final fun toString(): kotlin/String // io.opentelemetry.kotlin.attributes/AnyValue.NullValue.toString|toString(){}[0]
+    }
+}
+
+sealed class io.opentelemetry.kotlin.tracing/StatusData { // io.opentelemetry.kotlin.tracing/StatusData|null[0]
+    final val description // io.opentelemetry.kotlin.tracing/StatusData.description|{}description[0]
+        final fun <get-description>(): kotlin/String? // io.opentelemetry.kotlin.tracing/StatusData.description.<get-description>|<get-description>(){}[0]
+    final val statusCode // io.opentelemetry.kotlin.tracing/StatusData.statusCode|{}statusCode[0]
+        final fun <get-statusCode>(): io.opentelemetry.kotlin.tracing/StatusCode // io.opentelemetry.kotlin.tracing/StatusData.statusCode.<get-statusCode>|<get-statusCode>(){}[0]
+
+    final class Error : io.opentelemetry.kotlin.tracing/StatusData { // io.opentelemetry.kotlin.tracing/StatusData.Error|null[0]
+        constructor <init>(kotlin/String?) // io.opentelemetry.kotlin.tracing/StatusData.Error.<init>|<init>(kotlin.String?){}[0]
+
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.opentelemetry.kotlin.tracing/StatusData.Error.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.opentelemetry.kotlin.tracing/StatusData.Error.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.opentelemetry.kotlin.tracing/StatusData.Error.toString|toString(){}[0]
+    }
+
+    final object Ok : io.opentelemetry.kotlin.tracing/StatusData // io.opentelemetry.kotlin.tracing/StatusData.Ok|null[0]
+
+    final object Unset : io.opentelemetry.kotlin.tracing/StatusData // io.opentelemetry.kotlin.tracing/StatusData.Unset|null[0]
+}
+
+final fun <#A: kotlin/Any?> io.opentelemetry.kotlin.context/createContextKey(kotlin/String): io.opentelemetry.kotlin.context/ContextKey<#A> // io.opentelemetry.kotlin.context/createContextKey|createContextKey(kotlin.String){0§<kotlin.Any?>}[0]
+final fun io.opentelemetry.kotlin.baggage/createBaggage(kotlin/Function1<io.opentelemetry.kotlin.baggage/BaggageCreationAction, kotlin/Unit> = ...): io.opentelemetry.kotlin.baggage/Baggage // io.opentelemetry.kotlin.baggage/createBaggage|createBaggage(kotlin.Function1<io.opentelemetry.kotlin.baggage.BaggageCreationAction,kotlin.Unit>){}[0]
+final fun io.opentelemetry.kotlin.context/currentContext(): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.context/currentContext|currentContext(){}[0]
+final fun io.opentelemetry.kotlin.context/installContextStorage(io.opentelemetry.kotlin.context/CurrentContextStorage): kotlin/Boolean // io.opentelemetry.kotlin.context/installContextStorage|installContextStorage(io.opentelemetry.kotlin.context.CurrentContextStorage){}[0]
+final fun io.opentelemetry.kotlin.context/rootContext(): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.context/rootContext|rootContext(){}[0]
+final fun io.opentelemetry.kotlin.context/uninstallContextStorage(io.opentelemetry.kotlin.context/CurrentContextStorage): kotlin/Boolean // io.opentelemetry.kotlin.context/uninstallContextStorage|uninstallContextStorage(io.opentelemetry.kotlin.context.CurrentContextStorage){}[0]
+final fun io.opentelemetry.kotlin.propagation/createB3Propagator(io.opentelemetry.kotlin.init/B3Format = ...): io.opentelemetry.kotlin.propagation/TextMapPropagator // io.opentelemetry.kotlin.propagation/createB3Propagator|createB3Propagator(io.opentelemetry.kotlin.init.B3Format){}[0]
+final fun io.opentelemetry.kotlin.propagation/createCompositePropagator(kotlin/Array<out io.opentelemetry.kotlin.propagation/TextMapPropagator>...): io.opentelemetry.kotlin.propagation/TextMapPropagator // io.opentelemetry.kotlin.propagation/createCompositePropagator|createCompositePropagator(kotlin.Array<out|io.opentelemetry.kotlin.propagation.TextMapPropagator>...){}[0]
+final fun io.opentelemetry.kotlin.propagation/createMapTextMapGetter(): io.opentelemetry.kotlin.propagation/TextMapGetter<kotlin.collections/Map<kotlin/String, kotlin/String>> // io.opentelemetry.kotlin.propagation/createMapTextMapGetter|createMapTextMapGetter(){}[0]
+final fun io.opentelemetry.kotlin.propagation/createMutableMapTextMapSetter(): io.opentelemetry.kotlin.propagation/TextMapSetter<kotlin.collections/MutableMap<kotlin/String, kotlin/String>> // io.opentelemetry.kotlin.propagation/createMutableMapTextMapSetter|createMutableMapTextMapSetter(){}[0]
+final fun io.opentelemetry.kotlin.propagation/createNoopPropagator(): io.opentelemetry.kotlin.propagation/TextMapPropagator // io.opentelemetry.kotlin.propagation/createNoopPropagator|createNoopPropagator(){}[0]
+final fun io.opentelemetry.kotlin.propagation/createW3CBaggagePropagator(): io.opentelemetry.kotlin.propagation/TextMapPropagator // io.opentelemetry.kotlin.propagation/createW3CBaggagePropagator|createW3CBaggagePropagator(){}[0]
+final fun io.opentelemetry.kotlin.propagation/createW3CTraceContextPropagator(): io.opentelemetry.kotlin.propagation/TextMapPropagator // io.opentelemetry.kotlin.propagation/createW3CTraceContextPropagator|createW3CTraceContextPropagator(){}[0]
+final fun io.opentelemetry.kotlin.tracing/createInvalidSpanContext(): io.opentelemetry.kotlin.tracing/SpanContext // io.opentelemetry.kotlin.tracing/createInvalidSpanContext|createInvalidSpanContext(){}[0]
+final fun io.opentelemetry.kotlin.tracing/createNonRecordingSpan(io.opentelemetry.kotlin.tracing/SpanContext, io.opentelemetry.kotlin.tracing/SpanContext = ...): io.opentelemetry.kotlin.tracing/Span // io.opentelemetry.kotlin.tracing/createNonRecordingSpan|createNonRecordingSpan(io.opentelemetry.kotlin.tracing.SpanContext;io.opentelemetry.kotlin.tracing.SpanContext){}[0]
+final fun io.opentelemetry.kotlin.tracing/createSpanContext(kotlin/ByteArray, kotlin/ByteArray, kotlin/Function1<io.opentelemetry.kotlin.tracing/SpanContextCreationAction, kotlin/Unit> = ...): io.opentelemetry.kotlin.tracing/SpanContext // io.opentelemetry.kotlin.tracing/createSpanContext|createSpanContext(kotlin.ByteArray;kotlin.ByteArray;kotlin.Function1<io.opentelemetry.kotlin.tracing.SpanContextCreationAction,kotlin.Unit>){}[0]
+final fun io.opentelemetry.kotlin.tracing/createSpanContext(kotlin/String, kotlin/String, kotlin/Function1<io.opentelemetry.kotlin.tracing/SpanContextCreationAction, kotlin/Unit> = ...): io.opentelemetry.kotlin.tracing/SpanContext // io.opentelemetry.kotlin.tracing/createSpanContext|createSpanContext(kotlin.String;kotlin.String;kotlin.Function1<io.opentelemetry.kotlin.tracing.SpanContextCreationAction,kotlin.Unit>){}[0]
+final inline fun <#A: kotlin/Any?> (io.opentelemetry.kotlin.context/Context).io.opentelemetry.kotlin.context/runWithContext(kotlin/Function0<#A>): #A // io.opentelemetry.kotlin.context/runWithContext|runWithContext@io.opentelemetry.kotlin.context.Context(kotlin.Function0<0:0>){0§<kotlin.Any?>}[0]

@@ -1,0 +1,18 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, tvosArm64, tvosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <opentelemetry-kotlin:api-ext>
+final val io.opentelemetry.kotlin.tracing/hex // io.opentelemetry.kotlin.tracing/hex|@io.opentelemetry.kotlin.tracing.TraceFlags{}hex[0]
+    final fun (io.opentelemetry.kotlin.tracing/TraceFlags).<get-hex>(): kotlin/String // io.opentelemetry.kotlin.tracing/hex.<get-hex>|<get-hex>@io.opentelemetry.kotlin.tracing.TraceFlags(){}[0]
+
+final fun (io.opentelemetry.kotlin.attributes/AttributesMutator).io.opentelemetry.kotlin.attributes/setAttributes(kotlin.collections/Map<kotlin/String, kotlin/Any>) // io.opentelemetry.kotlin.attributes/setAttributes|setAttributes@io.opentelemetry.kotlin.attributes.AttributesMutator(kotlin.collections.Map<kotlin.String,kotlin.Any>){}[0]
+final fun (io.opentelemetry.kotlin.tracing/Span).io.opentelemetry.kotlin.tracing/addLink(io.opentelemetry.kotlin.tracing/Span, kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>? = ...) // io.opentelemetry.kotlin.tracing/addLink|addLink@io.opentelemetry.kotlin.tracing.Span(io.opentelemetry.kotlin.tracing.Span;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>?){}[0]
+final fun (io.opentelemetry.kotlin.tracing/Span).io.opentelemetry.kotlin.tracing/wrapOperation(kotlin/Function0<io.opentelemetry.kotlin.tracing/StatusData>) // io.opentelemetry.kotlin.tracing/wrapOperation|wrapOperation@io.opentelemetry.kotlin.tracing.Span(kotlin.Function0<io.opentelemetry.kotlin.tracing.StatusData>){}[0]
+final fun (io.opentelemetry.kotlin/OpenTelemetry).io.opentelemetry.kotlin/getLogger(kotlin/String): io.opentelemetry.kotlin.logging/Logger // io.opentelemetry.kotlin/getLogger|getLogger@io.opentelemetry.kotlin.OpenTelemetry(kotlin.String){}[0]
+final fun (io.opentelemetry.kotlin/OpenTelemetry).io.opentelemetry.kotlin/getMeter(kotlin/String): io.opentelemetry.kotlin.metrics/Meter // io.opentelemetry.kotlin/getMeter|getMeter@io.opentelemetry.kotlin.OpenTelemetry(kotlin.String){}[0]
+final fun (io.opentelemetry.kotlin/OpenTelemetry).io.opentelemetry.kotlin/getTracer(kotlin/String): io.opentelemetry.kotlin.tracing/Tracer // io.opentelemetry.kotlin/getTracer|getTracer@io.opentelemetry.kotlin.OpenTelemetry(kotlin.String){}[0]
+final inline fun <#A: kotlin/Any?> (io.opentelemetry.kotlin.context/Context).io.opentelemetry.kotlin.context/asCurrentContext(kotlin/Function0<#A>): #A // io.opentelemetry.kotlin.context/asCurrentContext|asCurrentContext@io.opentelemetry.kotlin.context.Context(kotlin.Function0<0:0>){0§<kotlin.Any?>}[0]

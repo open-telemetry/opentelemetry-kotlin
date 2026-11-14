@@ -1,0 +1,24 @@
+public final class io/opentelemetry/kotlin/OpenTelemetryExtKt {
+	public static final fun getLogger (Lio/opentelemetry/kotlin/OpenTelemetry;Ljava/lang/String;)Lio/opentelemetry/kotlin/logging/Logger;
+	public static final fun getMeter (Lio/opentelemetry/kotlin/OpenTelemetry;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/Meter;
+	public static final fun getTracer (Lio/opentelemetry/kotlin/OpenTelemetry;Ljava/lang/String;)Lio/opentelemetry/kotlin/tracing/Tracer;
+}
+
+public final class io/opentelemetry/kotlin/attributes/AttributesMutatorExtKt {
+	public static final fun setAttributes (Lio/opentelemetry/kotlin/attributes/AttributesMutator;Ljava/util/Map;)V
+}
+
+public final class io/opentelemetry/kotlin/context/ContextFactoryApiExtKt {
+	public static final fun asCurrentContext (Lio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public final class io/opentelemetry/kotlin/tracing/SpanExtKt {
+	public static final fun addLink (Lio/opentelemetry/kotlin/tracing/Span;Lio/opentelemetry/kotlin/tracing/Span;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun addLink$default (Lio/opentelemetry/kotlin/tracing/Span;Lio/opentelemetry/kotlin/tracing/Span;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static final fun wrapOperation (Lio/opentelemetry/kotlin/tracing/Span;Lkotlin/jvm/functions/Function0;)V
+}
+
+public final class io/opentelemetry/kotlin/tracing/TraceFlagsExtKt {
+	public static final fun getHex (Lio/opentelemetry/kotlin/tracing/TraceFlags;)Ljava/lang/String;
+}
+

@@ -1,0 +1,15 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, tvosArm64, tvosSimulatorArm64]
+// Alias: apple => [iosArm64, iosSimulatorArm64, tvosArm64, tvosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <opentelemetry-kotlin:implementation>
+final fun (io.opentelemetry.kotlin.init/ResourceDetectionConfigDsl).io.opentelemetry.kotlin.resource/deviceResourceDetector(): io.opentelemetry.kotlin.resource/ResourceDetector // io.opentelemetry.kotlin.resource/deviceResourceDetector|deviceResourceDetector@io.opentelemetry.kotlin.init.ResourceDetectionConfigDsl(){}[0]
+final fun (io.opentelemetry.kotlin.init/ResourceDetectionConfigDsl).io.opentelemetry.kotlin.resource/hostResourceDetector(): io.opentelemetry.kotlin.resource/ResourceDetector // io.opentelemetry.kotlin.resource/hostResourceDetector|hostResourceDetector@io.opentelemetry.kotlin.init.ResourceDetectionConfigDsl(){}[0]
+final fun io.opentelemetry.kotlin/createOpenTelemetry(io.opentelemetry.kotlin/Clock = ..., kotlin/Function1<io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl, kotlin/Unit> = ...): io.opentelemetry.kotlin/OpenTelemetrySdk // io.opentelemetry.kotlin/createOpenTelemetry|createOpenTelemetry(io.opentelemetry.kotlin.Clock;kotlin.Function1<io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl,kotlin.Unit>){}[0]
+
+// Targets: [apple]
+final fun io.opentelemetry.kotlin/createAppleOpenTelemetry(): io.opentelemetry.kotlin/OpenTelemetrySdk // io.opentelemetry.kotlin/createAppleOpenTelemetry|createAppleOpenTelemetry(){}[0]

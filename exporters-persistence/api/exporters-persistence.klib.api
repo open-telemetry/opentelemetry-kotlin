@@ -1,0 +1,14 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, tvosArm64, tvosSimulatorArm64]
+// Alias: native => [iosArm64, iosSimulatorArm64, linuxArm64, linuxX64, tvosArm64, tvosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <opentelemetry-kotlin:exporters-persistence>
+final fun (io.opentelemetry.kotlin.init/LogExportConfigDsl).io.opentelemetry.kotlin.logging.export/persistingLogRecordProcessor(io.opentelemetry.kotlin.logging.export/LogRecordProcessor, io.opentelemetry.kotlin.logging.export/LogRecordExporter, okio/Path, kotlin/Int = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Int = ...): io.opentelemetry.kotlin.logging.export/LogRecordProcessor // io.opentelemetry.kotlin.logging.export/persistingLogRecordProcessor|persistingLogRecordProcessor@io.opentelemetry.kotlin.init.LogExportConfigDsl(io.opentelemetry.kotlin.logging.export.LogRecordProcessor;io.opentelemetry.kotlin.logging.export.LogRecordExporter;okio.Path;kotlin.Int;kotlin.Long;kotlin.Long;kotlin.Int){}[0]
+final fun (io.opentelemetry.kotlin.init/TraceExportConfigDsl).io.opentelemetry.kotlin.tracing.export/persistingSpanProcessor(io.opentelemetry.kotlin.tracing.export/SpanProcessor, io.opentelemetry.kotlin.tracing.export/SpanExporter, okio/Path, kotlin/Int = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Int = ...): io.opentelemetry.kotlin.tracing.export/SpanProcessor // io.opentelemetry.kotlin.tracing.export/persistingSpanProcessor|persistingSpanProcessor@io.opentelemetry.kotlin.init.TraceExportConfigDsl(io.opentelemetry.kotlin.tracing.export.SpanProcessor;io.opentelemetry.kotlin.tracing.export.SpanExporter;okio.Path;kotlin.Int;kotlin.Long;kotlin.Long;kotlin.Int){}[0]
+
+// Targets: [native]
+final fun io.opentelemetry.kotlin.export/platformDefaultCacheDirectory(): okio/Path // io.opentelemetry.kotlin.export/platformDefaultCacheDirectory|platformDefaultCacheDirectory(){}[0]

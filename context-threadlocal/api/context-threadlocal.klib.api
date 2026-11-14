@@ -1,0 +1,9 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, tvosArm64, tvosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <opentelemetry-kotlin:context-threadlocal>
+final fun io.opentelemetry.kotlin.context/createThreadLocalCurrentContextStorage(): io.opentelemetry.kotlin.context/CurrentContextStorage // io.opentelemetry.kotlin.context/createThreadLocalCurrentContextStorage|createThreadLocalCurrentContextStorage(){}[0]

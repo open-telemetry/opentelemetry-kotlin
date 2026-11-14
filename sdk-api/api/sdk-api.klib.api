@@ -1,0 +1,583 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, tvosArm64, tvosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <opentelemetry-kotlin:sdk-api>
+open annotation class io.opentelemetry.kotlin.init/ConfigDsl : kotlin/Annotation { // io.opentelemetry.kotlin.init/ConfigDsl|null[0]
+    constructor <init>() // io.opentelemetry.kotlin.init/ConfigDsl.<init>|<init>(){}[0]
+}
+
+final enum class io.opentelemetry.kotlin.metrics.data/AggregationTemporality : kotlin/Enum<io.opentelemetry.kotlin.metrics.data/AggregationTemporality> { // io.opentelemetry.kotlin.metrics.data/AggregationTemporality|null[0]
+    enum entry CUMULATIVE // io.opentelemetry.kotlin.metrics.data/AggregationTemporality.CUMULATIVE|null[0]
+    enum entry DELTA // io.opentelemetry.kotlin.metrics.data/AggregationTemporality.DELTA|null[0]
+
+    final val entries // io.opentelemetry.kotlin.metrics.data/AggregationTemporality.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.opentelemetry.kotlin.metrics.data/AggregationTemporality> // io.opentelemetry.kotlin.metrics.data/AggregationTemporality.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.opentelemetry.kotlin.metrics.data/AggregationTemporality // io.opentelemetry.kotlin.metrics.data/AggregationTemporality.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.opentelemetry.kotlin.metrics.data/AggregationTemporality> // io.opentelemetry.kotlin.metrics.data/AggregationTemporality.values|values#static(){}[0]
+}
+
+final enum class io.opentelemetry.kotlin.metrics.instrument/InstrumentKind : kotlin/Enum<io.opentelemetry.kotlin.metrics.instrument/InstrumentKind> { // io.opentelemetry.kotlin.metrics.instrument/InstrumentKind|null[0]
+    enum entry HISTOGRAM // io.opentelemetry.kotlin.metrics.instrument/InstrumentKind.HISTOGRAM|null[0]
+
+    final val entries // io.opentelemetry.kotlin.metrics.instrument/InstrumentKind.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.opentelemetry.kotlin.metrics.instrument/InstrumentKind> // io.opentelemetry.kotlin.metrics.instrument/InstrumentKind.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.opentelemetry.kotlin.metrics.instrument/InstrumentKind // io.opentelemetry.kotlin.metrics.instrument/InstrumentKind.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.opentelemetry.kotlin.metrics.instrument/InstrumentKind> // io.opentelemetry.kotlin.metrics.instrument/InstrumentKind.values|values#static(){}[0]
+}
+
+final enum class io.opentelemetry.kotlin.metrics.instrument/InstrumentValueType : kotlin/Enum<io.opentelemetry.kotlin.metrics.instrument/InstrumentValueType> { // io.opentelemetry.kotlin.metrics.instrument/InstrumentValueType|null[0]
+    enum entry DOUBLE // io.opentelemetry.kotlin.metrics.instrument/InstrumentValueType.DOUBLE|null[0]
+    enum entry LONG // io.opentelemetry.kotlin.metrics.instrument/InstrumentValueType.LONG|null[0]
+
+    final val entries // io.opentelemetry.kotlin.metrics.instrument/InstrumentValueType.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.opentelemetry.kotlin.metrics.instrument/InstrumentValueType> // io.opentelemetry.kotlin.metrics.instrument/InstrumentValueType.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.opentelemetry.kotlin.metrics.instrument/InstrumentValueType // io.opentelemetry.kotlin.metrics.instrument/InstrumentValueType.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.opentelemetry.kotlin.metrics.instrument/InstrumentValueType> // io.opentelemetry.kotlin.metrics.instrument/InstrumentValueType.values|values#static(){}[0]
+}
+
+abstract fun interface io.opentelemetry.kotlin.logging/LoggerConfigurator { // io.opentelemetry.kotlin.logging/LoggerConfigurator|null[0]
+    abstract fun loggerConfig(io.opentelemetry.kotlin/InstrumentationScopeInfo): io.opentelemetry.kotlin.logging/LoggerConfig // io.opentelemetry.kotlin.logging/LoggerConfigurator.loggerConfig|loggerConfig(io.opentelemetry.kotlin.InstrumentationScopeInfo){}[0]
+}
+
+abstract fun interface io.opentelemetry.kotlin.tracing.sampling/SamplingPredicate { // io.opentelemetry.kotlin.tracing.sampling/SamplingPredicate|null[0]
+    abstract fun matches(io.opentelemetry.kotlin.context/Context, kotlin/String, io.opentelemetry.kotlin.tracing/SpanKind, io.opentelemetry.kotlin.attributes/AttributeContainer, kotlin.collections/List<io.opentelemetry.kotlin.tracing.model/SpanLink>): kotlin/Boolean // io.opentelemetry.kotlin.tracing.sampling/SamplingPredicate.matches|matches(io.opentelemetry.kotlin.context.Context;kotlin.String;io.opentelemetry.kotlin.tracing.SpanKind;io.opentelemetry.kotlin.attributes.AttributeContainer;kotlin.collections.List<io.opentelemetry.kotlin.tracing.model.SpanLink>){}[0]
+}
+
+abstract fun interface io.opentelemetry.kotlin.tracing/TracerConfigurator { // io.opentelemetry.kotlin.tracing/TracerConfigurator|null[0]
+    abstract fun tracerConfig(io.opentelemetry.kotlin/InstrumentationScopeInfo): io.opentelemetry.kotlin.tracing/TracerConfig // io.opentelemetry.kotlin.tracing/TracerConfigurator.tracerConfig|tracerConfig(io.opentelemetry.kotlin.InstrumentationScopeInfo){}[0]
+}
+
+abstract fun interface io.opentelemetry.kotlin/Clock { // io.opentelemetry.kotlin/Clock|null[0]
+    abstract fun now(): kotlin/Long // io.opentelemetry.kotlin/Clock.now|now(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.attributes/AttributeContainer { // io.opentelemetry.kotlin.attributes/AttributeContainer|null[0]
+    abstract val attributes // io.opentelemetry.kotlin.attributes/AttributeContainer.attributes|{}attributes[0]
+        abstract fun <get-attributes>(): kotlin.collections/Map<kotlin/String, kotlin/Any> // io.opentelemetry.kotlin.attributes/AttributeContainer.attributes.<get-attributes>|<get-attributes>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.export/TelemetryCloseable { // io.opentelemetry.kotlin.export/TelemetryCloseable|null[0]
+    abstract suspend fun forceFlush(): io.opentelemetry.kotlin.export/OperationResultCode // io.opentelemetry.kotlin.export/TelemetryCloseable.forceFlush|forceFlush(){}[0]
+    abstract suspend fun shutdown(): io.opentelemetry.kotlin.export/OperationResultCode // io.opentelemetry.kotlin.export/TelemetryCloseable.shutdown|shutdown(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.factory/IdGenerator { // io.opentelemetry.kotlin.factory/IdGenerator|null[0]
+    abstract val invalidSpanId // io.opentelemetry.kotlin.factory/IdGenerator.invalidSpanId|{}invalidSpanId[0]
+        abstract fun <get-invalidSpanId>(): kotlin/ByteArray // io.opentelemetry.kotlin.factory/IdGenerator.invalidSpanId.<get-invalidSpanId>|<get-invalidSpanId>(){}[0]
+    abstract val invalidTraceId // io.opentelemetry.kotlin.factory/IdGenerator.invalidTraceId|{}invalidTraceId[0]
+        abstract fun <get-invalidTraceId>(): kotlin/ByteArray // io.opentelemetry.kotlin.factory/IdGenerator.invalidTraceId.<get-invalidTraceId>|<get-invalidTraceId>(){}[0]
+    open val generatesRandomTraceIds // io.opentelemetry.kotlin.factory/IdGenerator.generatesRandomTraceIds|{}generatesRandomTraceIds[0]
+        open fun <get-generatesRandomTraceIds>(): kotlin/Boolean // io.opentelemetry.kotlin.factory/IdGenerator.generatesRandomTraceIds.<get-generatesRandomTraceIds>|<get-generatesRandomTraceIds>(){}[0]
+
+    abstract fun generateSpanIdBytes(): kotlin/ByteArray // io.opentelemetry.kotlin.factory/IdGenerator.generateSpanIdBytes|generateSpanIdBytes(){}[0]
+    abstract fun generateTraceIdBytes(): kotlin/ByteArray // io.opentelemetry.kotlin.factory/IdGenerator.generateTraceIdBytes|generateTraceIdBytes(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.factory/ResourceFactory { // io.opentelemetry.kotlin.factory/ResourceFactory|null[0]
+    abstract val empty // io.opentelemetry.kotlin.factory/ResourceFactory.empty|{}empty[0]
+        abstract fun <get-empty>(): io.opentelemetry.kotlin.resource/Resource // io.opentelemetry.kotlin.factory/ResourceFactory.empty.<get-empty>|<get-empty>(){}[0]
+
+    abstract fun create(kotlin/String? = ..., kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>): io.opentelemetry.kotlin.resource/Resource // io.opentelemetry.kotlin.factory/ResourceFactory.create|create(kotlin.String?;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>){}[0]
+    open fun createEntity(kotlin/String, kotlin/String? = ..., kotlin/Function1<io.opentelemetry.kotlin.resource/EntityAttributesMutator, kotlin/Unit>): io.opentelemetry.kotlin.resource/Entity? // io.opentelemetry.kotlin.factory/ResourceFactory.createEntity|createEntity(kotlin.String;kotlin.String?;kotlin.Function1<io.opentelemetry.kotlin.resource.EntityAttributesMutator,kotlin.Unit>){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.init/AttributeLimitsConfigDsl { // io.opentelemetry.kotlin.init/AttributeLimitsConfigDsl|null[0]
+    abstract var attributeCountLimit // io.opentelemetry.kotlin.init/AttributeLimitsConfigDsl.attributeCountLimit|{}attributeCountLimit[0]
+        abstract fun <get-attributeCountLimit>(): kotlin/Int? // io.opentelemetry.kotlin.init/AttributeLimitsConfigDsl.attributeCountLimit.<get-attributeCountLimit>|<get-attributeCountLimit>(){}[0]
+        abstract fun <set-attributeCountLimit>(kotlin/Int?) // io.opentelemetry.kotlin.init/AttributeLimitsConfigDsl.attributeCountLimit.<set-attributeCountLimit>|<set-attributeCountLimit>(kotlin.Int?){}[0]
+    abstract var attributeValueLengthLimit // io.opentelemetry.kotlin.init/AttributeLimitsConfigDsl.attributeValueLengthLimit|{}attributeValueLengthLimit[0]
+        abstract fun <get-attributeValueLengthLimit>(): kotlin/Int? // io.opentelemetry.kotlin.init/AttributeLimitsConfigDsl.attributeValueLengthLimit.<get-attributeValueLengthLimit>|<get-attributeValueLengthLimit>(){}[0]
+        abstract fun <set-attributeValueLengthLimit>(kotlin/Int?) // io.opentelemetry.kotlin.init/AttributeLimitsConfigDsl.attributeValueLengthLimit.<set-attributeValueLengthLimit>|<set-attributeValueLengthLimit>(kotlin.Int?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.init/ComposableRuleBasedConfigDsl : io.opentelemetry.kotlin.init/SamplerConfigDsl { // io.opentelemetry.kotlin.init/ComposableRuleBasedConfigDsl|null[0]
+    abstract fun rule(io.opentelemetry.kotlin.tracing.sampling/SamplingPredicate, kotlin/Function1<io.opentelemetry.kotlin.init/SamplerConfigDsl, io.opentelemetry.kotlin.tracing.sampling/ComposableSampler>) // io.opentelemetry.kotlin.init/ComposableRuleBasedConfigDsl.rule|rule(io.opentelemetry.kotlin.tracing.sampling.SamplingPredicate;kotlin.Function1<io.opentelemetry.kotlin.init.SamplerConfigDsl,io.opentelemetry.kotlin.tracing.sampling.ComposableSampler>){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.init/ConfigFileDsl { // io.opentelemetry.kotlin.init/ConfigFileDsl|null[0]
+    abstract fun configFile(io.opentelemetry.kotlin.init/DeclarativeConfigReader, kotlin/String? = ...) // io.opentelemetry.kotlin.init/ConfigFileDsl.configFile|configFile(io.opentelemetry.kotlin.init.DeclarativeConfigReader;kotlin.String?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.init/ContextConfigDsl { // io.opentelemetry.kotlin.init/ContextConfigDsl|null[0]
+    abstract var storage // io.opentelemetry.kotlin.init/ContextConfigDsl.storage|{}storage[0]
+        abstract fun <get-storage>(): io.opentelemetry.kotlin.context/CurrentContextStorage? // io.opentelemetry.kotlin.init/ContextConfigDsl.storage.<get-storage>|<get-storage>(){}[0]
+        abstract fun <set-storage>(io.opentelemetry.kotlin.context/CurrentContextStorage?) // io.opentelemetry.kotlin.init/ContextConfigDsl.storage.<set-storage>|<set-storage>(io.opentelemetry.kotlin.context.CurrentContextStorage?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.init/DeclarativeConfigReader // io.opentelemetry.kotlin.init/DeclarativeConfigReader|null[0]
+
+abstract interface io.opentelemetry.kotlin.init/LogExportConfigDsl { // io.opentelemetry.kotlin.init/LogExportConfigDsl|null[0]
+    abstract val clock // io.opentelemetry.kotlin.init/LogExportConfigDsl.clock|{}clock[0]
+        abstract fun <get-clock>(): io.opentelemetry.kotlin/Clock // io.opentelemetry.kotlin.init/LogExportConfigDsl.clock.<get-clock>|<get-clock>(){}[0]
+    abstract val sdkErrorHandler // io.opentelemetry.kotlin.init/LogExportConfigDsl.sdkErrorHandler|{}sdkErrorHandler[0]
+        abstract fun <get-sdkErrorHandler>(): io.opentelemetry.kotlin.error/SdkErrorHandler // io.opentelemetry.kotlin.init/LogExportConfigDsl.sdkErrorHandler.<get-sdkErrorHandler>|<get-sdkErrorHandler>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.init/LogLimitsConfigDsl : io.opentelemetry.kotlin.init/AttributeLimitsConfigDsl // io.opentelemetry.kotlin.init/LogLimitsConfigDsl|null[0]
+
+abstract interface io.opentelemetry.kotlin.init/LoggerProviderConfigDsl : io.opentelemetry.kotlin.init/ResourceConfigDsl { // io.opentelemetry.kotlin.init/LoggerProviderConfigDsl|null[0]
+    abstract fun export(kotlin/Function1<io.opentelemetry.kotlin.init/LogExportConfigDsl, io.opentelemetry.kotlin.logging.export/LogRecordProcessor>) // io.opentelemetry.kotlin.init/LoggerProviderConfigDsl.export|export(kotlin.Function1<io.opentelemetry.kotlin.init.LogExportConfigDsl,io.opentelemetry.kotlin.logging.export.LogRecordProcessor>){}[0]
+    abstract fun logLimits(kotlin/Function1<io.opentelemetry.kotlin.init/LogLimitsConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/LoggerProviderConfigDsl.logLimits|logLimits(kotlin.Function1<io.opentelemetry.kotlin.init.LogLimitsConfigDsl,kotlin.Unit>){}[0]
+    abstract fun loggerConfigurator(io.opentelemetry.kotlin.logging/LoggerConfigurator) // io.opentelemetry.kotlin.init/LoggerProviderConfigDsl.loggerConfigurator|loggerConfigurator(io.opentelemetry.kotlin.logging.LoggerConfigurator){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.init/MeterProviderConfigDsl : io.opentelemetry.kotlin.init/ResourceConfigDsl // io.opentelemetry.kotlin.init/MeterProviderConfigDsl|null[0]
+
+abstract interface io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl : io.opentelemetry.kotlin.init/ConfigFileDsl, io.opentelemetry.kotlin.init/ResourceConfigDsl { // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl|null[0]
+    abstract fun attributeLimits(kotlin/Function1<io.opentelemetry.kotlin.init/AttributeLimitsConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.attributeLimits|attributeLimits(kotlin.Function1<io.opentelemetry.kotlin.init.AttributeLimitsConfigDsl,kotlin.Unit>){}[0]
+    abstract fun context(kotlin/Function1<io.opentelemetry.kotlin.init/ContextConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.context|context(kotlin.Function1<io.opentelemetry.kotlin.init.ContextConfigDsl,kotlin.Unit>){}[0]
+    abstract fun errorHandler(io.opentelemetry.kotlin.error/SdkErrorHandler) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.errorHandler|errorHandler(io.opentelemetry.kotlin.error.SdkErrorHandler){}[0]
+    abstract fun idGenerator(kotlin/Function0<io.opentelemetry.kotlin.factory/IdGenerator>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.idGenerator|idGenerator(kotlin.Function0<io.opentelemetry.kotlin.factory.IdGenerator>){}[0]
+    abstract fun loggerProvider(kotlin/Function1<io.opentelemetry.kotlin.init/LoggerProviderConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.loggerProvider|loggerProvider(kotlin.Function1<io.opentelemetry.kotlin.init.LoggerProviderConfigDsl,kotlin.Unit>){}[0]
+    abstract fun meterProvider(kotlin/Function1<io.opentelemetry.kotlin.init/MeterProviderConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.meterProvider|meterProvider(kotlin.Function1<io.opentelemetry.kotlin.init.MeterProviderConfigDsl,kotlin.Unit>){}[0]
+    abstract fun propagator(kotlin/Function1<io.opentelemetry.kotlin.init/PropagatorConfigDsl, io.opentelemetry.kotlin.propagation/TextMapPropagator>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.propagator|propagator(kotlin.Function1<io.opentelemetry.kotlin.init.PropagatorConfigDsl,io.opentelemetry.kotlin.propagation.TextMapPropagator>){}[0]
+    abstract fun resourceDetection(kotlin/Function1<io.opentelemetry.kotlin.init/ResourceDetectionConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.resourceDetection|resourceDetection(kotlin.Function1<io.opentelemetry.kotlin.init.ResourceDetectionConfigDsl,kotlin.Unit>){}[0]
+    abstract fun shutdownTimeout(kotlin/Long) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.shutdownTimeout|shutdownTimeout(kotlin.Long){}[0]
+    abstract fun tracerProvider(kotlin/Function1<io.opentelemetry.kotlin.init/TracerProviderConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.tracerProvider|tracerProvider(kotlin.Function1<io.opentelemetry.kotlin.init.TracerProviderConfigDsl,kotlin.Unit>){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.init/PropagatorConfigDsl { // io.opentelemetry.kotlin.init/PropagatorConfigDsl|null[0]
+    abstract fun b3(io.opentelemetry.kotlin.init/B3Format = ...): io.opentelemetry.kotlin.propagation/TextMapPropagator // io.opentelemetry.kotlin.init/PropagatorConfigDsl.b3|b3(io.opentelemetry.kotlin.init.B3Format){}[0]
+    abstract fun composite(kotlin/Array<out io.opentelemetry.kotlin.propagation/TextMapPropagator>...): io.opentelemetry.kotlin.propagation/TextMapPropagator // io.opentelemetry.kotlin.init/PropagatorConfigDsl.composite|composite(kotlin.Array<out|io.opentelemetry.kotlin.propagation.TextMapPropagator>...){}[0]
+    abstract fun w3cBaggage(): io.opentelemetry.kotlin.propagation/TextMapPropagator // io.opentelemetry.kotlin.init/PropagatorConfigDsl.w3cBaggage|w3cBaggage(){}[0]
+    abstract fun w3cTraceContext(): io.opentelemetry.kotlin.propagation/TextMapPropagator // io.opentelemetry.kotlin.init/PropagatorConfigDsl.w3cTraceContext|w3cTraceContext(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.init/ResourceConfigDsl { // io.opentelemetry.kotlin.init/ResourceConfigDsl|null[0]
+    abstract var serviceName // io.opentelemetry.kotlin.init/ResourceConfigDsl.serviceName|{}serviceName[0]
+        abstract fun <get-serviceName>(): kotlin/String? // io.opentelemetry.kotlin.init/ResourceConfigDsl.serviceName.<get-serviceName>|<get-serviceName>(){}[0]
+        abstract fun <set-serviceName>(kotlin/String?) // io.opentelemetry.kotlin.init/ResourceConfigDsl.serviceName.<set-serviceName>|<set-serviceName>(kotlin.String?){}[0]
+
+    abstract fun resource(kotlin.collections/Map<kotlin/String, kotlin/Any>) // io.opentelemetry.kotlin.init/ResourceConfigDsl.resource|resource(kotlin.collections.Map<kotlin.String,kotlin.Any>){}[0]
+    abstract fun resource(kotlin/String? = ..., kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>) // io.opentelemetry.kotlin.init/ResourceConfigDsl.resource|resource(kotlin.String?;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.init/ResourceDetectionConfigDsl { // io.opentelemetry.kotlin.init/ResourceDetectionConfigDsl|null[0]
+    abstract fun detector(io.opentelemetry.kotlin.resource/ResourceDetector) // io.opentelemetry.kotlin.init/ResourceDetectionConfigDsl.detector|detector(io.opentelemetry.kotlin.resource.ResourceDetector){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.init/SamplerConfigDsl { // io.opentelemetry.kotlin.init/SamplerConfigDsl|null[0]
+    abstract fun alwaysOff(): io.opentelemetry.kotlin.tracing.sampling/Sampler // io.opentelemetry.kotlin.init/SamplerConfigDsl.alwaysOff|alwaysOff(){}[0]
+    abstract fun alwaysOn(): io.opentelemetry.kotlin.tracing.sampling/Sampler // io.opentelemetry.kotlin.init/SamplerConfigDsl.alwaysOn|alwaysOn(){}[0]
+    abstract fun alwaysRecord(io.opentelemetry.kotlin.tracing.sampling/Sampler): io.opentelemetry.kotlin.tracing.sampling/Sampler // io.opentelemetry.kotlin.init/SamplerConfigDsl.alwaysRecord|alwaysRecord(io.opentelemetry.kotlin.tracing.sampling.Sampler){}[0]
+    abstract fun composableAlwaysOff(): io.opentelemetry.kotlin.tracing.sampling/ComposableSampler // io.opentelemetry.kotlin.init/SamplerConfigDsl.composableAlwaysOff|composableAlwaysOff(){}[0]
+    abstract fun composableAlwaysOn(): io.opentelemetry.kotlin.tracing.sampling/ComposableSampler // io.opentelemetry.kotlin.init/SamplerConfigDsl.composableAlwaysOn|composableAlwaysOn(){}[0]
+    abstract fun composableAnnotating(io.opentelemetry.kotlin.tracing.sampling/ComposableSampler, kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>): io.opentelemetry.kotlin.tracing.sampling/ComposableSampler // io.opentelemetry.kotlin.init/SamplerConfigDsl.composableAnnotating|composableAnnotating(io.opentelemetry.kotlin.tracing.sampling.ComposableSampler;kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>){}[0]
+    abstract fun composableParentThreshold(io.opentelemetry.kotlin.tracing.sampling/ComposableSampler): io.opentelemetry.kotlin.tracing.sampling/ComposableSampler // io.opentelemetry.kotlin.init/SamplerConfigDsl.composableParentThreshold|composableParentThreshold(io.opentelemetry.kotlin.tracing.sampling.ComposableSampler){}[0]
+    abstract fun composableProbability(kotlin/Double): io.opentelemetry.kotlin.tracing.sampling/ComposableSampler // io.opentelemetry.kotlin.init/SamplerConfigDsl.composableProbability|composableProbability(kotlin.Double){}[0]
+    abstract fun composableRuleBased(kotlin/Function1<io.opentelemetry.kotlin.init/ComposableRuleBasedConfigDsl, kotlin/Unit>): io.opentelemetry.kotlin.tracing.sampling/ComposableSampler // io.opentelemetry.kotlin.init/SamplerConfigDsl.composableRuleBased|composableRuleBased(kotlin.Function1<io.opentelemetry.kotlin.init.ComposableRuleBasedConfigDsl,kotlin.Unit>){}[0]
+    abstract fun composite(kotlin/Function1<io.opentelemetry.kotlin.init/SamplerConfigDsl, io.opentelemetry.kotlin.tracing.sampling/ComposableSampler>): io.opentelemetry.kotlin.tracing.sampling/Sampler // io.opentelemetry.kotlin.init/SamplerConfigDsl.composite|composite(kotlin.Function1<io.opentelemetry.kotlin.init.SamplerConfigDsl,io.opentelemetry.kotlin.tracing.sampling.ComposableSampler>){}[0]
+    abstract fun parentBased(io.opentelemetry.kotlin.tracing.sampling/Sampler, io.opentelemetry.kotlin.tracing.sampling/Sampler = ..., io.opentelemetry.kotlin.tracing.sampling/Sampler = ..., io.opentelemetry.kotlin.tracing.sampling/Sampler = ..., io.opentelemetry.kotlin.tracing.sampling/Sampler = ...): io.opentelemetry.kotlin.tracing.sampling/Sampler // io.opentelemetry.kotlin.init/SamplerConfigDsl.parentBased|parentBased(io.opentelemetry.kotlin.tracing.sampling.Sampler;io.opentelemetry.kotlin.tracing.sampling.Sampler;io.opentelemetry.kotlin.tracing.sampling.Sampler;io.opentelemetry.kotlin.tracing.sampling.Sampler;io.opentelemetry.kotlin.tracing.sampling.Sampler){}[0]
+    abstract fun probability(kotlin/Double): io.opentelemetry.kotlin.tracing.sampling/Sampler // io.opentelemetry.kotlin.init/SamplerConfigDsl.probability|probability(kotlin.Double){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.init/SpanLimitsConfigDsl : io.opentelemetry.kotlin.init/AttributeLimitsConfigDsl { // io.opentelemetry.kotlin.init/SpanLimitsConfigDsl|null[0]
+    abstract var attributeCountPerEventLimit // io.opentelemetry.kotlin.init/SpanLimitsConfigDsl.attributeCountPerEventLimit|{}attributeCountPerEventLimit[0]
+        abstract fun <get-attributeCountPerEventLimit>(): kotlin/Int? // io.opentelemetry.kotlin.init/SpanLimitsConfigDsl.attributeCountPerEventLimit.<get-attributeCountPerEventLimit>|<get-attributeCountPerEventLimit>(){}[0]
+        abstract fun <set-attributeCountPerEventLimit>(kotlin/Int?) // io.opentelemetry.kotlin.init/SpanLimitsConfigDsl.attributeCountPerEventLimit.<set-attributeCountPerEventLimit>|<set-attributeCountPerEventLimit>(kotlin.Int?){}[0]
+    abstract var attributeCountPerLinkLimit // io.opentelemetry.kotlin.init/SpanLimitsConfigDsl.attributeCountPerLinkLimit|{}attributeCountPerLinkLimit[0]
+        abstract fun <get-attributeCountPerLinkLimit>(): kotlin/Int? // io.opentelemetry.kotlin.init/SpanLimitsConfigDsl.attributeCountPerLinkLimit.<get-attributeCountPerLinkLimit>|<get-attributeCountPerLinkLimit>(){}[0]
+        abstract fun <set-attributeCountPerLinkLimit>(kotlin/Int?) // io.opentelemetry.kotlin.init/SpanLimitsConfigDsl.attributeCountPerLinkLimit.<set-attributeCountPerLinkLimit>|<set-attributeCountPerLinkLimit>(kotlin.Int?){}[0]
+    abstract var eventCountLimit // io.opentelemetry.kotlin.init/SpanLimitsConfigDsl.eventCountLimit|{}eventCountLimit[0]
+        abstract fun <get-eventCountLimit>(): kotlin/Int? // io.opentelemetry.kotlin.init/SpanLimitsConfigDsl.eventCountLimit.<get-eventCountLimit>|<get-eventCountLimit>(){}[0]
+        abstract fun <set-eventCountLimit>(kotlin/Int?) // io.opentelemetry.kotlin.init/SpanLimitsConfigDsl.eventCountLimit.<set-eventCountLimit>|<set-eventCountLimit>(kotlin.Int?){}[0]
+    abstract var linkCountLimit // io.opentelemetry.kotlin.init/SpanLimitsConfigDsl.linkCountLimit|{}linkCountLimit[0]
+        abstract fun <get-linkCountLimit>(): kotlin/Int? // io.opentelemetry.kotlin.init/SpanLimitsConfigDsl.linkCountLimit.<get-linkCountLimit>|<get-linkCountLimit>(){}[0]
+        abstract fun <set-linkCountLimit>(kotlin/Int?) // io.opentelemetry.kotlin.init/SpanLimitsConfigDsl.linkCountLimit.<set-linkCountLimit>|<set-linkCountLimit>(kotlin.Int?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.init/TraceExportConfigDsl { // io.opentelemetry.kotlin.init/TraceExportConfigDsl|null[0]
+    abstract val clock // io.opentelemetry.kotlin.init/TraceExportConfigDsl.clock|{}clock[0]
+        abstract fun <get-clock>(): io.opentelemetry.kotlin/Clock // io.opentelemetry.kotlin.init/TraceExportConfigDsl.clock.<get-clock>|<get-clock>(){}[0]
+    abstract val sdkErrorHandler // io.opentelemetry.kotlin.init/TraceExportConfigDsl.sdkErrorHandler|{}sdkErrorHandler[0]
+        abstract fun <get-sdkErrorHandler>(): io.opentelemetry.kotlin.error/SdkErrorHandler // io.opentelemetry.kotlin.init/TraceExportConfigDsl.sdkErrorHandler.<get-sdkErrorHandler>|<get-sdkErrorHandler>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.init/TracerProviderConfigDsl : io.opentelemetry.kotlin.init/ResourceConfigDsl { // io.opentelemetry.kotlin.init/TracerProviderConfigDsl|null[0]
+    abstract fun export(kotlin/Function1<io.opentelemetry.kotlin.init/TraceExportConfigDsl, io.opentelemetry.kotlin.tracing.export/SpanProcessor>) // io.opentelemetry.kotlin.init/TracerProviderConfigDsl.export|export(kotlin.Function1<io.opentelemetry.kotlin.init.TraceExportConfigDsl,io.opentelemetry.kotlin.tracing.export.SpanProcessor>){}[0]
+    abstract fun sampler(kotlin/Function1<io.opentelemetry.kotlin.init/SamplerConfigDsl, io.opentelemetry.kotlin.tracing.sampling/Sampler>) // io.opentelemetry.kotlin.init/TracerProviderConfigDsl.sampler|sampler(kotlin.Function1<io.opentelemetry.kotlin.init.SamplerConfigDsl,io.opentelemetry.kotlin.tracing.sampling.Sampler>){}[0]
+    abstract fun spanLimits(kotlin/Function1<io.opentelemetry.kotlin.init/SpanLimitsConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/TracerProviderConfigDsl.spanLimits|spanLimits(kotlin.Function1<io.opentelemetry.kotlin.init.SpanLimitsConfigDsl,kotlin.Unit>){}[0]
+    abstract fun tracerConfigurator(io.opentelemetry.kotlin.tracing/TracerConfigurator) // io.opentelemetry.kotlin.init/TracerProviderConfigDsl.tracerConfigurator|tracerConfigurator(io.opentelemetry.kotlin.tracing.TracerConfigurator){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.logging.data/LogRecordData : io.opentelemetry.kotlin.attributes/AttributeContainer { // io.opentelemetry.kotlin.logging.data/LogRecordData|null[0]
+    abstract val body // io.opentelemetry.kotlin.logging.data/LogRecordData.body|{}body[0]
+        abstract fun <get-body>(): kotlin/Any? // io.opentelemetry.kotlin.logging.data/LogRecordData.body.<get-body>|<get-body>(){}[0]
+    abstract val droppedAttributesCount // io.opentelemetry.kotlin.logging.data/LogRecordData.droppedAttributesCount|{}droppedAttributesCount[0]
+        abstract fun <get-droppedAttributesCount>(): kotlin/Int // io.opentelemetry.kotlin.logging.data/LogRecordData.droppedAttributesCount.<get-droppedAttributesCount>|<get-droppedAttributesCount>(){}[0]
+    abstract val eventName // io.opentelemetry.kotlin.logging.data/LogRecordData.eventName|{}eventName[0]
+        abstract fun <get-eventName>(): kotlin/String? // io.opentelemetry.kotlin.logging.data/LogRecordData.eventName.<get-eventName>|<get-eventName>(){}[0]
+    abstract val instrumentationScopeInfo // io.opentelemetry.kotlin.logging.data/LogRecordData.instrumentationScopeInfo|{}instrumentationScopeInfo[0]
+        abstract fun <get-instrumentationScopeInfo>(): io.opentelemetry.kotlin/InstrumentationScopeInfo // io.opentelemetry.kotlin.logging.data/LogRecordData.instrumentationScopeInfo.<get-instrumentationScopeInfo>|<get-instrumentationScopeInfo>(){}[0]
+    abstract val observedTimestamp // io.opentelemetry.kotlin.logging.data/LogRecordData.observedTimestamp|{}observedTimestamp[0]
+        abstract fun <get-observedTimestamp>(): kotlin/Long? // io.opentelemetry.kotlin.logging.data/LogRecordData.observedTimestamp.<get-observedTimestamp>|<get-observedTimestamp>(){}[0]
+    abstract val resource // io.opentelemetry.kotlin.logging.data/LogRecordData.resource|{}resource[0]
+        abstract fun <get-resource>(): io.opentelemetry.kotlin.resource/Resource // io.opentelemetry.kotlin.logging.data/LogRecordData.resource.<get-resource>|<get-resource>(){}[0]
+    abstract val severityNumber // io.opentelemetry.kotlin.logging.data/LogRecordData.severityNumber|{}severityNumber[0]
+        abstract fun <get-severityNumber>(): io.opentelemetry.kotlin.logging/SeverityNumber? // io.opentelemetry.kotlin.logging.data/LogRecordData.severityNumber.<get-severityNumber>|<get-severityNumber>(){}[0]
+    abstract val severityText // io.opentelemetry.kotlin.logging.data/LogRecordData.severityText|{}severityText[0]
+        abstract fun <get-severityText>(): kotlin/String? // io.opentelemetry.kotlin.logging.data/LogRecordData.severityText.<get-severityText>|<get-severityText>(){}[0]
+    abstract val spanContext // io.opentelemetry.kotlin.logging.data/LogRecordData.spanContext|{}spanContext[0]
+        abstract fun <get-spanContext>(): io.opentelemetry.kotlin.tracing/SpanContext // io.opentelemetry.kotlin.logging.data/LogRecordData.spanContext.<get-spanContext>|<get-spanContext>(){}[0]
+    abstract val timestamp // io.opentelemetry.kotlin.logging.data/LogRecordData.timestamp|{}timestamp[0]
+        abstract fun <get-timestamp>(): kotlin/Long? // io.opentelemetry.kotlin.logging.data/LogRecordData.timestamp.<get-timestamp>|<get-timestamp>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.logging.export/LogRecordExporter : io.opentelemetry.kotlin.export/TelemetryCloseable { // io.opentelemetry.kotlin.logging.export/LogRecordExporter|null[0]
+    abstract suspend fun export(kotlin.collections/List<io.opentelemetry.kotlin.logging.data/LogRecordData>): io.opentelemetry.kotlin.export/OperationResultCode // io.opentelemetry.kotlin.logging.export/LogRecordExporter.export|export(kotlin.collections.List<io.opentelemetry.kotlin.logging.data.LogRecordData>){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.logging.export/LogRecordProcessor : io.opentelemetry.kotlin.export/TelemetryCloseable { // io.opentelemetry.kotlin.logging.export/LogRecordProcessor|null[0]
+    abstract fun onEmit(io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord, io.opentelemetry.kotlin.context/Context) // io.opentelemetry.kotlin.logging.export/LogRecordProcessor.onEmit|onEmit(io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord;io.opentelemetry.kotlin.context.Context){}[0]
+    open fun enabled(io.opentelemetry.kotlin.context/Context, io.opentelemetry.kotlin/InstrumentationScopeInfo, io.opentelemetry.kotlin.logging/SeverityNumber?, kotlin/String?): kotlin/Boolean // io.opentelemetry.kotlin.logging.export/LogRecordProcessor.enabled|enabled(io.opentelemetry.kotlin.context.Context;io.opentelemetry.kotlin.InstrumentationScopeInfo;io.opentelemetry.kotlin.logging.SeverityNumber?;kotlin.String?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord : io.opentelemetry.kotlin.attributes/AttributeContainer, io.opentelemetry.kotlin.attributes/AttributesMutator, io.opentelemetry.kotlin.logging.model/ReadableLogRecord { // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord|null[0]
+    abstract var body // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.body|{}body[0]
+        abstract fun <get-body>(): kotlin/Any? // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.body.<get-body>|<get-body>(){}[0]
+        abstract fun <set-body>(kotlin/Any?) // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.body.<set-body>|<set-body>(kotlin.Any?){}[0]
+    abstract var eventName // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.eventName|{}eventName[0]
+        abstract fun <get-eventName>(): kotlin/String? // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.eventName.<get-eventName>|<get-eventName>(){}[0]
+        abstract fun <set-eventName>(kotlin/String?) // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.eventName.<set-eventName>|<set-eventName>(kotlin.String?){}[0]
+    abstract var observedTimestamp // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.observedTimestamp|{}observedTimestamp[0]
+        abstract fun <get-observedTimestamp>(): kotlin/Long? // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.observedTimestamp.<get-observedTimestamp>|<get-observedTimestamp>(){}[0]
+        abstract fun <set-observedTimestamp>(kotlin/Long?) // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.observedTimestamp.<set-observedTimestamp>|<set-observedTimestamp>(kotlin.Long?){}[0]
+    abstract var severityNumber // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.severityNumber|{}severityNumber[0]
+        abstract fun <get-severityNumber>(): io.opentelemetry.kotlin.logging/SeverityNumber? // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.severityNumber.<get-severityNumber>|<get-severityNumber>(){}[0]
+        abstract fun <set-severityNumber>(io.opentelemetry.kotlin.logging/SeverityNumber?) // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.severityNumber.<set-severityNumber>|<set-severityNumber>(io.opentelemetry.kotlin.logging.SeverityNumber?){}[0]
+    abstract var severityText // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.severityText|{}severityText[0]
+        abstract fun <get-severityText>(): kotlin/String? // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.severityText.<get-severityText>|<get-severityText>(){}[0]
+        abstract fun <set-severityText>(kotlin/String?) // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.severityText.<set-severityText>|<set-severityText>(kotlin.String?){}[0]
+    abstract var spanContext // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.spanContext|{}spanContext[0]
+        abstract fun <get-spanContext>(): io.opentelemetry.kotlin.tracing/SpanContext // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.spanContext.<get-spanContext>|<get-spanContext>(){}[0]
+        abstract fun <set-spanContext>(io.opentelemetry.kotlin.tracing/SpanContext) // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.spanContext.<set-spanContext>|<set-spanContext>(io.opentelemetry.kotlin.tracing.SpanContext){}[0]
+    abstract var timestamp // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.timestamp|{}timestamp[0]
+        abstract fun <get-timestamp>(): kotlin/Long? // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.timestamp.<get-timestamp>|<get-timestamp>(){}[0]
+        abstract fun <set-timestamp>(kotlin/Long?) // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.timestamp.<set-timestamp>|<set-timestamp>(kotlin.Long?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.logging.model/ReadableLogRecord : io.opentelemetry.kotlin.logging.data/LogRecordData { // io.opentelemetry.kotlin.logging.model/ReadableLogRecord|null[0]
+    abstract fun toLogRecordData(): io.opentelemetry.kotlin.logging.data/LogRecordData // io.opentelemetry.kotlin.logging.model/ReadableLogRecord.toLogRecordData|toLogRecordData(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.logging/LoggerConfig { // io.opentelemetry.kotlin.logging/LoggerConfig|null[0]
+    open val enabled // io.opentelemetry.kotlin.logging/LoggerConfig.enabled|{}enabled[0]
+        open fun <get-enabled>(): kotlin/Boolean // io.opentelemetry.kotlin.logging/LoggerConfig.enabled.<get-enabled>|<get-enabled>(){}[0]
+    open val minimumSeverity // io.opentelemetry.kotlin.logging/LoggerConfig.minimumSeverity|{}minimumSeverity[0]
+        open fun <get-minimumSeverity>(): io.opentelemetry.kotlin.logging/SeverityNumber // io.opentelemetry.kotlin.logging/LoggerConfig.minimumSeverity.<get-minimumSeverity>|<get-minimumSeverity>(){}[0]
+    open val traceBased // io.opentelemetry.kotlin.logging/LoggerConfig.traceBased|{}traceBased[0]
+        open fun <get-traceBased>(): kotlin/Boolean // io.opentelemetry.kotlin.logging/LoggerConfig.traceBased.<get-traceBased>|<get-traceBased>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics.data/DoublePoint : io.opentelemetry.kotlin.metrics.data/PointData { // io.opentelemetry.kotlin.metrics.data/DoublePoint|null[0]
+    abstract val value // io.opentelemetry.kotlin.metrics.data/DoublePoint.value|{}value[0]
+        abstract fun <get-value>(): kotlin/Double // io.opentelemetry.kotlin.metrics.data/DoublePoint.value.<get-value>|<get-value>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics.data/ExponentialHistogramBuckets { // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramBuckets|null[0]
+    abstract val bucketCounts // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramBuckets.bucketCounts|{}bucketCounts[0]
+        abstract fun <get-bucketCounts>(): kotlin.collections/List<kotlin/Long> // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramBuckets.bucketCounts.<get-bucketCounts>|<get-bucketCounts>(){}[0]
+    abstract val offset // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramBuckets.offset|{}offset[0]
+        abstract fun <get-offset>(): kotlin/Int // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramBuckets.offset.<get-offset>|<get-offset>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics.data/ExponentialHistogramData : io.opentelemetry.kotlin.metrics.data/Data<io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint> { // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramData|null[0]
+    abstract val aggregationTemporality // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramData.aggregationTemporality|{}aggregationTemporality[0]
+        abstract fun <get-aggregationTemporality>(): io.opentelemetry.kotlin.metrics.data/AggregationTemporality // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramData.aggregationTemporality.<get-aggregationTemporality>|<get-aggregationTemporality>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint : io.opentelemetry.kotlin.metrics.data/PointData { // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint|null[0]
+    abstract val count // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.count|{}count[0]
+        abstract fun <get-count>(): kotlin/Long // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.count.<get-count>|<get-count>(){}[0]
+    abstract val max // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.max|{}max[0]
+        abstract fun <get-max>(): kotlin/Double? // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.max.<get-max>|<get-max>(){}[0]
+    abstract val min // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.min|{}min[0]
+        abstract fun <get-min>(): kotlin/Double? // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.min.<get-min>|<get-min>(){}[0]
+    abstract val negativeBuckets // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.negativeBuckets|{}negativeBuckets[0]
+        abstract fun <get-negativeBuckets>(): io.opentelemetry.kotlin.metrics.data/ExponentialHistogramBuckets // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.negativeBuckets.<get-negativeBuckets>|<get-negativeBuckets>(){}[0]
+    abstract val positiveBuckets // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.positiveBuckets|{}positiveBuckets[0]
+        abstract fun <get-positiveBuckets>(): io.opentelemetry.kotlin.metrics.data/ExponentialHistogramBuckets // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.positiveBuckets.<get-positiveBuckets>|<get-positiveBuckets>(){}[0]
+    abstract val scale // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.scale|{}scale[0]
+        abstract fun <get-scale>(): kotlin/Int // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.scale.<get-scale>|<get-scale>(){}[0]
+    abstract val sum // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.sum|{}sum[0]
+        abstract fun <get-sum>(): kotlin/Double? // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.sum.<get-sum>|<get-sum>(){}[0]
+    abstract val zeroCount // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.zeroCount|{}zeroCount[0]
+        abstract fun <get-zeroCount>(): kotlin/Long // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.zeroCount.<get-zeroCount>|<get-zeroCount>(){}[0]
+    abstract val zeroThreshold // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.zeroThreshold|{}zeroThreshold[0]
+        abstract fun <get-zeroThreshold>(): kotlin/Double // io.opentelemetry.kotlin.metrics.data/ExponentialHistogramPoint.zeroThreshold.<get-zeroThreshold>|<get-zeroThreshold>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics.data/HistogramData : io.opentelemetry.kotlin.metrics.data/Data<io.opentelemetry.kotlin.metrics.data/HistogramPoint> { // io.opentelemetry.kotlin.metrics.data/HistogramData|null[0]
+    abstract val aggregationTemporality // io.opentelemetry.kotlin.metrics.data/HistogramData.aggregationTemporality|{}aggregationTemporality[0]
+        abstract fun <get-aggregationTemporality>(): io.opentelemetry.kotlin.metrics.data/AggregationTemporality // io.opentelemetry.kotlin.metrics.data/HistogramData.aggregationTemporality.<get-aggregationTemporality>|<get-aggregationTemporality>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics.data/HistogramPoint : io.opentelemetry.kotlin.metrics.data/PointData { // io.opentelemetry.kotlin.metrics.data/HistogramPoint|null[0]
+    abstract val boundaries // io.opentelemetry.kotlin.metrics.data/HistogramPoint.boundaries|{}boundaries[0]
+        abstract fun <get-boundaries>(): kotlin.collections/List<kotlin/Double> // io.opentelemetry.kotlin.metrics.data/HistogramPoint.boundaries.<get-boundaries>|<get-boundaries>(){}[0]
+    abstract val count // io.opentelemetry.kotlin.metrics.data/HistogramPoint.count|{}count[0]
+        abstract fun <get-count>(): kotlin/Long // io.opentelemetry.kotlin.metrics.data/HistogramPoint.count.<get-count>|<get-count>(){}[0]
+    abstract val counts // io.opentelemetry.kotlin.metrics.data/HistogramPoint.counts|{}counts[0]
+        abstract fun <get-counts>(): kotlin.collections/List<kotlin/Long> // io.opentelemetry.kotlin.metrics.data/HistogramPoint.counts.<get-counts>|<get-counts>(){}[0]
+    abstract val max // io.opentelemetry.kotlin.metrics.data/HistogramPoint.max|{}max[0]
+        abstract fun <get-max>(): kotlin/Double? // io.opentelemetry.kotlin.metrics.data/HistogramPoint.max.<get-max>|<get-max>(){}[0]
+    abstract val min // io.opentelemetry.kotlin.metrics.data/HistogramPoint.min|{}min[0]
+        abstract fun <get-min>(): kotlin/Double? // io.opentelemetry.kotlin.metrics.data/HistogramPoint.min.<get-min>|<get-min>(){}[0]
+    abstract val sum // io.opentelemetry.kotlin.metrics.data/HistogramPoint.sum|{}sum[0]
+        abstract fun <get-sum>(): kotlin/Double? // io.opentelemetry.kotlin.metrics.data/HistogramPoint.sum.<get-sum>|<get-sum>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics.data/LongPoint : io.opentelemetry.kotlin.metrics.data/PointData { // io.opentelemetry.kotlin.metrics.data/LongPoint|null[0]
+    abstract val value // io.opentelemetry.kotlin.metrics.data/LongPoint.value|{}value[0]
+        abstract fun <get-value>(): kotlin/Long // io.opentelemetry.kotlin.metrics.data/LongPoint.value.<get-value>|<get-value>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.metrics.data/MetricData { // io.opentelemetry.kotlin.metrics.data/MetricData|null[0]
+    abstract val data // io.opentelemetry.kotlin.metrics.data/MetricData.data|{}data[0]
+        abstract fun <get-data>(): io.opentelemetry.kotlin.metrics.data/Data<io.opentelemetry.kotlin.metrics.data/PointData> // io.opentelemetry.kotlin.metrics.data/MetricData.data.<get-data>|<get-data>(){}[0]
+    abstract val description // io.opentelemetry.kotlin.metrics.data/MetricData.description|{}description[0]
+        abstract fun <get-description>(): kotlin/String? // io.opentelemetry.kotlin.metrics.data/MetricData.description.<get-description>|<get-description>(){}[0]
+    abstract val instrumentationScopeInfo // io.opentelemetry.kotlin.metrics.data/MetricData.instrumentationScopeInfo|{}instrumentationScopeInfo[0]
+        abstract fun <get-instrumentationScopeInfo>(): io.opentelemetry.kotlin/InstrumentationScopeInfo // io.opentelemetry.kotlin.metrics.data/MetricData.instrumentationScopeInfo.<get-instrumentationScopeInfo>|<get-instrumentationScopeInfo>(){}[0]
+    abstract val name // io.opentelemetry.kotlin.metrics.data/MetricData.name|{}name[0]
+        abstract fun <get-name>(): kotlin/String // io.opentelemetry.kotlin.metrics.data/MetricData.name.<get-name>|<get-name>(){}[0]
+    abstract val resource // io.opentelemetry.kotlin.metrics.data/MetricData.resource|{}resource[0]
+        abstract fun <get-resource>(): io.opentelemetry.kotlin.resource/Resource // io.opentelemetry.kotlin.metrics.data/MetricData.resource.<get-resource>|<get-resource>(){}[0]
+    abstract val unit // io.opentelemetry.kotlin.metrics.data/MetricData.unit|{}unit[0]
+        abstract fun <get-unit>(): kotlin/String? // io.opentelemetry.kotlin.metrics.data/MetricData.unit.<get-unit>|<get-unit>(){}[0]
+    open val isEmpty // io.opentelemetry.kotlin.metrics.data/MetricData.isEmpty|{}isEmpty[0]
+        open fun <get-isEmpty>(): kotlin/Boolean // io.opentelemetry.kotlin.metrics.data/MetricData.isEmpty.<get-isEmpty>|<get-isEmpty>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.resource/Entity { // io.opentelemetry.kotlin.resource/Entity|null[0]
+    abstract val description // io.opentelemetry.kotlin.resource/Entity.description|{}description[0]
+        abstract fun <get-description>(): kotlin.collections/Map<kotlin/String, kotlin/Any> // io.opentelemetry.kotlin.resource/Entity.description.<get-description>|<get-description>(){}[0]
+    abstract val id // io.opentelemetry.kotlin.resource/Entity.id|{}id[0]
+        abstract fun <get-id>(): kotlin.collections/Map<kotlin/String, kotlin/Any> // io.opentelemetry.kotlin.resource/Entity.id.<get-id>|<get-id>(){}[0]
+    abstract val schemaUrl // io.opentelemetry.kotlin.resource/Entity.schemaUrl|{}schemaUrl[0]
+        abstract fun <get-schemaUrl>(): kotlin/String? // io.opentelemetry.kotlin.resource/Entity.schemaUrl.<get-schemaUrl>|<get-schemaUrl>(){}[0]
+    abstract val type // io.opentelemetry.kotlin.resource/Entity.type|{}type[0]
+        abstract fun <get-type>(): kotlin/String // io.opentelemetry.kotlin.resource/Entity.type.<get-type>|<get-type>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.resource/EntityAttributesMutator { // io.opentelemetry.kotlin.resource/EntityAttributesMutator|null[0]
+    abstract fun description(kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>) // io.opentelemetry.kotlin.resource/EntityAttributesMutator.description|description(kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>){}[0]
+    abstract fun id(kotlin/Function1<io.opentelemetry.kotlin.attributes/AttributesMutator, kotlin/Unit>) // io.opentelemetry.kotlin.resource/EntityAttributesMutator.id|id(kotlin.Function1<io.opentelemetry.kotlin.attributes.AttributesMutator,kotlin.Unit>){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.resource/MutableResource { // io.opentelemetry.kotlin.resource/MutableResource|null[0]
+    abstract val attributes // io.opentelemetry.kotlin.resource/MutableResource.attributes|{}attributes[0]
+        abstract fun <get-attributes>(): kotlin.collections/MutableMap<kotlin/String, kotlin/Any> // io.opentelemetry.kotlin.resource/MutableResource.attributes.<get-attributes>|<get-attributes>(){}[0]
+
+    abstract var schemaUrl // io.opentelemetry.kotlin.resource/MutableResource.schemaUrl|{}schemaUrl[0]
+        abstract fun <get-schemaUrl>(): kotlin/String? // io.opentelemetry.kotlin.resource/MutableResource.schemaUrl.<get-schemaUrl>|<get-schemaUrl>(){}[0]
+        abstract fun <set-schemaUrl>(kotlin/String?) // io.opentelemetry.kotlin.resource/MutableResource.schemaUrl.<set-schemaUrl>|<set-schemaUrl>(kotlin.String?){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.resource/Resource : io.opentelemetry.kotlin.attributes/AttributeContainer { // io.opentelemetry.kotlin.resource/Resource|null[0]
+    abstract val schemaUrl // io.opentelemetry.kotlin.resource/Resource.schemaUrl|{}schemaUrl[0]
+        abstract fun <get-schemaUrl>(): kotlin/String? // io.opentelemetry.kotlin.resource/Resource.schemaUrl.<get-schemaUrl>|<get-schemaUrl>(){}[0]
+
+    abstract fun asNewResource(kotlin/Function1<io.opentelemetry.kotlin.resource/MutableResource, kotlin/Unit>): io.opentelemetry.kotlin.resource/Resource // io.opentelemetry.kotlin.resource/Resource.asNewResource|asNewResource(kotlin.Function1<io.opentelemetry.kotlin.resource.MutableResource,kotlin.Unit>){}[0]
+    abstract fun merge(io.opentelemetry.kotlin.resource/Resource): io.opentelemetry.kotlin.resource/Resource // io.opentelemetry.kotlin.resource/Resource.merge|merge(io.opentelemetry.kotlin.resource.Resource){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.resource/ResourceDetector { // io.opentelemetry.kotlin.resource/ResourceDetector|null[0]
+    abstract val name // io.opentelemetry.kotlin.resource/ResourceDetector.name|{}name[0]
+        abstract fun <get-name>(): kotlin/String // io.opentelemetry.kotlin.resource/ResourceDetector.name.<get-name>|<get-name>(){}[0]
+
+    abstract fun (io.opentelemetry.kotlin.factory/ResourceFactory).detect(): io.opentelemetry.kotlin.resource/Resource // io.opentelemetry.kotlin.resource/ResourceDetector.detect|detect@io.opentelemetry.kotlin.factory.ResourceFactory(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing.data/SpanData : io.opentelemetry.kotlin.attributes/AttributeContainer { // io.opentelemetry.kotlin.tracing.data/SpanData|null[0]
+    abstract val droppedAttributesCount // io.opentelemetry.kotlin.tracing.data/SpanData.droppedAttributesCount|{}droppedAttributesCount[0]
+        abstract fun <get-droppedAttributesCount>(): kotlin/Int // io.opentelemetry.kotlin.tracing.data/SpanData.droppedAttributesCount.<get-droppedAttributesCount>|<get-droppedAttributesCount>(){}[0]
+    abstract val droppedEventsCount // io.opentelemetry.kotlin.tracing.data/SpanData.droppedEventsCount|{}droppedEventsCount[0]
+        abstract fun <get-droppedEventsCount>(): kotlin/Int // io.opentelemetry.kotlin.tracing.data/SpanData.droppedEventsCount.<get-droppedEventsCount>|<get-droppedEventsCount>(){}[0]
+    abstract val droppedLinksCount // io.opentelemetry.kotlin.tracing.data/SpanData.droppedLinksCount|{}droppedLinksCount[0]
+        abstract fun <get-droppedLinksCount>(): kotlin/Int // io.opentelemetry.kotlin.tracing.data/SpanData.droppedLinksCount.<get-droppedLinksCount>|<get-droppedLinksCount>(){}[0]
+    abstract val endTimestamp // io.opentelemetry.kotlin.tracing.data/SpanData.endTimestamp|{}endTimestamp[0]
+        abstract fun <get-endTimestamp>(): kotlin/Long? // io.opentelemetry.kotlin.tracing.data/SpanData.endTimestamp.<get-endTimestamp>|<get-endTimestamp>(){}[0]
+    abstract val events // io.opentelemetry.kotlin.tracing.data/SpanData.events|{}events[0]
+        abstract fun <get-events>(): kotlin.collections/List<io.opentelemetry.kotlin.tracing.data/SpanEventData> // io.opentelemetry.kotlin.tracing.data/SpanData.events.<get-events>|<get-events>(){}[0]
+    abstract val hasEnded // io.opentelemetry.kotlin.tracing.data/SpanData.hasEnded|{}hasEnded[0]
+        abstract fun <get-hasEnded>(): kotlin/Boolean // io.opentelemetry.kotlin.tracing.data/SpanData.hasEnded.<get-hasEnded>|<get-hasEnded>(){}[0]
+    abstract val instrumentationScopeInfo // io.opentelemetry.kotlin.tracing.data/SpanData.instrumentationScopeInfo|{}instrumentationScopeInfo[0]
+        abstract fun <get-instrumentationScopeInfo>(): io.opentelemetry.kotlin/InstrumentationScopeInfo // io.opentelemetry.kotlin.tracing.data/SpanData.instrumentationScopeInfo.<get-instrumentationScopeInfo>|<get-instrumentationScopeInfo>(){}[0]
+    abstract val links // io.opentelemetry.kotlin.tracing.data/SpanData.links|{}links[0]
+        abstract fun <get-links>(): kotlin.collections/List<io.opentelemetry.kotlin.tracing.data/SpanLinkData> // io.opentelemetry.kotlin.tracing.data/SpanData.links.<get-links>|<get-links>(){}[0]
+    abstract val name // io.opentelemetry.kotlin.tracing.data/SpanData.name|{}name[0]
+        abstract fun <get-name>(): kotlin/String // io.opentelemetry.kotlin.tracing.data/SpanData.name.<get-name>|<get-name>(){}[0]
+    abstract val parent // io.opentelemetry.kotlin.tracing.data/SpanData.parent|{}parent[0]
+        abstract fun <get-parent>(): io.opentelemetry.kotlin.tracing/SpanContext // io.opentelemetry.kotlin.tracing.data/SpanData.parent.<get-parent>|<get-parent>(){}[0]
+    abstract val resource // io.opentelemetry.kotlin.tracing.data/SpanData.resource|{}resource[0]
+        abstract fun <get-resource>(): io.opentelemetry.kotlin.resource/Resource // io.opentelemetry.kotlin.tracing.data/SpanData.resource.<get-resource>|<get-resource>(){}[0]
+    abstract val spanContext // io.opentelemetry.kotlin.tracing.data/SpanData.spanContext|{}spanContext[0]
+        abstract fun <get-spanContext>(): io.opentelemetry.kotlin.tracing/SpanContext // io.opentelemetry.kotlin.tracing.data/SpanData.spanContext.<get-spanContext>|<get-spanContext>(){}[0]
+    abstract val spanKind // io.opentelemetry.kotlin.tracing.data/SpanData.spanKind|{}spanKind[0]
+        abstract fun <get-spanKind>(): io.opentelemetry.kotlin.tracing/SpanKind // io.opentelemetry.kotlin.tracing.data/SpanData.spanKind.<get-spanKind>|<get-spanKind>(){}[0]
+    abstract val startTimestamp // io.opentelemetry.kotlin.tracing.data/SpanData.startTimestamp|{}startTimestamp[0]
+        abstract fun <get-startTimestamp>(): kotlin/Long // io.opentelemetry.kotlin.tracing.data/SpanData.startTimestamp.<get-startTimestamp>|<get-startTimestamp>(){}[0]
+    abstract val status // io.opentelemetry.kotlin.tracing.data/SpanData.status|{}status[0]
+        abstract fun <get-status>(): io.opentelemetry.kotlin.tracing/StatusData // io.opentelemetry.kotlin.tracing.data/SpanData.status.<get-status>|<get-status>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing.data/SpanEventData : io.opentelemetry.kotlin.attributes/AttributeContainer { // io.opentelemetry.kotlin.tracing.data/SpanEventData|null[0]
+    abstract val droppedAttributesCount // io.opentelemetry.kotlin.tracing.data/SpanEventData.droppedAttributesCount|{}droppedAttributesCount[0]
+        abstract fun <get-droppedAttributesCount>(): kotlin/Int // io.opentelemetry.kotlin.tracing.data/SpanEventData.droppedAttributesCount.<get-droppedAttributesCount>|<get-droppedAttributesCount>(){}[0]
+    abstract val name // io.opentelemetry.kotlin.tracing.data/SpanEventData.name|{}name[0]
+        abstract fun <get-name>(): kotlin/String // io.opentelemetry.kotlin.tracing.data/SpanEventData.name.<get-name>|<get-name>(){}[0]
+    abstract val timestamp // io.opentelemetry.kotlin.tracing.data/SpanEventData.timestamp|{}timestamp[0]
+        abstract fun <get-timestamp>(): kotlin/Long // io.opentelemetry.kotlin.tracing.data/SpanEventData.timestamp.<get-timestamp>|<get-timestamp>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing.data/SpanLinkData : io.opentelemetry.kotlin.attributes/AttributeContainer { // io.opentelemetry.kotlin.tracing.data/SpanLinkData|null[0]
+    abstract val droppedAttributesCount // io.opentelemetry.kotlin.tracing.data/SpanLinkData.droppedAttributesCount|{}droppedAttributesCount[0]
+        abstract fun <get-droppedAttributesCount>(): kotlin/Int // io.opentelemetry.kotlin.tracing.data/SpanLinkData.droppedAttributesCount.<get-droppedAttributesCount>|<get-droppedAttributesCount>(){}[0]
+    abstract val spanContext // io.opentelemetry.kotlin.tracing.data/SpanLinkData.spanContext|{}spanContext[0]
+        abstract fun <get-spanContext>(): io.opentelemetry.kotlin.tracing/SpanContext // io.opentelemetry.kotlin.tracing.data/SpanLinkData.spanContext.<get-spanContext>|<get-spanContext>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing.export/SpanExporter : io.opentelemetry.kotlin.export/TelemetryCloseable { // io.opentelemetry.kotlin.tracing.export/SpanExporter|null[0]
+    abstract suspend fun export(kotlin.collections/List<io.opentelemetry.kotlin.tracing.data/SpanData>): io.opentelemetry.kotlin.export/OperationResultCode // io.opentelemetry.kotlin.tracing.export/SpanExporter.export|export(kotlin.collections.List<io.opentelemetry.kotlin.tracing.data.SpanData>){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing.export/SpanProcessor : io.opentelemetry.kotlin.export/TelemetryCloseable { // io.opentelemetry.kotlin.tracing.export/SpanProcessor|null[0]
+    abstract fun isEndRequired(): kotlin/Boolean // io.opentelemetry.kotlin.tracing.export/SpanProcessor.isEndRequired|isEndRequired(){}[0]
+    abstract fun isOnEndingRequired(): kotlin/Boolean // io.opentelemetry.kotlin.tracing.export/SpanProcessor.isOnEndingRequired|isOnEndingRequired(){}[0]
+    abstract fun isStartRequired(): kotlin/Boolean // io.opentelemetry.kotlin.tracing.export/SpanProcessor.isStartRequired|isStartRequired(){}[0]
+    abstract fun onEnd(io.opentelemetry.kotlin.tracing.model/ReadableSpan) // io.opentelemetry.kotlin.tracing.export/SpanProcessor.onEnd|onEnd(io.opentelemetry.kotlin.tracing.model.ReadableSpan){}[0]
+    abstract fun onEnding(io.opentelemetry.kotlin.tracing.model/ReadWriteSpan) // io.opentelemetry.kotlin.tracing.export/SpanProcessor.onEnding|onEnding(io.opentelemetry.kotlin.tracing.model.ReadWriteSpan){}[0]
+    abstract fun onStart(io.opentelemetry.kotlin.tracing.model/ReadWriteSpan, io.opentelemetry.kotlin.context/Context) // io.opentelemetry.kotlin.tracing.export/SpanProcessor.onStart|onStart(io.opentelemetry.kotlin.tracing.model.ReadWriteSpan;io.opentelemetry.kotlin.context.Context){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing.model/ReadWriteSpan : io.opentelemetry.kotlin.tracing.model/ReadableSpan, io.opentelemetry.kotlin.tracing/Span { // io.opentelemetry.kotlin.tracing.model/ReadWriteSpan|null[0]
+    abstract var spanContext // io.opentelemetry.kotlin.tracing.model/ReadWriteSpan.spanContext|{}spanContext[0]
+        abstract fun <get-spanContext>(): io.opentelemetry.kotlin.tracing/SpanContext // io.opentelemetry.kotlin.tracing.model/ReadWriteSpan.spanContext.<get-spanContext>|<get-spanContext>(){}[0]
+        abstract fun <set-spanContext>(io.opentelemetry.kotlin.tracing/SpanContext) // io.opentelemetry.kotlin.tracing.model/ReadWriteSpan.spanContext.<set-spanContext>|<set-spanContext>(io.opentelemetry.kotlin.tracing.SpanContext){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing.model/ReadableSpan : io.opentelemetry.kotlin.tracing.data/SpanData { // io.opentelemetry.kotlin.tracing.model/ReadableSpan|null[0]
+    abstract fun toSpanData(): io.opentelemetry.kotlin.tracing.data/SpanData // io.opentelemetry.kotlin.tracing.model/ReadableSpan.toSpanData|toSpanData(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing.model/SpanEvent : io.opentelemetry.kotlin.attributes/AttributesMutator, io.opentelemetry.kotlin.tracing.data/SpanEventData // io.opentelemetry.kotlin.tracing.model/SpanEvent|null[0]
+
+abstract interface io.opentelemetry.kotlin.tracing.model/SpanLink : io.opentelemetry.kotlin.attributes/AttributesMutator, io.opentelemetry.kotlin.tracing.data/SpanLinkData // io.opentelemetry.kotlin.tracing.model/SpanLink|null[0]
+
+abstract interface io.opentelemetry.kotlin.tracing.sampling/ComposableSampler { // io.opentelemetry.kotlin.tracing.sampling/ComposableSampler|null[0]
+    abstract val description // io.opentelemetry.kotlin.tracing.sampling/ComposableSampler.description|{}description[0]
+        abstract fun <get-description>(): kotlin/String // io.opentelemetry.kotlin.tracing.sampling/ComposableSampler.description.<get-description>|<get-description>(){}[0]
+
+    abstract fun getSamplingIntent(io.opentelemetry.kotlin.context/Context, kotlin/String, io.opentelemetry.kotlin.tracing/SpanKind, io.opentelemetry.kotlin.attributes/AttributeContainer, kotlin.collections/List<io.opentelemetry.kotlin.tracing.model/SpanLink>): io.opentelemetry.kotlin.tracing.sampling/SamplingIntent // io.opentelemetry.kotlin.tracing.sampling/ComposableSampler.getSamplingIntent|getSamplingIntent(io.opentelemetry.kotlin.context.Context;kotlin.String;io.opentelemetry.kotlin.tracing.SpanKind;io.opentelemetry.kotlin.attributes.AttributeContainer;kotlin.collections.List<io.opentelemetry.kotlin.tracing.model.SpanLink>){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing.sampling/Sampler { // io.opentelemetry.kotlin.tracing.sampling/Sampler|null[0]
+    abstract val description // io.opentelemetry.kotlin.tracing.sampling/Sampler.description|{}description[0]
+        abstract fun <get-description>(): kotlin/String // io.opentelemetry.kotlin.tracing.sampling/Sampler.description.<get-description>|<get-description>(){}[0]
+
+    abstract fun shouldSample(io.opentelemetry.kotlin.context/Context, kotlin/ByteArray, kotlin/String, io.opentelemetry.kotlin.tracing/SpanKind, io.opentelemetry.kotlin.attributes/AttributeContainer, kotlin.collections/List<io.opentelemetry.kotlin.tracing.model/SpanLink>): io.opentelemetry.kotlin.tracing.sampling/SamplingResult // io.opentelemetry.kotlin.tracing.sampling/Sampler.shouldSample|shouldSample(io.opentelemetry.kotlin.context.Context;kotlin.ByteArray;kotlin.String;io.opentelemetry.kotlin.tracing.SpanKind;io.opentelemetry.kotlin.attributes.AttributeContainer;kotlin.collections.List<io.opentelemetry.kotlin.tracing.model.SpanLink>){}[0]
+    open suspend fun shutdown(): io.opentelemetry.kotlin.export/OperationResultCode // io.opentelemetry.kotlin.tracing.sampling/Sampler.shutdown|shutdown(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing.sampling/SamplingIntent { // io.opentelemetry.kotlin.tracing.sampling/SamplingIntent|null[0]
+    abstract val adjustedCountReliable // io.opentelemetry.kotlin.tracing.sampling/SamplingIntent.adjustedCountReliable|{}adjustedCountReliable[0]
+        abstract fun <get-adjustedCountReliable>(): kotlin/Boolean // io.opentelemetry.kotlin.tracing.sampling/SamplingIntent.adjustedCountReliable.<get-adjustedCountReliable>|<get-adjustedCountReliable>(){}[0]
+    abstract val attributesProvider // io.opentelemetry.kotlin.tracing.sampling/SamplingIntent.attributesProvider|{}attributesProvider[0]
+        abstract fun <get-attributesProvider>(): kotlin/Function0<io.opentelemetry.kotlin.attributes/AttributeContainer>? // io.opentelemetry.kotlin.tracing.sampling/SamplingIntent.attributesProvider.<get-attributesProvider>|<get-attributesProvider>(){}[0]
+    abstract val threshold // io.opentelemetry.kotlin.tracing.sampling/SamplingIntent.threshold|{}threshold[0]
+        abstract fun <get-threshold>(): kotlin/Long? // io.opentelemetry.kotlin.tracing.sampling/SamplingIntent.threshold.<get-threshold>|<get-threshold>(){}[0]
+    abstract val traceStateProvider // io.opentelemetry.kotlin.tracing.sampling/SamplingIntent.traceStateProvider|{}traceStateProvider[0]
+        abstract fun <get-traceStateProvider>(): kotlin/Function2<io.opentelemetry.kotlin.tracing/TraceState, io.opentelemetry.kotlin.tracing.sampling/SamplingResult.Decision, io.opentelemetry.kotlin.tracing/TraceState>? // io.opentelemetry.kotlin.tracing.sampling/SamplingIntent.traceStateProvider.<get-traceStateProvider>|<get-traceStateProvider>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin.tracing.sampling/SamplingResult { // io.opentelemetry.kotlin.tracing.sampling/SamplingResult|null[0]
+    abstract val attributes // io.opentelemetry.kotlin.tracing.sampling/SamplingResult.attributes|{}attributes[0]
+        abstract fun <get-attributes>(): io.opentelemetry.kotlin.attributes/AttributeContainer // io.opentelemetry.kotlin.tracing.sampling/SamplingResult.attributes.<get-attributes>|<get-attributes>(){}[0]
+    abstract val decision // io.opentelemetry.kotlin.tracing.sampling/SamplingResult.decision|{}decision[0]
+        abstract fun <get-decision>(): io.opentelemetry.kotlin.tracing.sampling/SamplingResult.Decision // io.opentelemetry.kotlin.tracing.sampling/SamplingResult.decision.<get-decision>|<get-decision>(){}[0]
+    abstract val traceState // io.opentelemetry.kotlin.tracing.sampling/SamplingResult.traceState|{}traceState[0]
+        abstract fun <get-traceState>(): io.opentelemetry.kotlin.tracing/TraceState // io.opentelemetry.kotlin.tracing.sampling/SamplingResult.traceState.<get-traceState>|<get-traceState>(){}[0]
+
+    final enum class Decision : kotlin/Enum<io.opentelemetry.kotlin.tracing.sampling/SamplingResult.Decision> { // io.opentelemetry.kotlin.tracing.sampling/SamplingResult.Decision|null[0]
+        enum entry DROP // io.opentelemetry.kotlin.tracing.sampling/SamplingResult.Decision.DROP|null[0]
+        enum entry RECORD_AND_SAMPLE // io.opentelemetry.kotlin.tracing.sampling/SamplingResult.Decision.RECORD_AND_SAMPLE|null[0]
+        enum entry RECORD_ONLY // io.opentelemetry.kotlin.tracing.sampling/SamplingResult.Decision.RECORD_ONLY|null[0]
+
+        final val entries // io.opentelemetry.kotlin.tracing.sampling/SamplingResult.Decision.entries|#static{}entries[0]
+            final fun <get-entries>(): kotlin.enums/EnumEntries<io.opentelemetry.kotlin.tracing.sampling/SamplingResult.Decision> // io.opentelemetry.kotlin.tracing.sampling/SamplingResult.Decision.entries.<get-entries>|<get-entries>#static(){}[0]
+
+        final fun valueOf(kotlin/String): io.opentelemetry.kotlin.tracing.sampling/SamplingResult.Decision // io.opentelemetry.kotlin.tracing.sampling/SamplingResult.Decision.valueOf|valueOf#static(kotlin.String){}[0]
+        final fun values(): kotlin/Array<io.opentelemetry.kotlin.tracing.sampling/SamplingResult.Decision> // io.opentelemetry.kotlin.tracing.sampling/SamplingResult.Decision.values|values#static(){}[0]
+    }
+}
+
+abstract interface io.opentelemetry.kotlin.tracing/TracerConfig { // io.opentelemetry.kotlin.tracing/TracerConfig|null[0]
+    abstract val enabled // io.opentelemetry.kotlin.tracing/TracerConfig.enabled|{}enabled[0]
+        abstract fun <get-enabled>(): kotlin/Boolean // io.opentelemetry.kotlin.tracing/TracerConfig.enabled.<get-enabled>|<get-enabled>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin/InstrumentationScopeInfo { // io.opentelemetry.kotlin/InstrumentationScopeInfo|null[0]
+    abstract val attributes // io.opentelemetry.kotlin/InstrumentationScopeInfo.attributes|{}attributes[0]
+        abstract fun <get-attributes>(): kotlin.collections/Map<kotlin/String, kotlin/Any> // io.opentelemetry.kotlin/InstrumentationScopeInfo.attributes.<get-attributes>|<get-attributes>(){}[0]
+    abstract val name // io.opentelemetry.kotlin/InstrumentationScopeInfo.name|{}name[0]
+        abstract fun <get-name>(): kotlin/String // io.opentelemetry.kotlin/InstrumentationScopeInfo.name.<get-name>|<get-name>(){}[0]
+    abstract val schemaUrl // io.opentelemetry.kotlin/InstrumentationScopeInfo.schemaUrl|{}schemaUrl[0]
+        abstract fun <get-schemaUrl>(): kotlin/String? // io.opentelemetry.kotlin/InstrumentationScopeInfo.schemaUrl.<get-schemaUrl>|<get-schemaUrl>(){}[0]
+    abstract val version // io.opentelemetry.kotlin/InstrumentationScopeInfo.version|{}version[0]
+        abstract fun <get-version>(): kotlin/String? // io.opentelemetry.kotlin/InstrumentationScopeInfo.version.<get-version>|<get-version>(){}[0]
+}
+
+abstract interface io.opentelemetry.kotlin/OpenTelemetrySdk : io.opentelemetry.kotlin.export/TelemetryCloseable, io.opentelemetry.kotlin/OpenTelemetry { // io.opentelemetry.kotlin/OpenTelemetrySdk|null[0]
+    abstract val clock // io.opentelemetry.kotlin/OpenTelemetrySdk.clock|{}clock[0]
+        abstract fun <get-clock>(): io.opentelemetry.kotlin/Clock // io.opentelemetry.kotlin/OpenTelemetrySdk.clock.<get-clock>|<get-clock>(){}[0]
+    abstract val idGenerator // io.opentelemetry.kotlin/OpenTelemetrySdk.idGenerator|{}idGenerator[0]
+        abstract fun <get-idGenerator>(): io.opentelemetry.kotlin.factory/IdGenerator // io.opentelemetry.kotlin/OpenTelemetrySdk.idGenerator.<get-idGenerator>|<get-idGenerator>(){}[0]
+    abstract val resource // io.opentelemetry.kotlin/OpenTelemetrySdk.resource|{}resource[0]
+        abstract fun <get-resource>(): io.opentelemetry.kotlin.factory/ResourceFactory // io.opentelemetry.kotlin/OpenTelemetrySdk.resource.<get-resource>|<get-resource>(){}[0]
+}
+
+sealed interface <#A: out io.opentelemetry.kotlin.metrics.data/PointData> io.opentelemetry.kotlin.metrics.data/Data { // io.opentelemetry.kotlin.metrics.data/Data|null[0]
+    abstract val points // io.opentelemetry.kotlin.metrics.data/Data.points|{}points[0]
+        abstract fun <get-points>(): kotlin.collections/List<#A> // io.opentelemetry.kotlin.metrics.data/Data.points.<get-points>|<get-points>(){}[0]
+}
+
+sealed interface <#A: out io.opentelemetry.kotlin.metrics.data/PointData> io.opentelemetry.kotlin.metrics.data/GaugeData : io.opentelemetry.kotlin.metrics.data/Data<#A> { // io.opentelemetry.kotlin.metrics.data/GaugeData|null[0]
+    abstract interface DoubleGaugeData : io.opentelemetry.kotlin.metrics.data/GaugeData<io.opentelemetry.kotlin.metrics.data/DoublePoint> // io.opentelemetry.kotlin.metrics.data/GaugeData.DoubleGaugeData|null[0]
+
+    abstract interface LongGaugeData : io.opentelemetry.kotlin.metrics.data/GaugeData<io.opentelemetry.kotlin.metrics.data/LongPoint> // io.opentelemetry.kotlin.metrics.data/GaugeData.LongGaugeData|null[0]
+}
+
+sealed interface <#A: out io.opentelemetry.kotlin.metrics.data/PointData> io.opentelemetry.kotlin.metrics.data/SumData : io.opentelemetry.kotlin.metrics.data/Data<#A> { // io.opentelemetry.kotlin.metrics.data/SumData|null[0]
+    abstract val aggregationTemporality // io.opentelemetry.kotlin.metrics.data/SumData.aggregationTemporality|{}aggregationTemporality[0]
+        abstract fun <get-aggregationTemporality>(): io.opentelemetry.kotlin.metrics.data/AggregationTemporality // io.opentelemetry.kotlin.metrics.data/SumData.aggregationTemporality.<get-aggregationTemporality>|<get-aggregationTemporality>(){}[0]
+    abstract val isMonotonic // io.opentelemetry.kotlin.metrics.data/SumData.isMonotonic|{}isMonotonic[0]
+        abstract fun <get-isMonotonic>(): kotlin/Boolean // io.opentelemetry.kotlin.metrics.data/SumData.isMonotonic.<get-isMonotonic>|<get-isMonotonic>(){}[0]
+
+    abstract interface DoubleSumData : io.opentelemetry.kotlin.metrics.data/SumData<io.opentelemetry.kotlin.metrics.data/DoublePoint> // io.opentelemetry.kotlin.metrics.data/SumData.DoubleSumData|null[0]
+
+    abstract interface LongSumData : io.opentelemetry.kotlin.metrics.data/SumData<io.opentelemetry.kotlin.metrics.data/LongPoint> // io.opentelemetry.kotlin.metrics.data/SumData.LongSumData|null[0]
+}
+
+sealed interface io.opentelemetry.kotlin.metrics.data/PointData : io.opentelemetry.kotlin.attributes/AttributeContainer { // io.opentelemetry.kotlin.metrics.data/PointData|null[0]
+    abstract val epochNanos // io.opentelemetry.kotlin.metrics.data/PointData.epochNanos|{}epochNanos[0]
+        abstract fun <get-epochNanos>(): kotlin/Long // io.opentelemetry.kotlin.metrics.data/PointData.epochNanos.<get-epochNanos>|<get-epochNanos>(){}[0]
+    abstract val startEpochNanos // io.opentelemetry.kotlin.metrics.data/PointData.startEpochNanos|{}startEpochNanos[0]
+        abstract fun <get-startEpochNanos>(): kotlin/Long // io.opentelemetry.kotlin.metrics.data/PointData.startEpochNanos.<get-startEpochNanos>|<get-startEpochNanos>(){}[0]
+}
+
+sealed class io.opentelemetry.kotlin.export/OperationResultCode { // io.opentelemetry.kotlin.export/OperationResultCode|null[0]
+    final object Failure : io.opentelemetry.kotlin.export/OperationResultCode // io.opentelemetry.kotlin.export/OperationResultCode.Failure|null[0]
+
+    final object Success : io.opentelemetry.kotlin.export/OperationResultCode // io.opentelemetry.kotlin.export/OperationResultCode.Success|null[0]
+}
+
+final fun (kotlin/ByteArray).io.opentelemetry.kotlin.factory/toHexString(): kotlin/String // io.opentelemetry.kotlin.factory/toHexString|toHexString@kotlin.ByteArray(){}[0]
+final fun (kotlin/String).io.opentelemetry.kotlin.factory/hexToByteArray(): kotlin/ByteArray // io.opentelemetry.kotlin.factory/hexToByteArray|hexToByteArray@kotlin.String(){}[0]
