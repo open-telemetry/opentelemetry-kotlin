@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.reportError
 
+private const val MIN_REMOTE_SAMPLING_RATE = 1.0 / (1L shl 56)
 private const val API = "RemoteSamplingStrategy.toSampler"
 
 /**
@@ -14,19 +15,22 @@ private const val API = "RemoteSamplingStrategy.toSampler"
  * keep their previous sampler rather than replacing it, so a rejected update never silently
  * switches the SDK to a no-op.
  *
- * The result is intentionally *not* wrapped in [ParentBasedSampler]. Per the Trace SDK spec the
- * Jaeger remote sampler is a standalone built-in, like [ProbabilitySampler], and callers who want
+ * The result is intentionally *not* wrapped in a parent-based sampler. Per the Trace SDK spec the
+ * Jaeger remote sampler is a standalone built-in, like a probability sampler, and callers who want
  * parent-aware behavior compose it explicitly.
  */
-internal fun RemoteSamplingStrategy.toSampler(sdkErrorHandler: SdkErrorHandler): Sampler? {
+internal fun RemoteSamplingStrategy.toSampler(
+    sdkErrorHandler: SdkErrorHandler,
+    samplerForRate: (Double) -> Sampler,
+): Sampler? {
     warnIfBoundsPresent(sdkErrorHandler)
 
     if (operationSampling != null) {
-        return operationSampling.toSampler(sdkErrorHandler)
+        return operationSampling.toSampler(sdkErrorHandler, samplerForRate)
     }
 
     if (probabilisticSampling != null) {
-        return probabilisticSampling.toSampler(sdkErrorHandler)
+        return probabilisticSampling.toSampler(sdkErrorHandler, samplerForRate)
     }
 
     if (rateLimitingSampling != null) {
@@ -36,42 +40,43 @@ internal fun RemoteSamplingStrategy.toSampler(sdkErrorHandler: SdkErrorHandler):
     return null
 }
 
-private fun PerOperationSamplingStrategies.toSampler(sdkErrorHandler: SdkErrorHandler): Sampler? {
+private fun PerOperationSamplingStrategies.toSampler(
+    sdkErrorHandler: SdkErrorHandler,
+    samplerForRate: (Double) -> Sampler,
+): Sampler? {
     val defaultRate = defaultSamplingProbability
         ?: return sdkErrorHandler.warn("operationSampling is missing defaultSamplingProbability")
-    val defaultSampler = rateToSampler(defaultRate, sdkErrorHandler) ?: return null
+    val defaultSampler = rateToSampler(defaultRate, sdkErrorHandler, samplerForRate) ?: return null
 
     val byOperation = mutableMapOf<String, Sampler>()
     for ((operation, probabilisticSampling) in perOperationStrategies) {
         val rate = probabilisticSampling?.samplingRate
             ?: return sdkErrorHandler.warn("'$operation' is missing a samplingRate")
-        val sampler = rateToSampler(rate, sdkErrorHandler) ?: return null
+        val sampler = rateToSampler(rate, sdkErrorHandler, samplerForRate) ?: return null
         byOperation[operation] = sampler
     }
 
     return PerOperationSampler(defaultSampler, byOperation)
 }
 
-private fun ProbabilisticSamplingStrategy.toSampler(sdkErrorHandler: SdkErrorHandler): Sampler? {
+private fun ProbabilisticSamplingStrategy.toSampler(
+    sdkErrorHandler: SdkErrorHandler,
+    samplerForRate: (Double) -> Sampler,
+): Sampler? {
     val rate = samplingRate ?: return sdkErrorHandler.warn("probabilisticSampling is missing a samplingRate")
-    return rateToSampler(rate, sdkErrorHandler)
+    return rateToSampler(rate, sdkErrorHandler, samplerForRate)
 }
 
-/**
- * Maps a sampling rate to a [Sampler]:
- *  - `0` means "never sample" and maps to [AlwaysOffSampler]; [ProbabilitySampler] rejects it.
- *  - any other value is handed to [ProbabilitySampler], whose range check (`[2^-56, 1]`) is caught
- *    here rather than duplicated, so `NaN`, negatives and values above one all degrade to `null`.
- */
-private fun rateToSampler(rate: Double, sdkErrorHandler: SdkErrorHandler): Sampler? {
-    if (rate == 0.0) {
-        return AlwaysOffSampler
+private fun rateToSampler(
+    rate: Double,
+    sdkErrorHandler: SdkErrorHandler,
+    samplerForRate: (Double) -> Sampler,
+): Sampler? {
+    // Zero is valid. Positive rates below 2^-56 cannot be represented by the sampler.
+    if (rate != 0.0 && rate !in MIN_REMOTE_SAMPLING_RATE..1.0) {
+        return sdkErrorHandler.warn("sampling rate $rate is not a valid probability")
     }
-    return try {
-        ProbabilitySampler(rate, sdkErrorHandler)
-    } catch (e: IllegalArgumentException) {
-        sdkErrorHandler.warn("sampling rate $rate is not a valid probability")
-    }
+    return samplerForRate(rate)
 }
 
 private fun RemoteSamplingStrategy.warnIfBoundsPresent(sdkErrorHandler: SdkErrorHandler) {
