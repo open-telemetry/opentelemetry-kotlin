@@ -1,8 +1,5 @@
-package io.opentelemetry.kotlin.behavior
+package io.opentelemetry.kotlin.behavior.logging
 
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
-import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
-import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
