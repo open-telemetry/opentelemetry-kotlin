@@ -1,6 +1,7 @@
-package io.opentelemetry.kotlin.behavior
+package io.opentelemetry.kotlin.behavior.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 
 /**
  * Limits on log record data capture, which the spec defines as the same set of attribute limits the

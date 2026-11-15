@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.config.dsl.logging
 
-import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.OtlpHttpLogsExporterBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

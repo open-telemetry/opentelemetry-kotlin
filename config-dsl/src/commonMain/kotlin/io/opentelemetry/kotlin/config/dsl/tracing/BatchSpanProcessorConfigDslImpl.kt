@@ -1,8 +1,8 @@
 package io.opentelemetry.kotlin.config.dsl.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
-import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
 
 /**

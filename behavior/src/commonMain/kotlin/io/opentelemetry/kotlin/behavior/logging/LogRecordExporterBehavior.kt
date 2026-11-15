@@ -1,6 +1,9 @@
-package io.opentelemetry.kotlin.behavior
+package io.opentelemetry.kotlin.behavior.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.Behavior
+import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
+import io.opentelemetry.kotlin.behavior.mergeNode
 
 /**
  * Exporters for the logger provider. These are independent of the kind of processor (simple or
@@ -21,7 +24,7 @@ data class LogRecordExporterBehavior(
      * */
     val http: OtlpHttpLogsExporterBehavior? = null,
 
-) : Behavior<LogRecordExporterBehavior> {
+    ) : Behavior<LogRecordExporterBehavior> {
 
     override fun mergeWith(higher: LogRecordExporterBehavior): LogRecordExporterBehavior = copy(
         console = mergeNode(console, higher.console),

@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.config.yaml.logging
 
-import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.OtlpHttpLogsExporterBehavior
 import io.opentelemetry.kotlin.config.schema.model.NameStringValuePair
 import io.opentelemetry.kotlin.config.schema.model.OtlpHttpExporter
 import kotlin.test.Test

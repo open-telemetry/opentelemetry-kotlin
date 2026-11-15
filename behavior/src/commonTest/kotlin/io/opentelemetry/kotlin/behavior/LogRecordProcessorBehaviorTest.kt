@@ -1,5 +1,9 @@
 package io.opentelemetry.kotlin.behavior
 
+import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.OtlpHttpLogsExporterBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

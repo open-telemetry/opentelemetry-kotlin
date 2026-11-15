@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.config.dsl.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.limitOrUnset
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
 import io.opentelemetry.kotlin.init.LogLimitsConfigDsl

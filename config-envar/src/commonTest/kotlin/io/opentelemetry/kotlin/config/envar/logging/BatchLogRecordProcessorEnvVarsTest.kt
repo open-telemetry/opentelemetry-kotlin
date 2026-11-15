@@ -1,8 +1,8 @@
 package io.opentelemetry.kotlin.config.envar.logging
 
-import io.opentelemetry.kotlin.behavior.BatchLogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.LogRecordExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
 import io.opentelemetry.kotlin.config.envar.Exporter
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader

@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.config.yaml.tracing
 
-import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
-import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.OtlpHttpSpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
 import io.opentelemetry.kotlin.config.schema.model.BatchSpanProcessor
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
 import io.opentelemetry.kotlin.config.schema.model.NameStringValuePair

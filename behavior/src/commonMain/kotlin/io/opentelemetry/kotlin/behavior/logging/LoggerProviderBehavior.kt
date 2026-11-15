@@ -1,6 +1,8 @@
-package io.opentelemetry.kotlin.behavior
+package io.opentelemetry.kotlin.behavior.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.Behavior
+import io.opentelemetry.kotlin.behavior.mergeNode
 
 /**
  * Behavior of logging.
@@ -20,7 +22,7 @@ data class LoggerProviderBehavior(
      */
     val processor: LogRecordProcessorBehavior? = null,
 
-) : Behavior<LoggerProviderBehavior> {
+    ) : Behavior<LoggerProviderBehavior> {
 
     override fun mergeWith(higher: LoggerProviderBehavior): LoggerProviderBehavior = copy(
         logLimits = mergeNode(logLimits, higher.logLimits),

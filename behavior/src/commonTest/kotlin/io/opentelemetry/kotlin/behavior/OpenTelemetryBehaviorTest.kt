@@ -1,5 +1,9 @@
 package io.opentelemetry.kotlin.behavior
 
+import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
-import io.opentelemetry.kotlin.behavior.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.factory.hexToByteArray

@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.config.envar
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
+import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import io.opentelemetry.kotlin.behavior.toSeverityLevel
 import io.opentelemetry.kotlin.config.envar.logging.LogLimitsEnvVars
 import io.opentelemetry.kotlin.config.envar.logging.LogRecordProcessorEnvVars

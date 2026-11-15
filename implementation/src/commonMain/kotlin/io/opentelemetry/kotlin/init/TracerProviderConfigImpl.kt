@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.behavior.SamplerBehavior
-import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
-import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.ResourceConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.tracing.SpanLimitsConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.tracing.TraceExportConfigDslImpl

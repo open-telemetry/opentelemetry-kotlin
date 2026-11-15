@@ -2,8 +2,8 @@ package io.opentelemetry.kotlin.config.dsl.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.LogRecordExporterBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.OtlpHttpLogsExporterBehavior
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
 
 /**

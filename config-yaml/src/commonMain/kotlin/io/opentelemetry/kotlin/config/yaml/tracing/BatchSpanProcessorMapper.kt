@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.config.yaml.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.config.schema.model.BatchSpanProcessor
 
 /**

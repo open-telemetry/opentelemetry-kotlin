@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.config.dsl.tracing
 
-import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
