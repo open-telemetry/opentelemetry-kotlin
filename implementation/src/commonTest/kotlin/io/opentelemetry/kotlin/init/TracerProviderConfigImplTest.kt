@@ -3,8 +3,8 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.assertHasSdkDefaultAttributes
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
-import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SimpleSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior

@@ -1,17 +1,17 @@
 package io.opentelemetry.kotlin.config.envar
 
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
-import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
-import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
+import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.behavior.ResourceBehavior
+import io.opentelemetry.kotlin.behavior.SeverityLevel
+import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
-import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.behavior.ResourceBehavior
+import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
-import io.opentelemetry.kotlin.behavior.SeverityLevel
 import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior

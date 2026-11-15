@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.config.dsl.logging
 
-import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
 import io.opentelemetry.kotlin.behavior.logging.OtlpHttpLogsExporterBehavior
 import kotlin.test.Test
