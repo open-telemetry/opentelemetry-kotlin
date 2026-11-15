@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.config.yaml.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.OtlpExporter
-import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.OtlpHttpLogsExporterBehavior
 import io.opentelemetry.kotlin.config.schema.model.OtlpHttpExporter
 import kotlin.collections.ifEmpty
 import kotlin.collections.orEmpty

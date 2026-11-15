@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.config.dsl.tracing
 
-import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.OtlpHttpSpanExporterBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

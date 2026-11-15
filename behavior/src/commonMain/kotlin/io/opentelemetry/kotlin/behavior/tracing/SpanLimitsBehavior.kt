@@ -1,6 +1,7 @@
-package io.opentelemetry.kotlin.behavior
+package io.opentelemetry.kotlin.behavior.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.Behavior
 
 /**
  * Limits on span data capture. A `null` limit is left to whatever default the SDK being configured
