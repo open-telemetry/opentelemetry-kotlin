@@ -24,7 +24,7 @@ data class LogRecordExporterBehavior(
      * */
     val http: OtlpHttpLogsExporterBehavior? = null,
 
-    ) : Behavior<LogRecordExporterBehavior> {
+) : Behavior<LogRecordExporterBehavior> {
 
     override fun mergeWith(higher: LogRecordExporterBehavior): LogRecordExporterBehavior = copy(
         console = mergeNode(console, higher.console),

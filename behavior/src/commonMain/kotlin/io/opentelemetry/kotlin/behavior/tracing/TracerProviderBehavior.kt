@@ -33,7 +33,7 @@ data class TracerProviderBehavior(
      */
     val idGenerator: IdGeneratorBehavior? = null,
 
-    ) : Behavior<TracerProviderBehavior> {
+) : Behavior<TracerProviderBehavior> {
 
     override fun mergeWith(higher: TracerProviderBehavior): TracerProviderBehavior = copy(
         spanLimits = mergeNode(spanLimits, higher.spanLimits),
