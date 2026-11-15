@@ -3,6 +3,9 @@ package io.opentelemetry.kotlin.behavior.tracing
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.Behavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
+import io.opentelemetry.kotlin.behavior.Exporter
+import io.opentelemetry.kotlin.behavior.ExporterDelegate
+import io.opentelemetry.kotlin.behavior.OtlpExporter
 import io.opentelemetry.kotlin.behavior.mergeNode
 
 /**
@@ -12,19 +15,20 @@ import io.opentelemetry.kotlin.behavior.mergeNode
  */
 @ExperimentalApi
 data class SpanExporterBehavior(
-    /**
-     * Console span exporter.
-     * */
-    val console: ConsoleExporterBehavior? = null,
-    /**
-     * HTTP span exporter.
-     * */
-    val http: OtlpHttpSpanExporterBehavior? = null,
-) : Behavior<SpanExporterBehavior> {
-    override fun mergeWith(higher: SpanExporterBehavior): SpanExporterBehavior {
-        return SpanExporterBehavior(
-            console = mergeNode(console, higher.console),
-            http = mergeNode(http, higher.http),
+    val delegate: ExporterDelegate<OtlpHttpSpanExporterBehavior> = ExporterDelegate(),
+) : Behavior<SpanExporterBehavior>, Exporter by delegate {
+    constructor(
+        console: ConsoleExporterBehavior? = null,
+        http: OtlpHttpSpanExporterBehavior? = null,
+    ):this(ExporterDelegate(console = console, http = http))
+
+    override fun mergeWith(higher: SpanExporterBehavior): SpanExporterBehavior = copy(
+            delegate = delegate.copy(
+                console = mergeNode(console, higher.console),
+                http = mergeNode(
+                    http as OtlpHttpSpanExporterBehavior?,
+                    higher.http as OtlpHttpSpanExporterBehavior?
+                ),
+            )
         )
-    }
 }
