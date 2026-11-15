@@ -1,12 +1,13 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.OpenTelemetryDsl
 
 /**
  * Configures the optional properties of a [SpanContext] created via [createSpanContext].
  */
 @ExperimentalApi
-@TracingDsl
+@OpenTelemetryDsl
 public interface SpanContextCreationAction {
 
     /**

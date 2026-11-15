@@ -29,7 +29,7 @@ class CompatComplexLoggingBenchmark {
             body = "Hello world!",
             timestamp = 500,
             observedTimestamp = 1000,
-            context = otel.contextFactory.rootContext(),
+            context = rootContext(),
             severityNumber = SeverityNumber.DEBUG3,
             severityText = "debug3"
         ) {

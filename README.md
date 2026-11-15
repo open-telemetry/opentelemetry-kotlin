@@ -12,8 +12,8 @@ Please read [the docs](https://opentelemetry.io/docs/languages/kotlin/getting-st
 |-----------------------|------|-----------------|-------------|----------------|--------------------------------------------------|
 | JVM                   | 1    | ✅              | ✅          | ✅             | Heavily tested and supported for production use. |
 | Android (API 21+)     | 1    | ✅              | ✅          | ✅             | Heavily tested and supported for production use. |
-| iOS                   | 2    | ❌              | ✅          | ❌             | Compiles.                                        |
-| tvOS                  | 2    | ❌              | ❌          | ❌             | Compiles.                                        |
+| iOS                   | 2    | ✅              | ✅          | ❌             | Compiles.                                        |
+| tvOS                  | 2    | ✅              | ❌          | ❌             | Compiles.                                        |
 | JS                    | 2    | ✅              | ✅          | ❌             | Compiles.                                        |
 | Linux (x64 and ARM64) | 2    | ✅              | ❌          | ❌             | Compiles.                                        |
 
