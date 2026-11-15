@@ -1,8 +1,6 @@
-package io.opentelemetry.kotlin.behavior
+package io.opentelemetry.kotlin.behavior.logging
 
-import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
-import io.opentelemetry.kotlin.behavior.logging.OtlpHttpLogsExporterBehavior
-import io.opentelemetry.kotlin.behavior.logging.SimpleLogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals

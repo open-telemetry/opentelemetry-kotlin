@@ -1,8 +1,6 @@
-package io.opentelemetry.kotlin.behavior
+package io.opentelemetry.kotlin.behavior.tracing
 
-import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
-import io.opentelemetry.kotlin.behavior.tracing.OtlpHttpSpanExporterBehavior
-import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

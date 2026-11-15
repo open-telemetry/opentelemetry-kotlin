@@ -1,9 +1,6 @@
-package io.opentelemetry.kotlin.behavior
+package io.opentelemetry.kotlin.behavior.tracing
 
-import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
-import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
-import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
-import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
+import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
