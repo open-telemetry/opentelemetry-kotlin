@@ -8,7 +8,6 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
-import kotlin.test.assertSame
 
 @OptIn(ExperimentalApi::class)
 internal class CreateOpenTelemetryClockTest {
@@ -26,9 +25,9 @@ internal class CreateOpenTelemetryClockTest {
 
     @Test
     fun `clock supplied via the DSL is used`() {
-        val clock = FakeClock()
+        val clock = FakeClock(time = 42)
         val api = createOpenTelemetry { clock(clock) }.also(sdks::track)
-        assertSame(clock, api.clock)
+        assertEquals(42, api.clock.now())
     }
 
     @Test

@@ -37,7 +37,6 @@ internal class TracerErrorHandlingTest {
         Case("trace ID randomness flag throws", idGenerator = HostileIdGenerator(randomness = true)),
         Case("sampler throws", sampler = HostileSampler()),
         Case("sampling decision throws", sampler = HostileSampler(decisionOnly = true)),
-        Case("span creation action throws", action = { boom() }),
     )
 
     @Test
@@ -62,18 +61,26 @@ internal class TracerErrorHandlingTest {
     }
 
     @Test
-    fun testTracerRemainsUsableAfterHostileAction() {
+    fun testHostileActionKeepsPartialSpanAndTracerUsable() {
         val errorHandler = FakeSdkErrorHandler()
         val processor = FakeSpanProcessor()
         val tracer = createTracer(Case("healthy"), processor, errorHandler)
 
-        assertFalse(tracer.startSpan("first") { boom() }.isRecording())
-        assertEquals(1, errorHandler.userCodeErrors.size)
+        val span = tracer.startSpan("test-span") {
+            setStringAttribute("before", "kept")
+            boom()
+        }
 
-        val span = tracer.startSpan("second")
         assertTrue(span.isRecording())
-        assertEquals(1, errorHandler.userCodeErrors.size)
-        assertEquals(1, processor.startCalls.size)
+        assertTrue(span.spanContext.isValid)
+        assertEquals(mapOf("before" to "kept"), processor.startCalls.single().attributes)
+        val error = errorHandler.userCodeErrors.single()
+        assertEquals("SpanCreationAction failed", error.message)
+        assertEquals("boom", error.cause.message)
+
+        assertTrue(tracer.startSpan("second").isRecording())
+        assertEquals(2, processor.startCalls.size)
+        assertEquals(1, errorHandler.errors.size)
     }
 
     @Test

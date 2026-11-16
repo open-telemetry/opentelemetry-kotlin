@@ -66,14 +66,14 @@ public fun createOpenTelemetry(
     val ownsErrorSink = setProcessSdkErrorHandler(cfg.sdkErrorHandler)
     return OpenTelemetryImpl(
         tracerProvider = TracerProviderImpl(
-            clock = clock,
+            clock = cfg.clock,
             tracingConfig = tracingConfig,
             idGenerator = idGenerator,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior(),
             spanLimits = behavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior(),
         ),
         loggerProvider = LoggerProviderImpl(
-            clock = clock,
+            clock = cfg.clock,
             loggingConfig = loggingConfig,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior(),
             logLimits = behavior.loggerProvider?.logLimits ?: LogLimitsBehavior(),
@@ -83,7 +83,7 @@ public fun createOpenTelemetry(
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior()
         ),
         configProvider = ConfigProviderImpl { behaviorReader.readInstrumentation(configFilePath) },
-        clock = clock,
+        clock = cfg.clock,
         propagator = cfg.propagator,
         installedStorage = installedStorage,
         ownsErrorSink = ownsErrorSink,
