@@ -28,7 +28,7 @@ import io.opentelemetry.kotlin.propagation.TextMapPropagatorAdapter
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import kotlin.concurrent.Volatile
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class CompatOpenTelemetryConfig : OpenTelemetryConfigDsl, BehaviorSupplier<OpenTelemetryBehavior> {
 
     @Volatile private var configuredErrorHandler: SdkErrorHandler = PlatformSdkErrorHandler

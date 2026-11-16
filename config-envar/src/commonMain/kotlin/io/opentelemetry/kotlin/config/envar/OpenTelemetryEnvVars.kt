@@ -20,7 +20,7 @@ import io.opentelemetry.kotlin.config.envar.tracing.SpanProcessorEnvVars
  *
  * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class OpenTelemetryEnvVars(
     private val reader: ReportingEnvVarReader,
 ) {

@@ -12,7 +12,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 /**
  * Reads the behavior supplied by every configuration mechanism, then resolves their precedence.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal fun interface CompatBehaviorReader {
     fun read(configFilePath: String?, dsl: () -> OpenTelemetryBehavior): OpenTelemetryBehavior
 }
@@ -21,7 +21,7 @@ internal fun interface CompatBehaviorReader {
  * Reads every mechanism the platform supports. The declarative config file is only read when a
  * [declarativeConfigReader] was registered.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal fun defaultCompatBehaviorReader(
     envVarReader: EnvVarReader? = platformEnvVarReader(),
     sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,

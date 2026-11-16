@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.metrics
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class NoopDoubleGauge(
     override val name: String,
     override val unit: String?,

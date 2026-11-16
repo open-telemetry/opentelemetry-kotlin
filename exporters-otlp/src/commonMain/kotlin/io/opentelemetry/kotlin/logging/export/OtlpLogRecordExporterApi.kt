@@ -29,7 +29,7 @@ public fun ExportConfigDsl.otlpHttpLogRecordExporter(
 /**
  * Creates a log record exporter that writes telemetry to a file.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal fun ExportConfigDsl.otlpFileLogRecordExporter(
     block: OtlpFileExporterConfigDsl.() -> Unit
 ): LogRecordExporter =

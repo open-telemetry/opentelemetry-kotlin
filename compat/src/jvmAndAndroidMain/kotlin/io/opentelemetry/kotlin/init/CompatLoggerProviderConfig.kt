@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit
 import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor as OtelJavaBatchLogRecordProcessor
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor as OtelJavaSimpleLogRecordProcessor
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class CompatLoggerProviderConfig(
     private val clock: Clock,
     private val sdkErrorHandler: SdkErrorHandler,

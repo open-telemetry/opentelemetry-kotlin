@@ -20,7 +20,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * This event is meant to be used in conjunction with `os.name` [resource semantic convention](/docs/resource/os.md) to identify the mobile operating system (e.g. Android, iOS).
 * The `android.app.state` and `ios.app.state` fields are mutually exclusive and MUST NOT be used together, each field MUST be used with its corresponding `os.name` value.
 */
-@ExperimentalApi
 @IncubatingApi
 public class DeviceAppLifecycleEvent(
     /**
@@ -41,6 +40,7 @@ public class DeviceAppLifecycleEvent(
     public val iosAppState: String? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#span-limits
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class SpanLimitsBehavior(
 
     /**

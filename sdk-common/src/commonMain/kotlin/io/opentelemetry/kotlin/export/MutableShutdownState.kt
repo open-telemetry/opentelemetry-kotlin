@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.ThreadSafe
  * the shutdown state should use [ShutdownState] instead of this.
  */
 @ThreadSafe
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 public class MutableShutdownState : ShutdownState() {
 
     private val shutdown = AtomicBoolean(false)

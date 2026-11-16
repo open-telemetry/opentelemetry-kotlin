@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 /**
  * No-op implementation of [ObservableLongMeasurement].
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class NoopObservableLongMeasurement : ObservableLongMeasurement {
     override fun record(value: Long, attributes: (AttributesMutator.() -> Unit)?) = Unit
 }
