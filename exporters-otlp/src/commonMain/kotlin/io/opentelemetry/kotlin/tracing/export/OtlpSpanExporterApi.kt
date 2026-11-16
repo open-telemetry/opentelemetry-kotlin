@@ -16,7 +16,7 @@ import io.opentelemetry.kotlin.init.TraceExportConfigDsl
  */
 @ExperimentalApi
 public fun TraceExportConfigDsl.otlpHttpSpanExporter(
-    block: OtlpHttpExporterConfigDsl.() -> Unit = {},
+    block: (OtlpHttpExporterConfigDsl.() -> Unit)? = null,
 ): SpanExporter = OtlpHttpSpanExporter(
     createOtlpHttpClient(sdkErrorHandler, OtlpEndpoint.Traces, block = block),
     EXPORT_INITIAL_DELAY_MS,
@@ -30,7 +30,7 @@ public fun TraceExportConfigDsl.otlpHttpSpanExporter(
  */
 @ExperimentalApi
 internal fun TraceExportConfigDsl.otlpFileSpanExporter(
-    block: OtlpFileExporterConfigDsl.() -> Unit = {},
+    block: (OtlpFileExporterConfigDsl.() -> Unit)? = null,
 ): SpanExporter =
     OtlpFileSpanExporter(
         fileExporter = createOtlpFileExporter(block),

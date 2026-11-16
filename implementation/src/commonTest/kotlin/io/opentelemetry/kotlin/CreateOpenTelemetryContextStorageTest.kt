@@ -1,11 +1,11 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.context.ContextStorageOwner
 import io.opentelemetry.kotlin.context.CurrentContextStorage
 import io.opentelemetry.kotlin.context.FakeCurrentContextStorage
 import io.opentelemetry.kotlin.context.createSingleSlotCurrentContextStorage
 import io.opentelemetry.kotlin.context.createThreadLocalCurrentContextStorage
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.framework.SdkTracker
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -44,7 +44,7 @@ internal class CreateOpenTelemetryContextStorageTest {
             errorHandler(handler)
             context { storage { error("boom") } }
         }.also(sdks::track)
-        assertNotNull(assertIs<ContextFactoryImpl>(api.context).installedStorage)
+        assertNotNull(assertIs<ContextStorageOwner>(api).installedStorage)
         assertEquals("boom", handler.userCodeErrors.single().cause.message)
     }
 
@@ -52,6 +52,6 @@ internal class CreateOpenTelemetryContextStorageTest {
         val api = createOpenTelemetry {
             context { storage { storage } }
         }.also(sdks::track)
-        assertSame(storage, assertIs<ContextFactoryImpl>(api.context).installedStorage)
+        assertSame(storage, assertIs<ContextStorageOwner>(api).installedStorage)
     }
 }
