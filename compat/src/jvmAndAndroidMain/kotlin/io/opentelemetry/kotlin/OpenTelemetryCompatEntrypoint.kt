@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.reportError
-import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.init.CompatOpenTelemetryConfig
 import io.opentelemetry.kotlin.init.CompatSdkConfigFactory
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
@@ -65,8 +64,6 @@ public fun createCompatOpenTelemetry(
         loggerProvider = loggerProvider,
         meterProvider = meterProvider,
         clock = clock,
-        idGenerator = configFactory.idGenerator,
-        resource = CompatResourceFactory,
         propagator = cfg.propagator,
         sdkErrorHandler = cfg.sdkErrorHandler,
         processWideState = processWideState,

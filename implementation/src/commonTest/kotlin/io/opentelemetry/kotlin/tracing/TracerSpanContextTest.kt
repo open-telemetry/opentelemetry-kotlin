@@ -10,7 +10,6 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
-import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import kotlin.test.AfterTest
@@ -113,8 +112,8 @@ internal class TracerSpanContextTest {
     private fun assertValidSpanContext(spanContext: SpanContext) {
         assertTrue(spanContext.isValid)
         assertFalse(spanContext.isRemote)
-        assertNotEquals(idGenerator.invalidTraceId.toHexString(), spanContext.traceId)
-        assertNotEquals(idGenerator.invalidSpanId.toHexString(), spanContext.spanId)
+        assertNotEquals(createInvalidSpanContext().traceId, spanContext.traceId)
+        assertNotEquals(createInvalidSpanContext().spanId, spanContext.spanId)
         assertEquals(16, spanContext.traceIdBytes.size)
         assertEquals(8, spanContext.spanIdBytes.size)
         assertEquals(emptyMap(), spanContext.traceState.asMap())
