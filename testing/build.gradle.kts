@@ -11,7 +11,6 @@ kotlin {
     sourceSets {
         getByName("jvmAndAndroidMain") {
             dependencies {
-                api(project(":core"))
                 api(project(":compat"))
                 api(project(":java-typealiases"))
 

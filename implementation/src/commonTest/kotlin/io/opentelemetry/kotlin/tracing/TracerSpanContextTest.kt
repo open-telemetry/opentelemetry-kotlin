@@ -112,6 +112,8 @@ internal class TracerSpanContextTest {
     private fun assertValidSpanContext(spanContext: SpanContext) {
         assertTrue(spanContext.isValid)
         assertFalse(spanContext.isRemote)
+        assertNotEquals(createInvalidSpanContext().traceId, spanContext.traceId)
+        assertNotEquals(createInvalidSpanContext().spanId, spanContext.spanId)
         assertEquals(16, spanContext.traceIdBytes.size)
         assertEquals(8, spanContext.spanIdBytes.size)
         assertEquals(emptyMap(), spanContext.traceState.asMap())
