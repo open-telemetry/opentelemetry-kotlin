@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.error.sdkGuard
 
 @ExperimentalApi
 internal class ObservableLongMeasurementAdapter(
-    private val impl: OtelJavaObservableLongMeasurement,
+    internal val impl: OtelJavaObservableLongMeasurement,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : ObservableLongMeasurement {
     override fun record(

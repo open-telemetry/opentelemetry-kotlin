@@ -13,6 +13,10 @@
 
 ### 📈 Enhancements
 
+- Add an `io.opentelemetry.kotlin:bom` BOM that aligns the versions of all published
+  opentelemetry-kotlin artifacts. `compat-bom` now imports it, along with the
+  opentelemetry-java alpha BOM.
+  ([#1513](https://github.com/open-telemetry/opentelemetry-kotlin/issues/1513))
 - `compat` now exports `opentelemetry-api` and `opentelemetry-sdk` (and the `opentelemetry-bom`
   platform that versions them), so calls such as `toOtelJavaApi()` compile without adding
   opentelemetry-java as a separate dependency.
