@@ -21,7 +21,6 @@ include(
     ":propagation-utils",
     ":propagator-b3",
     ":api-ext",
-    ":context-impl",
     ":context-single-slot",
     ":context-threadlocal",
     ":context-coroutines",
