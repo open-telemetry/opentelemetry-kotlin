@@ -87,8 +87,7 @@ public final class io/opentelemetry/kotlin/init/ConfigFileDsl$DefaultImpls {
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/ContextConfigDsl {
-	public abstract fun getStorage ()Lio/opentelemetry/kotlin/context/CurrentContextStorage;
-	public abstract fun setStorage (Lio/opentelemetry/kotlin/context/CurrentContextStorage;)V
+	public abstract fun storage (Lkotlin/jvm/functions/Function0;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/DeclarativeConfigReader {

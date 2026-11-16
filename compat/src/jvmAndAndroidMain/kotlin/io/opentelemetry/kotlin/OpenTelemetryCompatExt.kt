@@ -26,7 +26,7 @@ import java.util.WeakHashMap
  * ContextStorage, so the Kotlin and Java APIs share one current context.
  *
  * If the receiver was created by `implementation`, opt in to
- * `context { storage = createOtelJavaCurrentContextStorage() }` when creating the SDK so that the
+ * `context { storage { createOtelJavaCurrentContextStorage() } }` when creating the SDK so that the
  * Kotlin and Java APIs share one current context. Otherwise, avoid reading or setting the
  * opentelemetry-java current context directly through `Context.current()`, `Context.makeCurrent()`,
  * `Span.current()`, `Baggage.current()`, etc., as these use a separate store and trace context
@@ -65,7 +65,7 @@ private fun OpenTelemetry.warnIfNotUsingOtelJavaContextStorage() {
         SdkError.ApiMisuse(
             api = "toOtelJavaApi",
             message = "Current context is not shared with opentelemetry-java. " +
-                "Set storage = createOtelJavaCurrentContextStorage() in the context {} config when creating the SDK.",
+                "Call storage { createOtelJavaCurrentContextStorage() } in the context {} config when creating the SDK.",
             severity = SdkErrorSeverity.WARNING,
         )
     )
