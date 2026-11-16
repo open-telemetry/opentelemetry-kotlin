@@ -4,9 +4,9 @@ import io.opentelemetry.kotlin.aliases.OtelJavaLogLimits
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanLimits
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
+import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
-import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
