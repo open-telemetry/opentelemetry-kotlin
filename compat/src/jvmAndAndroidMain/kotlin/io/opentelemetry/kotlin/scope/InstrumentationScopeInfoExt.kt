@@ -33,5 +33,9 @@ internal fun scopeCacheKey(
     schemaUrl: String?,
     attributes: (AttributesMutator.() -> Unit)? = null,
 ): InstrumentationScopeInfo {
-    return InstrumentationScopeInfoImpl(name, version, schemaUrl, compatAttributes(attributes).attributes)
+    val attrs = when (attributes) {
+        null -> emptyMap()
+        else -> compatAttributes(attributes).attributes
+    }
+    return InstrumentationScopeInfoImpl(name, version, schemaUrl, attrs)
 }
