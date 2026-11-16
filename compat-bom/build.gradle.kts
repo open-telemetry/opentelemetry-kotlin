@@ -12,6 +12,11 @@ javaPlatform {
 }
 
 dependencies {
-    // Import OpenTelemetry Java BOM version constraints
+    // Align all opentelemetry-kotlin artifacts
+    api(platform(project(":bom")))
+
+    // Import OpenTelemetry Java BOM version constraints. compat depends on both stable and alpha
+    // (e.g. opentelemetry-sdk-extension-incubator) opentelemetry-java artifacts.
     api(platform(libs.opentelemetry.bom))
+    api(platform(libs.opentelemetry.bom.alpha))
 }
