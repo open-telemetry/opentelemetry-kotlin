@@ -52,7 +52,7 @@ internal class SamplerConfigImpl(
     )
 
     override fun composite(block: SamplerConfigDsl.() -> ComposableSampler): Sampler =
-        CompositeSampler(block())
+        CompositeSampler(block(), sdkErrorHandler)
 
     override fun composableAlwaysOn(): ComposableSampler = ComposableAlwaysOnSampler
 
@@ -74,5 +74,5 @@ internal class SamplerConfigImpl(
     ): ComposableSampler = ComposableAnnotatingSampler(delegate, attributes)
 
     override fun composableRuleBased(block: ComposableRuleBasedConfigDsl.() -> Unit): ComposableSampler =
-        ComposableRuleBasedConfigImpl(this).apply(block).buildSampler()
+        ComposableRuleBasedConfigImpl(this, sdkErrorHandler).apply(block).buildSampler()
 }
