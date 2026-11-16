@@ -1,5 +1,6 @@
-package io.opentelemetry.kotlin.behavior
+package io.opentelemetry.kotlin.behavior.tracing
 
+import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

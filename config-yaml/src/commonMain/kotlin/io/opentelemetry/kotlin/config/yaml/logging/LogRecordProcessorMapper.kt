@@ -1,9 +1,8 @@
 package io.opentelemetry.kotlin.config.yaml.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.config.schema.model.LogRecordProcessor
-import io.opentelemetry.kotlin.config.yaml.toBehavior
 
 /**
  * Maps`logger_provider.processors` onto processor behavior.

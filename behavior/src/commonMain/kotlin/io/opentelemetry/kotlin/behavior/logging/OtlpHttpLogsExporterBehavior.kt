@@ -1,16 +1,20 @@
-package io.opentelemetry.kotlin.behavior
+package io.opentelemetry.kotlin.behavior.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.Behavior
+import io.opentelemetry.kotlin.behavior.OtlpExporter
+import io.opentelemetry.kotlin.behavior.OtlpHttpExporter
+import io.opentelemetry.kotlin.behavior.mergeMap
 
 /**
- * Selecting the OTLP HTTP Span exporter.
+ * Selecting the OTLP HTTP Logs exporter.
  *
  * https://opentelemetry.io/docs/specs/otel/protocol/exporter/
  */
 @OptIn(ExperimentalApi::class)
-data class OtlpHttpSpanExporterBehavior(
+data class OtlpHttpLogsExporterBehavior(
     val delegate: OtlpHttpExporter = OtlpHttpExporter()
-) : Behavior<OtlpHttpSpanExporterBehavior>, OtlpExporter by delegate {
+) : Behavior<OtlpHttpLogsExporterBehavior>, OtlpExporter by delegate {
     val signalEndpoint: String?
         get() = delegate.signalEndpoint
 
@@ -27,7 +31,7 @@ data class OtlpHttpSpanExporterBehavior(
         headers: Map<String, String?>? = null,
     ) : this(OtlpHttpExporter(endpoint, signalEndpoint, timeout, headers))
 
-    override fun mergeWith(higher: OtlpHttpSpanExporterBehavior): OtlpHttpSpanExporterBehavior {
+    override fun mergeWith(higher: OtlpHttpLogsExporterBehavior): OtlpHttpLogsExporterBehavior {
         return copy(
             delegate = OtlpHttpExporter(
                 endpoint = higher.endpoint ?: endpoint,

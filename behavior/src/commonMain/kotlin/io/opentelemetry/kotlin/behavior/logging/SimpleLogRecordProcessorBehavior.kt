@@ -1,6 +1,8 @@
-package io.opentelemetry.kotlin.behavior
+package io.opentelemetry.kotlin.behavior.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.Behavior
+import io.opentelemetry.kotlin.behavior.mergeNode
 
 /**
  * Unbuffered processing for the logger provider's processor: each log record is exported as it is

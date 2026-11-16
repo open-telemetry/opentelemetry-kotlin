@@ -1,4 +1,4 @@
-package io.opentelemetry.kotlin.behavior
+package io.opentelemetry.kotlin.behavior.logging
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

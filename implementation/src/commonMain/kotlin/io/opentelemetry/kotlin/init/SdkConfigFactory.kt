@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.init
 
-import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.behavior.SamplerBehavior
-import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.ResourceFactory

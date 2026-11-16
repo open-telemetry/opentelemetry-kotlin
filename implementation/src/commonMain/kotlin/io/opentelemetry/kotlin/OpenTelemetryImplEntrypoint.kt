@@ -1,8 +1,8 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
-import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
-import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.config.ConfigProviderImpl
 import io.opentelemetry.kotlin.context.CurrentContextStorage
 import io.opentelemetry.kotlin.context.installContextStorage
