@@ -10,9 +10,9 @@ import io.opentelemetry.kotlin.scope.toOtelKotlinInstrumentationScopeInfo
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.StatusData
-import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
+import io.opentelemetry.kotlin.tracing.toOtelKotlinSpanContext
 
 internal class SpanDataAdapter(
     val impl: OtelJavaSpanData,
