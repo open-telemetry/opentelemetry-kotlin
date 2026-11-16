@@ -70,7 +70,7 @@ internal class StdoutSpanExporterTest {
                 name = "io.opentelemetry.test",
                 version = "1.0.0"
             ),
-            hasEnded = true
+            isEnded = true
         )
 
         val result = exporter.export(listOf(span))

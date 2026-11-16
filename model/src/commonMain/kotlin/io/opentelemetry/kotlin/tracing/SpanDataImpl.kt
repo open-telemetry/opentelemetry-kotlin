@@ -26,7 +26,7 @@ class SpanDataImpl(
     override val droppedLinksCount: Int,
     override val resource: Resource,
     override val instrumentationScopeInfo: InstrumentationScopeInfo,
-    override val hasEnded: Boolean,
+    override val isEnded: Boolean,
     override val droppedAttributesCount: Int = 0,
 ) : ReadableSpan {
     override fun toSpanData(): SpanData = this
