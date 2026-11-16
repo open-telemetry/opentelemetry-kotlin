@@ -15,10 +15,10 @@ dependencyResolutionManagement {
 
 rootProject.name = "opentelemetry-kotlin"
 include(
-    ":core",
     ":api",
     ":error-handling",
     ":propagation-utils",
+    ":propagator-b3",
     ":api-ext",
     ":context-single-slot",
     ":context-threadlocal",
@@ -60,6 +60,7 @@ include(
     "examples:example-app",
     "examples:example-app-android",
     ":smoke-test",
+    ":docs-snippets",
     ":gradle-integration-test",
     ":serializable-models"
 )

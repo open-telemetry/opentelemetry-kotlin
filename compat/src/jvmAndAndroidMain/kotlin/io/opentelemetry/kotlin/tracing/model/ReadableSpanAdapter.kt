@@ -16,9 +16,9 @@ import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanEventDataAdapter
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkDataAdapter
-import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
+import io.opentelemetry.kotlin.tracing.toOtelKotlinSpanContext
 
 internal class ReadableSpanAdapter(
     val impl: OtelJavaReadableSpan

@@ -23,7 +23,7 @@ internal class CompatResourceDetectionConfigTest {
 
     @Test
     fun `sdk defaults are present without any configuration`() {
-        val resource = baseResource(CompatOpenTelemetryConfig(clock))
+        val resource = baseResource(CompatOpenTelemetryConfig())
         assertEquals("opentelemetry", resource.attributes[TelemetryAttributes.TELEMETRY_SDK_NAME])
         assertEquals("kotlin", resource.attributes[TelemetryAttributes.TELEMETRY_SDK_LANGUAGE])
         assertEquals(SdkBuildKonfig.SDK_VERSION, resource.attributes[TelemetryAttributes.TELEMETRY_SDK_VERSION])
@@ -34,7 +34,7 @@ internal class CompatResourceDetectionConfigTest {
 
     @Test
     fun `detected and explicit attributes override sdk defaults`() {
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.resourceDetection {
             detector(FakeResourceDetector(attributes = mapOf(ServiceAttributes.SERVICE_NAME to "detected")))
         }
@@ -48,7 +48,7 @@ internal class CompatResourceDetectionConfigTest {
 
     @Test
     fun `resource map values keep their types`() {
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.resource(mapOf("d" to 1.0, "i" to 1, "dl" to listOf(1.0)))
 
         val attrs = baseResource(cfg).attributes
@@ -59,14 +59,14 @@ internal class CompatResourceDetectionConfigTest {
 
     @Test
     fun `explicit schema url overrides sdk default`() {
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.resource("https://example.com/schema") { }
         assertEquals("https://example.com/schema", baseResource(cfg).schemaUrl)
     }
 
     @Test
     fun `detected attributes reach the global resource`() {
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.resourceDetection {
             detector(FakeResourceDetector(attributes = mapOf(testKey to "detected")))
         }
@@ -76,7 +76,7 @@ internal class CompatResourceDetectionConfigTest {
 
     @Test
     fun `resolved behavior resource overrides detected attributes`() {
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.resourceDetection {
             detector(FakeResourceDetector(attributes = mapOf(testKey to "detected")))
         }
@@ -91,7 +91,7 @@ internal class CompatResourceDetectionConfigTest {
 
     @Test
     fun `dsl service name attribute overrides environment service name`() {
-        val cfg = CompatOpenTelemetryConfig(clock).apply {
+        val cfg = CompatOpenTelemetryConfig().apply {
             resource(mapOf(ServiceAttributes.SERVICE_NAME to "dsl-service"))
         }
         val behavior = BehaviorResolverImpl().resolve(
@@ -109,7 +109,7 @@ internal class CompatResourceDetectionConfigTest {
 
     @Test
     fun `later detector wins on conflict`() {
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.resourceDetection {
             detector(FakeResourceDetector(name = "first", attributes = mapOf(testKey to "a")))
             detector(FakeResourceDetector(name = "second", attributes = mapOf(testKey to "b")))
@@ -120,7 +120,7 @@ internal class CompatResourceDetectionConfigTest {
 
     @Test
     fun `explicit config overrides detected attributes`() {
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.resourceDetection {
             detector(
                 FakeResourceDetector(
@@ -142,7 +142,7 @@ internal class CompatResourceDetectionConfigTest {
     @Test
     fun `throwing detector is reported and skipped`() {
         val handler = FakeSdkErrorHandler()
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.errorHandler(handler)
         cfg.resourceDetection {
             detector(FakeResourceDetector(name = "broken", error = IllegalStateException("boom")))
@@ -156,7 +156,7 @@ internal class CompatResourceDetectionConfigTest {
     @Test
     fun `detector with throwing name is reported and skipped`() {
         val handler = FakeSdkErrorHandler()
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.errorHandler(handler)
         cfg.resourceDetection {
             detector(FakeResourceDetector(name = "working", attributes = mapOf(testKey to "detected")))
