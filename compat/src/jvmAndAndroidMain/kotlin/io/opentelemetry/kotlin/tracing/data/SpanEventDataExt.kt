@@ -1,9 +1,8 @@
-package io.opentelemetry.kotlin.tracing.ext
+package io.opentelemetry.kotlin.tracing.data
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaEventData
 import io.opentelemetry.kotlin.attributes.attrsFromMap
-import io.opentelemetry.kotlin.tracing.data.SpanEventData
 
 /**
  * Copies an opentelemetry-kotlin [SpanEventData] into opentelemetry-java event data. The Java total

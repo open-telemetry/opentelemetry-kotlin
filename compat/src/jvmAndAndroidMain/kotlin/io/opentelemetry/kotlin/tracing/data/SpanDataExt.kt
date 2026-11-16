@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION", "TYPEALIAS_EXPANSION_DEPRECATION")
 
-package io.opentelemetry.kotlin.tracing.ext
+package io.opentelemetry.kotlin.tracing.data
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanData
@@ -8,20 +8,18 @@ import io.opentelemetry.kotlin.aliases.OtelJavaStatusData
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.resourceFromMap
 import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
-import io.opentelemetry.kotlin.tracing.data.OtelJavaSpanDataImpl
-import io.opentelemetry.kotlin.tracing.data.SpanData
-import io.opentelemetry.kotlin.tracing.data.SpanDataAdapter
+import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
+import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusCode
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpanAdapter
 import io.opentelemetry.kotlin.tracing.model.ReadableSpanAdapter
+import io.opentelemetry.kotlin.tracing.toOtelJavaSpanContext
 
 /**
  * Converts opentelemetry-kotlin [SpanData] to opentelemetry-java span data.
  * Existing Java span data adapters are unwrapped without copying.
  */
 @ExperimentalApi
-public fun SpanData.toOtelJavaSpan(): OtelJavaSpanData = toOtelJavaSpanData()
-
-internal fun SpanData.toOtelJavaSpanData(): OtelJavaSpanData = when (this) {
+public fun SpanData.toOtelJavaSpanData(): OtelJavaSpanData = when (this) {
     is SpanDataAdapter -> impl
     is ReadableSpanAdapter -> impl.toSpanData()
     is ReadWriteSpanAdapter -> impl.toSpanData()

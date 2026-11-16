@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.attributes.compatAttributes
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanCreationAction
 import io.opentelemetry.kotlin.tracing.SpanLinkCompatImpl
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
+import io.opentelemetry.kotlin.tracing.toOtelJavaSpanContext
 
 /**
  * Holds the attributes and links supplied in the span creation lambda so that they can be

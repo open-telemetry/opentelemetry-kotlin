@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package io.opentelemetry.kotlin.tracing.ext
+package io.opentelemetry.kotlin.tracing.data
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
@@ -9,10 +9,6 @@ import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaReadWriteSpan
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaReadableSpan
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanData
 import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
-import io.opentelemetry.kotlin.tracing.data.FakeSpanData
-import io.opentelemetry.kotlin.tracing.data.FakeSpanEventData
-import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
-import io.opentelemetry.kotlin.tracing.data.SpanDataAdapter
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpanAdapter
 import io.opentelemetry.kotlin.tracing.model.ReadableSpanAdapter
 import org.junit.Assert.assertEquals
@@ -25,7 +21,7 @@ internal class SpanDataExtTest {
     @Test
     fun testConversion() {
         val input = FakeSpanData()
-        val observed = input.toOtelJavaSpan()
+        val observed = input.toOtelJavaSpanData()
         assertEquals(input.hasEnded, observed.hasEnded())
         assertEquals(input.endTimestamp, observed.endEpochNanos)
         assertEquals(input.events.size, observed.totalRecordedEvents)
@@ -40,7 +36,7 @@ internal class SpanDataExtTest {
             droppedEventsCount = 4,
             droppedLinksCount = 5,
         )
-        val observed = input.toOtelJavaSpan()
+        val observed = input.toOtelJavaSpanData()
         assertEquals(input.attributes.size + 3, observed.totalAttributeCount)
         assertEquals(input.events.size + 4, observed.totalRecordedEvents)
         assertEquals(input.links.size + 5, observed.totalRecordedLinks)
@@ -52,7 +48,7 @@ internal class SpanDataExtTest {
             events = listOf(FakeSpanEventData(droppedAttributesCount = 2)),
             links = listOf(FakeSpanLinkData(droppedAttributesCount = 6)),
         )
-        val observed = input.toOtelJavaSpan()
+        val observed = input.toOtelJavaSpanData()
         assertEquals(3, observed.events.single().totalAttributeCount)
         assertEquals(7, observed.links.single().totalAttributeCount)
     }
@@ -60,7 +56,7 @@ internal class SpanDataExtTest {
     @Test
     fun testScopeConversion() {
         val scope = FakeInstrumentationScopeInfo(attributes = mapOf("scope.key" to "scope.value"))
-        val observed = FakeSpanData(instrumentationScopeInfo = scope).toOtelJavaSpan()
+        val observed = FakeSpanData(instrumentationScopeInfo = scope).toOtelJavaSpanData()
         assertEquals(scope.toOtelJavaInstrumentationScopeInfo(), observed.instrumentationScopeInfo)
 
         val libraryInfo = observed.instrumentationLibraryInfo
@@ -72,13 +68,13 @@ internal class SpanDataExtTest {
     @Test
     fun testSpanDataAdapterIsUnwrapped() {
         val impl = FakeOtelJavaSpanData()
-        assertSame(impl, SpanDataAdapter(impl).toOtelJavaSpan())
+        assertSame(impl, SpanDataAdapter(impl).toOtelJavaSpanData())
     }
 
     @Test
     fun testReadableSpanAdapterIsUnwrapped() {
         val impl = FakeOtelJavaSpanData()
-        assertSame(impl, ReadableSpanAdapter(FakeOtelJavaReadableSpan(impl)).toOtelJavaSpan())
+        assertSame(impl, ReadableSpanAdapter(FakeOtelJavaReadableSpan(impl)).toOtelJavaSpanData())
     }
 
     @Test
@@ -86,6 +82,6 @@ internal class SpanDataExtTest {
         val impl = FakeOtelJavaSpanData()
         val span =
             ReadWriteSpanAdapter(FakeOtelJavaReadWriteSpan(FakeOtelJavaReadableSpan(impl)), FakeSdkErrorHandler())
-        assertSame(impl, span.toOtelJavaSpan())
+        assertSame(impl, span.toOtelJavaSpanData())
     }
 }
