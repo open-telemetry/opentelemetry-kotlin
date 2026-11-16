@@ -16,6 +16,7 @@ import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.factory.IdGenerator
+import io.opentelemetry.kotlin.guarded
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.propagation.createNoopPropagator
 import kotlin.concurrent.Volatile
@@ -118,7 +119,7 @@ internal class OpenTelemetryConfigImpl(
     }
 
     override fun clock(clock: Clock) {
-        this.clock = clock
+        this.clock = clock.guarded(sdkErrorHandler)
     }
 
     override fun errorHandler(handler: SdkErrorHandler) {

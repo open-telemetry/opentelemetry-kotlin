@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.propagation
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.ContextKey
-import io.opentelemetry.kotlin.init.B3Format
 import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_HEX_LENGTH
 import io.opentelemetry.kotlin.propagation.utils.isAllZerosHex
 import io.opentelemetry.kotlin.propagation.utils.isValidHex

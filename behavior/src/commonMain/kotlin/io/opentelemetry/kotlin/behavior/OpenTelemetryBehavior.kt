@@ -1,6 +1,8 @@
 package io.opentelemetry.kotlin.behavior
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
+import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 
 /**
  * Behavior of the SDK, as supplied by one configuration mechanism.

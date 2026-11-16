@@ -45,7 +45,7 @@ public final class io/opentelemetry/kotlin/attributes/AnyValue$DoubleValue : io/
 public final class io/opentelemetry/kotlin/attributes/AnyValue$ListValue : io/opentelemetry/kotlin/attributes/AnyValue {
 	public fun <init> (Ljava/util/List;)V
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getValues ()Ljava/util/List;
+	public final fun getValue ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -61,7 +61,7 @@ public final class io/opentelemetry/kotlin/attributes/AnyValue$LongValue : io/op
 public final class io/opentelemetry/kotlin/attributes/AnyValue$MapValue : io/opentelemetry/kotlin/attributes/AnyValue {
 	public fun <init> (Ljava/util/Map;)V
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getValues ()Ljava/util/Map;
+	public final fun getValue ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
