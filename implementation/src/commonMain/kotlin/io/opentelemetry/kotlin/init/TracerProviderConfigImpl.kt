@@ -4,9 +4,9 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.config.dsl.ExportConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.tracing.SpanLimitsConfigDslImpl
-import io.opentelemetry.kotlin.config.dsl.tracing.TraceExportConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.init.config.TracingConfig
@@ -39,8 +39,8 @@ internal class TracerProviderConfigImpl(
         spanLimits.action()
     }
 
-    override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
-        processors.add(TraceExportConfigDslImpl(clock, sdkErrorHandler).action())
+    override fun export(action: ExportConfigDsl.() -> SpanProcessor) {
+        processors.add(ExportConfigDslImpl(clock, sdkErrorHandler).action())
     }
 
     override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
@@ -61,7 +61,7 @@ internal class TracerProviderConfigImpl(
             processor = when (processors.size) {
                 0 -> processorFromBehavior(processorBehavior)
                 1 -> processors.single()
-                else -> TraceExportConfigDslImpl(clock, sdkErrorHandler)
+                else -> ExportConfigDslImpl(clock, sdkErrorHandler)
                     .compositeSpanProcessor(*processors.toTypedArray())
             },
             resource = base.merge(resourceConfig.toBehavior().toResource()),
@@ -90,7 +90,7 @@ internal class TracerProviderConfigImpl(
         if (console == null) {
             return null
         }
-        return TraceExportConfigDslImpl(clock, sdkErrorHandler).run {
+        return ExportConfigDslImpl(clock, sdkErrorHandler).run {
             val exporter = stdoutSpanExporter()
             // An explicit simple processor wins when batch settings were merged from a lower layer.
             if (batch != null && simple == null) {

@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.tracing.export
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
-import io.opentelemetry.kotlin.export.FakeTraceExportConfig
+import io.opentelemetry.kotlin.export.FakeExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.loadTestFixture
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
 
 internal class StdoutSpanExporterTest {
 
-    private val exportConfig = FakeTraceExportConfig()
+    private val exportConfig = FakeExportConfig()
 
     @Test
     fun testExportMinimalSpan() = runTest {
@@ -123,7 +123,7 @@ internal class StdoutSpanExporterTest {
     fun testItemThatFailsToFormatDoesNotStopTheBatch() = runTest {
         val output = mutableListOf<String>()
         val errorHandler = FakeSdkErrorHandler()
-        val exporter = FakeTraceExportConfig(sdkErrorHandler = errorHandler).stdoutSpanExporter(output::add)
+        val exporter = FakeExportConfig(sdkErrorHandler = errorHandler).stdoutSpanExporter(output::add)
         val throwingSpan = object : SpanData by FakeSpanData() {
             override val name: String get() = error("boom")
         }

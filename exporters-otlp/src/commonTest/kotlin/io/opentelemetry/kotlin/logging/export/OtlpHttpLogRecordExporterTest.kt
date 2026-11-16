@@ -22,7 +22,7 @@ import io.opentelemetry.kotlin.export.createTestHttpClient
 import io.opentelemetry.kotlin.export.decodeOtlpRequestBody
 import io.opentelemetry.kotlin.export.testMockEngine
 import io.opentelemetry.kotlin.export.withShutdown
-import io.opentelemetry.kotlin.init.LogExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import kotlinx.coroutines.CompletableDeferred
@@ -216,7 +216,7 @@ internal class OtlpHttpLogRecordExporterTest {
         assertContentEquals(telemetry.toProtobufByteArray(), bytes)
     }
 
-    private fun fakeConfig(): LogExportConfigDsl = object : LogExportConfigDsl {
+    private fun fakeConfig(): ExportConfigDsl = object : ExportConfigDsl {
         override val clock: Clock = FakeClock()
         override val sdkErrorHandler = NoopSdkErrorHandler
     }
