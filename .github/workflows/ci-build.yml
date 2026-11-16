@@ -90,10 +90,10 @@ jobs:
             -Pkotlin.compiler.execution.strategy=in-process \
             -Pkotlin.native.disableCompilerDaemon=true
 
-  # Runs on macOS because the klib fixture consumes the library's iOS klibs, which KGP only
-  # publishes from a macOS host. The rest of the suite is host-independent, so it all runs here.
+  # Runs on Linux: Kotlin/Native cross-compiles and publishes the Apple klibs from a Linux host
+  # (as release.yml does), and the klib fixture only compiles klibs without linking Apple binaries.
   integration-test:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - name: Checkout Branch
