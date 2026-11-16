@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.FakeContext
-import io.opentelemetry.kotlin.export.FakeLogExportConfig
+import io.opentelemetry.kotlin.export.FakeExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
@@ -190,7 +190,7 @@ internal class SpanEventBridgeLogRecordProcessorTest {
     @Test
     fun testProcessorCreatedFromDsl() {
         val span = FakeSpan(spanContext = FakeSpanContext.VALID)
-        val processor = FakeLogExportConfig().spanEventBridgeLogRecordProcessor()
+        val processor = FakeExportConfig().spanEventBridgeLogRecordProcessor()
 
         processor.onEmit(eventLogRecord(), FakeContext(span = span))
 

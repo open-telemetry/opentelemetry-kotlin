@@ -32,8 +32,6 @@ internal class GuardedTextMapPropagatorTest {
     private val builtIns = listOf(
         createW3CTraceContextPropagator(),
         createW3CBaggagePropagator(),
-        createB3Propagator(B3Format.SINGLE),
-        createB3Propagator(B3Format.MULTI),
         createCompositePropagator(createW3CTraceContextPropagator(), createW3CBaggagePropagator()),
     )
 

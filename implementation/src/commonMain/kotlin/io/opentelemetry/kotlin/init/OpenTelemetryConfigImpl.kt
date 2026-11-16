@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.ClockImpl
 import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.config.DeclarativeBehaviorReader
@@ -20,7 +21,6 @@ import io.opentelemetry.kotlin.propagation.createNoopPropagator
 import kotlin.concurrent.Volatile
 
 internal class OpenTelemetryConfigImpl(
-    clock: Clock,
     internal val globalResourceConfig: ResourceConfigDslImpl = ResourceConfigDslImpl(),
 ) : OpenTelemetryConfigDsl,
     ResourceConfigDsl by globalResourceConfig,
@@ -47,8 +47,12 @@ internal class OpenTelemetryConfigImpl(
         ) { it > 0 }
     }
 
-    internal val tracingConfig: TracerProviderConfigImpl = TracerProviderConfigImpl(clock, sdkErrorHandler)
-    internal val loggingConfig: LoggerProviderConfigImpl = LoggerProviderConfigImpl(clock, sdkErrorHandler)
+    @Volatile internal var clock: Clock = ClockImpl()
+        private set
+    private val forwardingClock = Clock { clock.now() }
+
+    internal val tracingConfig: TracerProviderConfigImpl = TracerProviderConfigImpl(forwardingClock, sdkErrorHandler)
+    internal val loggingConfig: LoggerProviderConfigImpl = LoggerProviderConfigImpl(forwardingClock, sdkErrorHandler)
     internal val metricsConfig: MeterProviderConfigImpl = MeterProviderConfigImpl(sdkErrorHandler)
     internal val contextConfig: ContextConfigImpl = ContextConfigImpl()
     private val propagatorCfg: PropagatorConfigImpl = PropagatorConfigImpl()
@@ -102,6 +106,10 @@ internal class OpenTelemetryConfigImpl(
 
     override fun idGenerator(action: () -> IdGenerator) {
         idGeneratorBehavior = IdGeneratorBehavior.Custom(action)
+    }
+
+    override fun clock(clock: Clock) {
+        this.clock = clock
     }
 
     override fun errorHandler(handler: SdkErrorHandler) {
