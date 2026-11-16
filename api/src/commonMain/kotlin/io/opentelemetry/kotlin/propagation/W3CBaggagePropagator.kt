@@ -81,11 +81,35 @@ internal object W3CBaggagePropagator : TextMapPropagator {
     private fun encodeEntry(key: String, value: String, metadata: String): String {
         val sb = StringBuilder()
         sb.append(key).append(KEY_VALUE_DELIMITER).append(percentEncodeBaggageValue(value))
-        if (metadata.isNotEmpty()) {
+        if (metadata.isNotEmpty() && isValidMetadata(metadata)) {
             sb.append(METADATA_DELIMITER).append(metadata)
         }
         return sb.toString()
     }
+
+    /**
+     * Whether [metadata] matches the W3C `property *( OWS ";" OWS property )` grammar, where
+     * `property = key OWS "=" OWS value / key OWS`, `key` is a token and `value` is
+     * `*baggage-octet`. Metadata that doesn't match is dropped on inject (the entry is kept) so it
+     * can't add list members or break the header.
+     */
+    private fun isValidMetadata(metadata: String): Boolean =
+        metadata.split(METADATA_DELIMITER).all(::isValidProperty)
+
+    private fun isValidProperty(rawProperty: String): Boolean {
+        val property = rawProperty.trim(SPACE, HTAB)
+        val eq = property.indexOf(KEY_VALUE_DELIMITER)
+        if (eq == -1) {
+            return isValidBaggageKey(property)
+        }
+        val key = property.substring(0, eq).trimEnd(SPACE, HTAB)
+        val value = property.substring(eq + 1).trimStart(SPACE, HTAB)
+        return isValidBaggageKey(key) && value.all(::isBaggageOctet)
+    }
+
+    /** baggage-octet = %x21 / %x23-2B / %x2D-3A / %x3C-5B / %x5D-7E */
+    private fun isBaggageOctet(c: Char): Boolean =
+        c == '!' || c in '#'..'+' || c in '-'..':' || c in '<'..'[' || c in ']'..'~'
 
     private fun decode(header: String): Baggage? {
         val budget = HeaderBudget(MAX_HEADER_BYTES)

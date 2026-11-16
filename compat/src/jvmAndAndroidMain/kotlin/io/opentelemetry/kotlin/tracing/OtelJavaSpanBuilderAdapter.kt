@@ -12,7 +12,6 @@ import io.opentelemetry.kotlin.attributes.setOtelJavaAttributes
 import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
-import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
@@ -23,7 +22,6 @@ import java.util.concurrent.TimeUnit
 internal class OtelJavaSpanBuilderAdapter(
     private val tracer: Tracer,
     private val spanName: String,
-    private val contextFactory: ContextFactory,
 ) : OtelJavaSpanBuilder {
 
     private var start: Long = 0
@@ -105,8 +103,8 @@ internal class OtelJavaSpanBuilderAdapter(
 
     override fun startSpan(): OtelJavaSpan {
         val parentContext = when {
-            noParent -> contextFactory.rootContext()
-            else -> parent?.toOtelKotlinContext() ?: contextFactory.currentContext()
+            noParent -> rootContext()
+            else -> parent?.toOtelKotlinContext() ?: currentContext()
         }
         val span = tracer.startSpan(
             name = spanName,
@@ -122,7 +120,7 @@ internal class OtelJavaSpanBuilderAdapter(
                 }
             }
         )
-        return OtelJavaSpanAdapter(span, contextFactory)
+        return OtelJavaSpanAdapter(span)
     }
 
     private class LinkBuilder(

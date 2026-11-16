@@ -79,6 +79,46 @@ internal class W3CBaggagePropagatorTest {
     }
 
     @Test
+    fun `inject keeps metadata with several properties and optional whitespace`() {
+        val metadata = "propagation=public; ttl = 1;flag"
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl(metadata))
+        val carrier = injectInto(baggage)
+        assertEquals("k=v;$metadata", carrier["baggage"])
+    }
+
+    @Test
+    fun `inject drops metadata that would add a list member`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("p=1,evil=injected"))
+        val carrier = injectInto(baggage)
+        assertEquals("k=v", carrier["baggage"])
+        assertEquals(listOf("k"), extract(carrier.getValue("baggage")).asMap().keys.toList())
+    }
+
+    @Test
+    fun `inject drops metadata containing CR or LF`() {
+        val baggage = createBaggage()
+            .set("a", "1", BaggageEntryMetadataImpl("p=1\r\nX-Injected: 1"))
+            .set("b", "2", BaggageEntryMetadataImpl("p=1\n"))
+        val carrier = injectInto(baggage)
+        assertEquals("a=1,b=2", carrier["baggage"])
+    }
+
+    @Test
+    fun `inject drops metadata containing non-ASCII characters`() {
+        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("p=café"))
+        val carrier = injectInto(baggage)
+        assertEquals("k=v", carrier["baggage"])
+    }
+
+    @Test
+    fun `inject drops metadata that is not a property list`() {
+        listOf("bad key=1", "=1", "a;;b", "p=1;", "p=\"quoted\"", "p=a\\b").forEach { metadata ->
+            val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl(metadata))
+            assertEquals("k=v", injectInto(baggage)["baggage"], metadata)
+        }
+    }
+
+    @Test
     fun `inject skips entry whose key is not a valid token`() {
         val baggage = createBaggage().set("good", "g").set("bad key", "b")
         val carrier = injectInto(baggage)

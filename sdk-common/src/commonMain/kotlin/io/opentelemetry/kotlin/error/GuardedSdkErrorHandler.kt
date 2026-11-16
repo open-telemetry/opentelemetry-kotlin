@@ -11,6 +11,7 @@ public class GuardedSdkErrorHandler(
         try {
             delegate.onError(error)
         } catch (ignored: Throwable) {
+            ignored.restoreInterruptIfNeeded()
             // swallow
         }
     }
