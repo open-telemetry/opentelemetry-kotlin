@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.batchExportOperationConcurrent
-import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.MeterProvider
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
@@ -17,9 +16,8 @@ internal class CompatOpenTelemetryImpl(
     override val loggerProvider: LoggerProvider,
     override val meterProvider: MeterProvider,
     override val clock: Clock,
-    override val context: ContextFactory,
     override val propagator: TextMapPropagator,
-    private val sdkErrorHandler: SdkErrorHandler,
+    internal val sdkErrorHandler: SdkErrorHandler,
     private val processWideState: CompatProcessWideState? = null,
     private val timeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS,
 ) : OpenTelemetrySdk {
