@@ -1,6 +1,5 @@
 package io.opentelemetry.kotlin.tracing.model
 
-import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
@@ -23,15 +22,16 @@ internal fun buildSpanLink(
     spanLimitConfig: SpanLimitConfig,
     sdkErrorHandler: SdkErrorHandler,
 ): SpanLink? {
-    val container = AttributesModel(
+    val link = SpanLinkImpl(
+        spanContext = spanContext,
         attributeLimit = spanLimitConfig.attributeCountPerLinkLimit,
-        attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
+        attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit,
     )
     if (attributes != null) {
-        sdkErrorHandler.guard("Span link attributes failed") { attributes(container) }
+        sdkErrorHandler.guard("Span link attributes failed") { attributes(link) }
     }
-    if (!spanContext.isValid && container.attributes.isEmpty() && spanContext.traceState.asMap().isEmpty()) {
+    if (!spanContext.isValid && link.attributes.isEmpty() && spanContext.traceState.asMap().isEmpty()) {
         return null
     }
-    return SpanLinkImpl(spanContext, container)
+    return link
 }

@@ -1,8 +1,10 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpFileExporter
+import io.opentelemetry.kotlin.export.OtlpResponse
 import io.opentelemetry.kotlin.export.TelemetryExporter
 import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -20,19 +22,25 @@ internal class OtlpFileSpanExporter(
     initialDelayMs: Long,
     maxAttemptIntervalMs: Long,
     maxAttempts: Int,
-    sdkErrorHandler: SdkErrorHandler,
+    private val sdkErrorHandler: SdkErrorHandler,
     coroutineContext: CoroutineContext = ioDispatcher
 ) : SpanExporter {
 
-    private val exporter = TelemetryExporter(
+    private val exporter = TelemetryExporter<SpanData>(
         initialDelayMs,
         maxAttemptIntervalMs,
         maxAttempts,
         sdkErrorHandler,
         coroutineContext
     ) { telemetry ->
-        val encodedTelemetry = telemetry.map { encoder.encode(it) }
-        fileExporter.exportTelemetry(encodedTelemetry)
+        val encodedTelemetry = sdkErrorHandler.sdkGuardOrDefault(null, "OTLP file encoding failed") {
+            telemetry.map { encoder.encode(it) }
+        }
+        if (encodedTelemetry == null) {
+            OtlpResponse.EncodingFailed
+        } else {
+            fileExporter.exportTelemetry(encodedTelemetry)
+        }
     }
 
     override suspend fun export(telemetry: List<SpanData>): OperationResultCode {

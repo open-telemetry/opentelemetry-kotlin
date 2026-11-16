@@ -155,7 +155,7 @@ internal class LogExportTest {
         harness.config.logRecordProcessors.add(contextCapturingProcessor)
 
         // Create a context key and add a test value
-        val currentContext = harness.kotlinApi.context.currentContext()
+        val currentContext = currentContext()
         val contextKey = createContextKey<String>("best_team")
         val testContextValue = "independiente"
         val testContext = currentContext.set(contextKey, testContextValue)
@@ -228,7 +228,7 @@ internal class LogExportTest {
     fun `test log with decorated parent span in context`() = runTest {
         // a decorating Span is not a SpanAdapter, so storing it must still correlate the log
         val span = DecoratedSpan(harness.tracer.startSpan("span"))
-        val ctx = harness.kotlinApi.context.rootContext().storeSpan(span)
+        val ctx = rootContext().storeSpan(span)
         harness.logger.emit("test", context = ctx)
 
         harness.assertLogRecords(1, "log_decorated_span_context.json") { logs ->
