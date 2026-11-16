@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanBuilder
 import io.opentelemetry.kotlin.aliases.OtelJavaTracer
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
-import io.opentelemetry.kotlin.factory.CompatContextFactory
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -27,7 +26,6 @@ internal class TracerAdapterEnabledTest {
     private fun createTracer(isEnabled: () -> Boolean): Tracer =
         TracerAdapter(
             FakeOtelJavaTracer(isEnabled),
-            CompatContextFactory(),
             errorHandler,
         )
 

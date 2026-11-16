@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaObservableLongMeasurement
 import io.opentelemetry.kotlin.attributes.setOtelJavaAttributes
 
 internal class OtelJavaObservableLongMeasurementAdapter(
-    private val impl: ObservableLongMeasurement,
+    internal val impl: ObservableLongMeasurement,
 ) : OtelJavaObservableLongMeasurement {
     override fun record(value: Long) {
         impl.record(value)

@@ -113,7 +113,7 @@ internal class SpanExportTest {
 
     @Test
     fun `test span context parent`() = runTest {
-        val root = harness.kotlinApi.context.rootContext()
+        val root = rootContext()
 
         val a = harness.tracer.startSpan("a", parentContext = root)
         val ctxa = root.storeSpan(a)
@@ -166,7 +166,7 @@ internal class SpanExportTest {
 
     @Test
     fun `test span context parent for decorated span`() = runTest {
-        val root = harness.kotlinApi.context.rootContext()
+        val root = rootContext()
 
         // a decorating Span is not a SpanAdapter, so storing it must still preserve its span context
         val parent = DecoratedSpan(harness.tracer.startSpan("decorated_parent"))
@@ -209,7 +209,7 @@ internal class SpanExportTest {
         // Test span creation with invalid parent
         val span = harness.tracer.startSpan(
             "test_span",
-            parentContext = harness.kotlinApi.context.rootContext()
+            parentContext = rootContext()
         )
 
         // Child span should be created with a valid context
@@ -334,7 +334,7 @@ internal class SpanExportTest {
     fun `test trace and span id validation without sanitization`() = runTest {
         val span1 = harness.tracer.startSpan("validation_span_1")
         val span2 = harness.tracer.startSpan("validation_span_2")
-        val ctx = harness.kotlinApi.context.rootContext().storeSpan(span1)
+        val ctx = rootContext().storeSpan(span1)
         val span3 = harness.tracer.startSpan("validation_span_3", ctx)
 
         span1.end()
@@ -441,7 +441,7 @@ internal class SpanExportTest {
         harness.config.spanProcessors.add(contextCapturingProcessor)
 
         // Create a context key and add a test value
-        val currentContext = harness.kotlinApi.context.currentContext()
+        val currentContext = currentContext()
         val contextKey = createContextKey<String>("best_team")
         val testContextValue = "independiente"
         val testContext = currentContext.set(contextKey, testContextValue)
