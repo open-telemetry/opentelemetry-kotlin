@@ -19,7 +19,7 @@ public interface LoggerProviderConfigDsl : ResourceConfigDsl {
     /**
      * Configures how log records should be processed and exported.
      */
-    public fun export(action: LogExportConfigDsl.() -> LogRecordProcessor)
+    public fun export(action: ExportConfigDsl.() -> LogRecordProcessor)
 
     /**
      * Configures behavior of the logger.

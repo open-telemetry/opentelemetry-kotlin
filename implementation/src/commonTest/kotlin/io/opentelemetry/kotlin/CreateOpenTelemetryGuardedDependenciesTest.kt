@@ -30,7 +30,8 @@ internal class CreateOpenTelemetryGuardedDependenciesTest {
         val handler = FakeSdkErrorHandler()
         val spanProcessor = FakeSpanProcessor()
         val logProcessor = FakeLogRecordProcessor()
-        val api = createOpenTelemetry(clock = { boom() }) {
+        val api = createOpenTelemetry {
+            clock { boom() }
             errorHandler(handler)
             idGenerator { HostileIdGenerator }
             tracerProvider {

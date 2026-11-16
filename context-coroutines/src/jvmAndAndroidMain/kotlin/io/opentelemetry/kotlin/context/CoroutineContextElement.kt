@@ -12,7 +12,7 @@ import kotlin.coroutines.CoroutineContext
  * and into child coroutines.
  *
  * The SDK must be configured with thread-local current-context storage, using
- * `context { storage = createThreadLocalCurrentContextStorage() }`, for this to behave
+ * `context { storage { createThreadLocalCurrentContextStorage() } }`, for this to behave
  * correctly. You should also avoid setting the current context in
  * any other way if you use this method.
  *

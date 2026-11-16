@@ -18,7 +18,7 @@ import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
-import io.opentelemetry.kotlin.config.dsl.logging.LogExportConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.ExportConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.logging.LogLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.logging.LoggerConfigurator
@@ -67,9 +67,9 @@ internal class CompatLoggerProviderConfig(
         resourceAttrs.apply { setAttributeMap(map) }
     }
 
-    override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
+    override fun export(action: ExportConfigDsl.() -> LogRecordProcessor) {
         exportConfigured = true
-        val processor = LogExportConfigDslImpl(clock, sdkErrorHandler).action()
+        val processor = ExportConfigDslImpl(clock, sdkErrorHandler).action()
         processors.add(processor)
     }
 

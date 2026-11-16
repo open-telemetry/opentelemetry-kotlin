@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
-import io.opentelemetry.kotlin.export.FakeLogExportConfig
+import io.opentelemetry.kotlin.export.FakeExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.loadTestFixture
 import io.opentelemetry.kotlin.logging.SeverityNumber
@@ -21,7 +21,7 @@ internal class StdoutLogRecordExporterTest {
     @Test
     fun testExportLogRecordMinimal() = runTest {
         val output = mutableListOf<String>()
-        val exporter = FakeLogExportConfig().stdoutLogRecordExporter {
+        val exporter = FakeExportConfig().stdoutLogRecordExporter {
             output.add(it)
         }
 
@@ -47,7 +47,7 @@ internal class StdoutLogRecordExporterTest {
     @Test
     fun testExportLogRecord() = runTest {
         val output = mutableListOf<String>()
-        val exporter = FakeLogExportConfig().stdoutLogRecordExporter {
+        val exporter = FakeExportConfig().stdoutLogRecordExporter {
             output.add(it)
         }
 
@@ -117,7 +117,7 @@ internal class StdoutLogRecordExporterTest {
     fun testItemThatFailsToFormatDoesNotStopTheBatch() = runTest {
         val output = mutableListOf<String>()
         val errorHandler = FakeSdkErrorHandler()
-        val exporter = FakeLogExportConfig(sdkErrorHandler = errorHandler).stdoutLogRecordExporter(output::add)
+        val exporter = FakeExportConfig(sdkErrorHandler = errorHandler).stdoutLogRecordExporter(output::add)
         val throwingLogRecord = object : LogRecordData by FakeLogRecordData() {
             override val severityText: String get() = error("boom")
         }
