@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.propagation
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.rootContext
-import io.opentelemetry.kotlin.init.B3Format
 import io.opentelemetry.kotlin.tracing.createSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals

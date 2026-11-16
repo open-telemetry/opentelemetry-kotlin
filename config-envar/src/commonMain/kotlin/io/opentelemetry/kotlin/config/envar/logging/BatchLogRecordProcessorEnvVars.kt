@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.config.envar.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.BatchLogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 
 /**
