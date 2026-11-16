@@ -4,11 +4,11 @@ import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaTracer
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.error.userCode
-import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.model.CompatSpanCreationState
@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit
 
 internal class TracerAdapter(
     private val tracer: OtelJavaTracer,
-    private val contextFactory: ContextFactory,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Tracer {
 
@@ -38,7 +37,7 @@ internal class TracerAdapter(
         action: (SpanCreationAction.() -> Unit)?
     ): Span {
         val parentCtx = sdkErrorHandler.sdkGuardOrDefault(null, "Tracer.startSpan failed") {
-            (parentContext ?: contextFactory.current()).toOtelJavaContext()
+            (parentContext ?: currentContext()).toOtelJavaContext()
         } ?: return invalidSpan
 
         return sdkErrorHandler.sdkGuardOrDefault(null, "Tracer.startSpan failed") {

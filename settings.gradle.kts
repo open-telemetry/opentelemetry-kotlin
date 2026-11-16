@@ -20,7 +20,6 @@ include(
     ":error-handling",
     ":propagation-utils",
     ":api-ext",
-    ":context-impl",
     ":context-single-slot",
     ":context-threadlocal",
     ":context-coroutines",

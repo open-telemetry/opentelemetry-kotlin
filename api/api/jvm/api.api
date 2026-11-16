@@ -3,11 +3,13 @@ public abstract interface annotation class io/opentelemetry/kotlin/ExperimentalA
 
 public abstract interface class io/opentelemetry/kotlin/OpenTelemetry {
 	public abstract fun getConfigProvider ()Lio/opentelemetry/kotlin/config/ConfigProvider;
-	public abstract fun getContext ()Lio/opentelemetry/kotlin/factory/ContextFactory;
 	public abstract fun getLoggerProvider ()Lio/opentelemetry/kotlin/logging/LoggerProvider;
 	public abstract fun getMeterProvider ()Lio/opentelemetry/kotlin/metrics/MeterProvider;
 	public abstract fun getPropagator ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public abstract fun getTracerProvider ()Lio/opentelemetry/kotlin/tracing/TracerProvider;
+}
+
+public abstract interface annotation class io/opentelemetry/kotlin/OpenTelemetryDsl : java/lang/annotation/Annotation {
 }
 
 public abstract interface annotation class io/opentelemetry/kotlin/ThreadSafe : java/lang/annotation/Annotation {
@@ -179,11 +181,6 @@ public final class io/opentelemetry/kotlin/context/RootContextEntrypointKt {
 
 public abstract interface class io/opentelemetry/kotlin/context/Scope {
 	public abstract fun detach ()Z
-}
-
-public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
-	public abstract fun current ()Lio/opentelemetry/kotlin/context/Context;
-	public abstract fun root ()Lio/opentelemetry/kotlin/context/Context;
 }
 
 public final class io/opentelemetry/kotlin/init/B3Format : java/lang/Enum {
@@ -548,8 +545,5 @@ public abstract interface class io/opentelemetry/kotlin/tracing/TracerProvider {
 
 public final class io/opentelemetry/kotlin/tracing/TracerProvider$DefaultImpls {
 	public static synthetic fun getTracer$default (Lio/opentelemetry/kotlin/tracing/TracerProvider;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/Tracer;
-}
-
-public abstract interface annotation class io/opentelemetry/kotlin/tracing/TracingDsl : java/lang/annotation/Annotation {
 }
 

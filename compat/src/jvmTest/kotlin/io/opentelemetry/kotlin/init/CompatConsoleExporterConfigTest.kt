@@ -103,7 +103,13 @@ internal class CompatConsoleExporterConfigTest {
         val dslProcessor = FakeSpanProcessor()
         val provider = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             export { dslProcessor }
-            applyResolvedProcessor(SpanProcessorBehavior(console = ConsoleExporterBehavior()))
+            applyResolvedProcessor(
+                SpanProcessorBehavior(
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(console = ConsoleExporterBehavior()),
+                    )
+                )
+            )
         }.build(clock, idGenerator, spanLimits = noSpanLimits)
         provider.getTracer("test").startSpan("dsl-span").end()
         assertEquals(1, dslProcessor.endCalls.size)

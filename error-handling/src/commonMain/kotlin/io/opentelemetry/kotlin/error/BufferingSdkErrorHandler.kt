@@ -33,6 +33,7 @@ internal class BufferingSdkErrorHandler : SdkErrorHandler {
         try {
             route(error)
         } catch (ignored: Throwable) {
+            ignored.restoreCaughtInterruptIfNeeded()
         }
     }
 
@@ -49,6 +50,7 @@ internal class BufferingSdkErrorHandler : SdkErrorHandler {
                 else -> claim(installed)
             }
         } catch (ignored: Throwable) {
+            ignored.restoreCaughtInterruptIfNeeded()
             null
         } ?: return false
 
@@ -105,6 +107,7 @@ internal class BufferingSdkErrorHandler : SdkErrorHandler {
         try {
             deliver(target, error())
         } catch (ignored: Throwable) {
+            ignored.restoreCaughtInterruptIfNeeded()
         }
     }
 
@@ -116,6 +119,7 @@ internal class BufferingSdkErrorHandler : SdkErrorHandler {
         try {
             target.delegate.onError(error)
         } catch (thrown: Throwable) {
+            thrown.restoreCaughtInterruptIfNeeded()
             reportDelegateFailure(target, thrown)
         } finally {
             DeliveryReentrancyGuard.setActive(false)
@@ -136,6 +140,7 @@ internal class BufferingSdkErrorHandler : SdkErrorHandler {
                 )
             )
         } catch (ignored: Throwable) {
+            ignored.restoreCaughtInterruptIfNeeded()
         }
     }
 
