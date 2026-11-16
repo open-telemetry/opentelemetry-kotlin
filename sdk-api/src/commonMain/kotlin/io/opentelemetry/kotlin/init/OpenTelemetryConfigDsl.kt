@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.init
 
+import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.IdGenerator
@@ -63,6 +64,12 @@ public interface OpenTelemetryConfigDsl : ResourceConfigDsl, ConfigFileDsl {
      * https://opentelemetry.io/docs/specs/otel/trace/sdk/#id-generators
      */
     public fun idGenerator(action: () -> IdGenerator)
+
+    /**
+     * Configures the [Clock] used to timestamp telemetry. If this is not set the SDK uses the
+     * platform's wall clock.
+     */
+    public fun clock(clock: Clock)
 
     /**
      * Configures the [SdkErrorHandler] that is notified of errors and misuse detected by the SDK.

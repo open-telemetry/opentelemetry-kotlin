@@ -14,8 +14,8 @@ import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
 import io.opentelemetry.kotlin.tracing.ext.asOtelJavaSpan
-import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
+import io.opentelemetry.kotlin.tracing.toOtelKotlinSpanContext
 import java.util.WeakHashMap
 
 /**

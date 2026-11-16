@@ -14,7 +14,7 @@ internal class CompatOpenTelemetryConfigTest {
     @Test
     fun `shutdown timeout accepts positive values and rejects nonpositive values`() {
         val errors = FakeSdkErrorHandler()
-        val cfg = CompatOpenTelemetryConfig(clock).apply { errorHandler(errors) }
+        val cfg = CompatOpenTelemetryConfig().apply { errorHandler(errors) }
         assertEquals(5000L, cfg.shutdownTimeoutMs)
         cfg.shutdownTimeout(6000)
         assertEquals(6000L, cfg.shutdownTimeoutMs)
@@ -29,7 +29,7 @@ internal class CompatOpenTelemetryConfigTest {
     @Test
     fun `propagator uses the supplied custom propagator`() {
         val custom = FakeTextMapPropagator()
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.propagator { custom }
         assertSame(custom, cfg.createPropagator())
     }
@@ -37,7 +37,7 @@ internal class CompatOpenTelemetryConfigTest {
     @Test
     fun `propagator supplier is invoked lazily`() {
         var calls = 0
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.propagator {
             calls++
             FakeTextMapPropagator()
@@ -50,7 +50,7 @@ internal class CompatOpenTelemetryConfigTest {
     @Test
     fun `throwing propagator supplier falls back to noop`() {
         val errors = FakeSdkErrorHandler()
-        val cfg = CompatOpenTelemetryConfig(clock).apply { errorHandler(errors) }
+        val cfg = CompatOpenTelemetryConfig().apply { errorHandler(errors) }
         cfg.propagator { error("boom") }
         assertEquals(emptyList(), cfg.createPropagator().fields().toList())
         assertEquals(1, errors.userCodeErrors.size)
@@ -58,12 +58,12 @@ internal class CompatOpenTelemetryConfigTest {
 
     @Test
     fun `propagator defaults to noop`() {
-        assertEquals(emptyList(), CompatOpenTelemetryConfig(clock).createPropagator().fields().toList())
+        assertEquals(emptyList(), CompatOpenTelemetryConfig().createPropagator().fields().toList())
     }
 
     @Test
     fun `span limits dsl is reflected in resolved behavior`() {
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.tracerProvider {
             spanLimits {
                 attributeCountLimit = 8
@@ -88,7 +88,7 @@ internal class CompatOpenTelemetryConfigTest {
 
     @Test
     fun `log limits dsl is reflected in resolved behavior`() {
-        val cfg = CompatOpenTelemetryConfig(clock)
+        val cfg = CompatOpenTelemetryConfig()
         cfg.loggerProvider {
             logLimits {
                 attributeCountLimit = 8

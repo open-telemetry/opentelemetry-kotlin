@@ -30,21 +30,17 @@ import io.opentelemetry.kotlin.tracing.TracerProviderImpl
 public fun createOpenTelemetry(
 
     /**
-     * Defines the [Clock] implementation used by OpenTelemetry.
-     */
-    clock: Clock = ClockImpl(),
-
-    /**
      * Defines configuration for OpenTelemetry.
      */
     config: (OpenTelemetryConfigDsl.() -> Unit)? = null
 ): OpenTelemetrySdk {
-    val cfg = OpenTelemetryConfigImpl(clock)
+    val cfg = OpenTelemetryConfigImpl()
     if (config != null) {
         cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
             cfg.config()
         }
     }
+    val clock = cfg.clock
     val resourceFactory = ResourceFactoryImpl(cfg.sdkErrorHandler)
     val behaviorReader = defaultBehaviorReader(
         sdkErrorHandler = cfg.sdkErrorHandler,
@@ -88,8 +84,6 @@ public fun createOpenTelemetry(
         ),
         configProvider = ConfigProviderImpl { behaviorReader.readInstrumentation(configFilePath) },
         clock = clock,
-        idGenerator = idGenerator,
-        resource = resourceFactory,
         propagator = cfg.createPropagator(),
         installedStorage = installedStorage,
         ownsErrorSink = ownsErrorSink,
@@ -105,7 +99,7 @@ public fun createOpenTelemetry(
  */
 private fun installContextStorage(cfg: OpenTelemetryConfigImpl): CurrentContextStorage? {
     val contextConfig = cfg.contextConfig
-    val storage = contextConfig.generateStorage()
+    val storage = contextConfig.generateStorage(cfg.sdkErrorHandler)
     if (installContextStorage(storage)) {
         return storage
     }

@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.context.installContextStorage
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.context.uninstallContextStorage
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.factory.NoopResourceFactory
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.metrics.NoopObservableDoubleMeasurement
 import io.opentelemetry.kotlin.metrics.NoopObservableLongMeasurement
@@ -295,8 +296,7 @@ internal class NoopTests {
 
     @Test
     fun testNoopResource() {
-        val otel = NoopOpenTelemetrySdk
-        val resourceFactory = otel.resource
+        val resourceFactory = NoopResourceFactory
 
         // empty resource has no attributes and no schemaUrl
         val empty = resourceFactory.empty

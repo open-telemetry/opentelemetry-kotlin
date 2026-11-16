@@ -1,11 +1,9 @@
 package io.opentelemetry.kotlin
 
-import io.opentelemetry.kotlin.clock.ClockAdapter
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.reportError
-import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.init.CompatOpenTelemetryConfig
 import io.opentelemetry.kotlin.init.CompatSdkConfigFactory
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
@@ -25,15 +23,15 @@ import io.opentelemetry.kotlin.init.defaultCompatBehaviorReader
  */
 @ExperimentalApi
 public fun createCompatOpenTelemetry(
-    clock: Clock = ClockAdapter(io.opentelemetry.sdk.common.Clock.getDefault()),
     config: (OpenTelemetryConfigDsl.() -> Unit)? = null
 ): OpenTelemetrySdk {
-    val cfg = CompatOpenTelemetryConfig(clock)
+    val cfg = CompatOpenTelemetryConfig()
     if (config != null) {
         cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
             cfg.config()
         }
     }
+    val clock = cfg.clock
     if (cfg.contextConfigured) {
         cfg.sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
@@ -66,8 +64,6 @@ public fun createCompatOpenTelemetry(
         loggerProvider = loggerProvider,
         meterProvider = meterProvider,
         clock = clock,
-        idGenerator = configFactory.idGenerator,
-        resource = CompatResourceFactory,
         propagator = cfg.createPropagator(),
         sdkErrorHandler = cfg.sdkErrorHandler,
         processWideState = processWideState,

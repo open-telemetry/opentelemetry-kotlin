@@ -10,8 +10,10 @@ kotlin {
     sourceSets {
         getByName("jvmAndAndroidMain") {
             dependencies {
-                api(project(":core"))
-                implementation(project(":sdk-api"))
+                api(project(":sdk-api"))
+                api(project(":api-ext"))
+                api(project(":noop"))
+                api(project(":exporters-core"))
                 implementation(project(":sdk-common"))
                 implementation(project(":config"))
                 implementation(project(":config-dsl"))
@@ -31,6 +33,7 @@ kotlin {
         jvmTest {
             dependencies {
                 implementation(project(":context-single-slot"))
+                implementation(project(":propagator-b3"))
                 implementation(project(":test-fakes"))
                 implementation(project(":integration-test"))
                 implementation(libs.kotlinx.coroutines.test)

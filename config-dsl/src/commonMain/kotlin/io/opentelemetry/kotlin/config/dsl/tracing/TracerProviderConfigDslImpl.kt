@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
-import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 
 /**
@@ -18,7 +18,7 @@ class TracerProviderConfigDslImpl : BehaviorSupplier<TracerProviderBehavior> {
     private var sampler: SamplerBehavior? = null
 
     @Suppress("UnusedParameter")
-    fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
+    fun export(action: ExportConfigDsl.() -> SpanProcessor) {
         if (processor == null) {
             processor = SpanProcessorBehavior()
         }

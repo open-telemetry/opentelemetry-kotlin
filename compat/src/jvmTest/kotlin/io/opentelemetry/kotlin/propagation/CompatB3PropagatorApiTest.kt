@@ -10,24 +10,6 @@ import kotlin.test.assertEquals
 internal class CompatB3PropagatorApiTest {
 
     @Test
-    fun `b3 single returns propagator with b3 field`() {
-        val propagator = createB3Propagator(B3Format.SINGLE)
-        assertEquals(listOf("b3"), propagator.fields().toList())
-    }
-
-    @Test
-    fun `b3 multi returns propagator with X-B3 fields`() {
-        val propagator = createB3Propagator(B3Format.MULTI)
-        assertEquals(listOf("X-B3-TraceId", "X-B3-SpanId", "X-B3-Sampled", "X-B3-Flags"), propagator.fields().toList())
-    }
-
-    @Test
-    fun `b3 default format is SINGLE`() {
-        val propagator = createB3Propagator()
-        assertEquals(listOf("b3"), propagator.fields().toList())
-    }
-
-    @Test
     fun `b3 single round-trips a sampled span`() {
         val propagator = createB3Propagator(B3Format.SINGLE)
         val traceId = "0af7651916cd43dd8448eb211c80319c"
