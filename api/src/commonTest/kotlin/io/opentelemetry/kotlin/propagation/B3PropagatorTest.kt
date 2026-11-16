@@ -39,7 +39,36 @@ internal class B3PropagatorTest {
 
     @Test
     fun `multi format fields returns X-B3 headers`() {
-        assertEquals(listOf("X-B3-TraceId", "X-B3-SpanId", "X-B3-Sampled"), multiPropagator.fields().toList())
+        assertEquals(
+            listOf("X-B3-TraceId", "X-B3-SpanId", "X-B3-Sampled", "X-B3-Flags"),
+            multiPropagator.fields().toList()
+        )
+    }
+
+    @Test
+    fun `fields covers every header inject writes`() {
+        val singleCarrier = mutableMapOf<String, String>()
+        singlePropagator.inject(debugContext(), singleCarrier, FakeTextMapSetter)
+        assertTrue(singlePropagator.fields().containsAll(singleCarrier.keys))
+
+        val multiCarrier = mutableMapOf<String, String>()
+        multiPropagator.inject(debugContext(), multiCarrier, FakeTextMapSetter)
+        assertTrue(multiPropagator.fields().containsAll(multiCarrier.keys))
+    }
+
+    @Test
+    fun `clearing multi fields removes a stale debug flag before reuse`() {
+        val carrier = mutableMapOf<String, String>()
+        multiPropagator.inject(debugContext(), carrier, FakeTextMapSetter)
+        assertEquals("1", carrier["X-B3-Flags"])
+
+        multiPropagator.fields().forEach(carrier::remove)
+        multiPropagator.inject(
+            rootContext().storeSpanContext(createSpanContext(traceId, spanId) { isSampled = true }),
+            carrier,
+            FakeTextMapSetter,
+        )
+        assertNull(carrier["X-B3-Flags"])
     }
 
     @Test

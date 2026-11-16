@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaReadWriteSpan
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.OtelJavaAttributesMutator
 import io.opentelemetry.kotlin.attributes.attributeSink
-import io.opentelemetry.kotlin.attributes.compatAttributes
+import io.opentelemetry.kotlin.attributes.compatOtelJavaAttributes
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.tracing.SpanContext
@@ -54,8 +54,7 @@ internal class ReadWriteSpanAdapter(
         spanContext: SpanContext,
         attributes: (AttributesMutator.() -> Unit)?
     ) = sdkErrorHandler.sdkGuard("Span.addLink failed") {
-        val container = compatAttributes(attributes)
-        impl.addLink(spanContext.toOtelJavaSpanContext(), container.otelJavaAttributes())
+        impl.addLink(spanContext.toOtelJavaSpanContext(), compatOtelJavaAttributes(attributes))
     }
 
     override fun addEvent(
@@ -63,11 +62,11 @@ internal class ReadWriteSpanAdapter(
         timestamp: Long,
         attributes: (AttributesMutator.() -> Unit)?
     ) = sdkErrorHandler.sdkGuard("Span.addEvent failed") {
-        val container = compatAttributes(attributes)
+        val otelJavaAttributes = compatOtelJavaAttributes(attributes)
         if (timestamp > 0) {
-            impl.addEvent(name, container.otelJavaAttributes(), timestamp, TimeUnit.NANOSECONDS)
+            impl.addEvent(name, otelJavaAttributes, timestamp, TimeUnit.NANOSECONDS)
         } else {
-            impl.addEvent(name, container.otelJavaAttributes())
+            impl.addEvent(name, otelJavaAttributes)
         }
     }
 }

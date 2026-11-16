@@ -68,4 +68,14 @@ internal object NoopMeter : Meter {
         description: String?,
         vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
     ): ObservableDoubleGauge = NoopObservableDoubleGauge(name, unit, description)
+
+    override fun batchCallback(
+        measurement: ObservableMeasurement,
+        vararg additionalMeasurements: ObservableMeasurement,
+        callback: () -> Unit,
+    ): AutoCloseable = NoopBatchCallback
+}
+
+private object NoopBatchCallback : AutoCloseable {
+    override fun close() = Unit
 }
