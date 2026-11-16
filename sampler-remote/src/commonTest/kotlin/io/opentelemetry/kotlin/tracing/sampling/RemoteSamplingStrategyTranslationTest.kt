@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.attributes.EmptyAttributeContainer
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.hexToByteArray
@@ -22,9 +22,18 @@ internal class RemoteSamplingStrategyTranslationTest {
             traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = name,
             spanKind = SpanKind.INTERNAL,
-            attributes = AttributesModel(),
+            attributes = EmptyAttributeContainer,
             links = emptyList(),
         ).decision
+
+    private fun samplerForRate(rate: Double): Sampler =
+        FakeSampler(
+            decision = if (rate == 0.0) {
+                SamplingResult.Decision.DROP
+            } else {
+                SamplingResult.Decision.RECORD_AND_SAMPLE
+            },
+        )
 
     @Test
     fun probabilisticProducesSampler() {
@@ -33,7 +42,7 @@ internal class RemoteSamplingStrategyTranslationTest {
             probabilisticSampling = ProbabilisticSamplingStrategy(0.5),
         )
 
-        val sampler = assertNotNull(strategy.toSampler(errors))
+        val sampler = assertNotNull(strategy.toSampler(errors, ::samplerForRate))
 
         assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, sampler.sample("span"))
         assertFalse(errors.hasErrors())
@@ -47,7 +56,7 @@ internal class RemoteSamplingStrategyTranslationTest {
             probabilisticSampling = ProbabilisticSamplingStrategy(0.0),
         )
 
-        val sampler = assertNotNull(strategy.toSampler(errors))
+        val sampler = assertNotNull(strategy.toSampler(errors, ::samplerForRate))
 
         assertEquals(SamplingResult.Decision.DROP, sampler.sample("span"))
         assertFalse(errors.hasErrors())
@@ -60,7 +69,7 @@ internal class RemoteSamplingStrategyTranslationTest {
             probabilisticSampling = ProbabilisticSamplingStrategy(1.5),
         )
 
-        assertNull(strategy.toSampler(errors))
+        assertNull(strategy.toSampler(errors, ::samplerForRate))
         assertEquals(1, errors.apiMisuses.size)
     }
 
@@ -71,7 +80,7 @@ internal class RemoteSamplingStrategyTranslationTest {
             probabilisticSampling = ProbabilisticSamplingStrategy(-0.5),
         )
 
-        assertNull(strategy.toSampler(errors))
+        assertNull(strategy.toSampler(errors, ::samplerForRate))
         assertTrue(errors.hasErrors())
     }
 
@@ -82,7 +91,7 @@ internal class RemoteSamplingStrategyTranslationTest {
             probabilisticSampling = ProbabilisticSamplingStrategy(1e-30),
         )
 
-        assertNull(strategy.toSampler(errors))
+        assertNull(strategy.toSampler(errors, ::samplerForRate))
         assertTrue(errors.hasErrors())
     }
 
@@ -93,7 +102,7 @@ internal class RemoteSamplingStrategyTranslationTest {
             rateLimitingSampling = RateLimitingSamplingStrategy(5),
         )
 
-        assertNull(strategy.toSampler(errors))
+        assertNull(strategy.toSampler(errors, ::samplerForRate))
         assertEquals(1, errors.apiMisuses.size)
     }
 
@@ -101,7 +110,7 @@ internal class RemoteSamplingStrategyTranslationTest {
     fun emptyStrategyReturnsNull() {
         val errors = FakeSdkErrorHandler()
 
-        assertNull(RemoteSamplingStrategy().toSampler(errors))
+        assertNull(RemoteSamplingStrategy().toSampler(errors, ::samplerForRate))
         assertFalse(errors.hasErrors())
     }
 
@@ -117,7 +126,7 @@ internal class RemoteSamplingStrategyTranslationTest {
             ),
         )
 
-        val sampler = assertNotNull(strategy.toSampler(errors))
+        val sampler = assertNotNull(strategy.toSampler(errors, ::samplerForRate))
 
         assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, sampler.sample("/sampled"))
         assertEquals(SamplingResult.Decision.DROP, sampler.sample("/other"))
@@ -131,7 +140,7 @@ internal class RemoteSamplingStrategyTranslationTest {
             operationSampling = PerOperationSamplingStrategies(defaultSamplingProbability = 1.0),
         )
 
-        val sampler = assertNotNull(strategy.toSampler(errors))
+        val sampler = assertNotNull(strategy.toSampler(errors, ::samplerForRate))
 
         assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, sampler.sample("anything"))
         assertFalse(errors.hasErrors())
@@ -144,7 +153,7 @@ internal class RemoteSamplingStrategyTranslationTest {
             operationSampling = PerOperationSamplingStrategies(defaultSamplingProbability = null),
         )
 
-        assertNull(strategy.toSampler(errors))
+        assertNull(strategy.toSampler(errors, ::samplerForRate))
         assertTrue(errors.hasErrors())
     }
 
@@ -160,7 +169,7 @@ internal class RemoteSamplingStrategyTranslationTest {
             ),
         )
 
-        assertNull(strategy.toSampler(errors))
+        assertNull(strategy.toSampler(errors, ::samplerForRate))
         assertTrue(errors.hasErrors())
     }
 
@@ -176,7 +185,7 @@ internal class RemoteSamplingStrategyTranslationTest {
             ),
         )
 
-        assertNull(strategy.toSampler(errors))
+        assertNull(strategy.toSampler(errors, ::samplerForRate))
         assertTrue(errors.hasErrors())
     }
 
@@ -190,7 +199,7 @@ internal class RemoteSamplingStrategyTranslationTest {
             ),
         )
 
-        val sampler = assertNotNull(strategy.toSampler(errors))
+        val sampler = assertNotNull(strategy.toSampler(errors, ::samplerForRate))
 
         assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, sampler.sample("anything"))
         assertEquals(1, errors.apiMisuses.size)
@@ -208,7 +217,7 @@ internal class RemoteSamplingStrategyTranslationTest {
             ),
         )
 
-        assertNotNull(strategy.toSampler(errors))
+        assertNotNull(strategy.toSampler(errors, ::samplerForRate))
         assertFalse(errors.hasErrors())
     }
 
@@ -220,7 +229,7 @@ internal class RemoteSamplingStrategyTranslationTest {
             operationSampling = PerOperationSamplingStrategies(defaultSamplingProbability = 1.0),
         )
 
-        val sampler = assertNotNull(strategy.toSampler(errors))
+        val sampler = assertNotNull(strategy.toSampler(errors, ::samplerForRate))
 
         assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, sampler.sample("anything"))
     }
@@ -233,7 +242,7 @@ internal class RemoteSamplingStrategyTranslationTest {
             rateLimitingSampling = RateLimitingSamplingStrategy(5),
         )
 
-        val sampler = assertNotNull(strategy.toSampler(errors))
+        val sampler = assertNotNull(strategy.toSampler(errors, ::samplerForRate))
 
         assertEquals(SamplingResult.Decision.DROP, sampler.sample("anything"))
         assertFalse(errors.hasErrors())
