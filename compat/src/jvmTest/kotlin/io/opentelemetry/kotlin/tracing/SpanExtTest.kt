@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.assertions.assertSpanContextsMatch
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
-import io.opentelemetry.kotlin.tracing.ext.storeInContext
 import io.opentelemetry.kotlin.tracing.model.SpanAdapter
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -53,7 +52,7 @@ internal class SpanExtTest {
             NoopSdkErrorHandler,
         )
         val root = rootContext()
-        val ctx = span.storeInContext(root)
+        val ctx = root.storeSpan(span)
         val observed = root.extractSpan().spanContext
         assertSpanContextsMatch(createInvalidSpanContext(), observed)
 

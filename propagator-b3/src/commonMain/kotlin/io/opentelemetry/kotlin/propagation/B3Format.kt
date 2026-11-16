@@ -1,4 +1,4 @@
-package io.opentelemetry.kotlin.init
+package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 

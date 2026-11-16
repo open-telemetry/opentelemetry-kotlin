@@ -28,10 +28,10 @@ private fun AnyValue.transform(
     }
     return when (this) {
         is AnyValue.ListValue -> path.visit(this) {
-            AnyValue.ListValue(values.map { it.transform(maxDepth, sanitize, path) })
+            AnyValue.ListValue(value.map { it.transform(maxDepth, sanitize, path) })
         }
         is AnyValue.MapValue -> path.visit(this) {
-            AnyValue.MapValue(values.mapValues { it.value.transform(maxDepth, sanitize, path) })
+            AnyValue.MapValue(value.mapValues { it.value.transform(maxDepth, sanitize, path) })
         }
         is AnyValue.BytesValue -> sanitize(this).let { result ->
             when {

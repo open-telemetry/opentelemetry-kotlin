@@ -91,7 +91,7 @@ public sealed class AnyValue {
         override fun toString(): String = "BytesValue(size=${value.size})"
     }
 
-    public class ListValue(public val values: List<AnyValue>) : AnyValue() {
+    public class ListValue(public val value: List<AnyValue>) : AnyValue() {
         override fun equals(other: Any?): Boolean {
             if (this === other) {
                 return true
@@ -99,15 +99,15 @@ public sealed class AnyValue {
             if (other !is ListValue) {
                 return false
             }
-            return values == other.values
+            return value == other.value
         }
 
-        override fun hashCode(): Int = values.hashCode()
+        override fun hashCode(): Int = value.hashCode()
 
-        override fun toString(): String = "ListValue(values=$values)"
+        override fun toString(): String = "ListValue(value=$value)"
     }
 
-    public class MapValue(public val values: Map<String, AnyValue>) : AnyValue() {
+    public class MapValue(public val value: Map<String, AnyValue>) : AnyValue() {
         override fun equals(other: Any?): Boolean {
             if (this === other) {
                 return true
@@ -115,11 +115,11 @@ public sealed class AnyValue {
             if (other !is MapValue) {
                 return false
             }
-            return values == other.values
+            return value == other.value
         }
 
-        override fun hashCode(): Int = values.hashCode()
+        override fun hashCode(): Int = value.hashCode()
 
-        override fun toString(): String = "MapValue(values=$values)"
+        override fun toString(): String = "MapValue(value=$value)"
     }
 }

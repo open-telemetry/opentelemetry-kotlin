@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.rootContext
-import io.opentelemetry.kotlin.init.B3Format
 import org.junit.Test
 import kotlin.test.assertEquals
 
