@@ -6,7 +6,7 @@ import okio.Path
 /**
  * Returns the directory used to store telemetry for the given [PersistedTelemetryType].
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal fun getTelemetryStorageDirectory(
     cacheDirectory: Path,
     type: PersistedTelemetryType

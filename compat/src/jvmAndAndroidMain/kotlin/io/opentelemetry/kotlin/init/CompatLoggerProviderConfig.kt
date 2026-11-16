@@ -19,6 +19,7 @@ import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.logging.LogExportConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.ExportConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.logging.LogLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.logging.LoggerConfigurator
@@ -35,7 +36,7 @@ import java.util.concurrent.TimeUnit
 import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor as OtelJavaBatchLogRecordProcessor
 import io.opentelemetry.sdk.logs.export.SimpleLogRecordProcessor as OtelJavaSimpleLogRecordProcessor
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class CompatLoggerProviderConfig(
     private val clock: Clock,
     private val sdkErrorHandler: SdkErrorHandler,
@@ -67,9 +68,9 @@ internal class CompatLoggerProviderConfig(
         resourceAttrs.apply { setAttributeMap(map) }
     }
 
-    override fun export(action: LogExportConfigDsl.() -> LogRecordProcessor) {
+    override fun export(action: ExportConfigDsl.() -> LogRecordProcessor) {
         exportConfigured = true
-        val processor = LogExportConfigDslImpl(clock, sdkErrorHandler).action()
+        val processor = ExportConfigDslImpl(clock, sdkErrorHandler).action()
         processors.add(processor)
     }
 

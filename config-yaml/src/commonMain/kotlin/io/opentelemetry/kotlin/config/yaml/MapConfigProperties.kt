@@ -59,7 +59,7 @@ private val EMPTY_CONFIG_PROPERTIES: ConfigProperties = MapConfigProperties(empt
 /**
  * Returns a [ConfigProperties] for a copy of this mapping node, or an empty one if the node is absent.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun Map<String, Any?>?.toConfigProperties(): ConfigProperties =
     this?.let { MapConfigProperties(it.toMap()) } ?: EMPTY_CONFIG_PROPERTIES
 

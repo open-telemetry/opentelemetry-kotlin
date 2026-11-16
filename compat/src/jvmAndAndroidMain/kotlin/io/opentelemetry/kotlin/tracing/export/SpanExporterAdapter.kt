@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.awaitOperationResultCode
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.data.SpanData
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanData
+import io.opentelemetry.kotlin.tracing.data.toOtelJavaSpanData
 
 internal class SpanExporterAdapter(
     private val impl: OtelJavaSpanExporter

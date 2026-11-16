@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.behavior.mergeNode
  *
  * https://opentelemetry.io/docs/specs/otel/logs/sdk/#simple-processor
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class SimpleLogRecordProcessorBehavior(
 
     /**

@@ -38,6 +38,9 @@ jobs:
         with:
           cache-disabled: true
 
+      - name: Build logic tests
+        run: ./gradlew :buildSrc:test --warn
+
       # By default Kotlin/Native compiles inside the Gradle daemon, where parallel compiles and links
       # exhaust the daemon heap. Running it in separate processes avoids GC thrashing.
       - name: Gradle Build

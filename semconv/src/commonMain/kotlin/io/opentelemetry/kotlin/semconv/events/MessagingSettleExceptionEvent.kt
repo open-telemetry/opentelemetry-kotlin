@@ -20,7 +20,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * Instrumentations SHOULD set the severity to WARN (severity number 13) when recording this event.
 * Instrumentations MAY provide a configuration option to populate exception events with the attributes captured on the corresponding messaging settle span.
 */
-@ExperimentalApi
 @IncubatingApi
 public class MessagingSettleExceptionEvent(
     /**
@@ -49,6 +48,7 @@ public class MessagingSettleExceptionEvent(
     public val exceptionType: String? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

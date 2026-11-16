@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
  * Reads OTLP HTTP Log Exporter-specific environment variables and maps them to the corresponding
  * behavior configuration.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class OtlpHttpLogRecordExporterEnvVars(private val reader: ReportingEnvVarReader) {
     fun toBehavior(): OtlpHttpLogsExporterBehavior {
         val signalEndpoint = reader.readString(OTLP_LOGS_ENDPOINT)

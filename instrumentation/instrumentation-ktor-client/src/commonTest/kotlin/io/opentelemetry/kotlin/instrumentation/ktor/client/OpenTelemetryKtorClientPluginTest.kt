@@ -12,7 +12,7 @@ import io.opentelemetry.kotlin.createOpenTelemetry
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.SdkTracker
-import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -63,7 +63,7 @@ internal class OpenTelemetryKtorClientPluginTest {
         assertFails { client.get("http://example.com/x") }
 
         val span = spans.single()
-        assertTrue(span.hasEnded)
+        assertTrue(span.isEnded)
     }
 
     @Test
@@ -160,7 +160,7 @@ internal class OpenTelemetryKtorClientPluginTest {
 
     private fun okEngine(): MockEngine = MockEngine { respond("ok", HttpStatusCode.OK) }
 
-    private fun fakeConfig(): TraceExportConfigDsl = object : TraceExportConfigDsl {
+    private fun fakeConfig(): ExportConfigDsl = object : ExportConfigDsl {
         override val clock: Clock = FakeClock()
         override val sdkErrorHandler = NoopSdkErrorHandler
     }

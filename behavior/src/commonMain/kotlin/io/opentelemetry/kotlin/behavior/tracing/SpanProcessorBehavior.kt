@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.behavior.mergeNode
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#spanprocessor
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class SpanProcessorBehavior(
     /**
      * Simple processor, which exports each span as it ends.

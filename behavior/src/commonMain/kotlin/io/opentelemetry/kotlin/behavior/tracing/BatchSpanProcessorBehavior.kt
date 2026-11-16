@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.behavior.Behavior
 import io.opentelemetry.kotlin.behavior.mergeNode
 
 /** Batching settings for a span processor, in milliseconds where applicable. */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class BatchSpanProcessorBehavior(
     /** Delay between consecutive exports, in milliseconds. Must be non-negative. */
     val scheduleDelay: Long? = null,

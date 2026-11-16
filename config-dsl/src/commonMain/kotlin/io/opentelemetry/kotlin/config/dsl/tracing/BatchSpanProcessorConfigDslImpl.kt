@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
 /**
  * Captures the batch span processor configured programmatically and maps it onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class BatchSpanProcessorConfigDslImpl : BehaviorSupplier<BatchSpanProcessorBehavior> {
     private var exporter: SpanExporterBehavior? = null
     var scheduleDelay: Long? = null

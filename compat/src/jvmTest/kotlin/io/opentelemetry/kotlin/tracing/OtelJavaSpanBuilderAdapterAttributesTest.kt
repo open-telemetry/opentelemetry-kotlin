@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

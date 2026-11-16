@@ -21,12 +21,6 @@ internal class TracingIdFactoryImplTest {
     }
 
     @Test
-    fun testInvalidId() {
-        assertEquals("00000000000000000000000000000000", factory.invalidTraceId.toHexString())
-        assertEquals("0000000000000000", factory.invalidSpanId.toHexString())
-    }
-
-    @Test
     fun testGeneratesRandomTraceIds() {
         assertTrue(factory.generatesRandomTraceIds)
     }

@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.logging.SeverityNumber
 /**
  * A semantic convention event that can be emitted as a log record.
  */
-@ExperimentalApi
 public interface OpenTelemetryEvent {
 
     /**
@@ -25,6 +24,7 @@ public interface OpenTelemetryEvent {
      * - [attributes] - additional attributes to associate with the event. These are applied after the
      *   event's own attributes, so they replace any with the same key.
      */
+    @OptIn(ExperimentalApi::class)
     public fun emit(
         logger: Logger,
         timestamp: Long = 0,

@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.init.AttributeLimitsConfigDsl
 /**
  * Captures the global attribute limits configured programmatically, and maps them onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class AttributeLimitsConfigDslImpl :
     AttributeLimitsConfigDsl,
     BehaviorSupplier<AttributeLimitsBehavior> {

@@ -15,7 +15,7 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
  *
  * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#exporter-selection
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class SpanExporterEnvVars(
     private val reader: ReportingEnvVarReader,
 ) {

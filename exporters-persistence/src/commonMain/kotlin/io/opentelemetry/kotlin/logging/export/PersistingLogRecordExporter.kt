@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.export.TelemetryRepository
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class PersistingLogRecordExporter(
     private val exporter: LogRecordExporter,
     private val repository: TelemetryRepository<LogRecordData>,

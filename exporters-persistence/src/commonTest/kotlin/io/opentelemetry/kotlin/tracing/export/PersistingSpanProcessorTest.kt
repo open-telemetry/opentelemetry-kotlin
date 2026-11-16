@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.export.FakeTelemetryFileSystem
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
-import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
@@ -584,7 +584,7 @@ internal class PersistingSpanProcessorTest {
         scheduleDelayMs: Long = 5000,
     ): SpanProcessor {
         val dispatcher = StandardTestDispatcher(testScheduler)
-        val cfg = FakeTraceExportConfig()
+        val cfg = FakeExportConfig()
         val processor = when {
             processors.isEmpty() -> throw UnsupportedOperationException("Processors cannot be empty")
             processors.size == 1 -> processors.single()
@@ -605,10 +605,10 @@ internal class PersistingSpanProcessorTest {
         )
     }
 
-    private class FakeTraceExportConfig(
+    private class FakeExportConfig(
         override val clock: Clock = FakeClock(),
         override val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
-    ) : TraceExportConfigDsl
+    ) : ExportConfigDsl
 
     private class DelayingSpanProcessor(
         private val flushDelayMs: Long = 0,

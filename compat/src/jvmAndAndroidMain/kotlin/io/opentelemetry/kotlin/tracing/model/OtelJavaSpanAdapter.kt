@@ -13,9 +13,9 @@ import io.opentelemetry.kotlin.attributes.setOtelJavaAttribute
 import io.opentelemetry.kotlin.attributes.setOtelJavaAttributes
 import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.tracing.Span
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
-import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
+import io.opentelemetry.kotlin.tracing.toOtelJavaSpanContext
+import io.opentelemetry.kotlin.tracing.toOtelKotlinSpanContext
 import java.util.concurrent.TimeUnit
 
 internal class OtelJavaSpanAdapter(

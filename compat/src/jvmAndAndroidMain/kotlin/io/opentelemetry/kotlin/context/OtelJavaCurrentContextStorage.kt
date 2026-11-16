@@ -18,7 +18,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaContextStorage
 @ExperimentalApi
 public fun createOtelJavaCurrentContextStorage(): CurrentContextStorage = OtelJavaCurrentContextStorage()
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class OtelJavaCurrentContextStorage : CurrentContextStorage {
 
     private val root = rootContext()

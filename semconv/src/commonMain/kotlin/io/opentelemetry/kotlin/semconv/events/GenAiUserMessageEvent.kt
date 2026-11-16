@@ -18,7 +18,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 *
 * none
 */
-@ExperimentalApi
 @IncubatingApi
 @Deprecated("Chat history is reported on `gen_ai.input.messages` attribute on spans or `gen_ai.client.inference.operation.details` event.")
 public class GenAiUserMessageEvent(
@@ -28,6 +27,7 @@ public class GenAiUserMessageEvent(
     public val genAiSystem: String? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.behavior
 
 import io.opentelemetry.kotlin.ExperimentalApi
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class BehaviorResolverImpl : BehaviorResolver {
 
     override fun resolve(

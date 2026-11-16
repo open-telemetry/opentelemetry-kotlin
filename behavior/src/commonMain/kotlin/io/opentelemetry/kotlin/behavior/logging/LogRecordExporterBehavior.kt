@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.behavior.mergeNode
  *
  * https://opentelemetry.io/docs/specs/otel/logs/sdk/#logrecordexporter
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class LogRecordExporterBehavior(
 
     /**
