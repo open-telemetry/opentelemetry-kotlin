@@ -10,6 +10,6 @@ so it lives in its own module. To use it with the SDK, pass it to `propagator { 
 
 ```kotlin
 propagator {
-    composite(w3cTraceContext(), createB3Propagator(B3Format.MULTI))
+    createCompositePropagator(createW3CTraceContextPropagator(), createB3Propagator(B3Format.MULTI))
 }
 ```

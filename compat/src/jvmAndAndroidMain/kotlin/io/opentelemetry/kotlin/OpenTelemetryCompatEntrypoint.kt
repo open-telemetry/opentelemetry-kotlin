@@ -64,7 +64,7 @@ public fun createCompatOpenTelemetry(
         loggerProvider = loggerProvider,
         meterProvider = meterProvider,
         clock = clock,
-        propagator = cfg.propagator,
+        propagator = cfg.createPropagator(),
         sdkErrorHandler = cfg.sdkErrorHandler,
         processWideState = processWideState,
         timeoutMs = cfg.shutdownTimeoutMs,

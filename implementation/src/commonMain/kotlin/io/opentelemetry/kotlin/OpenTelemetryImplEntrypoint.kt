@@ -84,7 +84,7 @@ public fun createOpenTelemetry(
         ),
         configProvider = ConfigProviderImpl { behaviorReader.readInstrumentation(configFilePath) },
         clock = cfg.clock,
-        propagator = cfg.propagator,
+        propagator = cfg.createPropagator(),
         installedStorage = installedStorage,
         ownsErrorSink = ownsErrorSink,
         timeoutMs = cfg.shutdownTimeoutMs,
