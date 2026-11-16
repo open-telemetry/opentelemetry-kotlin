@@ -4,10 +4,6 @@ import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.config.ConfigProvider
 import io.opentelemetry.kotlin.config.FakeConfigProvider
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.factory.FakeIdGenerator
-import io.opentelemetry.kotlin.factory.FakeResourceFactory
-import io.opentelemetry.kotlin.factory.IdGenerator
-import io.opentelemetry.kotlin.factory.ResourceFactory
 import io.opentelemetry.kotlin.logging.FakeLoggerProvider
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.FakeMeterProvider
@@ -23,8 +19,6 @@ class FakeOpenTelemetry : OpenTelemetrySdk {
     override val meterProvider: MeterProvider = FakeMeterProvider()
     override val configProvider: ConfigProvider = FakeConfigProvider()
     override val clock: Clock = FakeClock()
-    override val idGenerator: IdGenerator = FakeIdGenerator()
-    override val resource: ResourceFactory = FakeResourceFactory()
     override val propagator: TextMapPropagator = FakeTextMapPropagator()
 
     var forceFlushCount: Int = 0

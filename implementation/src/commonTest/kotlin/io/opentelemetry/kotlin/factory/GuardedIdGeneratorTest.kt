@@ -27,16 +27,12 @@ internal class GuardedIdGeneratorTest {
         val generator = GuardedIdGenerator(HostileIdGenerator, errorHandler, ids)
         assertContentEquals(ids.generateTraceIdBytes(), generator.generateTraceIdBytes())
         assertContentEquals(ids.generateSpanIdBytes(), generator.generateSpanIdBytes())
-        assertContentEquals(ids.invalidTraceId, generator.invalidTraceId)
-        assertContentEquals(ids.invalidSpanId, generator.invalidSpanId)
         assertFalse(generator.generatesRandomTraceIds)
 
         assertEquals(
             listOf(
                 "generateTraceIdBytes",
                 "generateSpanIdBytes",
-                "invalidTraceId",
-                "invalidSpanId",
                 "generatesRandomTraceIds",
             ).map { "IdGenerator.$it failed, using fallback" },
             errorHandler.userCodeErrors.map { it.message },
@@ -54,8 +50,6 @@ internal class GuardedIdGeneratorTest {
     private object HostileIdGenerator : IdGenerator {
         override fun generateSpanIdBytes(): ByteArray = error("boom")
         override fun generateTraceIdBytes(): ByteArray = error("boom")
-        override val invalidTraceId: ByteArray get() = error("boom")
-        override val invalidSpanId: ByteArray get() = error("boom")
         override val generatesRandomTraceIds: Boolean get() = error("boom")
     }
 }

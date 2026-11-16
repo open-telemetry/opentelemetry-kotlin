@@ -15,12 +15,6 @@ internal class GuardedIdGenerator(
     override fun generateTraceIdBytes(): ByteArray =
         guard("generateTraceIdBytes", fallback::generateTraceIdBytes, delegate::generateTraceIdBytes)
 
-    override val invalidTraceId: ByteArray
-        get() = guard("invalidTraceId", fallback::invalidTraceId, delegate::invalidTraceId)
-
-    override val invalidSpanId: ByteArray
-        get() = guard("invalidSpanId", fallback::invalidSpanId, delegate::invalidSpanId)
-
     override val generatesRandomTraceIds: Boolean
         get() = guard("generatesRandomTraceIds", { false }, delegate::generatesRandomTraceIds)
 

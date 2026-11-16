@@ -62,8 +62,6 @@ internal class CreateOpenTelemetryGuardedDependenciesTest {
     private object HostileIdGenerator : IdGenerator {
         override fun generateSpanIdBytes(): ByteArray = boom()
         override fun generateTraceIdBytes(): ByteArray = boom()
-        override val invalidTraceId: ByteArray = ByteArray(16)
-        override val invalidSpanId: ByteArray = ByteArray(8)
     }
 
     private object HostileSampler : Sampler {
