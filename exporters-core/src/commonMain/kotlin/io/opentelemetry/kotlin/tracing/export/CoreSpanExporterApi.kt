@@ -92,4 +92,4 @@ public fun ExportConfigDsl.batchSpanProcessor(
 @ExperimentalApi
 public fun ExportConfigDsl.stdoutSpanExporter(
     logger: (String) -> Unit = ::platformLog
-): SpanExporter = StdoutSpanExporter(logger)
+): SpanExporter = StdoutSpanExporter(sdkErrorHandler, logger)

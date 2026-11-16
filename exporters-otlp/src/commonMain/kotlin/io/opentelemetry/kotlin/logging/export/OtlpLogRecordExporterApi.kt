@@ -16,7 +16,7 @@ import io.opentelemetry.kotlin.init.ExportConfigDsl
  */
 @ExperimentalApi
 public fun ExportConfigDsl.otlpHttpLogRecordExporter(
-    block: OtlpHttpExporterConfigDsl.() -> Unit = {},
+    block: (OtlpHttpExporterConfigDsl.() -> Unit)? = null,
 ): LogRecordExporter =
     OtlpHttpLogRecordExporter(
         createOtlpHttpClient(sdkErrorHandler, OtlpEndpoint.Logs, block = block),

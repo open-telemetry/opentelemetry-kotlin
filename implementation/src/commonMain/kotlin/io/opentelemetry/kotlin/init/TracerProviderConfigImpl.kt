@@ -86,7 +86,7 @@ internal class TracerProviderConfigImpl(
     private fun processorFromBehavior(behavior: SpanProcessorBehavior?): SpanProcessor? {
         val simple = behavior?.simple
         val batch = behavior?.batch
-        val console = behavior?.console ?: batch?.exporter?.console ?: simple?.exporter?.console
+        val console = batch?.exporter?.console ?: simple?.exporter?.console
         if (console == null) {
             return null
         }

@@ -46,7 +46,7 @@ internal class CompatTracerErrorHandlingTest {
         val otel = createOtel(FakeSpanProcessor())
         val tracer = otel.tracerProvider.getTracer("test")
         val parent = tracer.startSpan("parent")
-        val parentCtx = otel.context.rootContext().storeSpan(parent)
+        val parentCtx = rootContext().storeSpan(parent)
         val span = tracer.startSpan("child", parentContext = parentCtx) { boom() }
 
         assertFalse(span.isRecording())

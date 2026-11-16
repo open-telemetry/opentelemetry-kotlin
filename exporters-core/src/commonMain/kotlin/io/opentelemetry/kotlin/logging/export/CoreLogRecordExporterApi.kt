@@ -93,4 +93,4 @@ public fun ExportConfigDsl.batchLogRecordProcessor(
 @ExperimentalApi
 public fun ExportConfigDsl.stdoutLogRecordExporter(
     logger: (String) -> Unit = ::platformLog
-): LogRecordExporter = StdoutLogRecordExporter(logger)
+): LogRecordExporter = StdoutLogRecordExporter(sdkErrorHandler, logger)
