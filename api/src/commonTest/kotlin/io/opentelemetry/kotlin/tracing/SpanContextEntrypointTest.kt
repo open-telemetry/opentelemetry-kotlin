@@ -45,6 +45,11 @@ internal class SpanContextEntrypointTest {
     }
 
     @Test
+    fun `invalid IDs without an action return the shared invalid SpanContext`() {
+        assertSame(createInvalidSpanContext(), createSpanContext(invalidTraceId, spanId = "zz"))
+    }
+
+    @Test
     fun testDefaults() {
         val spanContext = createSpanContext(traceId, spanId)
         assertEquals(traceId, spanContext.traceId)
