@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.propagation.utils.percentDecodeBaggageValue
  *
  * https://opentelemetry.io/docs/specs/otel/protocol/exporter/
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 interface OtlpExporter {
     // TODO: Add all fields supported by the spec.
     //  Blocked by #974. (OTLP exporter configuration surface)

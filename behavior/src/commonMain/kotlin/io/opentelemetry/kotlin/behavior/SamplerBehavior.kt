@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.behavior
 
 import io.opentelemetry.kotlin.ExperimentalApi
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 sealed class SamplerBehavior : Behavior<SamplerBehavior> {
 
     data object AlwaysOn : SamplerBehavior()

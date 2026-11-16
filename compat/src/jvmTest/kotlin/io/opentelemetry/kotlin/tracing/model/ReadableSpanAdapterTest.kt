@@ -10,11 +10,11 @@ import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaReadableSpan
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanData
 import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaEventData
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaLinkData
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
+import io.opentelemetry.kotlin.tracing.data.toOtelJavaEventData
+import io.opentelemetry.kotlin.tracing.data.toOtelJavaLinkData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusData
+import io.opentelemetry.kotlin.tracing.toOtelJavaSpanContext
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -76,7 +76,7 @@ internal class ReadableSpanAdapterTest {
     private fun ReadableSpanAdapter.assertMutableProperties(expected: OtelJavaSpanData) {
         assertEquals(expected.name, name)
         assertEquals(expected.status, status.toOtelJavaStatusData())
-        assertEquals(expected.hasEnded(), hasEnded)
+        assertEquals(expected.hasEnded(), isEnded)
         assertEquals(expected.endEpochNanos.takeIf { expected.hasEnded() }, endTimestamp)
         assertEquals(expected.attributes.convertToMap(), attributes)
         assertEquals(expected.events, events.map { it.toOtelJavaEventData() })

@@ -17,7 +17,7 @@ private const val INSTRUMENTATION_KEY = "instrumentation"
  *
  * Throws if the file cannot be read, or does not hold valid YAML.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun readInstrumentationNode(
     fileSystem: FileSystem,
     path: Path,

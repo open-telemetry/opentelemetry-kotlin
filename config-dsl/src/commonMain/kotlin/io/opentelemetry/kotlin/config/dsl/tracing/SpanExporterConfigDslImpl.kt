@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
 /**
  * Captures the span exporter configured programmatically and maps it onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class SpanExporterConfigDslImpl : BehaviorSupplier<SpanExporterBehavior> {
     private var console: ConsoleExporterBehavior? = null
     private var http: OtlpHttpSpanExporterBehavior? = null

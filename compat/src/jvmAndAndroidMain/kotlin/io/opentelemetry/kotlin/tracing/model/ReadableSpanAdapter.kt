@@ -16,9 +16,9 @@ import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanEventDataAdapter
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkDataAdapter
-import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
+import io.opentelemetry.kotlin.tracing.toOtelKotlinSpanContext
 
 internal class ReadableSpanAdapter(
     val impl: OtelJavaReadableSpan
@@ -46,7 +46,7 @@ internal class ReadableSpanAdapter(
         get() = impl.toSpanData().links.map(::SpanLinkDataAdapter)
     override val droppedLinksCount: Int
         get() = impl.toSpanData().let { droppedCount(it.totalRecordedLinks, it.links.size) }
-    override val hasEnded: Boolean
+    override val isEnded: Boolean
         get() = impl.hasEnded()
     override val droppedAttributesCount: Int
         get() = droppedCount(impl.toSpanData().totalAttributeCount, impl.attributes.size())

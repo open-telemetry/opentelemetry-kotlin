@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanLimits
 import io.opentelemetry.kotlin.behavior.limitOrUnset
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class CompatSpanLimitsConfig : SpanLimitsConfigDsl {
 
     override var attributeCountLimit: Int? = null

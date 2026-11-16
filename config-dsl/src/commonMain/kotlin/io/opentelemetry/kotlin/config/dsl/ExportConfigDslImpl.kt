@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.init.ExportConfigDsl
 /**
  * Supplies the SDK dependencies that span and log record processors need when they are constructed via the DSL.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class ExportConfigDslImpl(
     override val clock: Clock,
     override val sdkErrorHandler: SdkErrorHandler,

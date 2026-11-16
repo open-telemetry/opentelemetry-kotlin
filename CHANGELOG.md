@@ -2,8 +2,25 @@
 
 ## Unreleased
 
+### Migration notes
+
+- `OpenTelemetrySdk.idGenerator` and `OpenTelemetrySdk.resource` have been removed. Configure the ID
+  generator with `idGenerator { }`. Resource detectors still receive a `ResourceFactory` via `detect(factory)`.
+- `IdGenerator.invalidTraceId` and `IdGenerator.invalidSpanId` have been removed, so custom generators no longer
+  implement them. Use `createInvalidSpanContext()` for the invalid IDs.
+- `SpanData.hasEnded` has been renamed to `isEnded`, matching `isRecording()`, `isValid` and `isRemote`. On
+  the JVM, the getter is now `isEnded()` instead of `getHasEnded()`.
+- compat's `SpanData.toOtelJavaSpan()` has been renamed to `toOtelJavaSpanData()`, since it returns
+  opentelemetry-java `SpanData` rather than a `Span`.
+- compat's public tracing converters have moved out of `io.opentelemetry.kotlin.tracing.ext` into the package
+  of the type they convert. `toOtelJavaSpanContext()`/`toOtelKotlinSpanContext()` now live in
+  `io.opentelemetry.kotlin.tracing`, and `toOtelJavaSpanData()`, `toOtelJavaEventData()` and
+  `toOtelJavaLinkData()` in `io.opentelemetry.kotlin.tracing.data`. Update the imports.
+
 ### 📈 Enhancements
 
+- `SpanProcessor.isStartRequired()`, `isEndRequired()` and `isOnEndingRequired()` now default to `true`, so
+  custom processors only override them to opt out of a callback.
 - Add an `io.opentelemetry.kotlin:bom` BOM that aligns the versions of all published
   opentelemetry-kotlin artifacts. `compat-bom` now imports it, along with the
   opentelemetry-java alpha BOM.

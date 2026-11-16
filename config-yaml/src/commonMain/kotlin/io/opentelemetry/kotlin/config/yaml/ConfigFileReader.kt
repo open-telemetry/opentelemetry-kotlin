@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.config.schema.model.OpenTelemetryConfiguration
 /**
  * Reads the declarative config file the SDK was pointed at.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun interface ConfigFileReader {
 
     /**
