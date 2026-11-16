@@ -5,11 +5,11 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 
 /**
- * Configures how traces are exported.
+ * Supplies the SDK dependencies needed to construct processors and exporters for any signal.
  */
 @ExperimentalApi
 @ConfigDsl
-public interface TraceExportConfigDsl {
+public interface ExportConfigDsl {
 
     /**
      * The [Clock] implementation that will be used by the OpenTelemetry implementation.
