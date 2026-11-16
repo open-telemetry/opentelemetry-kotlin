@@ -14,6 +14,7 @@ public final class io/opentelemetry/kotlin/OtelJavaOpenTelemetryExtKt {
 
 public final class io/opentelemetry/kotlin/baggage/BaggageExtKt {
 	public static final fun toOtelJavaBaggage (Lio/opentelemetry/kotlin/baggage/Baggage;)Lio/opentelemetry/api/baggage/Baggage;
+	public static final fun toOtelKotlinBaggage (Lio/opentelemetry/api/baggage/Baggage;)Lio/opentelemetry/kotlin/baggage/Baggage;
 }
 
 public final class io/opentelemetry/kotlin/context/ContextExtKt {
@@ -39,6 +40,8 @@ public final class io/opentelemetry/kotlin/logging/export/LogRecordProcessorExtK
 }
 
 public final class io/opentelemetry/kotlin/tracing/export/SpanExporterExtKt {
+	public static final fun toOtelJavaSpanExporter (Lio/opentelemetry/kotlin/tracing/export/SpanExporter;Lio/opentelemetry/kotlin/error/SdkErrorHandler;)Lio/opentelemetry/sdk/trace/export/SpanExporter;
+	public static synthetic fun toOtelJavaSpanExporter$default (Lio/opentelemetry/kotlin/tracing/export/SpanExporter;Lio/opentelemetry/kotlin/error/SdkErrorHandler;ILjava/lang/Object;)Lio/opentelemetry/sdk/trace/export/SpanExporter;
 	public static final fun toOtelKotlinSpanExporter (Lio/opentelemetry/sdk/trace/export/SpanExporter;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
 }
 

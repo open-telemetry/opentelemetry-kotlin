@@ -54,11 +54,8 @@ jobs:
       - name: Update version
         run: .github/scripts/update-version.sh $VERSION
 
-      - name: Update version in README
-        run: sed -Ei "s/(val otelKotlinVersion = \").*\"/\1${VERSION}\"/" README.md
-
       - name: Setup Java
-        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: temurin
           java-version: |
@@ -136,11 +133,8 @@ jobs:
       - name: Update version
         run: .github/scripts/update-version.sh $NEXT_VERSION
 
-      - name: Update version in README
-        run: sed -Ei "s/(val otelKotlinVersion = \").*\"/\1${VERSION}\"/" README.md
-
       - name: Setup Java
-        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: temurin
           java-version: |

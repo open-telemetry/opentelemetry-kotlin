@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.ioDispatcher
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
@@ -24,7 +25,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
 
 private const val EXPORT_WORKER_COUNT = 5
-private const val SHUTDOWN_TIMEOUT_MS = 5000L
+private const val DRAIN_TIMEOUT_MS = 5000L
 private const val CANCELLATION_TIMEOUT_MS = 500L
 
 // Includes both pending and in-flight entries; each entry holds one List<T>.
@@ -45,9 +46,18 @@ private enum class QueuedTelemetryState {
 
 private class QueuedTelemetry<T>(
     val telemetry: List<T>,
+    val sequence: Long,
     var attempts: Int = 0,
     var state: QueuedTelemetryState = QueuedTelemetryState.Pending
 )
+
+/**
+ * An in-progress forceFlush call that waits for every entry with a sequence below [endSequence].
+ */
+private class FlushWaiter(val endSequence: Long) {
+    val result = CompletableDeferred<Boolean>()
+    var failed = false
+}
 
 private sealed interface WorkerAction<out T> {
     data class Export<T>(
@@ -88,13 +98,19 @@ internal class TelemetryExporter<T>(
     // Retains entries until success, terminal failure, or retry exhaustion.
     private val queue = mutableListOf<QueuedTelemetry<T>>()
 
+    // Sequence assigned to the next enqueued entry.
+    private var nextSequence = 0L
+
+    // forceFlush calls waiting for earlier entries to finish.
+    private val flushWaiters = mutableListOf<FlushWaiter>()
+
     // Limits queued entries, including those currently in flight.
     private val semaphore = Semaphore(MAX_QUEUE_ENTRIES)
 
     // Wakes idle workers; redundant signals are skipped when the buffer is full.
     private val workAvailable = Channel<Unit>(EXPORT_WORKER_COUNT)
 
-    // Protects queue mutations, endpoint state, and shutdown transitions.
+    // Protects queue mutations, sequence numbering, flush waiters, endpoint state, and shutdown transitions.
     private val mutex = Mutex()
 
     init {
@@ -174,17 +190,17 @@ internal class TelemetryExporter<T>(
             }
             when (response) {
                 is OtlpResponse.Success -> {
-                    onExportComplete(entry, epoch, resetBackoff = true)
+                    onExportComplete(entry, epoch, delivered = true)
                 }
 
                 // The server accepted the request; retrying would only re-send the rejected
                 // portion, so treat a partial success as terminal.
                 is OtlpResponse.PartialSuccess -> {
-                    onExportComplete(entry, epoch, resetBackoff = true)
+                    onExportComplete(entry, epoch, delivered = true)
                 }
 
                 is OtlpResponse.UnretryableError -> {
-                    onExportComplete(entry, epoch, resetBackoff = false)
+                    onExportComplete(entry, epoch, delivered = false)
                 }
 
                 is OtlpResponse.RetryableError -> {
@@ -208,10 +224,7 @@ internal class TelemetryExporter<T>(
                                 item.state = QueuedTelemetryState.Pending
                                 workAvailable.trySend(Unit)
                             } else {
-                                val removed = queue.remove(item)
-                                if (removed) {
-                                    semaphore.release()
-                                }
+                                removeEntry(item, delivered = false)
                             }
                         }
                     }
@@ -220,14 +233,41 @@ internal class TelemetryExporter<T>(
         }
     }
 
-    private suspend fun onExportComplete(telemetry: QueuedTelemetry<T>, epoch: Long, resetBackoff: Boolean) {
+    /**
+     * Completes an entry. A delivered entry from the current backoff epoch also resets the endpoint backoff.
+     */
+    private suspend fun onExportComplete(telemetry: QueuedTelemetry<T>, epoch: Long, delivered: Boolean) {
         mutex.withLock {
-            queue.remove(telemetry)
-            if (resetBackoff && epoch == state.epoch) {
+            if (delivered && epoch == state.epoch) {
                 state.nextBackoffMs = initialDelayMs
                 state.isBackedOff = false
             }
-            semaphore.release()
+            removeEntry(telemetry, delivered)
+        }
+    }
+
+    /**
+     * Removes [entry] if it is still queued, and does nothing otherwise.
+     * If the entry wasn't [delivered], every waiter tracking it is marked as failed. Waiters whose
+     * [FlushWaiter.endSequence] is at or below the oldest queued sequence are then completed.
+     */
+    private fun removeEntry(entry: QueuedTelemetry<T>, delivered: Boolean) {
+        if (!queue.remove(entry)) {
+            return
+        }
+        semaphore.release()
+        if (!delivered) {
+            flushWaiters.forEach { waiter ->
+                if (entry.sequence < waiter.endSequence) {
+                    waiter.failed = true
+                }
+            }
+        }
+        val oldestSequence = queue.firstOrNull()?.sequence ?: nextSequence
+        flushWaiters.forEach { waiter ->
+            if (oldestSequence >= waiter.endSequence) {
+                waiter.result.complete(!waiter.failed)
+            }
         }
     }
 
@@ -251,8 +291,7 @@ internal class TelemetryExporter<T>(
                 }
             }
             if (telemetry.attempts >= maxAttempts) {
-                queue.remove(telemetry)
-                semaphore.release()
+                removeEntry(telemetry, delivered = false)
                 return
             }
             telemetry.state = QueuedTelemetryState.Pending
@@ -283,7 +322,7 @@ internal class TelemetryExporter<T>(
                 if (shutdownState.isShutdown) {
                     return Failure
                 }
-                queue.add(QueuedTelemetry(telemetry))
+                queue.add(QueuedTelemetry(telemetry, nextSequence++))
                 enqueued = true
                 workAvailable.trySend(Unit)
                 return Success
@@ -295,10 +334,49 @@ internal class TelemetryExporter<T>(
         }
     }
 
-    override suspend fun forceFlush(): OperationResultCode = Success
+    /**
+     * Waits until every entry enqueued before this call is delivered, rejected with an unretryable error,
+     * out of retries, or discarded at shutdown.
+     *
+     * Returns [Failure] if any of those entries was not delivered, or if they don't finish within
+     * [DRAIN_TIMEOUT_MS]. Returns [Failure] immediately if the endpoint is backed off past that deadline
+     * while an entry is still waiting to be sent. Partial success counts as delivered.
+     */
+    override suspend fun forceFlush(): OperationResultCode {
+        val deadline = timeSource.markNow() + DRAIN_TIMEOUT_MS.milliseconds
+        val waiter = mutex.withLock {
+            if (queue.isEmpty()) {
+                return Success
+            }
+            // pending entries can't be sent before the deadline while the endpoint is blocked
+            val blockedUntil = state.blockedUntil
+            if (blockedUntil != null && blockedUntil >= deadline &&
+                queue.any { it.state == QueuedTelemetryState.Pending }
+            ) {
+                return Failure
+            }
+            FlushWaiter(nextSequence).also { flushWaiters.add(it) }
+        }
+        try {
+            val delivered = withTimeoutOrNull(deadline - timeSource.markNow()) {
+                waiter.result.await()
+            } ?: false
+            return if (delivered) {
+                Success
+            } else {
+                Failure
+            }
+        } finally {
+            withContext(NonCancellable) {
+                mutex.withLock {
+                    flushWaiters.remove(waiter)
+                }
+            }
+        }
+    }
 
     override suspend fun shutdown(): OperationResultCode {
-        val deadline = timeSource.markNow() + SHUTDOWN_TIMEOUT_MS.milliseconds
+        val deadline = timeSource.markNow() + DRAIN_TIMEOUT_MS.milliseconds
         val canDrain = withContext(NonCancellable) {
             mutex.withLock {
                 shutdownState.shutdownNow()
@@ -348,6 +426,9 @@ internal class TelemetryExporter<T>(
         if (cancelled) {
             mutex.withLock {
                 queue.clear()
+                flushWaiters.forEach { waiter ->
+                    waiter.result.complete(false)
+                }
             }
         }
     }
