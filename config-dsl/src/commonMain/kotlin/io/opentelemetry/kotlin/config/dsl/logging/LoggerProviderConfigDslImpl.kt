@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 /**
  * Captures logger provider configuration and maps it onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class LoggerProviderConfigDslImpl : BehaviorSupplier<LoggerProviderBehavior> {
 
     private var processor: LogRecordProcessorBehavior? = null

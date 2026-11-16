@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.behavior.Behavior
 /**
  * A configuration DSL implementation that supplies the [Behavior] it captured.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun interface BehaviorSupplier<T : Behavior<T>> {
 
     /**

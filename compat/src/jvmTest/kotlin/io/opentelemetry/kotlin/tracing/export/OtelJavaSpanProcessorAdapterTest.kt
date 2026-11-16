@@ -11,9 +11,9 @@ import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanKind
-import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
+import io.opentelemetry.kotlin.tracing.toOtelKotlinSpanContext
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.AfterTest

@@ -1,9 +1,9 @@
-package io.opentelemetry.kotlin.tracing.ext
+package io.opentelemetry.kotlin.tracing.data
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaLinkData
 import io.opentelemetry.kotlin.attributes.attrsFromMap
-import io.opentelemetry.kotlin.tracing.data.SpanLinkData
+import io.opentelemetry.kotlin.tracing.toOtelJavaSpanContext
 
 /**
  * Copies an opentelemetry-kotlin [SpanLinkData] into opentelemetry-java link data. The Java total

@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.init.LogLimitsConfigDsl
 /**
  * Captures the log record limits configured programmatically, and maps them onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class LogLimitsConfigDslImpl : LogLimitsConfigDsl, BehaviorSupplier<LogLimitsBehavior> {
 
     override var attributeCountLimit: Int? = null

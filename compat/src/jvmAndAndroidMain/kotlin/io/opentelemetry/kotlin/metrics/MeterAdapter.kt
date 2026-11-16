@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.error.userCode
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class MeterAdapter(
     private val impl: OtelJavaMeter,
     private val sdkErrorHandler: SdkErrorHandler,

@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal object NoopTracerProvider : TracerProvider {
     override fun getTracer(
         name: String,

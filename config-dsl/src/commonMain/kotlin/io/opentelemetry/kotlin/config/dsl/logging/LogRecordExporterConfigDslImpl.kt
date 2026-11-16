@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
 /**
  * Captures the Log Record exporter configured programmatically and maps it onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class LogRecordExporterConfigDslImpl : BehaviorSupplier<LogRecordExporterBehavior> {
     private var console: ConsoleExporterBehavior? = null
     private var http: OtlpHttpLogsExporterBehavior? = null

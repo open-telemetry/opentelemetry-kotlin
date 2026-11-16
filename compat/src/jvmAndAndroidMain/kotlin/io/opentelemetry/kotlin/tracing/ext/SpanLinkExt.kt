@@ -6,6 +6,8 @@ import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.tracing.SpanLinkCompatImpl
 import io.opentelemetry.kotlin.tracing.model.SpanLink
+import io.opentelemetry.kotlin.tracing.toOtelJavaSpanContext
+import io.opentelemetry.kotlin.tracing.toOtelKotlinSpanContext
 
 @OptIn(ExperimentalApi::class)
 internal fun OtelJavaLinkData.toOtelKotlinSpanLink(): SpanLink = SpanLinkCompatImpl(
