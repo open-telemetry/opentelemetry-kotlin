@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  *
  * https://opentelemetry.io/docs/specs/otel/protocol/exporter/
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class OtlpHttpSpanExporterBehavior(
     val delegate: OtlpHttpExporter = OtlpHttpExporter()
 ) : Behavior<OtlpHttpSpanExporterBehavior>, OtlpExporter by delegate {

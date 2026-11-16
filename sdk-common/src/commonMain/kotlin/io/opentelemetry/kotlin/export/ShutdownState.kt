@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 /**
  * Read-only view of whether a component is shutdown or not.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 public abstract class ShutdownState {
 
     /**

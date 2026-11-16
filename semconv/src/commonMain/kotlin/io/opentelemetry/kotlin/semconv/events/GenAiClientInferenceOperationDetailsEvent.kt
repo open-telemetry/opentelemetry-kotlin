@@ -18,7 +18,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 *
 * This event is opt-in and could be used to store input and output details independently from traces.
 */
-@ExperimentalApi
 @IncubatingApi
 @Deprecated("Moved to the [OpenTelemetry GenAI semantic conventions repository](https://github.com/open-telemetry/semantic-conventions-genai).")
 public class GenAiClientInferenceOperationDetailsEvent(
@@ -280,6 +279,7 @@ public class GenAiClientInferenceOperationDetailsEvent(
     public val serverPort: Long? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

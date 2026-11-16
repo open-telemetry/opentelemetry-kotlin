@@ -30,7 +30,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 * already been reported and how the necessary data will be retrieved is left up
 * to the instrumentation. Providing enough data to dedupe is NOT REQUIRED.
 */
-@ExperimentalApi
 @IncubatingApi
 public class AppCrashEvent(
     /**
@@ -90,6 +89,7 @@ public class AppCrashEvent(
     public val sessionId: String? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

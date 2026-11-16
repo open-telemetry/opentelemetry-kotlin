@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  *
  * https://opentelemetry.io/docs/specs/otel/logs/sdk/#loggerprovider
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class LoggerProviderBehavior(
 
     /**

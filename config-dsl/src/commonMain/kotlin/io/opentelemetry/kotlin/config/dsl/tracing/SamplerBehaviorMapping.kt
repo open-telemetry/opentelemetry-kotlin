@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.behavior.SamplerBehavior
 /**
  * Maps a resolved [SamplerBehavior] onto SDK sampler instances.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun <T> SamplerBehavior.mapToSampler(
     alwaysOn: () -> T,
     alwaysOff: () -> T,

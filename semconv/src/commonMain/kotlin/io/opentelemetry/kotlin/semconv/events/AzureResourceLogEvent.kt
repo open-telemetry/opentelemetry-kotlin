@@ -18,7 +18,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 *
 * none
 */
-@ExperimentalApi
 @IncubatingApi
 public class AzureResourceLogEvent(
     /**
@@ -31,6 +30,7 @@ public class AzureResourceLogEvent(
     public val cloudResourceId: String? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

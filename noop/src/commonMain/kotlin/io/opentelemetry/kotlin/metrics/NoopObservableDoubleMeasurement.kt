@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 /**
  * No-op implementation of [ObservableDoubleMeasurement].
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class NoopObservableDoubleMeasurement : ObservableDoubleMeasurement {
     override fun record(value: Double, attributes: (AttributesMutator.() -> Unit)?) = Unit
 }

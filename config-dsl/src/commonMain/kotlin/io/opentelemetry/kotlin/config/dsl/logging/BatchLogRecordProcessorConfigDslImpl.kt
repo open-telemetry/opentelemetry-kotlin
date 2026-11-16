@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
 /**
  * Captures the batch log record processor configured programmatically and maps it onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class BatchLogRecordProcessorConfigDslImpl : BehaviorSupplier<BatchLogRecordProcessorBehavior> {
     private var exporter: LogRecordExporterBehavior? = null
     var scheduleDelay: Long? = null
