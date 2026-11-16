@@ -40,7 +40,7 @@ internal class OtelJavaReadableSpanAdapter(
     override fun getInstrumentationScopeInfo(): OtelJavaInstrumentationScopeInfo =
         span.instrumentationScopeInfo.toOtelJavaInstrumentationScopeInfo()
 
-    override fun hasEnded(): Boolean = span.hasEnded
+    override fun hasEnded(): Boolean = span.isEnded
 
     override fun getLatencyNanos(): Long {
         val end = span.endTimestamp

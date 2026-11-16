@@ -47,7 +47,7 @@ public fun ExportConfigDsl.persistingLogRecordProcessor(
     )
 }
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal fun ExportConfigDsl.persistingLogRecordProcessorImpl(
     processor: LogRecordProcessor,
     exporter: LogRecordExporter,

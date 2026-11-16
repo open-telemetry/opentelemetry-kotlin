@@ -18,7 +18,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 *
 * none
 */
-@ExperimentalApi
 @IncubatingApi
 @Deprecated("Replaced by `azure.resource.log`.")
 public class AzResourceLogEvent(
@@ -32,6 +31,7 @@ public class AzResourceLogEvent(
     public val cloudResourceId: String? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

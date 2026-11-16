@@ -69,7 +69,7 @@ internal fun Span.toSpanData(
     droppedEventsCount = dropped_events_count,
     links = links.map { it.toLinkData() },
     droppedLinksCount = dropped_links_count,
-    hasEnded = true,
+    isEnded = true,
     droppedAttributesCount = dropped_attributes_count
 )
 
@@ -170,7 +170,7 @@ private class DeserializedSpanData(
     override val droppedEventsCount: Int,
     override val links: List<SpanLinkData>,
     override val droppedLinksCount: Int,
-    override val hasEnded: Boolean,
+    override val isEnded: Boolean,
     override val droppedAttributesCount: Int
 ) : SpanData
 

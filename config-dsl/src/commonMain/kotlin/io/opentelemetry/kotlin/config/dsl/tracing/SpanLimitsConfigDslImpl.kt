@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.init.SpanLimitsConfigDsl
 /**
  * Captures the span limits configured programmatically, and maps them onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class SpanLimitsConfigDslImpl : SpanLimitsConfigDsl, BehaviorSupplier<SpanLimitsBehavior> {
 
     override var attributeCountLimit: Int? = null

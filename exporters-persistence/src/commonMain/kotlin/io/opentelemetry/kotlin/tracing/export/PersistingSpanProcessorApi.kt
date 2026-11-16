@@ -47,7 +47,7 @@ public fun ExportConfigDsl.persistingSpanProcessor(
     )
 }
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal fun ExportConfigDsl.persistingSpanProcessorImpl(
     processor: SpanProcessor,
     exporter: SpanExporter,

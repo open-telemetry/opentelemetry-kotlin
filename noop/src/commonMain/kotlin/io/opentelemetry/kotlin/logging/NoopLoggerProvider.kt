@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal object NoopLoggerProvider : LoggerProvider {
     override fun getLogger(
         name: String,

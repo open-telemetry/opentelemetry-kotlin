@@ -18,7 +18,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 *
 * Use this event to indicate that visual application component has been clicked, typically through a user's manual interaction.
 */
-@ExperimentalApi
 @IncubatingApi
 public class AppWidgetClickEvent(
     /**
@@ -63,6 +62,7 @@ public class AppWidgetClickEvent(
     public val appWidgetName: String? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

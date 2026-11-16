@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
  * Delegates [forceFlush] and [shutdown] to multiple [TelemetryCloseable]s,
  * returning [OperationResultCode.Success] only if every delegate succeeds.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 public class CompositeTelemetryCloseable(
     private val closeables: List<TelemetryCloseable>,
     private val sdkErrorHandler: SdkErrorHandler,

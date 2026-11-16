@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 /**
  * The result of reading and parsing an environment variable.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 sealed interface EnvVarReadResult<out T> {
     /** The environment variable contains a valid [value]. */
     data class Value<T>(
@@ -21,13 +21,13 @@ sealed interface EnvVarReadResult<out T> {
 }
 
 /** A warning produced while reading an environment variable. */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class EnvVarReadWarning(
     val name: String,
     val message: String,
 )
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal inline fun <T, R> EnvVarReadResult<T>.flatMap(
     transform: (T) -> EnvVarReadResult<R>,
 ): EnvVarReadResult<R> = when (this) {

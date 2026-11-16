@@ -111,7 +111,7 @@ internal class SpanMutatorErrorHandlingTest {
         assertEquals(1, errorHandler.userCodeErrors.size)
         assertEquals("value", span.attributes["key"])
         assertFalse(span.attributes.containsKey("hostile"))
-        assertTrue(span.hasEnded)
+        assertTrue(span.isEnded)
         assertEquals(1, processor.endCalls.size)
     }
 
@@ -126,7 +126,7 @@ internal class SpanMutatorErrorHandlingTest {
         )
         span.end()
 
-        assertTrue(span.hasEnded)
+        assertTrue(span.isEnded)
         assertFalse(span.isRecording())
         assertEquals(0L, span.endTimestamp)
         assertEquals(1, processor.endCalls.size)

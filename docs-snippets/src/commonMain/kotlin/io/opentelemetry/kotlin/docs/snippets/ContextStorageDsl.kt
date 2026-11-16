@@ -5,6 +5,6 @@ import io.opentelemetry.kotlin.createOpenTelemetry
 
 // region context-storage-dsl
 val otel = createOpenTelemetry {
-    context { storage = createThreadLocalCurrentContextStorage() }
+    context { storage { createThreadLocalCurrentContextStorage() } }
 }
 // end-region

@@ -63,7 +63,7 @@ internal class OpenTelemetryKtorClientPluginTest {
         assertFails { client.get("http://example.com/x") }
 
         val span = spans.single()
-        assertTrue(span.hasEnded)
+        assertTrue(span.isEnded)
     }
 
     @Test

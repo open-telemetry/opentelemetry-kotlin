@@ -46,7 +46,7 @@ internal class ReadableSpanAdapter(
         get() = impl.toSpanData().links.map(::SpanLinkDataAdapter)
     override val droppedLinksCount: Int
         get() = impl.toSpanData().let { droppedCount(it.totalRecordedLinks, it.links.size) }
-    override val hasEnded: Boolean
+    override val isEnded: Boolean
         get() = impl.hasEnded()
     override val droppedAttributesCount: Int
         get() = droppedCount(impl.toSpanData().totalAttributeCount, impl.attributes.size())

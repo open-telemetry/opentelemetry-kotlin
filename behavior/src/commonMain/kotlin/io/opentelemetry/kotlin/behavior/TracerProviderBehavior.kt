@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#tracer-provider
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class TracerProviderBehavior(
 
     /**
