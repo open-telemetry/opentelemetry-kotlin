@@ -100,7 +100,6 @@ tasks.register("ciBuild") {
     val perProjectTasks = setOf(
         LifecycleBasePlugin.BUILD_TASK_NAME,
         "linuxX64Test",
-        "linkDebugTestLinuxArm64",
         "koverXmlReport",
     )
     allprojects.forEach { project ->
