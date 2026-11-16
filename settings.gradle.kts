@@ -43,6 +43,7 @@ include(
     ":testing",
     ":test-fakes",
     ":integration-test",
+    ":bom",
     ":compat-bom",
     ":semconv",
     ":benchmark-android",
