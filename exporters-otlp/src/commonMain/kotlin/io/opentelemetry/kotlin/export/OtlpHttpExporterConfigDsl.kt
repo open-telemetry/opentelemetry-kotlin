@@ -72,11 +72,13 @@ internal fun createOtlpHttpClient(
     sdkErrorHandler: SdkErrorHandler,
     signal: OtlpEndpoint,
     getEnvVar: (String) -> String? = ::getEnvVarValue,
-    block: OtlpHttpExporterConfigDsl.() -> Unit,
+    block: (OtlpHttpExporterConfigDsl.() -> Unit)?,
 ): OtlpClient {
     val config = OtlpHttpExporterConfig()
-    sdkErrorHandler.guard("Failed to apply OTLP HTTP exporter config, continuing with partial config") {
-        config.block()
+    if (block != null) {
+        sdkErrorHandler.guard("Failed to apply OTLP HTTP exporter config, continuing with partial config") {
+            config.block()
+        }
     }
     val signalEndpoint = if (config.endpointConfigured) {
         null

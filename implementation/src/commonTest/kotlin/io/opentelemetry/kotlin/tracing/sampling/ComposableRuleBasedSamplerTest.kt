@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
+import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.factory.hexToByteArray
@@ -150,7 +152,9 @@ internal class ComposableRuleBasedSamplerTest {
 
         val context = contextWithParent(sampled = true, isRemote = true)
         val attributes = AttributesModel().apply { setStringAttribute("http.route", "/checkout") }
-        val links = listOf(SpanLinkImpl(createInvalidSpanContext(), AttributesModel()))
+        val links = listOf(
+            SpanLinkImpl(createInvalidSpanContext(), DEFAULT_ATTRIBUTE_LIMIT, DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT)
+        )
         sampler.intentFor(
             context = context,
             name = "checkout",

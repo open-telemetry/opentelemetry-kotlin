@@ -15,7 +15,6 @@ kotlin {
                 implementation(project(":api-ext"))
                 implementation(project(":sdk-api"))
                 implementation(project(":config"))
-                implementation(project(":context-impl"))
                 implementation(project(":context-single-slot"))
                 implementation(project(":propagation-utils"))
                 implementation(project(":config-dsl"))
@@ -26,7 +25,6 @@ kotlin {
                 implementation(project(":noop"))
                 implementation(project(":semconv"))
                 implementation(libs.kotlinx.coroutines)
-                implementation(libs.kotlin.serialization)
             }
         }
         commonTest {

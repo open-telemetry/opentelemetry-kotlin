@@ -1,8 +1,8 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
-import io.opentelemetry.kotlin.export.conversion.DeserializedSpanContext
 import io.opentelemetry.kotlin.export.conversion.createKeyValues
+import io.opentelemetry.kotlin.export.conversion.deserializedSpanContext
 import io.opentelemetry.kotlin.export.conversion.toAttributeMap
 import io.opentelemetry.kotlin.export.conversion.toFlagsInt
 import io.opentelemetry.kotlin.export.conversion.toW3CString
@@ -48,12 +48,12 @@ internal fun Span.toSpanData(
 ): SpanData = DeserializedSpanData(
     name = name,
     status = status?.toStatusData() ?: StatusData.Unset,
-    parent = DeserializedSpanContext(
+    parent = deserializedSpanContext(
         traceIdBytes = trace_id.toByteArray(),
         spanIdBytes = parent_span_id.toByteArray(),
         isRemote = flags.isRemoteContext(),
     ),
-    spanContext = DeserializedSpanContext(
+    spanContext = deserializedSpanContext(
         traceIdBytes = trace_id.toByteArray(),
         spanIdBytes = span_id.toByteArray(),
         flags = flags,
@@ -144,7 +144,7 @@ private fun Span.Event.toEventData(): SpanEventData = DeserializedSpanEventData(
 )
 
 private fun Span.Link.toLinkData(): SpanLinkData = DeserializedSpanLinkData(
-    spanContext = DeserializedSpanContext(
+    spanContext = deserializedSpanContext(
         traceIdBytes = trace_id.toByteArray(),
         spanIdBytes = span_id.toByteArray(),
         flags = flags,

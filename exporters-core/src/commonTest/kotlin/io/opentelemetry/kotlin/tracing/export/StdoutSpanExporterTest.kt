@@ -1,6 +1,8 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.FakeTraceExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.loadTestFixture
@@ -9,11 +11,14 @@ import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.StatusData
+import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanEventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
+import io.opentelemetry.kotlin.tracing.data.SpanData
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 internal class StdoutSpanExporterTest {
 
@@ -78,20 +83,20 @@ internal class StdoutSpanExporterTest {
 
     @Test
     fun testForceFlush() = runTest {
-        val exporter = StdoutSpanExporter()
+        val exporter = StdoutSpanExporter(NoopSdkErrorHandler)
         assertEquals(OperationResultCode.Success, exporter.forceFlush())
     }
 
     @Test
     fun testShutdown() = runTest {
-        val exporter = StdoutSpanExporter()
+        val exporter = StdoutSpanExporter(NoopSdkErrorHandler)
         assertEquals(OperationResultCode.Success, exporter.shutdown())
     }
 
     @Test
     fun testExportReturnsFailureAfterShutdown() = runTest {
         val output = mutableListOf<String>()
-        val exporter = StdoutSpanExporter(output::add)
+        val exporter = StdoutSpanExporter(NoopSdkErrorHandler, output::add)
         exporter.shutdown()
 
         val span = FakeReadWriteSpan(name = "test-span")
@@ -102,15 +107,34 @@ internal class StdoutSpanExporterTest {
 
     @Test
     fun testShutdownReturnsSuccessOnSecondCall() = runTest {
-        val exporter = StdoutSpanExporter()
+        val exporter = StdoutSpanExporter(NoopSdkErrorHandler)
         assertEquals(OperationResultCode.Success, exporter.shutdown())
         assertEquals(OperationResultCode.Success, exporter.shutdown())
     }
 
     @Test
     fun testForceFlushWorksAfterShutdown() = runTest {
-        val exporter = StdoutSpanExporter()
+        val exporter = StdoutSpanExporter(NoopSdkErrorHandler)
         exporter.shutdown()
         assertEquals(OperationResultCode.Success, exporter.forceFlush())
+    }
+
+    @Test
+    fun testItemThatFailsToFormatDoesNotStopTheBatch() = runTest {
+        val output = mutableListOf<String>()
+        val errorHandler = FakeSdkErrorHandler()
+        val exporter = FakeTraceExportConfig(sdkErrorHandler = errorHandler).stdoutSpanExporter(output::add)
+        val throwingSpan = object : SpanData by FakeSpanData() {
+            override val name: String get() = error("boom")
+        }
+
+        val result = exporter.export(listOf(FakeSpanData(name = "first"), throwingSpan, FakeSpanData(name = "third")))
+
+        assertEquals(OperationResultCode.Failure, result)
+        assertEquals(2, output.size)
+        assertTrue(output[0].startsWith("Span: first"))
+        assertTrue(output[1].startsWith("Span: third"))
+        assertEquals(1, errorHandler.errors.size)
+        assertEquals(1, errorHandler.userCodeErrors.size)
     }
 }

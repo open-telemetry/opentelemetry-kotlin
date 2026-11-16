@@ -136,7 +136,6 @@ internal class TracerErrorHandlingTest {
                 randomness -> boom()
                 else -> false
             }
-
     }
 
     /**

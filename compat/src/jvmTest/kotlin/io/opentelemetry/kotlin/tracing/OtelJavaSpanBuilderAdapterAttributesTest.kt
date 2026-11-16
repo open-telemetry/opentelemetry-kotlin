@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,7 +16,7 @@ internal class OtelJavaSpanBuilderAdapterAttributesTest {
 
     @Test
     fun `builder attributes keep their types`() {
-        OtelJavaSpanBuilderAdapter(tracer, "span", CompatContextFactory())
+        OtelJavaSpanBuilderAdapter(tracer, "span")
             .setAttribute("d", 1.0)
             .setAttribute(AttributeKey.longKey("l"), 1L)
             .setAttribute(AttributeKey.doubleArrayKey("dl"), listOf(1.0, 2.0))
@@ -37,7 +36,7 @@ internal class OtelJavaSpanBuilderAdapterAttributesTest {
             .put("d", 2.0)
             .put(AttributeKey.booleanArrayKey("bl"), listOf(true))
             .build()
-        OtelJavaSpanBuilderAdapter(tracer, "span", CompatContextFactory())
+        OtelJavaSpanBuilderAdapter(tracer, "span")
             .addLink(FakeSpanContext.VALID.toOtelJavaSpanContext(), linkAttrs)
             .startSpan()
 

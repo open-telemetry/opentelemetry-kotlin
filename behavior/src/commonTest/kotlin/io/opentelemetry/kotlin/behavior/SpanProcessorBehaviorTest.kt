@@ -5,58 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 internal class SpanProcessorBehaviorTest {
-
-    @Test
-    fun consoleStartsUnset() {
-        assertNull(SpanProcessorBehavior().console)
-    }
-
-    @Test
-    fun consoleStaysUnsetWhenNeitherLayerConfigured() {
-        assertNull(SpanProcessorBehavior().mergeWith(SpanProcessorBehavior()).console)
-    }
-
-    @Test
-    fun adoptsConsoleFromWhicheverLayerSuppliedIt() {
-        val console = ConsoleExporterBehavior()
-
-        assertEquals(
-            console,
-            SpanProcessorBehavior().mergeWith(SpanProcessorBehavior(console = console)).console,
-        )
-        assertEquals(
-            console,
-            SpanProcessorBehavior(console = console).mergeWith(SpanProcessorBehavior()).console,
-        )
-    }
-
-    @Test
-    fun httpStartsUnset() {
-        assertNull(SpanProcessorBehavior().http)
-    }
-
-    @Test
-    fun httpStaysUnsetWhenNeitherLayerConfigured() {
-        assertNull(SpanProcessorBehavior().mergeWith(SpanProcessorBehavior()).http)
-    }
-
-    @Test
-    fun adoptsHttpFromWhicheverLayerSuppliedIt() {
-        val http = OtlpHttpSpanExporterBehavior(
-            endpoint = "https://example.com",
-            timeout = 10_000,
-        )
-
-        assertEquals(
-            http,
-            SpanProcessorBehavior().mergeWith(SpanProcessorBehavior(http = http)).http,
-        )
-        assertEquals(
-            http,
-            SpanProcessorBehavior(http = http).mergeWith(SpanProcessorBehavior()).http,
-        )
-    }
-
     @Test
     fun simpleStartsUnset() {
         assertNull(SpanProcessorBehavior().simple)
@@ -83,12 +31,10 @@ internal class SpanProcessorBehaviorTest {
 
     @Test
     fun keepsExporterConfigurationWhenSelectingSimple() {
-        val http = OtlpHttpSpanExporterBehavior(endpoint = "https://example.com")
-        val merged = SpanProcessorBehavior(http = http).mergeWith(
+        val merged = SpanProcessorBehavior().mergeWith(
             SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior()),
         )
 
-        assertEquals(http, merged.http)
         assertEquals(SimpleSpanProcessorBehavior(), merged.simple)
     }
 }

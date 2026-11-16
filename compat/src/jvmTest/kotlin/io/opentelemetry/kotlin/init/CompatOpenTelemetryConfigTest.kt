@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
-import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.propagation.FakeTextMapPropagator
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -66,7 +65,7 @@ internal class CompatOpenTelemetryConfigTest {
         }
 
         val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
-        val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory())
+        val configFactory = CompatSdkConfigFactory(cfg, behavior, clock)
         val spanLimits = configFactory.spanLimits
         assertEquals(8, spanLimits.attributeCountLimit)
         assertEquals(16, spanLimits.attributeValueLengthLimit)
@@ -87,7 +86,7 @@ internal class CompatOpenTelemetryConfigTest {
         }
 
         val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
-        val logLimits = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory()).logLimits
+        val logLimits = CompatSdkConfigFactory(cfg, behavior, clock).logLimits
         assertEquals(8, logLimits.attributeCountLimit)
         assertEquals(16, logLimits.attributeValueLengthLimit)
     }
