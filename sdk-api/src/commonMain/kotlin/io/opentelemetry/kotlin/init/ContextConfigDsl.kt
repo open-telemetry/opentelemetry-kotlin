@@ -11,12 +11,15 @@ import io.opentelemetry.kotlin.context.CurrentContextStorage
 public interface ContextConfigDsl {
 
     /**
-     * The [CurrentContextStorage] that holds the current context. When `null` (the default), the
-     * SDK uses single-slot storage, shared by every thread.
+     * Supplies the [CurrentContextStorage] that holds the current context. If this is not called,
+     * the SDK uses single-slot storage, shared by every thread.
+     *
+     * The supplier is invoked once when the SDK is created. If it throws, the error is reported
+     * to the configured error handler and the single-slot default is used instead.
      *
      * Use a factory such as `createThreadLocalCurrentContextStorage()`, or supply your own
      * implementation. A custom implementation's [CurrentContextStorage.current] must return the
      * root context when nothing is attached.
      */
-    public var storage: CurrentContextStorage?
+    public fun storage(action: () -> CurrentContextStorage)
 }

@@ -54,7 +54,7 @@ internal class OtelJavaApiContextWarningTest {
         val errorHandler = FakeSdkErrorHandler()
         createOpenTelemetry {
             errorHandler(errorHandler)
-            context { storage = createOtelJavaCurrentContextStorage() }
+            context { storage { createOtelJavaCurrentContextStorage() } }
         }.also(sdks::track).toOtelJavaApi()
         assertTrue(errorHandler.apiMisuses.isEmpty())
     }

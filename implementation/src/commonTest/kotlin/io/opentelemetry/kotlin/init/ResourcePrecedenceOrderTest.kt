@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
-import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.resource.FakeResourceDetector
@@ -19,13 +18,12 @@ import kotlin.test.assertTrue
 
 internal class ResourcePrecedenceOrderTest {
 
-    private val clock = FakeClock()
     private val testKey = "test.key"
     private val customSchemaUrl = "https://example.com/schema"
 
     @Test
     fun testSdkDefaults() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         val resolver = SdkConfigFactory(cfg, cfg.toBehavior())
         val tracing = resolver.generateTracingConfig()
         val logging = resolver.generateLoggingConfig()
@@ -50,7 +48,7 @@ internal class ResourcePrecedenceOrderTest {
             "Invalid schema URL: $schemaUrl",
         )
 
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         val resolver = SdkConfigFactory(cfg, cfg.toBehavior())
         assertEquals(schemaUrl, resolver.generateTracingConfig().resource.schemaUrl)
         assertEquals(schemaUrl, resolver.generateLoggingConfig().resource.schemaUrl)
@@ -59,7 +57,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testSdkDefaultSchemaUrlSurvivesGlobalResource() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         cfg.resource(mapOf(testKey to "top"))
 
         val resolver = SdkConfigFactory(cfg, cfg.toBehavior())
@@ -69,7 +67,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testSchemaUrlOverrides() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         cfg.resource(customSchemaUrl) { }
 
         val resolver = SdkConfigFactory(cfg, cfg.toBehavior())
@@ -79,7 +77,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testGlobalOverrides() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         cfg.resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to "custom-sdk"))
 
         val resolver = SdkConfigFactory(cfg, cfg.toBehavior())
@@ -95,7 +93,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testSpecificOverrides() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         cfg.tracerProvider {
             resource(mapOf(TelemetryAttributes.TELEMETRY_SDK_NAME to "tracer-sdk"))
         }
@@ -109,7 +107,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testOverridePrecedence() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         cfg.resource(mapOf(testKey to "top"))
         cfg.tracerProvider {
             resource(mapOf(testKey to "provider"))
@@ -122,7 +120,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testOverridePrecedence2() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         cfg.resource(mapOf(testKey to "top"))
         cfg.tracerProvider {
             resource(mapOf(testKey to "tracer-only"))
@@ -135,7 +133,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testDetectorOverridesSdkDefaults() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         cfg.resourceDetection {
             detector(FakeResourceDetector(attributes = mapOf(ServiceAttributes.SERVICE_NAME to "detected")))
         }
@@ -148,7 +146,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testDetectorAppliesToAllSignals() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         cfg.resourceDetection {
             detector(FakeResourceDetector(attributes = mapOf(testKey to "detected")))
         }
@@ -161,7 +159,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testExplicitConfigOverridesDetector() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         cfg.resourceDetection {
             detector(FakeResourceDetector(attributes = mapOf(testKey to "detected")))
         }
@@ -177,7 +175,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun testServiceNameOverridesDetector() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         cfg.resourceDetection {
             detector(FakeResourceDetector(attributes = mapOf(ServiceAttributes.SERVICE_NAME to "detected")))
         }
@@ -190,7 +188,7 @@ internal class ResourcePrecedenceOrderTest {
     @Test
     fun testDetectorRunsOncePerSdk() {
         val detector = FakeResourceDetector(attributes = mapOf(testKey to "detected"))
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         cfg.resourceDetection {
             detector(detector)
         }
@@ -206,7 +204,7 @@ internal class ResourcePrecedenceOrderTest {
     @Test
     fun testDetectorSchemaUrlIsUsed() {
         val schemaUrl = "https://opentelemetry.io/schemas/1.43.0"
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         cfg.resourceDetection {
             detector(FakeResourceDetector(attributes = mapOf(testKey to "detected"), schemaUrl = schemaUrl))
         }
@@ -217,7 +215,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun `resolved config resource overrides detected attributes and dsl overrides config`() {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             resource(mapOf(testKey to "dsl"))
             resourceDetection {
                 detector(FakeResourceDetector(attributes = mapOf(testKey to "detected")))
@@ -240,7 +238,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun `dsl service name attribute overrides environment service name`() {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             resource(mapOf(ServiceAttributes.SERVICE_NAME to "dsl-service"))
         }
         val behavior = BehaviorResolverImpl().resolve(
@@ -269,7 +267,7 @@ internal class ResourcePrecedenceOrderTest {
 
     @Test
     fun `resolved environment resource overrides detected attributes`() {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             resourceDetection {
                 detector(FakeResourceDetector(attributes = mapOf(testKey to "detected")))
             }

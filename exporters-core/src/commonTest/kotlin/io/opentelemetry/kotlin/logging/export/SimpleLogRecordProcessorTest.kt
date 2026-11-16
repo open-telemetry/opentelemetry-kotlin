@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.logging.export
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.FakeInstrumentationScopeInfo
 import io.opentelemetry.kotlin.context.FakeContext
-import io.opentelemetry.kotlin.export.FakeLogExportConfig
+import io.opentelemetry.kotlin.export.FakeExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
@@ -24,7 +24,7 @@ internal class SimpleLogRecordProcessorTest {
 
     @Test
     fun testSpanProcessorDefaults() = runTest {
-        val processor = FakeLogExportConfig().simpleLogRecordProcessor(FakeLogRecordExporter())
+        val processor = FakeExportConfig().simpleLogRecordProcessor(FakeLogRecordExporter())
         assertTrue(processor.enabled(FakeContext(), FakeInstrumentationScopeInfo(), null, null))
         assertEquals(OperationResultCode.Success, processor.shutdown())
         assertEquals(OperationResultCode.Success, processor.forceFlush())
