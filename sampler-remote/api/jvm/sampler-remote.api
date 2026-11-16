@@ -1,0 +1,4 @@
+public final class io/opentelemetry/kotlin/tracing/sampling/RemoteSamplerEntrypointKt {
+	public static final fun remoteSamplerFromJson (Lio/opentelemetry/kotlin/init/SamplerConfigDsl;Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorHandler;)Lio/opentelemetry/kotlin/tracing/sampling/Sampler;
+}
+

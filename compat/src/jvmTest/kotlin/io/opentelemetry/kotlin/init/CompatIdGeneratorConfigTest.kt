@@ -6,7 +6,6 @@ import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
-import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import org.junit.Test
@@ -25,7 +24,7 @@ internal class CompatIdGeneratorConfigTest {
     fun usesDefaultIdGeneratorWhenBehaviorIsUnset() {
         val cfg = CompatOpenTelemetryConfig(clock)
         val idGenerator =
-            CompatSdkConfigFactory(cfg, OpenTelemetryBehavior(), clock, CompatContextFactory()).idGenerator
+            CompatSdkConfigFactory(cfg, OpenTelemetryBehavior(), clock).idGenerator
 
         assertIs<CompatIdGenerator>(idGenerator)
     }
@@ -34,7 +33,7 @@ internal class CompatIdGeneratorConfigTest {
     fun usesDefaultIdGeneratorWhenTracerProviderIdGeneratorIsUnset() {
         val cfg = CompatOpenTelemetryConfig(clock)
         val behavior = OpenTelemetryBehavior(tracerProvider = TracerProviderBehavior())
-        val idGenerator = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory()).idGenerator
+        val idGenerator = CompatSdkConfigFactory(cfg, behavior, clock).idGenerator
 
         assertIs<CompatIdGenerator>(idGenerator)
     }
@@ -42,7 +41,7 @@ internal class CompatIdGeneratorConfigTest {
     @Test
     fun usesIdGeneratorFromResolvedBehavior() {
         val cfg = CompatOpenTelemetryConfig(clock)
-        val idGenerator = CompatSdkConfigFactory(cfg, randomBehavior, clock, CompatContextFactory()).idGenerator
+        val idGenerator = CompatSdkConfigFactory(cfg, randomBehavior, clock).idGenerator
 
         assertIs<CompatIdGenerator>(idGenerator)
     }
@@ -58,7 +57,7 @@ internal class CompatIdGeneratorConfigTest {
             declarativeFile = randomBehavior,
             dsl = cfg.toBehavior(),
         )
-        val idGenerator = CompatSdkConfigFactory(cfg, behavior, clock, CompatContextFactory()).idGenerator
+        val idGenerator = CompatSdkConfigFactory(cfg, behavior, clock).idGenerator
 
         assertSame(custom, idGenerator)
     }
@@ -70,7 +69,7 @@ internal class CompatIdGeneratorConfigTest {
             errorHandler(handler)
             idGenerator { error("boom") }
         }
-        val idGenerator = CompatSdkConfigFactory(cfg, cfg.toBehavior(), clock, CompatContextFactory()).idGenerator
+        val idGenerator = CompatSdkConfigFactory(cfg, cfg.toBehavior(), clock).idGenerator
 
         assertIs<CompatIdGenerator>(idGenerator)
         assertEquals("boom", handler.userCodeErrors.single().cause.message)
