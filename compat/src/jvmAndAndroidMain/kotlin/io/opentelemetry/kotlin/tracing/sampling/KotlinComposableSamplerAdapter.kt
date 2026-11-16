@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.toOtelJavaAttributes
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
+import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceState
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanLink
@@ -29,28 +30,51 @@ internal class KotlinComposableSamplerAdapter(private val delegate: ComposableSa
         attributes: OtelJavaAttributes,
         links: List<OtelJavaLinkData>,
     ): OtelJavaSamplingIntent {
-        val intent = delegate.getSamplingIntent(
-            context.toOtelKotlinContext(),
-            name,
-            spanKind.toOtelKotlinSpanKind(),
-            CompatAttributesModel(attributes.toBuilder()),
-            links.map { it.toOtelKotlinSpanLink() },
-        )
+        val kotlinContext = context.toOtelKotlinContext()
+        val kotlinSpanKind = spanKind.toOtelKotlinSpanKind()
+        val kotlinAttributes = CompatAttributesModel(attributes.toBuilder())
+        val kotlinLinks = links.map { it.toOtelKotlinSpanLink() }
 
-        val threshold = intent.threshold ?: NEVER_SAMPLE_THRESHOLD
-        val javaAttributes = intent.attributesProvider?.invoke()?.toOtelJavaAttributes()
+        val intent = userCode {
+            delegate.getSamplingIntent(
+                kotlinContext,
+                name,
+                kotlinSpanKind,
+                kotlinAttributes,
+                kotlinLinks,
+            )
+        }
+
+        val threshold = userCode { intent.threshold } ?: NEVER_SAMPLE_THRESHOLD
+        val adjustedCountReliable = userCode { intent.adjustedCountReliable }
+
+        val attributesProvider = userCode { intent.attributesProvider }
+        val providedAttributes = attributesProvider?.let { provider ->
+            userCode { provider() }
+        }
+        val javaAttributes = providedAttributes?.toOtelJavaAttributes()
             ?: OtelJavaAttributes.empty()
-        val traceStateProvider = intent.traceStateProvider
+
+        val traceStateProvider = userCode { intent.traceStateProvider }
         val traceStateUpdater: Function<OtelJavaTraceState, OtelJavaTraceState> = if (traceStateProvider == null) {
             Function.identity()
         } else {
             Function { javaTraceState ->
-                traceStateProvider(javaTraceState.toOtelKotlinTraceState(), SamplingResult.Decision.RECORD_AND_SAMPLE)
-                    .toOtelJavaTraceState()
+                val kotlinTraceState = javaTraceState.toOtelKotlinTraceState()
+                val updatedTraceState = userCode {
+                    traceStateProvider(kotlinTraceState, SamplingResult.Decision.RECORD_AND_SAMPLE)
+                }
+
+                updatedTraceState.toOtelJavaTraceState()
             }
         }
 
-        return OtelJavaSamplingIntent.create(threshold, intent.adjustedCountReliable, javaAttributes, traceStateUpdater)
+        return OtelJavaSamplingIntent.create(
+            threshold,
+            adjustedCountReliable,
+            javaAttributes,
+            traceStateUpdater,
+        )
     }
 
     override fun getDescription(): String = delegate.description
