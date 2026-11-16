@@ -92,7 +92,7 @@ internal class PropagationCrossCheckTest {
     }
 
     private fun roundTrip(otel: OpenTelemetry, seed: Map<String, String>): Map<String, String> {
-        val extracted = otel.propagator.extract(otel.context.rootContext(), seed, FakeTextMapGetter)
+        val extracted = otel.propagator.extract(rootContext(), seed, FakeTextMapGetter)
         val out = mutableMapOf<String, String>()
         otel.propagator.inject(extracted, out, FakeTextMapSetter)
         return out

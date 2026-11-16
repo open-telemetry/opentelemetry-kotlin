@@ -35,6 +35,7 @@ import io.opentelemetry.example.app.ui.components.EventEditor
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.context.Scope
+import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanKind
 import kotlinx.coroutines.delay
@@ -238,7 +239,7 @@ private fun startSpan(otel: OpenTelemetry, form: SpanFormState): Pair<Span, Scop
 
     // Set span as current context if requested
     val scope = if (form.setAsCurrentContext) {
-        otel.context.current().storeSpan(span).attach()
+        currentContext().storeSpan(span).attach()
     } else {
         null
     }

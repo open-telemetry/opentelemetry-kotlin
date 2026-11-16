@@ -6,6 +6,7 @@ import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.util.AttributeKey
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.OpenTelemetry
+import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.tracing.SpanKind
 
 // Keep in sync with OtlpClient.kt
@@ -26,10 +27,9 @@ public fun openTelemetryKtorClientPlugin(openTelemetry: OpenTelemetry): ClientPl
             if (tracer.enabled() &&
                 request.attributes.getOrNull(suppressInstrumentationAttribute) != true
             ) {
-                val parentContext = openTelemetry.context.current()
                 val span = tracer.startSpan(
                     name = request.method.value,
-                    parentContext = parentContext,
+                    parentContext = currentContext(),
                     spanKind = SpanKind.CLIENT,
                 )
                 try {

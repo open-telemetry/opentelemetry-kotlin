@@ -170,7 +170,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testDeserializedSpanContext_valid() {
-        val context = DeserializedSpanContext(
+        val context = deserializedSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
             spanIdBytes = "1234567890123456".hexToByteArray(),
             flags = 1
@@ -184,7 +184,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testDeserializedSpanContext_invalid() {
-        val context = DeserializedSpanContext(
+        val context = deserializedSpanContext(
             traceIdBytes = "00000000000000000000000000000000".hexToByteArray(),
             spanIdBytes = "0000000000000000".hexToByteArray()
         )
@@ -193,7 +193,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testDeserializedSpanContext_remote() {
-        val context = DeserializedSpanContext(
+        val context = deserializedSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
             spanIdBytes = "1234567890123456".hexToByteArray(),
             flags = 1,
@@ -205,7 +205,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testDeserializedSpanContext_withTraceState() {
-        val context = DeserializedSpanContext(
+        val context = deserializedSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
             spanIdBytes = "1234567890123456".hexToByteArray(),
             traceStateString = "key1=value1,key2=value2"
@@ -217,7 +217,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testDeserializedSpanContext_emptyTraceState() {
-        val context = DeserializedSpanContext(
+        val context = deserializedSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
             spanIdBytes = "1234567890123456".hexToByteArray(),
             traceStateString = ""
@@ -227,7 +227,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testDeserializedSpanContext_malformedTraceState() {
-        val context = DeserializedSpanContext(
+        val context = deserializedSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
             spanIdBytes = "1234567890123456".hexToByteArray(),
             traceStateString = "foo=bar,nokey,baz=qux"
@@ -237,7 +237,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testDeserializedSpanContext_traceStateWithTrailingSeparator() {
-        val context = DeserializedSpanContext(
+        val context = deserializedSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
             spanIdBytes = "1234567890123456".hexToByteArray(),
             traceStateString = "foo=bar,"
@@ -247,7 +247,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testDeserializedSpanContext_traceStateOfOnlySeparators() {
-        val context = DeserializedSpanContext(
+        val context = deserializedSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
             spanIdBytes = "1234567890123456".hexToByteArray(),
             traceStateString = ",,,"
@@ -257,7 +257,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testDeserializedTraceFlags_sampled() {
-        val context = DeserializedSpanContext(
+        val context = deserializedSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
             spanIdBytes = "1234567890123456".hexToByteArray(),
             flags = 0x01
@@ -268,7 +268,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testDeserializedTraceFlags_random() {
-        val context = DeserializedSpanContext(
+        val context = deserializedSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
             spanIdBytes = "1234567890123456".hexToByteArray(),
             flags = 0x02
@@ -279,7 +279,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testDeserializedTraceFlags_sampledAndRandom() {
-        val context = DeserializedSpanContext(
+        val context = deserializedSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
             spanIdBytes = "1234567890123456".hexToByteArray(),
             flags = 0x03
@@ -364,7 +364,7 @@ class CommonProtobufConversionTest {
 
     @Test
     fun testTraceStateToW3CString() {
-        val context = DeserializedSpanContext(
+        val context = deserializedSpanContext(
             traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
             spanIdBytes = "1234567890123456".hexToByteArray(),
             traceStateString = "foo=bar,baz=qux"
@@ -381,7 +381,7 @@ class CommonProtobufConversionTest {
         return proto.toResource()
     }
 
-    private fun deserializedTraceState(header: String): TraceState = DeserializedSpanContext(
+    private fun deserializedTraceState(header: String): TraceState = deserializedSpanContext(
         traceIdBytes = "12345678901234567890123456789012".hexToByteArray(),
         spanIdBytes = "1234567890123456".hexToByteArray(),
         traceStateString = header,

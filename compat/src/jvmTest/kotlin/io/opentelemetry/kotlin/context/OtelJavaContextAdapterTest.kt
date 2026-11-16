@@ -8,8 +8,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceFlags
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.baggage.createBaggage
-import io.opentelemetry.kotlin.factory.CompatContextFactory
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
 import io.opentelemetry.kotlin.tracing.createSpanContext
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
@@ -37,15 +35,13 @@ internal class OtelJavaContextAdapterTest {
         uninstallContextStorage(storage)
     }
 
-    private val contextFactory = CompatContextFactory()
-    private val kotlinContextFactory = ContextFactoryImpl()
     private val kotlinSpan = createNonRecordingSpan(
         createSpanContext("0af7651916cd43dd8448eb211c80319c", "b7ad6b7169203331"),
     )
 
     @Test
     fun `test context`() {
-        val ctx = OtelJavaContextAdapter(contextFactory.root())
+        val ctx = OtelJavaContextAdapter(rootContext())
         val key1 = OtelJavaContextKey.named<String>("foo")
         val key2 = OtelJavaContextKey.named<String>("foo")
         val key3 = OtelJavaContextKey.named<String>("bar")
@@ -63,7 +59,7 @@ internal class OtelJavaContextAdapterTest {
 
     @Test
     fun `with null value clears the existing value`() {
-        val ctx = OtelJavaContextAdapter(contextFactory.root())
+        val ctx = OtelJavaContextAdapter(rootContext())
         val key = OtelJavaContextKey.named<String>("foo")
         val withValue = ctx.with(key, "value1")
         val result = withValue.with(key, javaNull())
@@ -100,7 +96,7 @@ internal class OtelJavaContextAdapterTest {
 
     @Test
     fun `java reads span stored in kotlin context`() {
-        val ctx = OtelJavaContextAdapter(kotlinContextFactory.root().storeSpan(kotlinSpan))
+        val ctx = OtelJavaContextAdapter(rootContext().storeSpan(kotlinSpan))
         val javaSpan = OtelJavaSpan.fromContext(ctx)
         assertEquals(kotlinSpan.spanContext.traceId, javaSpan.spanContext.traceId)
         assertEquals(kotlinSpan.spanContext.spanId, javaSpan.spanContext.spanId)
@@ -108,7 +104,7 @@ internal class OtelJavaContextAdapterTest {
 
     @Test
     fun `java reads no span from empty kotlin context`() {
-        val ctx = OtelJavaContextAdapter(kotlinContextFactory.root())
+        val ctx = OtelJavaContextAdapter(rootContext())
         assertNull(OtelJavaSpan.fromContextOrNull(ctx))
         assertFalse(OtelJavaSpan.fromContext(ctx).spanContext.isValid)
     }
@@ -123,7 +119,7 @@ internal class OtelJavaContextAdapterTest {
                 OtelJavaTraceState.getDefault(),
             )
         )
-        val ctx = OtelJavaContextAdapter(kotlinContextFactory.root()).with(javaSpan)
+        val ctx = OtelJavaContextAdapter(rootContext()).with(javaSpan)
         val span = ctx.toOtelKotlinContext().extractSpan()
         assertEquals(javaSpan.spanContext.traceId, span.spanContext.traceId)
         assertEquals(javaSpan.spanContext.spanId, span.spanContext.spanId)
@@ -131,22 +127,22 @@ internal class OtelJavaContextAdapterTest {
 
     @Test
     fun `kotlin span round trips through java`() {
-        val ctx = OtelJavaContextAdapter(kotlinContextFactory.root()).with(OtelJavaSpanAdapter(kotlinSpan))
+        val ctx = OtelJavaContextAdapter(rootContext()).with(OtelJavaSpanAdapter(kotlinSpan))
         assertSame(kotlinSpan, ctx.toOtelKotlinContext().extractSpan())
     }
 
     @Test
     fun `java reads baggage stored in kotlin context`() {
         val baggage = createBaggage { put("key", "value") }
-        val ctx = OtelJavaContextAdapter(kotlinContextFactory.root().storeBaggage(baggage))
+        val ctx = OtelJavaContextAdapter(rootContext().storeBaggage(baggage))
         assertEquals("value", OtelJavaBaggage.fromContext(ctx).getEntryValue("key"))
-        assertTrue(OtelJavaBaggage.fromContext(OtelJavaContextAdapter(kotlinContextFactory.root())).isEmpty)
+        assertTrue(OtelJavaBaggage.fromContext(OtelJavaContextAdapter(rootContext())).isEmpty)
     }
 
     @Test
     fun `kotlin reads baggage stored by java`() {
         val baggage = OtelJavaBaggage.builder().put("key", "value").build()
-        val ctx = baggage.storeInContext(OtelJavaContextAdapter(kotlinContextFactory.root()))
+        val ctx = baggage.storeInContext(OtelJavaContextAdapter(rootContext()))
         assertEquals("value", ctx.toOtelKotlinContext().extractBaggage().getValue("key"))
 
         val cleared = ctx.with(OtelJavaBaggage.empty())
@@ -156,23 +152,23 @@ internal class OtelJavaContextAdapterTest {
     @Test
     fun `make current uses kotlin current context storage`() {
         val javaCurrent = OtelJavaContext.current()
-        val previous = kotlinContextFactory.current()
-        val kotlinCtx = kotlinContextFactory.root().storeSpan(kotlinSpan)
+        val previous = currentContext()
+        val kotlinCtx = rootContext().storeSpan(kotlinSpan)
 
         OtelJavaContextAdapter(kotlinCtx).makeCurrent().use {
-            assertSame(kotlinCtx, kotlinContextFactory.current())
+            assertSame(kotlinCtx, currentContext())
             assertSame(javaCurrent, OtelJavaContext.current())
         }
-        assertSame(previous, kotlinContextFactory.current())
+        assertSame(previous, currentContext())
     }
 
     @Test
     fun `wrapped runnable uses kotlin current context storage`() {
-        val kotlinCtx = kotlinContextFactory.root().storeSpan(kotlinSpan)
+        val kotlinCtx = rootContext().storeSpan(kotlinSpan)
         var observed: Context? = null
-        OtelJavaContextAdapter(kotlinCtx).wrap(Runnable { observed = kotlinContextFactory.current() }).run()
+        OtelJavaContextAdapter(kotlinCtx).wrap(Runnable { observed = currentContext() }).run()
 
         assertSame(kotlinCtx, observed)
-        assertSame(kotlinContextFactory.root(), kotlinContextFactory.current())
+        assertSame(rootContext(), currentContext())
     }
 }
