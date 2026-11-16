@@ -19,6 +19,7 @@ include(
     ":api",
     ":error-handling",
     ":propagation-utils",
+    ":propagator-b3",
     ":api-ext",
     ":context-single-slot",
     ":context-threadlocal",
