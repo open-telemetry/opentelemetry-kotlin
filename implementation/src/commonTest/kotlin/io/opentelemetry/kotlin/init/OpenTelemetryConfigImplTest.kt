@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
-import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -33,12 +32,10 @@ import kotlin.test.assertTrue
 
 internal class OpenTelemetryConfigImplTest {
 
-    private val clock = FakeClock()
-
     @Test
     fun testShutdownTimeoutValidation() {
         val errors = FakeSdkErrorHandler()
-        val cfg = OpenTelemetryConfigImpl(clock).apply { errorHandler(errors) }
+        val cfg = OpenTelemetryConfigImpl().apply { errorHandler(errors) }
         assertEquals(3000L, cfg.shutdownTimeoutMs)
         cfg.shutdownTimeout(6000)
         assertEquals(6000L, cfg.shutdownTimeoutMs)
@@ -52,7 +49,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testDefaultConfig() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
         assertNull(resolver.generateTracingConfig().processor)
@@ -63,7 +60,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testPropagatorOverride() {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             propagator { w3cBaggage() }
         }
         assertSame(createW3CBaggagePropagator(), cfg.propagator)
@@ -71,7 +68,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testCompositePropagatorOverride() {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             propagator { composite(w3cBaggage()) }
         }
         val composite = cfg.propagator
@@ -81,7 +78,7 @@ internal class OpenTelemetryConfigImplTest {
     @Test
     fun testCustomPropagatorOverride() {
         val custom = FakeTextMapPropagator()
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             propagator { custom }
         }
         assertSame(custom, cfg.propagator)
@@ -89,7 +86,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testPropagatorUsesReturnValueNotLastBuilderCall() {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             propagator {
                 val traceContext = w3cTraceContext()
                 w3cBaggage()
@@ -101,7 +98,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testOverrideConfig() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         cfg.loggerProvider {
             export { FakeLogRecordProcessor() }
         }
@@ -116,7 +113,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testIdGeneratorDefault() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         assertIs<IdGeneratorImpl>(SdkConfigFactory(cfg, OpenTelemetryBehavior()).idGenerator)
     }
 
@@ -126,13 +123,13 @@ internal class OpenTelemetryConfigImplTest {
             tracerProvider = TracerProviderBehavior(idGenerator = IdGeneratorBehavior.Random),
         )
 
-        assertIs<IdGeneratorImpl>(SdkConfigFactory(OpenTelemetryConfigImpl(clock), behavior).idGenerator)
+        assertIs<IdGeneratorImpl>(SdkConfigFactory(OpenTelemetryConfigImpl(), behavior).idGenerator)
     }
 
     @Test
     fun testDslIdGeneratorOverridesResolvedBehavior() {
         val custom = FakeIdGenerator()
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             idGenerator { custom }
         }
         val behavior = BehaviorResolverImpl().resolve(
@@ -148,7 +145,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testGlobalAttrLimits() {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             attributeLimits {
                 attributeCountLimit = 64
             }
@@ -160,7 +157,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testLocalAttrLimits() {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             attributeLimits {
                 attributeCountLimit = 64
             }
@@ -177,7 +174,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testLocalSpanLimits() {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             tracerProvider {
                 spanLimits {
                     linkCountLimit = 8
@@ -197,7 +194,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testLocalAttrLimits2() {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             attributeLimits {
                 attributeCountLimit = 64
             }
@@ -217,7 +214,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testLocalLogLimits() {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             attributeLimits {
                 attributeCountLimit = 64
                 attributeValueLengthLimit = 256
@@ -237,7 +234,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testLocalLogLimits2() {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             attributeLimits {
                 attributeCountLimit = 64
             }
@@ -256,7 +253,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testSignalZeroAttrLimitBeatsGlobal() {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             attributeLimits {
                 attributeCountLimit = 64
             }
@@ -278,7 +275,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testNegativeGlobalAttrLimitFallsBackToDefault() {
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             attributeLimits {
                 attributeCountLimit = -1
                 attributeValueLengthLimit = -1
@@ -297,7 +294,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testDefaultErrorHandlerDiscardsReports() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         // no handler configured, so reports are swallowed rather than thrown
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
@@ -307,7 +304,7 @@ internal class OpenTelemetryConfigImplTest {
     @Test
     fun testCustomErrorHandlerReceivesReports() {
         val handler = FakeSdkErrorHandler()
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             errorHandler(handler)
         }
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
@@ -322,7 +319,7 @@ internal class OpenTelemetryConfigImplTest {
     fun testCustomErrorHandlerReceivesReportsWhenConfiguredLast() {
         val handler = FakeSdkErrorHandler()
         var captured: SdkErrorHandler? = null
-        OpenTelemetryConfigImpl(clock).apply {
+        OpenTelemetryConfigImpl().apply {
             tracerProvider {
                 export {
                     captured = sdkErrorHandler
@@ -340,7 +337,7 @@ internal class OpenTelemetryConfigImplTest {
     fun testLastConfiguredErrorHandlerWins() {
         val first = FakeSdkErrorHandler()
         val second = FakeSdkErrorHandler()
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             errorHandler(first)
             errorHandler(second)
         }
@@ -354,7 +351,7 @@ internal class OpenTelemetryConfigImplTest {
     @Test
     fun testErrorHandlerAcceptsLambda() {
         val received = mutableListOf<SdkError>()
-        val cfg = OpenTelemetryConfigImpl(clock).apply {
+        val cfg = OpenTelemetryConfigImpl().apply {
             errorHandler { received.add(it) }
         }
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
@@ -366,7 +363,7 @@ internal class OpenTelemetryConfigImplTest {
 
     @Test
     fun testDefaultAttrLimits() {
-        val cfg = OpenTelemetryConfigImpl(clock)
+        val cfg = OpenTelemetryConfigImpl()
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         with(behavior.spanLimitConfig()) {
             assertEquals(DEFAULT_ATTRIBUTE_LIMIT, attributeCountLimit)
