@@ -101,7 +101,7 @@ private class CompatComposableRuleBasedConfig(
 }
 
 private fun SamplingPredicate.toOtelJavaSamplingPredicate(): OtelJavaSamplingPredicate =
-    OtelJavaSamplingPredicate { parentContext, _, name, spanKind, attributes, parentLinks ->
+    OtelJavaSamplingPredicate { parentContext, name, spanKind, attributes, parentLinks ->
         matches(
             parentContext.toOtelKotlinContext(),
             name,
