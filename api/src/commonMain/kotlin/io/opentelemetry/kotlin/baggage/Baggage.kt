@@ -27,20 +27,14 @@ public interface Baggage {
     public fun asMap(): Map<String, BaggageEntry>
 
     /**
-     * Returns a new [Baggage] containing the given [name]/[value] pair with no metadata.
-     *
-     * If an entry for [name] already exists its value is replaced and its metadata is cleared.
-     */
-    @ThreadSafe
-    public fun set(name: String, value: String): Baggage
-
-    /**
      * Returns a new [Baggage] containing the given [name]/[value] pair with [metadata].
      *
-     * If an entry for [name] already exists its value and metadata are replaced.
+     * [metadata] is the raw metadata string per the OpenTelemetry specification; an empty string
+     * indicates no metadata. If an entry for [name] already exists its value and metadata are
+     * replaced.
      */
     @ThreadSafe
-    public fun set(name: String, value: String, metadata: BaggageEntryMetadata): Baggage
+    public fun put(name: String, value: String, metadata: String = ""): Baggage
 
     /**
      * Returns a new [Baggage] without the entry for [name].

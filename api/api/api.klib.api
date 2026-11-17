@@ -119,9 +119,8 @@ abstract interface io.opentelemetry.kotlin.attributes/AttributesMutator { // io.
 abstract interface io.opentelemetry.kotlin.baggage/Baggage { // io.opentelemetry.kotlin.baggage/Baggage|null[0]
     abstract fun asMap(): kotlin.collections/Map<kotlin/String, io.opentelemetry.kotlin.baggage/BaggageEntry> // io.opentelemetry.kotlin.baggage/Baggage.asMap|asMap(){}[0]
     abstract fun getValue(kotlin/String): kotlin/String? // io.opentelemetry.kotlin.baggage/Baggage.getValue|getValue(kotlin.String){}[0]
+    abstract fun put(kotlin/String, kotlin/String, kotlin/String = ...): io.opentelemetry.kotlin.baggage/Baggage // io.opentelemetry.kotlin.baggage/Baggage.put|put(kotlin.String;kotlin.String;kotlin.String){}[0]
     abstract fun remove(kotlin/String): io.opentelemetry.kotlin.baggage/Baggage // io.opentelemetry.kotlin.baggage/Baggage.remove|remove(kotlin.String){}[0]
-    abstract fun set(kotlin/String, kotlin/String): io.opentelemetry.kotlin.baggage/Baggage // io.opentelemetry.kotlin.baggage/Baggage.set|set(kotlin.String;kotlin.String){}[0]
-    abstract fun set(kotlin/String, kotlin/String, io.opentelemetry.kotlin.baggage/BaggageEntryMetadata): io.opentelemetry.kotlin.baggage/Baggage // io.opentelemetry.kotlin.baggage/Baggage.set|set(kotlin.String;kotlin.String;io.opentelemetry.kotlin.baggage.BaggageEntryMetadata){}[0]
 }
 
 abstract interface io.opentelemetry.kotlin.baggage/BaggageCreationAction { // io.opentelemetry.kotlin.baggage/BaggageCreationAction|null[0]

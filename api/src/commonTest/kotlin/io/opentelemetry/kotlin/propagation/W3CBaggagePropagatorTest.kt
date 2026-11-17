@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.baggage.Baggage
-import io.opentelemetry.kotlin.baggage.BaggageEntryMetadataImpl
 import io.opentelemetry.kotlin.baggage.createBaggage
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.FakeBaggageContext
@@ -32,48 +31,48 @@ internal class W3CBaggagePropagatorTest {
 
     @Test
     fun `inject writes a single entry`() {
-        val carrier = injectInto(createBaggage().set("k", "v"))
+        val carrier = injectInto(createBaggage().put("k", "v"))
         assertEquals("k=v", carrier["baggage"])
     }
 
     @Test
     fun `inject preserves entry insertion order`() {
-        val baggage = createBaggage().set("a", "1").set("b", "2").set("c", "3")
+        val baggage = createBaggage().put("a", "1").put("b", "2").put("c", "3")
         val carrier = injectInto(baggage)
         assertEquals("a=1,b=2,c=3", carrier["baggage"])
     }
 
     @Test
     fun `inject percent-encodes reserved characters in value`() {
-        val baggage = createBaggage().set("k", "hello world,with;chars")
+        val baggage = createBaggage().put("k", "hello world,with;chars")
         val carrier = injectInto(baggage)
         assertEquals("k=hello%20world%2Cwith%3Bchars", carrier["baggage"])
     }
 
     @Test
     fun `inject percent-encodes the percent character`() {
-        val baggage = createBaggage().set("k", "100%")
+        val baggage = createBaggage().put("k", "100%")
         val carrier = injectInto(baggage)
         assertEquals("k=100%25", carrier["baggage"])
     }
 
     @Test
     fun `inject percent-encodes utf-8 multibyte characters`() {
-        val baggage = createBaggage().set("k", "café")
+        val baggage = createBaggage().put("k", "café")
         val carrier = injectInto(baggage)
         assertEquals("k=caf%C3%A9", carrier["baggage"])
     }
 
     @Test
     fun `inject appends metadata when non-empty`() {
-        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("propagation=public"))
+        val baggage = createBaggage().put("k", "v", "propagation=public")
         val carrier = injectInto(baggage)
         assertEquals("k=v;propagation=public", carrier["baggage"])
     }
 
     @Test
     fun `inject omits metadata separator when metadata is empty`() {
-        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl(""))
+        val baggage = createBaggage().put("k", "v", "")
         val carrier = injectInto(baggage)
         assertEquals("k=v", carrier["baggage"])
     }
@@ -81,14 +80,14 @@ internal class W3CBaggagePropagatorTest {
     @Test
     fun `inject keeps metadata with several properties and optional whitespace`() {
         val metadata = "propagation=public; ttl = 1;flag"
-        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl(metadata))
+        val baggage = createBaggage().put("k", "v", metadata)
         val carrier = injectInto(baggage)
         assertEquals("k=v;$metadata", carrier["baggage"])
     }
 
     @Test
     fun `inject drops metadata that would add a list member`() {
-        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("p=1,evil=injected"))
+        val baggage = createBaggage().put("k", "v", "p=1,evil=injected")
         val carrier = injectInto(baggage)
         assertEquals("k=v", carrier["baggage"])
         assertEquals(listOf("k"), extract(carrier.getValue("baggage")).asMap().keys.toList())
@@ -97,15 +96,15 @@ internal class W3CBaggagePropagatorTest {
     @Test
     fun `inject drops metadata containing CR or LF`() {
         val baggage = createBaggage()
-            .set("a", "1", BaggageEntryMetadataImpl("p=1\r\nX-Injected: 1"))
-            .set("b", "2", BaggageEntryMetadataImpl("p=1\n"))
+            .put("a", "1", "p=1\r\nX-Injected: 1")
+            .put("b", "2", "p=1\n")
         val carrier = injectInto(baggage)
         assertEquals("a=1,b=2", carrier["baggage"])
     }
 
     @Test
     fun `inject drops metadata containing non-ASCII characters`() {
-        val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl("p=café"))
+        val baggage = createBaggage().put("k", "v", "p=café")
         val carrier = injectInto(baggage)
         assertEquals("k=v", carrier["baggage"])
     }
@@ -113,14 +112,14 @@ internal class W3CBaggagePropagatorTest {
     @Test
     fun `inject drops metadata that is not a property list`() {
         listOf("bad key=1", "=1", "a;;b", "p=1;", "p=\"quoted\"", "p=a\\b").forEach { metadata ->
-            val baggage = createBaggage().set("k", "v", BaggageEntryMetadataImpl(metadata))
+            val baggage = createBaggage().put("k", "v", metadata)
             assertEquals("k=v", injectInto(baggage)["baggage"], metadata)
         }
     }
 
     @Test
     fun `inject skips entry whose key is not a valid token`() {
-        val baggage = createBaggage().set("good", "g").set("bad key", "b")
+        val baggage = createBaggage().put("good", "g").put("bad key", "b")
         val carrier = injectInto(baggage)
         assertEquals("good=g", carrier["baggage"])
     }
@@ -128,7 +127,7 @@ internal class W3CBaggagePropagatorTest {
     @Test
     fun `inject skips entry whose serialized form exceeds per-entry limit`() {
         val oversize = "x".repeat(5000)
-        val baggage = createBaggage().set("ok", "v").set("big", oversize)
+        val baggage = createBaggage().put("ok", "v").put("big", oversize)
         val carrier = injectInto(baggage)
         assertEquals("ok=v", carrier["baggage"])
     }
@@ -136,7 +135,7 @@ internal class W3CBaggagePropagatorTest {
     @Test
     fun `inject truncates when total header would exceed 8192 bytes`() {
         val builder = (0 until 20).fold(createBaggage()) { acc, idx ->
-            acc.set("k$idx", "v".repeat(500))
+            acc.put("k$idx", "v".repeat(500))
         }
         val carrier = injectInto(builder)
         val header = carrier["baggage"]
@@ -147,7 +146,7 @@ internal class W3CBaggagePropagatorTest {
 
     @Test
     fun `inject does not write header when nothing fits`() {
-        val baggage = createBaggage().set("oversized", "x".repeat(5000))
+        val baggage = createBaggage().put("oversized", "x".repeat(5000))
         val carrier = injectInto(baggage)
         assertTrue(carrier.isEmpty())
     }
@@ -190,7 +189,7 @@ internal class W3CBaggagePropagatorTest {
     @Test
     fun `inject caps at 180 entries even when bytes remain`() {
         val baggage = (0 until 181).fold(createBaggage()) { acc, idx ->
-            acc.set("k$idx", "v")
+            acc.put("k$idx", "v")
         }
         val carrier = injectInto(baggage)
         val header = carrier["baggage"]
@@ -200,21 +199,21 @@ internal class W3CBaggagePropagatorTest {
 
     @Test
     fun `inject skips entry with empty name`() {
-        val baggage = createBaggage().set("", "v").set("ok", "g")
+        val baggage = createBaggage().put("", "v").put("ok", "g")
         val carrier = injectInto(baggage)
         assertEquals("ok=g", carrier["baggage"])
     }
 
     @Test
     fun `inject preserves baggage-octets in the hash-to-plus range`() {
-        val baggage = createBaggage().set("k", "#\$&'()*+")
+        val baggage = createBaggage().put("k", "#\$&'()*+")
         val carrier = injectInto(baggage)
         assertEquals("k=#\$&'()*+", carrier["baggage"])
     }
 
     @Test
     fun `inject preserves uppercase token characters in keys`() {
-        val baggage = createBaggage().set("X-Trace-Id", "v")
+        val baggage = createBaggage().put("X-Trace-Id", "v")
         val carrier = injectInto(baggage)
         assertEquals("X-Trace-Id=v", carrier["baggage"])
     }
@@ -349,8 +348,8 @@ internal class W3CBaggagePropagatorTest {
     @Test
     fun `inject and extract round-trip preserves entries and metadata`() {
         val original = createBaggage()
-            .set("user.id", "alice", BaggageEntryMetadataImpl("propagation=public"))
-            .set("session", "café 1!2@3")
+            .put("user.id", "alice", "propagation=public")
+            .put("session", "café 1!2@3")
         val carrier = injectInto(original)
 
         val ctx = root()
