@@ -25,6 +25,9 @@ Targets: JVM, Android (API 21+), iOS, JS.
   `./gradlew publishToMavenLocal -PsnapshotPublish=true` first (see `CONTRIBUTING.md`).
 - **Android tests**: skip running locally, but verify compilation with `./gradlew assembleAndroidTest`
 - **API changes**: run `./gradlew apiDump` to update dump files before opening a PR.
+- **Docs**: when a change materially affects documented behavior or APIs, update `docs/` and any affected README in
+  the same PR. Code samples live in `docs-snippets`; edit them there, run `./gradlew syncDocSnippets`, and delete samples
+  that no doc references any more.
 - **New modules**: decide whether the module is a public entrypoint. That means consumers depend on it directly, or
   another public module exports it with `api(...)`. If it is, set `io.opentelemetry.kotlin.containsPublicApi=true` in its
   `gradle.properties` and run `./gradlew apiDump`, which turns on explicit API mode and binary compatibility checks.
