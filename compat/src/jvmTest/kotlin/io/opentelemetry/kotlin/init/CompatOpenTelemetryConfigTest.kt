@@ -3,8 +3,10 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.propagation.FakeTextMapPropagator
+import io.opentelemetry.kotlin.propagation.SdkGuardedTextMapPropagator
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertSame
 
 internal class CompatOpenTelemetryConfigTest {
@@ -31,7 +33,7 @@ internal class CompatOpenTelemetryConfigTest {
         val custom = FakeTextMapPropagator()
         val cfg = CompatOpenTelemetryConfig()
         cfg.propagator { custom }
-        assertSame(custom, cfg.createPropagator())
+        assertSame(custom, assertIs<SdkGuardedTextMapPropagator>(cfg.createPropagator()).delegate)
     }
 
     @Test
