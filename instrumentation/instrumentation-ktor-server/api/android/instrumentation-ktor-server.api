@@ -1,0 +1,4 @@
+public final class io/opentelemetry/kotlin/instrumentation/ktor/server/OpenTelemetryKtorServerPluginApiKt {
+	public static final fun openTelemetryKtorServerPlugin (Lio/opentelemetry/kotlin/OpenTelemetry;)Lio/ktor/server/application/ApplicationPlugin;
+}
+

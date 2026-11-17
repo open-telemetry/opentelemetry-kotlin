@@ -24,10 +24,10 @@ Targets: JVM, Android (API 21+), iOS, JS.
   `./gradlew build` additionally assembles everything and runs `gradle-integration-test`, which needs
   `./gradlew publishToMavenLocal -PsnapshotPublish=true` first (see `CONTRIBUTING.md`).
 - **Android tests**: skip running locally, but verify compilation with `./gradlew assembleAndroidTest`
-- **API changes**: run `./gradlew apiDump` to update dump files before opening a PR.
+- **API changes**: run `./gradlew updateKotlinAbi` to update the ABI dump files (JVM, Android and klib) before opening a PR.
 - **New modules**: decide whether the module is a public entrypoint. That means consumers depend on it directly, or
   another public module exports it with `api(...)`. If it is, set `io.opentelemetry.kotlin.containsPublicApi=true` in its
-  `gradle.properties` and run `./gradlew apiDump`, which turns on explicit API mode and binary compatibility checks.
+  `gradle.properties` and run `./gradlew updateKotlinAbi`, which turns on explicit API mode and binary compatibility checks.
   Internal modules that other modules only pull in with `implementation(...)` leave the property unset (the default is
   `false`). Before a public module exports an internal one with `api(...)`, opt the internal module in first.
 - **PR size**: keep diffs under 500 lines.
