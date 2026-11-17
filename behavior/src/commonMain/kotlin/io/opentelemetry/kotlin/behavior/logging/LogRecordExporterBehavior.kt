@@ -16,11 +16,11 @@ import io.opentelemetry.kotlin.behavior.mergeNode
 @OptIn(ExperimentalApi::class)
 data class LogRecordExporterBehavior(
     val delegate: ExporterDelegate<OtlpHttpLogsExporterBehavior> = ExporterDelegate(),
-    ) : Behavior<LogRecordExporterBehavior>, Exporter by delegate {
+) : Behavior<LogRecordExporterBehavior>, Exporter by delegate {
     constructor(
         console: ConsoleExporterBehavior? = null,
         http: OtlpHttpLogsExporterBehavior? = null,
-    ):this(ExporterDelegate(console = console, http = http))
+    ) : this(ExporterDelegate(console = console, http = http))
 
     override fun mergeWith(higher: LogRecordExporterBehavior): LogRecordExporterBehavior = copy(
         delegate = delegate.copy(
