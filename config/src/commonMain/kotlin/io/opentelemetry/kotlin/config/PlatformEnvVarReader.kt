@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.supportsEnvVars
  * read them. Envars are read on the JVM, Linux, and Node.js, but not on Android, Apple, or browser
  * platforms.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun platformEnvVarReader(): EnvVarReader? = if (supportsEnvVars) {
     EnvVarReader(::getEnvVarValue)
 } else {

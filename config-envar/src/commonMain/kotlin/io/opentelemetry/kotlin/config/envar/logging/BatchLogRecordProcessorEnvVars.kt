@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.config.envar.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.BatchLogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 
 /**
@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
  *
  * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#batch-logrecord-processor
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class BatchLogRecordProcessorEnvVars(private val reader: ReportingEnvVarReader) {
     fun toBehavior(): BatchLogRecordProcessorBehavior? = BatchLogRecordProcessorBehavior(
         scheduleDelay = reader.readNonNegativeLong(SCHEDULE_DELAY),

@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
  * KMP SDK, Java SDK (via compat module), or no-op.
  * On other platforms, COMPAT mode is not supported and will throw an exception.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal expect fun createPlatformOpenTelemetry(
     sdkMode: AppConfig.SdkMode,
     config: OpenTelemetryConfigDsl.() -> Unit

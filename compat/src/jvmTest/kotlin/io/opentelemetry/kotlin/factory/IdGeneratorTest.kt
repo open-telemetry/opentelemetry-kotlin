@@ -11,12 +11,6 @@ internal class IdGeneratorTest {
     private val idGenerator = CompatIdGenerator()
 
     @Test
-    fun `test invalid`() {
-        assertEquals("00000000000000000000000000000000", idGenerator.invalidTraceId.toHexString())
-        assertEquals("0000000000000000", idGenerator.invalidSpanId.toHexString())
-    }
-
-    @Test
     fun `test trace ID generation`() {
         val traceId = idGenerator.generateTraceIdBytes()
         assertEquals(32, traceId.toHexString().length)

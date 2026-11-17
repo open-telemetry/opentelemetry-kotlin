@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.config.envar.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.OtlpExporter
-import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.OtlpHttpSpanExporterBehavior
 import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
 import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 
@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
  * Reads OTLP HTTP Span Exporter-specific environment variables and maps them to the corresponding
  * behavior configuration.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class OtlpHttpSpanExporterEnvVars(private val reader: ReportingEnvVarReader) {
     fun toBehavior(): OtlpHttpSpanExporterBehavior {
         val signalEndpoint = reader.readString(SpanExporterEnvVars.OTLP_TRACES_ENDPOINT)

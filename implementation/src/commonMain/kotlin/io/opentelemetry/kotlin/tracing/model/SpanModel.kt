@@ -226,7 +226,7 @@ internal class SpanModel(
                 return
             }
             // avoid running user code under the lock
-            val link = buildSpanLink(spanContext, attributes, spanLimitConfig) ?: return
+            val link = buildSpanLink(spanContext, attributes, spanLimitConfig, sdkErrorHandler) ?: return
             mutate("Span.addLink failed") {
                 if (linksList.size < spanLimitConfig.linkCountLimit) {
                     linksList.add(link)
@@ -262,7 +262,7 @@ internal class SpanModel(
                 attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit,
             )
             if (attributes != null) {
-                userCode { attributes(event) }
+                sdkErrorHandler.guard("Span event attributes failed") { attributes(event) }
             }
             mutate("Span.addEvent failed") {
                 if (eventsList.size < spanLimitConfig.eventCountLimit) {
@@ -320,7 +320,7 @@ internal class SpanModel(
     override val endTimestamp: Long?
         get() = lock.read { endTimestampImpl }
 
-    override val hasEnded: Boolean
+    override val isEnded: Boolean
         get() = lock.read { state == State.ENDED }
 
     private val attrs by lazy {

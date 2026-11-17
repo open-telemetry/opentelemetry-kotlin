@@ -18,7 +18,6 @@ import io.opentelemetry.kotlin.semconv.IncubatingApi
 *
 * none
 */
-@ExperimentalApi
 public class ExceptionEvent(
     /**
     * Indicates that the exception is escaping the scope of the span.
@@ -50,6 +49,7 @@ public class ExceptionEvent(
     public val exceptionType: String? = null,
 ) : OpenTelemetryEvent {
 
+    @OptIn(ExperimentalApi::class)
     override fun emit(
         logger: Logger,
         timestamp: Long,

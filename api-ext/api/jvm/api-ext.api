@@ -8,10 +8,6 @@ public final class io/opentelemetry/kotlin/attributes/AttributesMutatorExtKt {
 	public static final fun setAttributes (Lio/opentelemetry/kotlin/attributes/AttributesMutator;Ljava/util/Map;)V
 }
 
-public final class io/opentelemetry/kotlin/context/ContextFactoryApiExtKt {
-	public static final fun asCurrentContext (Lio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
-}
-
 public final class io/opentelemetry/kotlin/tracing/SpanExtKt {
 	public static final fun addLink (Lio/opentelemetry/kotlin/tracing/Span;Lio/opentelemetry/kotlin/tracing/Span;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun addLink$default (Lio/opentelemetry/kotlin/tracing/Span;Lio/opentelemetry/kotlin/tracing/Span;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V

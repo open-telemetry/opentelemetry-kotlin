@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.init.ResourceConfigDsl
 /**
  * Captures the resource configured programmatically, and maps it onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class ResourceConfigDslImpl : ResourceConfigDsl, BehaviorSupplier<ResourceBehavior> {
 
     private val attributes = ResourceAttributesMutator()
@@ -57,8 +57,8 @@ private class ResourceAttributesMutator : AttributesMutator {
         is AnyValue.LongValue -> AnyValue.LongValue(value)
         is AnyValue.DoubleValue -> AnyValue.DoubleValue(value)
         is AnyValue.BytesValue -> AnyValue.BytesValue(value.copyOf())
-        is AnyValue.ListValue -> AnyValue.ListValue(values.map { it.copyValue() })
-        is AnyValue.MapValue -> AnyValue.MapValue(values.mapValues { it.value.copyValue() })
+        is AnyValue.ListValue -> AnyValue.ListValue(value.map { it.copyValue() })
+        is AnyValue.MapValue -> AnyValue.MapValue(value.mapValues { it.value.copyValue() })
     }
 
     private fun set(key: String, value: Any) {

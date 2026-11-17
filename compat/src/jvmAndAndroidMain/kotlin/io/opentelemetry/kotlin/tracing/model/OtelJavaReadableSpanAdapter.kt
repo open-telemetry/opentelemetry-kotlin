@@ -15,9 +15,9 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.getOtelJavaAttribute
 import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanData
+import io.opentelemetry.kotlin.tracing.data.toOtelJavaSpanData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
+import io.opentelemetry.kotlin.tracing.toOtelJavaSpanContext
 
 internal class OtelJavaReadableSpanAdapter(
     private val span: ReadableSpan
@@ -40,7 +40,7 @@ internal class OtelJavaReadableSpanAdapter(
     override fun getInstrumentationScopeInfo(): OtelJavaInstrumentationScopeInfo =
         span.instrumentationScopeInfo.toOtelJavaInstrumentationScopeInfo()
 
-    override fun hasEnded(): Boolean = span.hasEnded
+    override fun hasEnded(): Boolean = span.isEnded
 
     override fun getLatencyNanos(): Long {
         val end = span.endTimestamp

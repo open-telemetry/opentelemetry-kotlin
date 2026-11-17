@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.config.dsl.logging
 
-import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

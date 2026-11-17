@@ -14,7 +14,7 @@ import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.data.LogRecordDataAdapter
 import io.opentelemetry.kotlin.logging.toOtelJavaSeverityNumber
 import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
+import io.opentelemetry.kotlin.tracing.toOtelJavaSpanContext
 
 internal fun LogRecordData.toOtelJavaLogRecordData(): OtelJavaLogRecordData = when (this) {
     is LogRecordDataAdapter -> impl

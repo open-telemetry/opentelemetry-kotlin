@@ -29,7 +29,7 @@ internal class SerializableSpanDataTest {
         compareEvents(fake.events, observed.events)
         compareLinks(fake.links, observed.links)
         assertEquals(fake.endTimestamp, observed.endTimestamp)
-        assertTrue(fake.hasEnded)
+        assertTrue(fake.isEnded)
         assertEquals(fake.events.size, observed.totalRecordedEvents)
         assertEquals(fake.links.size, observed.totalRecordedLinks)
         assertEquals(fake.attributes.size, observed.totalAttributeCount)

@@ -1,12 +1,12 @@
 package io.opentelemetry.kotlin.config.dsl.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
 
 /**
  * Maps a resolved [SamplerBehavior] onto SDK sampler instances.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun <T> SamplerBehavior.mapToSampler(
     alwaysOn: () -> T,
     alwaysOff: () -> T,
