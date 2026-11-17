@@ -16,6 +16,7 @@ fun processMessage(tracer: Tracer, traceId: String, spanId: String) {
     println(remoteParent.isValid)
 
     val parentCtx = rootContext().storeSpanContext(remoteParent)
-    tracer.startSpan("process-message", parentContext = parentCtx, spanKind = SpanKind.CONSUMER).end()
+    tracer.startSpan("process-message", parentContext = parentCtx, spanKind = SpanKind.CONSUMER)
+        .end()
 }
 // end-region
