@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.attributes
 
-import io.opentelemetry.kotlin.exceptionType
+import io.opentelemetry.kotlin.safeExceptionAttributes
 import io.opentelemetry.kotlin.semconv.ExceptionAttributes
 
 /**
@@ -9,17 +9,16 @@ import io.opentelemetry.kotlin.semconv.ExceptionAttributes
  * Logs SDK specification.
  */
 public fun AttributesMutator.setExceptionAttributes(exception: Throwable) {
-    // If the receiver also implements AttributeContainer, check for existing keys
-    // to avoid overwriting user-provided attributes.
+    val attributes = safeExceptionAttributes(exception)
     val container = this as? AttributeContainer
 
     if (container == null || !container.attributes.containsKey(ExceptionAttributes.EXCEPTION_STACKTRACE)) {
-        setStringAttribute(ExceptionAttributes.EXCEPTION_STACKTRACE, exception.stackTraceToString())
+        setStringAttribute(ExceptionAttributes.EXCEPTION_STACKTRACE, attributes.stackTrace)
     }
     if (container == null || !container.attributes.containsKey(ExceptionAttributes.EXCEPTION_MESSAGE)) {
-        exception.message?.let { setStringAttribute(ExceptionAttributes.EXCEPTION_MESSAGE, it) }
+        attributes.message?.let { setStringAttribute(ExceptionAttributes.EXCEPTION_MESSAGE, it) }
     }
     if (container == null || !container.attributes.containsKey(ExceptionAttributes.EXCEPTION_TYPE)) {
-        exception.exceptionType()?.let { setStringAttribute(ExceptionAttributes.EXCEPTION_TYPE, it) }
+        attributes.type?.let { setStringAttribute(ExceptionAttributes.EXCEPTION_TYPE, it) }
     }
 }

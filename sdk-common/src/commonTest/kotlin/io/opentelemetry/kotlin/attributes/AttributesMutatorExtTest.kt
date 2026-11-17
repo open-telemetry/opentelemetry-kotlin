@@ -63,6 +63,22 @@ internal class AttributesMutatorExtTest {
     }
 
     @Test
+    fun testSetExceptionAttributesToleratesHostileMessageAndToString() {
+        val mutator = FakeAttributesMutator()
+        val exception = object : IllegalStateException("unused") {
+            override val message: String?
+                get() = error("hostile message")
+
+            override fun toString(): String = error("hostile toString")
+        }
+
+        mutator.setExceptionAttributes(exception)
+
+        assertNotNull(mutator.attributes[ExceptionAttributes.EXCEPTION_STACKTRACE])
+        assertNotNull(mutator.attributes[ExceptionAttributes.EXCEPTION_MESSAGE])
+    }
+
+    @Test
     fun testSetExceptionAttributesDoesNotOverwriteExistingAttributes() {
         val mutator = FakeAttributesMutator()
         val exception = IllegalStateException("exception message")
