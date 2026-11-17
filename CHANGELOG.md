@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+This release targets version [v1.62.0](https://github.com/open-telemetry/opentelemetry-specification/releases/tag/v1.62.0)
+of the OpenTelemetry specification.
+
 ### Migration notes
 
 - `Context.asCurrentContext { }` has been removed from `api-ext`. Use `Context.runWithContext { }`
