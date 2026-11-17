@@ -69,10 +69,6 @@ abstract interface io.opentelemetry.kotlin.export/TelemetryCloseable { // io.ope
 }
 
 abstract interface io.opentelemetry.kotlin.factory/IdGenerator { // io.opentelemetry.kotlin.factory/IdGenerator|null[0]
-    abstract val invalidSpanId // io.opentelemetry.kotlin.factory/IdGenerator.invalidSpanId|{}invalidSpanId[0]
-        abstract fun <get-invalidSpanId>(): kotlin/ByteArray // io.opentelemetry.kotlin.factory/IdGenerator.invalidSpanId.<get-invalidSpanId>|<get-invalidSpanId>(){}[0]
-    abstract val invalidTraceId // io.opentelemetry.kotlin.factory/IdGenerator.invalidTraceId|{}invalidTraceId[0]
-        abstract fun <get-invalidTraceId>(): kotlin/ByteArray // io.opentelemetry.kotlin.factory/IdGenerator.invalidTraceId.<get-invalidTraceId>|<get-invalidTraceId>(){}[0]
     open val generatesRandomTraceIds // io.opentelemetry.kotlin.factory/IdGenerator.generatesRandomTraceIds|{}generatesRandomTraceIds[0]
         open fun <get-generatesRandomTraceIds>(): kotlin/Boolean // io.opentelemetry.kotlin.factory/IdGenerator.generatesRandomTraceIds.<get-generatesRandomTraceIds>|<get-generatesRandomTraceIds>(){}[0]
 
@@ -106,24 +102,22 @@ abstract interface io.opentelemetry.kotlin.init/ConfigFileDsl { // io.openteleme
 }
 
 abstract interface io.opentelemetry.kotlin.init/ContextConfigDsl { // io.opentelemetry.kotlin.init/ContextConfigDsl|null[0]
-    abstract var storage // io.opentelemetry.kotlin.init/ContextConfigDsl.storage|{}storage[0]
-        abstract fun <get-storage>(): io.opentelemetry.kotlin.context/CurrentContextStorage? // io.opentelemetry.kotlin.init/ContextConfigDsl.storage.<get-storage>|<get-storage>(){}[0]
-        abstract fun <set-storage>(io.opentelemetry.kotlin.context/CurrentContextStorage?) // io.opentelemetry.kotlin.init/ContextConfigDsl.storage.<set-storage>|<set-storage>(io.opentelemetry.kotlin.context.CurrentContextStorage?){}[0]
+    abstract fun storage(kotlin/Function0<io.opentelemetry.kotlin.context/CurrentContextStorage>) // io.opentelemetry.kotlin.init/ContextConfigDsl.storage|storage(kotlin.Function0<io.opentelemetry.kotlin.context.CurrentContextStorage>){}[0]
 }
 
 abstract interface io.opentelemetry.kotlin.init/DeclarativeConfigReader // io.opentelemetry.kotlin.init/DeclarativeConfigReader|null[0]
 
-abstract interface io.opentelemetry.kotlin.init/LogExportConfigDsl { // io.opentelemetry.kotlin.init/LogExportConfigDsl|null[0]
-    abstract val clock // io.opentelemetry.kotlin.init/LogExportConfigDsl.clock|{}clock[0]
-        abstract fun <get-clock>(): io.opentelemetry.kotlin/Clock // io.opentelemetry.kotlin.init/LogExportConfigDsl.clock.<get-clock>|<get-clock>(){}[0]
-    abstract val sdkErrorHandler // io.opentelemetry.kotlin.init/LogExportConfigDsl.sdkErrorHandler|{}sdkErrorHandler[0]
-        abstract fun <get-sdkErrorHandler>(): io.opentelemetry.kotlin.error/SdkErrorHandler // io.opentelemetry.kotlin.init/LogExportConfigDsl.sdkErrorHandler.<get-sdkErrorHandler>|<get-sdkErrorHandler>(){}[0]
+abstract interface io.opentelemetry.kotlin.init/ExportConfigDsl { // io.opentelemetry.kotlin.init/ExportConfigDsl|null[0]
+    abstract val clock // io.opentelemetry.kotlin.init/ExportConfigDsl.clock|{}clock[0]
+        abstract fun <get-clock>(): io.opentelemetry.kotlin/Clock // io.opentelemetry.kotlin.init/ExportConfigDsl.clock.<get-clock>|<get-clock>(){}[0]
+    abstract val sdkErrorHandler // io.opentelemetry.kotlin.init/ExportConfigDsl.sdkErrorHandler|{}sdkErrorHandler[0]
+        abstract fun <get-sdkErrorHandler>(): io.opentelemetry.kotlin.error/SdkErrorHandler // io.opentelemetry.kotlin.init/ExportConfigDsl.sdkErrorHandler.<get-sdkErrorHandler>|<get-sdkErrorHandler>(){}[0]
 }
 
 abstract interface io.opentelemetry.kotlin.init/LogLimitsConfigDsl : io.opentelemetry.kotlin.init/AttributeLimitsConfigDsl // io.opentelemetry.kotlin.init/LogLimitsConfigDsl|null[0]
 
 abstract interface io.opentelemetry.kotlin.init/LoggerProviderConfigDsl : io.opentelemetry.kotlin.init/ResourceConfigDsl { // io.opentelemetry.kotlin.init/LoggerProviderConfigDsl|null[0]
-    abstract fun export(kotlin/Function1<io.opentelemetry.kotlin.init/LogExportConfigDsl, io.opentelemetry.kotlin.logging.export/LogRecordProcessor>) // io.opentelemetry.kotlin.init/LoggerProviderConfigDsl.export|export(kotlin.Function1<io.opentelemetry.kotlin.init.LogExportConfigDsl,io.opentelemetry.kotlin.logging.export.LogRecordProcessor>){}[0]
+    abstract fun export(kotlin/Function1<io.opentelemetry.kotlin.init/ExportConfigDsl, io.opentelemetry.kotlin.logging.export/LogRecordProcessor>) // io.opentelemetry.kotlin.init/LoggerProviderConfigDsl.export|export(kotlin.Function1<io.opentelemetry.kotlin.init.ExportConfigDsl,io.opentelemetry.kotlin.logging.export.LogRecordProcessor>){}[0]
     abstract fun logLimits(kotlin/Function1<io.opentelemetry.kotlin.init/LogLimitsConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/LoggerProviderConfigDsl.logLimits|logLimits(kotlin.Function1<io.opentelemetry.kotlin.init.LogLimitsConfigDsl,kotlin.Unit>){}[0]
     abstract fun loggerConfigurator(io.opentelemetry.kotlin.logging/LoggerConfigurator) // io.opentelemetry.kotlin.init/LoggerProviderConfigDsl.loggerConfigurator|loggerConfigurator(io.opentelemetry.kotlin.logging.LoggerConfigurator){}[0]
 }
@@ -132,22 +126,16 @@ abstract interface io.opentelemetry.kotlin.init/MeterProviderConfigDsl : io.open
 
 abstract interface io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl : io.opentelemetry.kotlin.init/ConfigFileDsl, io.opentelemetry.kotlin.init/ResourceConfigDsl { // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl|null[0]
     abstract fun attributeLimits(kotlin/Function1<io.opentelemetry.kotlin.init/AttributeLimitsConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.attributeLimits|attributeLimits(kotlin.Function1<io.opentelemetry.kotlin.init.AttributeLimitsConfigDsl,kotlin.Unit>){}[0]
+    abstract fun clock(io.opentelemetry.kotlin/Clock) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.clock|clock(io.opentelemetry.kotlin.Clock){}[0]
     abstract fun context(kotlin/Function1<io.opentelemetry.kotlin.init/ContextConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.context|context(kotlin.Function1<io.opentelemetry.kotlin.init.ContextConfigDsl,kotlin.Unit>){}[0]
     abstract fun errorHandler(io.opentelemetry.kotlin.error/SdkErrorHandler) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.errorHandler|errorHandler(io.opentelemetry.kotlin.error.SdkErrorHandler){}[0]
     abstract fun idGenerator(kotlin/Function0<io.opentelemetry.kotlin.factory/IdGenerator>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.idGenerator|idGenerator(kotlin.Function0<io.opentelemetry.kotlin.factory.IdGenerator>){}[0]
     abstract fun loggerProvider(kotlin/Function1<io.opentelemetry.kotlin.init/LoggerProviderConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.loggerProvider|loggerProvider(kotlin.Function1<io.opentelemetry.kotlin.init.LoggerProviderConfigDsl,kotlin.Unit>){}[0]
     abstract fun meterProvider(kotlin/Function1<io.opentelemetry.kotlin.init/MeterProviderConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.meterProvider|meterProvider(kotlin.Function1<io.opentelemetry.kotlin.init.MeterProviderConfigDsl,kotlin.Unit>){}[0]
-    abstract fun propagator(kotlin/Function1<io.opentelemetry.kotlin.init/PropagatorConfigDsl, io.opentelemetry.kotlin.propagation/TextMapPropagator>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.propagator|propagator(kotlin.Function1<io.opentelemetry.kotlin.init.PropagatorConfigDsl,io.opentelemetry.kotlin.propagation.TextMapPropagator>){}[0]
+    abstract fun propagator(kotlin/Function0<io.opentelemetry.kotlin.propagation/TextMapPropagator>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.propagator|propagator(kotlin.Function0<io.opentelemetry.kotlin.propagation.TextMapPropagator>){}[0]
     abstract fun resourceDetection(kotlin/Function1<io.opentelemetry.kotlin.init/ResourceDetectionConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.resourceDetection|resourceDetection(kotlin.Function1<io.opentelemetry.kotlin.init.ResourceDetectionConfigDsl,kotlin.Unit>){}[0]
     abstract fun shutdownTimeout(kotlin/Long) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.shutdownTimeout|shutdownTimeout(kotlin.Long){}[0]
     abstract fun tracerProvider(kotlin/Function1<io.opentelemetry.kotlin.init/TracerProviderConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/OpenTelemetryConfigDsl.tracerProvider|tracerProvider(kotlin.Function1<io.opentelemetry.kotlin.init.TracerProviderConfigDsl,kotlin.Unit>){}[0]
-}
-
-abstract interface io.opentelemetry.kotlin.init/PropagatorConfigDsl { // io.opentelemetry.kotlin.init/PropagatorConfigDsl|null[0]
-    abstract fun b3(io.opentelemetry.kotlin.init/B3Format = ...): io.opentelemetry.kotlin.propagation/TextMapPropagator // io.opentelemetry.kotlin.init/PropagatorConfigDsl.b3|b3(io.opentelemetry.kotlin.init.B3Format){}[0]
-    abstract fun composite(kotlin/Array<out io.opentelemetry.kotlin.propagation/TextMapPropagator>...): io.opentelemetry.kotlin.propagation/TextMapPropagator // io.opentelemetry.kotlin.init/PropagatorConfigDsl.composite|composite(kotlin.Array<out|io.opentelemetry.kotlin.propagation.TextMapPropagator>...){}[0]
-    abstract fun w3cBaggage(): io.opentelemetry.kotlin.propagation/TextMapPropagator // io.opentelemetry.kotlin.init/PropagatorConfigDsl.w3cBaggage|w3cBaggage(){}[0]
-    abstract fun w3cTraceContext(): io.opentelemetry.kotlin.propagation/TextMapPropagator // io.opentelemetry.kotlin.init/PropagatorConfigDsl.w3cTraceContext|w3cTraceContext(){}[0]
 }
 
 abstract interface io.opentelemetry.kotlin.init/ResourceConfigDsl { // io.opentelemetry.kotlin.init/ResourceConfigDsl|null[0]
@@ -193,15 +181,8 @@ abstract interface io.opentelemetry.kotlin.init/SpanLimitsConfigDsl : io.opentel
         abstract fun <set-linkCountLimit>(kotlin/Int?) // io.opentelemetry.kotlin.init/SpanLimitsConfigDsl.linkCountLimit.<set-linkCountLimit>|<set-linkCountLimit>(kotlin.Int?){}[0]
 }
 
-abstract interface io.opentelemetry.kotlin.init/TraceExportConfigDsl { // io.opentelemetry.kotlin.init/TraceExportConfigDsl|null[0]
-    abstract val clock // io.opentelemetry.kotlin.init/TraceExportConfigDsl.clock|{}clock[0]
-        abstract fun <get-clock>(): io.opentelemetry.kotlin/Clock // io.opentelemetry.kotlin.init/TraceExportConfigDsl.clock.<get-clock>|<get-clock>(){}[0]
-    abstract val sdkErrorHandler // io.opentelemetry.kotlin.init/TraceExportConfigDsl.sdkErrorHandler|{}sdkErrorHandler[0]
-        abstract fun <get-sdkErrorHandler>(): io.opentelemetry.kotlin.error/SdkErrorHandler // io.opentelemetry.kotlin.init/TraceExportConfigDsl.sdkErrorHandler.<get-sdkErrorHandler>|<get-sdkErrorHandler>(){}[0]
-}
-
 abstract interface io.opentelemetry.kotlin.init/TracerProviderConfigDsl : io.opentelemetry.kotlin.init/ResourceConfigDsl { // io.opentelemetry.kotlin.init/TracerProviderConfigDsl|null[0]
-    abstract fun export(kotlin/Function1<io.opentelemetry.kotlin.init/TraceExportConfigDsl, io.opentelemetry.kotlin.tracing.export/SpanProcessor>) // io.opentelemetry.kotlin.init/TracerProviderConfigDsl.export|export(kotlin.Function1<io.opentelemetry.kotlin.init.TraceExportConfigDsl,io.opentelemetry.kotlin.tracing.export.SpanProcessor>){}[0]
+    abstract fun export(kotlin/Function1<io.opentelemetry.kotlin.init/ExportConfigDsl, io.opentelemetry.kotlin.tracing.export/SpanProcessor>) // io.opentelemetry.kotlin.init/TracerProviderConfigDsl.export|export(kotlin.Function1<io.opentelemetry.kotlin.init.ExportConfigDsl,io.opentelemetry.kotlin.tracing.export.SpanProcessor>){}[0]
     abstract fun sampler(kotlin/Function1<io.opentelemetry.kotlin.init/SamplerConfigDsl, io.opentelemetry.kotlin.tracing.sampling/Sampler>) // io.opentelemetry.kotlin.init/TracerProviderConfigDsl.sampler|sampler(kotlin.Function1<io.opentelemetry.kotlin.init.SamplerConfigDsl,io.opentelemetry.kotlin.tracing.sampling.Sampler>){}[0]
     abstract fun spanLimits(kotlin/Function1<io.opentelemetry.kotlin.init/SpanLimitsConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/TracerProviderConfigDsl.spanLimits|spanLimits(kotlin.Function1<io.opentelemetry.kotlin.init.SpanLimitsConfigDsl,kotlin.Unit>){}[0]
     abstract fun tracerConfigurator(io.opentelemetry.kotlin.tracing/TracerConfigurator) // io.opentelemetry.kotlin.init/TracerProviderConfigDsl.tracerConfigurator|tracerConfigurator(io.opentelemetry.kotlin.tracing.TracerConfigurator){}[0]
@@ -407,10 +388,10 @@ abstract interface io.opentelemetry.kotlin.tracing.data/SpanData : io.openteleme
         abstract fun <get-endTimestamp>(): kotlin/Long? // io.opentelemetry.kotlin.tracing.data/SpanData.endTimestamp.<get-endTimestamp>|<get-endTimestamp>(){}[0]
     abstract val events // io.opentelemetry.kotlin.tracing.data/SpanData.events|{}events[0]
         abstract fun <get-events>(): kotlin.collections/List<io.opentelemetry.kotlin.tracing.data/SpanEventData> // io.opentelemetry.kotlin.tracing.data/SpanData.events.<get-events>|<get-events>(){}[0]
-    abstract val hasEnded // io.opentelemetry.kotlin.tracing.data/SpanData.hasEnded|{}hasEnded[0]
-        abstract fun <get-hasEnded>(): kotlin/Boolean // io.opentelemetry.kotlin.tracing.data/SpanData.hasEnded.<get-hasEnded>|<get-hasEnded>(){}[0]
     abstract val instrumentationScopeInfo // io.opentelemetry.kotlin.tracing.data/SpanData.instrumentationScopeInfo|{}instrumentationScopeInfo[0]
         abstract fun <get-instrumentationScopeInfo>(): io.opentelemetry.kotlin/InstrumentationScopeInfo // io.opentelemetry.kotlin.tracing.data/SpanData.instrumentationScopeInfo.<get-instrumentationScopeInfo>|<get-instrumentationScopeInfo>(){}[0]
+    abstract val isEnded // io.opentelemetry.kotlin.tracing.data/SpanData.isEnded|{}isEnded[0]
+        abstract fun <get-isEnded>(): kotlin/Boolean // io.opentelemetry.kotlin.tracing.data/SpanData.isEnded.<get-isEnded>|<get-isEnded>(){}[0]
     abstract val links // io.opentelemetry.kotlin.tracing.data/SpanData.links|{}links[0]
         abstract fun <get-links>(): kotlin.collections/List<io.opentelemetry.kotlin.tracing.data/SpanLinkData> // io.opentelemetry.kotlin.tracing.data/SpanData.links.<get-links>|<get-links>(){}[0]
     abstract val name // io.opentelemetry.kotlin.tracing.data/SpanData.name|{}name[0]
@@ -450,12 +431,12 @@ abstract interface io.opentelemetry.kotlin.tracing.export/SpanExporter : io.open
 }
 
 abstract interface io.opentelemetry.kotlin.tracing.export/SpanProcessor : io.opentelemetry.kotlin.export/TelemetryCloseable { // io.opentelemetry.kotlin.tracing.export/SpanProcessor|null[0]
-    abstract fun isEndRequired(): kotlin/Boolean // io.opentelemetry.kotlin.tracing.export/SpanProcessor.isEndRequired|isEndRequired(){}[0]
-    abstract fun isOnEndingRequired(): kotlin/Boolean // io.opentelemetry.kotlin.tracing.export/SpanProcessor.isOnEndingRequired|isOnEndingRequired(){}[0]
-    abstract fun isStartRequired(): kotlin/Boolean // io.opentelemetry.kotlin.tracing.export/SpanProcessor.isStartRequired|isStartRequired(){}[0]
     abstract fun onEnd(io.opentelemetry.kotlin.tracing.model/ReadableSpan) // io.opentelemetry.kotlin.tracing.export/SpanProcessor.onEnd|onEnd(io.opentelemetry.kotlin.tracing.model.ReadableSpan){}[0]
     abstract fun onEnding(io.opentelemetry.kotlin.tracing.model/ReadWriteSpan) // io.opentelemetry.kotlin.tracing.export/SpanProcessor.onEnding|onEnding(io.opentelemetry.kotlin.tracing.model.ReadWriteSpan){}[0]
     abstract fun onStart(io.opentelemetry.kotlin.tracing.model/ReadWriteSpan, io.opentelemetry.kotlin.context/Context) // io.opentelemetry.kotlin.tracing.export/SpanProcessor.onStart|onStart(io.opentelemetry.kotlin.tracing.model.ReadWriteSpan;io.opentelemetry.kotlin.context.Context){}[0]
+    open fun isEndRequired(): kotlin/Boolean // io.opentelemetry.kotlin.tracing.export/SpanProcessor.isEndRequired|isEndRequired(){}[0]
+    open fun isOnEndingRequired(): kotlin/Boolean // io.opentelemetry.kotlin.tracing.export/SpanProcessor.isOnEndingRequired|isOnEndingRequired(){}[0]
+    open fun isStartRequired(): kotlin/Boolean // io.opentelemetry.kotlin.tracing.export/SpanProcessor.isStartRequired|isStartRequired(){}[0]
 }
 
 abstract interface io.opentelemetry.kotlin.tracing.model/ReadWriteSpan : io.opentelemetry.kotlin.tracing.model/ReadableSpan, io.opentelemetry.kotlin.tracing/Span { // io.opentelemetry.kotlin.tracing.model/ReadWriteSpan|null[0]
@@ -538,10 +519,6 @@ abstract interface io.opentelemetry.kotlin/InstrumentationScopeInfo { // io.open
 abstract interface io.opentelemetry.kotlin/OpenTelemetrySdk : io.opentelemetry.kotlin.export/TelemetryCloseable, io.opentelemetry.kotlin/OpenTelemetry { // io.opentelemetry.kotlin/OpenTelemetrySdk|null[0]
     abstract val clock // io.opentelemetry.kotlin/OpenTelemetrySdk.clock|{}clock[0]
         abstract fun <get-clock>(): io.opentelemetry.kotlin/Clock // io.opentelemetry.kotlin/OpenTelemetrySdk.clock.<get-clock>|<get-clock>(){}[0]
-    abstract val idGenerator // io.opentelemetry.kotlin/OpenTelemetrySdk.idGenerator|{}idGenerator[0]
-        abstract fun <get-idGenerator>(): io.opentelemetry.kotlin.factory/IdGenerator // io.opentelemetry.kotlin/OpenTelemetrySdk.idGenerator.<get-idGenerator>|<get-idGenerator>(){}[0]
-    abstract val resource // io.opentelemetry.kotlin/OpenTelemetrySdk.resource|{}resource[0]
-        abstract fun <get-resource>(): io.opentelemetry.kotlin.factory/ResourceFactory // io.opentelemetry.kotlin/OpenTelemetrySdk.resource.<get-resource>|<get-resource>(){}[0]
 }
 
 sealed interface <#A: out io.opentelemetry.kotlin.metrics.data/PointData> io.opentelemetry.kotlin.metrics.data/Data { // io.opentelemetry.kotlin.metrics.data/Data|null[0]

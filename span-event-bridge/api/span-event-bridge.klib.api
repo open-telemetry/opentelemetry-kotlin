@@ -6,4 +6,4 @@
 // - Show declarations: true
 
 // Library unique name: <opentelemetry-kotlin:span-event-bridge>
-final fun (io.opentelemetry.kotlin.init/LogExportConfigDsl).io.opentelemetry.kotlin.logging.export/spanEventBridgeLogRecordProcessor(): io.opentelemetry.kotlin.logging.export/LogRecordProcessor // io.opentelemetry.kotlin.logging.export/spanEventBridgeLogRecordProcessor|spanEventBridgeLogRecordProcessor@io.opentelemetry.kotlin.init.LogExportConfigDsl(){}[0]
+final fun (io.opentelemetry.kotlin.init/ExportConfigDsl).io.opentelemetry.kotlin.logging.export/spanEventBridgeLogRecordProcessor(): io.opentelemetry.kotlin.logging.export/LogRecordProcessor // io.opentelemetry.kotlin.logging.export/spanEventBridgeLogRecordProcessor|spanEventBridgeLogRecordProcessor@io.opentelemetry.kotlin.init.ExportConfigDsl(){}[0]
