@@ -18,7 +18,7 @@ data class SimpleLogRecordProcessorBehavior(
      * */
     val exporter: LogRecordExporterBehavior? = null,
 
-    ) : Behavior<SimpleLogRecordProcessorBehavior> {
+) : Behavior<SimpleLogRecordProcessorBehavior> {
 
     override fun mergeWith(higher: SimpleLogRecordProcessorBehavior): SimpleLogRecordProcessorBehavior = copy(
         exporter = mergeNode(exporter, higher.exporter),

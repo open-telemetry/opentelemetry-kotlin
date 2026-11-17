@@ -8,6 +8,7 @@ interface Exporter {
      * Console exporter.
      * */
     val console: ConsoleExporterBehavior?
+
     /**
      * HTTP exporter.
      * */
