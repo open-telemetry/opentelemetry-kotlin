@@ -16,18 +16,20 @@ import org.junit.jupiter.api.extension.ExtensionContext
  * A JUnit5 extension which sets up an [OpenTelemetry] instance for testing, resetting state before each test.
  *
  * ```kotlin
- * @ExtendWith(OpenTelemetryExtension::class)
  * class CoolTest {
+ *
+ *   @RegisterExtension
+ *   private val extension = OpenTelemetryExtension()
  *
  *   private lateinit var tracer: Tracer
  *
  *   @BeforeEach
- *   fun setUp(extension: OpenTelemetryExtension) {
+ *   fun setUp() {
  *     tracer = extension.getTracer("test")
  *   }
  *
  *   @Test
- *   fun test(extension: OpenTelemetryExtension) {
+ *   fun test() {
  *     tracer.startSpan("hello").end()
  *     assertTrue(
  *          extension.spans.any  { it.name == "hello" }
