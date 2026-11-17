@@ -72,6 +72,8 @@ For more information about the approver role, see the [community repository](htt
 - [Juan Vega](https://github.com/jdvr), New Relic
 - [Andrey Chernov](https://github.com/inetand)
 - [Viorel Alexandrescu](https://github.com/viorel-alexandrescu)
+- [Ilia Liferov](https://github.com/iliferov)
+- [Rafael Nicolau](https://github.com/Rxfa) OLX
 
 For more information about the triager role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#triager).
 
