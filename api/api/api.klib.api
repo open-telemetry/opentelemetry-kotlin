@@ -10,6 +10,10 @@ open annotation class io.opentelemetry.kotlin/ExperimentalApi : kotlin/Annotatio
     constructor <init>() // io.opentelemetry.kotlin/ExperimentalApi.<init>|<init>(){}[0]
 }
 
+open annotation class io.opentelemetry.kotlin/InternalApi : kotlin/Annotation { // io.opentelemetry.kotlin/InternalApi|null[0]
+    constructor <init>() // io.opentelemetry.kotlin/InternalApi.<init>|<init>(){}[0]
+}
+
 open annotation class io.opentelemetry.kotlin/OpenTelemetryDsl : kotlin/Annotation { // io.opentelemetry.kotlin/OpenTelemetryDsl|null[0]
     constructor <init>() // io.opentelemetry.kotlin/OpenTelemetryDsl.<init>|<init>(){}[0]
 }

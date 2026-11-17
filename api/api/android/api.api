@@ -1,6 +1,9 @@
 public abstract interface annotation class io/opentelemetry/kotlin/ExperimentalApi : java/lang/annotation/Annotation {
 }
 
+public abstract interface annotation class io/opentelemetry/kotlin/InternalApi : java/lang/annotation/Annotation {
+}
+
 public abstract interface class io/opentelemetry/kotlin/OpenTelemetry {
 	public abstract fun getConfigProvider ()Lio/opentelemetry/kotlin/config/ConfigProvider;
 	public abstract fun getLoggerProvider ()Lio/opentelemetry/kotlin/logging/LoggerProvider;
