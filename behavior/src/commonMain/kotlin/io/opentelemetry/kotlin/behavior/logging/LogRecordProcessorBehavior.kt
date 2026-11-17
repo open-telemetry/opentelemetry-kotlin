@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.behavior.mergeNode
  *
  * https://opentelemetry.io/docs/specs/otel/logs/sdk/#logrecordprocessor
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class LogRecordProcessorBehavior(
     /**
      * Simple processor, which exports each log record as it is emitted.

@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.resource.ResourceDetector
 /**
  * Captures the resource detectors registered programmatically, in registration order.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class ResourceDetectionConfigDslImpl : ResourceDetectionConfigDsl {
 
     private val registered = mutableListOf<ResourceDetector>()

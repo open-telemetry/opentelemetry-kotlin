@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.config.schema.model.SimpleLogRecordProcessor
 /**
  * Maps a `simple` log record processor onto its behavior, including the exporter it feeds.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun SimpleLogRecordProcessor.toBehavior(): SimpleLogRecordProcessorBehavior? {
     val exporterBehavior = exporter.toBehavior()
     exporterBehavior ?: return null

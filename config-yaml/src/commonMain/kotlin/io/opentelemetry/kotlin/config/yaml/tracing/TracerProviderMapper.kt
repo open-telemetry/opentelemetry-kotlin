@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.config.schema.model.TracerProvider
 /**
  * Maps the `tracer_provider` section onto its behavior, or null if nothing in it is configured.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun TracerProvider.toBehavior(): TracerProviderBehavior? {
     val behavior = TracerProviderBehavior(
         spanLimits = limits?.toBehavior(),

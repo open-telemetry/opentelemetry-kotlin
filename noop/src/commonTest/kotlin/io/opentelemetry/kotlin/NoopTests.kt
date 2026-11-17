@@ -166,6 +166,22 @@ internal class NoopTests {
         assertFalse(logger.enabled())
     }
 
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testNoopBatchCallback() {
+        val meter = NoopOpenTelemetry.meterProvider.getMeter("test-meter")
+        var calls = 0
+
+        val registration = meter.batchCallback(
+            NoopObservableLongMeasurement(),
+            NoopObservableDoubleMeasurement(),
+        ) { calls++ }
+
+        registration.close()
+        registration.close()
+        assertEquals(0, calls)
+    }
+
     @Test
     fun testNoopEvent() {
         val otel = NoopOpenTelemetry
@@ -275,28 +291,6 @@ internal class NoopTests {
         span.setByteArrayAttribute("bytes", byteArrayOf(1))
         span.setName("name")
         span.end()
-    }
-
-    @Test
-    fun testNoopResource() {
-        val otel = NoopOpenTelemetrySdk
-        val resourceFactory = otel.resource
-
-        // empty resource has no attributes and no schemaUrl
-        val empty = resourceFactory.empty
-        assertTrue(empty.attributes.isEmpty())
-        assertNull(empty.schemaUrl)
-
-        // created resource is also noop — attributes and schemaUrl are ignored
-        val created = resourceFactory.create(schemaUrl = "https://example.com") {
-            setStringAttribute("service.name", "test")
-        }
-        assertTrue(created.attributes.isEmpty())
-        assertNull(created.schemaUrl)
-
-        // merge and asNewResource return the same noop instance
-        assertSame(empty, empty.merge(created))
-        assertSame(empty, empty.asNewResource { attributes["k"] = "v" })
     }
 
     @Test

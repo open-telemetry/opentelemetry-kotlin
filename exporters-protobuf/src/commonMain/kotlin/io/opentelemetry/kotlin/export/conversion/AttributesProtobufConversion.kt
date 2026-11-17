@@ -71,11 +71,11 @@ internal fun KotlinAnyValue.toProtoAnyValue(): AnyValue = when (this) {
     is KotlinAnyValue.DoubleValue -> AnyValue(double_value = value)
     is KotlinAnyValue.BytesValue -> AnyValue(bytes_value = ByteString.of(*value))
     is KotlinAnyValue.ListValue -> AnyValue(
-        array_value = ArrayValue(values = values.map { it.toProtoAnyValue() })
+        array_value = ArrayValue(values = value.map { it.toProtoAnyValue() })
     )
     is KotlinAnyValue.MapValue -> AnyValue(
         kvlist_value = KeyValueList(
-            values = values.map { (key, value) -> KeyValue(key = key, value_ = value.toProtoAnyValue()) }
+            values = value.map { (key, entry) -> KeyValue(key = key, value_ = entry.toProtoAnyValue()) }
         )
     )
 }
@@ -87,12 +87,12 @@ internal fun AnyValue.toNestedAnyValue(): KotlinAnyValue = when {
     double_value != null -> KotlinAnyValue.DoubleValue(double_value)
     bytes_value != null -> KotlinAnyValue.BytesValue(bytes_value.toByteArray())
     array_value != null -> KotlinAnyValue.ListValue(
-        values = array_value.values.map { it.toNestedAnyValue() }
+        value = array_value.values.map { it.toNestedAnyValue() }
     )
     kvlist_value != null -> kvlist_value.toMapValue()
     else -> KotlinAnyValue.NullValue
 }
 
 internal fun KeyValueList.toMapValue(): KotlinAnyValue.MapValue = KotlinAnyValue.MapValue(
-    values = values.associate { it.key to (it.value_?.toNestedAnyValue() ?: KotlinAnyValue.NullValue) }
+    value = values.associate { it.key to (it.value_?.toNestedAnyValue() ?: KotlinAnyValue.NullValue) }
 )

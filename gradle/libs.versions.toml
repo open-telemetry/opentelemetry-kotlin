@@ -10,12 +10,11 @@ minSupportedKotlinPlugin = "2.0.0"
 minSupportedKotlinKlib = "2.4.0"
 minSupportedGradle = "8.0.2"
 detekt = "1.23.8"
-binaryCompatibilityValidator = "0.18.2"
 kotlinxBenchmarkRuntime = "0.5.0"
 kotlinxCoroutines = "1.10.2"
 ktor = "3.2.3"
 okio = "3.18.2"
-otel = "1.67.0"
+otel = "1.68.0"
 otel-alpha = "1.63.0-alpha"
 kotlinSerialization = "1.8.1"
 mavenPublish = "0.37.0"
@@ -49,7 +48,6 @@ detekt-api = { module = "io.gitlab.arturbosch.detekt:detekt-api", version.ref = 
 detekt-test = { module = "io.gitlab.arturbosch.detekt:detekt-test", version.ref = "detekt" }
 detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
-binary-compatibility-validator = { module = "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "binaryCompatibilityValidator" }
 kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmarkRuntime" }
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }

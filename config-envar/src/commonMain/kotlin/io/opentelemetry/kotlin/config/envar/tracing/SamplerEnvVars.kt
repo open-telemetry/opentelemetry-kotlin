@@ -14,7 +14,7 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
  *
  * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#general-sdk-configuration
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class SamplerEnvVars(private val reader: ReportingEnvVarReader) {
 
     fun toBehavior(): SamplerBehavior? = reader.readStringAndTransform(SAMPLER) { name ->

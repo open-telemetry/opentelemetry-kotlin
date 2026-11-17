@@ -11,8 +11,6 @@ public abstract interface class io/opentelemetry/kotlin/InstrumentationScopeInfo
 
 public abstract interface class io/opentelemetry/kotlin/OpenTelemetrySdk : io/opentelemetry/kotlin/OpenTelemetry, io/opentelemetry/kotlin/export/TelemetryCloseable {
 	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
-	public abstract fun getIdGenerator ()Lio/opentelemetry/kotlin/factory/IdGenerator;
-	public abstract fun getResource ()Lio/opentelemetry/kotlin/factory/ResourceFactory;
 }
 
 public abstract interface class io/opentelemetry/kotlin/attributes/AttributeContainer {
@@ -39,8 +37,6 @@ public abstract interface class io/opentelemetry/kotlin/factory/IdGenerator {
 	public abstract fun generateSpanIdBytes ()[B
 	public abstract fun generateTraceIdBytes ()[B
 	public abstract fun getGeneratesRandomTraceIds ()Z
-	public abstract fun getInvalidSpanId ()[B
-	public abstract fun getInvalidTraceId ()[B
 }
 
 public final class io/opentelemetry/kotlin/factory/IdGenerator$DefaultImpls {
@@ -87,14 +83,13 @@ public final class io/opentelemetry/kotlin/init/ConfigFileDsl$DefaultImpls {
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/ContextConfigDsl {
-	public abstract fun getStorage ()Lio/opentelemetry/kotlin/context/CurrentContextStorage;
-	public abstract fun setStorage (Lio/opentelemetry/kotlin/context/CurrentContextStorage;)V
+	public abstract fun storage (Lkotlin/jvm/functions/Function0;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/DeclarativeConfigReader {
 }
 
-public abstract interface class io/opentelemetry/kotlin/init/LogExportConfigDsl {
+public abstract interface class io/opentelemetry/kotlin/init/ExportConfigDsl {
 	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
 	public abstract fun getSdkErrorHandler ()Lio/opentelemetry/kotlin/error/SdkErrorHandler;
 }
@@ -113,26 +108,16 @@ public abstract interface class io/opentelemetry/kotlin/init/MeterProviderConfig
 
 public abstract interface class io/opentelemetry/kotlin/init/OpenTelemetryConfigDsl : io/opentelemetry/kotlin/init/ConfigFileDsl, io/opentelemetry/kotlin/init/ResourceConfigDsl {
 	public abstract fun attributeLimits (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun clock (Lio/opentelemetry/kotlin/Clock;)V
 	public abstract fun context (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun errorHandler (Lio/opentelemetry/kotlin/error/SdkErrorHandler;)V
 	public abstract fun idGenerator (Lkotlin/jvm/functions/Function0;)V
 	public abstract fun loggerProvider (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun meterProvider (Lkotlin/jvm/functions/Function1;)V
-	public abstract fun propagator (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun propagator (Lkotlin/jvm/functions/Function0;)V
 	public abstract fun resourceDetection (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun shutdownTimeout (J)V
 	public abstract fun tracerProvider (Lkotlin/jvm/functions/Function1;)V
-}
-
-public abstract interface class io/opentelemetry/kotlin/init/PropagatorConfigDsl {
-	public abstract fun b3 (Lio/opentelemetry/kotlin/init/B3Format;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
-	public abstract fun composite ([Lio/opentelemetry/kotlin/propagation/TextMapPropagator;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
-	public abstract fun w3cBaggage ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
-	public abstract fun w3cTraceContext ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
-}
-
-public final class io/opentelemetry/kotlin/init/PropagatorConfigDsl$DefaultImpls {
-	public static synthetic fun b3$default (Lio/opentelemetry/kotlin/init/PropagatorConfigDsl;Lio/opentelemetry/kotlin/init/B3Format;ILjava/lang/Object;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/ResourceConfigDsl {
@@ -178,11 +163,6 @@ public abstract interface class io/opentelemetry/kotlin/init/SpanLimitsConfigDsl
 	public abstract fun setAttributeCountPerLinkLimit (Ljava/lang/Integer;)V
 	public abstract fun setEventCountLimit (Ljava/lang/Integer;)V
 	public abstract fun setLinkCountLimit (Ljava/lang/Integer;)V
-}
-
-public abstract interface class io/opentelemetry/kotlin/init/TraceExportConfigDsl {
-	public abstract fun getClock ()Lio/opentelemetry/kotlin/Clock;
-	public abstract fun getSdkErrorHandler ()Lio/opentelemetry/kotlin/error/SdkErrorHandler;
 }
 
 public abstract interface class io/opentelemetry/kotlin/init/TracerProviderConfigDsl : io/opentelemetry/kotlin/init/ResourceConfigDsl {
@@ -406,7 +386,6 @@ public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanData : 
 	public abstract fun getDroppedLinksCount ()I
 	public abstract fun getEndTimestamp ()Ljava/lang/Long;
 	public abstract fun getEvents ()Ljava/util/List;
-	public abstract fun getHasEnded ()Z
 	public abstract fun getInstrumentationScopeInfo ()Lio/opentelemetry/kotlin/InstrumentationScopeInfo;
 	public abstract fun getLinks ()Ljava/util/List;
 	public abstract fun getName ()Ljava/lang/String;
@@ -416,6 +395,7 @@ public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanData : 
 	public abstract fun getSpanKind ()Lio/opentelemetry/kotlin/tracing/SpanKind;
 	public abstract fun getStartTimestamp ()J
 	public abstract fun getStatus ()Lio/opentelemetry/kotlin/tracing/StatusData;
+	public abstract fun isEnded ()Z
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/data/SpanEventData : io/opentelemetry/kotlin/attributes/AttributeContainer {
@@ -440,6 +420,12 @@ public abstract interface class io/opentelemetry/kotlin/tracing/export/SpanProce
 	public abstract fun onEnd (Lio/opentelemetry/kotlin/tracing/model/ReadableSpan;)V
 	public abstract fun onEnding (Lio/opentelemetry/kotlin/tracing/model/ReadWriteSpan;)V
 	public abstract fun onStart (Lio/opentelemetry/kotlin/tracing/model/ReadWriteSpan;Lio/opentelemetry/kotlin/context/Context;)V
+}
+
+public final class io/opentelemetry/kotlin/tracing/export/SpanProcessor$DefaultImpls {
+	public static fun isEndRequired (Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;)Z
+	public static fun isOnEndingRequired (Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;)Z
+	public static fun isStartRequired (Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;)Z
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/model/ReadWriteSpan : io/opentelemetry/kotlin/tracing/Span, io/opentelemetry/kotlin/tracing/model/ReadableSpan {

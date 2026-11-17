@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.behavior.mergeMap
  *
  * https://opentelemetry.io/docs/specs/otel/protocol/exporter/
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class OtlpHttpLogsExporterBehavior(
     val delegate: OtlpHttpExporter = OtlpHttpExporter()
 ) : Behavior<OtlpHttpLogsExporterBehavior>, OtlpExporter by delegate {

@@ -90,7 +90,9 @@ internal class TracerImpl(
             val spanIdBytes = userCode { idGenerator.generateSpanIdBytes() }
 
             val collector = action?.let { block ->
-                SpanCreationCollector(spanLimitConfig).also { userCode { block(it) } }
+                SpanCreationCollector(spanLimitConfig, sdkErrorHandler).also {
+                    sdkErrorHandler.guard("SpanCreationAction failed") { block(it) }
+                }
             }
 
             val result = userCode {

@@ -29,8 +29,10 @@ val sdkMode = SdkMode.COMPAT
 
 ### Using custom processors
 
-You can supply your own processors by altering `spanProcessor` and logRecordProcessor on
-`AppConfig`.
+You can supply your own processors by updating [`createSpanProcessor()`](src/commonMain/kotlin/io/opentelemetry/example/app/ProcessorFactory.kt#L22)
+and [`createLogRecordProcessor()`](src/commonMain/kotlin/io/opentelemetry/example/app/ProcessorFactory.kt#L32).
+[`TelemetryEntrypoint.kt`](src/commonMain/kotlin/io/opentelemetry/example/app/TelemetryEntrypoint.kt#L14)
+calls these functions when configuring the SDK.
 
 ## Example app targets
 

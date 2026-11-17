@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.behavior.mergeNode
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#tracer-provider
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class TracerProviderBehavior(
 
     /**

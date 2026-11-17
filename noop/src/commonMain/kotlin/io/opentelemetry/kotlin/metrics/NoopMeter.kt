@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  *
  * This implementation should induce as close to zero overhead as possible.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal object NoopMeter : Meter {
     override fun createLongGauge(name: String, unit: String?, description: String?): LongGauge =
         NoopLongGauge(name, unit, description)
@@ -68,4 +68,14 @@ internal object NoopMeter : Meter {
         description: String?,
         vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
     ): ObservableDoubleGauge = NoopObservableDoubleGauge(name, unit, description)
+
+    override fun batchCallback(
+        measurement: ObservableMeasurement,
+        vararg additionalMeasurements: ObservableMeasurement,
+        callback: () -> Unit,
+    ): AutoCloseable = NoopBatchCallback
+}
+
+private object NoopBatchCallback : AutoCloseable {
+    override fun close() = Unit
 }

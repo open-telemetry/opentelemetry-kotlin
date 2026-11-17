@@ -26,7 +26,7 @@ class FakeReadWriteSpan private constructor(
     override val endTimestamp: Long?,
     override val resource: Resource,
     override val instrumentationScopeInfo: InstrumentationScopeInfo,
-    override val hasEnded: Boolean,
+    override val isEnded: Boolean,
     override val droppedAttributesCount: Int,
 ) : ReadWriteSpan, AttributesMutator by attrs {
 
@@ -45,7 +45,7 @@ class FakeReadWriteSpan private constructor(
         endTimestamp: Long? = 0,
         resource: Resource = FakeResource(),
         instrumentationScopeInfo: InstrumentationScopeInfo = FakeInstrumentationScopeInfo(),
-        hasEnded: Boolean = false,
+        isEnded: Boolean = false,
         droppedAttributesCount: Int = 0
     ) : this(
         name,
@@ -62,7 +62,7 @@ class FakeReadWriteSpan private constructor(
         endTimestamp,
         resource,
         instrumentationScopeInfo,
-        hasEnded,
+        isEnded,
         droppedAttributesCount
     )
 

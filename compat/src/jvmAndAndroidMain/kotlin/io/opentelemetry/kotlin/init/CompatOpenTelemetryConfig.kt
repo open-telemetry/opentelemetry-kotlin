@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.init
 import io.opentelemetry.kotlin.COMPAT_DEFAULT_TIMEOUT_MS
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.aliases.OtelJavaClock
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapPropagator
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
@@ -10,26 +11,25 @@ import io.opentelemetry.kotlin.attributes.setAttributeMap
 import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
+import io.opentelemetry.kotlin.clock.ClockAdapter
 import io.opentelemetry.kotlin.config.DeclarativeBehaviorReader
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
-import io.opentelemetry.kotlin.config.dsl.PropagatorConfigImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceDetectionConfigDslImpl
 import io.opentelemetry.kotlin.config.toBehaviorReader
 import io.opentelemetry.kotlin.config.validateOrUseDefault
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.propagation.TextMapPropagatorAdapter
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import kotlin.concurrent.Volatile
 
-@ExperimentalApi
-internal class CompatOpenTelemetryConfig(
-    clock: Clock,
-) : OpenTelemetryConfigDsl, BehaviorSupplier<OpenTelemetryBehavior> {
+@OptIn(ExperimentalApi::class)
+internal class CompatOpenTelemetryConfig : OpenTelemetryConfigDsl, BehaviorSupplier<OpenTelemetryBehavior> {
 
     @Volatile private var configuredErrorHandler: SdkErrorHandler = PlatformSdkErrorHandler
     internal val sdkErrorHandler = GuardedSdkErrorHandler { configuredErrorHandler.onError(it) }
@@ -47,14 +47,21 @@ internal class CompatOpenTelemetryConfig(
         ) { it > 0 }
     }
 
-    internal val tracerProviderConfig = CompatTracerProviderConfig(clock, sdkErrorHandler)
-    internal val loggerProviderConfig = CompatLoggerProviderConfig(clock, sdkErrorHandler)
+    @Volatile internal var clock: Clock = ClockAdapter(OtelJavaClock.getDefault())
+        private set
+
+    /**
+     * Export configs are evaluated eagerly, possibly before [clock] is called, so they receive a
+     * forwarder that resolves the configured clock on each reading instead.
+     */
+    private val forwardingClock = Clock { clock.now() }
+
+    internal val tracerProviderConfig = CompatTracerProviderConfig(forwardingClock, sdkErrorHandler)
+    internal val loggerProviderConfig = CompatLoggerProviderConfig(forwardingClock, sdkErrorHandler)
     internal val meterProviderConfig = CompatMeterProviderConfig(sdkErrorHandler)
     private val globalAttributeLimits = AttributeLimitsConfigDslImpl()
-    private val propagatorCfg = PropagatorConfigImpl()
 
-    @Volatile internal var propagator: TextMapPropagator = TextMapPropagatorAdapter(OtelJavaTextMapPropagator.noop())
-        private set
+    @Volatile private var propagatorSupplier: (() -> TextMapPropagator)? = null
 
     @Volatile private var idGeneratorBehavior: IdGeneratorBehavior? = null
 
@@ -120,12 +127,26 @@ internal class CompatOpenTelemetryConfig(
         meterProviderConfig.action()
     }
 
-    override fun propagator(action: PropagatorConfigDsl.() -> TextMapPropagator) {
-        propagator = propagatorCfg.action()
+    override fun propagator(action: () -> TextMapPropagator) {
+        propagatorSupplier = action
+    }
+
+    /**
+     * Invokes the supplier configured via [propagator], falling back to a noop propagator if none
+     * was configured or the supplier throws.
+     */
+    internal fun createPropagator(): TextMapPropagator {
+        val noop = TextMapPropagatorAdapter(OtelJavaTextMapPropagator.noop())
+        val supplier = propagatorSupplier ?: return noop
+        return sdkErrorHandler.guardOrDefault(noop, "Failed to create TextMapPropagator, using noop") { supplier() }
     }
 
     override fun idGenerator(action: () -> IdGenerator) {
         idGeneratorBehavior = IdGeneratorBehavior.Custom(action)
+    }
+
+    override fun clock(clock: Clock) {
+        this.clock = clock
     }
 
     override fun errorHandler(handler: SdkErrorHandler) {

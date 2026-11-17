@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.behavior.mergeNode
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#simple-processor
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class SimpleSpanProcessorBehavior(
     /** Span exporter. */
     val exporter: SpanExporterBehavior? = null

@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.init.DeclarativeConfigReader
 /**
  * Reads the declarative config file the SDK was pointed at.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun interface DeclarativeBehaviorReader : DeclarativeConfigReader {
 
     /**
@@ -33,7 +33,7 @@ fun interface DeclarativeBehaviorReader : DeclarativeConfigReader {
  * Returns the reader behind a registered [DeclarativeConfigReader], or `null` and reports an
  * error if it did not come from an opentelemetry-kotlin artifact.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun DeclarativeConfigReader.toBehaviorReader(sdkErrorHandler: SdkErrorHandler): DeclarativeBehaviorReader? {
     if (this is DeclarativeBehaviorReader) {
         return this

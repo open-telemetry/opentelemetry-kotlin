@@ -13,7 +13,7 @@ import io.opentelemetry.kotlin.behavior.mergeNode
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#span-exporter
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class SpanExporterBehavior(
     val delegate: ExporterDelegate<OtlpHttpSpanExporterBehavior> = ExporterDelegate(),
 ) : Behavior<SpanExporterBehavior>, Exporter by delegate {

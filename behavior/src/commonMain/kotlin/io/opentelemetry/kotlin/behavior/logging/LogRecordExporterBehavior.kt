@@ -6,8 +6,6 @@ import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.Exporter
 import io.opentelemetry.kotlin.behavior.ExporterDelegate
 import io.opentelemetry.kotlin.behavior.mergeNode
-import io.opentelemetry.kotlin.behavior.tracing.OtlpHttpSpanExporterBehavior
-import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
 
 /**
  * Exporters for the logger provider. These are independent of the kind of processor (simple or
@@ -15,7 +13,7 @@ import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
  *
  * https://opentelemetry.io/docs/specs/otel/logs/sdk/#logrecordexporter
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class LogRecordExporterBehavior(
     val delegate: ExporterDelegate<OtlpHttpLogsExporterBehavior> = ExporterDelegate(),
     ) : Behavior<LogRecordExporterBehavior>, Exporter by delegate {

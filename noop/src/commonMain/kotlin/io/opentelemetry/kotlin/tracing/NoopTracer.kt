@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.currentContext
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal object NoopTracer : Tracer {
 
     override fun enabled(): Boolean = false
