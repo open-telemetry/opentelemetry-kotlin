@@ -165,9 +165,9 @@ fun baggageBasics() {
         put("region", "eu-west-1", metadata = "owner=payments")
     }
 
-    // Baggage is immutable too: set() and remove() return a new Baggage.
+    // Baggage is immutable too: put() and remove() return a new Baggage.
     val updated = baggage
-        .set("region", "us-east-1")
+        .put("region", "us-east-1")
         .remove("user.id")
 
     println(baggage.getValue("region")) // eu-west-1 (the original is unchanged)

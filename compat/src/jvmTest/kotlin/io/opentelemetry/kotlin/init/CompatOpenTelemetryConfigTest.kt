@@ -1,12 +1,16 @@
 package io.opentelemetry.kotlin.init
 
+import io.opentelemetry.kotlin.behavior.SeverityLevel
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.propagation.FakeTextMapPropagator
 import io.opentelemetry.kotlin.propagation.SdkGuardedTextMapPropagator
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 
 internal class CompatOpenTelemetryConfigTest {
@@ -26,6 +30,38 @@ internal class CompatOpenTelemetryConfigTest {
             assertEquals(6000L, cfg.shutdownTimeoutMs)
         }
         assertEquals(2, errors.apiMisuses.size)
+    }
+
+    @Test
+    fun `disabled and log level are supplied as behavior`() {
+        val cfg = CompatOpenTelemetryConfig()
+        cfg.disabled(true)
+        cfg.logLevel(SeverityNumber.WARN2)
+        val behavior = cfg.toBehavior()
+        assertEquals(true, behavior.disabled)
+        assertEquals(SeverityLevel.WARN2, behavior.logLevel)
+    }
+
+    @Test
+    fun `log level drops reports below it`() {
+        val errors = FakeSdkErrorHandler()
+        val cfg = CompatOpenTelemetryConfig().apply { errorHandler(errors) }
+        cfg.logLevel(SeverityNumber.ERROR)
+        cfg.shutdownTimeout(-1)
+        assertEquals(0, errors.errors.size)
+
+        cfg.minimumErrorSeverity = SdkErrorSeverity.WARNING
+        cfg.shutdownTimeout(-1)
+        assertEquals(1, errors.apiMisuses.size)
+    }
+
+    @Test
+    fun `unknown log level is reported and ignored`() {
+        val errors = FakeSdkErrorHandler()
+        val cfg = CompatOpenTelemetryConfig().apply { errorHandler(errors) }
+        cfg.logLevel(SeverityNumber.UNKNOWN)
+        assertEquals("OpenTelemetryConfigDsl.logLevel", errors.apiMisuses.single().api)
+        assertNull(cfg.toBehavior().logLevel)
     }
 
     @Test

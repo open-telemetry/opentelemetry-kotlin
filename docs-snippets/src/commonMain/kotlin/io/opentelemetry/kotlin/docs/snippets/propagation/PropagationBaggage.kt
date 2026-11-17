@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.context.currentContext
 // region propagation-baggage
 fun sendWithBaggage(otel: OpenTelemetry, request: OutgoingRequest) {
     // Add to the baggage that is already current rather than replacing it.
-    val baggage = currentContext().extractBaggage().set("user.tier", "gold")
+    val baggage = currentContext().extractBaggage().put("user.tier", "gold")
     val ctx = currentContext().storeBaggage(baggage)
 
     otel.propagator.inject(ctx, request, outgoingRequestSetter)
