@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.behavior.Behavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.Exporter
 import io.opentelemetry.kotlin.behavior.ExporterDelegate
-import io.opentelemetry.kotlin.behavior.OtlpExporter
 import io.opentelemetry.kotlin.behavior.mergeNode
 
 /**
@@ -20,15 +19,15 @@ data class SpanExporterBehavior(
     constructor(
         console: ConsoleExporterBehavior? = null,
         http: OtlpHttpSpanExporterBehavior? = null,
-    ):this(ExporterDelegate(console = console, http = http))
+    ) : this(ExporterDelegate(console = console, http = http))
 
     override fun mergeWith(higher: SpanExporterBehavior): SpanExporterBehavior = copy(
-            delegate = delegate.copy(
-                console = mergeNode(console, higher.console),
-                http = mergeNode(
-                    http as OtlpHttpSpanExporterBehavior?,
-                    higher.http as OtlpHttpSpanExporterBehavior?
-                ),
-            )
+        delegate = delegate.copy(
+            console = mergeNode(console, higher.console),
+            http = mergeNode(
+                http as OtlpHttpSpanExporterBehavior?,
+                higher.http as OtlpHttpSpanExporterBehavior?
+            ),
         )
+    )
 }
