@@ -110,8 +110,10 @@ public abstract interface class io/opentelemetry/kotlin/init/OpenTelemetryConfig
 	public abstract fun attributeLimits (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun clock (Lio/opentelemetry/kotlin/Clock;)V
 	public abstract fun context (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun disabled (Z)V
 	public abstract fun errorHandler (Lio/opentelemetry/kotlin/error/SdkErrorHandler;)V
 	public abstract fun idGenerator (Lkotlin/jvm/functions/Function0;)V
+	public abstract fun logLevel (Lio/opentelemetry/kotlin/logging/SeverityNumber;)V
 	public abstract fun loggerProvider (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun meterProvider (Lkotlin/jvm/functions/Function1;)V
 	public abstract fun propagator (Lkotlin/jvm/functions/Function0;)V

@@ -24,6 +24,24 @@ internal class CreateCompatOpenTelemetryDisabledTest {
         val api = createCompatOpenTelemetry {
             configFile(DeclarativeBehaviorReader { OpenTelemetryBehavior(disabled = false) }, "otel.yaml")
         }
+        assertNotSame(NoopOpenTelemetrySdk, api)
+        api.shutdown()
+    }
+
+    @Test
+    fun `disabled via the DSL creates the noop SDK`() {
+        val api = createCompatOpenTelemetry {
+            disabled(true)
+        }
+        assertSame(NoopOpenTelemetrySdk, api)
+    }
+
+    @Test
+    fun `DSL takes precedence over the config file for disabled`() = runTest {
+        val api = createCompatOpenTelemetry {
+            configFile(DeclarativeBehaviorReader { OpenTelemetryBehavior(disabled = true) }, "otel.yaml")
+            disabled(false)
+        }
 
         assertNotSame(NoopOpenTelemetrySdk, api)
         api.shutdown()
