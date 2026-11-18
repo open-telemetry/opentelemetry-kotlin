@@ -14,7 +14,11 @@ internal class LogRecordProcessorConfigDslImplTest {
 
     @Test
     fun startsUnset() {
-        assertNull(LogRecordProcessorConfigDslImpl().toBehavior())
+        val dsl = LogRecordProcessorConfigDslImpl()
+        assertEquals(
+            LogRecordProcessorBehavior(),
+            dsl.toBehavior()
+        )
     }
 
     @Test
