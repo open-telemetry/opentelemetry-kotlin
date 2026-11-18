@@ -25,6 +25,7 @@ import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.propagation.TextMapPropagatorAdapter
+import io.opentelemetry.kotlin.propagation.guarded
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import kotlin.concurrent.Volatile
 
@@ -133,12 +134,15 @@ internal class CompatOpenTelemetryConfig : OpenTelemetryConfigDsl, BehaviorSuppl
 
     /**
      * Invokes the supplier configured via [propagator], falling back to a noop propagator if none
-     * was configured or the supplier throws.
+     * was configured or the supplier throws. The returned propagator reports failures in user code
+     * to [sdkErrorHandler] instead of throwing.
      */
     internal fun createPropagator(): TextMapPropagator {
         val noop = TextMapPropagatorAdapter(OtelJavaTextMapPropagator.noop())
         val supplier = propagatorSupplier ?: return noop
-        return sdkErrorHandler.guardOrDefault(noop, "Failed to create TextMapPropagator, using noop") { supplier() }
+        return sdkErrorHandler.guardOrDefault(noop, "Failed to create TextMapPropagator, using noop") {
+            supplier().guarded(sdkErrorHandler)
+        }
     }
 
     override fun idGenerator(action: () -> IdGenerator) {

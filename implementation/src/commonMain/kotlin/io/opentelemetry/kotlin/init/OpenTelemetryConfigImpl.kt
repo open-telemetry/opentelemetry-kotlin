@@ -20,6 +20,7 @@ import io.opentelemetry.kotlin.guarded
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.propagation.createNoopPropagator
 import kotlin.concurrent.Volatile
+import io.opentelemetry.kotlin.propagation.guarded as guardedPropagator
 
 internal class OpenTelemetryConfigImpl(
     internal val globalResourceConfig: ResourceConfigDslImpl = ResourceConfigDslImpl(),
@@ -105,13 +106,14 @@ internal class OpenTelemetryConfigImpl(
 
     /**
      * Invokes the supplier configured via [propagator], falling back to a noop propagator if none
-     * was configured or the supplier throws.
+     * was configured or the supplier throws. The returned propagator reports failures in user code
+     * to [sdkErrorHandler] instead of throwing.
      */
     internal fun createPropagator(): TextMapPropagator {
         val supplier = propagatorSupplier ?: return createNoopPropagator()
         return sdkErrorHandler.guardOrDefault(createNoopPropagator(), "Failed to create TextMapPropagator, using noop") {
             supplier()
-        }
+        }.guardedPropagator(sdkErrorHandler)
     }
 
     override fun idGenerator(action: () -> IdGenerator) {
