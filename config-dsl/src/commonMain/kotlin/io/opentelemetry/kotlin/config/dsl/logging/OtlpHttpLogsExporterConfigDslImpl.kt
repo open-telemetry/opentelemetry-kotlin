@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.config.dsl.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.logging.OtlpHttpLogsExporterBehavior
-import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
 
 /**
  * Captures the OTLP HTTP logs exporter configured programmatically and maps it onto a behavior.

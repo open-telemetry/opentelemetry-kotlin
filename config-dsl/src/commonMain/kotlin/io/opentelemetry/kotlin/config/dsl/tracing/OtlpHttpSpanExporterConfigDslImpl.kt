@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.config.dsl.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.tracing.OtlpHttpSpanExporterBehavior
-import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
 
 /**
  * Captures the OTLP HTTP span exporter configured programmatically and maps it onto a behavior.
