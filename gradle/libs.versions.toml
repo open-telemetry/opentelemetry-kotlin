@@ -68,7 +68,6 @@ yamlkt = { module = "net.mamoe.yamlkt:yamlkt", version.ref = "yamlkt" }
 opentelemetry-bom = { group = "io.opentelemetry", name = "opentelemetry-bom", version.ref = "otel" }
 opentelemetry-bom-alpha = { group = "io.opentelemetry", name = "opentelemetry-bom-alpha", version.ref = "otel-alpha" }
 opentelemetry-api = { group = "io.opentelemetry", name = "opentelemetry-api"}
-opentelemetry-api-incubator = { group = "io.opentelemetry", name = "opentelemetry-api-incubator" }
 opentelemetry-sdk = { group = "io.opentelemetry", name = "opentelemetry-sdk"}
 opentelemetry-exporter-logging = { group = "io.opentelemetry", name = "opentelemetry-exporter-logging"}
 opentelemetry-sdk-extension-incubator = { group = "io.opentelemetry", name = "opentelemetry-sdk-extension-incubator"}
