@@ -1,12 +1,12 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.exporter.logging.LoggingSpanExporter
-import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.SimpleLogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SimpleSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
