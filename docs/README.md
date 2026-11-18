@@ -10,6 +10,9 @@ The code samples in these docs are compiled against the current source, so they 
 Start with [Getting started](getting-started.md): install the SDK, record a span and a log, and
 send them to a local collector.
 
+To send traces, read [Tracing](tracing.md): recording spans, attributes, events, status, exceptions,
+parent and child spans, links, and configuring sampling, processors and exporters.
+
 Read these in order if you're new to context and propagation:
 
 1. [Context](context.md): what a context is, the current context, context storage, threads and
