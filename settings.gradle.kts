@@ -59,6 +59,7 @@ include(
     ":java-typealiases",
     "examples:example-app",
     "examples:example-app-android",
+    "examples:local-collector",
     ":smoke-test",
     ":docs-snippets",
     ":gradle-integration-test",

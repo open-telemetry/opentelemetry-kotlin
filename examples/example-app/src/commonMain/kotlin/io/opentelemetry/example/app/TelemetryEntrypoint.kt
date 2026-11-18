@@ -5,16 +5,17 @@ import io.opentelemetry.kotlin.OpenTelemetrySdk
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 
 /**
- * Initializes the OpenTelemetry SDK.
+ * Initializes the OpenTelemetry SDK. Telemetry is exported to [url] via OTLP/HTTP if set,
+ * otherwise it is printed to stdout.
  */
 @OptIn(ExperimentalApi::class)
-fun initializeOtelSdk(): OpenTelemetrySdk {
+fun initializeOtelSdk(url: String? = AppConfig.url): OpenTelemetrySdk {
     val config: OpenTelemetryConfigDsl.() -> Unit = {
         tracerProvider {
-            export { createSpanProcessor(AppConfig.url) }
+            export { createSpanProcessor(url) }
         }
         loggerProvider {
-            export { createLogRecordProcessor(AppConfig.url) }
+            export { createLogRecordProcessor(url) }
         }
     }
     return createPlatformOpenTelemetry(AppConfig.sdkMode, config)
