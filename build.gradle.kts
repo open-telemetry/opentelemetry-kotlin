@@ -57,7 +57,7 @@ fun DocSnippetsTask.configureDocSnippets(checkOnly: Boolean) {
     group = "documentation"
     this.checkOnly.set(checkOnly)
     rootDirectory.set(layout.projectDirectory)
-    snippetSources.from(fileTree("docs-snippets/src") { include("**/*.kt") })
+    snippetSources.from(fileTree("docs-snippets/src") { include("**/*.kt", "**/*.kts", "**/*.swift") })
     markdownFiles.from(
         fileTree(rootDir) {
             include("docs/**/*.md", "**/README.md")
