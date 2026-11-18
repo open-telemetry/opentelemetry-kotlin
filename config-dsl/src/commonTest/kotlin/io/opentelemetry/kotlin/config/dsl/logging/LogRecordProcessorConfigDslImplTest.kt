@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.behavior.logging.OtlpHttpLogsExporterBehavior
 import io.opentelemetry.kotlin.behavior.logging.SimpleLogRecordProcessorBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class LogRecordProcessorConfigDslImplTest {
 
