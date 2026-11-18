@@ -12,13 +12,12 @@ import io.opentelemetry.kotlin.config.schema.model.LogRecordProcessor
 import io.opentelemetry.kotlin.config.schema.model.SimpleLogRecordProcessor
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class LogRecordProcessorMapperTest {
 
     @Test
     fun emptyProcessorsLeaveBehaviorUnset() {
-        assertNull(emptyList<LogRecordProcessor>().toBehavior())
+        assertEquals(LogRecordProcessorBehavior(), emptyList<LogRecordProcessor>().toBehavior())
     }
 
     @Test
