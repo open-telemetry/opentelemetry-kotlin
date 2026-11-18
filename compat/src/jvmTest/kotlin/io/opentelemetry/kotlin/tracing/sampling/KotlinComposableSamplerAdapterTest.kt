@@ -14,6 +14,7 @@ import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
+import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinTraceState
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -316,6 +317,39 @@ internal class KotlinComposableSamplerAdapterTest {
                 OtelJavaSpanKind.CLIENT,
                 OtelJavaAttributes.empty(),
                 emptyList(),
+            )
+        }
+    }
+
+    @Test
+    fun `throwing trace state asMap is reported as user code error`() {
+        val originalState = OtelJavaTraceState.getDefault()
+            .toOtelKotlinTraceState()
+
+        val hostileState = object : TraceState by originalState {
+            override fun asMap(): Map<String, String> = error("boom")
+        }
+
+        val delegate = FakeComposableSampler(
+            intent = FakeSamplingIntent(
+                traceStateProvider = { _, _ -> hostileState },
+            ),
+        )
+
+        val adapter = KotlinComposableSamplerAdapter(delegate)
+
+        assertUserCodeFailure {
+            val intent = adapter.getSamplingIntent(
+                OtelJavaContext.root(),
+                "trace-id",
+                "span",
+                OtelJavaSpanKind.CLIENT,
+                OtelJavaAttributes.empty(),
+                emptyList(),
+            )
+
+            intent.traceStateUpdater?.apply(
+                OtelJavaTraceState.getDefault()
             )
         }
     }

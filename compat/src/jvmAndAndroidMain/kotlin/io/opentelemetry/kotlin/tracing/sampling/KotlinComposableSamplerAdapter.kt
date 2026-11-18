@@ -73,18 +73,29 @@ internal class KotlinComposableSamplerAdapter(private val delegate: ComposableSa
         }
 
         val traceStateProvider = userCode { intent.traceStateProvider }
-        val traceStateUpdater: Function<OtelJavaTraceState, OtelJavaTraceState> = if (traceStateProvider == null) {
-            Function.identity()
-        } else {
-            Function { javaTraceState ->
-                val kotlinTraceState = javaTraceState.toOtelKotlinTraceState()
-                val updatedTraceState = userCode {
-                    traceStateProvider(kotlinTraceState, SamplingResult.Decision.RECORD_AND_SAMPLE)
-                }
 
-                updatedTraceState.toOtelJavaTraceState()
+        val traceStateUpdater: Function<OtelJavaTraceState, OtelJavaTraceState> =
+            if (traceStateProvider == null) {
+                Function.identity()
+            } else {
+                Function { javaTraceState ->
+                    val kotlinTraceState =
+                        javaTraceState.toOtelKotlinTraceState()
+
+                    val updatedTraceState = userCode {
+                        traceStateProvider(
+                            kotlinTraceState,
+                            SamplingResult.Decision.RECORD_AND_SAMPLE,
+                        )
+                    }
+
+                    val traceStateEntries = userCode {
+                        updatedTraceState.asMap()
+                    }
+
+                    traceStateEntries.toOtelJavaTraceState()
+                }
             }
-        }
 
         return OtelJavaSamplingIntent.create(
             threshold,
