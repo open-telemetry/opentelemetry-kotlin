@@ -18,6 +18,7 @@ import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.propagation.FakeTextMapPropagator
+import io.opentelemetry.kotlin.propagation.SdkGuardedTextMapPropagator
 import io.opentelemetry.kotlin.propagation.createCompositePropagator
 import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -64,7 +65,7 @@ internal class OpenTelemetryConfigImplTest {
         val cfg = OpenTelemetryConfigImpl().apply {
             propagator { createW3CBaggagePropagator() }
         }
-        assertSame(createW3CBaggagePropagator(), cfg.createPropagator())
+        assertSame(createW3CBaggagePropagator(), assertIs<SdkGuardedTextMapPropagator>(cfg.createPropagator()).delegate)
     }
 
     @Test
@@ -82,7 +83,7 @@ internal class OpenTelemetryConfigImplTest {
         val cfg = OpenTelemetryConfigImpl().apply {
             propagator { custom }
         }
-        assertSame(custom, cfg.createPropagator())
+        assertSame(custom, assertIs<SdkGuardedTextMapPropagator>(cfg.createPropagator()).delegate)
     }
 
     @Test
@@ -95,7 +96,7 @@ internal class OpenTelemetryConfigImplTest {
             }
         }
         assertEquals(0, calls)
-        assertSame(createW3CBaggagePropagator(), cfg.createPropagator())
+        assertSame(createW3CBaggagePropagator(), assertIs<SdkGuardedTextMapPropagator>(cfg.createPropagator()).delegate)
         assertEquals(1, calls)
     }
 

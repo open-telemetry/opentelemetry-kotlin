@@ -18,6 +18,7 @@ import io.ktor.utils.io.readRemaining
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.error.reportUserCodeError
+import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.export.OtlpResponse.ClientError
 import io.opentelemetry.kotlin.export.OtlpResponse.EncodingFailed
@@ -49,7 +50,9 @@ internal class OtlpClient(
 
     /** Releases an SDK-owned HTTP client; caller-supplied clients are not owned here. */
     internal fun release() {
-        httpClientLease?.release()
+        sdkErrorHandler.sdkGuard("Failed to release OTLP HTTP client") {
+            httpClientLease?.release()
+        }
     }
 
     private val contentType = ContentType.parse("application/x-protobuf")

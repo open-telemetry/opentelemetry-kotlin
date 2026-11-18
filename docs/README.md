@@ -7,8 +7,12 @@ The code samples in these docs are compiled against the current source, so they 
 
 ## Guides
 
-- [Context API](../api/README.md#current-context-api---an-explanation): the current context, and
-  how context storage is installed.
+Read these in order if you're new to context and propagation:
+
+1. [Context](context.md): what a context is, the current context, context storage, threads and
+   coroutines.
+2. [Propagation](propagation.md): sending context between processes with propagators, carriers,
+   B3 and custom propagators.
 
 ## Contributing to the docs
 

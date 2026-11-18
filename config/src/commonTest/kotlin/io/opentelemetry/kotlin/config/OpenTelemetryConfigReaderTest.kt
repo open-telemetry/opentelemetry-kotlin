@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import kotlin.test.Test
@@ -214,6 +215,25 @@ internal class OpenTelemetryConfigReaderTest {
         assertTrue(misuse.message.contains("cannot read $PATH"))
         assertEquals(SdkErrorSeverity.ERROR, misuse.severity)
         assertEquals(1, handler.errors.size)
+    }
+
+    @Test
+    fun `should route problems reported while reading the config file to the error handler`() {
+        val handler = FakeSdkErrorHandler()
+        val reported = SdkError.ApiMisuse(api = "resource", message = "bad", severity = SdkErrorSeverity.WARNING)
+        val reader = OpenTelemetryConfigReader(
+            envVarReader = null,
+            declarativeConfigReader = object : DeclarativeBehaviorReader {
+                override fun read(path: String) = OpenTelemetryBehavior()
+                override fun read(path: String, sdkErrorHandler: SdkErrorHandler): OpenTelemetryBehavior {
+                    sdkErrorHandler.onError(reported)
+                    return OpenTelemetryBehavior()
+                }
+            },
+            sdkErrorHandler = handler,
+        )
+        reader.read(configFilePath = PATH)
+        assertSame(reported, handler.errors.single())
     }
 
     @Test

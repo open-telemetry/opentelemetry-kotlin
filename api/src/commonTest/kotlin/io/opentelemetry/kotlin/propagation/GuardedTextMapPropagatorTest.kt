@@ -37,7 +37,7 @@ internal class GuardedTextMapPropagatorTest {
 
     private val populatedContext: Context = rootContext()
         .storeSpanContext(createSpanContext("0af7651916cd43dd8448eb211c80319c", "b7ad6b7169203331"))
-        .storeBaggage(createBaggage().set("user", "alice"))
+        .storeBaggage(createBaggage().put("user", "alice"))
 
     @Test
     fun `throwing setter does not escape built-in propagators`() {
