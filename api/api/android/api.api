@@ -98,9 +98,12 @@ public abstract interface class io/opentelemetry/kotlin/attributes/AttributesMut
 public abstract interface class io/opentelemetry/kotlin/baggage/Baggage {
 	public abstract fun asMap ()Ljava/util/Map;
 	public abstract fun getValue (Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun put (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/baggage/Baggage;
 	public abstract fun remove (Ljava/lang/String;)Lio/opentelemetry/kotlin/baggage/Baggage;
-	public abstract fun set (Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/baggage/Baggage;
-	public abstract fun set (Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/baggage/BaggageEntryMetadata;)Lio/opentelemetry/kotlin/baggage/Baggage;
+}
+
+public final class io/opentelemetry/kotlin/baggage/Baggage$DefaultImpls {
+	public static synthetic fun put$default (Lio/opentelemetry/kotlin/baggage/Baggage;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/baggage/Baggage;
 }
 
 public abstract interface class io/opentelemetry/kotlin/baggage/BaggageCreationAction {

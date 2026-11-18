@@ -77,7 +77,7 @@ internal class CompatContextBaggageTest {
         val javaBaggage = OtelJavaBaggage.builder().put("bad key", "b").put("good", "g").build()
         val ctx = javaBaggage.storeInContext(rootContext().toOtelJavaContext()).toOtelKotlinContext()
 
-        val updated = ctx.storeBaggage(ctx.extractBaggage().set("user", "alice"))
+        val updated = ctx.storeBaggage(ctx.extractBaggage().put("user", "alice"))
         val written = OtelJavaBaggage.fromContext(updated.toOtelJavaContext())
 
         assertEquals(mapOf("bad key" to "b", "good" to "g", "user" to "alice"), written.asMap().mapValues { it.value.value })
