@@ -21,7 +21,7 @@ internal class LogRecordProcessorBehaviorTest {
                 scheduleDelay = 1_000,
                 exportTimeout = 1_000,
                 maxQueueSize = 1_000,
-                maxExportBatchSize = 1_000,
+                requestedQueueSize = 1_000,
                 exporter = LogRecordExporterBehavior(
                     console = ConsoleExporterBehavior()
                 )
@@ -37,7 +37,7 @@ internal class LogRecordProcessorBehaviorTest {
                 scheduleDelay = 100,
                 exportTimeout = 100,
                 maxQueueSize = 100,
-                maxExportBatchSize = 100,
+                requestedQueueSize = 100,
                 exporter = LogRecordExporterBehavior(
                     http = OtlpHttpLogsExporterBehavior(
                         endpoint = "http://localhost:8080/lower"
@@ -50,7 +50,7 @@ internal class LogRecordProcessorBehaviorTest {
                 scheduleDelay = 1_000,
                 exportTimeout = 1_000,
                 maxQueueSize = 1_000,
-                maxExportBatchSize = 1_000,
+                requestedQueueSize = 1_000,
                 exporter = LogRecordExporterBehavior(
                     http = OtlpHttpLogsExporterBehavior(
                         endpoint = "http://localhost:8080/higher"

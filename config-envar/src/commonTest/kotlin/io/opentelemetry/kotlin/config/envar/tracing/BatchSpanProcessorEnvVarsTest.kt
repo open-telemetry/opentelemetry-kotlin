@@ -25,7 +25,7 @@ internal class BatchSpanProcessorEnvVarsTest {
                 scheduleDelay = 100,
                 exportTimeout = 0,
                 maxQueueSize = 40,
-                maxExportBatchSize = 20,
+                requestedQueueSize = 20,
                 SpanExporterBehavior(
                     console = ConsoleExporterBehavior()
                 )

@@ -22,14 +22,14 @@ data class BatchLogRecordProcessorBehavior(
         scheduleDelay: Long? = null,
         exportTimeout: Long? = null,
         maxQueueSize: Int? = null,
-        maxExportBatchSize: Int? = null,
+        requestedQueueSize: Int? = null,
         exporter: LogRecordExporterBehavior? = null,
     ) : this(
         BatchProcessorDelegate(
             scheduleDelay,
             exportTimeout,
             maxQueueSize,
-            maxExportBatchSize,
+            requestedQueueSize,
             exporter
         )
     )
@@ -39,7 +39,7 @@ data class BatchLogRecordProcessorBehavior(
             scheduleDelay = higher.scheduleDelay ?: scheduleDelay,
             exportTimeout = higher.exportTimeout ?: exportTimeout,
             maxQueueSize = higher.maxQueueSize ?: maxQueueSize,
-            maxExportBatchSize = higher.maxExportBatchSize ?: maxExportBatchSize,
+            requestedQueueSize = higher.requestedQueueSize ?: requestedQueueSize,
             exporter = mergeNode(
                 exporter as LogRecordExporterBehavior?,
                 higher.exporter as LogRecordExporterBehavior?

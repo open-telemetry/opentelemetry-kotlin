@@ -23,7 +23,7 @@ internal class BatchSpanProcessorConfigDslImplTest {
             scheduleDelay = 1
             exporterTimeout = 2
             maxQueueSize = 3
-            maxExportBatchSize = 4
+            requestedQueueSize = 4
             exporter {
                 http {
                     endpoint = "http://www.example.com"
@@ -36,7 +36,7 @@ internal class BatchSpanProcessorConfigDslImplTest {
                 scheduleDelay = 1,
                 exportTimeout = 2,
                 maxQueueSize = 3,
-                maxExportBatchSize = 4,
+                requestedQueueSize = 4,
                 exporter = SpanExporterBehavior(
                     http = OtlpHttpSpanExporterBehavior(
                         endpoint = "http://www.example.com"
@@ -54,7 +54,7 @@ internal class BatchSpanProcessorConfigDslImplTest {
             scheduleDelay = -1
             exporterTimeout = -1
             maxQueueSize = 0
-            maxExportBatchSize = 0
+            requestedQueueSize = 0
         }
         assertEquals(
             BatchSpanProcessorBehavior(),

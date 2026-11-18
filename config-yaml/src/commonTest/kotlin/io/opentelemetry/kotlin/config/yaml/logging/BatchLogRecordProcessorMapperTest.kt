@@ -40,7 +40,7 @@ internal class BatchLogRecordProcessorMapperTest {
                 scheduleDelay = 100,
                 exportTimeout = 200,
                 maxQueueSize = 400,
-                maxExportBatchSize = 300,
+                requestedQueueSize = 300,
                 exporter = LogRecordExporterBehavior(
                     console = ConsoleExporterBehavior(),
                     http = OtlpHttpLogsExporterBehavior(
@@ -65,22 +65,5 @@ internal class BatchLogRecordProcessorMapperTest {
             BatchLogRecordProcessorBehavior(),
             behavior
         )
-    }
-
-    @Test
-    fun batchSizeIsCappedAtQueueSize() {
-        val behavior = BatchLogRecordProcessor(
-            maxQueueSize = 100,
-            maxExportBatchSize = 400,
-            exporter = LogRecordExporter()
-        ).toBehavior()
-        assertEquals(100, behavior.maxQueueSize)
-        assertEquals(100, behavior.maxExportBatchSize)
-    }
-
-    @Test
-    fun defaultBatchSizeIsCappedAtQueueSize() {
-        val behavior = BatchLogRecordProcessor(maxQueueSize = 100, exporter = LogRecordExporter()).toBehavior()
-        assertEquals(100, behavior.maxExportBatchSize)
     }
 }

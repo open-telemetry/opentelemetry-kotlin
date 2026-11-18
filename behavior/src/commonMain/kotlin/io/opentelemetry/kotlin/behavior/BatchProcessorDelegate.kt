@@ -7,6 +7,13 @@ data class BatchProcessorDelegate(
     override val scheduleDelay: Long? = null,
     override val exportTimeout: Long? = null,
     override val maxQueueSize: Int? = null,
-    override val maxExportBatchSize: Int? = null,
+    override val requestedQueueSize: Int? = null,
     override val exporter: Exporter? = null,
-) : BatchProcessor
+) : BatchProcessor {
+    override val maxExportBatchSize: Int? = let {
+        if (maxQueueSize != null && requestedQueueSize != null) {
+            return@let minOf(requestedQueueSize, maxQueueSize)
+        }
+        requestedQueueSize ?: maxQueueSize
+    }
+}
