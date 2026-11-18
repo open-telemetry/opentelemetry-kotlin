@@ -5,7 +5,6 @@ class FakeBaggage(
 ) : Baggage {
     override fun getValue(name: String): String? = entries[name]?.value
     override fun asMap(): Map<String, BaggageEntry> = entries
-    override fun set(name: String, value: String): Baggage = this
-    override fun set(name: String, value: String, metadata: BaggageEntryMetadata): Baggage = this
+    override fun put(name: String, value: String, metadata: String): Baggage = this
     override fun remove(name: String): Baggage = this
 }

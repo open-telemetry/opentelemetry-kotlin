@@ -13,6 +13,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.logging.LoggerProviderAdapter
 import io.opentelemetry.kotlin.metrics.MeterProviderAdapter
 import io.opentelemetry.kotlin.propagation.TextMapPropagatorAdapter
+import io.opentelemetry.kotlin.propagation.guarded
 import io.opentelemetry.kotlin.tracing.TracerProviderAdapter
 
 /**
@@ -49,7 +50,7 @@ public fun OtelJavaOpenTelemetry.toOtelKotlinApi(
         loggerProvider = LoggerProviderAdapter(unobfuscatedLoggerProvider(), errorHandler),
         meterProvider = MeterProviderAdapter(unobfuscatedMeterProvider(), errorHandler),
         clock = clock,
-        propagator = TextMapPropagatorAdapter(propagators.textMapPropagator),
+        propagator = TextMapPropagatorAdapter(propagators.textMapPropagator).guarded(errorHandler),
         sdkErrorHandler = errorHandler,
         processWideState = processWideState,
     )

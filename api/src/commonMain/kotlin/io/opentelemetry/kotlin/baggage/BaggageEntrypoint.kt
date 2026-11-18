@@ -34,7 +34,7 @@ private class BaggageCreationActionImpl : BaggageCreationAction {
     private var baggage: Baggage = BaggageImpl.EMPTY
 
     override fun put(name: String, value: String, metadata: String) {
-        baggage = baggage.set(name, value, BaggageEntryMetadataImpl(metadata))
+        baggage = baggage.put(name, value, metadata)
     }
 
     override fun remove(name: String) {

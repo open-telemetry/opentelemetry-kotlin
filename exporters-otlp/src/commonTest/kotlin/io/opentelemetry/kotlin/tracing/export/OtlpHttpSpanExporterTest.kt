@@ -18,9 +18,9 @@ import io.opentelemetry.kotlin.export.EXPORT_REQUEST_TIMEOUT_MS
 import io.opentelemetry.kotlin.export.HttpClientRegistry
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OtlpClient
-import io.opentelemetry.kotlin.export.createHttpEngine
 import io.opentelemetry.kotlin.export.createTestHttpClient
 import io.opentelemetry.kotlin.export.decodeOtlpRequestBody
+import io.opentelemetry.kotlin.export.httpEngineFactory
 import io.opentelemetry.kotlin.export.testMockEngine
 import io.opentelemetry.kotlin.export.withShutdown
 import io.opentelemetry.kotlin.init.ExportConfigDsl
@@ -178,15 +178,18 @@ internal class OtlpHttpSpanExporterTest {
             val sharedClient = assertNotNull(
                 HttpClientRegistry.peek(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
             )
+            val sharedEngine = sharedClient.engine
 
             assertTrue(sharedClient.coroutineContext[Job]?.isActive == true)
             firstExporter.shutdown()
             assertTrue(sharedClient.coroutineContext[Job]?.isActive == true)
+            assertTrue(sharedEngine.coroutineContext[Job]?.isActive == true)
             secondExporter.shutdown()
             assertNull(
                 HttpClientRegistry.peek(requestTimeoutMs = EXPORT_REQUEST_TIMEOUT_MS)
             )
             assertTrue(sharedClient.coroutineContext[Job]?.isCompleted == true)
+            assertEquals(false, sharedEngine.coroutineContext[Job]?.isActive)
         } finally {
             HttpClientRegistry.clear()
         }
@@ -230,6 +233,7 @@ internal class OtlpHttpSpanExporterTest {
             val shutdownCode = withContext(Dispatchers.Default) { factoryExporter.shutdown() }
             assertEquals(OperationResultCode.Success, shutdownCode)
             assertEquals(1, mockServer.requestHistory.size)
+            assertTrue(mockServer.coroutineContext[Job]?.isActive == true)
         } finally {
             withContext(NonCancellable) {
                 factoryExporter.shutdown()
@@ -241,7 +245,7 @@ internal class OtlpHttpSpanExporterTest {
 
     @Test
     fun testHttpClientRegistryIsReused() {
-        val engine = createHttpEngine()
+        val engine = httpEngineFactory.create()
         val client1 = HttpClientRegistry.getOrCreate(
             engine = engine,
             requestTimeoutMs = 30_000,
@@ -254,11 +258,13 @@ internal class OtlpHttpSpanExporterTest {
 
         assertSame(client1, client2)
         HttpClientRegistry.clear()
+        assertTrue(engine.coroutineContext[Job]?.isActive == true)
+        engine.close()
     }
 
     @Test
     fun testHttpClientRegistryConcurrency() = runTest {
-        val engine = createHttpEngine()
+        val engine = httpEngineFactory.create()
 
         val clients = coroutineScope {
             (1..50).map {
@@ -273,6 +279,7 @@ internal class OtlpHttpSpanExporterTest {
 
         assertTrue(clients.all { it === clients.first() })
         HttpClientRegistry.clear()
+        engine.close()
     }
 
     private suspend fun waitAndAssertExportedTelemetry(telemetry: List<SpanData>) {

@@ -14,6 +14,6 @@ class OtlpHttpSpanExporterConfigDslImpl : BehaviorSupplier<OtlpHttpSpanExporterB
     var headers: Map<String, String?>? = null
 
     override fun toBehavior(): OtlpHttpSpanExporterBehavior {
-        return OtlpHttpSpanExporterBehavior(endpoint, timeout, headers)
+        return OtlpHttpSpanExporterBehavior(endpoint, timeout?.takeIf { it >= 0 }, headers)
     }
 }

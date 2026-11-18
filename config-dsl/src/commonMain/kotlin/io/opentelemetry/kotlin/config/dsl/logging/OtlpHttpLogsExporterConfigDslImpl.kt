@@ -14,6 +14,6 @@ class OtlpHttpLogsExporterConfigDslImpl : BehaviorSupplier<OtlpHttpLogsExporterB
     var headers: Map<String, String?>? = null
 
     override fun toBehavior(): OtlpHttpLogsExporterBehavior {
-        return OtlpHttpLogsExporterBehavior(endpoint, timeout, headers)
+        return OtlpHttpLogsExporterBehavior(endpoint, timeout?.takeIf { it >= 0 }, headers)
     }
 }

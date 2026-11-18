@@ -44,7 +44,11 @@ calls these functions when configuring the SDK.
 
 ### Console (JVM)
 
+The console app exports telemetry to [local-collector](../local-collector/README.md) at
+`http://localhost:4318`. Start the collector first, then run the app:
+
 ```sh
+./gradlew :examples:local-collector:run
 ./gradlew :examples:example-app:runConsoleExampleApp
 ```
 

@@ -6,6 +6,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.config.validateOrUseDefault
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
+import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.getEnvVarValue
 import io.opentelemetry.kotlin.init.ConfigDsl
 
@@ -38,7 +39,9 @@ public interface OtlpHttpExporterConfigDsl {
     public var timeoutMs: Long
 
     /**
-     * Optional Ktor engine. When unset, exporters share a default engine.
+     * Optional Ktor engine. When unset, exporters with the same [timeoutMs] share an SDK-created
+     * engine that is closed when the last of them shuts down. An engine you supply is never closed
+     * by the SDK; one installed by `configureTls` is SDK-created and closed on shutdown.
      * Ignored when [httpClient] is set.
      */
     public var httpClientEngine: HttpClientEngine?
@@ -66,6 +69,7 @@ internal class OtlpHttpExporterConfig : OtlpHttpExporterConfigDsl {
     override var timeoutMs: Long = EXPORT_REQUEST_TIMEOUT_MS
     override var httpClientEngine: HttpClientEngine? = null
     override var httpClient: HttpClient? = null
+    internal var sdkOwnedEngine: HttpClientEngine? = null
 }
 
 internal fun createOtlpHttpClient(
@@ -112,10 +116,17 @@ internal fun createOtlpHttpClient(
         default = EXPORT_REQUEST_TIMEOUT_MS,
     ) { it > 0 }
     val suppliedClient = config.httpClient
+    val engine = config.httpClientEngine
+    val sdkOwnedEngine = config.sdkOwnedEngine.also { config.sdkOwnedEngine = null }
+    val ownsEngine = sdkOwnedEngine != null && sdkOwnedEngine === engine
+    if (sdkOwnedEngine != null && (suppliedClient != null || !ownsEngine)) {
+        sdkErrorHandler.sdkGuard("Failed to close unused OTLP HTTP engine") { sdkOwnedEngine.close() }
+    }
     val httpClientLease = if (suppliedClient == null) {
         HttpClientRegistry.lease(
-            engine = config.httpClientEngine,
+            engine = engine,
             requestTimeoutMs = timeoutMs,
+            ownsEngine = ownsEngine,
         )
     } else {
         null

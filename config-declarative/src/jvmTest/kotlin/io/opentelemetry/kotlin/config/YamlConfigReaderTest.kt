@@ -1,10 +1,12 @@
 package io.opentelemetry.kotlin.config
 
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 
 internal class YamlConfigReaderTest {
 
@@ -14,6 +16,15 @@ internal class YamlConfigReaderTest {
         val behavior = reader.read(writeConfigFile(CONFIG_FILE))
         assertEquals(64, behavior.attributeLimits?.attributeCountLimit)
         assertEquals(256, behavior.tracerProvider?.spanLimits?.attributeCountLimit)
+    }
+
+    @Test
+    fun `should report invalid resource attributes to the error handler`() {
+        val reader = assertIs<DeclarativeBehaviorReader>(yamlConfigReader())
+        val handler = FakeSdkErrorHandler()
+        val behavior = reader.read(writeConfigFile(CONFIG_FILE_WITH_INVALID_ATTRIBUTES_LIST), handler)
+        assertNull(behavior.resource?.attributes)
+        assertEquals(1, handler.errors.size)
     }
 
     @Test
@@ -59,6 +70,12 @@ internal class YamlConfigReaderTest {
               processors: []
               limits:
                 attribute_count_limit: 256
+        """.trimIndent()
+
+        val CONFIG_FILE_WITH_INVALID_ATTRIBUTES_LIST = """
+            file_format: "1.0"
+            resource:
+              attributes_list: "=missing-key"
         """.trimIndent()
 
         val CONFIG_FILE_WITH_INSTRUMENTATION = """

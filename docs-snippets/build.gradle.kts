@@ -12,6 +12,14 @@ kotlin {
                 implementation(project(":exporters-otlp"))
                 implementation(project(":config-declarative"))
                 implementation(project(":context-threadlocal"))
+                implementation(project(":context-single-slot"))
+            }
+        }
+        getByName("jvmAndAndroidMain") {
+            dependencies {
+                implementation(project(":context-coroutines"))
+                implementation(project(":compat"))
+                implementation(libs.kotlinx.coroutines)
             }
         }
     }

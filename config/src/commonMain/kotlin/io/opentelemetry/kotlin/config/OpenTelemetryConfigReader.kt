@@ -113,7 +113,7 @@ class OpenTelemetryConfigReader(
             fallback = OpenTelemetryBehavior(),
             toError = ::configFileError,
         ) {
-            reader.read(path)
+            reader.read(path, SdkErrorHandler(::reportError))
         }
     }
 
