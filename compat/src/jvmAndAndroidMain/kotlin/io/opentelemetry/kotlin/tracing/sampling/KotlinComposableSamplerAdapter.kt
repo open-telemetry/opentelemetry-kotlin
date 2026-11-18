@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSamplingIntent
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.toOtelJavaAttributes
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import io.opentelemetry.kotlin.error.userCode
@@ -49,11 +50,27 @@ internal class KotlinComposableSamplerAdapter(private val delegate: ComposableSa
         val adjustedCountReliable = userCode { intent.adjustedCountReliable }
 
         val attributesProvider = userCode { intent.attributesProvider }
+
         val providedAttributes = attributesProvider?.let { provider ->
             userCode { provider() }
         }
-        val javaAttributes = providedAttributes?.toOtelJavaAttributes()
-            ?: OtelJavaAttributes.empty()
+
+        val javaAttributes = when (providedAttributes) {
+            null -> {
+                OtelJavaAttributes.empty()
+            }
+
+            is CompatAttributesModel -> {
+                providedAttributes.toOtelJavaAttributes()
+            }
+
+            else -> {
+                val attributeMap = userCode {
+                    providedAttributes.attributes
+                }
+                attrsFromMap(attributeMap)
+            }
+        }
 
         val traceStateProvider = userCode { intent.traceStateProvider }
         val traceStateUpdater: Function<OtelJavaTraceState, OtelJavaTraceState> = if (traceStateProvider == null) {

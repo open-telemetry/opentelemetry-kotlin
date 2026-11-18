@@ -293,6 +293,33 @@ internal class KotlinComposableSamplerAdapterTest {
         }
     }
 
+    @Test
+    fun `throwing attribute container getter is reported as user code error`() {
+        val hostileAttributes = object : AttributeContainer {
+            override val attributes: Map<String, Any>
+                get() = error("boom")
+        }
+
+        val delegate = FakeComposableSampler(
+            intent = FakeSamplingIntent(
+                attributesProvider = { hostileAttributes },
+            ),
+        )
+
+        val adapter = KotlinComposableSamplerAdapter(delegate)
+
+        assertUserCodeFailure {
+            adapter.getSamplingIntent(
+                OtelJavaContext.root(),
+                "trace-id",
+                "span",
+                OtelJavaSpanKind.CLIENT,
+                OtelJavaAttributes.empty(),
+                emptyList(),
+            )
+        }
+    }
+
     private fun assertUserCodeFailure(action: () -> Unit) {
         val errorHandler = FakeSdkErrorHandler()
 
