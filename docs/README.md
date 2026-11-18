@@ -10,6 +10,9 @@ The code samples in these docs are compiled against the current source, so they 
 Start with [Getting started](getting-started.md): install the SDK, record a span and a log, and
 send them to a local collector.
 
+Then read [Configuration](configuration.md): the configuration DSL, resources, exporters, sampling
+and limits, environment variables, configuration files and which one wins.
+
 Read these in order if you're new to context and propagation:
 
 1. [Context](context.md): what a context is, the current context, context storage, threads and
