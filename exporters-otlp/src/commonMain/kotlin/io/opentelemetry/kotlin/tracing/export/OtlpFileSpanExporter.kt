@@ -9,15 +9,13 @@ import io.opentelemetry.kotlin.export.TelemetryExporter
 import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.encode.JsonSpanEncoder
-import okio.blackholeSink
-import okio.buffer
 import kotlin.coroutines.CoroutineContext
 
 /**
  * A [SpanExporter] that outputs span data in JSON format to a file.
  */
 internal class OtlpFileSpanExporter(
-    private val fileExporter: OtlpFileExporter = OtlpFileExporter(blackholeSink().buffer()),
+    private val fileExporter: OtlpFileExporter = OtlpFileExporter(),
     private val encoder: JsonSpanEncoder = JsonSpanEncoder(),
     initialDelayMs: Long,
     maxAttemptIntervalMs: Long,

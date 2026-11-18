@@ -2,6 +2,7 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.InternalApi
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.reportError
@@ -72,7 +73,28 @@ public fun ExportConfigDsl.batchLogRecordProcessor(
     scheduleDelayMs: Long = BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
-    dispatcher: CoroutineDispatcher = ioDispatcher,
+): LogRecordProcessor = batchLogRecordProcessorWithDispatcher(
+    exporter,
+    maxQueueSize,
+    scheduleDelayMs,
+    exportTimeoutMs,
+    maxExportBatchSize,
+    ioDispatcher,
+)
+
+/**
+ * Variant of [batchLogRecordProcessor] that runs the export loop on [dispatcher]. Exists so other
+ * opentelemetry-kotlin modules can inject a test dispatcher without exposing coroutines types in the public API.
+ */
+@ExperimentalApi
+@InternalApi
+public fun ExportConfigDsl.batchLogRecordProcessorWithDispatcher(
+    exporter: LogRecordExporter,
+    maxQueueSize: Int,
+    scheduleDelayMs: Long,
+    exportTimeoutMs: Long,
+    maxExportBatchSize: Int,
+    dispatcher: CoroutineDispatcher,
 ): LogRecordProcessor = BatchLogRecordProcessorImpl(
     exporter,
     maxQueueSize,
