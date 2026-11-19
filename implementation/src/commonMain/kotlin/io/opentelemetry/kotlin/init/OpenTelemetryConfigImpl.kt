@@ -4,6 +4,9 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ClockImpl
 import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.behavior.SeverityLevel
+import io.opentelemetry.kotlin.behavior.toMinimumSdkErrorSeverity
+import io.opentelemetry.kotlin.behavior.toSeverityLevel
 import io.opentelemetry.kotlin.config.DeclarativeBehaviorReader
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
@@ -13,10 +16,13 @@ import io.opentelemetry.kotlin.config.toBehaviorReader
 import io.opentelemetry.kotlin.config.validateOrUseDefault
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.PlatformSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.guarded
+import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 import io.opentelemetry.kotlin.propagation.createNoopPropagator
 import kotlin.concurrent.Volatile
@@ -31,10 +37,20 @@ internal class OpenTelemetryConfigImpl(
     @Volatile private var configuredErrorHandler: SdkErrorHandler = PlatformSdkErrorHandler
 
     /**
+     * The lowest severity forwarded to the configured handler. Set by [logLevel], then replaced by the
+     * resolved log level once every config layer has been read.
+     */
+    @Volatile internal var minimumErrorSeverity: SdkErrorSeverity = SdkErrorSeverity.INFO
+
+    /**
      * The handler is configured after the sub-configs below have been created, so they receive a
      * forwarder that resolves the configured handler on each report instead.
      */
-    internal val sdkErrorHandler = GuardedSdkErrorHandler { configuredErrorHandler.onError(it) }
+    internal val sdkErrorHandler = GuardedSdkErrorHandler {
+        if (it.severity >= minimumErrorSeverity) {
+            configuredErrorHandler.onError(it)
+        }
+    }
 
     internal var shutdownTimeoutMs: Long = 3000
         private set
@@ -128,7 +144,33 @@ internal class OpenTelemetryConfigImpl(
         configuredErrorHandler = handler
     }
 
+    @Volatile private var disabled: Boolean? = null
+
+    @Volatile private var logLevel: SeverityLevel? = null
+
+    override fun disabled(disabled: Boolean) {
+        this.disabled = disabled
+    }
+
+    override fun logLevel(level: SeverityNumber) {
+        val severityLevel = level.toSeverityLevel()
+        if (severityLevel == null) {
+            sdkErrorHandler.onError(
+                SdkError.ApiMisuse(
+                    api = "OpenTelemetryConfigDsl.logLevel",
+                    message = "Ignoring log level $level; it has no severity.",
+                    severity = SdkErrorSeverity.WARNING,
+                )
+            )
+            return
+        }
+        logLevel = severityLevel
+        minimumErrorSeverity = severityLevel.toMinimumSdkErrorSeverity()
+    }
+
     override fun toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
+        disabled = disabled,
+        logLevel = logLevel,
         resource = globalResourceConfig.toBehavior(),
         attributeLimits = globalAttributeLimits.toBehavior(),
         tracerProvider = tracingConfig.toBehavior().copy(idGenerator = idGeneratorBehavior),

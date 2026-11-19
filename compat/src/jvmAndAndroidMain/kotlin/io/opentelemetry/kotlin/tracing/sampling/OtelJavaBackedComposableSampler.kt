@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.aliases.OtelJavaComposableSampler
+import io.opentelemetry.kotlin.aliases.OtelJavaSamplingDecision
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.toOtelJavaAttributes
@@ -32,11 +33,8 @@ internal class OtelJavaBackedComposableSampler(
         fallbackIntent,
         "ComposableSampler.getSamplingIntent failed",
     ) {
-        val traceId = context.extractSpan().spanContext.traceId
-
         val javaIntent = impl.getSamplingIntent(
             context.toOtelJavaContext(),
-            traceId,
             name,
             spanKind.toOtelJavaSpanKind(),
             attributes.toOtelJavaAttributes(),
@@ -46,7 +44,7 @@ internal class OtelJavaBackedComposableSampler(
         val javaThreshold = javaIntent.threshold
         val javaTraceStateUpdater = javaIntent.traceStateUpdater
         val javaSamplingAttributes = javaIntent.attributes
-        val javaThresholdReliable = javaIntent.isThresholdReliable
+        val javaThresholdReliable = javaIntent.isAdjustedCountReliable
 
         object : SamplingIntent {
             override val threshold: Long? =
@@ -66,13 +64,15 @@ internal class OtelJavaBackedComposableSampler(
                 ((TraceState, SamplingResult.Decision) -> TraceState)? =
                 javaTraceStateUpdater?.let { updater ->
                     {
-                            traceState, _ ->
+                            traceState, decision ->
                         sdkErrorHandler.sdkGuardOrDefault(
                             traceState,
                             "ComposableSampler.traceStateProvider failed",
                         ) {
+                            val javaDecision = OtelJavaSamplingDecision.valueOf(decision.name)
                             updater.apply(
-                                traceState.toOtelJavaTraceState()
+                                traceState.toOtelJavaTraceState(),
+                                javaDecision,
                             ).toOtelKotlinTraceState()
                         }
                     }

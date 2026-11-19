@@ -21,6 +21,14 @@ fun interface DeclarativeBehaviorReader : DeclarativeConfigReader {
     fun read(path: String): OpenTelemetryBehavior
 
     /**
+     * Reads and parses the declarative config file at [path], reporting recoverable problems in its
+     * contents to [sdkErrorHandler].
+     *
+     * Throws if the file cannot be read, or does not hold a valid configuration.
+     */
+    fun read(path: String, sdkErrorHandler: SdkErrorHandler): OpenTelemetryBehavior = read(path)
+
+    /**
      * Reads the `.instrumentation` node of the declarative config file at [path], or returns `null`
      * if this reader does not support it.
      *

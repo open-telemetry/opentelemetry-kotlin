@@ -14,8 +14,6 @@ internal class FakeOtelJavaComposableSampler(
 
     var lastContext: OtelJavaContext? = null
         private set
-    var lastTraceId: String? = null
-        private set
     var lastName: String? = null
         private set
     var lastSpanKind: OtelJavaSpanKind? = null
@@ -27,14 +25,12 @@ internal class FakeOtelJavaComposableSampler(
 
     override fun getSamplingIntent(
         context: OtelJavaContext,
-        traceId: String,
         name: String,
         spanKind: OtelJavaSpanKind,
         attributes: OtelJavaAttributes,
         links: List<OtelJavaLinkData>,
     ): OtelJavaSamplingIntent {
         lastContext = context
-        lastTraceId = traceId
         lastName = name
         lastSpanKind = spanKind
         lastAttributes = attributes

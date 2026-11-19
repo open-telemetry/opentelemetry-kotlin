@@ -4,20 +4,18 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.SimpleLogRecordProcessorBehavior
+import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
 
 /**
  * Captures the log record processor configured programmatically, and maps it onto a behavior.
  */
 @OptIn(ExperimentalApi::class)
-class LogRecordProcessorConfigDslImpl {
+class LogRecordProcessorConfigDslImpl : BehaviorSupplier<LogRecordProcessorBehavior> {
 
     private var simple: SimpleLogRecordProcessorBehavior? = null
     private var batch: BatchLogRecordProcessorBehavior? = null
 
-    fun toBehavior(): LogRecordProcessorBehavior? = when {
-        simple == null && batch == null -> null
-        else -> LogRecordProcessorBehavior(simple = simple, batch = batch)
-    }
+    override fun toBehavior(): LogRecordProcessorBehavior = LogRecordProcessorBehavior(simple = simple, batch = batch)
 
     fun simple(action: SimpleLogRecordProcessorConfigDslImpl.() -> Unit) {
         val impl = SimpleLogRecordProcessorConfigDslImpl()

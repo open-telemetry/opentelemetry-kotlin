@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
+import io.opentelemetry.kotlin.aliases.OtelJavaSamplingDecision
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.attributes.AttributeContainer
@@ -41,7 +42,6 @@ internal class KotlinComposableSamplerAdapterTest {
 
         val intent = adapter.getSamplingIntent(
             OtelJavaContext.root(),
-            "trace-id",
             "span",
             OtelJavaSpanKind.CLIENT,
             OtelJavaAttributes.empty(),
@@ -58,7 +58,6 @@ internal class KotlinComposableSamplerAdapterTest {
 
         val intent = adapter.getSamplingIntent(
             OtelJavaContext.root(),
-            "trace-id",
             "span",
             OtelJavaSpanKind.CLIENT,
             OtelJavaAttributes.empty(),
@@ -66,7 +65,7 @@ internal class KotlinComposableSamplerAdapterTest {
         )
 
         assertEquals(7L, intent.threshold)
-        assertFalse(intent.isThresholdReliable)
+        assertFalse(intent.isAdjustedCountReliable)
     }
 
     @Test
@@ -76,7 +75,6 @@ internal class KotlinComposableSamplerAdapterTest {
 
         val intent = adapter.getSamplingIntent(
             OtelJavaContext.root(),
-            "trace-id",
             "span",
             OtelJavaSpanKind.CLIENT,
             OtelJavaAttributes.empty(),
@@ -98,7 +96,6 @@ internal class KotlinComposableSamplerAdapterTest {
 
         val intent = adapter.getSamplingIntent(
             OtelJavaContext.root(),
-            "trace-id",
             "span",
             OtelJavaSpanKind.CLIENT,
             OtelJavaAttributes.empty(),
@@ -119,7 +116,6 @@ internal class KotlinComposableSamplerAdapterTest {
 
         val intent = adapter.getSamplingIntent(
             OtelJavaContext.root(),
-            "trace-id",
             "span",
             OtelJavaSpanKind.CLIENT,
             OtelJavaAttributes.empty(),
@@ -136,7 +132,6 @@ internal class KotlinComposableSamplerAdapterTest {
 
         val intent = adapter.getSamplingIntent(
             OtelJavaContext.root(),
-            "trace-id",
             "span",
             OtelJavaSpanKind.CLIENT,
             OtelJavaAttributes.empty(),
@@ -144,7 +139,7 @@ internal class KotlinComposableSamplerAdapterTest {
         )
         val defaultTraceState = OtelJavaTraceState.getDefault()
 
-        assertEquals(defaultTraceState, intent.traceStateUpdater?.apply(defaultTraceState))
+        assertEquals(defaultTraceState, intent.traceStateUpdater?.apply(defaultTraceState, OtelJavaSamplingDecision.DROP))
     }
 
     @Test
@@ -164,16 +159,15 @@ internal class KotlinComposableSamplerAdapterTest {
 
         val intent = adapter.getSamplingIntent(
             OtelJavaContext.root(),
-            "trace-id",
             "span",
             OtelJavaSpanKind.CLIENT,
             OtelJavaAttributes.empty(),
             emptyList(),
         )
-        val result = intent.traceStateUpdater?.apply(OtelJavaTraceState.getDefault())
+        val result = intent.traceStateUpdater?.apply(OtelJavaTraceState.getDefault(), OtelJavaSamplingDecision.RECORD_ONLY)
 
         assertEquals("1", result?.get("th"))
-        assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, observedDecision)
+        assertEquals(SamplingResult.Decision.RECORD_ONLY, observedDecision)
         assertEquals(emptyMap(), observedTraceState?.asMap())
     }
 
@@ -185,7 +179,6 @@ internal class KotlinComposableSamplerAdapterTest {
 
         adapter.getSamplingIntent(
             context,
-            "trace-id",
             "my-span",
             OtelJavaSpanKind.SERVER,
             OtelJavaAttributes.empty(),
@@ -215,7 +208,6 @@ internal class KotlinComposableSamplerAdapterTest {
         assertUserCodeFailure {
             adapter.getSamplingIntent(
                 OtelJavaContext.root(),
-                "trace-id",
                 "span",
                 OtelJavaSpanKind.CLIENT,
                 OtelJavaAttributes.empty(),
@@ -237,7 +229,6 @@ internal class KotlinComposableSamplerAdapterTest {
         assertUserCodeFailure {
             adapter.getSamplingIntent(
                 OtelJavaContext.root(),
-                "trace-id",
                 "span",
                 OtelJavaSpanKind.CLIENT,
                 OtelJavaAttributes.empty(),
@@ -260,7 +251,6 @@ internal class KotlinComposableSamplerAdapterTest {
         assertUserCodeFailure {
             adapter.getSamplingIntent(
                 OtelJavaContext.root(),
-                "trace-id",
                 "span",
                 OtelJavaSpanKind.CLIENT,
                 OtelJavaAttributes.empty(),
@@ -283,14 +273,13 @@ internal class KotlinComposableSamplerAdapterTest {
         assertUserCodeFailure {
             val intent = adapter.getSamplingIntent(
                 OtelJavaContext.root(),
-                "trace-id",
                 "span",
                 OtelJavaSpanKind.CLIENT,
                 OtelJavaAttributes.empty(),
                 emptyList(),
             )
 
-            intent.traceStateUpdater?.apply(OtelJavaTraceState.getDefault())
+            intent.traceStateUpdater?.apply(OtelJavaTraceState.getDefault(), OtelJavaSamplingDecision.RECORD_ONLY)
         }
     }
 
@@ -312,7 +301,6 @@ internal class KotlinComposableSamplerAdapterTest {
         assertUserCodeFailure {
             adapter.getSamplingIntent(
                 OtelJavaContext.root(),
-                "trace-id",
                 "span",
                 OtelJavaSpanKind.CLIENT,
                 OtelJavaAttributes.empty(),
@@ -341,16 +329,13 @@ internal class KotlinComposableSamplerAdapterTest {
         assertUserCodeFailure {
             val intent = adapter.getSamplingIntent(
                 OtelJavaContext.root(),
-                "trace-id",
                 "span",
                 OtelJavaSpanKind.CLIENT,
                 OtelJavaAttributes.empty(),
                 emptyList(),
             )
 
-            intent.traceStateUpdater?.apply(
-                OtelJavaTraceState.getDefault()
-            )
+            intent.traceStateUpdater?.apply(OtelJavaTraceState.getDefault(), OtelJavaSamplingDecision.RECORD_ONLY)
         }
     }
 
