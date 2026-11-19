@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.getFileSystem
 import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.ioDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import okio.Path
+import okio.Path.Companion.toPath
 
 /**
  * Creates a processor that persists telemetry before exporting it. This avoids
@@ -30,7 +30,7 @@ import okio.Path
 public fun ExportConfigDsl.persistingLogRecordProcessor(
     processor: LogRecordProcessor,
     exporter: LogRecordExporter,
-    cacheDirectory: Path,
+    cacheDirectory: String,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
     scheduleDelayMs: Long = BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS,
     exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
@@ -39,7 +39,7 @@ public fun ExportConfigDsl.persistingLogRecordProcessor(
     return persistingLogRecordProcessorImpl(
         processor = processor,
         exporter = exporter,
-        fileSystem = TelemetryFileSystemImpl(getFileSystem(), cacheDirectory),
+        fileSystem = TelemetryFileSystemImpl(getFileSystem(), cacheDirectory.toPath()),
         maxQueueSize = maxQueueSize,
         scheduleDelayMs = scheduleDelayMs,
         exportTimeoutMs = exportTimeoutMs,

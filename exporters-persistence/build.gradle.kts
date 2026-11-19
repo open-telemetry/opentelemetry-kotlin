@@ -10,7 +10,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(project(":sdk-api"))
+                api(project(":sdk-api"))
                 implementation(project(":sdk-common"))
                 implementation(project(":exporters-core"))
                 implementation(project(":exporters-otlp"))

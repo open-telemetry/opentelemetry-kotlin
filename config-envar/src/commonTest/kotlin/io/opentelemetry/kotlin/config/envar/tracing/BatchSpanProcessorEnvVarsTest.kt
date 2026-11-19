@@ -39,7 +39,11 @@ internal class BatchSpanProcessorEnvVarsTest {
         val warnings = mutableListOf<EnvVarReadWarning>()
         val reader = reportingEnvVarReader({ "0" }, warnings::add)
         assertEquals(
-            BatchSpanProcessorBehavior(scheduleDelay = 0, exportTimeout = 0),
+            BatchSpanProcessorBehavior(
+                scheduleDelay = 0,
+                exportTimeout = 0,
+                exporter = SpanExporterBehavior()
+            ),
             BatchSpanProcessorEnvVars(reader).toBehavior(),
         )
         assertEquals(3, warnings.size)
@@ -47,6 +51,11 @@ internal class BatchSpanProcessorEnvVarsTest {
 
     @Test
     fun leavesUnsetBatchSettingsUnset() {
-        assertEquals(null, BatchSpanProcessorEnvVars(reportingEnvVarReader({ null })).toBehavior())
+        assertEquals(
+            BatchSpanProcessorBehavior(
+                exporter = SpanExporterBehavior(),
+            ),
+            BatchSpanProcessorEnvVars(reportingEnvVarReader({ null })).toBehavior()
+        )
     }
 }

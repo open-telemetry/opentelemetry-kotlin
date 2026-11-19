@@ -8,8 +8,7 @@ import io.opentelemetry.kotlin.config.schema.model.SimpleSpanProcessor
  * Maps a `simple` span processor onto its behavior, including the exporter it feeds.
  */
 @OptIn(ExperimentalApi::class)
-fun SimpleSpanProcessor.toBehavior(): SimpleSpanProcessorBehavior? {
-    val exporterBehavior = exporter.toBehavior()
-    exporterBehavior ?: return null
-    return SimpleSpanProcessorBehavior(exporter = exporterBehavior)
-}
+fun SimpleSpanProcessor.toBehavior(): SimpleSpanProcessorBehavior =
+    SimpleSpanProcessorBehavior(
+        exporter = exporter.toBehavior()
+    )

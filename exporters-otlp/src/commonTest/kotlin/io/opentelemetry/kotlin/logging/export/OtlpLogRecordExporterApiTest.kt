@@ -7,8 +7,6 @@ import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import kotlinx.coroutines.test.runTest
-import okio.blackholeSink
-import okio.buffer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -17,10 +15,9 @@ internal class OtlpLogRecordExporterApiTest {
     @Test
     fun `should successfully create file logrecord exporter with dsl and export to a sink`() = runTest {
         // given
-        val logRecords = listOf(FakeLogRecordData())
-        val blackholeBufferSink = blackholeSink().buffer()
+        val logRecords = listOf(FakeLogRecordData(), FakeLogRecordData())
         val fileLogRecordExporter = fakeConfig().otlpFileLogRecordExporter {
-            sink = blackholeBufferSink
+            sink = {}
         }
 
         // when
@@ -30,10 +27,6 @@ internal class OtlpLogRecordExporterApiTest {
         assertEquals(
             expected = OperationResultCode.Success,
             actual = result
-        )
-        assertEquals(
-            expected = "",
-            actual = blackholeBufferSink.buffer.readUtf8()
         )
     }
 }

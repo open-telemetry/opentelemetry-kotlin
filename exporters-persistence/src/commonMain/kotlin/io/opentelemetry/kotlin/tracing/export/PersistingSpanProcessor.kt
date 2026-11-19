@@ -69,7 +69,7 @@ internal class PersistingSpanProcessor(
 
     private val persistingExporter = PersistingSpanExporter(exporter, repository)
 
-    private val batchingProcessor = dsl.batchSpanProcessor(
+    private val batchingProcessor = dsl.batchSpanProcessorWithDispatcher(
         persistingExporter,
         maxQueueSize,
         scheduleDelayMs,

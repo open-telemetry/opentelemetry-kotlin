@@ -9,12 +9,8 @@ import io.opentelemetry.kotlin.config.schema.model.SpanExporter
  * Maps `tracer_provider.processors.exporter` onto its behavior.
  */
 @OptIn(ExperimentalApi::class)
-fun SpanExporter.toBehavior(): SpanExporterBehavior? {
-    if (console == null && otlpHttp == null) {
-        return null
-    }
-    return SpanExporterBehavior(
+fun SpanExporter.toBehavior(): SpanExporterBehavior =
+    SpanExporterBehavior(
         console = console?.let { ConsoleExporterBehavior() },
         http = otlpHttp?.toBehavior()
     )
-}

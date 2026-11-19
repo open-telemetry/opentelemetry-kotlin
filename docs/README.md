@@ -13,6 +13,9 @@ send them to a local collector.
 To send traces, read [Tracing](tracing.md): recording spans, attributes, events, status, exceptions,
 parent and child spans, links, and configuring sampling, processors and exporters.
 
+To send logs, read [Logging](logging.md): emitting log records, severity, attributes, events,
+linking logs to traces, and configuring processors and exporters.
+
 Read these in order if you're new to context and propagation:
 
 1. [Context](context.md): what a context is, the current context, context storage, threads and
