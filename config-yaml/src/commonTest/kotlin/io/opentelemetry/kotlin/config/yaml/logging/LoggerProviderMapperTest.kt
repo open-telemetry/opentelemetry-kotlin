@@ -15,12 +15,14 @@ import io.opentelemetry.kotlin.config.schema.model.SimpleLogRecordProcessor
 import kotlin.collections.emptyList
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class LoggerProviderMapperTest {
     @Test
     fun unsetIfNoMappedFields() {
-        assertNull(LoggerProvider(emptyList()).toBehavior())
+        assertEquals(
+            LoggerProviderBehavior(processor = LogRecordProcessorBehavior()),
+            LoggerProvider(emptyList()).toBehavior()
+        )
     }
 
     @Test
