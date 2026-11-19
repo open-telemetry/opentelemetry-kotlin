@@ -61,10 +61,12 @@ Attributes are key-value pairs that describe a span. Set them when the span star
 it's running:
 
 ```kotlin tracing-attributes
+@OptIn(IncubatingApi::class)
 fun loadCart(tracer: Tracer, cartId: String, fetchItems: () -> Long) {
     // Attributes known up front should be set at creation, so samplers can see them.
     val span = tracer.startSpan("load-cart") {
-        setStringAttribute("cart.id", cartId)
+        setStringAttribute(AppAttributes.APP_SCREEN_NAME, "cart") // a semantic convention key
+        setStringAttribute("cart.id", cartId) // a custom key
     }
     try {
         // Attributes can also be set while the span is running.
@@ -77,6 +79,12 @@ fun loadCart(tracer: Tracer, cartId: String, fetchItems: () -> Long) {
 
 Prefer setting attributes at creation where possible, as samplers only see attributes that exist
 when the span starts.
+
+Use a key from the [semantic conventions](https://opentelemetry.io/docs/specs/semconv/) where one
+fits, so backends know what the attribute means. The `semconv` module
+(`io.opentelemetry.kotlin:semconv`) has constants for every key. Most are marked `@IncubatingApi`
+because they can change between semantic convention versions, so opt in with
+`@OptIn(IncubatingApi::class)`. Where no key fits, namespace your own, like `cart.id` above.
 
 ### Events
 
@@ -348,9 +356,10 @@ Implement `SpanProcessor` to change spans before they're exported, e.g. to add a
 every span. Put it before any export operations in a composite processor:
 
 ```kotlin tracing-custom-processor
+@OptIn(IncubatingApi::class)
 class SessionIdSpanProcessor(private val sessionId: () -> String) : SpanProcessor {
     override fun onStart(span: ReadWriteSpan, parentContext: Context) {
-        span.setStringAttribute("session.id", sessionId())
+        span.setStringAttribute(SessionAttributes.SESSION_ID, sessionId())
     }
 
     override fun onEnding(span: ReadWriteSpan) = Unit
