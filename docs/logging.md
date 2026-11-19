@@ -55,17 +55,25 @@ Every parameter of `emit()` is optional. The rest of this part explains each one
 Attributes are key-value pairs that describe a log. Set them in the trailing lambda:
 
 ```kotlin logging-attributes
+@OptIn(IncubatingApi::class)
 fun logPayment(logger: Logger, cartId: String, items: Long) {
     logger.emit(
         body = "Payment accepted",
         severityNumber = SeverityNumber.INFO,
         severityText = "INFO",
     ) {
-        setStringAttribute("cart.id", cartId)
+        setStringAttribute(AppAttributes.APP_SCREEN_NAME, "checkout") // a semantic convention key
+        setStringAttribute("cart.id", cartId) // a custom key
         setLongAttribute("cart.items", items)
     }
 }
 ```
+
+Use a key from the [semantic conventions](https://opentelemetry.io/docs/specs/semconv/) where one
+fits, so backends know what the attribute means. The `semconv` module
+(`io.opentelemetry.kotlin:semconv`) has constants for every key. Most are marked `@IncubatingApi`
+because they can change between semantic convention versions, so opt in with
+`@OptIn(IncubatingApi::class)`. Where no key fits, namespace your own, like `cart.id` above.
 
 ### Structured bodies
 
@@ -113,14 +121,16 @@ An event is a log record with an `eventName`. The name identifies the type of ev
 and provides information on its expected attributes and body:
 
 ```kotlin logging-event
+@OptIn(IncubatingApi::class)
 fun recordButtonTap(logger: Logger) {
-    logger.emit(eventName = "com.example.button.tap") {
-        setStringAttribute("button.id", "checkout")
+    logger.emit(eventName = "app.widget.click") {
+        setStringAttribute(AppAttributes.APP_WIDGET_ID, "checkout")
     }
 }
 ```
 
-Event names should be namespaced so they don't clash with names from other code.
+Use an event name from the semantic conventions where one fits, like `app.widget.click` above.
+Otherwise, namespace your own name so it doesn't clash with names from other code.
 
 ### Timestamps
 
@@ -271,9 +281,10 @@ Implement `LogRecordProcessor` to change logs before they're exported, e.g. to a
 every log. Put it before any export operations in a composite processor:
 
 ```kotlin logging-custom-processor
+@OptIn(IncubatingApi::class)
 class SessionIdProcessor(private val sessionId: () -> String) : LogRecordProcessor {
     override fun onEmit(log: ReadWriteLogRecord, context: Context) {
-        log.setStringAttribute("session.id", sessionId())
+        log.setStringAttribute(SessionAttributes.SESSION_ID, sessionId())
     }
 
     override suspend fun forceFlush() = OperationResultCode.Success

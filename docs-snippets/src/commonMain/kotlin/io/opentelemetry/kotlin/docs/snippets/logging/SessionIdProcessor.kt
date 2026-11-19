@@ -9,11 +9,14 @@ import io.opentelemetry.kotlin.logging.export.batchLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.compositeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.otlpHttpLogRecordExporter
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
+import io.opentelemetry.kotlin.semconv.IncubatingApi
+import io.opentelemetry.kotlin.semconv.SessionAttributes
 
 // region logging-custom-processor
+@OptIn(IncubatingApi::class)
 class SessionIdProcessor(private val sessionId: () -> String) : LogRecordProcessor {
     override fun onEmit(log: ReadWriteLogRecord, context: Context) {
-        log.setStringAttribute("session.id", sessionId())
+        log.setStringAttribute(SessionAttributes.SESSION_ID, sessionId())
     }
 
     override suspend fun forceFlush() = OperationResultCode.Success
