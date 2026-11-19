@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.config.envar.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 
@@ -13,9 +14,9 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 @OptIn(ExperimentalApi::class)
 class SpanLimitsEnvVars(
     private val reader: ReportingEnvVarReader,
-) {
+) : BehaviorSupplier<SpanLimitsBehavior> {
 
-    fun toBehavior(): SpanLimitsBehavior = SpanLimitsBehavior(
+    override fun toBehavior(): SpanLimitsBehavior = SpanLimitsBehavior(
         attributeCountLimit = reader.readNonNegativeInt(ATTRIBUTE_COUNT_LIMIT),
         attributeValueLengthLimit = reader.readNonNegativeInt(ATTRIBUTE_VALUE_LENGTH_LIMIT),
         linkCountLimit = reader.readNonNegativeInt(LINK_COUNT_LIMIT),

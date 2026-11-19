@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.config.envar.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
 import io.opentelemetry.kotlin.config.envar.Exporter
@@ -10,8 +11,10 @@ import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 
 @OptIn(ExperimentalApi::class)
-class LogRecordExporterEnvVars(private val reader: ReportingEnvVarReader) {
-    fun toBehavior(): LogRecordExporterBehavior? {
+class LogRecordExporterEnvVars(
+    private val reader: ReportingEnvVarReader
+) : BehaviorSupplier<LogRecordExporterBehavior> {
+    override fun toBehavior(): LogRecordExporterBehavior {
         return reader.readStringAndTransform(LOGS_EXPORTER) { name ->
             when (Exporter.fromValue(name.lowercase())) {
                 Exporter.CONSOLE -> Value(
@@ -25,7 +28,7 @@ class LogRecordExporterEnvVars(private val reader: ReportingEnvVarReader) {
                 null -> Invalid(EnvVarReadWarning(LOGS_EXPORTER, "Unknown value '$name'; ignoring"))
                 else -> Value(null) // Known exporter, but not yet supported.
             }
-        }
+        } ?: LogRecordExporterBehavior()
     }
 
     internal companion object {
