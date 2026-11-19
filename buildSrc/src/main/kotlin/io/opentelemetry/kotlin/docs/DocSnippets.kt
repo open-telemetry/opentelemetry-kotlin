@@ -12,7 +12,7 @@ internal object DocSnippets {
     private val regionStart = Regex("""^// region (\S+)$""")
     private const val REGION_END = "// end-region"
     private val fence = Regex(
-        """^(```\w+ (\S+)\n)(?:.*?\n)?```$""",
+        """^(```\w+ (\S+)\n)(?:.*?\n)??```$""",
         setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL),
     )
     private val token = Regex("""\{\{(\w+)}}""")

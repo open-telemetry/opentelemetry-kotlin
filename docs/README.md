@@ -13,6 +13,9 @@ send them to a local collector.
 Then read [Configuration](configuration.md): the configuration DSL, resources, exporters, sampling
 and limits, environment variables, configuration files and which one wins.
 
+To send traces, read [Tracing](tracing.md): recording spans, attributes, events, status, exceptions,
+parent and child spans, links, and configuring sampling, processors and exporters.
+
 To send logs, read [Logging](logging.md): emitting log records, severity, attributes, events,
 linking logs to traces, and configuring processors and exporters.
 
