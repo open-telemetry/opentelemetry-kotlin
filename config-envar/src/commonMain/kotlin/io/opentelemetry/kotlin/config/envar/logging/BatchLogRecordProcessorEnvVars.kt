@@ -13,7 +13,7 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 @OptIn(ExperimentalApi::class)
 internal class BatchLogRecordProcessorEnvVars(
     private val reader: ReportingEnvVarReader
-): BehaviorSupplier<BatchLogRecordProcessorBehavior> {
+) : BehaviorSupplier<BatchLogRecordProcessorBehavior> {
     override fun toBehavior(): BatchLogRecordProcessorBehavior = BatchLogRecordProcessorBehavior(
         scheduleDelay = reader.readNonNegativeLong(SCHEDULE_DELAY),
         exportTimeout = reader.readNonNegativeLong(EXPORT_TIMEOUT),

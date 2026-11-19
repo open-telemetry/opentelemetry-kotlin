@@ -26,8 +26,6 @@ class ResourceEnvVars(
             attributes = reader.readStringAndTransform(RESOURCE_ATTRIBUTES, ::parseAttributes),
         )
 
-
-
     private fun parseAttributes(value: String): EnvVarReadResult<Map<String, String>?> {
         val attributes = parseResourceAttributes(value) ?: return invalidAttributes()
         return Value(attributes)

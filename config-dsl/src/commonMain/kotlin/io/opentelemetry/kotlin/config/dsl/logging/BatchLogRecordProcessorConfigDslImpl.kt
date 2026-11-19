@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.config.dsl.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
 import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
-import io.opentelemetry.kotlin.behavior.BehaviorSupplier
 
 /**
  * Captures the batch log record processor configured programmatically and maps it onto a behavior.

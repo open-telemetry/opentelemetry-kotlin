@@ -3,14 +3,11 @@ package io.opentelemetry.kotlin.config.envar.logging
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
 import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
-import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
-import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
 import io.opentelemetry.kotlin.config.envar.Exporter
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class BatchLogRecordProcessorEnvVarsTest {
     @Test
