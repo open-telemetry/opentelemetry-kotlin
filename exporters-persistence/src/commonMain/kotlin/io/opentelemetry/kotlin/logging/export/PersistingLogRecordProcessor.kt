@@ -70,7 +70,7 @@ internal class PersistingLogRecordProcessor(
 
     private val storingExporter = PersistingLogRecordExporter(exporter, repository)
 
-    private val batchingProcessor = dsl.batchLogRecordProcessor(
+    private val batchingProcessor = dsl.batchLogRecordProcessorWithDispatcher(
         storingExporter,
         maxQueueSize,
         scheduleDelayMs,

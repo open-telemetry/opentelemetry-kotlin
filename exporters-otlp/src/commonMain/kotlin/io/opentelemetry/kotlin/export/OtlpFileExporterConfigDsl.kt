@@ -2,18 +2,20 @@ package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.init.ConfigDsl
-import okio.Sink
-import okio.blackholeSink
-import okio.buffer
 
 @ExperimentalApi
 @ConfigDsl
 public interface OtlpFileExporterConfigDsl {
-    public var sink: Sink
+
+    /**
+     * Receives exported telemetry, one OTLP JSON line per call (without a trailing newline).
+     * Defaults to discarding all output.
+     */
+    public var sink: (String) -> Unit
 }
 
 internal class OtlpFileExporterConfig : OtlpFileExporterConfigDsl {
-    override var sink: Sink = blackholeSink()
+    override var sink: (String) -> Unit = {}
 }
 
 internal fun createOtlpFileExporter(
@@ -22,6 +24,6 @@ internal fun createOtlpFileExporter(
     val config = OtlpFileExporterConfig()
     block?.invoke(config)
     return OtlpFileExporter(
-        sink = config.sink.buffer()
+        sink = config.sink
     )
 }
