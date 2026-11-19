@@ -8,8 +8,8 @@
 // Library unique name: <opentelemetry-kotlin:exporters-otlp>
 abstract interface io.opentelemetry.kotlin.export/OtlpFileExporterConfigDsl { // io.opentelemetry.kotlin.export/OtlpFileExporterConfigDsl|null[0]
     abstract var sink // io.opentelemetry.kotlin.export/OtlpFileExporterConfigDsl.sink|{}sink[0]
-        abstract fun <get-sink>(): okio/Sink // io.opentelemetry.kotlin.export/OtlpFileExporterConfigDsl.sink.<get-sink>|<get-sink>(){}[0]
-        abstract fun <set-sink>(okio/Sink) // io.opentelemetry.kotlin.export/OtlpFileExporterConfigDsl.sink.<set-sink>|<set-sink>(okio.Sink){}[0]
+        abstract fun <get-sink>(): kotlin/Function1<kotlin/String, kotlin/Unit> // io.opentelemetry.kotlin.export/OtlpFileExporterConfigDsl.sink.<get-sink>|<get-sink>(){}[0]
+        abstract fun <set-sink>(kotlin/Function1<kotlin/String, kotlin/Unit>) // io.opentelemetry.kotlin.export/OtlpFileExporterConfigDsl.sink.<set-sink>|<set-sink>(kotlin.Function1<kotlin.String,kotlin.Unit>){}[0]
 }
 
 abstract interface io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl { // io.opentelemetry.kotlin.export/OtlpHttpExporterConfigDsl|null[0]

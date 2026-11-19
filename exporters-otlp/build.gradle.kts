@@ -19,14 +19,14 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(project(":sdk-api"))
+                api(project(":sdk-api"))
                 implementation(project(":sdk-common"))
                 implementation(project(":exporters-protobuf"))
                 implementation(project(":exporters-json"))
                 implementation(project(":serializable-models"))
                 implementation(project(":platform-implementations"))
                 implementation(project(":platform-io"))
-                implementation(libs.ktor.client.core)
+                api(libs.ktor.client.core)
                 implementation(libs.ktor.client.encoding)
             }
         }
