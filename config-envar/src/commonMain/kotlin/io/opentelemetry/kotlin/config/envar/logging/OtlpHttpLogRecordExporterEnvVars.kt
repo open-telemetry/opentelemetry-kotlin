@@ -1,7 +1,9 @@
 package io.opentelemetry.kotlin.config.envar.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
 import io.opentelemetry.kotlin.behavior.OtlpExporter
+import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
 import io.opentelemetry.kotlin.behavior.logging.OtlpHttpLogsExporterBehavior
 import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
 import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
@@ -11,8 +13,10 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
  * behavior configuration.
  */
 @OptIn(ExperimentalApi::class)
-class OtlpHttpLogRecordExporterEnvVars(private val reader: ReportingEnvVarReader) {
-    fun toBehavior(): OtlpHttpLogsExporterBehavior {
+class OtlpHttpLogRecordExporterEnvVars(
+    private val reader: ReportingEnvVarReader
+) : BehaviorSupplier<OtlpHttpLogsExporterBehavior> {
+    override fun toBehavior(): OtlpHttpLogsExporterBehavior {
         val signalEndpoint = reader.readString(OTLP_LOGS_ENDPOINT)
         val endpoint = reader.readString(OpenTelemetryEnvVars.OTLP_ENDPOINT)
         val timeout = reader.readNonNegativeLong(OTLP_LOGS_TIMEOUT)

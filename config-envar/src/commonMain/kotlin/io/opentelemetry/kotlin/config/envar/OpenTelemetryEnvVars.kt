@@ -1,9 +1,11 @@
 package io.opentelemetry.kotlin.config.envar
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.toSeverityLevel
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.envar.logging.LogLimitsEnvVars
 import io.opentelemetry.kotlin.config.envar.logging.LogRecordProcessorEnvVars
@@ -23,12 +25,12 @@ import io.opentelemetry.kotlin.config.envar.tracing.SpanProcessorEnvVars
 @OptIn(ExperimentalApi::class)
 class OpenTelemetryEnvVars(
     private val reader: ReportingEnvVarReader,
-) {
+) : BehaviorSupplier<OpenTelemetryBehavior> {
     /**
      * No Environment variables for [OpenTelemetryBehavior.distribution].
      * See https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#general-sdk-configuration.
      */
-    fun toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
+    override fun toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
         disabled = reader.readBoolean(SDK_DISABLED),
         logLevel = reader.readStringAndTransform(LOG_LEVEL) { value ->
             value.toSeverityLevel()?.let { Value(it) }

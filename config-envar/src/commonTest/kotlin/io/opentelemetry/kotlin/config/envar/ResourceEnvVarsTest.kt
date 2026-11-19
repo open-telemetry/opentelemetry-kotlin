@@ -11,7 +11,10 @@ internal class ResourceEnvVarsTest {
 
     @Test
     fun `should leave resource unset when environment configures nothing`() {
-        assertNull(toBehavior(emptyMap()))
+        assertEquals(
+            ResourceBehavior(),
+            toBehavior(emptyMap())
+        )
     }
 
     @Test
@@ -122,7 +125,11 @@ internal class ResourceEnvVarsTest {
                 onWarning = warnings::add,
             )
 
-            assertNull(behavior, "<$value> should not configure a resource")
+            assertEquals(
+                ResourceBehavior(),
+                behavior,
+                "<$value> should not configure a resource"
+            )
             assertEquals(
                 listOf(
                     EnvVarReadWarning(

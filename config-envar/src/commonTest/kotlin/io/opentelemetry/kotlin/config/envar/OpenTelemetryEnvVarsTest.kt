@@ -36,13 +36,22 @@ internal class OpenTelemetryEnvVarsTest {
             OpenTelemetryBehavior(
                 disabled = false,
                 attributeLimits = AttributeLimitsBehavior(),
+                resource = ResourceBehavior(),
                 loggerProvider = LoggerProviderBehavior(
                     logLimits = LogLimitsBehavior(),
-                    processor = LogRecordProcessorBehavior(),
+                    processor = LogRecordProcessorBehavior(
+                        batch = BatchLogRecordProcessorBehavior(
+                            exporter = LogRecordExporterBehavior()
+                        )
+                    ),
                 ),
                 tracerProvider = TracerProviderBehavior(
                     spanLimits = SpanLimitsBehavior(),
-                    processor = SpanProcessorBehavior()
+                    processor = SpanProcessorBehavior(
+                        batch = BatchSpanProcessorBehavior(
+                            exporter = SpanExporterBehavior()
+                        )
+                    )
                 ),
             ),
             behavior,
@@ -140,13 +149,22 @@ internal class OpenTelemetryEnvVarsTest {
         val expected = OpenTelemetryBehavior(
             disabled = false,
             attributeLimits = AttributeLimitsBehavior(),
+            resource = ResourceBehavior(),
             tracerProvider = TracerProviderBehavior(
                 spanLimits = SpanLimitsBehavior(),
-                processor = SpanProcessorBehavior()
+                processor = SpanProcessorBehavior(
+                    batch = BatchSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(),
+                    ),
+                )
             ),
             loggerProvider = LoggerProviderBehavior(
                 logLimits = LogLimitsBehavior(),
-                processor = LogRecordProcessorBehavior()
+                processor = LogRecordProcessorBehavior(
+                    batch = BatchLogRecordProcessorBehavior(
+                        exporter = LogRecordExporterBehavior(),
+                    ),
+                )
             ),
 
         )

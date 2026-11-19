@@ -37,7 +37,8 @@ internal class LogRecordExporterEnvVarsTest {
         val exporters =
             listOf(Exporter.LOGGING, Exporter.NONE, Exporter.OTLP_STDOUT)
         exporters.forEach { exporter ->
-            assertNull(
+            assertEquals(
+                LogRecordExporterBehavior(),
                 toBehavior(mapOf(LogRecordExporterEnvVars.LOGS_EXPORTER to exporter.value)::get),
                 "<$exporter> should not configure a processor"
             )
@@ -47,7 +48,10 @@ internal class LogRecordExporterEnvVarsTest {
     @Test
     fun `should leave unknown exporter unset`() {
         val configs = mapOf(LogRecordExporterEnvVars.LOGS_EXPORTER to unknownExporter)
-        assertNull(toBehavior(configs::get))
+        assertEquals(
+            LogRecordExporterBehavior(),
+            toBehavior(configs::get)
+        )
     }
 
     @Test

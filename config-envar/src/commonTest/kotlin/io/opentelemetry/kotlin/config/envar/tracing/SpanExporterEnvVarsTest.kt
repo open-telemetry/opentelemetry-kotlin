@@ -15,7 +15,10 @@ class SpanExporterEnvVarsTest {
 
     @Test
     fun `should leave unset env vars unset`() {
-        assertNull(toBehavior { null })
+        assertEquals(
+            SpanExporterBehavior(),
+            toBehavior { null }
+        )
     }
 
     @Test
@@ -41,7 +44,8 @@ class SpanExporterEnvVarsTest {
     fun `should leave known non-implemented exporters unset`() {
         val exporters = listOf(Exporter.LOGGING, Exporter.NONE, Exporter.OTLP_STDOUT)
         exporters.forEach { exporter ->
-            assertNull(
+            assertEquals(
+                SpanExporterBehavior(),
                 toBehavior(mapOf(SpanExporterEnvVars.TRACES_EXPORTER to exporter.value)::get),
                 "<$exporter> should not configure a processor"
             )
@@ -51,7 +55,10 @@ class SpanExporterEnvVarsTest {
     @Test
     fun `should leave unknown exporter unset`() {
         val configs = mapOf(SpanExporterEnvVars.TRACES_EXPORTER to unknownExporter)
-        assertNull(toBehavior(configs::get))
+        assertEquals(
+            SpanExporterBehavior(),
+            toBehavior(configs::get)
+        )
     }
 
     @Test

@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.config.envar
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Invalid
@@ -17,21 +18,15 @@ import io.opentelemetry.kotlin.propagation.utils.parseResourceAttributes
 @OptIn(ExperimentalApi::class)
 class ResourceEnvVars(
     private val reader: ReportingEnvVarReader,
-) {
+) : BehaviorSupplier<ResourceBehavior> {
 
-    fun toBehavior(): ResourceBehavior? {
-        val attributes = reader.readStringAndTransform(RESOURCE_ATTRIBUTES, ::parseAttributes)
-        val serviceName = reader.readString(SERVICE_NAME)
+    override fun toBehavior(): ResourceBehavior =
+        ResourceBehavior(
+            serviceName = reader.readString(SERVICE_NAME),
+            attributes = reader.readStringAndTransform(RESOURCE_ATTRIBUTES, ::parseAttributes),
+        )
 
-        return if (attributes == null && serviceName == null) {
-            null
-        } else {
-            ResourceBehavior(
-                serviceName = serviceName,
-                attributes = attributes,
-            )
-        }
-    }
+
 
     private fun parseAttributes(value: String): EnvVarReadResult<Map<String, String>?> {
         val attributes = parseResourceAttributes(value) ?: return invalidAttributes()
