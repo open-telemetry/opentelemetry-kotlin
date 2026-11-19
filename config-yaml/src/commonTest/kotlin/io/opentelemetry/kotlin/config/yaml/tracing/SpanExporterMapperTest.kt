@@ -8,13 +8,15 @@ import io.opentelemetry.kotlin.config.schema.model.OtlpHttpExporter
 import io.opentelemetry.kotlin.config.schema.model.SpanExporter
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class SpanExporterMapperTest {
 
     @Test
-    fun leavesExporterUnsetWhenNoneIsKnown() {
-        assertNull(SpanExporter().toBehavior())
+    fun unsetIfNoMappedFields() {
+        assertEquals(
+            SpanExporterBehavior(),
+            SpanExporter().toBehavior()
+        )
     }
 
     @Test

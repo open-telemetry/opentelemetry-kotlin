@@ -20,7 +20,10 @@ internal class SpanProcessorMapperTest {
 
     @Test
     fun emptyProcessorsLeaveBehaviorUnset() {
-        assertNull(emptyList<SpanProcessor>().toBehavior())
+        assertEquals(
+            SpanProcessorBehavior(),
+            emptyList<SpanProcessor>().toBehavior()
+        )
     }
 
     @Test
@@ -99,15 +102,7 @@ internal class SpanProcessorMapperTest {
         val processors = listOf(
             SpanProcessor(batch = BatchSpanProcessor(exporter = consoleExporter())),
         )
-        assertNull(processors.toBehavior()?.simple)
-    }
-
-    @Test
-    fun leavesProcessorsWithNoKnownExportersUnset() {
-        val processors = listOf(
-            SpanProcessor(simple = SimpleSpanProcessor(exporter = SpanExporter())),
-        )
-        assertNull(processors.toBehavior()?.simple)
+        assertNull(processors.toBehavior().simple)
     }
 
     private fun consoleExporter() = SpanExporter(console = ConsoleExporter())

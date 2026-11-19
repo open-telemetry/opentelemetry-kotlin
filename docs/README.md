@@ -13,6 +13,9 @@ send them to a local collector.
 Then read [Configuration](configuration.md): the configuration DSL, resources, exporters, sampling
 and limits, environment variables, configuration files and which one wins.
 
+To send logs, read [Logging](logging.md): emitting log records, severity, attributes, events,
+linking logs to traces, and configuring processors and exporters.
+
 Read these in order if you're new to context and propagation:
 
 1. [Context](context.md): what a context is, the current context, context storage, threads and

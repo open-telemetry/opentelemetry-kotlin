@@ -16,7 +16,7 @@ internal class BatchLogRecordProcessorMapperTest {
     fun everyFieldStartsWithDefaultValue() {
         val behavior = BatchLogRecordProcessor(exporter = LogRecordExporter()).toBehavior()
         assertEquals(
-            BatchLogRecordProcessorBehavior(),
+            BatchLogRecordProcessorBehavior(exporter = LogRecordExporterBehavior()),
             behavior
         )
     }
@@ -62,7 +62,7 @@ internal class BatchLogRecordProcessorMapperTest {
             exporter = LogRecordExporter()
         ).toBehavior()
         assertEquals(
-            BatchLogRecordProcessorBehavior(),
+            BatchLogRecordProcessorBehavior(exporter = LogRecordExporterBehavior()),
             behavior
         )
     }

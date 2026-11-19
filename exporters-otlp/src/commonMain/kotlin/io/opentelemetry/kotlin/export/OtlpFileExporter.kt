@@ -1,14 +1,8 @@
 package io.opentelemetry.kotlin.export
 
-import okio.BufferedSink
-
-internal class OtlpFileExporter(private val sink: BufferedSink) {
+internal class OtlpFileExporter(private val sink: (String) -> Unit = {}) {
     fun exportTelemetry(telemetry: List<String>): OtlpResponse {
-        telemetry.forEach {
-            sink.writeUtf8(it)
-            sink.writeUtf8("\n")
-        }
-        sink.flush()
+        telemetry.forEach(sink)
         return OtlpResponse.Success
     }
 }

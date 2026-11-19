@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaComposableSampler
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaLinkData
+import io.opentelemetry.kotlin.aliases.OtelJavaSamplingDecision
 import io.opentelemetry.kotlin.aliases.OtelJavaSamplingIntent
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
@@ -14,7 +15,7 @@ import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceState
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanLink
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinTraceState
-import java.util.function.Function
+import java.util.function.BiFunction
 
 /** Sentinel used when the delegate's intent is `null` (never sample); `R` is always < 2^56. */
 private const val NEVER_SAMPLE_THRESHOLD: Long = 1L shl 56
@@ -23,7 +24,6 @@ internal class KotlinComposableSamplerAdapter(private val delegate: ComposableSa
 
     override fun getSamplingIntent(
         context: OtelJavaContext,
-        traceId: String,
         name: String,
         spanKind: OtelJavaSpanKind,
         attributes: OtelJavaAttributes,
@@ -41,14 +41,16 @@ internal class KotlinComposableSamplerAdapter(private val delegate: ComposableSa
         val javaAttributes = intent.attributesProvider?.invoke()?.toOtelJavaAttributes()
             ?: OtelJavaAttributes.empty()
         val traceStateProvider = intent.traceStateProvider
-        val traceStateUpdater: Function<OtelJavaTraceState, OtelJavaTraceState> = if (traceStateProvider == null) {
-            Function.identity()
-        } else {
-            Function { javaTraceState ->
-                traceStateProvider(javaTraceState.toOtelKotlinTraceState(), SamplingResult.Decision.RECORD_AND_SAMPLE)
-                    .toOtelJavaTraceState()
+        val traceStateUpdater: BiFunction<OtelJavaTraceState, OtelJavaSamplingDecision, OtelJavaTraceState> =
+            if (traceStateProvider == null) {
+                BiFunction { state, _ -> state }
+            } else {
+                BiFunction { javaTraceState, decision ->
+                    val kotlinDecision = SamplingResult.Decision.valueOf(decision.name)
+                    traceStateProvider(javaTraceState.toOtelKotlinTraceState(), kotlinDecision)
+                        .toOtelJavaTraceState()
+                }
             }
-        }
 
         return OtelJavaSamplingIntent.create(threshold, intent.adjustedCountReliable, javaAttributes, traceStateUpdater)
     }
