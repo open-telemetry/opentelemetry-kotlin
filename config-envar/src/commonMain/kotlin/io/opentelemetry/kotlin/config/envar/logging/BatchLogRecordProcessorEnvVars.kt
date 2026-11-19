@@ -15,7 +15,7 @@ internal class BatchLogRecordProcessorEnvVars(private val reader: ReportingEnvVa
         scheduleDelay = reader.readNonNegativeLong(SCHEDULE_DELAY),
         exportTimeout = reader.readNonNegativeLong(EXPORT_TIMEOUT),
         maxQueueSize = reader.readNonNegativeInt(MAX_QUEUE_SIZE, acceptZero = false),
-        maxExportBatchSize = reader.readNonNegativeInt(MAX_EXPORT_BATCH_SIZE, acceptZero = false),
+        requestedQueueSize = reader.readNonNegativeInt(MAX_EXPORT_BATCH_SIZE, acceptZero = false),
         exporter = LogRecordExporterEnvVars(reader).toBehavior(),
     ).takeUnless {
         it.scheduleDelay == null && it.exportTimeout == null &&

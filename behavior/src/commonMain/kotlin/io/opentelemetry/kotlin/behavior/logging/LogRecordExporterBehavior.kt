@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.behavior.logging
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.Behavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
+import io.opentelemetry.kotlin.behavior.Exporter
+import io.opentelemetry.kotlin.behavior.ExporterDelegate
 import io.opentelemetry.kotlin.behavior.mergeNode
 
 /**
@@ -13,21 +15,20 @@ import io.opentelemetry.kotlin.behavior.mergeNode
  */
 @OptIn(ExperimentalApi::class)
 data class LogRecordExporterBehavior(
-
-    /**
-     * Console log exporter.
-     * */
-    val console: ConsoleExporterBehavior? = null,
-
-    /**
-     * HTTP log exporter.
-     * */
-    val http: OtlpHttpLogsExporterBehavior? = null,
-
-) : Behavior<LogRecordExporterBehavior> {
+    val delegate: ExporterDelegate<OtlpHttpLogsExporterBehavior> = ExporterDelegate(),
+) : Behavior<LogRecordExporterBehavior>, Exporter by delegate {
+    constructor(
+        console: ConsoleExporterBehavior? = null,
+        http: OtlpHttpLogsExporterBehavior? = null,
+    ) : this(ExporterDelegate(console = console, http = http))
 
     override fun mergeWith(higher: LogRecordExporterBehavior): LogRecordExporterBehavior = copy(
-        console = mergeNode(console, higher.console),
-        http = mergeNode(http, higher.http),
+        delegate = delegate.copy(
+            console = mergeNode(console, higher.console),
+            http = mergeNode(
+                http as OtlpHttpLogsExporterBehavior?,
+                higher.http as OtlpHttpLogsExporterBehavior?
+            ),
+        )
     )
 }

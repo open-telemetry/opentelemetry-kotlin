@@ -46,7 +46,7 @@ internal class SpanProcessorConfigDslImplTest {
                 scheduleDelay = 1
                 exporterTimeout = 2
                 maxQueueSize = 3
-                maxExportBatchSize = 4
+                requestedQueueSize = 4
             }
         }
         assertEquals(
@@ -58,7 +58,7 @@ internal class SpanProcessorConfigDslImplTest {
                     scheduleDelay = 1,
                     exportTimeout = 2,
                     maxQueueSize = 3,
-                    maxExportBatchSize = 4
+                    requestedQueueSize = 4
                 )
             ),
             dsl.toBehavior(),
@@ -80,7 +80,7 @@ internal class SpanProcessorConfigDslImplTest {
                 scheduleDelay = 1
                 exporterTimeout = 2
                 maxQueueSize = 3
-                maxExportBatchSize = 4
+                requestedQueueSize = 4
             }
         }
         assertEquals(
@@ -92,7 +92,7 @@ internal class SpanProcessorConfigDslImplTest {
                     scheduleDelay = 1,
                     exportTimeout = 2,
                     maxQueueSize = 3,
-                    maxExportBatchSize = 4
+                    requestedQueueSize = 4
                 ),
             ),
             dsl.toBehavior(),
