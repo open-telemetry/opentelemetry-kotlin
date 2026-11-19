@@ -10,6 +10,9 @@ The code samples in these docs are compiled against the current source, so they 
 Start with [Getting started](getting-started.md): install the SDK, record a span and a log, and
 send them to a local collector.
 
+Then read [Configuration](configuration.md): the configuration DSL, resources, exporters, sampling
+and limits, environment variables, configuration files and which one wins.
+
 To send traces, read [Tracing](tracing.md): recording spans, attributes, events, status, exceptions,
 parent and child spans, links, and configuring sampling, processors and exporters.
 
