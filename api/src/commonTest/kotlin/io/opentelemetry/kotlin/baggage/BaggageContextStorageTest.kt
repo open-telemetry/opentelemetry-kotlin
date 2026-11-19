@@ -19,7 +19,7 @@ internal class BaggageContextStorageTest {
 
     @Test
     fun `storeBaggage then extractBaggage round-trips entries`() {
-        val baggage = createBaggage().set("user", "alice").set("region", "eu")
+        val baggage = createBaggage().put("user", "alice").put("region", "eu")
         val stored = rootContext().storeBaggage(baggage)
 
         val extracted = stored.extractBaggage()
@@ -30,7 +30,7 @@ internal class BaggageContextStorageTest {
 
     @Test
     fun `clearBaggage on populated context yields empty baggage`() {
-        val populated = rootContext().storeBaggage(createBaggage().set("user", "alice"))
+        val populated = rootContext().storeBaggage(createBaggage().put("user", "alice"))
 
         val cleared = populated.clearBaggage()
 
@@ -41,7 +41,7 @@ internal class BaggageContextStorageTest {
     @Test
     fun `storing baggage does not mutate original context`() {
         val root = rootContext()
-        val derived = root.storeBaggage(createBaggage().set("user", "alice"))
+        val derived = root.storeBaggage(createBaggage().put("user", "alice"))
 
         assertNotSame(root, derived)
         assertSame(createBaggage(), root.extractBaggage())
@@ -50,7 +50,7 @@ internal class BaggageContextStorageTest {
 
     @Test
     fun `clearBaggage does not mutate original context`() {
-        val populated = rootContext().storeBaggage(createBaggage().set("user", "alice"))
+        val populated = rootContext().storeBaggage(createBaggage().put("user", "alice"))
 
         val cleared = populated.clearBaggage()
 

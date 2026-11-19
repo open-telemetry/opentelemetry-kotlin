@@ -14,7 +14,10 @@ import io.opentelemetry.kotlin.error.reportApiUserCodeError
  * https://opentelemetry.io/docs/specs/otel/baggage/api/
  */
 @ExperimentalApi
-public fun createBaggage(action: BaggageCreationAction.() -> Unit = {}): Baggage {
+public fun createBaggage(action: (BaggageCreationAction.() -> Unit)? = null): Baggage {
+    if (action == null) {
+        return BaggageImpl.EMPTY
+    }
     val builder = BaggageCreationActionImpl()
     try {
         builder.action()
@@ -31,7 +34,7 @@ private class BaggageCreationActionImpl : BaggageCreationAction {
     private var baggage: Baggage = BaggageImpl.EMPTY
 
     override fun put(name: String, value: String, metadata: String) {
-        baggage = baggage.set(name, value, BaggageEntryMetadataImpl(metadata))
+        baggage = baggage.put(name, value, metadata)
     }
 
     override fun remove(name: String) {

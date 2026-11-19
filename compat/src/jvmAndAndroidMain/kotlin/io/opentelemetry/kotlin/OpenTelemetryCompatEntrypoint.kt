@@ -1,12 +1,9 @@
 package io.opentelemetry.kotlin
 
-import io.opentelemetry.kotlin.clock.ClockAdapter
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.reportError
-import io.opentelemetry.kotlin.factory.CompatContextFactory
-import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.init.CompatOpenTelemetryConfig
 import io.opentelemetry.kotlin.init.CompatSdkConfigFactory
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
@@ -26,15 +23,15 @@ import io.opentelemetry.kotlin.init.defaultCompatBehaviorReader
  */
 @ExperimentalApi
 public fun createCompatOpenTelemetry(
-    clock: Clock = ClockAdapter(io.opentelemetry.sdk.common.Clock.getDefault()),
-    config: OpenTelemetryConfigDsl.() -> Unit = {}
+    config: (OpenTelemetryConfigDsl.() -> Unit)? = null
 ): OpenTelemetrySdk {
-    val contextFactory = CompatContextFactory()
-
-    val cfg = CompatOpenTelemetryConfig(clock)
-    cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
-        cfg.config()
+    val cfg = CompatOpenTelemetryConfig()
+    if (config != null) {
+        cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
+            cfg.config()
+        }
     }
+    val clock = cfg.clock
     if (cfg.contextConfigured) {
         cfg.sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
@@ -45,20 +42,31 @@ public fun createCompatOpenTelemetry(
             )
         )
     }
-    val behavior = defaultCompatBehaviorReader(sdkErrorHandler = cfg.sdkErrorHandler)
-        .read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
+    val behavior = defaultCompatBehaviorReader(
+        sdkErrorHandler = cfg.sdkErrorHandler,
+        declarativeConfigReader = cfg.declarativeConfigReader,
+    ).read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
+
+    if (behavior.disabled == true) {
+        return NoopOpenTelemetrySdk
+    }
 
     // configFactory is legacy - use behavior to control SDK functionality instead
-    val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, contextFactory)
+    val configFactory = CompatSdkConfigFactory(cfg, behavior, clock)
+    val tracerProvider = configFactory.buildTracerProvider()
+    val loggerProvider = configFactory.buildLoggerProvider()
+    val meterProvider = configFactory.buildMeterProvider()
+
+    // claim process-wide state last, so that a failure earlier in init doesn't leave it claimed.
+    val processWideState = claimCompatProcessWideState("createCompatOpenTelemetry", cfg.sdkErrorHandler)
     return CompatOpenTelemetryImpl(
-        tracerProvider = configFactory.buildTracerProvider(),
-        loggerProvider = configFactory.buildLoggerProvider(),
-        meterProvider = configFactory.buildMeterProvider(),
+        tracerProvider = tracerProvider,
+        loggerProvider = loggerProvider,
+        meterProvider = meterProvider,
         clock = clock,
-        context = contextFactory,
-        idGenerator = configFactory.idGenerator,
-        resource = CompatResourceFactory,
-        propagator = cfg.propagator,
+        propagator = cfg.createPropagator(),
         sdkErrorHandler = cfg.sdkErrorHandler,
+        processWideState = processWideState,
+        timeoutMs = cfg.shutdownTimeoutMs,
     )
 }

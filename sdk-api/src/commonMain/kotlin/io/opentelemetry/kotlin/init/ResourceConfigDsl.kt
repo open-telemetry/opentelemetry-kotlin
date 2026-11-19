@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
  * Defines configuration for a resource.
  */
 @ExperimentalApi
+@ConfigDsl
 public interface ResourceConfigDsl {
 
     /**
@@ -17,6 +18,10 @@ public interface ResourceConfigDsl {
 
     /**
      * Declares a resource, including an optional schema and any attributes.
+     *
+     * The [AttributesMutator] receiver does not carry the [ConfigDsl] marker, so the
+     * enclosing configuration remains accessible implicitly inside [attributes]. Keep configuration
+     * calls outside this lambda to avoid modifying the enclosing configuration unintentionally.
      */
     public fun resource(schemaUrl: String? = null, attributes: AttributesMutator.() -> Unit)
 

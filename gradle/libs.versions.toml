@@ -1,5 +1,5 @@
 [versions]
-agp = "9.5.0"
+agp = "9.5.1"
 kotlin = "2.4.21"
 android-minSdk = "21"
 android-compileSdk = "37"
@@ -10,12 +10,11 @@ minSupportedKotlinPlugin = "2.0.0"
 minSupportedKotlinKlib = "2.4.0"
 minSupportedGradle = "8.0.2"
 detekt = "1.23.8"
-binaryCompatibilityValidator = "0.18.2"
 kotlinxBenchmarkRuntime = "0.5.0"
 kotlinxCoroutines = "1.10.2"
 ktor = "3.2.3"
 okio = "3.18.2"
-otel = "1.67.0"
+otel = "1.68.0"
 otel-alpha = "1.63.0-alpha"
 kotlinSerialization = "1.8.1"
 mavenPublish = "0.37.0"
@@ -29,7 +28,7 @@ androidxTest = "1.7.0"
 androidxRunner = "1.7.0"
 androidxJunit = "1.3.0"
 protobufKotlin = "4.36.2"
-protobufPlugin = "0.10.0"
+protobufPlugin = "0.10.1"
 wire = "7.1.2"
 buildKonfig = "0.23.0"
 composeMultiplatform = "1.12.2"
@@ -49,7 +48,6 @@ detekt-api = { module = "io.gitlab.arturbosch.detekt:detekt-api", version.ref = 
 detekt-test = { module = "io.gitlab.arturbosch.detekt:detekt-test", version.ref = "detekt" }
 detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
-binary-compatibility-validator = { module = "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "binaryCompatibilityValidator" }
 kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmarkRuntime" }
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
@@ -63,6 +61,7 @@ ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 ktor-network = { module = "io.ktor:ktor-network", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
+ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 okio-fakefilesystem = { module = "com.squareup.okio:okio-fakefilesystem", version.ref = "okio" }

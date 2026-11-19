@@ -39,5 +39,11 @@ internal class OtelJavaTextMapPropagatorAdapter(
 }
 
 @OptIn(ExperimentalApi::class)
-internal fun TextMapPropagator.toOtelJavaTextMapPropagator(): OtelJavaTextMapPropagator =
-    (this as? TextMapPropagatorAdapter)?.impl ?: OtelJavaTextMapPropagatorAdapter(this)
+internal fun TextMapPropagator.toOtelJavaTextMapPropagator(): OtelJavaTextMapPropagator {
+    val adapter = when (this) {
+        is TextMapPropagatorAdapter -> this
+        is SdkGuardedTextMapPropagator -> delegate as? TextMapPropagatorAdapter
+        else -> null
+    }
+    return adapter?.impl ?: OtelJavaTextMapPropagatorAdapter(this)
+}

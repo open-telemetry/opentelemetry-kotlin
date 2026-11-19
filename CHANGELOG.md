@@ -2,6 +2,51 @@
 
 ## Unreleased
 
+This release targets version [v1.62.0](https://github.com/open-telemetry/opentelemetry-specification/releases/tag/v1.62.0)
+of the OpenTelemetry specification.
+
+### Migration notes
+
+- `Context.asCurrentContext { }` has been removed from `api-ext`. Use `Context.runWithContext { }`
+  from `api` instead, which behaves identically.
+- `Span.storeInContext(context)` has been removed from `compat`. Use `context.storeSpan(span)` instead.
+- `B3Format` has moved from `io.opentelemetry.kotlin.init` to `io.opentelemetry.kotlin.propagation`, alongside
+  `createB3Propagator()`. Update the import.
+- `AnyValue.ListValue.values` and `AnyValue.MapValue.values` have been renamed to `value`, matching the other
+  `AnyValue` variants.
+- `OpenTelemetrySdk.idGenerator` and `OpenTelemetrySdk.resource` have been removed. Configure the ID
+  generator with `idGenerator { }`. Resource detectors still receive a `ResourceFactory` via `detect(factory)`.
+- `IdGenerator.invalidTraceId` and `IdGenerator.invalidSpanId` have been removed, so custom generators no longer
+  implement them. Use `createInvalidSpanContext()` for the invalid IDs.
+- `SpanData.hasEnded` has been renamed to `isEnded`, matching `isRecording()`, `isValid` and `isRemote`. On
+  the JVM, the getter is now `isEnded()` instead of `getHasEnded()`.
+- compat's `SpanData.toOtelJavaSpan()` has been renamed to `toOtelJavaSpanData()`, since it returns
+  opentelemetry-java `SpanData` rather than a `Span`.
+- compat's public tracing converters have moved out of `io.opentelemetry.kotlin.tracing.ext` into the package
+  of the type they convert. `toOtelJavaSpanContext()`/`toOtelKotlinSpanContext()` now live in
+  `io.opentelemetry.kotlin.tracing`, and `toOtelJavaSpanData()`, `toOtelJavaEventData()` and
+  `toOtelJavaLinkData()` in `io.opentelemetry.kotlin.tracing.data`. Update the imports.
+
+### 📈 Enhancements
+
+- `SpanProcessor.isStartRequired()`, `isEndRequired()` and `isOnEndingRequired()` now default to `true`, so
+  custom processors only override them to opt out of a callback.
+- Add an `io.opentelemetry.kotlin:bom` BOM that aligns the versions of all published
+  opentelemetry-kotlin artifacts. `compat-bom` now imports it, along with the
+  opentelemetry-java alpha BOM.
+  ([#1513](https://github.com/open-telemetry/opentelemetry-kotlin/issues/1513))
+- `compat` now exports `opentelemetry-api` and `opentelemetry-sdk` (and the `opentelemetry-bom`
+  platform that versions them), so calls such as `toOtelJavaApi()` compile without adding
+  opentelemetry-java as a separate dependency.
+
+### 🐞 Bug fixes
+
+- Move new and updated trace-state entries to the front after protobuf deserialization.
+- Drop baggage entry metadata on inject when it doesn't match the W3C property grammar, so it
+  can no longer add list members or write CR, LF or non-ASCII characters into the header.
+- Include `X-B3-Flags` in the multi-header B3 propagator's `fields()`, since inject writes it
+  for debug spans.
+
 ## Version 0.10.0 (2026-11-05)
 
 ### Migration notes

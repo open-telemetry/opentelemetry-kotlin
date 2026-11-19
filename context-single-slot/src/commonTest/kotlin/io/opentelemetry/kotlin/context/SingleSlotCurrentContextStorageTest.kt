@@ -12,8 +12,8 @@ internal class SingleSlotCurrentContextStorageTest {
 
     @BeforeTest
     fun setUp() {
-        root = FakeContext()
-        storage = SingleSlotCurrentContextStorage { root }
+        root = rootContext()
+        storage = SingleSlotCurrentContextStorage()
     }
 
     @Test

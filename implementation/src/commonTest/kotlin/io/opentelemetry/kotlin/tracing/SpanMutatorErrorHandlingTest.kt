@@ -12,6 +12,7 @@ import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
+import io.opentelemetry.kotlin.tracing.model.SpanCreationCollector
 import io.opentelemetry.kotlin.tracing.model.SpanModel
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -53,6 +54,51 @@ internal class SpanMutatorErrorHandlingTest {
     }
 
     @Test
+    fun testHostileEventAttributesKeepPartialEvent() {
+        val errorHandler = FakeSdkErrorHandler()
+        val span = createSpan(errorHandler = errorHandler)
+        span.addEvent("event") {
+            setStringAttribute("a", "value")
+            boom()
+        }
+
+        val event = span.events.single()
+        assertEquals("event", event.name)
+        assertEquals(mapOf("a" to "value"), event.attributes)
+        assertEquals("boom", errorHandler.userCodeErrors.single().cause.message)
+    }
+
+    @Test
+    fun testHostileLinkAttributesKeepPartialLink() {
+        val errorHandler = FakeSdkErrorHandler()
+        val span = createSpan(errorHandler = errorHandler)
+        span.addLink(FakeSpanContext.VALID) {
+            setStringAttribute("a", "value")
+            boom()
+        }
+
+        val link = span.links.single()
+        assertEquals(FakeSpanContext.VALID, link.spanContext)
+        assertEquals(mapOf("a" to "value"), link.attributes)
+        assertEquals("boom", errorHandler.userCodeErrors.single().cause.message)
+    }
+
+    @Test
+    fun testHostileCreationLinkAttributesKeepPartialLink() {
+        val errorHandler = FakeSdkErrorHandler()
+        val collector = SpanCreationCollector(truncatingLimits, errorHandler)
+        collector.addLink(FakeSpanContext.VALID) {
+            setStringAttribute("a", "value")
+            boom()
+        }
+
+        val link = collector.links.single()
+        assertEquals(FakeSpanContext.VALID, link.spanContext)
+        assertEquals(mapOf("a" to "value"), link.attributes)
+        assertEquals("boom", errorHandler.userCodeErrors.single().cause.message)
+    }
+
+    @Test
     fun testSpanRemainsUsableAfterHostileInput() {
         val errorHandler = FakeSdkErrorHandler()
         val processor = FakeSpanProcessor()
@@ -65,7 +111,7 @@ internal class SpanMutatorErrorHandlingTest {
         assertEquals(1, errorHandler.userCodeErrors.size)
         assertEquals("value", span.attributes["key"])
         assertFalse(span.attributes.containsKey("hostile"))
-        assertTrue(span.hasEnded)
+        assertTrue(span.isEnded)
         assertEquals(1, processor.endCalls.size)
     }
 
@@ -80,7 +126,7 @@ internal class SpanMutatorErrorHandlingTest {
         )
         span.end()
 
-        assertTrue(span.hasEnded)
+        assertTrue(span.isEnded)
         assertFalse(span.isRecording())
         assertEquals(0L, span.endTimestamp)
         assertEquals(1, processor.endCalls.size)

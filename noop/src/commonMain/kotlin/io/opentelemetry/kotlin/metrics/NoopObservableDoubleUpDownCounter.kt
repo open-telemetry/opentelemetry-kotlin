@@ -5,12 +5,14 @@ import io.opentelemetry.kotlin.ExperimentalApi
 /**
  * No-op implementation of [ObservableDoubleUpDownCounter].
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class NoopObservableDoubleUpDownCounter(
     override val name: String,
     override val unit: String?,
     override val description: String?,
 ) : ObservableDoubleUpDownCounter {
+    override val measurement: ObservableDoubleMeasurement = NoopObservableDoubleMeasurement()
+
     override fun registerCallback(callback: (ObservableDoubleMeasurement) -> Unit): AutoCloseable =
         NoopCallbackHandle
 

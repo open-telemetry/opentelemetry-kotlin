@@ -6,3 +6,5 @@ import platform.posix.getenv
 
 @OptIn(ExperimentalForeignApi::class)
 public actual fun getEnvVarValue(name: String): String? = getenv(name)?.toKString()
+
+public actual val supportsEnvVars: Boolean = true

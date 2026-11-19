@@ -21,7 +21,7 @@ import io.opentelemetry.sdk.extension.incubator.trace.samplers.SamplingPredicate
 /**
  * Provides the built-in samplers backed by opentelemetry-java.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class CompatSamplerConfig(
     private val sdkErrorHandler: SdkErrorHandler = PlatformSdkErrorHandler,
 ) : SamplerConfigDsl {
@@ -119,7 +119,7 @@ internal class CompatSamplerConfig(
         )
 }
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 private class CompatComposableRuleBasedConfig(
     private val dsl: SamplerConfigDsl,
 ) : ComposableRuleBasedConfigDsl, SamplerConfigDsl by dsl {

@@ -101,6 +101,39 @@ internal class MeterProviderImplTest {
         assertFalse(called)
     }
 
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testObservableDoubleGaugeIsNoopUntilMetricsCollectionIsImplemented() {
+        var called = false
+        val gauge = impl.getMeter("test").createObservableDoubleGauge(
+            name = "temperature",
+            callbacks = arrayOf<(ObservableDoubleMeasurement) -> Unit>({ called = true }),
+        )
+
+        assertEquals("temperature", gauge.name)
+        gauge.registerCallback { called = true }.close()
+        gauge.close()
+        assertFalse(called)
+    }
+
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testBatchCallbackIsNoopUntilMetricsCollectionIsImplemented() {
+        val meter = impl.getMeter("test")
+        val longMeasurement = meter.createObservableLongCounter("jobs").measurement
+        val doubleMeasurement = meter.createObservableDoubleGauge("capacity").measurement
+        var called = false
+
+        val registration = meter.batchCallback(longMeasurement, doubleMeasurement) {
+            called = true
+        }
+
+        val noopRegistration = NoopOpenTelemetry.meterProvider.getMeter("test").batchCallback(longMeasurement) {}
+        assertSame(noopRegistration, registration)
+        registration.close()
+        assertFalse(called)
+    }
+
     @Test
     fun testLongGaugeExposesMetadata() {
         val gauge = impl.getMeter("test").createLongGauge(

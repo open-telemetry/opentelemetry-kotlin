@@ -15,7 +15,7 @@ import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import java.util.concurrent.TimeUnit
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class LoggerAdapter(
     private val impl: OtelJavaLogger,
     private val sdkErrorHandler: SdkErrorHandler,
@@ -98,9 +98,11 @@ internal class LoggerAdapter(
             builder.setSeverityText(severityText)
         }
 
+        // Process user attributes first so they take precedence for attribute count limit
+        // and are not overwritten by exception-derived attributes.
         val container = compatAttributes {
-            exception?.let { setExceptionAttributes(it) }
             attributes?.invoke(this)
+            exception?.let { setExceptionAttributes(it) }
         }
         if (exception != null || attributes != null) {
             builder.setAllAttributes(container.otelJavaAttributes())

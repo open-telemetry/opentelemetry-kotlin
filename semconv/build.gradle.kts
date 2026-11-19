@@ -42,7 +42,10 @@ tasks.register<GenerateSemanticConventionsTask>("generateSemanticConventions").c
 }
 
 
+// semconv is consumer-facing, so explicit API mode is on. The binary compatibility validator stays off
+// (containsPublicApi is unset) because the API is generated and changes with every semconv version bump.
 kotlin {
+    explicitApi()
     sourceSets {
         commonMain {
             dependencies {

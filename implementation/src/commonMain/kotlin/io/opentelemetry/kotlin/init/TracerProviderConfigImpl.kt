@@ -1,16 +1,13 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
-import io.opentelemetry.kotlin.behavior.SamplerBehavior
-import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
-import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
+import io.opentelemetry.kotlin.config.dsl.ExportConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceConfigDslImpl
-import io.opentelemetry.kotlin.config.dsl.SpanLimitsConfigDslImpl
-import io.opentelemetry.kotlin.config.dsl.TraceExportConfigDslImpl
-import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.config.dsl.tracing.SpanLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.error.SdkErrorSeverity
-import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.resource.Resource
@@ -18,6 +15,7 @@ import io.opentelemetry.kotlin.tracing.TracerConfigImpl
 import io.opentelemetry.kotlin.tracing.TracerConfigurator
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.export.batchSpanProcessor
+import io.opentelemetry.kotlin.tracing.export.compositeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.simpleSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.stdoutSpanExporter
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
@@ -29,7 +27,7 @@ internal class TracerProviderConfigImpl(
     private val resourceConfig: ResourceConfigDslImpl = ResourceConfigDslImpl()
 ) : TracerProviderConfigDsl, ResourceConfigDsl by resourceConfig {
 
-    private var processor: SpanProcessor? = null
+    private val processors = mutableListOf<SpanProcessor>()
     private var samplerAction: (SamplerConfigDsl.() -> Sampler)? = null
     private val defaultTracerConfig = TracerConfigImpl(true)
     private var tracerConfigurator: TracerConfigurator = TracerConfigurator {
@@ -41,18 +39,8 @@ internal class TracerProviderConfigImpl(
         spanLimits.action()
     }
 
-    override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
-        if (processor != null) {
-            sdkErrorHandler.reportError(
-                SdkError.ApiMisuse(
-                    api = "TracerProviderConfigDsl.export",
-                    message = "export() should only be called once.",
-                    severity = SdkErrorSeverity.WARNING,
-                )
-            )
-            return
-        }
-        processor = TraceExportConfigDslImpl(clock, sdkErrorHandler).action()
+    override fun export(action: ExportConfigDsl.() -> SpanProcessor) {
+        processors.add(ExportConfigDslImpl(clock, sdkErrorHandler).action())
     }
 
     override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
@@ -63,13 +51,19 @@ internal class TracerProviderConfigImpl(
         tracerConfigurator = configurator
     }
 
+    @Suppress("SpreadOperator")
     fun generateTracingConfig(
         base: Resource,
         processorBehavior: SpanProcessorBehavior? = null,
     ): TracingConfig {
         val action = samplerAction ?: { parentBased(root = alwaysOn()) }
         return TracingConfig(
-            processor = processor ?: processorFromBehavior(processorBehavior),
+            processor = when (processors.size) {
+                0 -> processorFromBehavior(processorBehavior)
+                1 -> processors.single()
+                else -> ExportConfigDslImpl(clock, sdkErrorHandler)
+                    .compositeSpanProcessor(*processors.toTypedArray())
+            },
             resource = base.merge(resourceConfig.toBehavior().toResource()),
             sdkErrorHandler = sdkErrorHandler,
             samplerFactory = { SamplerConfigImpl(sdkErrorHandler).action() },
@@ -92,11 +86,11 @@ internal class TracerProviderConfigImpl(
     private fun processorFromBehavior(behavior: SpanProcessorBehavior?): SpanProcessor? {
         val simple = behavior?.simple
         val batch = behavior?.batch
-        val console = behavior?.console ?: batch?.exporter?.console ?: simple?.exporter?.console
+        val console = batch?.exporter?.console ?: simple?.exporter?.console
         if (console == null) {
             return null
         }
-        return TraceExportConfigDslImpl(clock, sdkErrorHandler).run {
+        return ExportConfigDslImpl(clock, sdkErrorHandler).run {
             val exporter = stdoutSpanExporter()
             // An explicit simple processor wins when batch settings were merged from a lower layer.
             if (batch != null && simple == null) {

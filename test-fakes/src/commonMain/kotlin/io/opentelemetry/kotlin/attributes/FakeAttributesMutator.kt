@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.attributes
 class FakeAttributesMutator(
     private val map: MutableMap<String, Any> = mutableMapOf()
-) : AttributesMutator {
+) : AttributesMutator, AttributeContainer {
 
     override fun setBooleanAttribute(key: String, value: Boolean) {
         map[key] = value
@@ -55,6 +55,6 @@ class FakeAttributesMutator(
         map[key] = value
     }
 
-    val attributes: Map<String, Any>
+    override val attributes: Map<String, Any>
         get() = map.toMap()
 }

@@ -27,6 +27,11 @@ internal class OtelJavaDoubleCounterBuilderAdapter(
 
     override fun build(): OtelJavaDoubleCounter = javaBuilder().build()
 
+    override fun buildObserver(): OtelJavaObservableDoubleMeasurement =
+        OtelJavaObservableDoubleMeasurementAdapter(
+            meter.createObservableDoubleCounter(name, unit, description).measurement
+        )
+
     override fun buildWithCallback(
         callback: Consumer<OtelJavaObservableDoubleMeasurement>,
     ): OtelJavaObservableDoubleCounter {

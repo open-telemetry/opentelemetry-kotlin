@@ -1,13 +1,13 @@
 package io.opentelemetry.kotlin.config.yaml.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.config.schema.model.BatchSpanProcessor
 
 /**
  * Maps `tracer_provider.processors.batch` onto batch span processor behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun BatchSpanProcessor.toBehavior(): BatchSpanProcessorBehavior {
     val scheduleDelay = scheduleDelay?.takeIf { value -> value >= 0 }
     val exportTimeout = exportTimeout?.takeIf { value -> value >= 0 }

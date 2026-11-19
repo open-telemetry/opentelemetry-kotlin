@@ -2,15 +2,17 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
+import io.opentelemetry.kotlin.attributes.EmptyAttributeContainer
 import io.opentelemetry.kotlin.attributes.copyAttributes
 import io.opentelemetry.kotlin.attributes.typedAttributesOrConvert
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.export.ShutdownState
-import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.propagation.utils.isValidTraceIdBytes
@@ -27,7 +29,6 @@ import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
 internal class TracerImpl(
     private val clock: Clock,
     private val processor: SpanProcessor?,
-    private val contextFactory: ContextFactory,
     private val idGenerator: IdGenerator,
     private val scope: InstrumentationScopeInfo,
     private val resource: Resource,
@@ -37,8 +38,8 @@ internal class TracerImpl(
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Tracer {
 
-    private val propagatingNoopTracer = PropagatingNoopTracer(contextFactory, sdkErrorHandler)
-    private val root = contextFactory.root()
+    private val propagatingNoopTracer = PropagatingNoopTracer(sdkErrorHandler)
+    private val root = rootContext()
     private val invalidSpanContext = createInvalidSpanContext()
     private val invalidSpan = createNonRecordingSpan(invalidSpanContext)
 
@@ -68,7 +69,7 @@ internal class TracerImpl(
                 return@sdkGuardOrDefault invalidSpan
             }
 
-            val ctx = parentContext ?: contextFactory.current()
+            val ctx = parentContext ?: currentContext()
 
             val parentSpanContext = when (ctx) {
                 root -> invalidSpanContext
@@ -88,8 +89,11 @@ internal class TracerImpl(
             }
             val spanIdBytes = userCode { idGenerator.generateSpanIdBytes() }
 
-            val collector = SpanCreationCollector(spanLimitConfig)
-            userCode { action?.invoke(collector) }
+            val collector = action?.let { block ->
+                SpanCreationCollector(spanLimitConfig, sdkErrorHandler).also {
+                    sdkErrorHandler.guard("SpanCreationAction failed") { block(it) }
+                }
+            }
 
             val result = userCode {
                 sampler.shouldSample(
@@ -97,8 +101,8 @@ internal class TracerImpl(
                     traceIdBytes = traceIdBytes,
                     name = name,
                     spanKind = spanKind,
-                    attributes = collector.attributes,
-                    links = collector.links
+                    attributes = collector?.attributes ?: EmptyAttributeContainer,
+                    links = collector?.links.orEmpty()
                 )
             }
 
@@ -130,12 +134,12 @@ internal class TracerImpl(
                 parent = parentSpanContext,
                 spanContext = spanContext,
                 spanLimitConfig = spanLimitConfig,
-                initialLinks = collector.links,
-                initialDroppedAttributesCount = collector.droppedAttributesCount,
-                initialDroppedLinksCount = collector.droppedLinksCount,
+                initialLinks = collector?.links.orEmpty(),
+                initialDroppedAttributesCount = collector?.droppedAttributesCount ?: 0,
+                initialDroppedLinksCount = collector?.droppedLinksCount ?: 0,
                 sdkErrorHandler = sdkErrorHandler
             )
-            spanModel.copyAttributes(collector.attributes)
+            collector?.let { spanModel.copyAttributes(it.attributes) }
             spanModel.copyAttributes(userCode { result.attributes.typedAttributesOrConvert() })
             sdkErrorHandler.guard {
                 processor?.takeIf(SpanProcessor::isStartRequired)

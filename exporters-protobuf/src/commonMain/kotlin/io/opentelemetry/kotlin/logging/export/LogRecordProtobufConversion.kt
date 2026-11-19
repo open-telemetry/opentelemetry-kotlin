@@ -2,8 +2,8 @@ package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.attributes.AnyValue as KotlinAnyValue
-import io.opentelemetry.kotlin.export.conversion.DeserializedSpanContext
 import io.opentelemetry.kotlin.export.conversion.createKeyValues
+import io.opentelemetry.kotlin.export.conversion.deserializedSpanContext
 import io.opentelemetry.kotlin.export.conversion.toAttributeMap
 import io.opentelemetry.kotlin.export.conversion.toFlagsInt
 import io.opentelemetry.kotlin.export.conversion.toIdByteString
@@ -69,7 +69,7 @@ internal fun LogRecord.toLogRecordData(
     body = body?.toAny(),
     eventName = event_name.ifEmpty { null },
     attributes = attributes.toAttributeMap(),
-    spanContext = DeserializedSpanContext(
+    spanContext = deserializedSpanContext(
         traceIdBytes = trace_id.toByteArray(),
         spanIdBytes = span_id.toByteArray(),
         flags = flags,
@@ -100,7 +100,7 @@ private fun AnyValue.toAny(): Any? = when {
     double_value != null -> double_value
     bytes_value  != null -> KotlinAnyValue.BytesValue(bytes_value.toByteArray())
     array_value  != null -> KotlinAnyValue.ListValue(
-        values = array_value.values.map { it.toNestedAnyValue() }
+        value = array_value.values.map { it.toNestedAnyValue() }
     )
     kvlist_value != null -> kvlist_value.toMapValue()
     else                 -> null

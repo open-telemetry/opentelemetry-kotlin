@@ -24,7 +24,8 @@ public fun Baggage.toOtelJavaBaggage(): OtelJavaBaggage {
  * rejects (e.g. a key that is not a valid RFC 7230 token) is dropped.
  */
 @OptIn(ExperimentalApi::class)
-internal fun OtelJavaBaggage.toOtelKotlinBaggage(): Baggage = createBaggage {
+@ExperimentalApi
+public fun OtelJavaBaggage.toOtelKotlinBaggage(): Baggage = createBaggage {
     forEach { name, entry ->
         put(name, entry.value, entry.metadata.value)
     }

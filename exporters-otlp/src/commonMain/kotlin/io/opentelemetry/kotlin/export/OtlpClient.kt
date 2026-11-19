@@ -13,11 +13,15 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.contentType
 import io.ktor.http.encodedPath
 import io.ktor.http.fromHttpToGmtDate
+import io.ktor.util.AttributeKey
 import io.ktor.utils.io.readRemaining
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.error.reportUserCodeError
+import io.opentelemetry.kotlin.error.sdkGuard
+import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.export.OtlpResponse.ClientError
+import io.opentelemetry.kotlin.export.OtlpResponse.EncodingFailed
 import io.opentelemetry.kotlin.export.OtlpResponse.PartialSuccess
 import io.opentelemetry.kotlin.export.OtlpResponse.ResponseTooLarge
 import io.opentelemetry.kotlin.export.OtlpResponse.RetryableError
@@ -46,7 +50,9 @@ internal class OtlpClient(
 
     /** Releases an SDK-owned HTTP client; caller-supplied clients are not owned here. */
     internal fun release() {
-        httpClientLease?.release()
+        sdkErrorHandler.sdkGuard("Failed to release OTLP HTTP client") {
+            httpClientLease?.release()
+        }
     }
 
     private val contentType = ContentType.parse("application/x-protobuf")
@@ -67,6 +73,17 @@ internal class OtlpClient(
     private suspend fun exportTelemetry(
         endpoint: OtlpEndpoint,
         requestSerializer: () -> ByteArray,
+        parsePartialSuccess: (body: ByteArray) -> OtlpPartialSuccess?,
+    ): OtlpResponse {
+        val body = sdkErrorHandler.sdkGuardOrDefault(null, "OTLP request encoding failed") {
+            requestSerializer()
+        } ?: return EncodingFailed
+        return sendRequest(endpoint, body, parsePartialSuccess)
+    }
+
+    private suspend fun sendRequest(
+        endpoint: OtlpEndpoint,
+        body: ByteArray,
         parsePartialSuccess: (body: ByteArray) -> OtlpPartialSuccess?,
     ): OtlpResponse = sdkErrorHandler.guardOrDefaultSuspend(Unknown, "OTLP export failed") {
         val url = signalEndpoint?.let {
@@ -89,13 +106,14 @@ internal class OtlpClient(
             emptyMap()
         }
         val response = httpClient.post(url) {
+            attributes.put(suppressInstrumentationAttribute, true)
             if (supportsHttpCompression) {
                 compress("gzip")
             }
             contentType(contentType)
             header(HttpHeaders.UserAgent, userAgent)
             requestHeaders.forEach { (name, value) -> header(name, value) }
-            setBody(requestSerializer())
+            setBody(body)
         }
         classifyResponse(response, parsePartialSuccess)
     }
@@ -159,5 +177,9 @@ internal class OtlpClient(
 
     private companion object {
         const val MAX_RESPONSE_BODY_BYTES: Long = 4 * 1024 * 1024
+
+        // Keep in sync with OpenTelemetryKtorClientPluginApi.kt
+        val suppressInstrumentationAttribute: AttributeKey<Boolean> =
+            AttributeKey("opentelemetry-kotlin.suppress-instrumentation")
     }
 }

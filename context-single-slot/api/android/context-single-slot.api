@@ -1,0 +1,4 @@
+public final class io/opentelemetry/kotlin/context/SingleSlotCurrentContextStorageKt {
+	public static final fun createSingleSlotCurrentContextStorage ()Lio/opentelemetry/kotlin/context/CurrentContextStorage;
+}
+

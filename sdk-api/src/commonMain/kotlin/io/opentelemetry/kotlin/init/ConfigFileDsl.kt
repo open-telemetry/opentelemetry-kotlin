@@ -7,18 +7,22 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * https://opentelemetry.io/docs/specs/otel/configuration/
  */
 @ExperimentalApi
+@ConfigDsl
 public interface ConfigFileDsl {
 
     /**
-     * Declares the path of a YAML configuration file, in the format defined by
-     * opentelemetry-configuration. Declaring more than one file retains the last one declared.
+     * Enables declarative configuration, reading the file with [reader]. Declaring this more than
+     * once retains the last declaration.
      *
-     * Relative or absolute paths are accepted.
+     * The file is read from [path] if supplied, otherwise from the `OTEL_CONFIG_FILE` environment
+     * variable. Relative or absolute paths are accepted. Without this declaration no file is
+     * read, and a path set in `OTEL_CONFIG_FILE` is reported as an error and ignored.
      *
-     * This file is only read on the JVM (not Android). Every other target ignores this path.
+     * Declarative config support is a separate artifact, so the SDK doesn't pull in a YAML parser
+     * unless you ask for it. Add `config-declarative` and pass `yamlConfigReader()`.
      *
-     * SDK initialization will error if a YAML file is supplied that cannot be read or does
-     * not contain valid configuration.
+     * SDK initialization will error if a file is supplied that cannot be read or does not contain
+     * valid configuration.
      */
-    public fun configFile(path: String)
+    public fun configFile(reader: DeclarativeConfigReader, path: String? = null)
 }

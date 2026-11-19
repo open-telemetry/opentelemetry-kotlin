@@ -1,28 +1,26 @@
 package io.opentelemetry.kotlin.config.envar
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
-import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.toSeverityLevel
+import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.envar.logging.LogLimitsEnvVars
 import io.opentelemetry.kotlin.config.envar.logging.LogRecordProcessorEnvVars
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Invalid
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Value
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
-import io.opentelemetry.kotlin.config.envar.tracing.BatchSpanProcessorEnvVars
 import io.opentelemetry.kotlin.config.envar.tracing.SamplerEnvVars
 import io.opentelemetry.kotlin.config.envar.tracing.SpanLimitsEnvVars
-import io.opentelemetry.kotlin.config.envar.tracing.TracesExporterEnvVars
+import io.opentelemetry.kotlin.config.envar.tracing.SpanProcessorEnvVars
 
 /**
  * Maps every environment variable this SDK understands onto [OpenTelemetryBehavior].
  *
  * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class OpenTelemetryEnvVars(
     private val reader: ReportingEnvVarReader,
 ) {
@@ -42,9 +40,7 @@ class OpenTelemetryEnvVars(
         tracerProvider = TracerProviderBehavior(
             spanLimits = SpanLimitsEnvVars(reader).toBehavior(),
             sampler = SamplerEnvVars(reader).toBehavior(),
-            processor = TracesExporterEnvVars(reader).toBehavior()?.let {
-                it.mergeWith(SpanProcessorBehavior(batch = BatchSpanProcessorEnvVars(reader).toBehavior()))
-            },
+            processor = SpanProcessorEnvVars(reader).toBehavior(),
         ),
         loggerProvider = LoggerProviderBehavior(
             logLimits = LogLimitsEnvVars(reader).toBehavior(),

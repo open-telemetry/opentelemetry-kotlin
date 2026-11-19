@@ -7,9 +7,9 @@ import io.opentelemetry.kotlin.attributes.compatAttributes
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuard
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class ObservableDoubleMeasurementAdapter(
-    private val impl: OtelJavaObservableDoubleMeasurement,
+    internal val impl: OtelJavaObservableDoubleMeasurement,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : ObservableDoubleMeasurement {
     override fun record(

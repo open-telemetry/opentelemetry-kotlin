@@ -3,6 +3,8 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.EmptyAttributeContainer
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import kotlin.random.Random
@@ -15,6 +17,7 @@ import kotlin.random.Random
  */
 internal class CompositeSampler(
     private val delegate: ComposableSampler,
+    private val sdkErrorHandler: SdkErrorHandler,
     private val random: Random = Random.Default,
 ) : Sampler {
 
@@ -50,11 +53,12 @@ internal class CompositeSampler(
             SamplingResult.Decision.DROP
         }
 
-        val derivedOtelTraceState = intent.traceStateProvider
-            ?.invoke(traceState, decision)
-            ?.get(KnownTraceState.OT)
-            ?.let(OtelTraceState::parse)
-            ?: otelTraceState
+        val providedOtValue = intent.traceStateProvider?.let { provider ->
+            sdkErrorHandler.guardOrDefault(null, "Sampling intent traceStateProvider failed") {
+                provider(traceState, decision).get(KnownTraceState.OT)
+            }
+        }
+        val derivedOtelTraceState = providedOtValue?.let(OtelTraceState::parse) ?: otelTraceState
         if (sampled && adjustableThreshold) {
             intentThreshold?.let(derivedOtelTraceState::setThreshold)
         } else {
@@ -67,7 +71,11 @@ internal class CompositeSampler(
             traceState.put(KnownTraceState.OT, derivedOtelTraceState.encode())
         }
         val attr = if (sampled) {
-            intent.attributesProvider?.invoke() ?: EmptyAttributeContainer
+            intent.attributesProvider?.let { provider ->
+                sdkErrorHandler.guardOrDefault(EmptyAttributeContainer, "Sampling intent attributesProvider failed") {
+                    provider()
+                }
+            } ?: EmptyAttributeContainer
         } else {
             EmptyAttributeContainer
         }

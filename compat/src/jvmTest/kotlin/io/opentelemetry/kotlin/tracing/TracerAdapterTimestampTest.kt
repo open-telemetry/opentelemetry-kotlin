@@ -9,8 +9,8 @@ import io.opentelemetry.kotlin.aliases.OtelJavaReadableSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanData
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanProcessor
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
-import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.toOtelKotlinApi
 import kotlin.test.AfterTest
@@ -29,7 +29,6 @@ internal class TracerAdapterTimestampTest {
             .setClock(sdkClock)
             .addSpanProcessor(CapturingProcessor(ended))
             .build(),
-        CompatContextFactory(),
         NoopSdkErrorHandler,
     ).getTracer("test")
 
@@ -145,7 +144,7 @@ internal class TracerAdapterTimestampTest {
             .tracerProvider.getTracer("test")
 
         val parent = kotlinTracer.startSpan("parent")
-        val child = kotlinTracer.startSpan("child", parentContext = CompatContextFactory().root().storeSpan(parent))
+        val child = kotlinTracer.startSpan("child", parentContext = rootContext().storeSpan(parent))
         clock.advance(wall = 1_000, mono = 200)
         child.addEvent("event")
         child.end()

@@ -2,9 +2,14 @@ package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.config.NoopConfigProperties
 import io.opentelemetry.kotlin.config.NoopConfigProvider
+import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.FakeContext
-import io.opentelemetry.kotlin.context.NoopContext
+import io.opentelemetry.kotlin.context.FakeCurrentContextStorage
 import io.opentelemetry.kotlin.context.createContextKey
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.installContextStorage
+import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.context.uninstallContextStorage
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.metrics.NoopObservableDoubleMeasurement
@@ -13,17 +18,21 @@ import io.opentelemetry.kotlin.metrics.ObservableDoubleMeasurement
 import io.opentelemetry.kotlin.metrics.ObservableLongMeasurement
 import io.opentelemetry.kotlin.propagation.TextMapGetter
 import io.opentelemetry.kotlin.propagation.TextMapSetter
+import io.opentelemetry.kotlin.propagation.createCompositePropagator
 import io.opentelemetry.kotlin.propagation.createNoopPropagator
+import io.opentelemetry.kotlin.propagation.createW3CBaggagePropagator
+import io.opentelemetry.kotlin.propagation.createW3CTraceContextPropagator
 import io.opentelemetry.kotlin.tracing.FakeSpan
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.NoopSpan
-import io.opentelemetry.kotlin.tracing.NoopSpanContext
+import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.SpanKind
+import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
+import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -67,7 +76,8 @@ internal class NoopTests {
         assertTrue(traceState.asMap().isEmpty())
         assertEquals(null, traceState.get("any-key"))
 
-        assertSame(traceState, traceState.put("key", "value"))
+        assertEquals(mapOf("key" to "value"), traceState.put("key", "value").asMap())
+        assertTrue(traceState.asMap().isEmpty())
         assertSame(traceState, traceState.remove("key"))
     }
 
@@ -88,6 +98,44 @@ internal class NoopTests {
         val tracer = NoopOpenTelemetry.tracerProvider.getTracer("test-tracer")
         val span = tracer.startSpan("span", parentContext = FakeContext())
         assertTrue(span is NoopSpan)
+    }
+
+    @Test
+    fun testNoopTracerPropagatesImplicitParent() {
+        val tracer = NoopOpenTelemetry.tracerProvider.getTracer("test-tracer")
+        val remoteParent = rootContext().storeSpanContext(FakeSpanContext.VALID)
+        val storage = FakeCurrentContextStorage()
+        assertTrue(installContextStorage(storage))
+        try {
+            val scope = remoteParent.attach()
+            val span = try {
+                tracer.startSpan("span")
+            } finally {
+                scope.detach()
+            }
+            assertEquals(FakeSpanContext.VALID.traceId, span.spanContext.traceId)
+            assertEquals(FakeSpanContext.VALID.spanId, span.spanContext.spanId)
+            assertFalse(span.isRecording())
+        } finally {
+            uninstallContextStorage(storage)
+        }
+    }
+
+    @Test
+    fun testNoopTracerReturnsNonRecordingParentDirectly() {
+        val tracer = NoopOpenTelemetry.tracerProvider.getTracer("test-tracer")
+        val parentSpan = createNonRecordingSpan(FakeSpanContext.VALID)
+        val span = tracer.startSpan("span", parentContext = rootContext().storeSpan(parentSpan))
+        assertSame(parentSpan, span)
+    }
+
+    @Test
+    fun testNoopTracerSurvivesThrowingParentContext() {
+        val tracer = NoopOpenTelemetry.tracerProvider.getTracer("test-tracer")
+        val parent = object : Context by rootContext() {
+            override fun extractSpan(): Span = error("hostile")
+        }
+        assertSame(NoopSpan, tracer.startSpan("span", parentContext = parent))
     }
 
     @Test
@@ -116,6 +164,22 @@ internal class NoopTests {
             }
         )
         assertFalse(logger.enabled())
+    }
+
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testNoopBatchCallback() {
+        val meter = NoopOpenTelemetry.meterProvider.getMeter("test-meter")
+        var calls = 0
+
+        val registration = meter.batchCallback(
+            NoopObservableLongMeasurement(),
+            NoopObservableDoubleMeasurement(),
+        ) { calls++ }
+
+        registration.close()
+        registration.close()
+        assertEquals(0, calls)
     }
 
     @Test
@@ -159,49 +223,70 @@ internal class NoopTests {
 
     @Test
     fun testNoopExplicitContext() {
-        val otel = NoopOpenTelemetry
-
         val key = createContextKey<String>("key")
 
-        val ctx = otel.context.root()
+        val ctx = rootContext()
 
         val other = ctx.set(key, "value")
-        assertSame(ctx, other)
-
+        assertEquals("value", other.get(key))
         assertNull(ctx.get(key))
     }
 
     @Test
     fun testNoopCurrentContext() {
-        val otel = NoopOpenTelemetry
-        val ctx = otel.context.root()
+        val ctx = rootContext()
 
-        // current context
-        ctx.attach().detach()
-        assertNotNull(otel.context.current())
+        // no storage is installed, so the current context is root and attach is a no-op
+        assertSame(ctx, currentContext())
+        assertTrue(ctx.attach().detach())
+        assertSame(ctx, currentContext())
     }
 
     @Test
     fun testStoreSpan() {
         val otel = NoopOpenTelemetry
         val span = otel.tracerProvider.getTracer("tracer").startSpan("span")
-        val ctx = otel.context.root().storeSpan(span)
-        assertTrue(ctx is NoopContext)
+        val ctx = rootContext().storeSpan(span)
+        assertSame(span, ctx.extractSpan())
     }
 
     @Test
     fun testStoreSpanContext() {
-        val root = NoopOpenTelemetry.context.root()
-        assertSame(root, root.storeSpanContext(NoopSpanContext))
+        val root = rootContext()
+        val ctx = root.storeSpanContext(FakeSpanContext.VALID)
+        assertSame(FakeSpanContext.VALID, ctx.extractSpan().spanContext)
+        assertFalse(root.extractSpan().spanContext.isValid)
+    }
+
+    @Test
+    fun testPropagatorsRoundTripThroughNoopRootContext() {
+        val propagator = createCompositePropagator(
+            createW3CTraceContextPropagator(),
+            createW3CBaggagePropagator(),
+        )
+        val traceparent = "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
+        val carrier = mapOf("traceparent" to traceparent, "baggage" to "key=value")
+
+        val extracted = propagator.extract(rootContext(), carrier, MapGetter)
+        assertEquals("0af7651916cd43dd8448eb211c80319c", extracted.extractSpan().spanContext.traceId)
+        assertEquals("value", extracted.extractBaggage().getValue("key"))
+
+        val injected = mutableMapOf<String, String>()
+        propagator.inject(extracted, injected, TextMapSetter { map, key, value -> map[key] = value })
+        assertEquals(traceparent, injected["traceparent"])
+        assertEquals("key=value", injected["baggage"])
+
+        val span = NoopOpenTelemetry.tracerProvider.getTracer("").startSpan("x", parentContext = extracted)
+        assertEquals(extracted.extractSpan().spanContext, span.spanContext)
     }
 
     @Test
     fun testNoopSpan() {
-        val span = NoopOpenTelemetry.context.root().extractSpan()
+        val span = NoopOpenTelemetry.tracerProvider.getTracer("tracer").startSpan("span")
         assertTrue(span is NoopSpan)
         assertFalse(span.isRecording())
-        assertSame(NoopSpanContext, span.spanContext)
-        assertSame(NoopSpanContext, span.parent)
+        assertSame(createInvalidSpanContext(), span.spanContext)
+        assertSame(createInvalidSpanContext(), span.parent)
         verifySpanOperationsAreNoop(span)
         span.setByteArrayAttribute("bytes", byteArrayOf(1))
         span.setName("name")
@@ -209,32 +294,10 @@ internal class NoopTests {
     }
 
     @Test
-    fun testNoopResource() {
-        val otel = NoopOpenTelemetrySdk
-        val resourceFactory = otel.resource
-
-        // empty resource has no attributes and no schemaUrl
-        val empty = resourceFactory.empty
-        assertTrue(empty.attributes.isEmpty())
-        assertNull(empty.schemaUrl)
-
-        // created resource is also noop — attributes and schemaUrl are ignored
-        val created = resourceFactory.create(schemaUrl = "https://example.com") {
-            setStringAttribute("service.name", "test")
-        }
-        assertTrue(created.attributes.isEmpty())
-        assertNull(created.schemaUrl)
-
-        // merge and asNewResource return the same noop instance
-        assertSame(empty, empty.merge(created))
-        assertSame(empty, empty.asNewResource { attributes["k"] = "v" })
-    }
-
-    @Test
     fun testNoopTextMapPropagator() {
         assertEquals(emptyList(), createNoopPropagator().fields())
 
-        val ctx = NoopOpenTelemetry.context.root()
+        val ctx = rootContext()
         val carrier = mutableMapOf("key" to "value")
 
         // inject is a no-op — setter must never be called
@@ -352,6 +415,49 @@ internal class NoopTests {
         }.close()
         observableLongGauge.close()
         assertFalse(longGaugeCallbackInvoked)
+
+        var doubleGaugeCallbackInvoked = false
+        val doubleGaugeCreationCallback: (ObservableDoubleMeasurement) -> Unit = { measurement ->
+            doubleGaugeCallbackInvoked = true
+            measurement.record(21.5)
+        }
+        val observableDoubleGauge = meter.createObservableDoubleGauge(
+            name = "temperature",
+            callbacks = arrayOf(doubleGaugeCreationCallback),
+        )
+        observableDoubleGauge.registerCallback {
+            doubleGaugeCallbackInvoked = true
+            it.record(22.0)
+        }.close()
+        observableDoubleGauge.close()
+        assertFalse(doubleGaugeCallbackInvoked)
+    }
+
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testNoopObservableMeasurementHandles() {
+        val meter = NoopOpenTelemetry.meterProvider.getMeter("test-meter")
+        val longInstruments = listOf(
+            meter.createObservableLongCounter("long.counter"),
+            meter.createObservableLongUpDownCounter("long.up_down_counter"),
+            meter.createObservableLongGauge("long.gauge"),
+        )
+        val doubleInstruments = listOf(
+            meter.createObservableDoubleCounter("double.counter"),
+            meter.createObservableDoubleUpDownCounter("double.up_down_counter"),
+            meter.createObservableDoubleGauge("double.gauge"),
+        )
+
+        longInstruments.forEach {
+            assertSame(it.measurement, it.measurement)
+            it.measurement.record(1)
+            it.close()
+        }
+        doubleInstruments.forEach {
+            assertSame(it.measurement, it.measurement)
+            it.measurement.record(1.5)
+            it.close()
+        }
     }
 
     @OptIn(ExperimentalApi::class)
@@ -382,6 +488,13 @@ internal class NoopTests {
         }
 
         assertFalse(attributesCalled)
+    }
+
+    private object MapGetter : TextMapGetter<Map<String, String>> {
+        override fun keys(carrier: Map<String, String>) = carrier.keys
+        override fun get(carrier: Map<String, String>, key: String) = carrier[key]
+        override fun getAll(carrier: Map<String, String>, key: String): List<String> =
+            carrier[key]?.let { listOf(it) } ?: emptyList()
     }
 
     private fun verifySpanOperationsAreNoop(span: NoopSpan) {

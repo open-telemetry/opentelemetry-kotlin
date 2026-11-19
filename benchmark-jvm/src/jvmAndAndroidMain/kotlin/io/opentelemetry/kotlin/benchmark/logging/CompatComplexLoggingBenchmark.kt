@@ -1,6 +1,7 @@
 package io.kotlin.opentelemetry.benchmark.logging
 
 import io.opentelemetry.kotlin.OpenTelemetry
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.createOpenTelemetry
 import io.opentelemetry.kotlin.logging.Logger
@@ -28,7 +29,7 @@ class CompatComplexLoggingBenchmark {
             body = "Hello world!",
             timestamp = 500,
             observedTimestamp = 1000,
-            context = otel.contextFactory.root(),
+            context = rootContext(),
             severityNumber = SeverityNumber.DEBUG3,
             severityText = "debug3"
         ) {

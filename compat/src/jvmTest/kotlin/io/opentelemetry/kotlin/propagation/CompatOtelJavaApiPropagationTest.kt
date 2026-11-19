@@ -31,7 +31,7 @@ internal class CompatOtelJavaApiPropagationTest {
 
     @Test
     fun `java api round trips w3cTraceContext`() {
-        val otel = createCompatOpenTelemetry { propagator { w3cTraceContext() } }.also(sdks::track)
+        val otel = createCompatOpenTelemetry { propagator { createW3CTraceContextPropagator() } }.also(sdks::track)
         val propagator = otel.toOtelJavaApi().propagators.textMapPropagator
         assertEquals(listOf("traceparent", "tracestate"), propagator.fields().toList())
 
@@ -44,7 +44,7 @@ internal class CompatOtelJavaApiPropagationTest {
     @Test
     fun `java api propagates remote parent to child span`() {
         val otel = createCompatOpenTelemetry {
-            propagator { w3cTraceContext() }
+            propagator { createW3CTraceContextPropagator() }
             tracerProvider { export { FakeSpanProcessor() } }
         }.also(sdks::track)
         val javaApi = otel.toOtelJavaApi()
@@ -66,7 +66,7 @@ internal class CompatOtelJavaApiPropagationTest {
 
     @Test
     fun `java api round trips w3cBaggage`() {
-        val otel = createCompatOpenTelemetry { propagator { w3cBaggage() } }.also(sdks::track)
+        val otel = createCompatOpenTelemetry { propagator { createW3CBaggagePropagator() } }.also(sdks::track)
         val propagator = otel.toOtelJavaApi().propagators.textMapPropagator
         val carrier = mapOf("baggage" to "userId=alice")
 

@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
-import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -29,7 +28,7 @@ internal class SpanOnEndingOtherThreadTest {
         with(processor.endCalls.single()) {
             assertEquals("test", name)
             assertEquals(mapOf("key" to "value"), attributes)
-            assertTrue(hasEnded)
+            assertTrue(isEnded)
         }
     }
 
@@ -112,14 +111,13 @@ internal class SpanOnEndingOtherThreadTest {
 
         with(processor.endCalls.single()) {
             assertEquals("test", name)
-            assertTrue(hasEnded)
+            assertTrue(isEnded)
         }
     }
 
     private fun tracer(processor: FakeSpanProcessor): TracerImpl = TracerImpl(
         clock = FakeClock(),
         processor = processor,
-        contextFactory = FakeContextFactory(),
         scope = InstrumentationScopeInfoImpl("key", null, null, emptyMap()),
         resource = FakeResource(),
         spanLimitConfig = fakeSpanLimitsConfig,

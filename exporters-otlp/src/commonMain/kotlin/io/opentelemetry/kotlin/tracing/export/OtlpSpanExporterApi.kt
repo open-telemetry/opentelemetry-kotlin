@@ -9,14 +9,14 @@ import io.opentelemetry.kotlin.export.OtlpFileExporterConfigDsl
 import io.opentelemetry.kotlin.export.OtlpHttpExporterConfigDsl
 import io.opentelemetry.kotlin.export.createOtlpFileExporter
 import io.opentelemetry.kotlin.export.createOtlpHttpClient
-import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 
 /**
  * Creates a span exporter that sends telemetry over OTLP HTTP.
  */
 @ExperimentalApi
-public fun TraceExportConfigDsl.otlpHttpSpanExporter(
-    block: OtlpHttpExporterConfigDsl.() -> Unit = {},
+public fun ExportConfigDsl.otlpHttpSpanExporter(
+    block: (OtlpHttpExporterConfigDsl.() -> Unit)? = null,
 ): SpanExporter = OtlpHttpSpanExporter(
     createOtlpHttpClient(sdkErrorHandler, OtlpEndpoint.Traces, block = block),
     EXPORT_INITIAL_DELAY_MS,
@@ -28,9 +28,9 @@ public fun TraceExportConfigDsl.otlpHttpSpanExporter(
 /**
  * Creates a span exporter that writes telemetry to a file.
  */
-@ExperimentalApi
-internal fun TraceExportConfigDsl.otlpFileSpanExporter(
-    block: OtlpFileExporterConfigDsl.() -> Unit = {},
+@OptIn(ExperimentalApi::class)
+internal fun ExportConfigDsl.otlpFileSpanExporter(
+    block: (OtlpFileExporterConfigDsl.() -> Unit)? = null,
 ): SpanExporter =
     OtlpFileSpanExporter(
         fileExporter = createOtlpFileExporter(block),

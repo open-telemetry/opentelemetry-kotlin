@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.config.schema.model.AttributeLimits
  * Maps the top-level `attribute_limits` section of a declarative config file onto the behavior it
  * supplies. Anything the file omits, or sets to a value the spec disallows, is left unset.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun AttributeLimits.toBehavior(): AttributeLimitsBehavior = AttributeLimitsBehavior(
     attributeCountLimit = limitOrUnset(attributeCountLimit),
     attributeValueLengthLimit = limitOrUnset(attributeValueLengthLimit),

@@ -146,4 +146,24 @@ internal class CompatOpenTelemetrySdkCloseableTest {
         assertEquals(Success, sdk.shutdown())
         assertEquals(setOf("span-shutdown", "log-shutdown"), calls.toSet())
     }
+
+    @Test
+    fun `configured timeout allows flush and shutdown longer than five seconds`() = runBlocking {
+        val slowOperation = {
+            Thread.sleep(5500)
+            Success
+        }
+        val sdk = createCompatOpenTelemetry {
+            tracerProvider {
+                export { FakeSpanProcessor(flushCode = slowOperation, shutdownCode = slowOperation) }
+            }
+            loggerProvider {
+                export { FakeLogRecordProcessor(flushCode = slowOperation, shutdownCode = slowOperation) }
+            }
+            shutdownTimeout(6000)
+        }.also(sdks::track)
+
+        assertEquals(Success, sdk.forceFlush())
+        assertEquals(Success, sdk.shutdown())
+    }
 }

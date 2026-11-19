@@ -1,0 +1,9 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, tvosArm64, tvosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <opentelemetry-kotlin:sdk-ext>
+final fun (io.opentelemetry.kotlin.tracing/Span).io.opentelemetry.kotlin.tracing/toReadableSpan(): io.opentelemetry.kotlin.tracing.model/ReadableSpan // io.opentelemetry.kotlin.tracing/toReadableSpan|toReadableSpan@io.opentelemetry.kotlin.tracing.Span(){}[0]

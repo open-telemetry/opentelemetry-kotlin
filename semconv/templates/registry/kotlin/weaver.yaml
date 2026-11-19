@@ -3,7 +3,9 @@ params:
   excluded_attributes: []
 comment_formats:
   kdoc:
-    format: html
+    format: markdown
+    shortcut_reference_links: false
+    escape_square_brackets: false
     header: "/**"
     prefix: "* "
     footer: "*/"

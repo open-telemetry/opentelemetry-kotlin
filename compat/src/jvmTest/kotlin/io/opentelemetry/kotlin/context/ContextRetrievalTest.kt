@@ -27,7 +27,7 @@ internal class ContextRetrievalTest {
     @Before
     fun setUp() {
         impl = OtelJavaContext.current()
-        kotlinDecorator = ContextAdapter(impl)
+        kotlinDecorator = impl.toOtelKotlinContext()
         javaDecorator = OtelJavaContextAdapter(kotlinDecorator)
     }
 

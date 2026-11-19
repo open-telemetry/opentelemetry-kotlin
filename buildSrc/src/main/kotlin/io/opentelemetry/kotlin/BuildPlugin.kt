@@ -13,12 +13,12 @@ class BuildPlugin : Plugin<Project> {
             val kotlin = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
             project.configureKotlin(kotlin)
             project.configureDetekt()
-            project.configureBinaryCompatValidation()
+            project.configureBinaryCompatValidation(kotlin)
             project.configureExplicitApiMode(kotlin)
             project.configureOptIn(kotlin)
             project.configureTest()
             project.configureAppleTests(kotlin)
-            project.configureLinuxTests(kotlin)
+            project.configureNativeTests(kotlin)
 
             project.pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
                 val androidTarget = kotlin.extensions.getByType(KotlinMultiplatformAndroidLibraryTarget::class.java)
@@ -28,7 +28,6 @@ class BuildPlugin : Plugin<Project> {
         project.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
             val kotlin = project.extensions.getByType(KotlinJvmProjectExtension::class.java)
             project.configureDetekt()
-            project.configureBinaryCompatValidation()
             project.configureTest()
         }
         project.configurePublishing()
