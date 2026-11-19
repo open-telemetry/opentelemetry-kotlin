@@ -7,12 +7,18 @@ The code samples in these docs are compiled against the current source, so they 
 
 ## Guides
 
+Start with [Getting started](getting-started.md): install the SDK, record a span and a log, and
+send them to a local collector.
+
 Read these in order if you're new to context and propagation:
 
 1. [Context](context.md): what a context is, the current context, context storage, threads and
    coroutines.
 2. [Propagation](propagation.md): sending context between processes with propagators, carriers,
    B3 and custom propagators.
+
+If you use opentelemetry-java alongside opentelemetry-kotlin, read [Compat mode](compat.md): the
+`compat` module, converting between the Java and Kotlin APIs, and sharing context.
 
 ## Contributing to the docs
 
