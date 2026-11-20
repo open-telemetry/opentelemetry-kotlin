@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
 internal class BatchTelemetryProcessorTest {
@@ -55,8 +56,8 @@ internal class BatchTelemetryProcessorTest {
             config = BatchTelemetryConfig(
                 maxQueueSize = 100,
                 maxExportBatchSize = 1,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = 1000,
+                scheduleDelay = 1.milliseconds,
+                exportTimeout = 1000.milliseconds,
                 sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,
@@ -83,8 +84,8 @@ internal class BatchTelemetryProcessorTest {
             config = BatchTelemetryConfig(
                 maxQueueSize = 100,
                 maxExportBatchSize = 1,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = 1000,
+                scheduleDelay = 1.milliseconds,
+                exportTimeout = 1000.milliseconds,
                 sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,
@@ -101,8 +102,8 @@ internal class BatchTelemetryProcessorTest {
             config = BatchTelemetryConfig(
                 maxQueueSize = 100,
                 maxExportBatchSize = 1,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = 1000,
+                scheduleDelay = 1.milliseconds,
+                exportTimeout = 1000.milliseconds,
                 sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,
@@ -310,8 +311,8 @@ internal class BatchTelemetryProcessorTest {
         config = BatchTelemetryConfig(
             maxQueueSize = 100,
             maxExportBatchSize = batchSize,
-            scheduleDelayMs = scheduleDelayMs,
-            exportTimeoutMs = exportTimeoutMs,
+            scheduleDelay = scheduleDelayMs.milliseconds,
+            exportTimeout = exportTimeoutMs.milliseconds,
             forceFlushTimeoutMs = forceFlushTimeoutMs,
             sdkErrorHandler = sdkErrorHandler,
         ),
@@ -333,8 +334,8 @@ internal class BatchTelemetryProcessorTest {
             config = BatchTelemetryConfig(
                 maxQueueSize = maxQueueSize,
                 maxExportBatchSize = batchSize,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = exportTimeoutMs,
+                scheduleDelay = 1.milliseconds,
+                exportTimeout = exportTimeoutMs.milliseconds,
                 sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,

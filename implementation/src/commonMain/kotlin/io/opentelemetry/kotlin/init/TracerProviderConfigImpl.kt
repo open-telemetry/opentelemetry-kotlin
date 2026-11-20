@@ -22,6 +22,7 @@ import io.opentelemetry.kotlin.tracing.export.simpleSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.stdoutSpanExporter
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.toSampler
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class TracerProviderConfigImpl(
     private val clock: Clock,
@@ -102,8 +103,8 @@ internal class TracerProviderConfigImpl(
             if (batch != null && simple == null) {
                 batchSpanProcessor(
                     exporter = exporter,
-                    scheduleDelayMs = batch.scheduleDelay ?: BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS,
-                    exportTimeoutMs = batch.exportTimeout ?: BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
+                    scheduleDelay = (batch.scheduleDelay ?: BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS).milliseconds,
+                    exportTimeout = (batch.exportTimeout ?: BatchTelemetryDefaults.EXPORT_TIMEOUT_MS).milliseconds,
                     maxQueueSize = batch.maxQueueSize ?: BatchTelemetryDefaults.MAX_QUEUE_SIZE,
                     maxExportBatchSize = batch.maxExportBatchSize ?: BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
                 )
