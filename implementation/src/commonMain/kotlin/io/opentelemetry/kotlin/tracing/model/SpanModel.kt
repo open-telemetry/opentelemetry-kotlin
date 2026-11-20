@@ -8,7 +8,10 @@ import io.opentelemetry.kotlin.ThreadLocal
 import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.error.sdkGuard
@@ -98,6 +101,16 @@ internal class SpanModel(
     }
 
     override fun setName(name: String) {
+        if (name.isBlank()) {
+            sdkErrorHandler.reportError(
+                SdkError.ApiMisuse(
+                    api = "Span.setName",
+                    message = "Span name must be non-empty",
+                    severity = SdkErrorSeverity.WARNING,
+                )
+            )
+            return
+        }
         mutate("Span.setName failed") {
             nameImpl = name
         }
