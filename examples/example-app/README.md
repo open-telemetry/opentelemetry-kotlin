@@ -1,21 +1,32 @@
 # example-app
 
 A Kotlin Multiplatform example app that demonstrates the OpenTelemetry Kotlin API. It emits
-spans and logs that are then sent to OpenTelemetry exporters that by default print the telemetry.
+spans and logs and exports them via OTLP/HTTP with `service.name` set to `otel-kotlin-example`.
+
+## Viewing the telemetry
+
+The app sends telemetry to [local-collector](../local-collector/README.md). Start it before running
+any of the targets below:
+
+```sh
+./gradlew :examples:local-collector:run
+```
+
+The UI apps (desktop, Android and iOS) batch telemetry and flush it when the app goes to the
+background. The console and Node.js apps flush before they exit.
 
 ## Configuring the example app
 
-### Exporting telemetry to an OpenTelemetry collector
+### Changing the collector URL
 
-By default, the example app prints telemetry to stdout. You can optionally export telemetry to an
-OpenTelemetry collector by setting the `url` property in `AppConfig.kt`:
+The app exports to `http://localhost:4318`, or `http://10.0.2.2:4318` on Android (the emulator's
+address for the host). To send telemetry somewhere else, such as an
+[OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector), change the
+`url` property in `AppConfig.kt`:
 
 ```kotlin
-val url: String? = "http://localhost:4318"
+val url: String = "http://my-collector:4318"
 ```
-
-To run a collector locally,
-see [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector).
 
 ### Altering the SDK mode
 
@@ -44,23 +55,18 @@ calls these functions when configuring the SDK.
 
 ### Console (JVM)
 
-The console app exports telemetry to [local-collector](../local-collector/README.md) at
-`http://localhost:4318`. Start the collector first, then run the app:
-
 ```sh
-./gradlew :examples:local-collector:run
 ./gradlew :examples:example-app:runConsoleExampleApp
 ```
 
 ### Android
 
-Install and run the Android app on a connected device or emulator:
+Install the Android app on an emulator, then launch it manually. See
+[example-app-android](../example-app-android/README.md) for physical devices.
 
 ```sh
 ./gradlew :examples:example-app:runAndroidExampleApp
 ```
-
-Then launch it manually from your device/emulator.
 
 ### JS (Node.js)
 
@@ -70,7 +76,9 @@ Then launch it manually from your device/emulator.
 
 ### iOS
 
-Build and run the iOS app in the simulator (requires macOS with Xcode):
+Build and run the iOS app in the simulator. This requires macOS with Xcode 14 or newer and an
+iPhone simulator running iOS 15 or newer. The script picks an iPhone on the newest suitable
+runtime and opens Simulator (DeviceHub on Xcode 27 and newer):
 
 ```sh
 ./gradlew :examples:example-app:runIosExampleApp
