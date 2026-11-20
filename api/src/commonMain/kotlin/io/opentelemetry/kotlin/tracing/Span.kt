@@ -32,7 +32,7 @@ public interface Span : AttributesMutator, SpanLinkCreator, SpanEventCreator {
     public fun isRecording(): Boolean
 
     /**
-     * Sets the name of the span. Must be non-empty.
+     * Sets the name of the span. Must be non-empty: a blank name is ignored and reported as API misuse.
      */
     @ThreadSafe
     public fun setName(name: String)
