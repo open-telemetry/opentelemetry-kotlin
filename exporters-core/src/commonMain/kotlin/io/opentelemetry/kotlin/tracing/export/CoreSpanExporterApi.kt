@@ -13,6 +13,8 @@ import io.opentelemetry.kotlin.platformLog
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Creates a composite span processor that delegates to a list of processors.
@@ -69,14 +71,14 @@ public fun ExportConfigDsl.compositeSpanExporter(vararg exporters: SpanExporter)
 public fun ExportConfigDsl.batchSpanProcessor(
     exporter: SpanExporter,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
-    scheduleDelayMs: Long = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS,
-    exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
+    scheduleDelay: Duration = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS.milliseconds,
+    exportTimeout: Duration = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS.milliseconds,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
 ): SpanProcessor = batchSpanProcessorWithDispatcher(
     exporter,
     maxQueueSize,
-    scheduleDelayMs,
-    exportTimeoutMs,
+    scheduleDelay,
+    exportTimeout,
     maxExportBatchSize,
     ioDispatcher,
 )
@@ -90,15 +92,15 @@ public fun ExportConfigDsl.batchSpanProcessor(
 public fun ExportConfigDsl.batchSpanProcessorWithDispatcher(
     exporter: SpanExporter,
     maxQueueSize: Int,
-    scheduleDelayMs: Long,
-    exportTimeoutMs: Long,
+    scheduleDelay: Duration,
+    exportTimeout: Duration,
     maxExportBatchSize: Int,
     dispatcher: CoroutineDispatcher,
 ): SpanProcessor = BatchSpanProcessorImpl(
     exporter,
     maxQueueSize,
-    scheduleDelayMs,
-    exportTimeoutMs,
+    scheduleDelay,
+    exportTimeout,
     maxExportBatchSize,
     sdkErrorHandler,
     dispatcher,

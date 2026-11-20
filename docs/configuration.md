@@ -194,9 +194,9 @@ fun initWithTunedExport(fetchToken: suspend () -> String): OpenTelemetrySdk = cr
                     headers = { mapOf("Authorization" to "Bearer ${fetchToken()}") } // called per export
                 },
                 maxQueueSize = 4096, // spans buffered before new ones are dropped
-                scheduleDelayMs = 2_000, // how often a batch is exported
+                scheduleDelay = 2.seconds, // how often a batch is exported
                 maxExportBatchSize = 256,
-                exportTimeoutMs = 10_000,
+                exportTimeout = 10.seconds,
             )
         }
     }
@@ -218,9 +218,11 @@ The batch processor's settings are:
 | Parameter            | Meaning                                                                      | Default                       |
 |----------------------|------------------------------------------------------------------------------|-------------------------------|
 | `maxQueueSize`       | How many items are buffered. When the buffer is full, new items are dropped. | 2048                          |
-| `scheduleDelayMs`    | How long to wait between exports.                                            | 5000 for spans, 1000 for logs |
+| `scheduleDelay`      | How long to wait between span exports.                                       | 5 seconds                     |
+| `scheduleDelayMs`    | How long to wait between log exports.                                        | 1000                          |
 | `maxExportBatchSize` | The most items sent in one export.                                           | 512                           |
-| `exportTimeoutMs`    | How long an export can take before it's cancelled.                           | 30000                         |
+| `exportTimeout`      | How long a span export can take before it's cancelled.                       | 30 seconds                    |
+| `exportTimeoutMs`    | How long a log export can take before it's cancelled.                        | 30000                         |
 
 ### Sampling
 

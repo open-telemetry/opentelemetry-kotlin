@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.OpenTelemetrySdk
 import io.opentelemetry.kotlin.createOpenTelemetry
 import io.opentelemetry.kotlin.tracing.export.batchSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.otlpHttpSpanExporter
+import kotlin.time.Duration.Companion.seconds
 
 // region configuration-otlp
 fun initWithTunedExport(fetchToken: suspend () -> String): OpenTelemetrySdk = createOpenTelemetry {
@@ -16,9 +17,9 @@ fun initWithTunedExport(fetchToken: suspend () -> String): OpenTelemetrySdk = cr
                     headers = { mapOf("Authorization" to "Bearer ${fetchToken()}") } // called per export
                 },
                 maxQueueSize = 4096, // spans buffered before new ones are dropped
-                scheduleDelayMs = 2_000, // how often a batch is exported
+                scheduleDelay = 2.seconds, // how often a batch is exported
                 maxExportBatchSize = 256,
-                exportTimeoutMs = 10_000,
+                exportTimeout = 10.seconds,
             )
         }
     }
