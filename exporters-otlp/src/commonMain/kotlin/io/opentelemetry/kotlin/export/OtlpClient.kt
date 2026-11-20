@@ -20,14 +20,7 @@ import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
 import io.opentelemetry.kotlin.error.reportUserCodeError
 import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
-import io.opentelemetry.kotlin.export.OtlpResponse.ClientError
 import io.opentelemetry.kotlin.export.OtlpResponse.EncodingFailed
-import io.opentelemetry.kotlin.export.OtlpResponse.PartialSuccess
-import io.opentelemetry.kotlin.export.OtlpResponse.ResponseTooLarge
-import io.opentelemetry.kotlin.export.OtlpResponse.RetryableError
-import io.opentelemetry.kotlin.export.OtlpResponse.ServerError
-import io.opentelemetry.kotlin.export.OtlpResponse.Success
-import io.opentelemetry.kotlin.export.OtlpResponse.UnexpectedStatus
 import io.opentelemetry.kotlin.export.OtlpResponse.Unknown
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.export.deserializeLogRecordPartialSuccess
@@ -57,6 +50,7 @@ internal class OtlpClient(
 
     private val contentType = ContentType.parse("application/x-protobuf")
     private val userAgent = "OTel-OTLP-Exporter-Kotlin/${BuildKonfig.VERSION}"
+    private val responseProcessor = OtlpResponseProcessor(sdkErrorHandler)
 
     suspend fun exportLogs(telemetry: List<LogRecordData>): OtlpResponse = exportTelemetry(
         OtlpEndpoint.Logs,
@@ -115,50 +109,29 @@ internal class OtlpClient(
             requestHeaders.forEach { (name, value) -> header(name, value) }
             setBody(body)
         }
-        classifyResponse(response, parsePartialSuccess)
+        responseProcessor.classify(response.toOtlpHttpResponse(), parsePartialSuccess)
+    }
+
+    private suspend fun HttpResponse.toOtlpHttpResponse(): OtlpHttpResponse {
+        val code = status.value
+        return OtlpHttpResponse(
+            statusCode = code,
+            retryAfterMs = if (isRetryableStatus(code)) {
+                parseRetryAfterMs()
+            } else {
+                null
+            },
+            body = readBoundedBody(),
+        )
     }
 
     /**
-     * Classifies a response according to the OTLP/HTTP spec.:
-     *
-     * See https://opentelemetry.io/docs/specs/otlp/
+     * Reads the response body, capping it at [MAX_RESPONSE_BODY_BYTES] + 1 so that an oversized
+     * body can be detected without buffering it all.
      */
-    private suspend fun classifyResponse(
-        response: HttpResponse,
-        parsePartialSuccess: (body: ByteArray) -> OtlpPartialSuccess?,
-    ): OtlpResponse {
-        val code = response.status.value
-        val body = response.boundedBodyBytes() ?: run {
-            sdkErrorHandler.reportUserCodeError(
-                IllegalStateException("OTLP response body exceeded $MAX_RESPONSE_BODY_BYTES bytes"),
-                "OTLP response discarded (status=$code)",
-            )
-            return ResponseTooLarge(code)
-        }
-        return when (code) {
-            in 200..299 -> when (val partialSuccess = parsePartialSuccess(body)) {
-                null -> Success
-                else -> PartialSuccess(partialSuccess.rejectedCount, partialSuccess.errorMessage)
-            }
-
-            429, 502, 503, 504 -> RetryableError(
-                code,
-                response.parseRetryAfterMs(),
-                body.deserializeStatusMessage(),
-            )
-
-            in 400..499 -> ClientError(code, body.deserializeStatusMessage())
-            in 500..599 -> ServerError(code, body.deserializeStatusMessage())
-            else -> UnexpectedStatus(code)
-        }
-    }
-
-    /**
-     * Reads the response body, returning null if it exceeds [MAX_RESPONSE_BODY_BYTES].
-     */
-    private suspend fun HttpResponse.boundedBodyBytes(): ByteArray? =
+    private suspend fun HttpResponse.readBoundedBody(): ByteArray =
         bodyAsChannel().readRemaining(MAX_RESPONSE_BODY_BYTES + 1).use { packet ->
-            packet.readByteArray().takeIf { it.size <= MAX_RESPONSE_BODY_BYTES }
+            packet.readByteArray()
         }
 
     /**
@@ -176,8 +149,6 @@ internal class OtlpClient(
     }
 
     private companion object {
-        const val MAX_RESPONSE_BODY_BYTES: Long = 4 * 1024 * 1024
-
         // Keep in sync with OpenTelemetryKtorClientPluginApi.kt
         val suppressInstrumentationAttribute: AttributeKey<Boolean> =
             AttributeKey("opentelemetry-kotlin.suppress-instrumentation")
