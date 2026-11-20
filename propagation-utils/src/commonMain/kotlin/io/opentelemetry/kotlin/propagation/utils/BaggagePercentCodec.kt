@@ -15,6 +15,7 @@ private const val OCTET_LT = 0x3C
 private const val OCTET_LBRACKET = 0x5B
 private const val OCTET_RBRACKET = 0x5D
 private const val OCTET_TILDE = 0x7E
+private const val MAX_ASCII = 0x7F
 
 private val HEX_UPPER = charArrayOf(
     '0', '1', '2', '3', '4', '5', '6', '7',
@@ -43,7 +44,8 @@ public fun percentEncodeBaggageValue(value: String): String {
 }
 
 /**
- * Decodes `%HH` sequences in [value]. Returns null if [value] contains a malformed sequence.
+ * Decodes `%HH` sequences in [value]. Returns null if [value] contains a malformed sequence, or
+ * contains a non-ASCII character alongside a `%HH` sequence.
  */
 public fun percentDecodeBaggageValue(value: String): String? {
     if (!value.contains(PERCENT_CHAR)) {
@@ -59,6 +61,9 @@ public fun percentDecodeBaggageValue(value: String): String? {
             bytes[pos++] = decoded.toByte()
             i += PERCENT_SEQUENCE_LENGTH
         } else {
+            if (c.code > MAX_ASCII) {
+                return null
+            }
             bytes[pos++] = c.code.toByte()
             i++
         }

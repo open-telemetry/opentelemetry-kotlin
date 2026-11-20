@@ -29,6 +29,8 @@ internal class BaggagePercentCodecTest {
         assertNull(percentDecodeBaggageValue("%"))
         assertNull(percentDecodeBaggageValue("abc%2"))
         assertNull(percentDecodeBaggageValue("%zz"))
+        assertNull(percentDecodeBaggageValue("é%20"))
+        assertNull(percentDecodeBaggageValue("%20\u0100"))
     }
 
     @Test
