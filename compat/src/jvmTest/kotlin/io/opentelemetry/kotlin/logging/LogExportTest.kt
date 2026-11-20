@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
+import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import io.opentelemetry.kotlin.semconv.ExceptionAttributes
@@ -97,11 +98,19 @@ internal class LogExportTest {
     }
 
     @Test
-    fun `test null AnyValue body leaves the body unset`() = runTest {
+    fun `test explicit empty body reaches processors and exporters`() = runTest {
+        val processor = FakeLogRecordProcessor()
+        harness.config.logRecordProcessors.add(processor)
         harness.logger.emit(AnyValue.NullValue)
+        harness.logger.emit(null)
 
-        harness.assertLogRecords(1, null) { logs ->
-            assertNull(logs[0].body)
+        assertEquals(2, processor.logs.size)
+        assertEquals(AnyValue.NullValue, processor.logs[0].body)
+        assertNull(processor.logs[1].body)
+
+        harness.assertLogRecords(2, null) { logs ->
+            assertEquals(AnyValue.NullValue, logs[0].body)
+            assertNull(logs[1].body)
         }
     }
 
