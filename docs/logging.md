@@ -95,8 +95,9 @@ fun logStructured(logger: Logger) {
 }
 ```
 
-You can also pass an `AnyValue` to control the exact type. Any other object is converted with
-`toString()`.
+You can also pass an `AnyValue` to control the exact type. `AnyValue.NullValue` represents an
+explicit empty body that is passed to processors and exporters. Passing Kotlin `null` leaves the
+body unset. Any other object is converted with `toString()`.
 
 Generally, it's preferred to set attributes instead as these are easier to process on most backends.
 

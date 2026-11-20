@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.aliases.OtelJavaValue
 import io.opentelemetry.kotlin.aliases.OtelJavaValueType
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class AnyValueConversionTest {
 
@@ -72,7 +71,7 @@ internal class AnyValueConversionTest {
         assertEquals(true, OtelJavaValue.of(true).toOtelKotlinBody())
         assertEquals(5L, OtelJavaValue.of(5L).toOtelKotlinBody())
         assertEquals(1.5, OtelJavaValue.of(1.5).toOtelKotlinBody())
-        assertNull(OtelJavaValue.empty().toOtelKotlinBody())
+        assertEquals(AnyValue.NullValue, OtelJavaValue.empty().toOtelKotlinBody())
     }
 
     @Test
