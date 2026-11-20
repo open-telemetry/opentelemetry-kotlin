@@ -7,6 +7,8 @@ import io.opentelemetry.kotlin.tracing.data.SpanData
 
 /**
  * An interface for exporting spans to an arbitrary destination.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#span-exporter
  */
 @ExperimentalApi
 public interface SpanExporter : TelemetryCloseable {

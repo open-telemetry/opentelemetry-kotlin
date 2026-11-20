@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
+import io.opentelemetry.kotlin.ThreadSafe
 
 /**
  * Dynamically controls how a [Logger] should behave by constructing a [LoggerConfig].
@@ -10,6 +11,7 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfo
  * https://opentelemetry.io/docs/specs/otel/logs/sdk/#loggerconfigurator
  */
 @ExperimentalApi
+@ThreadSafe
 public fun interface LoggerConfigurator {
 
     /**

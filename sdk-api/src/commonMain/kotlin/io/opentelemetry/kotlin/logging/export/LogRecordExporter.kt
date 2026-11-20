@@ -7,6 +7,8 @@ import io.opentelemetry.kotlin.logging.data.LogRecordData
 
 /**
  * An interface for exporting logs to an arbitrary destination.
+ *
+ * https://opentelemetry.io/docs/specs/otel/logs/sdk/#logrecordexporter
  */
 @ExperimentalApi
 public interface LogRecordExporter : TelemetryCloseable {
