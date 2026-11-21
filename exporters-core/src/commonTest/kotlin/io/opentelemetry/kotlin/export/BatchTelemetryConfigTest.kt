@@ -6,6 +6,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.microseconds
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class BatchTelemetryConfigTest {
@@ -77,5 +78,33 @@ internal class BatchTelemetryConfigTest {
         )
         assertTrue(handler.apiMisuses.isEmpty())
         assertEquals(Duration.INFINITE, cfg.exportTimeout)
+    }
+
+    @Test
+    fun testSubMillisecondDurationsRetainPrecision() {
+        val handler = FakeSdkErrorHandler()
+        val cfg = BatchTelemetryConfig(
+            scheduleDelay = 500.microseconds,
+            exportTimeout = 750.microseconds,
+            sdkErrorHandler = handler,
+        )
+
+        assertTrue(handler.apiMisuses.isEmpty())
+        assertEquals(500.microseconds, cfg.scheduleDelay)
+        assertEquals(750.microseconds, cfg.exportTimeout)
+    }
+
+    @Test
+    fun testNegativeSubMillisecondDurationFallsBackToDefault() {
+        val handler = FakeSdkErrorHandler()
+        val cfg = BatchTelemetryConfig(
+            scheduleDelay = (-500).microseconds,
+            exportTimeout = (-750).microseconds,
+            sdkErrorHandler = handler,
+        )
+
+        assertEquals(2, handler.apiMisuses.size)
+        assertEquals(BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS.milliseconds, cfg.scheduleDelay)
+        assertEquals(BatchTelemetryDefaults.EXPORT_TIMEOUT_MS.milliseconds, cfg.exportTimeout)
     }
 }
