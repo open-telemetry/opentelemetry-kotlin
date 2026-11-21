@@ -370,7 +370,9 @@ fun initWithDiagnostics(isDebugBuild: Boolean, userOptedOut: Boolean): OpenTelem
 }
 ```
 
-- `errorHandler` replaces the default handler, which writes to the platform log. Your handler
+- `errorHandler` replaces the default handler, which writes to the platform log. On the JVM, it
+  uses `java.util.logging` with logger name `io.opentelemetry.kotlin`. The `INFO`, `WARNING`, and
+  `ERROR` severities map to Java logging levels `INFO`, `WARNING`, and `SEVERE`. Your handler
   shouldn't throw.
 - `logLevel` sets the lowest severity that reaches the handler. `INFO` and below pass
   everything, `WARN` passes warnings and errors, and `ERROR` and above pass errors only.
