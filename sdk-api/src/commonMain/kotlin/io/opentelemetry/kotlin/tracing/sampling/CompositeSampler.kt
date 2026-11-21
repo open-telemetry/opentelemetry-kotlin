@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -13,6 +14,7 @@ import io.opentelemetry.kotlin.tracing.model.SpanLink
  * which allows multiple samplers to work together in making a sampling decision.
  */
 @ExperimentalApi
+@ThreadSafe
 public interface ComposableSampler {
 
     /**
@@ -34,6 +36,7 @@ public interface ComposableSampler {
 }
 
 @ExperimentalApi
+@ThreadSafe
 public interface SamplingIntent {
     /** Rejection threshold in [0, 2^56). `null` means DROP. Lower ⇒ more likely to sample. */
     public val threshold: Long?

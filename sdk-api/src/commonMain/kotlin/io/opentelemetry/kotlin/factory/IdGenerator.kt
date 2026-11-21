@@ -1,10 +1,17 @@
 package io.opentelemetry.kotlin.factory
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.propagation.utils.decodeHexOrEmpty
 import io.opentelemetry.kotlin.propagation.utils.encodeHex
 
+/**
+ * Generates trace and span IDs.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#id-generators
+ */
 @ExperimentalApi
+@ThreadSafe
 public interface IdGenerator {
 
     /**
