@@ -14,14 +14,15 @@ internal class ParentBasedSampler(
     private val localParentNotSampled: Sampler,
 ) : Sampler {
 
-    override val description: String =
-        "ParentBased{" +
-            "root:${root.description}," +
-            "remoteParentSampled:${remoteParentSampled.description}," +
-            "remoteParentNotSampled:${remoteParentNotSampled.description}," +
-            "localParentSampled:${localParentSampled.description}," +
-            "localParentNotSampled:${localParentNotSampled.description}" +
-            "}"
+    override val description: String
+        get() =
+            "ParentBased{" +
+                "root:${root.description}," +
+                "remoteParentSampled:${remoteParentSampled.description}," +
+                "remoteParentNotSampled:${remoteParentNotSampled.description}," +
+                "localParentSampled:${localParentSampled.description}," +
+                "localParentNotSampled:${localParentNotSampled.description}" +
+                "}"
 
     override fun shouldSample(
         context: Context,
