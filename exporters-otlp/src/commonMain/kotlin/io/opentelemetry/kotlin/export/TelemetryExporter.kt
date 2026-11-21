@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
-import io.opentelemetry.kotlin.error.reportUserCodeError
+import io.opentelemetry.kotlin.error.reportTransientError
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.ioDispatcher
@@ -183,7 +183,7 @@ internal class TelemetryExporter<T>(
                 is OtlpResponse.PartialSuccess -> {
                     if (response.rejectedCount > 0) {
                         val msg = "OTLP export partially rejected (${response.rejectedCount} items): ${response.errorMessage}"
-                        sdkErrorHandler.reportUserCodeError(
+                        sdkErrorHandler.reportTransientError(
                             IllegalStateException(msg),
                             "OTLP export partially rejected",
                         )
@@ -193,7 +193,7 @@ internal class TelemetryExporter<T>(
 
                 is OtlpResponse.UnretryableError -> {
                     val msg = "OTLP export failed with unretryable error (status=${response.statusCode})"
-                    sdkErrorHandler.reportUserCodeError(
+                    sdkErrorHandler.reportTransientError(
                         IllegalStateException(msg),
                         "OTLP export unretryable error",
                     )
@@ -264,7 +264,7 @@ internal class TelemetryExporter<T>(
                 }
             }
             if (telemetry.attempts >= maxAttempts) {
-                sdkErrorHandler.reportUserCodeError(
+                sdkErrorHandler.reportTransientError(
                     IllegalStateException("OTLP export exhausted max attempts ($maxAttempts)"),
                     "OTLP export attempts exhausted"
                 )

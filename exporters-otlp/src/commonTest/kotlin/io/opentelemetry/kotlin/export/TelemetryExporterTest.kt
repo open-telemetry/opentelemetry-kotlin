@@ -357,9 +357,9 @@ internal class TelemetryExporterTest {
         exporter.withShutdown {
             exporter.export(listOf("data"))
             advanceTimeBy(1000)
-            assertEquals(1, errorHandler.userCodeErrors.size)
-            assertEquals("OTLP export partially rejected", errorHandler.userCodeErrors.single().message)
-            assertTrue(errorHandler.userCodeErrors.single().cause.message!!.contains("2 items"))
+            assertEquals(1, errorHandler.transientErrors.size)
+            assertEquals("OTLP export partially rejected", errorHandler.transientErrors.single().message)
+            assertTrue(errorHandler.transientErrors.single().cause!!.message!!.contains("2 items"))
         }
     }
 
@@ -375,7 +375,7 @@ internal class TelemetryExporterTest {
         exporter.withShutdown {
             exporter.export(listOf("data"))
             advanceTimeBy(1000)
-            assertEquals(0, errorHandler.userCodeErrors.size)
+            assertEquals(0, errorHandler.transientErrors.size)
         }
     }
 
@@ -391,9 +391,9 @@ internal class TelemetryExporterTest {
         exporter.withShutdown {
             exporter.export(listOf("data"))
             advanceTimeBy(1000)
-            assertEquals(1, errorHandler.userCodeErrors.size)
-            assertEquals("OTLP export unretryable error", errorHandler.userCodeErrors.single().message)
-            assertTrue(errorHandler.userCodeErrors.single().cause.message!!.contains("status=400"))
+            assertEquals(1, errorHandler.transientErrors.size)
+            assertEquals("OTLP export unretryable error", errorHandler.transientErrors.single().message)
+            assertTrue(errorHandler.transientErrors.single().cause!!.message!!.contains("status=400"))
         }
     }
 
@@ -412,9 +412,9 @@ internal class TelemetryExporterTest {
         exporter.withShutdown {
             exporter.export(listOf("data"))
             advanceTimeBy(1000)
-            assertEquals(1, errorHandler.userCodeErrors.size)
-            assertEquals("OTLP export attempts exhausted", errorHandler.userCodeErrors.single().message)
-            assertTrue(errorHandler.userCodeErrors.single().cause.message!!.contains("3"))
+            assertEquals(1, errorHandler.transientErrors.size)
+            assertEquals("OTLP export attempts exhausted", errorHandler.transientErrors.single().message)
+            assertTrue(errorHandler.transientErrors.single().cause!!.message!!.contains("3"))
         }
     }
 }
