@@ -11,7 +11,10 @@ import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.model.SpanLink
+import io.opentelemetry.kotlin.tracing.sampling.ComposableSampler
+import io.opentelemetry.kotlin.tracing.sampling.FakeSamplingIntent
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
+import io.opentelemetry.kotlin.tracing.sampling.SamplingIntent
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
 import org.junit.Test
 import kotlin.test.AfterTest
@@ -66,6 +69,75 @@ internal class CompatTracerErrorHandlingTest {
         }.also(sdks::track)
         val span = otel.tracerProvider.getTracer("test").startSpan("span")
 
+        assertFalse(span.isRecording())
+        assertSingleError("Tracer.startSpan failed")
+    }
+
+    @Test
+    fun `throwing sampling predicate is reported as user code error`() {
+        var predicateCalled = false
+
+        val otel = createCompatOpenTelemetry {
+            errorHandler(errorHandler)
+            tracerProvider {
+                sampler {
+                    composite {
+                        composableRuleBased {
+                            rule({ _, _, _, _, _ ->
+                                predicateCalled = true
+                                error("boom")
+                            }) {
+                                composableAlwaysOn()
+                            }
+                        }
+                    }
+                }
+                export { FakeSpanProcessor() }
+            }
+        }.also(sdks::track)
+
+        val span = otel.tracerProvider.getTracer("test").startSpan("span")
+
+        assertTrue(predicateCalled, "The sampling predicate was not invoked")
+        assertFalse(span.isRecording())
+        assertSingleError("Tracer.startSpan failed")
+    }
+
+    @Test
+    fun `throwing composable trace state provider is reported as user code error`() {
+        var providerCalled = false
+
+        val otel = createCompatOpenTelemetry {
+            errorHandler(errorHandler)
+            tracerProvider {
+                sampler {
+                    composite {
+                        object : ComposableSampler {
+                            override val description: String = "HostileComposableSampler"
+
+                            override fun getSamplingIntent(
+                                context: Context,
+                                name: String,
+                                spanKind: SpanKind,
+                                attributes: AttributeContainer,
+                                links: List<SpanLink>,
+                            ): SamplingIntent = FakeSamplingIntent(
+                                threshold = 0L,
+                                traceStateProvider = { _, _ ->
+                                    providerCalled = true
+                                    error("boom")
+                                },
+                            )
+                        }
+                    }
+                }
+                export { FakeSpanProcessor() }
+            }
+        }.also(sdks::track)
+
+        val span = otel.tracerProvider.getTracer("test").startSpan("span")
+
+        assertTrue(providerCalled, "The trace state provider was not invoked")
         assertFalse(span.isRecording())
         assertSingleError("Tracer.startSpan failed")
     }

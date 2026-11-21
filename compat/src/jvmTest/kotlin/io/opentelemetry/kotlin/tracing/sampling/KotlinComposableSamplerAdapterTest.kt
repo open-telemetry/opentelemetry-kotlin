@@ -9,8 +9,14 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
+import io.opentelemetry.kotlin.error.sdkGuard
+import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
+import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinTraceState
+import io.opentelemetry.kotlin.tracing.model.SpanLink
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -181,5 +187,169 @@ internal class KotlinComposableSamplerAdapterTest {
 
         assertEquals("my-span", delegate.lastName)
         assertEquals(OtelJavaSpanKind.SERVER.toOtelKotlinSpanKind(), delegate.lastSpanKind)
+    }
+
+    @Test
+    fun `throwing getSamplingIntent is reported as user code error`() {
+        val delegate = object : ComposableSampler {
+            override val description: String = "HostileComposableSampler"
+
+            override fun getSamplingIntent(
+                context: Context,
+                name: String,
+                spanKind: SpanKind,
+                attributes: AttributeContainer,
+                links: List<SpanLink>,
+            ): SamplingIntent = error("boom")
+        }
+
+        val adapter = KotlinComposableSamplerAdapter(delegate)
+
+        assertUserCodeFailure {
+            adapter.getSamplingIntent(
+                OtelJavaContext.root(),
+                "span",
+                OtelJavaSpanKind.CLIENT,
+                OtelJavaAttributes.empty(),
+                emptyList(),
+            )
+        }
+    }
+
+    @Test
+    fun `throwing sampling intent getter is reported as user code error`() {
+        val hostileIntent = object : SamplingIntent by FakeSamplingIntent() {
+            override val threshold: Long?
+                get() = error("boom")
+        }
+        val adapter = KotlinComposableSamplerAdapter(
+            FakeComposableSampler(intent = hostileIntent)
+        )
+
+        assertUserCodeFailure {
+            adapter.getSamplingIntent(
+                OtelJavaContext.root(),
+                "span",
+                OtelJavaSpanKind.CLIENT,
+                OtelJavaAttributes.empty(),
+                emptyList(),
+            )
+        }
+    }
+
+    @Test
+    fun `throwing attributes provider is reported as user code error`() {
+        val delegate = FakeComposableSampler(
+            intent = FakeSamplingIntent(
+                attributesProvider = {
+                    error("boom")
+                },
+            ),
+        )
+        val adapter = KotlinComposableSamplerAdapter(delegate)
+
+        assertUserCodeFailure {
+            adapter.getSamplingIntent(
+                OtelJavaContext.root(),
+                "span",
+                OtelJavaSpanKind.CLIENT,
+                OtelJavaAttributes.empty(),
+                emptyList(),
+            )
+        }
+    }
+
+    @Test
+    fun `throwing trace state provider is reported as user code error`() {
+        val delegate = FakeComposableSampler(
+            intent = FakeSamplingIntent(
+                traceStateProvider = { _, _ ->
+                    error("boom")
+                },
+            ),
+        )
+        val adapter = KotlinComposableSamplerAdapter(delegate)
+
+        assertUserCodeFailure {
+            val intent = adapter.getSamplingIntent(
+                OtelJavaContext.root(),
+                "span",
+                OtelJavaSpanKind.CLIENT,
+                OtelJavaAttributes.empty(),
+                emptyList(),
+            )
+
+            intent.traceStateUpdater?.apply(OtelJavaTraceState.getDefault(), OtelJavaSamplingDecision.RECORD_ONLY)
+        }
+    }
+
+    @Test
+    fun `throwing attribute container getter is reported as user code error`() {
+        val hostileAttributes = object : AttributeContainer {
+            override val attributes: Map<String, Any>
+                get() = error("boom")
+        }
+
+        val delegate = FakeComposableSampler(
+            intent = FakeSamplingIntent(
+                attributesProvider = { hostileAttributes },
+            ),
+        )
+
+        val adapter = KotlinComposableSamplerAdapter(delegate)
+
+        assertUserCodeFailure {
+            adapter.getSamplingIntent(
+                OtelJavaContext.root(),
+                "span",
+                OtelJavaSpanKind.CLIENT,
+                OtelJavaAttributes.empty(),
+                emptyList(),
+            )
+        }
+    }
+
+    @Test
+    fun `throwing trace state asMap is reported as user code error`() {
+        val originalState = OtelJavaTraceState.getDefault()
+            .toOtelKotlinTraceState()
+
+        val hostileState = object : TraceState by originalState {
+            override fun asMap(): Map<String, String> = error("boom")
+        }
+
+        val delegate = FakeComposableSampler(
+            intent = FakeSamplingIntent(
+                traceStateProvider = { _, _ -> hostileState },
+            ),
+        )
+
+        val adapter = KotlinComposableSamplerAdapter(delegate)
+
+        assertUserCodeFailure {
+            val intent = adapter.getSamplingIntent(
+                OtelJavaContext.root(),
+                "span",
+                OtelJavaSpanKind.CLIENT,
+                OtelJavaAttributes.empty(),
+                emptyList(),
+            )
+
+            intent.traceStateUpdater?.apply(OtelJavaTraceState.getDefault(), OtelJavaSamplingDecision.RECORD_ONLY)
+        }
+    }
+
+    private fun assertUserCodeFailure(action: () -> Unit) {
+        val errorHandler = FakeSdkErrorHandler()
+
+        errorHandler.sdkGuard("Composable sampler callback failed") {
+            action()
+        }
+
+        assertEquals(1, errorHandler.errors.size)
+
+        val error = errorHandler.userCodeErrors.single()
+        assertEquals("Composable sampler callback failed", error.message)
+        assertEquals("boom", error.cause.message)
     }
 }
