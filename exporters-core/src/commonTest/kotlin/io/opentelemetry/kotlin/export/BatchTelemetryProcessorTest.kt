@@ -238,7 +238,7 @@ internal class BatchTelemetryProcessorTest {
             OperationResultCode.Success
         }
         processor.processTelemetry(1)
-        assertEquals(OperationResultCode.Failure, processor.forceFlush())
+        assertEquals(OperationResultCode.Timeout, processor.forceFlush())
 
         // the worker recovers once the stuck export hits its timeout
         advanceTimeBy(100)
