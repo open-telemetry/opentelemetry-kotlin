@@ -16,6 +16,7 @@ import io.opentelemetry.kotlin.behavior.SeverityLevel
 import io.opentelemetry.kotlin.behavior.toMinimumSdkErrorSeverity
 import io.opentelemetry.kotlin.behavior.toSeverityLevel
 import io.opentelemetry.kotlin.clock.ClockAdapter
+import io.opentelemetry.kotlin.clock.guarded
 import io.opentelemetry.kotlin.config.DeclarativeBehaviorReader
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceDetectionConfigDslImpl
@@ -167,7 +168,8 @@ internal class CompatOpenTelemetryConfig : OpenTelemetryConfigDsl, BehaviorSuppl
     }
 
     override fun clock(clock: Clock) {
-        this.clock = clock
+        // user-supplied: guarded so a throwing clock cannot destabilize the Java SDK
+        this.clock = clock.guarded(sdkErrorHandler)
     }
 
     override fun errorHandler(handler: SdkErrorHandler) {

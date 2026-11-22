@@ -6,20 +6,26 @@ import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.clock.ClockAdapter
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.createCompatOpenTelemetry
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaClock
+import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import org.junit.Test
+import kotlin.test.AfterTest
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
 internal class CompatClockTest {
 
     private val processor = FakeSpanProcessor()
+    private val sdks = SdkTracker()
 
     private fun startSpan(clock: Clock) = CompatTracerProviderConfig(clock, NoopSdkErrorHandler)
         .apply { export { processor } }
@@ -68,6 +74,27 @@ internal class CompatClockTest {
     }
 
     @Test
+    fun `throwing custom clock falls back to the default clock and reports`() {
+        val handler = FakeSdkErrorHandler()
+        val sdk = createCompatOpenTelemetry {
+            errorHandler(handler)
+            clock(throwingClock())
+            tracerProvider { export { processor } }
+        }.also(sdks::track)
+        val span = sdk.tracerProvider.getTracer("test").startSpan("span")
+        span.addEvent("event")
+        span.end()
+        val ended = processor.endCalls.single()
+
+        assertTrue(ended.startTimestamp > 0)
+        assertTrue(handler.userCodeErrors.isNotEmpty())
+        assertEquals(
+            "Clock.now failed, using fallback clock",
+            handler.userCodeErrors.first().message,
+        )
+    }
+
+    @Test
     fun `custom clock times logs`() {
         val clock = FakeClock(time = 100)
         val logProcessor = FakeLogRecordProcessor()
@@ -78,4 +105,9 @@ internal class CompatClockTest {
             .emit(body = "log")
         assertEquals(100L, logProcessor.logs.single().observedTimestamp)
     }
+
+    @AfterTest
+    fun tearDown() = sdks.shutdownAll()
+
+    private fun throwingClock(): Clock = Clock { error("clock boom") }
 }
