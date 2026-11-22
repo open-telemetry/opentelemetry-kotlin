@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin
 
-import io.opentelemetry.kotlin.factory.ContextFactory
+import io.opentelemetry.kotlin.config.ConfigProvider
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.Meter
@@ -34,9 +34,11 @@ public interface OpenTelemetry {
     public val meterProvider: MeterProvider
 
     /**
-     * Factory that constructs Context objects.
+     * The [ConfigProvider] that instrumentation libraries read their configuration from.
+     *
+     * https://opentelemetry.io/docs/specs/otel/configuration/api/
      */
-    public val context: ContextFactory
+    public val configProvider: ConfigProvider
 
     /**
      * The [TextMapPropagator] used to inject and extract context across process boundaries.

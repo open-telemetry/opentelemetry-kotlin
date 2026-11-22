@@ -4,7 +4,6 @@ plugins {
     id("io.opentelemetry.kotlin.build-logic")
     id("signing")
     id("com.vanniktech.maven.publish")
-    id("org.jetbrains.kotlinx.kover")
 }
 
 kotlin {
@@ -16,11 +15,6 @@ kotlin {
                 api(project(":config-envar"))
                 api(project(":sdk-api"))
                 implementation(project(":platform-implementations"))
-            }
-        }
-        jvmMain {
-            dependencies {
-                implementation(project(":config-yaml"))
             }
         }
         commonTest {

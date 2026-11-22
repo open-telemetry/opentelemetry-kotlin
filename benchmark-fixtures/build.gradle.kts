@@ -10,6 +10,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlinx.benchmark.runtime)
                 implementation(project(":sdk-api"))
+                implementation(project(":sdk-common"))
                 implementation(project(":api-ext"))
                 implementation(project(":noop"))
                 implementation(project(":implementation"))

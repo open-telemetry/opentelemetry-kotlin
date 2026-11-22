@@ -3,8 +3,7 @@ package io.opentelemetry.kotlin.metrics
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaLongUpDownCounter
-import io.opentelemetry.kotlin.attributes.convertToMap
-import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.attributes.setOtelJavaAttributes
 
 internal class OtelJavaLongUpDownCounterAdapter(
     private val impl: LongUpDownCounter,
@@ -19,7 +18,7 @@ internal class OtelJavaLongUpDownCounterAdapter(
         if (attributes.isEmpty) {
             impl.add(value)
         } else {
-            impl.add(value) { setTypedAttributes(attributes.convertToMap()) }
+            impl.add(value) { setOtelJavaAttributes(attributes) }
         }
     }
 

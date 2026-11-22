@@ -3,30 +3,26 @@ package io.opentelemetry.kotlin.metrics
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaObservableLongMeasurement
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.attributes.compatAttributes
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuard
-import io.opentelemetry.kotlin.error.userCode
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class ObservableLongMeasurementAdapter(
-    private val impl: OtelJavaObservableLongMeasurement,
+    internal val impl: OtelJavaObservableLongMeasurement,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : ObservableLongMeasurement {
-    override fun record(value: Long) {
-        sdkErrorHandler.sdkGuard("ObservableLongMeasurement.record failed") {
-            impl.record(value)
-        }
-    }
-
     override fun record(
         value: Long,
-        attributes: AttributesMutator.() -> Unit,
+        attributes: (AttributesMutator.() -> Unit)?,
     ) {
         sdkErrorHandler.sdkGuard("ObservableLongMeasurement.record failed") {
-            val container = CompatAttributesModel()
-            userCode { attributes(container) }
-            impl.record(value, container.otelJavaAttributes())
+            if (attributes == null) {
+                impl.record(value)
+            } else {
+                val container = compatAttributes(attributes)
+                impl.record(value, container.otelJavaAttributes())
+            }
         }
     }
 }

@@ -6,12 +6,12 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 /**
  * No-op implementation of [DoubleUpDownCounter].
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class NoopDoubleUpDownCounter(
     override val name: String,
     override val unit: String?,
     override val description: String?,
 ) : DoubleUpDownCounter {
     override fun enabled(): Boolean = false
-    override fun add(value: Double, attributes: AttributesMutator.() -> Unit) = Unit
+    override fun add(value: Double, attributes: (AttributesMutator.() -> Unit)?) = Unit
 }

@@ -36,51 +36,6 @@ Any component marked stable here should NOT have api surface marked with `@Exper
 | propagation | ⚠️          | ️      |
 | tracing     | ⚠️          | ️      |
 
-## Current Context API - an explanation
+## Context and propagation
 
-The [current Context API](https://opentelemetry.io/docs/specs/otel/context/#optional-global-operations)
-allows for context to be applied to traces/logs automatically, rather than explicitly passing in a
-`Context` parameter every time. This is a fairly tricky concept to grasp intuitively, but
-essentially it composes of these parts:
-
-1. A storage mechanism that records _what_ the current context is. There can only be one
-   current context at a time in this API. The storage mechanism is fulfilled
-   by the `CurrentContextStorage` API.
-2. A mechanism for context objects to set themselves as the current context. This is
-   achieved by calling `Context.attach()`, which stores the object in the `CurrentContextStorage`
-   and returns a `Scope` object
-3. When a context object no longer needs to be the current context, there needs to be a way to
-   reset the current context to its previous state. A `Scope` object is a token that achieves this
-   goal by calling `detach()`
-4. A means of determining what the current context is at any one time. `ContextFactory.current()`
-   solves this.
-5. The library users calls `attach()` for contexts at appropriate units of execution in their
-   application (e.g. spanning a function, or a particular workflow). Nested calls are allowed
-
-### Current Context API example usage
-
-A code sample makes this easier to understand:
-
-```kotlin
-// Declare keys once and share the instance with whatever needs to read the value back.
-// A key with a matching name is a different key - see the ContextKey docs.
-private val USER_ID: ContextKey<String> = createContextKey("user.id")
-
-internal fun exampleUsage(api: OpenTelemetry) {
-    // 1. obtain the current context. Defaults to root() if no current context is available.
-    val ctx = api.context.current()
-
-    // 2. create a new context but don't set it as the current context.
-    val newContext = ctx.set(USER_ID, "abc123")
-
-    // 3. set the new context as the current context.
-    val scope = newContext.attach()
-
-    // 4. perform tracing/logging here. tracers/loggers should call current()
-    // internally so the appropriate context is set automatically.
-    api.tracerProvider.getTracer("tracer").startSpan("my_span")
-
-    // 5. unset the new context as the current context and restore the previous context.
-    scope.detach()
-}
-```
+See the [context guide](../docs/context.md) and the [propagation guide](../docs/propagation.md).

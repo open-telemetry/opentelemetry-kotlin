@@ -21,8 +21,8 @@ class FakeLogger(
     override fun emit(
         body: Any?,
         eventName: String?,
-        timestamp: Long?,
-        observedTimestamp: Long?,
+        timestamp: Long,
+        observedTimestamp: Long,
         context: Context?,
         severityNumber: SeverityNumber?,
         severityText: String?,
@@ -42,8 +42,8 @@ class FakeLogger(
 
     private fun processTelemetry(
         eventName: String?,
-        timestamp: Long?,
-        observedTimestamp: Long?,
+        timestamp: Long,
+        observedTimestamp: Long,
         severityNumber: SeverityNumber?,
         severityText: String?,
         body: Any?,

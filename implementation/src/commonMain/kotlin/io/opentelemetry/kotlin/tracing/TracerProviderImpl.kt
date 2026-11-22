@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
-import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guardOrDefault
@@ -17,17 +17,17 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.export.runWithTimeout
-import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.init.config.DefaultSampler
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
+import io.opentelemetry.kotlin.tracing.sampling.SamplerCloseable
+import io.opentelemetry.kotlin.tracing.sampling.guarded
 
 internal class TracerProviderImpl(
     private val clock: Clock,
     tracingConfig: TracingConfig,
-    contextFactory: ContextFactory,
     private val idGenerator: IdGenerator,
     private val attributeLimits: AttributeLimitsBehavior,
     spanLimits: SpanLimitsBehavior,
@@ -35,16 +35,18 @@ internal class TracerProviderImpl(
 
     private val sdkErrorHandler = tracingConfig.sdkErrorHandler
     private val shutdownState: MutableShutdownState = MutableShutdownState()
-    private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(
-        tracingConfig.processor?.let { listOf(it) } ?: emptyList(),
-        sdkErrorHandler,
-    )
-    private val noopTracer = PropagatingNoopTracer(contextFactory, sdkErrorHandler)
-    private val spanLimitConfig = SpanLimitConfig(spanLimits)
-
     private val sampler = sdkErrorHandler.guardOrDefault(DefaultSampler, "Failed to create sampler, using default") {
         tracingConfig.samplerFactory()
-    }
+    }.guarded(sdkErrorHandler)
+
+    // Processors shut down first so that any spans still in flight finish before the sampler
+    // releases its resources.
+    private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(
+        listOfNotNull(tracingConfig.processor, SamplerCloseable(sampler)),
+        sdkErrorHandler,
+    )
+    private val noopTracer = PropagatingNoopTracer(sdkErrorHandler)
+    private val spanLimitConfig = SpanLimitConfig(spanLimits)
 
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
         if (tracingConfig.processor == null) {
@@ -57,7 +59,6 @@ internal class TracerProviderImpl(
             TracerImpl(
                 clock = clock,
                 processor = tracingConfig.processor,
-                contextFactory = contextFactory,
                 scope = key,
                 resource = tracingConfig.resource,
                 spanLimitConfig = spanLimitConfig,

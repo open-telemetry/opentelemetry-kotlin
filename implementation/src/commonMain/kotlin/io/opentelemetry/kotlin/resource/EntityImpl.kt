@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.resource
 
-import io.opentelemetry.kotlin.attributes.attributeMapHashCode
-import io.opentelemetry.kotlin.attributes.attributeMapsEqual
+import io.opentelemetry.kotlin.attributes.toAttributeValues
 
 internal class EntityImpl(
     override val type: String,
@@ -9,6 +8,8 @@ internal class EntityImpl(
     override val id: Map<String, Any>,
     override val description: Map<String, Any>
 ) : Entity {
+
+    private val typedId = id.toAttributeValues()
 
     /**
      * An entity is identified by its [type] and [id] only. [description] and [schemaUrl] are not
@@ -23,8 +24,8 @@ internal class EntityImpl(
         if (other !is EntityImpl) {
             return false
         }
-        return type == other.type && attributeMapsEqual(id, other.id)
+        return type == other.type && typedId == other.typedId
     }
 
-    override fun hashCode(): Int = 31 * type.hashCode() + attributeMapHashCode(id)
+    override fun hashCode(): Int = 31 * type.hashCode() + typedId.hashCode()
 }

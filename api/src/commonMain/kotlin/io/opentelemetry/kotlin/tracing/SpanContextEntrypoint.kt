@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.reportApiUserCodeError
 import io.opentelemetry.kotlin.propagation.utils.SPAN_ID_BYTES
 import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_BYTES
 import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateValidator
@@ -55,7 +56,7 @@ public fun createInvalidSpanContext(): SpanContext = INVALID_SPAN_CONTEXT
 public fun createSpanContext(
     traceId: String,
     spanId: String,
-    action: SpanContextCreationAction.() -> Unit = {},
+    action: (SpanContextCreationAction.() -> Unit)? = null,
 ): SpanContext = createSpanContext(traceId.decodeHexOrEmpty(), spanId.decodeHexOrEmpty(), action)
 
 /**
@@ -63,7 +64,8 @@ public fun createSpanContext(
  * [action] DSL block.
  *
  * An ID that is not the correct length, or that is all zeros, is replaced with all zeros, which
- * makes the [SpanContext] invalid. If [action] throws, the invalid [SpanContext] is returned.
+ * makes the [SpanContext] invalid. If [action] throws, the invalid [SpanContext] is returned and
+ * the exception is reported.
  *
  * This does not require an [io.opentelemetry.kotlin.OpenTelemetry] instance.
  *
@@ -73,17 +75,32 @@ public fun createSpanContext(
 public fun createSpanContext(
     traceIdBytes: ByteArray,
     spanIdBytes: ByteArray,
-    action: SpanContextCreationAction.() -> Unit = {},
+    action: (SpanContextCreationAction.() -> Unit)? = null,
 ): SpanContext {
+    val validTraceId = traceIdBytes.takeIf { it.isValidTraceIdBytes() } ?: INVALID_TRACE_ID_BYTES
+    val validSpanId = spanIdBytes.takeIf { it.isValidSpanIdBytes() } ?: INVALID_SPAN_ID_BYTES
+    if (action == null) {
+        if (validTraceId === INVALID_TRACE_ID_BYTES && validSpanId === INVALID_SPAN_ID_BYTES) {
+            return INVALID_SPAN_CONTEXT
+        }
+        return SpanContextImpl(
+            traceIdBytes = validTraceId,
+            spanIdBytes = validSpanId,
+            traceFlags = TRACE_FLAGS[0],
+            isRemote = false,
+            traceState = TraceStateImpl.EMPTY,
+        )
+    }
     val builder = SpanContextCreationActionImpl()
     try {
         builder.action()
-    } catch (ignored: Throwable) {
+    } catch (e: Throwable) {
+        reportApiUserCodeError(e, "createSpanContext action threw")
         return INVALID_SPAN_CONTEXT
     }
     return SpanContextImpl(
-        traceIdBytes = traceIdBytes.takeIf { it.isValidTraceIdBytes() } ?: INVALID_TRACE_ID_BYTES,
-        spanIdBytes = spanIdBytes.takeIf { it.isValidSpanIdBytes() } ?: INVALID_SPAN_ID_BYTES,
+        traceIdBytes = validTraceId,
+        spanIdBytes = validSpanId,
         traceFlags = builder.traceFlags(),
         isRemote = builder.isRemote,
         traceState = builder.traceState,

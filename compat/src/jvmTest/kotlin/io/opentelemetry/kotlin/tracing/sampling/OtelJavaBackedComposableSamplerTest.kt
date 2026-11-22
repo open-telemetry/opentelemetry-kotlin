@@ -3,17 +3,19 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
+import io.opentelemetry.kotlin.aliases.OtelJavaSamplingDecision
 import io.opentelemetry.kotlin.aliases.OtelJavaTraceState
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaComposableSampler
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSamplingIntent
 import io.opentelemetry.kotlin.tracing.FakeTraceState
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
 import org.junit.Test
-import java.util.function.Function
+import java.util.function.BiFunction
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
@@ -91,16 +93,17 @@ internal class OtelJavaBackedComposableSamplerTest {
 
     @Test
     fun `trace state updater is applied through the provider`() {
-        val updater = Function<OtelJavaTraceState, OtelJavaTraceState> {
-            it.toBuilder().put("th", "1").build()
+        val updater = BiFunction<OtelJavaTraceState, OtelJavaSamplingDecision, OtelJavaTraceState> {
+                state, decision ->
+            state.toBuilder().put("th", decision.name.lowercase()).build()
         }
         val impl = FakeOtelJavaComposableSampler(intent = FakeOtelJavaSamplingIntent(traceStateUpdater = updater))
         val wrapper = OtelJavaBackedComposableSampler(impl)
 
         val intent = wrapper.getSamplingIntent(FakeContext(), "span", SpanKind.CLIENT, CompatAttributesModel(), emptyList())
 
-        val result = intent.traceStateProvider?.invoke(FakeTraceState(emptyMap()), SamplingResult.Decision.RECORD_AND_SAMPLE)
-        assertEquals("1", result?.get("th"))
+        val result = intent.traceStateProvider?.invoke(FakeTraceState(emptyMap()), SamplingResult.Decision.RECORD_ONLY)
+        assertEquals("record_only", result?.get("th"))
     }
 
     @Test
@@ -117,14 +120,14 @@ internal class OtelJavaBackedComposableSamplerTest {
     }
 
     @Test
-    fun `traceId name and spanKind are forwarded to impl`() {
+    fun `context name and spanKind are forwarded to impl`() {
         val impl = FakeOtelJavaComposableSampler()
         val wrapper = OtelJavaBackedComposableSampler(impl)
         val context = FakeContext()
 
         wrapper.getSamplingIntent(context, "my-span", SpanKind.SERVER, CompatAttributesModel(), emptyList())
 
-        assertEquals(context.extractSpan().spanContext.traceId, impl.lastTraceId)
+        assertEquals(context, impl.lastContext?.toOtelKotlinContext())
         assertEquals("my-span", impl.lastName)
         assertEquals(SpanKind.SERVER.toOtelJavaSpanKind(), impl.lastSpanKind)
     }

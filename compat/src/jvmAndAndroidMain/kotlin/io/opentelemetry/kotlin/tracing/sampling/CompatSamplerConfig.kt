@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaCompositeSampler
 import io.opentelemetry.kotlin.aliases.OtelJavaSampler
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.attributes.compatAttributes
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import io.opentelemetry.kotlin.init.ComposableRuleBasedConfigDsl
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
@@ -17,7 +18,7 @@ import io.opentelemetry.sdk.extension.incubator.trace.samplers.SamplingPredicate
 /**
  * Provides the built-in samplers backed by opentelemetry-java.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class CompatSamplerConfig : SamplerConfigDsl {
 
     override fun alwaysOn(): Sampler = SamplerAdapter(OtelJavaSampler.alwaysOn())
@@ -26,6 +27,13 @@ internal class CompatSamplerConfig : SamplerConfigDsl {
 
     override fun alwaysRecord(root: Sampler): Sampler =
         SamplerAdapter(OtelJavaAlwaysRecordSampler.create(root.toOtelJavaSampler()))
+
+    override fun probability(ratio: Double): Sampler {
+        // opentelemetry-java does not reject out-of-range ratios, but silently drops spans.
+        // fail here so we can fallback to the default sampler.
+        require(ratio in 0.0..1.0) { "ratio must be between 0 and 1, got $ratio" }
+        return SamplerAdapter(OtelJavaCompositeSampler.wrap(OtelJavaComposableSampler.probability(ratio)))
+    }
 
     override fun parentBased(
         root: Sampler,
@@ -67,7 +75,7 @@ internal class CompatSamplerConfig : SamplerConfigDsl {
     ): ComposableSampler = OtelJavaBackedComposableSampler(
         OtelJavaComposableSampler.annotating(
             delegate.toOtelJavaComposableSampler(),
-            CompatAttributesModel().apply(attributes).otelJavaAttributes(),
+            compatAttributes(attributes).otelJavaAttributes(),
         )
     )
 
@@ -75,7 +83,7 @@ internal class CompatSamplerConfig : SamplerConfigDsl {
         OtelJavaBackedComposableSampler(CompatComposableRuleBasedConfig(this).apply(block).build())
 }
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 private class CompatComposableRuleBasedConfig(
     private val dsl: SamplerConfigDsl,
 ) : ComposableRuleBasedConfigDsl, SamplerConfigDsl by dsl {
@@ -93,7 +101,7 @@ private class CompatComposableRuleBasedConfig(
 }
 
 private fun SamplingPredicate.toOtelJavaSamplingPredicate(): OtelJavaSamplingPredicate =
-    OtelJavaSamplingPredicate { parentContext, _, name, spanKind, attributes, parentLinks ->
+    OtelJavaSamplingPredicate { parentContext, name, spanKind, attributes, parentLinks ->
         matches(
             parentContext.toOtelKotlinContext(),
             name,

@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaContextKey
 import io.opentelemetry.kotlin.aliases.OtelJavaLogger
 import io.opentelemetry.kotlin.aliases.OtelJavaSeverity
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.context.ContextAdapter
+import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
@@ -111,7 +111,7 @@ internal class OtelJavaLogExportTest {
         var capturedJavaContext: OtelJavaContext? = null
 
         override fun onEmit(log: ReadWriteLogRecord, context: Context) {
-            capturedJavaContext = (context as ContextAdapter).impl
+            capturedJavaContext = context.toOtelJavaContext()
         }
 
         override suspend fun shutdown(): OperationResultCode = OperationResultCode.Success

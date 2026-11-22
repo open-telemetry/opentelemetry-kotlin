@@ -34,7 +34,7 @@ internal class SpanProcessOnEndReadTest {
     @Test
     fun testReadPropertiesInProcessor() = runTest {
         harness.config.spanProcessors.add(OnEndSpanProcessor())
-        harness.tracer.startSpan("span", null, SpanKind.INTERNAL, null) {
+        harness.tracer.startSpan("span", null, SpanKind.INTERNAL, 0) {
             setStringAttribute("key", "value")
             addLink(FakeSpanContext.INVALID) {
                 setStringAttribute("foo", "bar")
@@ -54,7 +54,7 @@ internal class SpanProcessOnEndReadTest {
             // assert properties can be read
             assertEquals("span", name)
             assertEquals(StatusData.Unset, status)
-            assertTrue(hasEnded)
+            assertTrue(isEnded)
             assertEquals(SpanKind.INTERNAL, spanKind)
             assertEquals(0, startTimestamp)
             assertEquals(0L, endTimestamp)

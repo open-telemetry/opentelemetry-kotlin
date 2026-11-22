@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.export
 
-import io.opentelemetry.proto.common.v1.AnyValue
-import io.opentelemetry.proto.common.v1.KeyValue
+import io.opentelemetry.kotlin.proto.common.v1.AnyValue
+import io.opentelemetry.kotlin.proto.common.v1.KeyValue
 import kotlin.test.assertEquals
 
 fun assertAttributesMatch(

@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.model
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanCreationAction
@@ -18,6 +19,7 @@ import io.opentelemetry.kotlin.tracing.SpanCreationAction
  */
 internal class SpanCreationCollector(
     private val spanLimitConfig: SpanLimitConfig,
+    private val sdkErrorHandler: SdkErrorHandler,
     private val attrs: AttributesModel = AttributesModel(
         attributeLimit = spanLimitConfig.attributeCountLimit,
         attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
@@ -41,7 +43,7 @@ internal class SpanCreationCollector(
         attributes: (AttributesMutator.() -> Unit)?,
     ) {
         if (linksList.size < spanLimitConfig.linkCountLimit) {
-            buildSpanLink(spanContext, attributes, spanLimitConfig)?.let(linksList::add)
+            buildSpanLink(spanContext, attributes, spanLimitConfig, sdkErrorHandler)?.let(linksList::add)
         } else {
             droppedLinksCountImpl++
         }

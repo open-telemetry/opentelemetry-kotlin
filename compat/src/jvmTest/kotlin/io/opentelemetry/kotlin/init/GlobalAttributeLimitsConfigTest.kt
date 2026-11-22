@@ -4,11 +4,11 @@ import io.opentelemetry.kotlin.aliases.OtelJavaLogLimits
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanLimits
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
-import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
-import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
-import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -76,10 +76,10 @@ internal class GlobalAttributeLimitsConfigTest {
     }
 
     @Test
-    fun `the merged global limit reaches the adapters`() {
+    fun `the merged global limit reaches the Java span limits`() {
         val global = AttributeLimitsBehavior(attributeCountLimit = 64)
 
-        assertEquals(64, buildSpanLimits(global).effectiveAttributeCountLimit)
+        assertEquals(64, buildSpanLimits(global).build().maxNumberOfAttributes)
     }
 
     @Test

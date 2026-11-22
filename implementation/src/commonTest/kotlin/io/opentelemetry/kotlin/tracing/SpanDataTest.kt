@@ -1,11 +1,11 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
-import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.data.SpanData
@@ -38,7 +38,6 @@ internal class SpanDataTest {
         tracer = TracerImpl(
             clock = clock,
             processor = processor,
-            contextFactory = FakeContextFactory(),
             scope = key,
             resource = fakeResource,
             spanLimitConfig = fakeSpanLimitsConfig,
@@ -84,7 +83,7 @@ internal class SpanDataTest {
         span.setByteArrayAttribute("bytes", bytes)
         val data = span.toReadableSpan().toSpanData()
         bytes[0] = 9
-        assertEquals(1.toByte(), (data.attributes["bytes"] as ByteArray)[0])
+        assertEquals(1.toByte(), (data.attributes["bytes"] as AnyValue.BytesValue).value[0])
     }
 
     @Test
@@ -112,7 +111,7 @@ internal class SpanDataTest {
         eventList.add(false)
         linkBytes[0] = 9
         assertEquals(listOf(true), data.events.single().attributes["flags"])
-        assertEquals(1.toByte(), (data.links.single().attributes["bytes"] as ByteArray)[0])
+        assertEquals(1.toByte(), (data.links.single().attributes["bytes"] as AnyValue.BytesValue).value[0])
     }
 
     @Test

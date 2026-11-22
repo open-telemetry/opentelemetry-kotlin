@@ -4,7 +4,6 @@ plugins {
     id("io.opentelemetry.kotlin.build-logic")
     id("signing")
     id("com.vanniktech.maven.publish")
-    id("org.jetbrains.kotlinx.kover")
 }
 
 kotlin {
@@ -18,6 +17,7 @@ kotlin {
         commonTest {
             dependencies {
                 implementation(project(":implementation"))
+                implementation(project(":exporters-otlp"))
                 implementation(project(":test-fakes"))
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.ktor.client.mock)

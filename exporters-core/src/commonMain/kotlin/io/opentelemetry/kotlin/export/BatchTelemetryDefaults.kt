@@ -1,11 +1,13 @@
 package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.InternalApi
 
 /**
  * Default values for how telemetry is batched.
  */
 @ExperimentalApi
+@InternalApi
 public object BatchTelemetryDefaults {
 
     /**

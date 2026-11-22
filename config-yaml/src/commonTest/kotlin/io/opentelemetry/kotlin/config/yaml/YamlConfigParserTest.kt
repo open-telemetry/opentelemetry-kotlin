@@ -5,6 +5,7 @@ import okio.fakefilesystem.FakeFileSystem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 internal class YamlConfigParserTest {
 
@@ -51,4 +52,44 @@ internal class YamlConfigParserTest {
 
         assertEquals(mapOf("key" to "value"), parser.parse(fileSystem, path))
     }
+
+    @Test
+    fun parsesIntegerScalar() {
+        assertEquals(42, parseMapping("n: 42")["n"])
+    }
+
+    @Test
+    fun parsesFloatScalar() {
+        assertEquals(42.5, parseMapping("d: 42.5")["d"])
+    }
+
+    @Test
+    fun parsesBooleanScalar() {
+        assertEquals(true, parseMapping("b: true")["b"])
+    }
+
+    @Test
+    fun parsesExplicitNullAsPresentKey() {
+        val result = parseMapping("nil: null")
+        assertTrue(result.containsKey("nil"))
+        assertNull(result["nil"])
+    }
+
+    @Test
+    fun parsesSequenceOfScalars() {
+        assertEquals(listOf(1, 2, 3), parseMapping("list: [1, 2, 3]")["list"])
+    }
+
+    @Test
+    fun parsesSequenceOfMappings() {
+        val yaml =
+            """
+            list:
+              - a: 1
+              - a: 2
+            """.trimIndent()
+        assertEquals(listOf(mapOf("a" to 1), mapOf("a" to 2)), parseMapping(yaml)["list"])
+    }
+
+    private fun parseMapping(yaml: String): Map<*, *> = parser.parse(yaml) as Map<*, *>
 }

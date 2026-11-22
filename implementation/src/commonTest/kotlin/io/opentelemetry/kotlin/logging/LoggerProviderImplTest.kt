@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
@@ -33,7 +32,6 @@ internal class LoggerProviderImplTest {
         NoopSdkErrorHandler,
         loggerConfigurator,
     )
-    private val contextFactory = FakeContextFactory()
     private val attributeLimits = AttributeLimitsBehavior()
     private val logLimits = AttributeLimitsBehavior(100, 100)
     private lateinit var impl: LoggerProviderImpl
@@ -43,7 +41,6 @@ internal class LoggerProviderImplTest {
         impl = LoggerProviderImpl(
             clock,
             loggingConfig,
-            contextFactory,
             attributeLimits,
             logLimits,
         )
@@ -66,7 +63,6 @@ internal class LoggerProviderImplTest {
         val provider = LoggerProviderImpl(
             clock,
             config,
-            contextFactory,
             attributeLimits,
             logLimits,
         )
@@ -163,7 +159,6 @@ internal class LoggerProviderImplTest {
         impl = LoggerProviderImpl(
             clock,
             config,
-            contextFactory,
             attributeLimits,
             logLimits,
         )
@@ -192,7 +187,6 @@ internal class LoggerProviderImplTest {
         impl = LoggerProviderImpl(
             clock,
             config,
-            contextFactory,
             attributeLimits,
             logLimits,
         )
@@ -222,7 +216,6 @@ internal class LoggerProviderImplTest {
         impl = LoggerProviderImpl(
             clock,
             config,
-            contextFactory,
             attributeLimits,
             logLimits,
         )
@@ -281,7 +274,6 @@ internal class LoggerProviderImplTest {
     ) = LoggerProviderImpl(
         clock,
         LoggingConfig(processor, FakeResource(), errorHandler, loggerConfigurator),
-        contextFactory,
         attributeLimits,
         logLimits,
     )

@@ -64,7 +64,7 @@ class FakeSpan private constructor(
 
     override fun addEvent(
         name: String,
-        timestamp: Long?,
+        timestamp: Long,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         val fakeSpanEvent = FakeSpanEvent(name, timestamp ?: 0)

@@ -1,6 +1,9 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.RecordingSdkErrorHandler
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -10,6 +13,18 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
 internal class SpanContextEntrypointTest {
+
+    private val errorHandler = RecordingSdkErrorHandler()
+
+    @BeforeTest
+    fun setUp() {
+        errorHandler.install()
+    }
+
+    @AfterTest
+    fun tearDown() {
+        errorHandler.uninstall()
+    }
 
     private val traceId = "12345678901234567890123456789012"
     private val spanId = "1234567890123456"
@@ -27,6 +42,11 @@ internal class SpanContextEntrypointTest {
         assertTrue(spanContext.traceState.asMap().isEmpty())
         assertFalse(spanContext.isValid)
         assertFalse(spanContext.isRemote)
+    }
+
+    @Test
+    fun `invalid IDs without an action return the shared invalid SpanContext`() {
+        assertSame(createInvalidSpanContext(), createSpanContext(invalidTraceId, spanId = "zz"))
     }
 
     @Test
@@ -205,18 +225,28 @@ internal class SpanContextEntrypointTest {
 
     @Test
     fun testThrowingActionReturnsInvalidSpanContext() {
+        val exc = IllegalStateException("boom")
         val spanContext = createSpanContext(traceId, spanId) {
             isSampled = true
-            error("boom")
+            throw exc
         }
         assertSame(createInvalidSpanContext(), spanContext)
+        errorHandler.assertSingleUserCodeError(exc)
     }
 
     @Test
     fun testThrowingTraceStateActionReturnsInvalidSpanContext() {
+        val exc = IllegalStateException("boom")
         val spanContext = createSpanContext(traceId, spanId) {
-            traceState { error("boom") }
+            traceState { throw exc }
         }
         assertSame(createInvalidSpanContext(), spanContext)
+        errorHandler.assertSingleUserCodeError(exc)
+    }
+
+    @Test
+    fun testValidActionReportsNothing() {
+        createSpanContext(traceId, spanId) { isSampled = true }
+        assertEquals(emptyList(), errorHandler.errors)
     }
 }

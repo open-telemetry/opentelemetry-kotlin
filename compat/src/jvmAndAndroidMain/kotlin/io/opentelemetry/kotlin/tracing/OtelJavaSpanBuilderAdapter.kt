@@ -8,11 +8,10 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpan
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanBuilder
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
-import io.opentelemetry.kotlin.attributes.convertToMap
-import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.attributes.setOtelJavaAttributes
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.context.toOtelKotlinContext
-import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
 import java.util.Queue
@@ -22,10 +21,9 @@ import java.util.concurrent.TimeUnit
 internal class OtelJavaSpanBuilderAdapter(
     private val tracer: Tracer,
     private val spanName: String,
-    private val contextFactory: ContextFactory,
 ) : OtelJavaSpanBuilder {
 
-    private var start: Long? = null
+    private var start: Long = 0
     private var parent: OtelJavaContext? = null
     private var noParent: Boolean = false
     private var kind: OtelJavaSpanKind = OtelJavaSpanKind.INTERNAL
@@ -104,8 +102,8 @@ internal class OtelJavaSpanBuilderAdapter(
 
     override fun startSpan(): OtelJavaSpan {
         val parentContext = when {
-            noParent -> contextFactory.root()
-            else -> parent?.toOtelKotlinContext() ?: contextFactory.current()
+            noParent -> rootContext()
+            else -> parent?.toOtelKotlinContext() ?: currentContext()
         }
         val span = tracer.startSpan(
             name = spanName,
@@ -113,15 +111,15 @@ internal class OtelJavaSpanBuilderAdapter(
             spanKind = kind.toOtelKotlinSpanKind(),
             startTimestamp = start,
             action = {
-                setTypedAttributes(attrs.build().asMap().mapKeys { it.key.key })
+                setOtelJavaAttributes(attrs.build())
                 links.forEach { link ->
                     addLink(link.spanContext.toOtelKotlinSpanContext()) {
-                        setTypedAttributes(link.attributes.convertToMap())
+                        setOtelJavaAttributes(link.attributes)
                     }
                 }
             }
         )
-        return OtelJavaSpanAdapter(span, contextFactory)
+        return OtelJavaSpanAdapter(span)
     }
 
     private class LinkBuilder(

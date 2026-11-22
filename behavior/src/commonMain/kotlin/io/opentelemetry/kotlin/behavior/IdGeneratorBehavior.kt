@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.factory.IdGenerator
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#id-generators
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 sealed class IdGeneratorBehavior : Behavior<IdGeneratorBehavior> {
 
     data object Random : IdGeneratorBehavior()

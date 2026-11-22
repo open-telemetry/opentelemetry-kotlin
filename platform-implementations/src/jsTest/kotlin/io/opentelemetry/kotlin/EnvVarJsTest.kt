@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 internal class EnvVarJsTest {
 
@@ -10,5 +11,10 @@ internal class EnvVarJsTest {
         val env = js("process.env")
         env["OTEL_KOTLIN_TEST_ENV_VAR"] = "42"
         assertEquals("42", getEnvVarValue("OTEL_KOTLIN_TEST_ENV_VAR"))
+    }
+
+    @Test
+    fun testSupportsEnvVarsOnNode() {
+        assertTrue(supportsEnvVars)
     }
 }

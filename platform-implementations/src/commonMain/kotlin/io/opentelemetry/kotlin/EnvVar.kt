@@ -13,3 +13,9 @@ package io.opentelemetry.kotlin
  * because an app's process environment is controlled by the host or tooling rather than the app.
  */
 public expect fun getEnvVarValue(name: String): String?
+
+/**
+ * Whether [getEnvVarValue] reads envars on the platform the SDK is running on. `true` on the JVM,
+ * Linux and Node.js; `false` on Android, Apple, and browser platforms.
+ */
+public expect val supportsEnvVars: Boolean

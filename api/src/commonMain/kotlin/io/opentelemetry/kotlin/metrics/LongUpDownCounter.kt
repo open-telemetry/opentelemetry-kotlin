@@ -24,5 +24,5 @@ public interface LongUpDownCounter : SynchronousInstrument {
      * [value] may be positive, negative, or zero.
      */
     @ThreadSafe
-    public fun add(value: Long, attributes: AttributesMutator.() -> Unit = {})
+    public fun add(value: Long, attributes: (AttributesMutator.() -> Unit)? = null)
 }

@@ -1,8 +1,6 @@
 package io.opentelemetry.kotlin.baggage
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.propagation.utils.isValidBaggageKey
-import io.opentelemetry.kotlin.propagation.utils.isValidBaggageValue
 
 @OptIn(ExperimentalApi::class)
 internal class BaggageImpl private constructor(
@@ -13,11 +11,16 @@ internal class BaggageImpl private constructor(
 
     override fun asMap(): Map<String, BaggageEntry> = entries
 
-    override fun set(name: String, value: String): Baggage =
-        setImpl(name, value, EMPTY_METADATA)
-
-    override fun set(name: String, value: String, metadata: BaggageEntryMetadata): Baggage =
-        setImpl(name, value, metadata)
+    override fun put(name: String, value: String, metadata: String): Baggage {
+        if (entries.size >= MAX_ENTRIES && name !in entries) {
+            return this
+        }
+        val entryMetadata = when {
+            metadata.isEmpty() -> EMPTY_METADATA
+            else -> BaggageEntryMetadataImpl(metadata)
+        }
+        return BaggageImpl(entries + (name to BaggageEntryImpl(value, entryMetadata)))
+    }
 
     override fun remove(name: String): Baggage =
         when (name) {
@@ -38,19 +41,6 @@ internal class BaggageImpl private constructor(
     override fun hashCode(): Int = entries.hashCode()
 
     override fun toString(): String = "BaggageImpl(entries=$entries)"
-
-    private fun setImpl(name: String, value: String, metadata: BaggageEntryMetadata): Baggage {
-        if (!isValidBaggageKey(name)) {
-            return this
-        }
-        if (!isValidBaggageValue(value)) {
-            return this
-        }
-        if (entries.size >= MAX_ENTRIES && name !in entries) {
-            return this
-        }
-        return BaggageImpl(entries + (name to BaggageEntryImpl(value, metadata)))
-    }
 
     companion object {
         const val MAX_ENTRIES = 180

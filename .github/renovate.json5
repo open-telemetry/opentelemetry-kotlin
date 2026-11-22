@@ -4,6 +4,7 @@
     "config:best-practices",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
+  "minimumReleaseAge": "7 days",
   "packageRules": [
     {
       "groupName": "all patch versions",
@@ -12,6 +13,12 @@
     },
     {
       "matchUpdateTypes": ["minor", "major"],
+      "schedule": ["before 8am on Monday"]
+    },
+    {
+      "description": "Raise all GitHub Actions updates as one weekly PR. Must come after the patch group so this groupName wins.",
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions",
       "schedule": ["before 8am on Monday"]
     },
     {
@@ -32,6 +39,16 @@
       ],
       "matchUpdateTypes": ["major", "minor"],
       "enabled": false
+    },
+    {
+      "description": "opentelemetry-bom-alpha versions always end in -alpha, which Renovate treats as unstable and won't bump across minors by default. Allow it, and group it with opentelemetry-bom so the sdk and incubator versions never drift apart. Must come after the patch group so this groupName wins.",
+      "matchManagers": ["gradle"],
+      "matchPackageNames": [
+        "io.opentelemetry:opentelemetry-bom",
+        "io.opentelemetry:opentelemetry-bom-alpha"
+      ],
+      "groupName": "opentelemetry-java",
+      "ignoreUnstable": false
     }
   ],
   "labels": [

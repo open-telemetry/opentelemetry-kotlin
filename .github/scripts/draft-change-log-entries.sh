@@ -13,6 +13,10 @@ fi
 
 echo "## Unreleased"
 echo
+# Replace vX.Y.Z with the specification version this release supports. See
+# https://opentelemetry.io/docs/specs/otel/library-guidelines/#version-labeling
+echo "This release targets version [vX.Y.Z](https://github.com/open-telemetry/opentelemetry-specification/releases/tag/vX.Y.Z) of the OpenTelemetry specification."
+echo
 echo "### Migration notes"
 echo
 echo

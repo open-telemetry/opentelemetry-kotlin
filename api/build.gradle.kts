@@ -4,7 +4,6 @@ plugins {
     id("io.opentelemetry.kotlin.build-logic")
     id("signing")
     id("com.vanniktech.maven.publish")
-    id("org.jetbrains.kotlinx.kover")
 }
 
 kotlin {
@@ -12,7 +11,14 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(project(":error-handling"))
+                implementation(project(":platform-implementations"))
                 implementation(project(":propagation-utils"))
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.kotest.property)
             }
         }
     }

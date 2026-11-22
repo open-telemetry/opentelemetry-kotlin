@@ -1,5 +1,8 @@
 package io.opentelemetry.kotlin.attributes
 
+import io.opentelemetry.kotlin.internal.codePointCount
+import io.opentelemetry.kotlin.internal.takeCodePoints
+
 /**
  * A typed, immutable attribute value. There is one corresponding type per [AttributesMutator]
  * setter except for byte arrays that are implemented as an [AnyValue.BytesValue] inside [Value].
@@ -106,19 +109,13 @@ public sealed class AttributeValue {
     }
 
     /**
-     * An [AnyValue], including byte arrays as [AnyValue.BytesValue].
+     * An [AnyValue], including byte arrays as [AnyValue.BytesValue]. Nested strings and bytes are
+     * truncated too. Nesting deeper than [transform]'s default depth, and containers that contain
+     * themselves, are replaced with [AnyValue.NullValue].
      */
     public class Value(value: AnyValue, lengthLimit: Int = NO_LIMIT) : AttributeValue() {
-        // TODO future: deep-copy and truncate nested values via AnyValue transform.
         @Suppress("MemberNameEqualsClassName") // consistent with every other case's value
-        public val value: AnyValue = when (value) {
-            is AnyValue.StringValue -> when (val truncated = value.value.truncate(lengthLimit)) {
-                value.value -> value
-                else -> AnyValue.StringValue(truncated)
-            }
-            is AnyValue.BytesValue -> AnyValue.BytesValue(value.value.truncatedCopy(lengthLimit))
-            else -> value
-        }
+        public val value: AnyValue = value.transform { leaf -> leaf.truncate(lengthLimit) }
 
         override fun toAny(): Any = value
 
@@ -196,12 +193,24 @@ public sealed class AttributeValue {
 
 private const val NO_LIMIT: Int = -1
 
-private fun String.truncate(limit: Int): String = when (limit) {
-    in indices -> take(limit)
-    else -> this
+/**
+ * Truncates to at most [limit] Unicode code points without splitting a surrogate pair. A string
+ * whose UTF-16 length is within [limit] can't exceed it in code points, so it's returned as-is.
+ */
+private fun String.truncate(limit: Int): String = when {
+    limit !in indices || codePointCount() <= limit -> this
+    else -> takeCodePoints(limit)
 }
 
-private fun ByteArray.truncatedCopy(limit: Int): ByteArray = when (limit) {
-    in indices -> copyOf(limit)
-    else -> copyOf()
+/**
+ * Truncates a string or bytes leaf, returning it unchanged when it's within [limit] so that
+ * [transform] can skip the allocation for strings and make its own copy of bytes.
+ */
+private fun AnyValue.truncate(limit: Int): AnyValue = when {
+    this is AnyValue.StringValue -> when (val truncated = value.truncate(limit)) {
+        value -> this
+        else -> AnyValue.StringValue(truncated)
+    }
+    this is AnyValue.BytesValue && limit in value.indices -> AnyValue.BytesValue(value.copyOf(limit))
+    else -> this
 }

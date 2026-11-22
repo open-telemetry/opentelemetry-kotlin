@@ -225,6 +225,40 @@ internal class W3CTraceContextPropagatorTest {
     }
 
     @Test
+    fun `extract combines multiple tracestate headers in order`() {
+        val state = extractTraceState("foo=1", "bar=2,baz=3")
+        assertEquals(listOf("foo" to "1", "bar" to "2", "baz" to "3"), state.toList())
+    }
+
+    @Test
+    fun `extract keeps the first value of a key repeated across tracestate headers`() {
+        val state = extractTraceState("foo=1", "bar=2", "foo=3")
+        assertEquals(listOf("foo" to "1", "bar" to "2"), state.toList())
+    }
+
+    @Test
+    fun `extract ignores empty tracestate headers among multiple headers`() {
+        val state = extractTraceState("", "foo=1", " ", "bar=2")
+        assertEquals(listOf("foo" to "1", "bar" to "2"), state.toList())
+    }
+
+    @Test
+    fun `extract applies the 32 member limit across multiple tracestate headers`() {
+        val first = (0 until 20).joinToString(",") { "a$it=1" }
+        val second = (0 until 20).joinToString(",") { "b$it=1" }
+        val state = extractTraceState(first, second)
+        assertEquals(32, state.size)
+        assertEquals("1", state["b11"])
+        assertNull(state["b12"])
+    }
+
+    @Test
+    fun `extract attaches an empty TraceState when getAll returns no tracestate headers`() {
+        val state = extractTraceState()
+        assertTrue(state.isEmpty())
+    }
+
+    @Test
     fun `extract attaches a non-recording span on the returned context`() {
         val carrier = mapOf("traceparent" to "00-$traceId-$spanId-01")
         val result = propagator.extract(rootContext(), carrier, MapTextMapGetter)
@@ -290,6 +324,15 @@ internal class W3CTraceContextPropagatorTest {
         val carrier = mutableMapOf<String, String>()
         propagator.inject(context, carrier, MapTextMapSetter)
         return carrier
+    }
+
+    private fun extractTraceState(vararg tracestate: String): Map<String, String> {
+        val carrier = mapOf(
+            "traceparent" to listOf("00-$traceId-$spanId-01"),
+            "tracestate" to tracestate.toList(),
+        )
+        val result = propagator.extract(rootContext(), carrier, MultiValueMapTextMapGetter)
+        return result.extractSpan().spanContext.traceState.asMap()
     }
 
     private object MapTextMapGetter : TextMapGetter<Map<String, String>> {

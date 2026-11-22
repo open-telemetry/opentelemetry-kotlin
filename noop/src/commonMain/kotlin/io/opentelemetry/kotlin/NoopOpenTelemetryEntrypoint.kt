@@ -13,3 +13,13 @@ package io.opentelemetry.kotlin
  */
 @ExperimentalApi
 public val NoopOpenTelemetry: OpenTelemetry = NoopOpenTelemetryImpl
+
+/**
+ * A no-op instance of [OpenTelemetrySdk]. This is the same instance as [NoopOpenTelemetry], typed
+ * as [OpenTelemetrySdk] so that code which owns the SDK can switch between a real and a no-op
+ * implementation and still call [OpenTelemetrySdk.forceFlush] and [OpenTelemetrySdk.shutdown].
+ *
+ * Library authors that only need the API should use [NoopOpenTelemetry] instead.
+ */
+@ExperimentalApi
+public val NoopOpenTelemetrySdk: OpenTelemetrySdk = NoopOpenTelemetryImpl

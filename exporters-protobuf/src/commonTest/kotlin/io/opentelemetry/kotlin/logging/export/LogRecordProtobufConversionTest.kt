@@ -56,7 +56,7 @@ class LogRecordProtobufConversionTest {
         assertEquals(obj.spanContext.traceId, protobuf.trace_id.toByteArray().toHexString())
         assertEquals(obj.spanContext.spanId, protobuf.span_id.toByteArray().toHexString())
         assertEquals(obj.severityText, protobuf.severity_text)
-        assertEquals(obj.severityNumber?.severityNumber, protobuf.severity_number.value)
+        assertEquals(obj.severityNumber?.value, protobuf.severity_number.value)
         assertAttributesMatch(obj.attributes, protobuf.attributes)
     }
 

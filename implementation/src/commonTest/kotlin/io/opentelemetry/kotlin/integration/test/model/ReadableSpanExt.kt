@@ -13,8 +13,8 @@ import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
+import io.opentelemetry.kotlin.tracing.hex
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
-import io.opentelemetry.kotlin.tracing.model.hex
 
 internal fun ReadableSpan.toSerializable(): SerializableSpanData =
     SerializableSpanData(
@@ -28,7 +28,7 @@ internal fun ReadableSpan.toSerializable(): SerializableSpanData =
         events = events.map(SpanEventData::toSerializable),
         links = links.map(SpanLinkData::toSerializable),
         endTimestamp = endTimestamp ?: -1,
-        ended = hasEnded,
+        ended = isEnded,
         totalRecordedEvents = events.size,
         totalRecordedLinks = links.size + droppedLinksCount,
         totalAttributeCount = attributes.size,

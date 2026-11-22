@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaReadWriteSpan
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaReadableSpan
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanData
@@ -18,12 +19,12 @@ import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
 import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
+import io.opentelemetry.kotlin.tracing.data.toOtelJavaEventData
+import io.opentelemetry.kotlin.tracing.data.toOtelJavaLinkData
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaEventData
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaLinkData
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusData
+import io.opentelemetry.kotlin.tracing.toOtelJavaSpanContext
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.AfterTest
@@ -41,7 +42,7 @@ internal class ReadWriteSpanAdapterTest {
     fun setUp() = runTest {
         fakeReadableSpan = FakeOtelJavaReadableSpan(fakeInProgressOtelJavaSpanData)
         fakeImpl = FakeOtelJavaReadWriteSpan(fakeReadableSpan)
-        adapter = ReadWriteSpanAdapter(fakeImpl)
+        adapter = ReadWriteSpanAdapter(fakeImpl, FakeSdkErrorHandler())
         harness = OtelKotlinHarness(testScheduler)
     }
 
@@ -130,7 +131,7 @@ internal class ReadWriteSpanAdapterTest {
     private fun ReadWriteSpanAdapter.assertMutableProperties(expected: OtelJavaSpanData) {
         assertEquals(expected.name, name)
         assertEquals(expected.status, status.toOtelJavaStatusData())
-        assertEquals(expected.hasEnded(), hasEnded)
+        assertEquals(expected.hasEnded(), isEnded)
         assertEquals(expected.endEpochNanos.takeIf { expected.hasEnded() }, endTimestamp)
         assertEquals(expected.attributes.convertToMap(), attributes)
         assertEquals(expected.events, events.map { it.toOtelJavaEventData() })

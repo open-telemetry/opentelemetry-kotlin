@@ -7,7 +7,6 @@ plugins {
     id("io.opentelemetry.kotlin.build-logic")
     id("signing")
     id("com.vanniktech.maven.publish")
-    id("org.jetbrains.kotlinx.kover")
     alias(libs.plugins.download)
     alias(libs.plugins.wire)
 }
@@ -37,8 +36,16 @@ val updateOtelProtoDefinitions = tasks.register<Copy>("updateOtelProtoDefinition
         exclude {
             !it.path.endsWith(".proto")
         }
+        // avoid clashing with identical package name in io.opentelemetry.proto:opentelemetry-proto
+        filter { line ->
+            line.replace(
+                "option java_package = \"io.opentelemetry.proto.",
+                "option java_package = \"io.opentelemetry.kotlin.proto."
+            )
+        }
         includeEmptyDirs = false
     }
+    inputs.property("javaPackagePrefix", "io.opentelemetry.kotlin.proto")
     into(protoResultDir)
 }
 

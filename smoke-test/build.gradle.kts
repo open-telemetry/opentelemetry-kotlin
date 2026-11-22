@@ -8,11 +8,11 @@ kotlin {
     sourceSets {
         commonTest {
             dependencies {
-                implementation(project(":core"))
                 implementation(project(":implementation"))
                 implementation(project(":exporters-otlp"))
                 implementation(project(":exporters-core"))
                 implementation(project(":exporters-protobuf"))
+                implementation(project(":sdk-common"))
                 implementation(project(":test-fakes"))
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.ktor.client.core)

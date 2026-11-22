@@ -1,9 +1,11 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.export.guardExporterCode
 import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
@@ -20,6 +22,7 @@ import kotlinx.coroutines.sync.withLock
 internal class SimpleSpanProcessor(
     private val exporter: SpanExporter,
     private val scope: CoroutineScope,
+    private val sdkErrorHandler: SdkErrorHandler,
 ) : SpanProcessor {
 
     private val exportMutex = Mutex()
@@ -41,7 +44,9 @@ internal class SimpleSpanProcessor(
         shutdownState.execute {
             scope.launch {
                 exportMutex.withLock {
-                    exporter.export(listOf(span))
+                    sdkErrorHandler.guardExporterCode("Span export failed") {
+                        exporter.export(listOf(span))
+                    }
                 }
             }
         }
@@ -52,8 +57,12 @@ internal class SimpleSpanProcessor(
     override fun isOnEndingRequired(): Boolean = false
 
     override suspend fun forceFlush(): OperationResultCode =
-        runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS) { exporter.forceFlush() }
+        runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS) {
+            sdkErrorHandler.guardExporterCode("Exporter forceFlush failed") { exporter.forceFlush() }
+        }
 
     override suspend fun shutdown(): OperationResultCode =
-        shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS, exporter::shutdown)
+        shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS) {
+            sdkErrorHandler.guardExporterCode("Exporter shutdown failed") { exporter.shutdown() }
+        }
 }

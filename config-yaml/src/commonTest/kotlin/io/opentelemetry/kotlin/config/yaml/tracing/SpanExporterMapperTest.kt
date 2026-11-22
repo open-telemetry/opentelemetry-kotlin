@@ -1,20 +1,22 @@
 package io.opentelemetry.kotlin.config.yaml.tracing
 
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
-import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.OtlpHttpSpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
 import io.opentelemetry.kotlin.config.schema.model.OtlpHttpExporter
 import io.opentelemetry.kotlin.config.schema.model.SpanExporter
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class SpanExporterMapperTest {
 
     @Test
-    fun leavesExporterUnsetWhenNoneIsKnown() {
-        assertNull(SpanExporter().toBehavior())
+    fun unsetIfNoMappedFields() {
+        assertEquals(
+            SpanExporterBehavior(),
+            SpanExporter().toBehavior()
+        )
     }
 
     @Test

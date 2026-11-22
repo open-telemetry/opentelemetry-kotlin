@@ -34,9 +34,12 @@ public interface Context {
     public fun <T> get(key: ContextKey<T>): T?
 
     /**
-     * Sets the supplied context as the current context. A [Scope] object
-     * is returned; when the [Scope] is closed the previous context
-     * will be restored.
+     * Sets the supplied context as the current context through the installed
+     * [CurrentContextStorage]. A [Scope] object is returned; when the [Scope] is closed the
+     * previous context will be restored.
+     *
+     * If no [CurrentContextStorage] is installed this is a no-op, and the returned [Scope] does
+     * nothing when detached.
      *
      * Neglecting to close the [Scope] once the 'execution unit' of the context
      * has finished is considered a programming error that will leak resources.

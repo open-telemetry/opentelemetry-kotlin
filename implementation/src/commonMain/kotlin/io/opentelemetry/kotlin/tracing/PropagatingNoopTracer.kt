@@ -1,16 +1,16 @@
 package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.currentContext
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
-import io.opentelemetry.kotlin.factory.ContextFactory
 
 internal class PropagatingNoopTracer(
-    private val contextFactory: ContextFactory,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Tracer {
 
-    private val root = contextFactory.root()
+    private val root = rootContext()
     private val invalidSpanContext = createInvalidSpanContext()
     private val invalidSpan = createNonRecordingSpan(invalidSpanContext)
 
@@ -20,11 +20,11 @@ internal class PropagatingNoopTracer(
         name: String,
         parentContext: Context?,
         spanKind: SpanKind,
-        startTimestamp: Long?,
+        startTimestamp: Long,
         action: (SpanCreationAction.() -> Unit)?
     ): Span =
         sdkErrorHandler.sdkGuardOrDefault(invalidSpan, "Tracer.startSpan failed") {
-            val ctx = parentContext ?: contextFactory.current()
+            val ctx = parentContext ?: currentContext()
             if (ctx == root) {
                 return@sdkGuardOrDefault invalidSpan
             }

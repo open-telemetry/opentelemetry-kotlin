@@ -19,8 +19,8 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.kotlinx.benchmark.runtime)
-                implementation(project(":core"))
                 implementation(project(":implementation"))
+                implementation(project(":sdk-common"))
                 implementation(project(":benchmark-fixtures"))
             }
         }
@@ -29,7 +29,6 @@ kotlin {
                 implementation(project.dependencies.platform(libs.opentelemetry.bom))
                 implementation(libs.opentelemetry.api)
                 implementation(libs.opentelemetry.sdk)
-                implementation(project(":core"))
                 implementation(project(":compat"))
                 implementation(project(":implementation"))
                 implementation(project(":benchmark-fixtures"))

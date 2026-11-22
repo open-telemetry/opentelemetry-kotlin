@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.logging.export
 
+import io.opentelemetry.kotlin.COMPAT_DEFAULT_TIMEOUT_MS
 import io.opentelemetry.kotlin.aliases.OtelJavaCompletableResultCode
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaLogRecordProcessor
@@ -17,6 +18,7 @@ import kotlinx.coroutines.cancel
 internal class OtelJavaLogRecordProcessorAdapter(
     private val impl: LogRecordProcessor,
     private val sdkErrorHandler: SdkErrorHandler,
+    private val timeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS,
 ) : OtelJavaLogRecordProcessor {
 
     private val unsupportedWrites = UnsupportedLogRecordWriteReporter(sdkErrorHandler)
@@ -35,12 +37,12 @@ internal class OtelJavaLogRecordProcessorAdapter(
     }
 
     override fun forceFlush(): OtelJavaCompletableResultCode =
-        scope.launchAsCompletableResultCode(sdkErrorHandler, "LogRecordProcessor.forceFlush") {
+        scope.launchAsCompletableResultCode(sdkErrorHandler, "LogRecordProcessor.forceFlush", timeoutMs) {
             impl.forceFlush()
         }
 
     override fun shutdown(): OtelJavaCompletableResultCode =
-        scope.launchAsCompletableResultCode(sdkErrorHandler, "LogRecordProcessor.shutdown") {
+        scope.launchAsCompletableResultCode(sdkErrorHandler, "LogRecordProcessor.shutdown", timeoutMs) {
             impl.shutdown()
         }.whenComplete { scope.cancel() }
 }

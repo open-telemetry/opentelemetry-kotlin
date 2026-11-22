@@ -1,16 +1,17 @@
 package io.opentelemetry.kotlin.export
 
 import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.compression.ContentEncodingConfig
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.util.collections.ConcurrentMap
 import io.opentelemetry.kotlin.AtomicBoolean
 
 internal data class HttpClientKey(
-    val engine: HttpClientEngine,
+    val engine: HttpClientEngine?,
     val timeoutMs: Long,
 )
 
@@ -33,18 +34,33 @@ internal object HttpClientRegistry {
         val key: HttpClientKey,
         val client: HttpClient,
         var users: Int,
-    )
+        val ownsEngine: Boolean = false,
+    ) {
+        fun close() {
+            try {
+                client.close()
+            } finally {
+                if (ownsEngine) {
+                    key.engine?.close()
+                }
+            }
+        }
+    }
 
     private val clients = ConcurrentMap<HttpClientKey, SharedClient>()
-    private val defaultEngine: HttpClientEngine by lazy { createHttpEngine() }
     private val gate = AtomicBoolean(false)
 
     /**
      * Acquires a reference to an SDK-owned client. The client is closed when the last lease is
-     * released.
+     * released. If [engine] is null the client's SDK-created engine is closed with it. A non-null
+     * [engine] is only closed when [ownsEngine] is true, i.e. the SDK created it.
      */
-    fun lease(engine: HttpClientEngine? = null, requestTimeoutMs: Long): HttpClientLease = withGate {
-        val key = HttpClientKey(engine ?: defaultEngine, requestTimeoutMs)
+    fun lease(
+        engine: HttpClientEngine? = null,
+        requestTimeoutMs: Long,
+        ownsEngine: Boolean = false,
+    ): HttpClientLease = withGate {
+        val key = HttpClientKey(engine, requestTimeoutMs)
         val shared = clients[key]
         if (shared != null) {
             shared.users++
@@ -55,6 +71,7 @@ internal object HttpClientRegistry {
             key = key,
             client = createDefaultHttpClient(requestTimeoutMs, key.engine),
             users = 1,
+            ownsEngine = ownsEngine,
         )
         clients[key] = created
         HttpClientLease(created.client) { release(created) }
@@ -65,7 +82,7 @@ internal object HttpClientRegistry {
      * that inspect the shared-client cache; exporters must use [lease].
      */
     internal fun getOrCreate(engine: HttpClientEngine? = null, requestTimeoutMs: Long): HttpClient = withGate {
-        val key = HttpClientKey(engine ?: defaultEngine, requestTimeoutMs)
+        val key = HttpClientKey(engine, requestTimeoutMs)
         clients[key]?.client ?: SharedClient(
             key = key,
             client = createDefaultHttpClient(requestTimeoutMs, key.engine),
@@ -75,13 +92,16 @@ internal object HttpClientRegistry {
 
     /** Returns a client for test inspection without acquiring an exporter lease. */
     internal fun peek(engine: HttpClientEngine? = null, requestTimeoutMs: Long): HttpClient? = withGate {
-        clients[HttpClientKey(engine ?: defaultEngine, requestTimeoutMs)]?.client
+        clients[HttpClientKey(engine, requestTimeoutMs)]?.client
     }
 
-    /** Closes and removes all SDK-owned clients. Intended for test cleanup. */
+    /**
+     * Closes and removes every registry client and any engine the SDK owns. Caller-supplied
+     * engines stay open. Intended for test cleanup.
+     */
     internal fun clear() {
         val toClose = withGate {
-            val clientsToClose = clients.values.map { it.client }
+            val clientsToClose = clients.values.toList()
             clients.clear()
             clientsToClose
         }
@@ -89,15 +109,15 @@ internal object HttpClientRegistry {
     }
 
     private fun release(shared: SharedClient) {
-        val clientToClose = withGate {
+        val toClose = withGate {
             shared.users--
             if (shared.users > 0 || clients[shared.key] !== shared) {
                 return@withGate null
             }
             clients.remove(shared.key)
-            shared.client
+            shared
         }
-        clientToClose?.close()
+        toClose?.close()
     }
 
     private inline fun <T> withGate(block: () -> T): T {
@@ -114,24 +134,30 @@ internal object HttpClientRegistry {
 
 internal fun createDefaultHttpClient(
     requestTimeoutMs: Long,
-    engine: HttpClientEngine = createHttpEngine(),
-): HttpClient = HttpClient(engine) {
-    install(HttpTimeout) {
-        requestTimeoutMillis = requestTimeoutMs
-    }
-    install(ContentNegotiation)
-    install(ContentEncoding) {
-        mode = ContentEncodingConfig.Mode.All
-        if (supportsHttpCompression) {
-            gzip()
-            deflate()
-        } else {
-            identity()
+    engine: HttpClientEngine? = null,
+): HttpClient {
+    val configure: HttpClientConfig<*>.() -> Unit = {
+        install(HttpTimeout) {
+            requestTimeoutMillis = requestTimeoutMs
         }
+        install(ContentEncoding) {
+            mode = ContentEncodingConfig.Mode.All
+            if (supportsHttpCompression) {
+                gzip()
+                deflate()
+            } else {
+                identity()
+            }
+        }
+    }
+    return if (engine == null) {
+        HttpClient(httpEngineFactory, configure)
+    } else {
+        HttpClient(engine, configure)
     }
 }
 
-internal expect fun createHttpEngine(): HttpClientEngine
+internal expect val httpEngineFactory: HttpClientEngineFactory<*>
 
-// Ktor's gzip/deflate encoders on native targets are a no-op
+// Ktor's gzip/deflate encoders on native and JS targets are a no-op
 internal expect val supportsHttpCompression: Boolean

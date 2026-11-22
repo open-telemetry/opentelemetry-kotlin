@@ -97,7 +97,7 @@ internal class AttributesMutatorImplTest {
         val attrs = AttributesModel(attributeLimit).apply {
             setByteArrayAttribute("bytes", bytes)
         }.attributes
-        val stored = attrs["bytes"] as ByteArray
+        val stored = (attrs["bytes"] as AnyValue.BytesValue).value
         assertTrue(stored.contentEquals(bytes))
     }
 
@@ -108,7 +108,7 @@ internal class AttributesMutatorImplTest {
             setByteArrayAttribute("bytes", bytes)
         }
         bytes[0] = 0x09
-        val stored = model.attributes["bytes"] as ByteArray
+        val stored = (model.attributes["bytes"] as AnyValue.BytesValue).value
         assertTrue(stored.contentEquals(byteArrayOf(0x01, 0x02, 0x03)))
     }
 
@@ -117,17 +117,80 @@ internal class AttributesMutatorImplTest {
         val attrs = AttributesModel(attributeLimit = attributeLimit, attributeValueLengthLimit = 3).apply {
             setByteArrayAttribute("bytes", byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05, 0x06))
         }.attributes
-        val stored = attrs["bytes"] as ByteArray
+        val stored = (attrs["bytes"] as AnyValue.BytesValue).value
         assertTrue(stored.contentEquals(byteArrayOf(0x01, 0x02, 0x03)))
+    }
+
+    @Test
+    fun testStringValueTruncatedWithEmoji() {
+        // Emoji (😀) is a supplementary Unicode character requiring 2 UTF-16 code units
+        // Truncating at 3 UTF-16 code units would split the surrogate pair, creating invalid UTF-8
+        // With Unicode-safe truncation, the emoji is counted as 1 code point
+        val attrs = AttributesModel(attributeLimit, attributeValueLengthLimit = 3).apply {
+            setStringAttribute("key", "abc😀def")
+        }.attributes
+        assertEquals("abc", attrs["key"])
+    }
+
+    @Test
+    fun testStringValueTruncatedBeforeSurrogatePair() {
+        // Truncate right before an emoji, should not split the surrogate pair
+        val attrs = AttributesModel(attributeLimit, attributeValueLengthLimit = 3).apply {
+            setStringAttribute("key", "abc😀")
+        }.attributes
+        assertEquals("abc", attrs["key"])
+    }
+
+    @Test
+    fun testStringValueTruncatedAfterSurrogatePair() {
+        // Truncate after an emoji, should include the complete emoji
+        val attrs = AttributesModel(attributeLimit, attributeValueLengthLimit = 4).apply {
+            setStringAttribute("key", "abc😀def")
+        }.attributes
+        assertEquals("abc😀", attrs["key"])
+    }
+
+    @Test
+    fun testStringListValueTruncatedWithEmoji() {
+        val attrs = AttributesModel(attributeLimit, attributeValueLengthLimit = 4).apply {
+            setStringListAttribute("key", listOf("abc😀def", "xyz"))
+        }.attributes
+        @Suppress("UNCHECKED_CAST")
+        assertEquals(listOf("abc😀", "xyz"), attrs["key"] as List<String>)
+    }
+
+    @Test
+    fun testMixedAsciiAndEmojiTruncated() {
+        val attrs = AttributesModel(attributeLimit, attributeValueLengthLimit = 5).apply {
+            setStringAttribute("key", "ab😀cd")
+        }.attributes
+        assertEquals("ab😀cd", attrs["key"])
+    }
+
+    @Test
+    fun testShorterThanLimitUnchanged() {
+        val attrs = AttributesModel(attributeLimit = attributeLimit, attributeValueLengthLimit = 10).apply {
+            setStringAttribute("key", "ab😀cd")
+        }.attributes
+        assertEquals("ab😀cd", attrs["key"])
+    }
+
+    @Test
+    fun testExactlyAtLimitUnchanged() {
+        // "ab😀c" is 5 code points
+        val attrs = AttributesModel(attributeLimit = attributeLimit, attributeValueLengthLimit = 5).apply {
+            setStringAttribute("key", "ab😀c")
+        }.attributes
+        assertEquals("ab😀c", attrs["key"])
     }
 
     @Test
     fun testByteArrayValueAtLimit() {
         val bytes = byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05)
-        val attrs = AttributesModel(attributeLimit = attributeLimit, attributeValueLengthLimit = 5).apply {
+        val attrs = AttributesModel(attributeLimit, attributeValueLengthLimit = 5).apply {
             setByteArrayAttribute("bytes", bytes)
         }.attributes
-        val stored = attrs["bytes"] as ByteArray
+        val stored = (attrs["bytes"] as AnyValue.BytesValue).value
         assertTrue(stored.contentEquals(bytes))
     }
 
@@ -182,7 +245,7 @@ internal class AttributesMutatorImplTest {
     @Test
     fun testAnyValueStringTruncatedRecursively() {
         val attrs = AttributesModel(
-            attributeLimit = attributeLimit,
+            attributeLimit,
             attributeValueLengthLimit = 3
         ).apply {
             setAnyValueAttribute(
@@ -197,16 +260,16 @@ internal class AttributesMutatorImplTest {
         }.attributes
 
         val map = attrs["map"] as AnyValue.MapValue
-        assertEquals("abc", (map.values["k"] as AnyValue.StringValue).value)
+        assertEquals("abc", (map.value["k"] as AnyValue.StringValue).value)
         val list = attrs["list"] as AnyValue.ListValue
-        assertEquals("abc", (list.values[0] as AnyValue.StringValue).value)
+        assertEquals("abc", (list.value[0] as AnyValue.StringValue).value)
         assertEquals("abc", (attrs["flat"] as AnyValue.StringValue).value)
     }
 
     @Test
     fun testAnyValueBytesTruncatedRecursively() {
         val attrs = AttributesModel(
-            attributeLimit = attributeLimit,
+            attributeLimit,
             attributeValueLengthLimit = 3
         ).apply {
             setAnyValueAttribute(
@@ -223,13 +286,13 @@ internal class AttributesMutatorImplTest {
 
         val flat = (attrs["bytes"] as AnyValue.BytesValue).value
         assertTrue(flat.contentEquals(byteArrayOf(0x01, 0x02, 0x03)))
-        val nested = ((attrs["nested"] as AnyValue.ListValue).values[0] as AnyValue.BytesValue).value
+        val nested = ((attrs["nested"] as AnyValue.ListValue).value[0] as AnyValue.BytesValue).value
         assertTrue(nested.contentEquals(byteArrayOf(0x01, 0x02, 0x03)))
     }
 
     @Test
     fun testAnyValueRespectsAttributeLimit() {
-        val model = AttributesModel(attributeLimit = 1).apply {
+        val model = AttributesModel(1).apply {
             setAnyValueAttribute("first", AnyValue.StringValue("a"))
             setAnyValueAttribute("second", AnyValue.StringValue("b"))
         }
@@ -334,15 +397,15 @@ internal class AttributesMutatorImplTest {
         nestedItems.add(AnyValue.LongValue(2L))
         nested["extra"] = AnyValue.StringValue("x")
 
-        val storedList = (attrs["list"] as AnyValue.ListValue).values
+        val storedList = (attrs["list"] as AnyValue.ListValue).value
         assertEquals(listOf(AnyValue.StringValue("a")), storedList)
         assertTrue((attrs["bytes"] as AnyValue.BytesValue).value.contentEquals(byteArrayOf(1, 2)))
         val storedMap = attrs["map"] as AnyValue.MapValue
         assertEquals(
             listOf(AnyValue.LongValue(1L)),
-            (storedMap.values["list"] as AnyValue.ListValue).values,
+            (storedMap.value["list"] as AnyValue.ListValue).value,
         )
-        assertEquals(null, storedMap.values["extra"])
+        assertEquals(null, storedMap.value["extra"])
     }
 
     @Test
@@ -380,7 +443,7 @@ internal class AttributesMutatorImplTest {
         var observed = storedAnyValue("deep", value)
         var depth = 0
         while (observed is AnyValue.ListValue) {
-            observed = observed.values.single()
+            observed = observed.value.single()
             depth++
         }
         assertEquals(16, depth)
@@ -394,7 +457,7 @@ internal class AttributesMutatorImplTest {
         var observed = storedAnyValue("deep", value)
         var depth = 0
         while (observed is AnyValue.ListValue) {
-            observed = observed.values.single()
+            observed = observed.value.single()
             depth++
         }
         assertEquals(15, depth)
@@ -408,7 +471,7 @@ internal class AttributesMutatorImplTest {
         var observed = storedAnyValue("deep", value)
         var depth = 0
         while (observed is AnyValue.ListValue) {
-            observed = observed.values.single()
+            observed = observed.value.single()
             depth++
         }
         assertEquals(16, depth)
@@ -434,7 +497,7 @@ internal class AttributesMutatorImplTest {
 
     @Test
     fun testNegativeLimitsFallBackToDefaults() {
-        val attrs = AttributesModel(attributeLimit = -1, attributeValueLengthLimit = -1).apply {
+        val attrs = AttributesModel(-1, attributeValueLengthLimit = -1).apply {
             setStringAttribute("key", "abcdef")
             setByteArrayAttribute("bytes", byteArrayOf(1, 2, 3))
         }

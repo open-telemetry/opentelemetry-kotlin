@@ -142,4 +142,173 @@ internal class ResourceDetectionTest {
 
         assertFalse(errorHandler.hasErrors())
     }
+
+    @Test
+    fun testSameSchemaUrlNoConflict() {
+        val detectors = listOf(
+            FakeResourceDetector(
+                name = "host",
+                attributes = mapOf("host.name" to "a"),
+                schemaUrl = "https://example.com/1.0.0"
+            ),
+            FakeResourceDetector(
+                name = "process",
+                attributes = mapOf("process.pid" to "123"),
+                schemaUrl = "https://example.com/1.0.0"
+            ),
+        )
+
+        val resource = detectors.detectResource(factory, errorHandler)
+        assertEquals("https://example.com/1.0.0", resource.schemaUrl)
+        assertFalse(errorHandler.hasErrors())
+    }
+
+    @Test
+    fun testConflictingSchemaUrlsReported() {
+        val detectors = listOf(
+            FakeResourceDetector(
+                name = "host",
+                attributes = mapOf("host.name" to "a"),
+                schemaUrl = "https://example.com/1.0.0"
+            ),
+            FakeResourceDetector(
+                name = "process",
+                attributes = mapOf("process.pid" to "123"),
+                schemaUrl = "https://example.com/2.0.0"
+            ),
+        )
+
+        val resource = detectors.detectResource(factory, errorHandler)
+        // Keeps the last schema URL (process wins)
+        assertEquals("https://example.com/2.0.0", resource.schemaUrl)
+
+        val error = errorHandler.apiMisuses.single()
+        assertEquals("ResourceDetector", error.api)
+        assertTrue(error.message.contains("conflicting schema URL"))
+        assertTrue(error.message.contains("https://example.com/1.0.0"))
+        assertTrue(error.message.contains("https://example.com/2.0.0"))
+        assertTrue(error.message.contains("process"))
+    }
+
+    @Test
+    fun testEmptySchemaUrlNoConflict() {
+        val detectors = listOf(
+            FakeResourceDetector(
+                name = "host",
+                attributes = mapOf("host.name" to "a"),
+                schemaUrl = null
+            ),
+            FakeResourceDetector(
+                name = "process",
+                attributes = mapOf("process.pid" to "123"),
+                schemaUrl = "https://example.com/1.0.0"
+            ),
+        )
+
+        val resource = detectors.detectResource(factory, errorHandler)
+        assertEquals("https://example.com/1.0.0", resource.schemaUrl)
+        assertFalse(errorHandler.hasErrors())
+    }
+
+    @Test
+    fun testNullSchemaUrlNoConflict() {
+        val detectors = listOf(
+            FakeResourceDetector(
+                name = "host",
+                attributes = mapOf("host.name" to "a"),
+                schemaUrl = "https://example.com/1.0.0"
+            ),
+            FakeResourceDetector(
+                name = "process",
+                attributes = mapOf("process.pid" to "123"),
+                schemaUrl = null
+            ),
+        )
+
+        val resource = detectors.detectResource(factory, errorHandler)
+        assertEquals("https://example.com/1.0.0", resource.schemaUrl)
+        assertFalse(errorHandler.hasErrors())
+    }
+
+    @Test
+    fun testBothEmptySchemaUrlsNoConflict() {
+        val detectors = listOf(
+            FakeResourceDetector(
+                name = "host",
+                attributes = mapOf("host.name" to "a"),
+                schemaUrl = null
+            ),
+            FakeResourceDetector(
+                name = "process",
+                attributes = mapOf("process.pid" to "123"),
+                schemaUrl = null
+            ),
+        )
+
+        val resource = detectors.detectResource(factory, errorHandler)
+        assertNull(resource.schemaUrl)
+        assertFalse(errorHandler.hasErrors())
+    }
+
+    @Test
+    fun testEmptyStringSchemaUrlNoConflict() {
+        val detectors = listOf(
+            FakeResourceDetector(
+                name = "host",
+                attributes = mapOf("host.name" to "a"),
+                schemaUrl = ""
+            ),
+            FakeResourceDetector(
+                name = "process",
+                attributes = mapOf("process.pid" to "123"),
+                schemaUrl = "https://example.com/1.0.0"
+            ),
+        )
+
+        val resource = detectors.detectResource(factory, errorHandler)
+        assertEquals("https://example.com/1.0.0", resource.schemaUrl)
+        assertFalse(errorHandler.hasErrors())
+    }
+
+    @Test
+    fun testBothEmptyStringSchemaUrlsNoConflict() {
+        val detectors = listOf(
+            FakeResourceDetector(
+                name = "host",
+                attributes = mapOf("host.name" to "a"),
+                schemaUrl = ""
+            ),
+            FakeResourceDetector(
+                name = "process",
+                attributes = mapOf("process.pid" to "123"),
+                schemaUrl = ""
+            ),
+        )
+
+        val resource = detectors.detectResource(factory, errorHandler)
+        assertEquals("", resource.schemaUrl)
+        assertFalse(errorHandler.hasErrors())
+    }
+
+    @Test
+    fun testConflictingSchemaUrlsWithAttributesMerged() {
+        val detectors = listOf(
+            FakeResourceDetector(
+                name = "host",
+                attributes = mapOf("host.name" to "a"),
+                schemaUrl = "https://example.com/1.0.0"
+            ),
+            FakeResourceDetector(
+                name = "process",
+                attributes = mapOf("process.pid" to "123"),
+                schemaUrl = "https://example.com/2.0.0"
+            ),
+        )
+
+        val resource = detectors.detectResource(factory, errorHandler)
+        // Attributes should still be merged even with conflicting schema URLs
+        assertEquals(mapOf("host.name" to "a", "process.pid" to "123"), resource.attributes)
+        assertEquals("https://example.com/2.0.0", resource.schemaUrl)
+        assertTrue(errorHandler.hasErrors())
+    }
 }

@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.OpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -45,7 +46,7 @@ internal class CompatTracerErrorHandlingTest {
         val otel = createOtel(FakeSpanProcessor())
         val tracer = otel.tracerProvider.getTracer("test")
         val parent = tracer.startSpan("parent")
-        val parentCtx = otel.context.root().storeSpan(parent)
+        val parentCtx = rootContext().storeSpan(parent)
         val span = tracer.startSpan("child", parentContext = parentCtx) { boom() }
 
         assertFalse(span.isRecording())
@@ -108,6 +109,25 @@ internal class CompatTracerErrorHandlingTest {
             errorHandler.userCodeErrors.map { it.message }
         )
         assertTrue(span.isRecording())
+    }
+
+    @Test
+    fun `throwing event and link attribute lambdas in onStart do not abort the processor`() {
+        val processor = FakeSpanProcessor(
+            startAction = { span, _ ->
+                span.addEvent("event") { boom() }
+                span.addLink(span.spanContext) { boom() }
+                span.setStringAttribute("after", "value")
+            }
+        )
+        val span = createOtel(processor).tracerProvider.getTracer("test").startSpan("span")
+
+        assertEquals(
+            listOf("Span.addEvent failed", "Span.addLink failed"),
+            errorHandler.userCodeErrors.map { it.message }
+        )
+        assertEquals(listOf("boom", "boom"), errorHandler.userCodeErrors.map { it.cause.message })
+        assertEquals("value", (span as AttributeContainer).attributes["after"])
     }
 
     @Test

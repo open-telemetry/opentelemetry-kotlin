@@ -2,14 +2,13 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
-import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.init.config.DefaultSampler
@@ -18,6 +17,7 @@ import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.resource.ResourceImpl
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
+import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -45,7 +45,6 @@ internal class TracerProviderImplTest {
         impl = TracerProviderImpl(
             clock = FakeClock(),
             tracingConfig = tracingConfig,
-            contextFactory = FakeContextFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
             spanLimits = SpanLimitsBehavior(),
@@ -68,7 +67,6 @@ internal class TracerProviderImplTest {
         val provider = TracerProviderImpl(
             clock = FakeClock(),
             tracingConfig = config,
-            contextFactory = FakeContextFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
             spanLimits = SpanLimitsBehavior(),
@@ -181,7 +179,6 @@ internal class TracerProviderImplTest {
         val provider = TracerProviderImpl(
             clock = FakeClock(),
             tracingConfig = config,
-            contextFactory = FakeContextFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
             spanLimits = SpanLimitsBehavior(),
@@ -210,7 +207,6 @@ internal class TracerProviderImplTest {
         val provider = TracerProviderImpl(
             clock = FakeClock(),
             tracingConfig = config,
-            contextFactory = FakeContextFactory(),
             idGenerator = FakeIdGenerator(),
             attributeLimits = AttributeLimitsBehavior(),
             spanLimits = SpanLimitsBehavior(),
@@ -284,6 +280,19 @@ internal class TracerProviderImplTest {
     }
 
     @Test
+    fun testInvalidProbabilityFallsBackToDefaultSampler() {
+        listOf(-0.1, 1.5, Double.NaN).forEach { ratio ->
+            val errorHandler = FakeSdkErrorHandler()
+            val provider = createProvider(errorHandler = errorHandler, samplerFactory = {
+                SamplerConfigImpl().probability(ratio)
+            })
+
+            assertTrue(provider.getTracer(name = "test").startSpan("test-span").isRecording())
+            assertIs<IllegalArgumentException>(errorHandler.userCodeErrors.single().cause)
+        }
+    }
+
+    @Test
     fun testThrowingErrorHandlerDoesNotEscapeForceFlush() = runTest {
         val provider = createProvider(
             processor = FakeSpanProcessor(flushCode = { error("boom") }),
@@ -305,6 +314,70 @@ internal class TracerProviderImplTest {
         assertEquals(OperationResultCode.Failure, provider.shutdown())
     }
 
+    @Test
+    fun testShutdownShutsDownSamplerAfterProcessor() = runTest {
+        val order = mutableListOf<String>()
+        val sampler = FakeSampler(shutdownCode = {
+            order += "sampler"
+            OperationResultCode.Success
+        })
+        val provider = createProvider(
+            processor = FakeSpanProcessor(shutdownCode = {
+                order += "processor"
+                OperationResultCode.Success
+            }),
+            samplerFactory = { sampler },
+        )
+
+        assertEquals(OperationResultCode.Success, provider.shutdown())
+        assertEquals(listOf("processor", "sampler"), order)
+    }
+
+    @Test
+    fun testShutdownShutsDownSamplerOnlyOnce() = runTest {
+        val sampler = FakeSampler()
+        val provider = createProvider(samplerFactory = { sampler })
+
+        provider.shutdown()
+        provider.shutdown()
+        assertEquals(1, sampler.shutdownCount)
+    }
+
+    @Test
+    fun testForceFlushDoesNotShutDownSampler() = runTest {
+        val sampler = FakeSampler()
+        val provider = createProvider(samplerFactory = { sampler })
+
+        assertEquals(OperationResultCode.Success, provider.forceFlush())
+        assertEquals(0, sampler.shutdownCount)
+    }
+
+    @Test
+    fun testSamplerShutdownFailureIsReturned() = runTest {
+        val sampler = FakeSampler(shutdownCode = { OperationResultCode.Failure })
+        val provider = createProvider(samplerFactory = { sampler })
+
+        assertEquals(OperationResultCode.Failure, provider.shutdown())
+    }
+
+    @Test
+    fun testThrowingSamplerShutdownIsReported() = runTest {
+        var processorShutdown = false
+        val errorHandler = FakeSdkErrorHandler()
+        val provider = createProvider(
+            processor = FakeSpanProcessor(shutdownCode = {
+                processorShutdown = true
+                OperationResultCode.Success
+            }),
+            errorHandler = errorHandler,
+            samplerFactory = { FakeSampler(shutdownCode = { error("boom") }) },
+        )
+
+        assertEquals(OperationResultCode.Failure, provider.shutdown())
+        assertTrue(processorShutdown)
+        assertEquals("boom", errorHandler.userCodeErrors.single().cause.message)
+    }
+
     private fun createProvider(
         processor: SpanProcessor? = FakeSpanProcessor(),
         errorHandler: SdkErrorHandler = NoopSdkErrorHandler,
@@ -317,7 +390,6 @@ internal class TracerProviderImplTest {
             errorHandler,
             samplerFactory = samplerFactory,
         ),
-        contextFactory = FakeContextFactory(),
         idGenerator = FakeIdGenerator(),
         attributeLimits = AttributeLimitsBehavior(),
         spanLimits = SpanLimitsBehavior(),

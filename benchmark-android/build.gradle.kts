@@ -31,6 +31,7 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_11)
+        optIn.add("io.opentelemetry.kotlin.ExperimentalApi")
     }
 }
 
@@ -41,7 +42,6 @@ dependencies {
     androidTestImplementation(project.dependencies.platform(libs.opentelemetry.bom))
     androidTestImplementation(libs.opentelemetry.api)
     androidTestImplementation(libs.opentelemetry.sdk)
-    androidTestImplementation(project(":core"))
     androidTestImplementation(project(":compat"))
     androidTestImplementation(project(":implementation"))
     androidTestImplementation(project(":benchmark-fixtures"))

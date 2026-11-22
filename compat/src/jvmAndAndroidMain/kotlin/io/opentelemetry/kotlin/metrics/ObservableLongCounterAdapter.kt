@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.aliases.OtelJavaMeter
 import io.opentelemetry.kotlin.aliases.OtelJavaObservableLongCounter
@@ -8,7 +9,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 @ThreadSafe
 internal class ObservableLongCounterAdapter(
     private val impl: OtelJavaMeter,
@@ -22,6 +23,15 @@ internal class ObservableLongCounterAdapter(
     private val lock = Any()
     private val callbackHandles = mutableSetOf<OtelJavaObservableLongCounter>()
     private var closed = false
+
+    override val measurement: ObservableLongMeasurement by lazy {
+        sdkErrorHandler.sdkGuardOrDefault(null, "ObservableLongCounter.measurement failed") {
+            val builder = impl.counterBuilder(name)
+            unit?.let(builder::setUnit)
+            description?.let(builder::setDescription)
+            ObservableLongMeasurementAdapter(builder.buildObserver(), sdkErrorHandler)
+        } ?: NoopOpenTelemetry.meterProvider.getMeter("").createObservableLongCounter(name).measurement
+    }
 
     init {
         callbacks.forEach { registerCallback(it) }

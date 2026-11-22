@@ -6,7 +6,6 @@ plugins {
     id("io.opentelemetry.kotlin.build-logic")
     id("signing")
     id("com.vanniktech.maven.publish")
-    id("org.jetbrains.kotlinx.kover")
     alias(libs.plugins.buildKonfig)
 }
 

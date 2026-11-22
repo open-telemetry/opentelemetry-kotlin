@@ -6,8 +6,12 @@ import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 
 internal fun TraceState.toOtelJavaTraceState(): OtelJavaTraceState {
     return OtelJavaTraceState.builder().apply {
-        asMap().entries.reversed().forEach { // reverse to preserve original order
-            put(it.key, it.value)
+        try {
+            asMap().entries.reversed().forEach { // reverse to preserve original order
+                put(it.key, it.value)
+            }
+        } catch (exc: Throwable) {
+            // Silently ignore errors from custom TraceState implementations
         }
     }.build()
 }

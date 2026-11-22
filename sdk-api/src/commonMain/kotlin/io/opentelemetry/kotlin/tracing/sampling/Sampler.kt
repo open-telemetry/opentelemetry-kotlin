@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 
@@ -38,4 +39,15 @@ public interface Sampler {
      * The name of the sampler or a short description that may be displayed in debug pages/logs.
      */
     public val description: String
+
+    /**
+     * Releases any resources held by the sampler. Called when the
+     * [io.opentelemetry.kotlin.tracing.TracerProvider] is shut down. Samplers that delegate to other
+     * samplers should forward this call to each delegate.
+     *
+     * The default implementation does nothing.
+     *
+     * https://opentelemetry.io/docs/specs/otel/trace/sdk/#sampler
+     */
+    public suspend fun shutdown(): OperationResultCode = OperationResultCode.Success
 }

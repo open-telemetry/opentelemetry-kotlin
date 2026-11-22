@@ -8,6 +8,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNotSame
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 internal class ResourceFactoryImplTest {
@@ -66,6 +67,20 @@ internal class ResourceFactoryImplTest {
             (0 until count).forEach { setStringAttribute("key$it", "value$it") }
         }
         assertEquals(count, resource.attributes.size)
+    }
+
+    @Test
+    fun testCreateUserCodeThrowsReturnsEmpty() {
+        val exception = IllegalStateException("boom")
+        val resource = factory.create(schemaUrl = "https://example.com/schema") {
+            setStringAttribute("key", "value")
+            throw exception
+        }
+
+        assertSame(factory.empty, resource)
+        val error = errors.userCodeErrors.single()
+        assertEquals(exception, error.cause)
+        assertEquals("ResourceFactory.create failed", error.message)
     }
 
     @Test

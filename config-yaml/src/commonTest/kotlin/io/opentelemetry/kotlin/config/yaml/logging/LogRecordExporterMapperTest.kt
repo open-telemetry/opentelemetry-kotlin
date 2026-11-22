@@ -1,14 +1,13 @@
 package io.opentelemetry.kotlin.config.yaml.logging
 
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.LogRecordExporterBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.OtlpHttpLogsExporterBehavior
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
 import io.opentelemetry.kotlin.config.schema.model.LogRecordExporter
 import io.opentelemetry.kotlin.config.schema.model.OtlpHttpExporter
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class LogRecordExporterMapperTest {
     @Test
@@ -32,11 +31,10 @@ internal class LogRecordExporterMapperTest {
             ),
             exporter.toBehavior(),
         )
-        assertNull(LogRecordExporter().toBehavior())
     }
 
     @Test
     fun unsetIfNoMappedFields() {
-        assertNull(LogRecordExporter().toBehavior())
+        assertEquals(LogRecordExporterBehavior(), LogRecordExporter().toBehavior())
     }
 }

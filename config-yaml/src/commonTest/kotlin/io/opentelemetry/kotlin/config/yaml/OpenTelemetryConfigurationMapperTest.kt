@@ -2,15 +2,17 @@ package io.opentelemetry.kotlin.config.yaml
 
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
-import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
-import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
-import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SeverityLevel
-import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
-import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.toSeverityLevel
+import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.schema.model.AlwaysOffSampler
 import io.opentelemetry.kotlin.config.schema.model.IdGenerator
 import io.opentelemetry.kotlin.config.schema.model.OpenTelemetryConfiguration
@@ -19,10 +21,12 @@ import io.opentelemetry.kotlin.config.schema.model.Sampler
 import io.opentelemetry.kotlin.config.schema.model.SeverityNumber
 import io.opentelemetry.kotlin.config.schema.model.SpanLimits
 import io.opentelemetry.kotlin.config.schema.model.TracerProvider
+import io.opentelemetry.kotlin.config.yaml.tracing.toBehavior
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.framework.loadTestFixture
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 internal class OpenTelemetryConfigurationMapperTest {
 
@@ -48,12 +52,14 @@ internal class OpenTelemetryConfigurationMapperTest {
                 ),
             ),
             tracerProvider = TracerProviderBehavior(
+                processor = SpanProcessorBehavior(),
                 spanLimits = SpanLimitsBehavior(
                     attributeCountLimit = 128,
                     eventCountLimit = 64,
                 ),
             ),
             loggerProvider = LoggerProviderBehavior(
+                processor = LogRecordProcessorBehavior(),
                 logLimits = LogLimitsBehavior(
                     attributeCountLimit = 64,
                     attributeValueLengthLimit = 256,
@@ -71,30 +77,25 @@ internal class OpenTelemetryConfigurationMapperTest {
 
     @Test
     fun leavesLimitsTheSpecDisallowsUnset() {
-        val behavior = OpenTelemetryConfiguration(
-            fileFormat = FILE_FORMAT,
-            tracerProvider = TracerProvider(
-                processors = emptyList(),
-                limits = SpanLimits(attributeCountLimit = -1),
-            ),
-        ).toBehavior()
-
-        assertEquals(SpanLimitsBehavior(), behavior.tracerProvider?.spanLimits)
-        assertNull(behavior.tracerProvider?.processor)
+        val config = SpanLimits(attributeCountLimit = -1)
+        assertEquals(
+            SpanLimitsBehavior(),
+            config.toBehavior()
+        )
     }
 
     @Test
     fun mapsTracerProviderSampler() {
-        val config = OpenTelemetryConfiguration(
-            fileFormat = FILE_FORMAT,
-            tracerProvider = TracerProvider(
-                processors = emptyList(),
-                sampler = Sampler(alwaysOff = AlwaysOffSampler()),
-            )
+        val config = TracerProvider(
+            processors = emptyList(),
+            sampler = Sampler(alwaysOff = AlwaysOffSampler()),
         )
         assertEquals(
-            TracerProviderBehavior(sampler = SamplerBehavior.AlwaysOff),
-            config.toBehavior().tracerProvider
+            TracerProviderBehavior(
+                processor = SpanProcessorBehavior(),
+                sampler = SamplerBehavior.AlwaysOff,
+            ),
+            config.toBehavior()
         )
     }
 
@@ -128,6 +129,31 @@ internal class OpenTelemetryConfigurationMapperTest {
         SeverityNumber.entries.forEach {
             assertEquals(it.name, it.toString().toSeverityLevel()?.name)
         }
+    }
+
+    @Test
+    fun sdkErrorHandlerReceivesWarningForMalformedAttributesList() {
+        val handler = FakeSdkErrorHandler()
+        val config = OpenTelemetryConfiguration(
+            fileFormat = FILE_FORMAT,
+            resource = io.opentelemetry.kotlin.config.schema.model.Resource(attributesList = "bad-entry-no-equals"),
+        )
+        config.toBehavior(handler)
+
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals("resource.attributes_list", handler.apiMisuses.single().api)
+    }
+
+    @Test
+    fun noErrorWhenResourceAttributesAreValid() {
+        val handler = FakeSdkErrorHandler()
+        val config = OpenTelemetryConfiguration(
+            fileFormat = FILE_FORMAT,
+            resource = io.opentelemetry.kotlin.config.schema.model.Resource(attributesList = "k=v"),
+        )
+        config.toBehavior(handler)
+
+        assertTrue(handler.errors.isEmpty())
     }
 
     private companion object {

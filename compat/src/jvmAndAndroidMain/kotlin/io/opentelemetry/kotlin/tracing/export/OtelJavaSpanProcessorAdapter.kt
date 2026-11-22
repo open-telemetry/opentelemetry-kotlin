@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.tracing.export
 
+import io.opentelemetry.kotlin.COMPAT_DEFAULT_TIMEOUT_MS
 import io.opentelemetry.kotlin.aliases.OtelJavaCompletableResultCode
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaExtendedSpanProcessor
@@ -23,6 +24,7 @@ import kotlinx.coroutines.cancel
 internal class OtelJavaSpanProcessorAdapter(
     private val impl: SpanProcessor,
     private val sdkErrorHandler: SdkErrorHandler,
+    private val timeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS,
 ) : OtelJavaSpanProcessor, OtelJavaExtendedSpanProcessor {
 
     private val scope by lazy {
@@ -31,7 +33,7 @@ internal class OtelJavaSpanProcessorAdapter(
 
     override fun onStart(parentContext: OtelJavaContext, span: OtelJavaReadWriteSpan) {
         sdkErrorHandler.guard("SpanProcessor.onStart failed") {
-            impl.onStart(ReadWriteSpanAdapter(span), parentContext.toOtelKotlinContext())
+            impl.onStart(ReadWriteSpanAdapter(span, sdkErrorHandler), parentContext.toOtelKotlinContext())
         }
     }
 
@@ -43,7 +45,7 @@ internal class OtelJavaSpanProcessorAdapter(
 
     override fun onEnding(span: ReadWriteSpan) {
         sdkErrorHandler.guard("SpanProcessor.onEnding failed") {
-            impl.onEnding(ReadWriteSpanAdapter(span))
+            impl.onEnding(ReadWriteSpanAdapter(span, sdkErrorHandler))
         }
     }
 
@@ -57,12 +59,12 @@ internal class OtelJavaSpanProcessorAdapter(
         sdkErrorHandler.guardOrDefault(true, "SpanProcessor.isOnEndingRequired failed") { impl.isOnEndingRequired() }
 
     override fun forceFlush(): OtelJavaCompletableResultCode =
-        scope.launchAsCompletableResultCode(sdkErrorHandler, "SpanProcessor.forceFlush") {
+        scope.launchAsCompletableResultCode(sdkErrorHandler, "SpanProcessor.forceFlush", timeoutMs) {
             impl.forceFlush()
         }
 
     override fun shutdown(): OtelJavaCompletableResultCode =
-        scope.launchAsCompletableResultCode(sdkErrorHandler, "SpanProcessor.shutdown") {
+        scope.launchAsCompletableResultCode(sdkErrorHandler, "SpanProcessor.shutdown", timeoutMs) {
             impl.shutdown()
         }.whenComplete { scope.cancel() }
 }

@@ -10,18 +10,18 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanContext
 import io.opentelemetry.kotlin.aliases.OtelJavaValue
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.getOtelJavaAttribute
-import io.opentelemetry.kotlin.attributes.setTypedAttribute
+import io.opentelemetry.kotlin.attributes.setOtelJavaAttribute
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import io.opentelemetry.kotlin.logging.toOtelJavaSeverityNumber
 import io.opentelemetry.kotlin.scope.toOtelJavaInstrumentationScopeInfo
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
+import io.opentelemetry.kotlin.tracing.toOtelJavaSpanContext
 
 internal class OtelJavaReadWriteLogRecordAdapter(
     private val log: ReadWriteLogRecord
 ) : OtelJavaReadWriteLogRecord {
 
     override fun <T> setAttribute(key: OtelJavaAttributeKey<T>, value: T?): OtelJavaReadWriteLogRecord {
-        value?.let { log.setTypedAttribute(key.key, it) }
+        value?.let { log.setOtelJavaAttribute(key, it) }
         return this
     }
 

@@ -6,9 +6,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.fakes.otel.java.FakeOtelJavaSpanProcessor
-import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,8 +19,6 @@ internal class TracerProviderAdapterTest {
 
     private val adapter = TracerProviderAdapter(
         OtelJavaSdkTracerProvider.builder().build(),
-        CompatSpanLimitsConfig(),
-        CompatContextFactory(),
         NoopSdkErrorHandler,
     )
 
@@ -59,8 +55,6 @@ internal class TracerProviderAdapterTest {
     fun testForceFlushAndShutdownFailForNonSdkProvider() = runTest {
         val adapter = TracerProviderAdapter(
             OtelJavaOpenTelemetry.noop().tracerProvider,
-            CompatSpanLimitsConfig(),
-            CompatContextFactory(),
             NoopSdkErrorHandler,
         )
 
@@ -76,8 +70,6 @@ internal class TracerProviderAdapterTest {
             .build()
         val adapter = TracerProviderAdapter(
             provider,
-            CompatSpanLimitsConfig(),
-            CompatContextFactory(),
             NoopSdkErrorHandler,
         )
 
@@ -94,8 +86,6 @@ internal class TracerProviderAdapterTest {
         val errorHandler = FakeSdkErrorHandler()
         val adapter = TracerProviderAdapter(
             OtelJavaSdkTracerProvider.builder().addSpanProcessor(processor).build(),
-            CompatSpanLimitsConfig(),
-            CompatContextFactory(),
             errorHandler,
         )
 
@@ -114,8 +104,6 @@ internal class TracerProviderAdapterTest {
         val errorHandler = FakeSdkErrorHandler()
         val adapter = TracerProviderAdapter(
             OtelJavaSdkTracerProvider.builder().addSpanProcessor(processor).build(),
-            CompatSpanLimitsConfig(),
-            CompatContextFactory(),
             errorHandler,
         )
 

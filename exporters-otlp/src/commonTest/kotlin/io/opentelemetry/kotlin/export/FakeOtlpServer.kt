@@ -11,10 +11,10 @@ import io.ktor.http.headersOf
 import io.ktor.util.GZipEncoder
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.toByteArray
-import io.opentelemetry.proto.collector.logs.v1.ExportLogsPartialSuccess
-import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse
-import io.opentelemetry.proto.collector.trace.v1.ExportTracePartialSuccess
-import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse
+import io.opentelemetry.kotlin.proto.collector.logs.v1.ExportLogsPartialSuccess
+import io.opentelemetry.kotlin.proto.collector.logs.v1.ExportLogsServiceResponse
+import io.opentelemetry.kotlin.proto.collector.trace.v1.ExportTracePartialSuccess
+import io.opentelemetry.kotlin.proto.collector.trace.v1.ExportTraceServiceResponse
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext

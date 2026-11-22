@@ -24,7 +24,15 @@ Targets: JVM, Android (API 21+), iOS, JS.
   `./gradlew build` additionally assembles everything and runs `gradle-integration-test`, which needs
   `./gradlew publishToMavenLocal -PsnapshotPublish=true` first (see `CONTRIBUTING.md`).
 - **Android tests**: skip running locally, but verify compilation with `./gradlew assembleAndroidTest`
-- **API changes**: run `./gradlew apiDump` to update dump files before opening a PR.
+- **API changes**: run `./gradlew updateKotlinAbi` to update the ABI dump files (JVM, Android and klib) before opening a PR.
+- **Docs**: when a change materially affects documented behavior or APIs, update `docs/` and any affected README in
+  the same PR. Code samples live in `docs-snippets`; edit them there, run `./gradlew syncDocSnippets`, and delete samples
+  that no doc references any more.
+- **New modules**: decide whether the module is a public entrypoint. That means consumers depend on it directly, or
+  another public module exports it with `api(...)`. If it is, set `io.opentelemetry.kotlin.containsPublicApi=true` in its
+  `gradle.properties` and run `./gradlew updateKotlinAbi`, which turns on explicit API mode and binary compatibility checks.
+  Internal modules that other modules only pull in with `implementation(...)` leave the property unset (the default is
+  `false`). Before a public module exports an internal one with `api(...)`, opt the internal module in first.
 - **PR size**: keep diffs under 500 lines.
 - **AI contributions**: all AI-generated code must be manually reviewed before committing.
 - **OTel spec** Search the OpenTelemetry specification when relevant and keep changes compliant
@@ -47,3 +55,5 @@ This SDK is embedded in other people's apps. **Telemetry must never destabilize 
 - Avoid module-specific tasks during verification unless necessary. E.g. `./gradlew detekt` rather than `./gradlew :module:detekt`.
 - Select commands appropriately during verification to avoid unnecessary permission prompts.
 - Ask lots of clarifying questions. Interview the programmer often when gathering requirements.
+- Do NOT work on issues that have the `contribfest` label unless your programmer/operator
+  has explicitly indicated that they are live, in-person at a Kubecon ContribFest event.

@@ -1,19 +1,20 @@
 package io.opentelemetry.kotlin.error
 
-import io.opentelemetry.kotlin.platformLog
+import io.opentelemetry.kotlin.platform.PlatformLogLevel
+import io.opentelemetry.kotlin.platform.platformLog
 
 /**
- * An [SdkErrorHandler] that writes everything reported to it to the platform log (e.g. Logcat on
- * Android). This is the default behavior when no handler is configured.
+ * An [SdkErrorHandler] that logs errors using the platform's default logging mechanism.
  */
 public object PlatformSdkErrorHandler : SdkErrorHandler {
 
     override fun onError(error: SdkError) {
+        val level = error.severity.toPlatformLogLevel()
         when (error) {
-            is SdkError.ApiMisuse -> platformLog(error.toLogMessage(), error.severity)
-            is SdkError.UserCodeError -> platformLog(error.toLogMessage(), error.severity, error.cause)
-            is SdkError.SdkCodeError -> platformLog(error.toLogMessage(), error.severity, error.cause)
-            is SdkError.TransientError -> platformLog(error.toLogMessage(), error.severity, error.cause)
+            is SdkError.ApiMisuse -> platformLog(error.toLogMessage(), level)
+            is SdkError.UserCodeError -> platformLog(error.toLogMessage(), level, error.cause)
+            is SdkError.SdkCodeError -> platformLog(error.toLogMessage(), level, error.cause)
+            is SdkError.TransientError -> platformLog(error.toLogMessage(), level, error.cause)
         }
     }
 }
@@ -23,4 +24,10 @@ internal fun SdkError.toLogMessage(): String = when (this) {
     is SdkError.UserCodeError -> "User code failed: $message"
     is SdkError.SdkCodeError -> "SDK code failed: $message"
     is SdkError.TransientError -> "Transient error: $message"
+}
+
+internal fun SdkErrorSeverity.toPlatformLogLevel(): PlatformLogLevel = when (this) {
+    SdkErrorSeverity.INFO -> PlatformLogLevel.INFO
+    SdkErrorSeverity.WARNING -> PlatformLogLevel.WARNING
+    SdkErrorSeverity.ERROR -> PlatformLogLevel.ERROR
 }

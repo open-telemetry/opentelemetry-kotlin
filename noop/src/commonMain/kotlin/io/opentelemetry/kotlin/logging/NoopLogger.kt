@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.context.Context
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal object NoopLogger : Logger {
     override fun enabled(
         context: Context?,
@@ -15,8 +15,8 @@ internal object NoopLogger : Logger {
     override fun emit(
         body: Any?,
         eventName: String?,
-        timestamp: Long?,
-        observedTimestamp: Long?,
+        timestamp: Long,
+        observedTimestamp: Long,
         context: Context?,
         severityNumber: SeverityNumber?,
         severityText: String?,

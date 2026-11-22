@@ -3,50 +3,47 @@
 package io.opentelemetry.example.app
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.factory.ContextFactory
+import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.logging.Logger
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.semconv.DbAttributes
 import io.opentelemetry.kotlin.semconv.ErrorAttributes
+import io.opentelemetry.kotlin.semconv.ExceptionAttributes
 import io.opentelemetry.kotlin.semconv.HttpAttributes
 import io.opentelemetry.kotlin.semconv.IncubatingApi
 import io.opentelemetry.kotlin.semconv.UrlAttributes
 import io.opentelemetry.kotlin.semconv.UserAttributes
 import io.opentelemetry.kotlin.tracing.Tracer
 import io.opentelemetry.kotlin.tracing.SpanKind
-import kotlinx.coroutines.delay
 
 /**
  * Runs platform-independent examples demonstrating how to use opentelemetry-kotlin's API.
+ * Telemetry is exported to [url] via OTLP/HTTP if set, otherwise it is printed to stdout.
  */
-suspend fun runAllExamples(platform: String) {
+suspend fun runAllExamples(platform: String, url: String? = AppConfig.url) {
     println("=== OpenTelemetry Kotlin Example ($platform) ===")
     println()
-    if (AppConfig.url != null) {
-        println("Telemetry will be exported to: ${AppConfig.url}")
+    if (url != null) {
+        println("Telemetry will be exported to: $url")
     } else {
         println("Telemetry will be printed to stdout.")
     }
     println()
 
-    val otel = initializeOtelSdk()
+    val otel = initializeOtelSdk(url)
     val tracer = otel.tracerProvider.getTracer(AppConfig.APP_NAME)
     val logger = otel.loggerProvider.getLogger(AppConfig.APP_NAME)
 
     demonstrateBasicSpan(tracer)
     demonstrateComplexSpan(tracer)
-    demonstrateSpanNesting(tracer, otel.context)
+    demonstrateSpanNesting(tracer)
     demonstrateBasicLogging(logger)
     demonstrateComplexLogging(logger)
 
     // flush all pending telemetry before terminating
-    AppConfig.forceFlush()
+    otel.forceFlush()
 
-    // give HTTP client time to complete requests before process exits.
-    // in future the SDK needs to be updated to handle this automatically.
-    delay(500)
-
-    AppConfig.shutdown()
+    otel.shutdown()
 }
 
 /**
@@ -89,14 +86,14 @@ private fun demonstrateComplexSpan(tracer: Tracer) {
 /**
  * Creates nested spans that represent parent-child relationships.
  */
-private fun demonstrateSpanNesting(tracer: Tracer, contextFactory: ContextFactory) {
+private fun demonstrateSpanNesting(tracer: Tracer) {
     val parentSpan = tracer.startSpan(
         "parent-operation",
         null,
         SpanKind.INTERNAL,
-        null
+        0
     ) { setStringAttribute("operation.type", "database-transaction") }
-    val parentContext = contextFactory.current().storeSpan(parentSpan)
+    val parentContext = currentContext().storeSpan(parentSpan)
 
     // Create first child span (database query)
     val childSpan1 =
@@ -116,7 +113,7 @@ private fun demonstrateSpanNesting(tracer: Tracer, contextFactory: ContextFactor
         "cache-lookup",
         parentContext,
         SpanKind.INTERNAL,
-        null
+        0
     ) { setStringAttribute("cache.type", "redis") }
     childSpan2.end()
 
@@ -161,7 +158,7 @@ private fun demonstrateComplexLogging(logger: Logger) {
         severityText = "ERROR",
         attributes = {
             setStringAttribute(ErrorAttributes.ERROR_TYPE, "DatabaseConnectionError")
-            setStringAttribute(ErrorAttributes.ERROR_MESSAGE, "Connection timeout after 30s")
+            setStringAttribute(ExceptionAttributes.EXCEPTION_MESSAGE, "Connection timeout after 30s")
             setStringAttribute("db.host", "db.example.com")
         })
 }

@@ -1,0 +1,9 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, tvosArm64, tvosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <opentelemetry-kotlin.instrumentation:instrumentation-ktor-client>
+final fun io.opentelemetry.kotlin.instrumentation.ktor.client/openTelemetryKtorClientPlugin(io.opentelemetry.kotlin/OpenTelemetry): io.ktor.client.plugins.api/ClientPlugin<kotlin/Unit> // io.opentelemetry.kotlin.instrumentation.ktor.client/openTelemetryKtorClientPlugin|openTelemetryKtorClientPlugin(io.opentelemetry.kotlin.OpenTelemetry){}[0]

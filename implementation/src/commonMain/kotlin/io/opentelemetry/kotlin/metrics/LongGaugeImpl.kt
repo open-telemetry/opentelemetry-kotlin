@@ -8,5 +8,5 @@ internal class LongGaugeImpl(
     override val description: String?,
 ) : LongGauge {
     override fun enabled(): Boolean = true
-    override fun record(value: Long, attributes: AttributesMutator.() -> Unit) = Unit
+    override fun record(value: Long, attributes: (AttributesMutator.() -> Unit)?) = Unit
 }

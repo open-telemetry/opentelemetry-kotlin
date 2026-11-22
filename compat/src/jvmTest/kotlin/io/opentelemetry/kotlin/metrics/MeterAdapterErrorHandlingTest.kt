@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.metrics
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
+import io.opentelemetry.kotlin.aliases.OtelJavaDoubleGaugeBuilder
 import io.opentelemetry.kotlin.aliases.OtelJavaDoubleUpDownCounter
 import io.opentelemetry.kotlin.aliases.OtelJavaLongCounterBuilder
 import io.opentelemetry.kotlin.aliases.OtelJavaLongUpDownCounter
@@ -107,6 +108,72 @@ internal class MeterAdapterErrorHandlingTest {
         assertSdkErrors(listOf("ObservableDoubleUpDownCounter.registerCallback failed"))
     }
 
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testThrowingObservableLongGaugeBuilderReturnsNoopRegistration() {
+        val meter = MeterAdapter(ThrowingJavaMeter(), errorHandler)
+        val gauge = meter.createObservableLongGauge("queue.depth")
+
+        val registration = gauge.registerCallback { it.record(1L) }
+        assertSame(NoopObservableCounterRegistration, registration)
+        registration.close()
+        gauge.close()
+        assertSdkErrors(listOf("ObservableLongGauge.registerCallback failed"))
+    }
+
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testThrowingObservableDoubleGaugeBuilderReturnsNoopRegistration() {
+        val meter = MeterAdapter(ThrowingJavaMeter(), errorHandler)
+        val gauge = meter.createObservableDoubleGauge("temperature")
+
+        val registration = gauge.registerCallback { it.record(1.5) }
+        assertSame(NoopObservableCounterRegistration, registration)
+        registration.close()
+        gauge.close()
+        assertSdkErrors(listOf("ObservableDoubleGauge.registerCallback failed"))
+    }
+
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testThrowingObservableBuildersReturnNoopMeasurementHandles() {
+        val meter = MeterAdapter(ThrowingJavaMeter(), errorHandler)
+
+        meter.createObservableLongCounter("long.counter").measurement.record(1)
+        meter.createObservableDoubleCounter("double.counter").measurement.record(1.5)
+        meter.createObservableLongUpDownCounter("long.up_down_counter").measurement.record(-1)
+        meter.createObservableDoubleUpDownCounter("double.up_down_counter").measurement.record(-1.5)
+        meter.createObservableLongGauge("long.gauge").measurement.record(2)
+        meter.createObservableDoubleGauge("double.gauge").measurement.record(2.5)
+
+        assertSdkErrors(
+            listOf(
+                "ObservableLongCounter.measurement failed",
+                "ObservableDoubleCounter.measurement failed",
+                "ObservableLongUpDownCounter.measurement failed",
+                "ObservableDoubleUpDownCounter.measurement failed",
+                "ObservableLongGauge.measurement failed",
+                "ObservableDoubleGauge.measurement failed",
+            ),
+        )
+    }
+
+    @OptIn(ExperimentalApi::class)
+    @Test
+    fun testThrowingBuildObserverReturnsNoopMeasurementHandle() {
+        val javaMeter = object : OtelJavaMeter by OtelJavaMeterProvider.noop().get("") {
+            override fun counterBuilder(name: String): OtelJavaLongCounterBuilder =
+                object : OtelJavaLongCounterBuilder by OtelJavaMeterProvider.noop().get("").counterBuilder(name) {
+                    override fun buildObserver(): OtelJavaObservableLongMeasurement = error("boom")
+                }
+        }
+        val counter = MeterAdapter(javaMeter, errorHandler).createObservableLongCounter("long.counter")
+
+        counter.measurement.record(1)
+
+        assertSdkErrors(listOf("ObservableLongCounter.measurement failed"))
+    }
+
     @Test
     fun testThrowingAttributesDoesNotEscapeRecord() {
         val longMeasurement = ThrowingJavaLongMeasurement(throws = false)
@@ -158,6 +225,7 @@ internal class MeterAdapterErrorHandlingTest {
     private class ThrowingJavaMeter : OtelJavaMeter by OtelJavaMeterProvider.noop().get("") {
         override fun upDownCounterBuilder(name: String): OtelJavaLongUpDownCounterBuilder = error("boom")
         override fun counterBuilder(name: String): OtelJavaLongCounterBuilder = error("boom")
+        override fun gaugeBuilder(name: String): OtelJavaDoubleGaugeBuilder = error("boom")
     }
 
     private class ThrowingJavaLongCounter : OtelJavaLongUpDownCounter {

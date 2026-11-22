@@ -3,13 +3,12 @@ package io.opentelemetry.kotlin.metrics
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaLongUpDownCounter
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.attributes.CompatAttributesModel
+import io.opentelemetry.kotlin.attributes.compatAttributes
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
-import io.opentelemetry.kotlin.error.userCode
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class LongUpDownCounterAdapter(
     private val impl: OtelJavaLongUpDownCounter,
     override val name: String,
@@ -22,11 +21,14 @@ internal class LongUpDownCounterAdapter(
             impl.isEnabled()
         }
 
-    override fun add(value: Long, attributes: AttributesMutator.() -> Unit) {
+    override fun add(value: Long, attributes: (AttributesMutator.() -> Unit)?) {
         sdkErrorHandler.sdkGuard("LongUpDownCounter.add failed") {
-            val container = CompatAttributesModel()
-            userCode { attributes(container) }
-            impl.add(value, container.otelJavaAttributes())
+            if (attributes == null) {
+                impl.add(value)
+            } else {
+                val container = compatAttributes(attributes)
+                impl.add(value, container.otelJavaAttributes())
+            }
         }
     }
 }

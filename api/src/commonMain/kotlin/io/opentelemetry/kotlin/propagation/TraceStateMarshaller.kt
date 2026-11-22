@@ -14,7 +14,11 @@ import io.opentelemetry.kotlin.tracing.createSpanContext
 internal class TraceStateMarshaller(val traceState: TraceState) {
 
     private val state by lazy {
-        traceState.asMap()
+        try {
+            traceState.asMap()
+        } catch (exc: Throwable) {
+            emptyMap()
+        }
     }
 
     fun encode(): String = W3CTraceStateCodec.encode(state)

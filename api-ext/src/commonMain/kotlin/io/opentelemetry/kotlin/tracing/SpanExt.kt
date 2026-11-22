@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.exceptionType
  */
 @ExperimentalApi
 @ThreadSafe
-public fun Span.addLink(span: Span, attributes: AttributesMutator.() -> Unit = {}) {
+public fun Span.addLink(span: Span, attributes: (AttributesMutator.() -> Unit)? = null) {
     addLink(span.spanContext, attributes)
 }
 
