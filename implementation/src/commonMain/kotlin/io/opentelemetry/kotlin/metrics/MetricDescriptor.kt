@@ -21,7 +21,7 @@ internal class MetricDescriptor private constructor(
     val name: String,
     val description: String?,
     val sourceInstrument: InstrumentDescriptor,
-    val view: View,
+    val view: View?,
     val attributesProcessor: AttributesProcessor,
     val cardinalityLimit: Int,
 ) {
@@ -34,7 +34,7 @@ internal class MetricDescriptor private constructor(
             name.equals(other.name, ignoreCase = true) &&
             description == other.description &&
             sourceInstrument == other.sourceInstrument &&
-            view.aggregation == other.view.aggregation &&
+            view?.aggregation == other.view?.aggregation &&
             attributesProcessor == other.attributesProcessor &&
             cardinalityLimit == other.cardinalityLimit
 
@@ -43,7 +43,7 @@ internal class MetricDescriptor private constructor(
         var result = name.lowercase().hashCode()
         result = 31 * result + description.hashCode()
         result = 31 * result + sourceInstrument.hashCode()
-        result = 31 * result + view.aggregation.hashCode()
+        result = 31 * result + view?.aggregation.hashCode()
         result = 31 * result + attributesProcessor.hashCode()
         result = 31 * result + cardinalityLimit
         return result
@@ -54,18 +54,23 @@ internal class MetricDescriptor private constructor(
             "view=$view, cardinalityLimit=$cardinalityLimit)"
 
     companion object {
+        /**
+         * Creates the descriptor of the stream that [view] produces for [sourceInstrument]. A `null`
+         * [view] represents the default stream of an instrument that matched no View. The optional
+         * parameters override the View's settings, for example with MetricReader defaults.
+         */
         fun create(
             sourceInstrument: InstrumentDescriptor,
-            view: View,
-            attributesProcessor: AttributesProcessor = view.attributesProcessor,
-            cardinalityLimit: Int = view.cardinalityLimit,
+            view: View?,
+            attributesProcessor: AttributesProcessor? = view?.attributesProcessor,
+            cardinalityLimit: Int? = view?.cardinalityLimit,
         ): MetricDescriptor = MetricDescriptor(
-            name = view.name ?: sourceInstrument.name,
-            description = view.description ?: sourceInstrument.description,
+            name = view?.name ?: sourceInstrument.name,
+            description = view?.description ?: sourceInstrument.description,
             sourceInstrument = sourceInstrument,
             view = view,
-            attributesProcessor = attributesProcessor,
-            cardinalityLimit = cardinalityLimit.takeIf { it > 0 }
+            attributesProcessor = attributesProcessor ?: AttributesProcessor.Noop,
+            cardinalityLimit = cardinalityLimit?.takeIf { it > 0 }
                 ?: MetricStorage.DEFAULT_MAX_CARDINALITY,
         )
     }

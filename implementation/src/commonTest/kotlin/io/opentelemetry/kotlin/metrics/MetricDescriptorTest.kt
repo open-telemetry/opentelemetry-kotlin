@@ -78,7 +78,7 @@ internal class MetricDescriptorTest {
         selector: InstrumentSelector = InstrumentSelector(name = "*"),
         name: String? = null,
         description: String? = null,
-        cardinalityLimit: Int = MetricStorage.DEFAULT_MAX_CARDINALITY,
+        cardinalityLimit: Int? = null,
     ): View = View(
         selector = selector,
         name = name,
