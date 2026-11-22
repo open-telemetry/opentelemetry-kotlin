@@ -1,10 +1,11 @@
 package io.opentelemetry.kotlin.error
 
-import io.opentelemetry.kotlin.platform.PlatformLogLevel
-import io.opentelemetry.kotlin.platform.platformLog
+import io.opentelemetry.kotlin.PlatformLogLevel
+import io.opentelemetry.kotlin.platformLog
 
 /**
- * An [SdkErrorHandler] that logs errors using the platform's default logging mechanism.
+ * An [SdkErrorHandler] that writes everything reported to it to the platform log (e.g. Logcat on
+ * Android). This is the default behavior when no handler is configured.
  */
 public object PlatformSdkErrorHandler : SdkErrorHandler {
 
