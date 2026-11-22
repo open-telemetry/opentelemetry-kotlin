@@ -36,11 +36,11 @@ internal class MetricDescriptorTest {
     fun `selector does not participate in resolved descriptor equality`() {
         val first = MetricDescriptor.create(
             sourceInstrument = instrument,
-            view = view(selector = { _, _ -> true }),
+            view = view(selector = InstrumentSelector(name = "instrument-*")),
         )
         val second = MetricDescriptor.create(
             sourceInstrument = instrument,
-            view = view(selector = { _, _ -> true }),
+            view = view(selector = InstrumentSelector(name = "instrument-name")),
         )
 
         assertEquals(first, second)
@@ -75,7 +75,7 @@ internal class MetricDescriptorTest {
     }
 
     private fun view(
-        selector: InstrumentSelector = InstrumentSelector { _, _ -> true },
+        selector: InstrumentSelector = InstrumentSelector(name = "*"),
         name: String? = null,
         description: String? = null,
         cardinalityLimit: Int = MetricStorage.DEFAULT_MAX_CARDINALITY,
