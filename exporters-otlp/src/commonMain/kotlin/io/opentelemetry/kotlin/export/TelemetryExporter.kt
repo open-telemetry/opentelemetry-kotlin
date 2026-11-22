@@ -192,7 +192,7 @@ internal class TelemetryExporter<T>(
                 }
 
                 is OtlpResponse.UnretryableError -> {
-                    val msg = "OTLP export failed with unretryable error (status=${response.statusCode})"
+                    val msg = "OTLP export failed with unretryable error (status=${response.statusCode}, response=$response)"
                     sdkErrorHandler.reportTransientError(
                         IllegalStateException(msg),
                         "OTLP export unretryable error",
@@ -245,6 +245,7 @@ internal class TelemetryExporter<T>(
     }
 
     private suspend fun onExportError(telemetry: QueuedTelemetry<T>, epoch: Long, retryAfterMs: Long?) {
+        var exhausted = false
         mutex.withLock {
             if (epoch == state.epoch) {
                 // Only the first failure from the current epoch advances the backoff and epoch.
@@ -264,16 +265,19 @@ internal class TelemetryExporter<T>(
                 }
             }
             if (telemetry.attempts >= maxAttempts) {
-                sdkErrorHandler.reportTransientError(
-                    IllegalStateException("OTLP export exhausted max attempts ($maxAttempts)"),
-                    "OTLP export attempts exhausted"
-                )
+                exhausted = true
                 queue.remove(telemetry)
                 semaphore.release()
-                return
+            } else {
+                telemetry.state = QueuedTelemetryState.Pending
+                workAvailable.trySend(Unit)
             }
-            telemetry.state = QueuedTelemetryState.Pending
-            workAvailable.trySend(Unit)
+        }
+        if (exhausted) {
+            sdkErrorHandler.reportTransientError(
+                IllegalStateException("OTLP export exhausted max attempts ($maxAttempts)"),
+                "OTLP export attempts exhausted"
+            )
         }
     }
 

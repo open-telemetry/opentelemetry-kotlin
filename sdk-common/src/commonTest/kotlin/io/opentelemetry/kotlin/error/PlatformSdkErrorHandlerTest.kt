@@ -15,10 +15,13 @@ internal class PlatformSdkErrorHandlerTest {
         assertEquals("User code failed: export", userCode.toLogMessage())
         val sdkCode = SdkError.SdkCodeError(exc, "read", SdkErrorSeverity.ERROR)
         assertEquals("SDK code failed: read", sdkCode.toLogMessage())
+        val transient = SdkError.TransientError(exc, "timeout", SdkErrorSeverity.WARNING)
+        assertEquals("Transient error: timeout", transient.toLogMessage())
     }
 
     @Test
     fun logsWithoutThrowing() {
         PlatformSdkErrorHandler.onError(SdkError.UserCodeError(exc, "export", SdkErrorSeverity.WARNING))
+        PlatformSdkErrorHandler.onError(SdkError.TransientError(exc, "export", SdkErrorSeverity.WARNING))
     }
 }
