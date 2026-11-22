@@ -171,7 +171,7 @@ These functions are available inside `export { }`:
 | `simpleSpanProcessor`, `simpleLogRecordProcessor`         | Export each span or log record as soon as it ends. Useful for debugging.           | `implementation`        |
 | `compositeSpanProcessor`, `compositeLogRecordProcessor`   | Pass telemetry to several processors, in order.                                    | `implementation`        |
 | `compositeSpanExporter`, `compositeLogRecordExporter`     | Pass each batch to several exporters.                                              | `implementation`        |
-| `stdoutSpanExporter`, `stdoutLogRecordExporter`           | Print telemetry to the platform log.                                               | `implementation`        |
+| `stdoutSpanExporter`, `stdoutLogRecordExporter`           | Print telemetry to the platform log (Java logging on JVM).                                               | `implementation`        |
 | `otlpHttpSpanExporter`, `otlpHttpLogRecordExporter`       | Send telemetry to an OTLP/HTTP endpoint.                                           | `exporters-otlp`        |
 | `persistingSpanProcessor`, `persistingLogRecordProcessor` | Write telemetry to disk before exporting, so it survives the process being killed. | `exporters-persistence` |
 | `inMemorySpanExporter`, `inMemoryLogRecordExporter`       | Keep telemetry in memory, for tests.                                               | `exporters-in-memory`   |

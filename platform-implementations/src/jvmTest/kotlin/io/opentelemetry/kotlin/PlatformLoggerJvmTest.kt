@@ -8,17 +8,22 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 internal class PlatformLoggerJvmTest {
 
     private val logger = Logger.getLogger("io.opentelemetry.kotlin")
     private val originalLevel = logger.level
     private val originalUseParentHandlers = logger.useParentHandlers
+    private val originalFilter = logger.filter
+    private var handlerFailure: Throwable? = null
     private val records = mutableListOf<LogRecord>()
     private val handler = object : Handler() {
         override fun publish(record: LogRecord) {
+            handlerFailure?.let { throw it }
             records.add(record)
         }
 
@@ -28,6 +33,7 @@ internal class PlatformLoggerJvmTest {
 
     @BeforeTest
     fun setUp() {
+        logger.filter = null
         logger.level = Level.ALL
         logger.useParentHandlers = false
         handler.level = Level.ALL
@@ -36,6 +42,7 @@ internal class PlatformLoggerJvmTest {
 
     @AfterTest
     fun tearDown() {
+        logger.filter = originalFilter
         logger.removeHandler(handler)
         logger.level = originalLevel
         logger.useParentHandlers = originalUseParentHandlers
@@ -64,5 +71,43 @@ internal class PlatformLoggerJvmTest {
         platformLog("visible error", PlatformLogLevel.ERROR)
 
         assertEquals(listOf("visible error"), records.map { it.message })
+    }
+
+    @Test
+    fun containsHandlerFailures() {
+        handlerFailure = IllegalStateException("handler failed")
+        platformLog("message", PlatformLogLevel.ERROR)
+        assertTrue(records.isEmpty())
+    }
+
+    @Test
+    fun containsFilterFailures() {
+        logger.setFilter { throw IllegalStateException("filter failed") }
+        platformLog("message", PlatformLogLevel.ERROR)
+        assertTrue(records.isEmpty())
+    }
+
+    @Test
+    fun restoresInterruptionAfterHandlerFailure() {
+        assertFalse(Thread.currentThread().isInterrupted)
+        handlerFailure = InterruptedException("interrupted")
+        try {
+            platformLog("message", PlatformLogLevel.ERROR)
+            assertTrue(Thread.currentThread().isInterrupted)
+        } finally {
+            Thread.interrupted()
+        }
+    }
+
+    @Test
+    fun restoresInterruptionAfterFilterFailure() {
+        assertFalse(Thread.currentThread().isInterrupted)
+        logger.setFilter { throw InterruptedException("interrupted") }
+        try {
+            platformLog("message", PlatformLogLevel.ERROR)
+            assertTrue(Thread.currentThread().isInterrupted)
+        } finally {
+            Thread.interrupted()
+        }
     }
 }

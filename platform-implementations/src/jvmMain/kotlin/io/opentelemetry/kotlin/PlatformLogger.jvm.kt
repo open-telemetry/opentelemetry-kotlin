@@ -11,5 +11,11 @@ public actual fun platformLog(message: String, level: PlatformLogLevel, throwabl
         PlatformLogLevel.WARNING -> Level.WARNING
         PlatformLogLevel.ERROR -> Level.SEVERE
     }
-    logger.log(javaLevel, message, throwable)
+    try {
+        logger.log(javaLevel, message, throwable)
+    } catch (ignored: Throwable) {
+        if (ignored is InterruptedException) {
+            Thread.currentThread().interrupt()
+        }
+    }
 }
