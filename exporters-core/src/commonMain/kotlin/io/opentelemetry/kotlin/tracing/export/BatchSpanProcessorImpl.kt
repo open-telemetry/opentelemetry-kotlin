@@ -13,12 +13,13 @@ import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
 import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlin.time.Duration
 
 internal class BatchSpanProcessorImpl(
     private val exporter: SpanExporter,
     maxQueueSize: Int,
-    scheduleDelayMs: Long,
-    exportTimeoutMs: Long,
+    scheduleDelay: Duration,
+    exportTimeout: Duration,
     maxExportBatchSize: Int,
     private val sdkErrorHandler: SdkErrorHandler,
     dispatcher: CoroutineDispatcher = ioDispatcher,
@@ -29,8 +30,8 @@ internal class BatchSpanProcessorImpl(
         BatchTelemetryProcessor(
             config = BatchTelemetryConfig(
                 maxQueueSize = maxQueueSize,
-                scheduleDelayMs = scheduleDelayMs,
-                exportTimeoutMs = exportTimeoutMs,
+                scheduleDelay = scheduleDelay,
+                exportTimeout = exportTimeout,
                 maxExportBatchSize = maxExportBatchSize,
                 sdkErrorHandler = sdkErrorHandler,
             ),

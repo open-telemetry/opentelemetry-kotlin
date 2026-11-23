@@ -21,9 +21,9 @@ public final class io/opentelemetry/kotlin/logging/export/CoreLogRecordExporterA
 }
 
 public final class io/opentelemetry/kotlin/tracing/export/CoreSpanExporterApiKt {
-	public static final fun batchSpanProcessor (Lio/opentelemetry/kotlin/init/ExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJI)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
-	public static synthetic fun batchSpanProcessor$default (Lio/opentelemetry/kotlin/init/ExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJIILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
-	public static final fun batchSpanProcessorWithDispatcher (Lio/opentelemetry/kotlin/init/ExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJILkotlinx/coroutines/CoroutineDispatcher;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
+	public static final fun batchSpanProcessor-MHpS38I (Lio/opentelemetry/kotlin/init/ExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJI)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
+	public static synthetic fun batchSpanProcessor-MHpS38I$default (Lio/opentelemetry/kotlin/init/ExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJIILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
+	public static final fun batchSpanProcessorWithDispatcher-2AWqQcw (Lio/opentelemetry/kotlin/init/ExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;IJJILkotlinx/coroutines/CoroutineDispatcher;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
 	public static final fun compositeSpanExporter (Lio/opentelemetry/kotlin/init/ExportConfigDsl;[Lio/opentelemetry/kotlin/tracing/export/SpanExporter;)Lio/opentelemetry/kotlin/tracing/export/SpanExporter;
 	public static final fun compositeSpanProcessor (Lio/opentelemetry/kotlin/init/ExportConfigDsl;[Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
 	public static final fun simpleSpanProcessor (Lio/opentelemetry/kotlin/init/ExportConfigDsl;Lio/opentelemetry/kotlin/tracing/export/SpanExporter;)Lio/opentelemetry/kotlin/tracing/export/SpanProcessor;
