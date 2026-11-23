@@ -235,7 +235,12 @@ internal class MeterImpl(
         val baseline = entries.firstOrNull { it.descriptor.valueType == requested.valueType }
             ?: entries.first()
         return checkForConflict(requested, baseline.descriptor)
-            ?: error("conflictFor called for a descriptor with no conflict")
+            ?: SdkError.ApiMisuse(
+                api = "Meter",
+                message = "Instrument '${requested.name}' conflicts with an existing " +
+                    "registration. Using first-seen descriptor.",
+                severity = SdkErrorSeverity.WARNING,
+            )
     }
 
     private fun checkForConflict(
