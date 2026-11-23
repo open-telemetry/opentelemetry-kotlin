@@ -9,7 +9,17 @@ plugins {
     id("com.android.kotlin.multiplatform.library") apply false
     id("org.jetbrains.kotlin.multiplatform") apply false
     id("com.vanniktech.maven.publish") apply false
+    alias(libs.plugins.dokka)
     id("org.jetbrains.kotlinx.kover") version "0.9.11" apply false
+}
+
+subprojects {
+    pluginManager.withPlugin("org.jetbrains.dokka") {
+        rootProject.dependencies.add(
+            "dokka",
+            rootProject.dependencies.project(mapOf("path" to path)),
+        )
+    }
 }
 
 plugins.withType<YarnPlugin> {
