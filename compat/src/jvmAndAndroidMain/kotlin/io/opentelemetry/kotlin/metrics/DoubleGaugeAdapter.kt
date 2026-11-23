@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class DoubleGaugeAdapter(
     private val impl: OtelJavaDoubleGauge,
     override val name: String,
@@ -19,10 +19,14 @@ internal class DoubleGaugeAdapter(
     override fun enabled(): Boolean =
         sdkErrorHandler.sdkGuardOrDefault(false, "DoubleGauge.enabled failed") { impl.isEnabled() }
 
-    override fun record(value: Double, attributes: AttributesMutator.() -> Unit) {
+    override fun record(value: Double, attributes: (AttributesMutator.() -> Unit)?) {
         sdkErrorHandler.sdkGuard("DoubleGauge.record failed") {
-            val container = compatAttributes(attributes)
-            impl.set(value, container.otelJavaAttributes())
+            if (attributes == null) {
+                impl.set(value)
+            } else {
+                val container = compatAttributes(attributes)
+                impl.set(value, container.otelJavaAttributes())
+            }
         }
     }
 }

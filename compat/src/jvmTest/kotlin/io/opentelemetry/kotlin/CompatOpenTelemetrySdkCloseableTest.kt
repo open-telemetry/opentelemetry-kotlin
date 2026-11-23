@@ -102,7 +102,7 @@ internal class CompatOpenTelemetrySdkCloseableTest {
     fun `shutdown of a dsl configured sdk stops spans being recorded`() = runBlocking {
         val sdk = createCompatOpenTelemetry {
             tracerProvider { export { FakeSpanProcessor() } }
-        }.also(sdks::track) as OpenTelemetrySdk
+        }.also(sdks::track)
         val tracer = sdk.tracerProvider.getTracer("test")
         assertTrue(tracer.startSpan("before").isRecording())
         assertEquals(Success, sdk.forceFlush())
@@ -137,7 +137,7 @@ internal class CompatOpenTelemetrySdkCloseableTest {
         val sdk = createCompatOpenTelemetry {
             tracerProvider { export { spanProcessor } }
             loggerProvider { export { logProcessor } }
-        }.also(sdks::track) as OpenTelemetrySdk
+        }.also(sdks::track)
 
         assertEquals(Success, sdk.forceFlush())
         assertEquals(setOf("span-flush", "log-flush"), calls.toSet())
@@ -145,5 +145,25 @@ internal class CompatOpenTelemetrySdkCloseableTest {
         calls.clear()
         assertEquals(Success, sdk.shutdown())
         assertEquals(setOf("span-shutdown", "log-shutdown"), calls.toSet())
+    }
+
+    @Test
+    fun `configured timeout allows flush and shutdown longer than five seconds`() = runBlocking {
+        val slowOperation = {
+            Thread.sleep(5500)
+            Success
+        }
+        val sdk = createCompatOpenTelemetry {
+            tracerProvider {
+                export { FakeSpanProcessor(flushCode = slowOperation, shutdownCode = slowOperation) }
+            }
+            loggerProvider {
+                export { FakeLogRecordProcessor(flushCode = slowOperation, shutdownCode = slowOperation) }
+            }
+            shutdownTimeout(6000)
+        }.also(sdks::track)
+
+        assertEquals(Success, sdk.forceFlush())
+        assertEquals(Success, sdk.shutdown())
     }
 }

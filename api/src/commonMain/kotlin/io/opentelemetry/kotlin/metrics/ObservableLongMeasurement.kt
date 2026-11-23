@@ -9,12 +9,7 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 public interface ObservableLongMeasurement : ObservableMeasurement {
 
     /**
-     * Records a measurement.
+     * Records a measurement, optionally associating attributes with it.
      */
-    public fun record(value: Long)
-
-    /**
-     * Records a measurement with a set of attributes.
-     */
-    public fun record(value: Long, attributes: AttributesMutator.() -> Unit)
+    public fun record(value: Long, attributes: (AttributesMutator.() -> Unit)? = null)
 }

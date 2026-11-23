@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.attributes.copyTypedAttributes
+import io.opentelemetry.kotlin.attributes.copyAttributes
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
@@ -49,8 +49,8 @@ internal class ComposableAnnotatingSampler(
      */
     private fun merge(delegateAttributes: AttributeContainer): AttributeContainer =
         AttributesModel().apply {
-            copyTypedAttributes(delegateAttributes.attributes)
-            copyTypedAttributes(annotations.attributes)
+            copyAttributes(delegateAttributes)
+            copyAttributes(annotations)
         }
 
     override val description: String

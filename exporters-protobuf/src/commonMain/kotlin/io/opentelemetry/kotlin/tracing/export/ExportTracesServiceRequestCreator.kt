@@ -4,9 +4,9 @@ import io.opentelemetry.kotlin.export.conversion.toResource
 import io.opentelemetry.kotlin.export.conversion.toInstrumentationScopeInfo
 import io.opentelemetry.kotlin.export.conversion.toProtobuf
 import io.opentelemetry.kotlin.tracing.data.SpanData
-import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest
-import io.opentelemetry.proto.trace.v1.ResourceSpans
-import io.opentelemetry.proto.trace.v1.ScopeSpans
+import io.opentelemetry.kotlin.proto.collector.trace.v1.ExportTraceServiceRequest
+import io.opentelemetry.kotlin.proto.trace.v1.ResourceSpans
+import io.opentelemetry.kotlin.proto.trace.v1.ScopeSpans
 
 fun List<SpanData>.toProtobufByteArray() =
     ExportTraceServiceRequest.ADAPTER.encode(toExportTraceServiceRequest())

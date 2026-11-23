@@ -40,15 +40,11 @@ internal class OtelJavaObservableDoubleMeasurementAdapterTest {
 
     private class RecordingKotlinDoubleMeasurement : ObservableDoubleMeasurement {
         val adds: MutableList<Pair<Double, Map<String, Any>>> = mutableListOf()
-        override fun record(value: Double) {
-            record(value) {}
-        }
-
         override fun record(
             value: Double,
-            attributes: AttributesMutator.() -> Unit,
+            attributes: (AttributesMutator.() -> Unit)?,
         ) {
-            adds.add(value to FakeAttributesMutator().apply(attributes).attributes)
+            adds.add(value to FakeAttributesMutator().apply { attributes?.invoke(this) }.attributes)
         }
     }
 }

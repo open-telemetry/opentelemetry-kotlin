@@ -48,7 +48,7 @@ internal class LogRecordExporterAdapterTest {
         assertEquals(original.timestamp, observed.timestampEpochNanos)
         assertEquals(original.observedTimestamp, observed.observedTimestampEpochNanos)
         assertEquals(original.severityText, observed.severityText)
-        assertEquals(original.severityNumber?.severityNumber, observed.severity.severityNumber)
+        assertEquals(original.severityNumber?.value, observed.severity.severityNumber)
         assertEquals(original.body, observed.bodyValue?.asString())
         assertEquals(original.attributes, observed.attributes.convertToMap())
         assertEquals(original.resource.attributes, observed.resource.attributes.convertToMap())

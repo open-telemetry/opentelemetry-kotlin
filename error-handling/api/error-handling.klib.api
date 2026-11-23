@@ -1,0 +1,64 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, tvosArm64, tvosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <opentelemetry-kotlin:error-handling>
+final enum class io.opentelemetry.kotlin.error/SdkErrorSeverity : kotlin/Enum<io.opentelemetry.kotlin.error/SdkErrorSeverity> { // io.opentelemetry.kotlin.error/SdkErrorSeverity|null[0]
+    enum entry ERROR // io.opentelemetry.kotlin.error/SdkErrorSeverity.ERROR|null[0]
+    enum entry INFO // io.opentelemetry.kotlin.error/SdkErrorSeverity.INFO|null[0]
+    enum entry WARNING // io.opentelemetry.kotlin.error/SdkErrorSeverity.WARNING|null[0]
+
+    final val entries // io.opentelemetry.kotlin.error/SdkErrorSeverity.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.opentelemetry.kotlin.error/SdkErrorSeverity> // io.opentelemetry.kotlin.error/SdkErrorSeverity.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.opentelemetry.kotlin.error/SdkErrorSeverity // io.opentelemetry.kotlin.error/SdkErrorSeverity.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.opentelemetry.kotlin.error/SdkErrorSeverity> // io.opentelemetry.kotlin.error/SdkErrorSeverity.values|values#static(){}[0]
+}
+
+abstract fun interface io.opentelemetry.kotlin.error/SdkErrorHandler { // io.opentelemetry.kotlin.error/SdkErrorHandler|null[0]
+    abstract fun onError(io.opentelemetry.kotlin.error/SdkError) // io.opentelemetry.kotlin.error/SdkErrorHandler.onError|onError(io.opentelemetry.kotlin.error.SdkError){}[0]
+}
+
+sealed class io.opentelemetry.kotlin.error/SdkError { // io.opentelemetry.kotlin.error/SdkError|null[0]
+    final val message // io.opentelemetry.kotlin.error/SdkError.message|{}message[0]
+        final fun <get-message>(): kotlin/String // io.opentelemetry.kotlin.error/SdkError.message.<get-message>|<get-message>(){}[0]
+    final val severity // io.opentelemetry.kotlin.error/SdkError.severity|{}severity[0]
+        final fun <get-severity>(): io.opentelemetry.kotlin.error/SdkErrorSeverity // io.opentelemetry.kotlin.error/SdkError.severity.<get-severity>|<get-severity>(){}[0]
+
+    final class ApiMisuse : io.opentelemetry.kotlin.error/SdkError { // io.opentelemetry.kotlin.error/SdkError.ApiMisuse|null[0]
+        constructor <init>(kotlin/String, kotlin/String, io.opentelemetry.kotlin.error/SdkErrorSeverity) // io.opentelemetry.kotlin.error/SdkError.ApiMisuse.<init>|<init>(kotlin.String;kotlin.String;io.opentelemetry.kotlin.error.SdkErrorSeverity){}[0]
+
+        final val api // io.opentelemetry.kotlin.error/SdkError.ApiMisuse.api|{}api[0]
+            final fun <get-api>(): kotlin/String // io.opentelemetry.kotlin.error/SdkError.ApiMisuse.api.<get-api>|<get-api>(){}[0]
+
+        final fun toString(): kotlin/String // io.opentelemetry.kotlin.error/SdkError.ApiMisuse.toString|toString(){}[0]
+    }
+
+    final class SdkCodeError : io.opentelemetry.kotlin.error/SdkError { // io.opentelemetry.kotlin.error/SdkError.SdkCodeError|null[0]
+        constructor <init>(kotlin/Throwable, kotlin/String, io.opentelemetry.kotlin.error/SdkErrorSeverity) // io.opentelemetry.kotlin.error/SdkError.SdkCodeError.<init>|<init>(kotlin.Throwable;kotlin.String;io.opentelemetry.kotlin.error.SdkErrorSeverity){}[0]
+
+        final val cause // io.opentelemetry.kotlin.error/SdkError.SdkCodeError.cause|{}cause[0]
+            final fun <get-cause>(): kotlin/Throwable // io.opentelemetry.kotlin.error/SdkError.SdkCodeError.cause.<get-cause>|<get-cause>(){}[0]
+
+        final fun toString(): kotlin/String // io.opentelemetry.kotlin.error/SdkError.SdkCodeError.toString|toString(){}[0]
+    }
+
+    final class UserCodeError : io.opentelemetry.kotlin.error/SdkError { // io.opentelemetry.kotlin.error/SdkError.UserCodeError|null[0]
+        constructor <init>(kotlin/Throwable, kotlin/String, io.opentelemetry.kotlin.error/SdkErrorSeverity) // io.opentelemetry.kotlin.error/SdkError.UserCodeError.<init>|<init>(kotlin.Throwable;kotlin.String;io.opentelemetry.kotlin.error.SdkErrorSeverity){}[0]
+
+        final val cause // io.opentelemetry.kotlin.error/SdkError.UserCodeError.cause|{}cause[0]
+            final fun <get-cause>(): kotlin/Throwable // io.opentelemetry.kotlin.error/SdkError.UserCodeError.cause.<get-cause>|<get-cause>(){}[0]
+
+        final fun toString(): kotlin/String // io.opentelemetry.kotlin.error/SdkError.UserCodeError.toString|toString(){}[0]
+    }
+}
+
+final object io.opentelemetry.kotlin.error/NoopSdkErrorHandler : io.opentelemetry.kotlin.error/SdkErrorHandler { // io.opentelemetry.kotlin.error/NoopSdkErrorHandler|null[0]
+    final fun onError(io.opentelemetry.kotlin.error/SdkError) // io.opentelemetry.kotlin.error/NoopSdkErrorHandler.onError|onError(io.opentelemetry.kotlin.error.SdkError){}[0]
+}
+
+final fun io.opentelemetry.kotlin.error/reportError(io.opentelemetry.kotlin.error/SdkError) // io.opentelemetry.kotlin.error/reportError|reportError(io.opentelemetry.kotlin.error.SdkError){}[0]
+final fun io.opentelemetry.kotlin.error/setProcessSdkErrorHandler(io.opentelemetry.kotlin.error/SdkErrorHandler?): kotlin/Boolean // io.opentelemetry.kotlin.error/setProcessSdkErrorHandler|setProcessSdkErrorHandler(io.opentelemetry.kotlin.error.SdkErrorHandler?){}[0]

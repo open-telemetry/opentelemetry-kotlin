@@ -1,7 +1,8 @@
 package io.opentelemetry.kotlin.config.envar.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
+import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 
 /**
@@ -10,11 +11,11 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
  *
  * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#exporter-selection
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class LogRecordProcessorEnvVars(
     private val reader: ReportingEnvVarReader,
-) {
-    fun toBehavior(): LogRecordProcessorBehavior? {
+) : BehaviorSupplier<LogRecordProcessorBehavior> {
+    override fun toBehavior(): LogRecordProcessorBehavior {
         return LogRecordProcessorBehavior(
             batch = BatchLogRecordProcessorEnvVars(reader).toBehavior(),
         )

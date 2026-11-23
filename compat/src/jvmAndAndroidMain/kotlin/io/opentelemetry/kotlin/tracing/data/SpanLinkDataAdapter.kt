@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaLinkData
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.droppedCount
 import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
+import io.opentelemetry.kotlin.tracing.toOtelKotlinSpanContext
 
 internal class SpanLinkDataAdapter(
     impl: OtelJavaLinkData,

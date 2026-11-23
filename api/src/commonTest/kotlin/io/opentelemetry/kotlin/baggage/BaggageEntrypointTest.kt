@@ -1,6 +1,9 @@
 package io.opentelemetry.kotlin.baggage
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.RecordingSdkErrorHandler
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -8,6 +11,18 @@ import kotlin.test.assertSame
 
 @OptIn(ExperimentalApi::class)
 internal class BaggageEntrypointTest {
+
+    private val errorHandler = RecordingSdkErrorHandler()
+
+    @BeforeTest
+    fun setUp() {
+        errorHandler.install()
+    }
+
+    @AfterTest
+    fun tearDown() {
+        errorHandler.uninstall()
+    }
 
     @Test
     fun `omitting the action returns the shared empty Baggage`() {
@@ -22,11 +37,19 @@ internal class BaggageEntrypointTest {
 
     @Test
     fun `throwing action returns the shared empty Baggage`() {
+        val exc = IllegalStateException("boom")
         val baggage = createBaggage {
             put("user", "alice")
-            error("boom")
+            throw exc
         }
         assertSame(BaggageImpl.EMPTY, baggage)
+        errorHandler.assertSingleUserCodeError(exc)
+    }
+
+    @Test
+    fun `valid action reports nothing`() {
+        createBaggage { put("user", "alice") }
+        assertEquals(emptyList(), errorHandler.errors)
     }
 
     @Test
@@ -80,27 +103,20 @@ internal class BaggageEntrypointTest {
     }
 
     @Test
-    fun `put with invalid key drops entry`() {
+    fun `put accepts any string for key and value`() {
         val baggage = createBaggage {
             put("ok", "v")
-            put("bad key", "v")
+            put("bad key", "line1\nline2")
             put("", "v")
-        }
-        assertEquals(1, baggage.asMap().size)
-        assertEquals("v", baggage.getValue("ok"))
-        assertNull(baggage.getValue("bad key"))
-    }
-
-    @Test
-    fun `put with invalid value drops entry`() {
-        val baggage = createBaggage {
-            put("ok", "v")
             put("crlf", "bad\rvalue")
             put("nul", "bad\u0000value")
         }
-        assertEquals(1, baggage.asMap().size)
-        assertNull(baggage.getValue("crlf"))
-        assertNull(baggage.getValue("nul"))
+        assertEquals(5, baggage.asMap().size)
+        assertEquals("v", baggage.getValue("ok"))
+        assertEquals("line1\nline2", baggage.getValue("bad key"))
+        assertEquals("v", baggage.getValue(""))
+        assertEquals("bad\rvalue", baggage.getValue("crlf"))
+        assertEquals("bad\u0000value", baggage.getValue("nul"))
     }
 
     @Test

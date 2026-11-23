@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
@@ -22,6 +21,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 internal class LoggerProviderImplTest {
 
@@ -33,7 +33,6 @@ internal class LoggerProviderImplTest {
         NoopSdkErrorHandler,
         loggerConfigurator,
     )
-    private val contextFactory = FakeContextFactory()
     private val attributeLimits = AttributeLimitsBehavior()
     private val logLimits = AttributeLimitsBehavior(100, 100)
     private lateinit var impl: LoggerProviderImpl
@@ -43,7 +42,6 @@ internal class LoggerProviderImplTest {
         impl = LoggerProviderImpl(
             clock,
             loggingConfig,
-            contextFactory,
             attributeLimits,
             logLimits,
         )
@@ -66,7 +64,6 @@ internal class LoggerProviderImplTest {
         val provider = LoggerProviderImpl(
             clock,
             config,
-            contextFactory,
             attributeLimits,
             logLimits,
         )
@@ -163,7 +160,6 @@ internal class LoggerProviderImplTest {
         impl = LoggerProviderImpl(
             clock,
             config,
-            contextFactory,
             attributeLimits,
             logLimits,
         )
@@ -192,7 +188,6 @@ internal class LoggerProviderImplTest {
         impl = LoggerProviderImpl(
             clock,
             config,
-            contextFactory,
             attributeLimits,
             logLimits,
         )
@@ -222,7 +217,6 @@ internal class LoggerProviderImplTest {
         impl = LoggerProviderImpl(
             clock,
             config,
-            contextFactory,
             attributeLimits,
             logLimits,
         )
@@ -254,6 +248,28 @@ internal class LoggerProviderImplTest {
     }
 
     @Test
+    fun testThrowingLoggerConfiguratorFallsBackToDefaultConfig() {
+        val errorHandler = FakeSdkErrorHandler()
+        var calls = 0
+        val provider = createProvider(
+            errorHandler = errorHandler,
+            configurator = {
+                calls++
+                error("boom")
+            },
+        )
+
+        val logger = provider.getLogger(name = "test")
+
+        assertTrue(logger.enabled())
+        assertSame(logger, provider.getLogger(name = "test"))
+        assertEquals(1, calls)
+        val recorded = errorHandler.userCodeErrors.single()
+        assertEquals("Failed to compute logger config, using default", recorded.message)
+        assertEquals("boom", recorded.cause.message)
+    }
+
+    @Test
     fun testThrowingErrorHandlerDoesNotEscapeForceFlush() = runTest {
         val provider = createProvider(
             processor = FakeLogRecordProcessor(flushCode = { error("boom") }),
@@ -278,10 +294,10 @@ internal class LoggerProviderImplTest {
     private fun createProvider(
         processor: LogRecordProcessor? = FakeLogRecordProcessor(),
         errorHandler: SdkErrorHandler = NoopSdkErrorHandler,
+        configurator: LoggerConfigurator = loggerConfigurator,
     ) = LoggerProviderImpl(
         clock,
-        LoggingConfig(processor, FakeResource(), errorHandler, loggerConfigurator),
-        contextFactory,
+        LoggingConfig(processor, FakeResource(), errorHandler, configurator),
         attributeLimits,
         logLimits,
     )

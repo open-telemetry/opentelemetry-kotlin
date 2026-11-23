@@ -3,8 +3,7 @@ package io.opentelemetry.kotlin.metrics
 import io.opentelemetry.kotlin.aliases.OtelJavaAttributes
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaDoubleGauge
-import io.opentelemetry.kotlin.attributes.convertToMap
-import io.opentelemetry.kotlin.attributes.setTypedAttributes
+import io.opentelemetry.kotlin.attributes.setOtelJavaAttributes
 
 internal class OtelJavaDoubleGaugeAdapter(
     private val impl: DoubleGauge,
@@ -19,7 +18,7 @@ internal class OtelJavaDoubleGaugeAdapter(
         if (attributes.isEmpty) {
             impl.record(value)
         } else {
-            impl.record(value) { setTypedAttributes(attributes.convertToMap()) }
+            impl.record(value) { setOtelJavaAttributes(attributes) }
         }
     }
 

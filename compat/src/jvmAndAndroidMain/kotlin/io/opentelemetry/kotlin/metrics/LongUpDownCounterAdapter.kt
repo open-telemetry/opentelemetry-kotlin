@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class LongUpDownCounterAdapter(
     private val impl: OtelJavaLongUpDownCounter,
     override val name: String,
@@ -21,10 +21,14 @@ internal class LongUpDownCounterAdapter(
             impl.isEnabled()
         }
 
-    override fun add(value: Long, attributes: AttributesMutator.() -> Unit) {
+    override fun add(value: Long, attributes: (AttributesMutator.() -> Unit)?) {
         sdkErrorHandler.sdkGuard("LongUpDownCounter.add failed") {
-            val container = compatAttributes(attributes)
-            impl.add(value, container.otelJavaAttributes())
+            if (attributes == null) {
+                impl.add(value)
+            } else {
+                val container = compatAttributes(attributes)
+                impl.add(value, container.otelJavaAttributes())
+            }
         }
     }
 }

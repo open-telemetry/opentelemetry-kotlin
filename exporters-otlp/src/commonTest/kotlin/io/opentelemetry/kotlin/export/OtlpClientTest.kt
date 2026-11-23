@@ -18,13 +18,13 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.logging.data.FakeLogRecordData
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.export.toProtobufByteArray
+import io.opentelemetry.kotlin.proto.collector.logs.v1.ExportLogsPartialSuccess
+import io.opentelemetry.kotlin.proto.collector.logs.v1.ExportLogsServiceResponse
+import io.opentelemetry.kotlin.proto.collector.trace.v1.ExportTracePartialSuccess
+import io.opentelemetry.kotlin.proto.collector.trace.v1.ExportTraceServiceResponse
 import io.opentelemetry.kotlin.tracing.data.FakeSpanData
 import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.export.toProtobufByteArray
-import io.opentelemetry.proto.collector.logs.v1.ExportLogsPartialSuccess
-import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse
-import io.opentelemetry.proto.collector.trace.v1.ExportTracePartialSuccess
-import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
@@ -266,6 +266,30 @@ internal class OtlpClientTest {
         assertEquals("Bearer first", server.requestHistory[0].headers[HttpHeaders.Authorization])
         assertEquals("Bearer second", server.requestHistory[1].headers[HttpHeaders.Authorization])
         assertEquals(expectedUserAgent, server.requestHistory[0].headers[HttpHeaders.UserAgent])
+    }
+
+    @Test
+    fun testTraceEncodingFailureIsNotSent() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        val throwingSpan = object : SpanData by FakeSpanData() {
+            override val name: String get() = error("boom")
+        }
+
+        assertEquals(OtlpResponse.EncodingFailed, client.exportTraces(listOf(throwingSpan)))
+        assertEquals(1, errorHandler.sdkCodeErrors.size)
+        assertEquals(0, server.requestHistory.size)
+    }
+
+    @Test
+    fun testLogEncodingFailureIsNotSent() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        val throwingLogRecord = object : LogRecordData by FakeLogRecordData() {
+            override val severityText: String get() = error("boom")
+        }
+
+        assertEquals(OtlpResponse.EncodingFailed, client.exportLogs(listOf(throwingLogRecord)))
+        assertEquals(1, errorHandler.sdkCodeErrors.size)
+        assertEquals(0, server.requestHistory.size)
     }
 
     @Test

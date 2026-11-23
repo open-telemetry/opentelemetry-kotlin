@@ -1,15 +1,16 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.config.ConfigProvider
+import io.opentelemetry.kotlin.context.ContextStorageOwner
+import io.opentelemetry.kotlin.context.CurrentContextStorage
+import io.opentelemetry.kotlin.context.uninstallContextStorage
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.setProcessSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
-import io.opentelemetry.kotlin.export.OperationResultCode.Failure
-import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.export.TelemetryCloseable
-import io.opentelemetry.kotlin.export.runWithTimeout
-import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.factory.IdGenerator
-import io.opentelemetry.kotlin.factory.ResourceFactory
+import io.opentelemetry.kotlin.export.batchExportOperationConcurrent
 import io.opentelemetry.kotlin.logging.LoggerProvider
 import io.opentelemetry.kotlin.metrics.MeterProvider
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
@@ -21,56 +22,37 @@ internal class OpenTelemetryImpl(
     override val meterProvider: MeterProvider,
     override val configProvider: ConfigProvider,
     override val clock: Clock,
-    override val context: ContextFactory,
-    override val idGenerator: IdGenerator,
-    override val resource: ResourceFactory,
     override val propagator: TextMapPropagator,
+    override val installedStorage: CurrentContextStorage? = null,
+    private val ownsErrorSink: Boolean = false,
     private val timeoutMs: Long = 3000,
-) : OpenTelemetrySdk {
+    override val sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
+) : OpenTelemetrySdk, ContextStorageOwner {
 
     private val shutdownState: MutableShutdownState = MutableShutdownState()
 
-    override suspend fun forceFlush(): OperationResultCode = withOverallTimeout {
-        val tracerResult = when (tracerProvider) {
-            is TelemetryCloseable -> tracerProvider.forceFlush()
-            else -> Success
-        }
-        val loggerResult = when (loggerProvider) {
-            is TelemetryCloseable -> loggerProvider.forceFlush()
-            else -> Success
-        }
-        val meterResult = when (meterProvider) {
-            is TelemetryCloseable -> meterProvider.forceFlush()
-            else -> Success
-        }
-        combineResults(tracerResult, loggerResult, meterResult)
-    }
+    private val closeables = listOfNotNull(
+        tracerProvider as? TelemetryCloseable,
+        loggerProvider as? TelemetryCloseable,
+        meterProvider as? TelemetryCloseable,
+    )
+
+    override suspend fun forceFlush(): OperationResultCode =
+        batchExportOperationConcurrent(closeables, sdkErrorHandler, timeoutMs, TelemetryCloseable::forceFlush)
 
     override suspend fun shutdown(): OperationResultCode =
-        shutdownState.shutdown {
-            withOverallTimeout {
-                val tracerResult = when (tracerProvider) {
-                    is TelemetryCloseable -> tracerProvider.shutdown()
-                    else -> Success
-                }
-                val loggerResult = when (loggerProvider) {
-                    is TelemetryCloseable -> loggerProvider.shutdown()
-                    else -> Success
-                }
-                val meterResult = when (meterProvider) {
-                    is TelemetryCloseable -> meterProvider.shutdown()
-                    else -> Success
-                }
-                combineResults(tracerResult, loggerResult, meterResult)
+        shutdownState.shutdown(timeoutMs) {
+            try {
+                batchExportOperationConcurrent(closeables, sdkErrorHandler, timeoutMs, TelemetryCloseable::shutdown)
+            } finally {
+                releaseProcessWideState()
             }
         }
 
-    private suspend fun withOverallTimeout(action: suspend () -> OperationResultCode): OperationResultCode =
-        runWithTimeout(timeoutMs, action)
-
-    private fun combineResults(vararg results: OperationResultCode): OperationResultCode =
-        when {
-            results.all { it == Success } -> Success
-            else -> Failure
+    private fun releaseProcessWideState() {
+        installedStorage?.let(::uninstallContextStorage)
+        if (ownsErrorSink) {
+            setProcessSdkErrorHandler(null)
         }
+    }
 }

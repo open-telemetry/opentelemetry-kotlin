@@ -5,9 +5,9 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
@@ -29,7 +29,6 @@ internal class BuiltInSamplersTest {
 
     private val clock = FakeClock()
     private val idGenerator = IdGeneratorImpl()
-    private val contextFactory = ContextFactoryImpl()
     private val scope = InstrumentationScopeInfoImpl("test", null, null, emptyMap())
 
     private val samplerDsl = SamplerConfigImpl()
@@ -37,7 +36,6 @@ internal class BuiltInSamplersTest {
     private fun buildTracer(sampler: Sampler) = TracerImpl(
         clock = clock,
         processor = FakeSpanProcessor(),
-        contextFactory = contextFactory,
         scope = scope,
         resource = FakeResource(),
         spanLimitConfig = fakeSpanLimitsConfig,
@@ -53,7 +51,7 @@ internal class BuiltInSamplersTest {
             this.isRemote = isRemote
         }
         val parentSpan = createNonRecordingSpan(parentSpanContext)
-        return contextFactory.root().storeSpan(parentSpan)
+        return rootContext().storeSpan(parentSpan)
     }
 
     @Test
@@ -71,6 +69,22 @@ internal class BuiltInSamplersTest {
     }
 
     @Test
+    fun testProbabilityOneSamplesSpan() {
+        val span = buildTracer(samplerDsl.probability(1.0)).startSpan("span")
+        assertTrue(span.isRecording())
+        assertTrue(span.spanContext.traceFlags.isSampled)
+    }
+
+    @Test
+    fun testProbabilityZeroDropsSpan() {
+        listOf(0.0, 1e-20).forEach { ratio ->
+            val span = buildTracer(samplerDsl.probability(ratio)).startSpan("span")
+            assertFalse(span.isRecording(), "ratio $ratio should drop")
+            assertFalse(span.spanContext.traceFlags.isSampled, "ratio $ratio should drop")
+        }
+    }
+
+    @Test
     fun testParentBasedDescription() {
         val sampler = samplerDsl.parentBased(root = samplerDsl.alwaysOn())
         assertEquals(
@@ -79,6 +93,16 @@ internal class BuiltInSamplersTest {
                 "localParentNotSampled:AlwaysOffSampler}",
             sampler.description
         )
+    }
+
+    @Test
+    fun testParentBasedDescriptionReflectsDelegateChanges() {
+        val delegate = mutableDescriptionSampler("initial")
+        val sampler = samplerDsl.parentBased(root = delegate)
+
+        assertTrue(sampler.description.contains("root:initial"))
+        delegate.description = "updated"
+        assertTrue(sampler.description.contains("root:updated"))
     }
 
     @Test
@@ -128,10 +152,20 @@ internal class BuiltInSamplersTest {
     }
 
     @Test
+    fun testAlwaysRecordSamplerDescriptionReflectsDelegateChanges() {
+        val delegate = mutableDescriptionSampler("initial")
+        val sampler = samplerDsl.alwaysRecord(root = delegate)
+
+        assertEquals("AlwaysRecordSampler{initial}", sampler.description)
+        delegate.description = "updated"
+        assertEquals("AlwaysRecordSampler{updated}", sampler.description)
+    }
+
+    @Test
     fun testAlwaysRecordSamplerDrop() {
         val fakeSampler = FakeSampler(SamplingResult.Decision.DROP)
         val result = samplerDsl.alwaysRecord(root = fakeSampler).shouldSample(
-            context = contextFactory.root(),
+            context = rootContext(),
             traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
@@ -145,7 +179,7 @@ internal class BuiltInSamplersTest {
     fun testAlwaysRecordSamplerRecordOnly() {
         val fakeSampler = FakeSampler(SamplingResult.Decision.RECORD_ONLY)
         val result = samplerDsl.alwaysRecord(root = fakeSampler).shouldSample(
-            context = contextFactory.root(),
+            context = rootContext(),
             traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
@@ -159,7 +193,7 @@ internal class BuiltInSamplersTest {
     fun testAlwaysRecordSamplerRecordAndSample() {
         val fakeSampler = FakeSampler(SamplingResult.Decision.RECORD_AND_SAMPLE)
         val result = samplerDsl.alwaysRecord(root = fakeSampler).shouldSample(
-            context = contextFactory.root(),
+            context = rootContext(),
             traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
@@ -178,7 +212,7 @@ internal class BuiltInSamplersTest {
             samplerTraceState = traceState,
         )
         val result = samplerDsl.alwaysRecord(root = fakeSampler).shouldSample(
-            context = contextFactory.root(),
+            context = rootContext(),
             traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
@@ -189,4 +223,9 @@ internal class BuiltInSamplersTest {
         assertEquals("value", result.attributes.attributes["key"])
         assertEquals("data", result.traceState.get("vendor"))
     }
+
+    private fun mutableDescriptionSampler(initialDescription: String) =
+        object : Sampler by FakeSampler() {
+            override var description: String = initialDescription
+        }
 }

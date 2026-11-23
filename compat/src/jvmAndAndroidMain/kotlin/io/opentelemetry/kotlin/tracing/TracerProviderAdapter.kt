@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.tracing
 
+import io.opentelemetry.kotlin.COMPAT_DEFAULT_TIMEOUT_MS
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.NoopOpenTelemetry
@@ -13,17 +14,14 @@ import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.TelemetryCloseable
-import io.opentelemetry.kotlin.factory.ContextFactory
-import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.scope.scopeCacheKey
 import java.util.concurrent.ConcurrentHashMap
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class TracerProviderAdapter(
     private val tracerProvider: OtelJavaTracerProvider,
-    private val spanLimitsConfig: CompatSpanLimitsConfig,
-    private val contextFactory: ContextFactory,
     private val sdkErrorHandler: SdkErrorHandler,
+    private val timeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS,
 ) : TracerProvider, TelemetryCloseable {
 
     private val map = ConcurrentHashMap<InstrumentationScopeInfo, TracerAdapter>()
@@ -42,7 +40,7 @@ internal class TracerProviderAdapter(
             schemaUrl?.let(tracerBuilder::setSchemaUrl)
             version?.let(tracerBuilder::setInstrumentationVersion)
             val tracer = tracerBuilder.build()
-            TracerAdapter(tracer, spanLimitsConfig, contextFactory, sdkErrorHandler)
+            TracerAdapter(tracer, sdkErrorHandler)
         }
     }
 
@@ -51,7 +49,7 @@ internal class TracerProviderAdapter(
             OperationResultCode.Failure,
             "TracerProvider.forceFlush failed",
         ) {
-            awaitOperationResultCode { tracerProvider.forceFlush() }
+            awaitOperationResultCode(timeoutMs) { tracerProvider.forceFlush() }
         }
         else -> OperationResultCode.Failure
     }
@@ -61,7 +59,7 @@ internal class TracerProviderAdapter(
             OperationResultCode.Failure,
             "TracerProvider.shutdown failed",
         ) {
-            awaitOperationResultCode { tracerProvider.shutdown() }
+            awaitOperationResultCode(timeoutMs) { tracerProvider.shutdown() }
         }
         else -> OperationResultCode.Failure
     }

@@ -6,8 +6,9 @@ import io.opentelemetry.kotlin.aliases.OtelJavaBaggage
 import io.opentelemetry.kotlin.aliases.OtelJavaContext
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapGetter
 import io.opentelemetry.kotlin.aliases.OtelJavaTextMapPropagator
-import io.opentelemetry.kotlin.context.ContextAdapter
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.context.toOtelJavaContext
+import io.opentelemetry.kotlin.context.toOtelKotlinContext
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -30,7 +31,7 @@ internal class TextMapPropagatorAdapterTest {
             .put("k", "v")
             .build()
             .storeInContext(OtelJavaContext.root())
-        val ktCtx = ContextAdapter(javaCtx)
+        val ktCtx = javaCtx.toOtelKotlinContext()
         val carrier = mutableMapOf<String, String>()
 
         TextMapPropagatorAdapter(impl).inject(ktCtx, carrier, MapSetter)
@@ -43,34 +44,34 @@ internal class TextMapPropagatorAdapterTest {
         val carrier = mapOf("baggage" to "k=v")
 
         val extracted = TextMapPropagatorAdapter(impl).extract(
-            ContextAdapter(OtelJavaContext.root()),
+            OtelJavaContext.root().toOtelKotlinContext(),
             carrier,
             MapGetter
         )
 
-        val javaCtx = (extracted as ContextAdapter).impl
+        val javaCtx = extracted.toOtelJavaContext()
         assertEquals("v", OtelJavaBaggage.fromContext(javaCtx).getEntryValue("k"))
     }
 
     @Test
-    fun `extract returns ContextAdapter wrapping Java context`() {
+    fun `extract exposes extracted baggage to Kotlin`() {
         val extracted = TextMapPropagatorAdapter(impl).extract(
-            ContextAdapter(OtelJavaContext.root()),
+            OtelJavaContext.root().toOtelKotlinContext(),
             mapOf("baggage" to "k=v"),
             MapGetter
         )
-        assertTrue(extracted is ContextAdapter)
+        assertEquals("v", extracted.extractBaggage().getValue("k"))
     }
 
     @Test
     fun `extract on malformed input returns input context unchanged`() {
-        val input = ContextAdapter(OtelJavaContext.root())
+        val input = OtelJavaContext.root().toOtelKotlinContext()
         val extracted = TextMapPropagatorAdapter(impl).extract(
             input,
             mapOf("baggage" to ""),
             MapGetter
         )
-        val javaCtx = (extracted as ContextAdapter).impl
+        val javaCtx = extracted.toOtelJavaContext()
         assertTrue(OtelJavaBaggage.fromContext(javaCtx).isEmpty)
     }
 
@@ -84,7 +85,7 @@ internal class TextMapPropagatorAdapterTest {
     }
 
     @Test
-    fun `extract adapts context that is not a ContextAdapter`() {
+    fun `extract adapts context that did not come from Java`() {
         var getterCalled = false
         val getter = object : TextMapGetter<Map<String, String>> {
             override fun keys(carrier: Map<String, String>): Collection<String> {

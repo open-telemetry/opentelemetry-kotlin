@@ -1,11 +1,21 @@
 package io.opentelemetry.kotlin
 
-import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import java.util.logging.Level
+import java.util.logging.Logger
 
-public actual fun platformLog(message: String, severity: SdkErrorSeverity, throwable: Throwable?) {
-    val prefix = when (severity) {
-        SdkErrorSeverity.INFO -> ""
-        SdkErrorSeverity.WARNING, SdkErrorSeverity.ERROR -> "[$severity] "
+private val logger = Logger.getLogger("io.opentelemetry.kotlin")
+
+public actual fun platformLog(message: String, level: PlatformLogLevel, throwable: Throwable?) {
+    val javaLevel = when (level) {
+        PlatformLogLevel.INFO -> Level.INFO
+        PlatformLogLevel.WARNING -> Level.WARNING
+        PlatformLogLevel.ERROR -> Level.SEVERE
     }
-    println("$prefix$message ${throwable?.stackTraceToString().orEmpty()}".trimEnd())
+    try {
+        logger.log(javaLevel, message, throwable)
+    } catch (ignored: Throwable) {
+        if (ignored is InterruptedException) {
+            Thread.currentThread().interrupt()
+        }
+    }
 }

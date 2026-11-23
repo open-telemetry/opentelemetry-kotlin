@@ -1,16 +1,16 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.exporter.logging.LoggingSpanExporter
-import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
-import io.opentelemetry.kotlin.behavior.LogRecordExporterBehavior
-import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
-import io.opentelemetry.kotlin.behavior.SimpleLogRecordProcessorBehavior
-import io.opentelemetry.kotlin.behavior.SimpleSpanProcessorBehavior
-import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
-import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
-import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.SimpleLogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SimpleSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
@@ -103,7 +103,13 @@ internal class CompatConsoleExporterConfigTest {
         val dslProcessor = FakeSpanProcessor()
         val provider = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             export { dslProcessor }
-            applyResolvedProcessor(SpanProcessorBehavior(console = ConsoleExporterBehavior()))
+            applyResolvedProcessor(
+                SpanProcessorBehavior(
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(console = ConsoleExporterBehavior()),
+                    )
+                )
+            )
         }.build(clock, idGenerator, spanLimits = noSpanLimits)
         provider.getTracer("test").startSpan("dsl-span").end()
         assertEquals(1, dslProcessor.endCalls.size)

@@ -22,10 +22,12 @@ internal class ResourceFactoryImpl(
 
     override val empty: Resource = ResourceImpl(AttributesModel(attributeLimit = NO_ATTRIBUTE_LIMIT), null)
 
-    override fun create(schemaUrl: String?, attributes: AttributesMutator.() -> Unit): Resource {
-        val attrs = AttributesModel(attributeLimit = NO_ATTRIBUTE_LIMIT).apply { attributes() }
-        return ResourceImpl(attrs, schemaUrl)
-    }
+    override fun create(schemaUrl: String?, attributes: AttributesMutator.() -> Unit): Resource =
+        sdkErrorHandler.sdkGuardOrDefault(empty, "ResourceFactory.create failed") {
+            val attrs = AttributesModel(attributeLimit = NO_ATTRIBUTE_LIMIT)
+            userCode { attrs.attributes() }
+            ResourceImpl(attrs, schemaUrl)
+        }
 
     override fun createEntity(
         type: String,

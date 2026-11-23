@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.config.yaml.tracing
 
-import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
-import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.OtlpHttpSpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
 import io.opentelemetry.kotlin.config.schema.model.BatchSpanProcessor
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
 import io.opentelemetry.kotlin.config.schema.model.NameStringValuePair
@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.config.schema.model.OtlpHttpExporter
 import io.opentelemetry.kotlin.config.schema.model.SpanExporter
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 internal class BatchSpanProcessorMapperTest {
 
@@ -18,12 +19,7 @@ internal class BatchSpanProcessorMapperTest {
     fun everyFieldStartsWithDefaultValue() {
         val behavior = BatchSpanProcessor(exporter = SpanExporter()).toBehavior()
         assertEquals(
-            BatchSpanProcessorBehavior(
-                scheduleDelay = BatchSpanProcessorBehavior.DEFAULT_SCHEDULE_DELAY,
-                exportTimeout = BatchSpanProcessorBehavior.DEFAULT_EXPORT_TIMEOUT,
-                maxQueueSize = BatchSpanProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE,
-                maxExportBatchSize = BatchSpanProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE
-            ),
+            BatchSpanProcessorBehavior(exporter = SpanExporterBehavior()),
             behavior
         )
     }
@@ -42,7 +38,8 @@ internal class BatchSpanProcessorMapperTest {
                 scheduleDelay = 100,
                 exportTimeout = 200,
                 maxQueueSize = 400,
-                maxExportBatchSize = 300
+                maxExportBatchSize = 300,
+                exporter = SpanExporterBehavior()
             ),
             behavior
         )
@@ -58,12 +55,7 @@ internal class BatchSpanProcessorMapperTest {
             exporter = SpanExporter()
         ).toBehavior()
         assertEquals(
-            BatchSpanProcessorBehavior(
-                scheduleDelay = BatchSpanProcessorBehavior.DEFAULT_SCHEDULE_DELAY,
-                exportTimeout = BatchSpanProcessorBehavior.DEFAULT_EXPORT_TIMEOUT,
-                maxQueueSize = BatchSpanProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE,
-                maxExportBatchSize = BatchSpanProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE
-            ),
+            BatchSpanProcessorBehavior(exporter = SpanExporterBehavior()),
             behavior
         )
     }
@@ -75,8 +67,8 @@ internal class BatchSpanProcessorMapperTest {
             maxExportBatchSize = Int.MAX_VALUE.toLong() + 1,
             exporter = SpanExporter()
         ).toBehavior()
-        assertEquals(BatchSpanProcessorBehavior.DEFAULT_MAX_QUEUE_SIZE, behavior.maxQueueSize)
-        assertEquals(BatchSpanProcessorBehavior.DEFAULT_MAX_EXPORT_BATCH_SIZE, behavior.maxExportBatchSize)
+        assertNull(behavior.maxQueueSize)
+        assertNull(behavior.maxExportBatchSize)
     }
 
     @Test

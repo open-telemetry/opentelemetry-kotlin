@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.context
 import io.opentelemetry.kotlin.ExperimentalApi
 
 @OptIn(ExperimentalApi::class)
-private val ROOT_CONTEXT: Context = ContextValue()
+private val ROOT_CONTEXT: Context = ContextValue(ProcessWideContextStorageSlot)
 
 /**
  * Returns the root [Context], which holds no values. The same instance is returned on every call.
@@ -16,4 +16,4 @@ private val ROOT_CONTEXT: Context = ContextValue()
  * https://opentelemetry.io/docs/specs/otel/context/
  */
 @ExperimentalApi
-internal fun rootContext(): Context = ROOT_CONTEXT
+public fun rootContext(): Context = ROOT_CONTEXT

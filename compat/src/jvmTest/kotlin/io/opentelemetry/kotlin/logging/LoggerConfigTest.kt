@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.logging
 
+import io.opentelemetry.kotlin.context.rootContext
 import io.opentelemetry.kotlin.framework.OtelKotlinHarness
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
@@ -85,7 +86,7 @@ internal class LoggerConfigTest {
         }
 
         val logger = harness.kotlinApi.loggerProvider.getLogger("test")
-        val unsampled = harness.kotlinApi.context.root()
+        val unsampled = rootContext()
             .storeSpan(harness.tracer.startSpan("unsampled"))
 
         assertFalse(logger.enabled(context = unsampled))

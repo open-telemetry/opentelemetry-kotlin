@@ -1,9 +1,5 @@
 package io.opentelemetry.example.app
 
-import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
-import io.opentelemetry.kotlin.tracing.export.SpanProcessor
-
 /**
  * Controls how the example app behaves.
  */
@@ -46,22 +42,4 @@ object AppConfig {
      * to the collector via OTLP/HTTP, otherwise telemetry will be printed to stdout.
      */
     val url: String? = null
-
-    @ExperimentalApi
-    internal var spanProcessor: SpanProcessor? = null
-
-    @ExperimentalApi
-    internal var logRecordProcessor: LogRecordProcessor? = null
-
-    @ExperimentalApi
-    suspend fun forceFlush() {
-        spanProcessor?.forceFlush()
-        logRecordProcessor?.forceFlush()
-    }
-
-    @ExperimentalApi
-    suspend fun shutdown() {
-        spanProcessor?.shutdown()
-        logRecordProcessor?.shutdown()
-    }
 }

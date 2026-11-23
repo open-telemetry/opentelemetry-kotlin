@@ -28,5 +28,12 @@ public sealed class StatusData(
      * The operation completed with an error. An optional description of the error may be provided.
      */
     @ThreadSafe
-    public class Error(description: String?) : StatusData(StatusCode.ERROR, description)
+    public class Error(description: String?) : StatusData(StatusCode.ERROR, description) {
+
+        override fun equals(other: Any?): Boolean = other is Error && description == other.description
+
+        override fun hashCode(): Int = description.hashCode()
+
+        override fun toString(): String = "Error(description=$description)"
+    }
 }

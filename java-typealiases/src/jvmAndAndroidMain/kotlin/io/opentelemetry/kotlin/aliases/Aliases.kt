@@ -8,6 +8,7 @@ import io.opentelemetry.api.baggage.BaggageBuilder
 import io.opentelemetry.api.baggage.BaggageEntry
 import io.opentelemetry.api.baggage.BaggageEntryMetadata
 import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.common.AttributeType
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.common.AttributesBuilder
 import io.opentelemetry.api.common.KeyValue
@@ -19,6 +20,7 @@ import io.opentelemetry.api.logs.Logger
 import io.opentelemetry.api.logs.LoggerBuilder
 import io.opentelemetry.api.logs.LoggerProvider
 import io.opentelemetry.api.logs.Severity
+import io.opentelemetry.api.metrics.BatchCallback
 import io.opentelemetry.api.metrics.DoubleCounter
 import io.opentelemetry.api.metrics.DoubleCounterBuilder
 import io.opentelemetry.api.metrics.DoubleGauge
@@ -114,6 +116,7 @@ typealias OtelJavaBaggageEntry = BaggageEntry
 typealias OtelJavaBaggageEntryMetadata = BaggageEntryMetadata
 typealias OtelJavaAttributes = Attributes
 typealias OtelJavaAttributeKey<T> = AttributeKey<T>
+typealias OtelJavaAttributeType = AttributeType
 typealias OtelJavaSpan = Span
 typealias OtelJavaSpanContext = SpanContext
 typealias OtelJavaTraceFlags = TraceFlags
@@ -157,6 +160,7 @@ typealias OtelJavaScopeConfigurator<T> = ScopeConfigurator<T>
 typealias OtelJavaMeterProvider = MeterProvider
 typealias OtelJavaMeterBuilder = MeterBuilder
 typealias OtelJavaMeter = Meter
+typealias OtelJavaBatchCallback = BatchCallback
 typealias OtelJavaDoubleCounter = DoubleCounter
 typealias OtelJavaLongCounter = LongCounter
 typealias OtelJavaDoubleCounterBuilder = DoubleCounterBuilder

@@ -1,21 +1,23 @@
 package io.opentelemetry.kotlin
 
-import io.opentelemetry.kotlin.clock.ClockAdapter
+import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.behavior.toMinimumSdkErrorSeverity
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.reportError
-import io.opentelemetry.kotlin.factory.CompatContextFactory
-import io.opentelemetry.kotlin.factory.CompatResourceFactory
 import io.opentelemetry.kotlin.init.CompatOpenTelemetryConfig
 import io.opentelemetry.kotlin.init.CompatSdkConfigFactory
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 import io.opentelemetry.kotlin.init.defaultCompatBehaviorReader
 
 /**
- * Constructs an [OpenTelemetry] instance that exposes OpenTelemetry as a Kotlin API. The SDK is
+ * Constructs an [OpenTelemetrySdk] instance that exposes OpenTelemetry as a Kotlin API. The SDK is
  * configured entirely via the Kotlin DSL. Under the hood all calls to the Kotlin API will be
  * delegated to an OpenTelemetry Java SDK implementation that this SDK will construct internally.
+ *
+ * The caller owns the returned instance and should call [OpenTelemetrySdk.shutdown] when telemetry
+ * is no longer needed.
  *
  * It's not possible to obtain a reference to the Java API using this function. If this is a
  * requirement because you have existing instrumentation, it's recommended to call
@@ -23,15 +25,15 @@ import io.opentelemetry.kotlin.init.defaultCompatBehaviorReader
  */
 @ExperimentalApi
 public fun createCompatOpenTelemetry(
-    clock: Clock = ClockAdapter(io.opentelemetry.sdk.common.Clock.getDefault()),
-    config: OpenTelemetryConfigDsl.() -> Unit = {}
-): OpenTelemetry {
-    val contextFactory = CompatContextFactory()
-
-    val cfg = CompatOpenTelemetryConfig(clock)
-    cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
-        cfg.config()
+    config: (OpenTelemetryConfigDsl.() -> Unit)? = null
+): OpenTelemetrySdk {
+    val cfg = CompatOpenTelemetryConfig()
+    if (config != null) {
+        cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
+            cfg.config()
+        }
     }
+    val clock = cfg.clock
     if (cfg.contextConfigured) {
         cfg.sdkErrorHandler.reportError(
             SdkError.ApiMisuse(
@@ -42,20 +44,33 @@ public fun createCompatOpenTelemetry(
             )
         )
     }
-    val behavior = defaultCompatBehaviorReader(sdkErrorHandler = cfg.sdkErrorHandler)
-        .read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
+    val behavior = defaultCompatBehaviorReader(
+        sdkErrorHandler = cfg.sdkErrorHandler,
+        declarativeConfigReader = cfg.declarativeConfigReader,
+    ).read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
+
+    cfg.minimumErrorSeverity = (behavior.logLevel ?: OpenTelemetryBehavior.DEFAULT_LOG_LEVEL).toMinimumSdkErrorSeverity()
+
+    if (behavior.disabled == true) {
+        return NoopOpenTelemetrySdk
+    }
 
     // configFactory is legacy - use behavior to control SDK functionality instead
-    val configFactory = CompatSdkConfigFactory(cfg, behavior, clock, contextFactory)
+    val configFactory = CompatSdkConfigFactory(cfg, behavior, clock)
+    val tracerProvider = configFactory.buildTracerProvider()
+    val loggerProvider = configFactory.buildLoggerProvider()
+    val meterProvider = configFactory.buildMeterProvider()
+
+    // claim process-wide state last, so that a failure earlier in init doesn't leave it claimed.
+    val processWideState = claimCompatProcessWideState("createCompatOpenTelemetry", cfg.sdkErrorHandler)
     return CompatOpenTelemetryImpl(
-        tracerProvider = configFactory.buildTracerProvider(),
-        loggerProvider = configFactory.buildLoggerProvider(),
-        meterProvider = configFactory.buildMeterProvider(),
+        tracerProvider = tracerProvider,
+        loggerProvider = loggerProvider,
+        meterProvider = meterProvider,
         clock = clock,
-        context = contextFactory,
-        idGenerator = configFactory.idGenerator,
-        resource = CompatResourceFactory,
-        propagator = cfg.propagator,
+        propagator = cfg.createPropagator(),
         sdkErrorHandler = cfg.sdkErrorHandler,
+        processWideState = processWideState,
+        timeoutMs = cfg.shutdownTimeoutMs,
     )
 }

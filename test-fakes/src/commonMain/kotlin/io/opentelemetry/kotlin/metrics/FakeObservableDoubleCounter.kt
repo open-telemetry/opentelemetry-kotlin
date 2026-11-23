@@ -6,6 +6,8 @@ class FakeObservableDoubleCounter(
     override val description: String? = null,
     initialCallbacks: List<(ObservableDoubleMeasurement) -> Unit> = emptyList(),
 ) : ObservableDoubleCounter {
+    override val measurement = FakeObservableDoubleMeasurement()
+
     private val callbackRegistry = FakeAsynchronousCallbackRegistry<ObservableDoubleMeasurement>()
 
     val callbacks: List<(ObservableDoubleMeasurement) -> Unit>

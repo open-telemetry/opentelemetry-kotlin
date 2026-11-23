@@ -5,7 +5,6 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
-import io.opentelemetry.kotlin.factory.FakeContextFactory
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.resource.FakeResource
@@ -46,7 +45,6 @@ internal class SpanAttributesTest {
         tracer = TracerImpl(
             clock = FakeClock(),
             processor = FakeSpanProcessor(),
-            contextFactory = FakeContextFactory(),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = spanLimitConfig,
@@ -226,7 +224,6 @@ internal class SpanAttributesTest {
         return TracerImpl(
             clock = FakeClock(),
             processor = FakeSpanProcessor(),
-            contextFactory = FakeContextFactory(),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = config,

@@ -30,7 +30,7 @@
     "resource": {
       "schemaUrl": "SEMCONV_SCHEMA_URL",
       "attributes": {
-        "service.name": "unknown_service:kotlin",
+        "service.name": "SDK_DEFAULT_SERVICE_NAME",
         "telemetry.sdk.name": "opentelemetry",
         "telemetry.sdk.language": "kotlin",
         "telemetry.sdk.version": "UNKNOWN",
@@ -75,7 +75,7 @@
     "resource": {
       "schemaUrl": "SEMCONV_SCHEMA_URL",
       "attributes": {
-        "service.name": "unknown_service:kotlin",
+        "service.name": "SDK_DEFAULT_SERVICE_NAME",
         "telemetry.sdk.name": "opentelemetry",
         "telemetry.sdk.language": "kotlin",
         "telemetry.sdk.version": "UNKNOWN",

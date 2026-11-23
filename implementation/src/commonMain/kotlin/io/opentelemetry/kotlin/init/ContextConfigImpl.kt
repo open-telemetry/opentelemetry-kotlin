@@ -1,29 +1,33 @@
 package io.opentelemetry.kotlin.init
 
-import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.CurrentContextStorage
-import io.opentelemetry.kotlin.context.CurrentContextStorageMode
-import io.opentelemetry.kotlin.context.SingleSlotCurrentContextStorage
-import io.opentelemetry.kotlin.context.ThreadLocalCurrentContextStorage
-
-internal val DEFAULT_STORAGE_MODE = CurrentContextStorageMode.SINGLE_SLOT
+import io.opentelemetry.kotlin.context.createSingleSlotCurrentContextStorage
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.guardOrDefault
+import kotlin.concurrent.Volatile
 
 internal class ContextConfigImpl : ContextConfigDsl {
-    override var storageMode: CurrentContextStorageMode? = null
 
-    private var customStorage: ((() -> Context) -> CurrentContextStorage)? = null
+    @Volatile private var storageSupplier: (() -> CurrentContextStorage)? = null
 
-    override fun storage(action: (rootSupplier: () -> Context) -> CurrentContextStorage) {
-        customStorage = action
+    override fun storage(action: () -> CurrentContextStorage) {
+        storageSupplier = action
     }
 
-    internal fun generateStorage(rootSupplier: () -> Context): CurrentContextStorage {
-        customStorage?.let { return it(rootSupplier) }
-        return when (storageMode ?: DEFAULT_STORAGE_MODE) {
-            CurrentContextStorageMode.SINGLE_SLOT -> SingleSlotCurrentContextStorage(rootSupplier)
-            CurrentContextStorageMode.THREAD_LOCAL -> ThreadLocalCurrentContextStorage(
-                rootSupplier
-            )
-        }
+    /**
+     * True if a storage was configured.
+     */
+    internal val explicitlyConfigured: Boolean
+        get() = storageSupplier != null
+
+    /**
+     * Invokes the configured supplier. Falls back to single-slot storage if no supplier was
+     * configured, or if the supplier throws.
+     */
+    internal fun generateStorage(sdkErrorHandler: SdkErrorHandler): CurrentContextStorage {
+        val supplier = storageSupplier ?: return createSingleSlotCurrentContextStorage()
+        return sdkErrorHandler.guardOrDefault(null, "Failed to create CurrentContextStorage, using default") {
+            supplier()
+        } ?: createSingleSlotCurrentContextStorage()
     }
 }

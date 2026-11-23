@@ -35,7 +35,7 @@ internal class SpanProcessOnStartOverrideTest {
     @Test
     fun testOverridePropertiesInProcessor() = runTest {
         harness.config.spanProcessors.add(OnStartSpanProcessor())
-        harness.tracer.startSpan("span", null, SpanKind.INTERNAL, null) {
+        harness.tracer.startSpan("span", null, SpanKind.INTERNAL, 0) {
             setStringAttribute("key", "value")
             addLink(FakeSpanContext.INVALID)
         }
@@ -57,7 +57,7 @@ internal class SpanProcessOnStartOverrideTest {
             // assert properties can be read
             assertEquals("span", name)
             assertEquals(StatusData.Unset, status)
-            assertFalse(hasEnded)
+            assertFalse(isEnded)
             assertEquals(SpanKind.INTERNAL, spanKind)
             assertEquals(0, startTimestamp)
             assertNull(endTimestamp)

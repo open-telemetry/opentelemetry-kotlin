@@ -34,6 +34,11 @@ internal class OtelJavaLongUpDownCounterBuilderAdapter(
     override fun build(): OtelJavaLongUpDownCounter =
         OtelJavaLongUpDownCounterAdapter(meter.createLongUpDownCounter(name, unit, description))
 
+    override fun buildObserver(): OtelJavaObservableLongMeasurement =
+        OtelJavaObservableLongMeasurementAdapter(
+            meter.createObservableLongUpDownCounter(name, unit, description).measurement
+        )
+
     override fun buildWithCallback(
         callback: Consumer<OtelJavaObservableLongMeasurement>,
     ): OtelJavaObservableLongUpDownCounter {

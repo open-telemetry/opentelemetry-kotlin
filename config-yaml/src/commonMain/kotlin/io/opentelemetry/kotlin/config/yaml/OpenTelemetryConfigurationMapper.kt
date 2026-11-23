@@ -7,23 +7,27 @@ import io.opentelemetry.kotlin.config.schema.model.OpenTelemetryConfiguration
 import io.opentelemetry.kotlin.config.schema.model.SeverityNumber
 import io.opentelemetry.kotlin.config.yaml.logging.toBehavior
 import io.opentelemetry.kotlin.config.yaml.tracing.toBehavior
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 
 /**
  * Maps a declarative config file onto the behavior it supplies, as one layer.
  */
-@ExperimentalApi
-fun OpenTelemetryConfiguration.toBehavior(): OpenTelemetryBehavior = OpenTelemetryBehavior(
+@OptIn(ExperimentalApi::class)
+fun OpenTelemetryConfiguration.toBehavior(
+    sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
+): OpenTelemetryBehavior = OpenTelemetryBehavior(
     fileFormat = fileFormat,
     disabled = disabled,
     logLevel = logLevel?.toSeverityLevel(),
     distribution = distribution,
     attributeLimits = attributeLimits?.toBehavior(),
-    resource = resource?.toBehavior(),
+    resource = resource?.toBehavior(sdkErrorHandler),
     loggerProvider = loggerProvider?.toBehavior(),
     tracerProvider = tracerProvider?.toBehavior(),
 )
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal fun SeverityNumber.toSeverityLevel(): SeverityLevel? = when (this) {
     SeverityNumber.TRACE -> SeverityLevel.TRACE
     SeverityNumber.TRACE2 -> SeverityLevel.TRACE2

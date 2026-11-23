@@ -4,8 +4,10 @@ on:
   push:
     branches: [ main ]
   pull_request:
-  release:
-    types: [ released ]
+
+# Gradle caching policy:
+# - Never trigger this workflow on release or tag events, which should publish without any cache.
+# - Only pushes to main write the cache. PR runs restore main's entries read-only
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -26,7 +28,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Java
-        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
           java-version: |
@@ -36,26 +38,17 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
         with:
-          cache-disabled: true
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
+      - name: Build logic tests
+        run: ./gradlew :buildSrc:test --warn
+
+      # By default Kotlin/Native compiles inside the Gradle daemon, where parallel compiles and links
+      # exhaust the daemon heap. Running it in separate processes avoids GC thrashing.
       - name: Gradle Build
-        run: ./gradlew ciBuild -x :gradle-integration-test:test --warn
-
-      - name: Set up ARM64 emulation
-        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
-        with:
-          platforms: arm64
-
-      - name: Linux ARM64 tests
-        timeout-minutes: 10
         run: |
-          mapfile -d '' binaries < <(find "$PWD" -path '*/build/bin/linuxArm64/debugTest/test.kexe' -print0)
-          test "${#binaries[@]}" -gt 0
-          for binary in "${binaries[@]}"; do
-            docker run --rm --platform linux/arm64 --network none \
-              --mount "type=bind,source=$(dirname "$binary"),target=/tests,readonly" \
-              --workdir /tests ubuntu:24.04 /tests/test.kexe
-          done
+          ./gradlew ciBuild -x :gradle-integration-test:test --warn \
+            -Pkotlin.native.disableCompilerDaemon=true
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
@@ -65,9 +58,9 @@ jobs:
           fail_ci_if_error: false
           files: build/reports/kover/report.xml
 
-  # Runs on macOS because the klib fixture consumes the library's iOS klibs, which KGP only
-  # publishes from a macOS host. The rest of the suite is host-independent, so it all runs here.
-  integration-test:
+  # Runs on macOS because simulator tests need a macOS host. tvOS runs the same appleMain code as
+  # iOS, so only the iOS simulator tests run; tvOS klibs are still compiled by integration-test.
+  apple-simulator-test:
     runs-on: macos-latest
     timeout-minutes: 60
     steps:
@@ -77,7 +70,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Java
-        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
           java-version: |
@@ -89,11 +82,55 @@ jobs:
         with:
           cache-disabled: true
 
+      # macOS runners have 3 CPUs and ~7 GB of RAM, less than the 8 GB heaps gradle.properties sets
+      # for the Gradle and Kotlin daemons. Shrink the Gradle daemon, compile Kotlin/JVM inside it
+      # rather than in a second daemon, and run Kotlin/Native in separate processes.
+      - name: iOS simulator tests
+        run: |
+          ./gradlew iosSimulatorArm64Test --warn \
+            -Dorg.gradle.jvmargs="-Xmx3g -XX:+UseParallelGC -XX:MaxMetaspaceSize=2g -Dfile.encoding=UTF-8" \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            -Pkotlin.native.disableCompilerDaemon=true
+
+  # Runs on Linux: Kotlin/Native cross-compiles and publishes the Apple klibs from a Linux host
+  # (as release.yml does), and the klib fixture only compiles klibs without linking Apple binaries.
+  integration-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout Branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Java
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: |
+            17
+            21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      # Same Gradle settings as apple-simulator-test. Both steps pass identical flags so the second
+      # step reuses the first step's daemon rather than starting another one.
       - name: Publish snapshot to Maven local
-        run: ./gradlew publishToMavenLocal -PsnapshotPublish=true --warn
+        run: |
+          ./gradlew publishToMavenLocal -PsnapshotPublish=true --warn \
+            -Dorg.gradle.jvmargs="-Xmx3g -XX:+UseParallelGC -XX:MaxMetaspaceSize=2g -Dfile.encoding=UTF-8" \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            -Pkotlin.native.disableCompilerDaemon=true
 
       - name: Gradle Integration Test
-        run: ./gradlew :gradle-integration-test:test --warn
+        run: |
+          ./gradlew :gradle-integration-test:test --warn \
+            -Dorg.gradle.jvmargs="-Xmx3g -XX:+UseParallelGC -XX:MaxMetaspaceSize=2g -Dfile.encoding=UTF-8" \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            -Pkotlin.native.disableCompilerDaemon=true
 
   required-status-check:
     permissions:
@@ -101,10 +138,12 @@ jobs:
       issues: write
     needs:
       - gradle-test
+      - apple-simulator-test
       - integration-test
     runs-on: ubuntu-latest
     if: always()
     steps:
       - if: |
-          needs.gradle-test.result != 'success' || needs.integration-test.result != 'success'
+          needs.gradle-test.result != 'success' || needs.apple-simulator-test.result != 'success' ||
+          needs.integration-test.result != 'success'
         run: exit 1

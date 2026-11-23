@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class DoubleUpDownCounterAdapter(
     private val impl: OtelJavaDoubleUpDownCounter,
     override val name: String,
@@ -21,10 +21,14 @@ internal class DoubleUpDownCounterAdapter(
             impl.isEnabled()
         }
 
-    override fun add(value: Double, attributes: AttributesMutator.() -> Unit) {
+    override fun add(value: Double, attributes: (AttributesMutator.() -> Unit)?) {
         sdkErrorHandler.sdkGuard("DoubleUpDownCounter.add failed") {
-            val container = compatAttributes(attributes)
-            impl.add(value, container.otelJavaAttributes())
+            if (attributes == null) {
+                impl.add(value)
+            } else {
+                val container = compatAttributes(attributes)
+                impl.add(value, container.otelJavaAttributes())
+            }
         }
     }
 }

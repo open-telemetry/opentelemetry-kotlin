@@ -16,8 +16,16 @@ dependencies {
     implementation(libs.agp)
     implementation(libs.detekt.gradle.plugin)
     implementation(libs.mavenPublish)
-    implementation(libs.binary.compatibility.validator)
     implementation(libs.kotlinpoet)
+
+    testImplementation(kotlin("test"))
+    testImplementation(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 gradlePlugin {

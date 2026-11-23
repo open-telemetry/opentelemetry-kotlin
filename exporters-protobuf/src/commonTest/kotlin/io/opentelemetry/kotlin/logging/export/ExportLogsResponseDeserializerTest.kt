@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.logging.export
 
-import io.opentelemetry.proto.collector.logs.v1.ExportLogsPartialSuccess
-import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse
+import io.opentelemetry.kotlin.proto.collector.logs.v1.ExportLogsPartialSuccess
+import io.opentelemetry.kotlin.proto.collector.logs.v1.ExportLogsServiceResponse
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

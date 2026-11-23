@@ -6,11 +6,10 @@ import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.compatAttributes
-import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanCreationAction
 import io.opentelemetry.kotlin.tracing.SpanLinkCompatImpl
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
+import io.opentelemetry.kotlin.tracing.toOtelJavaSpanContext
 
 /**
  * Holds the attributes and links supplied in the span creation lambda so that they can be
@@ -18,13 +17,10 @@ import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
  */
 @OptIn(ExperimentalApi::class)
 internal class CompatSpanCreationState(
-    private val spanLimitsConfig: CompatSpanLimitsConfig,
     private val attrs: CompatAttributesModel = CompatAttributesModel(),
 ) : SpanCreationAction, AttributesMutator by attrs, AttributeContainer by attrs {
 
     private val linksImpl = mutableListOf<SpanLinkCompatImpl>()
-
-    val links: List<SpanLink> get() = linksImpl.take(spanLimitsConfig.effectiveLinkCountLimit)
 
     override fun addLink(
         spanContext: SpanContext,

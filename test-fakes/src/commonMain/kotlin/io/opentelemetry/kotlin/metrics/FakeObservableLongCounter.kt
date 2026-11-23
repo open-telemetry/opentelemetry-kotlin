@@ -6,6 +6,8 @@ class FakeObservableLongCounter(
     override val description: String? = null,
     initialCallbacks: List<(ObservableLongMeasurement) -> Unit> = emptyList(),
 ) : ObservableLongCounter {
+    override val measurement = FakeObservableLongMeasurement()
+
     private val callbackRegistry = FakeAsynchronousCallbackRegistry<ObservableLongMeasurement>()
 
     val callbacks: List<(ObservableLongMeasurement) -> Unit>

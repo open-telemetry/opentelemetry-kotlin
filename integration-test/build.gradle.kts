@@ -15,6 +15,7 @@ kotlin {
                 implementation(project(":semconv"))
                 implementation(project(":exporters-core"))
                 implementation(project(":serializable-models"))
+                implementation(project(":sdk-common"))
                 implementation(libs.kotlin.serialization)
                 implementation(libs.kotlinx.coroutines)
                 implementation(libs.kotlinx.coroutines.test)

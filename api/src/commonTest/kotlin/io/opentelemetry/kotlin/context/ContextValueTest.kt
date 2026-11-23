@@ -94,6 +94,24 @@ internal class ContextValueTest {
     }
 
     @Test
+    fun testAttachDispatchesToInjectedSource() {
+        val attached = mutableListOf<Context>()
+        val storage = object : CurrentContextStorage {
+            override fun current(): Context = attached.lastOrNull() ?: rootContext()
+            override fun attach(context: Context): Scope {
+                attached += context
+                return UnattachedScope
+            }
+        }
+        val root = ContextValue({ storage })
+        val derived = root.set(createContextKey("key"), "value").storeBaggage(createBaggage())
+
+        root.attach()
+        derived.attach()
+        assertEquals(listOf<Context>(root, derived), attached)
+    }
+
+    @Test
     fun testExtractSpanFromRootReturnsInvalid() {
         val span = rootContext().extractSpan()
         assertEquals(createInvalidSpanContext(), span.spanContext)

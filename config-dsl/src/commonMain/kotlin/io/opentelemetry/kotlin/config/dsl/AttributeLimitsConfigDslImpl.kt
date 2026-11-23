@@ -2,13 +2,14 @@ package io.opentelemetry.kotlin.config.dsl
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
 import io.opentelemetry.kotlin.behavior.limitOrUnset
 import io.opentelemetry.kotlin.init.AttributeLimitsConfigDsl
 
 /**
  * Captures the global attribute limits configured programmatically, and maps them onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class AttributeLimitsConfigDslImpl :
     AttributeLimitsConfigDsl,
     BehaviorSupplier<AttributeLimitsBehavior> {

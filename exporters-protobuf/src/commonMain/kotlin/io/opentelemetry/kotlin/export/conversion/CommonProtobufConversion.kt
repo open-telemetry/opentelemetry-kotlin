@@ -1,21 +1,16 @@
 package io.opentelemetry.kotlin.export.conversion
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
-import io.opentelemetry.kotlin.factory.toHexString
 import io.opentelemetry.kotlin.propagation.utils.isAllZeroBytes
-import io.opentelemetry.kotlin.propagation.utils.isValidSpanIdBytes
-import io.opentelemetry.kotlin.propagation.utils.isValidTraceIdBytes
-import io.opentelemetry.kotlin.propagation.utils.SPAN_ID_BYTES
-import io.opentelemetry.kotlin.propagation.utils.TRACE_ID_BYTES
 import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateCodec
-import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateValidator
 import io.opentelemetry.kotlin.resource.MutableResource
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.TraceFlags
 import io.opentelemetry.kotlin.tracing.TraceState
-import io.opentelemetry.kotlin.tracing.model.hex
-import io.opentelemetry.proto.common.v1.InstrumentationScope
+import io.opentelemetry.kotlin.tracing.createSpanContext
+import io.opentelemetry.kotlin.tracing.hex
+import io.opentelemetry.kotlin.proto.common.v1.InstrumentationScope
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 
@@ -32,7 +27,7 @@ fun InstrumentationScopeInfo.toProtobuf(): InstrumentationScope = Instrumentatio
 )
 
 internal fun Resource.toProtobuf() =
-    io.opentelemetry.proto.resource.v1.Resource(attributes = attributes.createKeyValues())
+    io.opentelemetry.kotlin.proto.resource.v1.Resource(attributes = attributes.createKeyValues())
 
 internal fun InstrumentationScope.toInstrumentationScopeInfo(
     schemaUrl: String?
@@ -43,7 +38,7 @@ internal fun InstrumentationScope.toInstrumentationScopeInfo(
     attributes = attributes.toAttributeMap()
 )
 
-internal fun io.opentelemetry.proto.resource.v1.Resource.toResource(
+internal fun io.opentelemetry.kotlin.proto.resource.v1.Resource.toResource(
     schemaUrl: String? = null,
 ): Resource =
     DeserializedResource(
@@ -53,7 +48,13 @@ internal fun io.opentelemetry.proto.resource.v1.Resource.toResource(
 
 internal fun TraceFlags.toFlagsInt(): Int = hex.toInt(16)
 
-internal fun TraceState.toW3CString(): String = W3CTraceStateCodec.encode(asMap())
+internal fun TraceState.toW3CString(): String = W3CTraceStateCodec.encode(
+    try {
+        asMap()
+    } catch (exc: Throwable) {
+        emptyMap()
+    }
+)
 
 private class DeserializedInstrumentationScopeInfo(
     override val name: String,
@@ -86,42 +87,23 @@ private class DeserializedMutableResource(
     override var schemaUrl: String?,
 ) : MutableResource
 
-internal class DeserializedSpanContext(
+internal fun deserializedSpanContext(
     traceIdBytes: ByteArray,
     spanIdBytes: ByteArray,
     flags: Int = 0,
     traceStateString: String = "",
-    override val isRemote: Boolean = false,
-) : SpanContext {
-    override val traceIdBytes: ByteArray = if (traceIdBytes.isEmpty()) ByteArray(TRACE_ID_BYTES) else traceIdBytes
-    override val spanIdBytes: ByteArray = if (spanIdBytes.isEmpty()) ByteArray(SPAN_ID_BYTES) else spanIdBytes
-    override val traceId: String by lazy { this.traceIdBytes.toHexString() }
-    override val spanId: String by lazy { this.spanIdBytes.toHexString() }
-    override val traceFlags: TraceFlags = DeserializedTraceFlags(flags and 0xFF)
-    override val isValid: Boolean by lazy {
-        this.traceIdBytes.isValidTraceIdBytes() && this.spanIdBytes.isValidSpanIdBytes()
-    }
-    override val traceState: TraceState by lazy {
-        DeserializedTraceState(W3CTraceStateCodec.decode(traceStateString))
+    isRemote: Boolean = false,
+): SpanContext = createSpanContext(traceIdBytes, spanIdBytes) {
+    isSampled = (flags and SAMPLED_FLAG) != 0
+    isRandom = (flags and RANDOM_FLAG) != 0
+    this.isRemote = isRemote
+    if (traceStateString.isNotEmpty()) {
+        val entries = W3CTraceStateCodec.decode(traceStateString)
+        traceState {
+            entries.forEach { (key, value) -> put(key, value) }
+        }
     }
 }
 
-private class DeserializedTraceFlags(value: Int) : TraceFlags {
-    override val isSampled: Boolean = (value and 0x01) != 0
-    override val isRandom: Boolean = (value and 0x02) != 0
-}
-
-private class DeserializedTraceState(private val entries: Map<String, String>) : TraceState {
-    override fun get(key: String): String? = entries[key]
-    override fun asMap(): Map<String, String> = entries
-    override fun put(key: String, value: String): TraceState = when {
-        W3CTraceStateValidator.canPut(entries, key, value) ->
-            DeserializedTraceState(entries + (key to value))
-        else -> this
-    }
-
-    override fun remove(key: String): TraceState = when {
-        entries.containsKey(key) -> DeserializedTraceState(entries - key)
-        else -> this
-    }
-}
+private const val SAMPLED_FLAG = 0x01
+private const val RANDOM_FLAG = 0x02

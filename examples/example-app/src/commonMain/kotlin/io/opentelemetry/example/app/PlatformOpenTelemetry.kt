@@ -1,8 +1,7 @@
 package io.opentelemetry.example.app
 
-import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.OpenTelemetry
+import io.opentelemetry.kotlin.OpenTelemetrySdk
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 
 /**
@@ -11,8 +10,8 @@ import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
  * KMP SDK, Java SDK (via compat module), or no-op.
  * On other platforms, COMPAT mode is not supported and will throw an exception.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal expect fun createPlatformOpenTelemetry(
     sdkMode: AppConfig.SdkMode,
     config: OpenTelemetryConfigDsl.() -> Unit
-): OpenTelemetry
+): OpenTelemetrySdk

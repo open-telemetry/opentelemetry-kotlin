@@ -67,8 +67,14 @@ public fun OtlpHttpExporterConfigDsl.configureTls(
     val sslContext = SSLContext.getInstance("TLS").apply {
         init(keyManagers, arrayOf(trustManager), null)
     }
-    httpClientEngine = OkHttp.create {
+    val engine = OkHttp.create {
         config { sslSocketFactory(sslContext.socketFactory, trustManager) }
+    }
+    httpClientEngine = engine
+    (this as? OtlpHttpExporterConfig)?.let { config ->
+        val previous = config.sdkOwnedEngine
+        config.sdkOwnedEngine = engine
+        previous?.close()
     }
 }
 

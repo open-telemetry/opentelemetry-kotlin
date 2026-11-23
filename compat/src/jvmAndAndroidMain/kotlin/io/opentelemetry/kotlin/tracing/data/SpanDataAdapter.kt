@@ -10,9 +10,9 @@ import io.opentelemetry.kotlin.scope.toOtelKotlinInstrumentationScopeInfo
 import io.opentelemetry.kotlin.tracing.SpanContext
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.StatusData
-import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinStatusData
+import io.opentelemetry.kotlin.tracing.toOtelKotlinSpanContext
 
 internal class SpanDataAdapter(
     val impl: OtelJavaSpanData,
@@ -31,6 +31,6 @@ internal class SpanDataAdapter(
     override val droppedLinksCount: Int = droppedCount(impl.totalRecordedLinks, impl.links.size)
     override val resource: Resource = ResourceAdapter(impl.resource)
     override val instrumentationScopeInfo: InstrumentationScopeInfo = impl.instrumentationScopeInfo.toOtelKotlinInstrumentationScopeInfo()
-    override val hasEnded: Boolean = impl.hasEnded()
+    override val isEnded: Boolean = impl.hasEnded()
     override val droppedAttributesCount: Int = droppedCount(impl.totalAttributeCount, impl.attributes.size())
 }

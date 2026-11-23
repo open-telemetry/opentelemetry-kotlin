@@ -3,8 +3,11 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
+import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.context.Context
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
+import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -22,8 +25,6 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
 internal class ComposableRuleBasedSamplerTest {
-
-    private val contextFactory = ContextFactoryImpl()
 
     private val samplerDsl = SamplerConfigImpl()
 
@@ -60,6 +61,20 @@ internal class ComposableRuleBasedSamplerTest {
     }
 
     @Test
+    fun `throwing predicate is treated as no match and the next rule is tried`() {
+        val errorHandler = FakeSdkErrorHandler()
+        val sampler = SamplerConfigImpl(errorHandler).composableRuleBased {
+            rule({ _, _, _, _, _ -> error("boom") }) { composableAlwaysOff() }
+            rule(matchesEverything) { composableAlwaysOn() }
+        }
+
+        val intent = sampler.intentFor()
+        assertEquals(0L, intent.threshold)
+        assertTrue(intent.adjustedCountReliable)
+        assertEquals("boom", errorHandler.userCodeErrors.single().cause.message)
+    }
+
+    @Test
     fun `returns non sampling intent when no rule matches`() {
         val sampler = samplerDsl.composableRuleBased {
             rule(matchesNothing) { composableAlwaysOn() }
@@ -84,7 +99,7 @@ internal class ComposableRuleBasedSamplerTest {
                 rule({ _, name, _, _, _ -> name == "other" }) { composableAlwaysOn() }
             }
         }.shouldSample(
-            context = contextFactory.root(),
+            context = rootContext(),
             traceIdBytes = traceId.hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
@@ -103,7 +118,7 @@ internal class ComposableRuleBasedSamplerTest {
                 rule({ _, name, _, _, _ -> name == "span" }) { composableAlwaysOn() }
             }
         }.shouldSample(
-            context = contextFactory.root(),
+            context = rootContext(),
             traceIdBytes = traceId.hexToByteArray(),
             name = "span",
             spanKind = SpanKind.INTERNAL,
@@ -152,7 +167,9 @@ internal class ComposableRuleBasedSamplerTest {
 
         val context = contextWithParent(sampled = true, isRemote = true)
         val attributes = AttributesModel().apply { setStringAttribute("http.route", "/checkout") }
-        val links = listOf(SpanLinkImpl(createInvalidSpanContext(), AttributesModel()))
+        val links = listOf(
+            SpanLinkImpl(createInvalidSpanContext(), DEFAULT_ATTRIBUTE_LIMIT, DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT)
+        )
         sampler.intentFor(
             context = context,
             name = "checkout",
@@ -244,11 +261,11 @@ internal class ComposableRuleBasedSamplerTest {
             }
         }
         val parentSpan = createNonRecordingSpan(parentSpanContext)
-        return contextFactory.root().storeSpan(parentSpan)
+        return rootContext().storeSpan(parentSpan)
     }
 
     private fun ComposableSampler.intentFor(
-        context: Context = contextFactory.root(),
+        context: Context = rootContext(),
         name: String = "span",
         spanKind: SpanKind = SpanKind.INTERNAL,
         attributes: AttributeContainer = AttributesModel(),

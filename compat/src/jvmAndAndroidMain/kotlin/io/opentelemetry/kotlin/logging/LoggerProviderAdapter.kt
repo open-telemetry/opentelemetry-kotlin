@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.logging
 
+import io.opentelemetry.kotlin.COMPAT_DEFAULT_TIMEOUT_MS
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.NoopOpenTelemetry
@@ -16,10 +17,11 @@ import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.scope.scopeCacheKey
 import java.util.concurrent.ConcurrentHashMap
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class LoggerProviderAdapter(
     private val impl: OtelJavaLoggerProvider,
     private val sdkErrorHandler: SdkErrorHandler,
+    private val timeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS,
 ) : LoggerProvider, TelemetryCloseable {
 
     private val map = ConcurrentHashMap<InstrumentationScopeInfo, LoggerAdapter>()
@@ -50,7 +52,7 @@ internal class LoggerProviderAdapter(
             OperationResultCode.Failure,
             "LoggerProvider.forceFlush failed",
         ) {
-            awaitOperationResultCode { impl.forceFlush() }
+            awaitOperationResultCode(timeoutMs) { impl.forceFlush() }
         }
         else -> OperationResultCode.Failure
     }
@@ -60,7 +62,7 @@ internal class LoggerProviderAdapter(
             OperationResultCode.Failure,
             "LoggerProvider.shutdown failed",
         ) {
-            awaitOperationResultCode { impl.shutdown() }
+            awaitOperationResultCode(timeoutMs) { impl.shutdown() }
         }
         else -> OperationResultCode.Failure
     }

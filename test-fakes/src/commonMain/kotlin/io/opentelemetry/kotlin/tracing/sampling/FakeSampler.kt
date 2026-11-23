@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.context.Context
+import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.tracing.FakeTraceState
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.TraceState
@@ -11,7 +12,11 @@ class FakeSampler(
     private val decision: SamplingResult.Decision = SamplingResult.Decision.RECORD_AND_SAMPLE,
     private val samplerAttributes: Map<String, Any> = emptyMap(),
     private val samplerTraceState: TraceState = FakeTraceState(emptyMap()),
+    private val shutdownCode: () -> OperationResultCode = { OperationResultCode.Success },
 ) : Sampler {
+
+    var shutdownCount = 0
+        private set
 
     var callCount = 0
         private set
@@ -37,6 +42,11 @@ class FakeSampler(
     }
 
     override val description: String = "FakeSampler"
+
+    override suspend fun shutdown(): OperationResultCode {
+        shutdownCount++
+        return shutdownCode()
+    }
 
     private class FakeSamplingResult(
         override val decision: SamplingResult.Decision,

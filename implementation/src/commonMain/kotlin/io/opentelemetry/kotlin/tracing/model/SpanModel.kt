@@ -25,7 +25,6 @@ import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
-import io.opentelemetry.kotlin.tracing.frozenCopy
 import io.opentelemetry.kotlin.tracing.toSnapshot
 
 /**
@@ -227,7 +226,7 @@ internal class SpanModel(
                 return
             }
             // avoid running user code under the lock
-            val link = buildSpanLink(spanContext, attributes, spanLimitConfig) ?: return
+            val link = buildSpanLink(spanContext, attributes, spanLimitConfig, sdkErrorHandler) ?: return
             mutate("Span.addLink failed") {
                 if (linksList.size < spanLimitConfig.linkCountLimit) {
                     linksList.add(link)
@@ -240,7 +239,7 @@ internal class SpanModel(
 
     override fun addEvent(
         name: String,
-        timestamp: Long?,
+        timestamp: Long,
         attributes: (AttributesMutator.() -> Unit)?
     ) {
         sdkErrorHandler.sdkGuard("Span.addEvent failed") {
@@ -252,15 +251,19 @@ internal class SpanModel(
                 return
             }
             // avoid running user code under the lock
-            val eventTimestamp = timestamp?.takeIf { it > 0 } ?: userCode { clock.now() }
-            val container = AttributesModel(
+            val eventTimestamp = when {
+                timestamp > 0 -> timestamp
+                else -> userCode { clock.now() }
+            }
+            val event = SpanEventImpl(
+                name = name,
+                timestamp = eventTimestamp,
                 attributeLimit = spanLimitConfig.attributeCountPerEventLimit,
-                attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit
+                attributeValueLengthLimit = spanLimitConfig.attributeValueLengthLimit,
             )
             if (attributes != null) {
-                userCode { attributes(container) }
+                sdkErrorHandler.guard("Span event attributes failed") { attributes(event) }
             }
-            val event = SpanEventImpl(name, eventTimestamp, container)
             mutate("Span.addEvent failed") {
                 if (eventsList.size < spanLimitConfig.eventCountLimit) {
                     eventsList.add(event)
@@ -300,7 +303,7 @@ internal class SpanModel(
             spanKind,
             startTimestamp,
             endTimestampImpl,
-            attrs.attributes.frozenCopy(),
+            attrs.attributes,
             eventsList.map { it.toSnapshot() },
             droppedEventsCountImpl,
             linksList.map { it.toSnapshot() },
@@ -317,7 +320,7 @@ internal class SpanModel(
     override val endTimestamp: Long?
         get() = lock.read { endTimestampImpl }
 
-    override val hasEnded: Boolean
+    override val isEnded: Boolean
         get() = lock.read { state == State.ENDED }
 
     private val attrs by lazy {

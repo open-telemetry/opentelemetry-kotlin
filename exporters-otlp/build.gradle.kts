@@ -19,15 +19,14 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(project(":sdk-api"))
+                api(project(":sdk-api"))
                 implementation(project(":sdk-common"))
                 implementation(project(":exporters-protobuf"))
                 implementation(project(":exporters-json"))
                 implementation(project(":serializable-models"))
                 implementation(project(":platform-implementations"))
-                implementation(libs.ktor.client.core)
-                implementation(libs.ktor.client.cio)
-                implementation(libs.ktor.client.content.negotiation)
+                implementation(project(":platform-io"))
+                api(libs.ktor.client.core)
                 implementation(libs.ktor.client.encoding)
             }
         }
@@ -41,6 +40,16 @@ kotlin {
         getByName("jvmAndAndroidMain") {
             dependencies {
                 implementation(libs.ktor.client.okhttp)
+            }
+        }
+        appleMain {
+            dependencies {
+                implementation(libs.ktor.client.darwin)
+            }
+        }
+        linuxMain {
+            dependencies {
+                implementation(libs.ktor.client.cio)
             }
         }
         linuxTest {

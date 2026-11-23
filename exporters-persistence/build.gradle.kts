@@ -10,12 +10,13 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(project(":sdk-api"))
+                api(project(":sdk-api"))
                 implementation(project(":sdk-common"))
                 implementation(project(":exporters-core"))
                 implementation(project(":exporters-otlp"))
                 implementation(project(":exporters-protobuf"))
                 implementation(project(":platform-implementations"))
+                implementation(project(":platform-io"))
                 implementation(libs.kotlinx.coroutines)
             }
         }

@@ -13,3 +13,12 @@ public actual fun getEnvVarValue(name: String): String? {
     val env = js("(typeof process !== 'undefined' && process) ? process.env : {}")
     return env[name] as? String
 }
+
+/**
+ * Evaluated on each access, so it reflects whether `process` is currently defined.
+ */
+public actual val supportsEnvVars: Boolean
+    get() = hasProcess()
+
+@Suppress("UnsafeCastFromDynamic")
+private fun hasProcess(): Boolean = js("typeof process !== 'undefined' && !!process")

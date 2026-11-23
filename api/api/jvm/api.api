@@ -1,13 +1,18 @@
 public abstract interface annotation class io/opentelemetry/kotlin/ExperimentalApi : java/lang/annotation/Annotation {
 }
 
+public abstract interface annotation class io/opentelemetry/kotlin/InternalApi : java/lang/annotation/Annotation {
+}
+
 public abstract interface class io/opentelemetry/kotlin/OpenTelemetry {
 	public abstract fun getConfigProvider ()Lio/opentelemetry/kotlin/config/ConfigProvider;
-	public abstract fun getContext ()Lio/opentelemetry/kotlin/factory/ContextFactory;
 	public abstract fun getLoggerProvider ()Lio/opentelemetry/kotlin/logging/LoggerProvider;
 	public abstract fun getMeterProvider ()Lio/opentelemetry/kotlin/metrics/MeterProvider;
 	public abstract fun getPropagator ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public abstract fun getTracerProvider ()Lio/opentelemetry/kotlin/tracing/TracerProvider;
+}
+
+public abstract interface annotation class io/opentelemetry/kotlin/OpenTelemetryDsl : java/lang/annotation/Annotation {
 }
 
 public abstract interface annotation class io/opentelemetry/kotlin/ThreadSafe : java/lang/annotation/Annotation {
@@ -43,7 +48,7 @@ public final class io/opentelemetry/kotlin/attributes/AnyValue$DoubleValue : io/
 public final class io/opentelemetry/kotlin/attributes/AnyValue$ListValue : io/opentelemetry/kotlin/attributes/AnyValue {
 	public fun <init> (Ljava/util/List;)V
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getValues ()Ljava/util/List;
+	public final fun getValue ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -59,7 +64,7 @@ public final class io/opentelemetry/kotlin/attributes/AnyValue$LongValue : io/op
 public final class io/opentelemetry/kotlin/attributes/AnyValue$MapValue : io/opentelemetry/kotlin/attributes/AnyValue {
 	public fun <init> (Ljava/util/Map;)V
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getValues ()Ljava/util/Map;
+	public final fun getValue ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -93,9 +98,12 @@ public abstract interface class io/opentelemetry/kotlin/attributes/AttributesMut
 public abstract interface class io/opentelemetry/kotlin/baggage/Baggage {
 	public abstract fun asMap ()Ljava/util/Map;
 	public abstract fun getValue (Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun put (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/baggage/Baggage;
 	public abstract fun remove (Ljava/lang/String;)Lio/opentelemetry/kotlin/baggage/Baggage;
-	public abstract fun set (Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/baggage/Baggage;
-	public abstract fun set (Ljava/lang/String;Ljava/lang/String;Lio/opentelemetry/kotlin/baggage/BaggageEntryMetadata;)Lio/opentelemetry/kotlin/baggage/Baggage;
+}
+
+public final class io/opentelemetry/kotlin/baggage/Baggage$DefaultImpls {
+	public static synthetic fun put$default (Lio/opentelemetry/kotlin/baggage/Baggage;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/baggage/Baggage;
 }
 
 public abstract interface class io/opentelemetry/kotlin/baggage/BaggageCreationAction {
@@ -158,30 +166,36 @@ public final class io/opentelemetry/kotlin/context/ContextKeyEntrypointKt {
 	public static final fun createContextKey (Ljava/lang/String;)Lio/opentelemetry/kotlin/context/ContextKey;
 }
 
+public final class io/opentelemetry/kotlin/context/ContextStorageEntrypointKt {
+	public static final fun installContextStorage (Lio/opentelemetry/kotlin/context/CurrentContextStorage;)Z
+	public static final fun uninstallContextStorage (Lio/opentelemetry/kotlin/context/CurrentContextStorage;)Z
+}
+
+public final class io/opentelemetry/kotlin/context/CurrentContextEntrypointKt {
+	public static final fun currentContext ()Lio/opentelemetry/kotlin/context/Context;
+	public static final fun runWithContext (Lio/opentelemetry/kotlin/context/Context;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public abstract interface class io/opentelemetry/kotlin/context/CurrentContextStorage {
+	public abstract fun attach (Lio/opentelemetry/kotlin/context/Context;)Lio/opentelemetry/kotlin/context/Scope;
+	public abstract fun current ()Lio/opentelemetry/kotlin/context/Context;
+}
+
+public final class io/opentelemetry/kotlin/context/RootContextEntrypointKt {
+	public static final fun rootContext ()Lio/opentelemetry/kotlin/context/Context;
+}
+
 public abstract interface class io/opentelemetry/kotlin/context/Scope {
 	public abstract fun detach ()Z
 }
 
-public abstract interface class io/opentelemetry/kotlin/factory/ContextFactory {
-	public abstract fun current ()Lio/opentelemetry/kotlin/context/Context;
-	public abstract fun root ()Lio/opentelemetry/kotlin/context/Context;
-}
-
-public final class io/opentelemetry/kotlin/init/B3Format : java/lang/Enum {
-	public static final field MULTI Lio/opentelemetry/kotlin/init/B3Format;
-	public static final field SINGLE Lio/opentelemetry/kotlin/init/B3Format;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/init/B3Format;
-	public static fun values ()[Lio/opentelemetry/kotlin/init/B3Format;
-}
-
 public abstract interface class io/opentelemetry/kotlin/logging/Logger {
-	public abstract fun emit (Ljava/lang/Object;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/SeverityNumber;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun emit (Ljava/lang/Object;Ljava/lang/String;JJLio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/SeverityNumber;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun enabled (Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/SeverityNumber;Ljava/lang/String;)Z
 }
 
 public final class io/opentelemetry/kotlin/logging/Logger$DefaultImpls {
-	public static synthetic fun emit$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/Object;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/SeverityNumber;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static synthetic fun emit$default (Lio/opentelemetry/kotlin/logging/Logger;Ljava/lang/Object;Ljava/lang/String;JJLio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/SeverityNumber;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun enabled$default (Lio/opentelemetry/kotlin/logging/Logger;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/logging/SeverityNumber;Ljava/lang/String;ILjava/lang/Object;)Z
 }
 
@@ -194,6 +208,7 @@ public final class io/opentelemetry/kotlin/logging/LoggerProvider$DefaultImpls {
 }
 
 public final class io/opentelemetry/kotlin/logging/SeverityNumber : java/lang/Enum {
+	public static final field Companion Lio/opentelemetry/kotlin/logging/SeverityNumber$Companion;
 	public static final field DEBUG Lio/opentelemetry/kotlin/logging/SeverityNumber;
 	public static final field DEBUG2 Lio/opentelemetry/kotlin/logging/SeverityNumber;
 	public static final field DEBUG3 Lio/opentelemetry/kotlin/logging/SeverityNumber;
@@ -220,12 +235,17 @@ public final class io/opentelemetry/kotlin/logging/SeverityNumber : java/lang/En
 	public static final field WARN3 Lio/opentelemetry/kotlin/logging/SeverityNumber;
 	public static final field WARN4 Lio/opentelemetry/kotlin/logging/SeverityNumber;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public final fun getSeverityNumber ()I
+	public final fun getValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/logging/SeverityNumber;
 	public static fun values ()[Lio/opentelemetry/kotlin/logging/SeverityNumber;
 }
 
+public final class io/opentelemetry/kotlin/logging/SeverityNumber$Companion {
+	public final fun fromValue (I)Lio/opentelemetry/kotlin/logging/SeverityNumber;
+}
+
 public abstract interface class io/opentelemetry/kotlin/metrics/AsynchronousInstrument : io/opentelemetry/kotlin/metrics/Instrument, java/lang/AutoCloseable {
+	public abstract fun getMeasurement ()Lio/opentelemetry/kotlin/metrics/ObservableMeasurement;
 	public abstract fun registerCallback (Lkotlin/jvm/functions/Function1;)Ljava/lang/AutoCloseable;
 }
 
@@ -284,13 +304,16 @@ public final class io/opentelemetry/kotlin/metrics/LongUpDownCounter$DefaultImpl
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/Meter {
+	public abstract fun batchCallback (Lio/opentelemetry/kotlin/metrics/ObservableMeasurement;[Lio/opentelemetry/kotlin/metrics/ObservableMeasurement;Lkotlin/jvm/functions/Function0;)Ljava/lang/AutoCloseable;
 	public abstract fun createDoubleGauge (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/DoubleGauge;
 	public abstract fun createDoubleUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/DoubleUpDownCounter;
 	public abstract fun createLongGauge (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/LongGauge;
 	public abstract fun createLongUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/LongUpDownCounter;
 	public abstract fun createObservableDoubleCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleCounter;
+	public abstract fun createObservableDoubleGauge (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleGauge;
 	public abstract fun createObservableDoubleUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleUpDownCounter;
 	public abstract fun createObservableLongCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableLongCounter;
+	public abstract fun createObservableLongGauge (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableLongGauge;
 	public abstract fun createObservableLongUpDownCounter (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/metrics/ObservableLongUpDownCounter;
 }
 
@@ -300,8 +323,10 @@ public final class io/opentelemetry/kotlin/metrics/Meter$DefaultImpls {
 	public static synthetic fun createLongGauge$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/LongGauge;
 	public static synthetic fun createLongUpDownCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/LongUpDownCounter;
 	public static synthetic fun createObservableDoubleCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleCounter;
+	public static synthetic fun createObservableDoubleGauge$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleGauge;
 	public static synthetic fun createObservableDoubleUpDownCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableDoubleUpDownCounter;
 	public static synthetic fun createObservableLongCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableLongCounter;
+	public static synthetic fun createObservableLongGauge$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableLongGauge;
 	public static synthetic fun createObservableLongUpDownCounter$default (Lio/opentelemetry/kotlin/metrics/Meter;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/metrics/ObservableLongUpDownCounter;
 }
 
@@ -316,9 +341,15 @@ public final class io/opentelemetry/kotlin/metrics/MeterProvider$DefaultImpls {
 public abstract interface class io/opentelemetry/kotlin/metrics/ObservableDoubleCounter : io/opentelemetry/kotlin/metrics/AsynchronousInstrument {
 }
 
+public abstract interface class io/opentelemetry/kotlin/metrics/ObservableDoubleGauge : io/opentelemetry/kotlin/metrics/AsynchronousInstrument {
+}
+
 public abstract interface class io/opentelemetry/kotlin/metrics/ObservableDoubleMeasurement : io/opentelemetry/kotlin/metrics/ObservableMeasurement {
-	public abstract fun record (D)V
 	public abstract fun record (DLkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/opentelemetry/kotlin/metrics/ObservableDoubleMeasurement$DefaultImpls {
+	public static synthetic fun record$default (Lio/opentelemetry/kotlin/metrics/ObservableDoubleMeasurement;DLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/ObservableDoubleUpDownCounter : io/opentelemetry/kotlin/metrics/AsynchronousInstrument {
@@ -327,9 +358,15 @@ public abstract interface class io/opentelemetry/kotlin/metrics/ObservableDouble
 public abstract interface class io/opentelemetry/kotlin/metrics/ObservableLongCounter : io/opentelemetry/kotlin/metrics/AsynchronousInstrument {
 }
 
+public abstract interface class io/opentelemetry/kotlin/metrics/ObservableLongGauge : io/opentelemetry/kotlin/metrics/AsynchronousInstrument {
+}
+
 public abstract interface class io/opentelemetry/kotlin/metrics/ObservableLongMeasurement : io/opentelemetry/kotlin/metrics/ObservableMeasurement {
-	public abstract fun record (J)V
 	public abstract fun record (JLkotlin/jvm/functions/Function1;)V
+}
+
+public final class io/opentelemetry/kotlin/metrics/ObservableLongMeasurement$DefaultImpls {
+	public static synthetic fun record$default (Lio/opentelemetry/kotlin/metrics/ObservableLongMeasurement;JLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/metrics/ObservableLongUpDownCounter : io/opentelemetry/kotlin/metrics/AsynchronousInstrument {
@@ -342,9 +379,12 @@ public abstract interface class io/opentelemetry/kotlin/metrics/SynchronousInstr
 	public abstract fun enabled ()Z
 }
 
+public final class io/opentelemetry/kotlin/propagation/MapTextMapCarriersKt {
+	public static final fun createMapTextMapGetter ()Lio/opentelemetry/kotlin/propagation/TextMapGetter;
+	public static final fun createMutableMapTextMapSetter ()Lio/opentelemetry/kotlin/propagation/TextMapSetter;
+}
+
 public final class io/opentelemetry/kotlin/propagation/PropagatorEntrypointsKt {
-	public static final fun createB3Propagator (Lio/opentelemetry/kotlin/init/B3Format;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
-	public static synthetic fun createB3Propagator$default (Lio/opentelemetry/kotlin/init/B3Format;ILjava/lang/Object;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public static final fun createCompositePropagator ([Lio/opentelemetry/kotlin/propagation/TextMapPropagator;)Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public static final fun createNoopPropagator ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
 	public static final fun createW3CBaggagePropagator ()Lio/opentelemetry/kotlin/propagation/TextMapPropagator;
@@ -415,11 +455,11 @@ public abstract interface class io/opentelemetry/kotlin/tracing/SpanCreationActi
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/SpanEventCreator {
-	public abstract fun addEvent (Ljava/lang/String;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun addEvent (Ljava/lang/String;JLkotlin/jvm/functions/Function1;)V
 }
 
 public final class io/opentelemetry/kotlin/tracing/SpanEventCreator$DefaultImpls {
-	public static synthetic fun addEvent$default (Lio/opentelemetry/kotlin/tracing/SpanEventCreator;Ljava/lang/String;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static synthetic fun addEvent$default (Lio/opentelemetry/kotlin/tracing/SpanEventCreator;Ljava/lang/String;JLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public final class io/opentelemetry/kotlin/tracing/SpanKind : java/lang/Enum {
@@ -458,6 +498,9 @@ public abstract class io/opentelemetry/kotlin/tracing/StatusData {
 
 public final class io/opentelemetry/kotlin/tracing/StatusData$Error : io/opentelemetry/kotlin/tracing/StatusData {
 	public fun <init> (Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/opentelemetry/kotlin/tracing/StatusData$Ok : io/opentelemetry/kotlin/tracing/StatusData {
@@ -486,11 +529,11 @@ public abstract interface class io/opentelemetry/kotlin/tracing/TraceStateCreati
 
 public abstract interface class io/opentelemetry/kotlin/tracing/Tracer {
 	public abstract fun enabled ()Z
-	public abstract fun startSpan (Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/SpanKind;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/Span;
+	public abstract fun startSpan (Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/SpanKind;JLkotlin/jvm/functions/Function1;)Lio/opentelemetry/kotlin/tracing/Span;
 }
 
 public final class io/opentelemetry/kotlin/tracing/Tracer$DefaultImpls {
-	public static synthetic fun startSpan$default (Lio/opentelemetry/kotlin/tracing/Tracer;Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/SpanKind;Ljava/lang/Long;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/Span;
+	public static synthetic fun startSpan$default (Lio/opentelemetry/kotlin/tracing/Tracer;Ljava/lang/String;Lio/opentelemetry/kotlin/context/Context;Lio/opentelemetry/kotlin/tracing/SpanKind;JLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/Span;
 }
 
 public abstract interface class io/opentelemetry/kotlin/tracing/TracerProvider {
@@ -499,8 +542,5 @@ public abstract interface class io/opentelemetry/kotlin/tracing/TracerProvider {
 
 public final class io/opentelemetry/kotlin/tracing/TracerProvider$DefaultImpls {
 	public static synthetic fun getTracer$default (Lio/opentelemetry/kotlin/tracing/TracerProvider;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/opentelemetry/kotlin/tracing/Tracer;
-}
-
-public abstract interface annotation class io/opentelemetry/kotlin/tracing/TracingDsl : java/lang/annotation/Annotation {
 }
 

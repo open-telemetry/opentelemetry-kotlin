@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * https://opentelemetry.io/docs/specs/otel/context/api-propagators/#textmap-propagator
  */
 @ExperimentalApi
-public fun interface TextMapSetter<C> {
+public fun interface TextMapSetter<in C> {
 
     /**
      * Sets [key] to [value] on [carrier], replacing any existing value.

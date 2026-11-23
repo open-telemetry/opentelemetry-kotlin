@@ -8,5 +8,5 @@ internal class DoubleGaugeImpl(
     override val description: String?,
 ) : DoubleGauge {
     override fun enabled(): Boolean = true
-    override fun record(value: Double, attributes: AttributesMutator.() -> Unit) = Unit
+    override fun record(value: Double, attributes: (AttributesMutator.() -> Unit)?) = Unit
 }

@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaLogger
-import io.opentelemetry.kotlin.aliases.OtelJavaValueType
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.compatAttributes
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
@@ -15,7 +14,7 @@ import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import java.util.concurrent.TimeUnit
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class LoggerAdapter(
     private val impl: OtelJavaLogger,
     private val sdkErrorHandler: SdkErrorHandler,
@@ -37,8 +36,8 @@ internal class LoggerAdapter(
     override fun emit(
         body: Any?,
         eventName: String?,
-        timestamp: Long?,
-        observedTimestamp: Long?,
+        timestamp: Long,
+        observedTimestamp: Long,
         context: Context?,
         severityNumber: SeverityNumber?,
         severityText: String?,
@@ -63,8 +62,8 @@ internal class LoggerAdapter(
     private fun processTelemetry(
         eventName: String?,
         body: Any?,
-        timestamp: Long?,
-        observedTimestamp: Long?,
+        timestamp: Long,
+        observedTimestamp: Long,
         context: Context?,
         severityNumber: SeverityNumber?,
         severityText: String?,
@@ -74,7 +73,7 @@ internal class LoggerAdapter(
         val builder = impl.logRecordBuilder()
 
         val otelJavaBody = sdkErrorHandler.guardOrDefault(null, "LogRecord.body failed") {
-            body?.toOtelJavaValue()?.takeIf { it.type != OtelJavaValueType.EMPTY }
+            body?.toOtelJavaValue()
         }
         if (otelJavaBody != null) {
             builder.setBody(otelJavaBody)
@@ -82,10 +81,10 @@ internal class LoggerAdapter(
         if (eventName != null) {
             builder.setEventName(eventName)
         }
-        if (timestamp != null && timestamp > 0) {
+        if (timestamp > 0) {
             builder.setTimestamp(timestamp, TimeUnit.NANOSECONDS)
         }
-        if (observedTimestamp != null && observedTimestamp > 0) {
+        if (observedTimestamp > 0) {
             builder.setObservedTimestamp(observedTimestamp, TimeUnit.NANOSECONDS)
         }
         if (context != null) {
@@ -98,9 +97,11 @@ internal class LoggerAdapter(
             builder.setSeverityText(severityText)
         }
 
+        // Process user attributes first so they take precedence for attribute count limit
+        // and are not overwritten by exception-derived attributes.
         val container = compatAttributes {
-            exception?.let { setExceptionAttributes(it) }
             attributes?.invoke(this)
+            exception?.let { setExceptionAttributes(it) }
         }
         if (exception != null || attributes != null) {
             builder.setAllAttributes(container.otelJavaAttributes())

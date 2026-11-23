@@ -7,14 +7,16 @@ import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
-import io.opentelemetry.kotlin.export.FakeLogExportConfig
+import io.opentelemetry.kotlin.export.FakeExportConfig
 import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.export.telemetryExceptionHandler
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -39,8 +41,8 @@ internal class SimpleLogRecordProcessorTest {
     ) = SimpleLogRecordProcessor(exporter, CoroutineScope(StandardTestDispatcher(testScheduler)), handler)
 
     @Test
-    fun testLogRecordProcessorDefaults() = runTest {
-        val processor = FakeLogExportConfig().simpleLogRecordProcessor(FakeLogRecordExporter())
+    fun testSpanProcessorDefaults() = runTest {
+        val processor = FakeExportConfig().simpleLogRecordProcessor(FakeLogRecordExporter())
         assertTrue(processor.enabled(FakeContext(), FakeInstrumentationScopeInfo(), null, null))
         assertEquals(OperationResultCode.Success, processor.shutdown())
         assertEquals(OperationResultCode.Success, processor.forceFlush())
@@ -52,7 +54,7 @@ internal class SimpleLogRecordProcessorTest {
         val processor = SimpleLogRecordProcessor(
             exporter,
             CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
-            NoopSdkErrorHandler,
+            FakeSdkErrorHandler(),
         )
 
         val log = FakeReadWriteLogRecord(body = "my_log")
@@ -67,7 +69,7 @@ internal class SimpleLogRecordProcessorTest {
         val processor = SimpleLogRecordProcessor(
             exporter,
             CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
-            NoopSdkErrorHandler,
+            FakeSdkErrorHandler(),
         )
 
         val log = FakeReadWriteLogRecord(body = "my_log")
@@ -86,7 +88,7 @@ internal class SimpleLogRecordProcessorTest {
         val processor = SimpleLogRecordProcessor(
             exporter,
             CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
-            NoopSdkErrorHandler,
+            FakeSdkErrorHandler(),
         )
         processor.shutdown()
 
@@ -99,7 +101,7 @@ internal class SimpleLogRecordProcessorTest {
         val processor = SimpleLogRecordProcessor(
             FakeLogRecordExporter(),
             CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
-            NoopSdkErrorHandler,
+            FakeSdkErrorHandler(),
         )
 
         assertEquals(OperationResultCode.Success, processor.shutdown())
@@ -111,7 +113,7 @@ internal class SimpleLogRecordProcessorTest {
         val processor = SimpleLogRecordProcessor(
             FakeLogRecordExporter(),
             CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
-            NoopSdkErrorHandler,
+            FakeSdkErrorHandler(),
         )
         processor.shutdown()
 
@@ -123,7 +125,7 @@ internal class SimpleLogRecordProcessorTest {
         val processor = SimpleLogRecordProcessor(
             FakeLogRecordExporter(),
             CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
-            NoopSdkErrorHandler,
+            FakeSdkErrorHandler(),
         )
         processor.shutdown()
 
@@ -134,7 +136,6 @@ internal class SimpleLogRecordProcessorTest {
     fun testConcurrentExportsAreSerialized() = runTest {
         val exporter = SuspendingLogRecordExporter()
         val processor = newProcessor(exporter, testScheduler = testScheduler)
-
         repeat(5) { processor.onEmit(FakeReadWriteLogRecord(body = "log_$it"), FakeContext()) }
         advanceUntilIdle()
 
@@ -368,6 +369,52 @@ internal class SimpleLogRecordProcessorTest {
         // A repeated shutdown does not run cleanup a second time.
         assertEquals(OperationResultCode.Success, processor.shutdown())
         assertEquals(1, exporter.shutdownCalls)
+    }
+
+    @Test
+    fun testExportFailureIsContained() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        var exportCount = 0
+        val exporter = FakeLogRecordExporter(action = {
+            if (exportCount++ == 0) {
+                error("export failed")
+            }
+            OperationResultCode.Success
+        })
+        val scope = CoroutineScope(
+            SupervisorJob() +
+                UnconfinedTestDispatcher(testScheduler) +
+                telemetryExceptionHandler("test", errorHandler)
+        )
+        val processor = SimpleLogRecordProcessor(exporter, scope, errorHandler)
+        processor.onEmit(FakeReadWriteLogRecord(body = "first"), FakeContext())
+        processor.onEmit(FakeReadWriteLogRecord(body = "second"), FakeContext())
+
+        assertEquals(listOf("first", "second"), exporter.logs.map { it.body.toString() })
+        assertEquals("export failed", errorHandler.userCodeErrors.single().cause.message)
+        assertTrue(errorHandler.sdkCodeErrors.isEmpty())
+    }
+
+    @Test
+    fun testForceFlushFailureIsContained() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val exporter = FakeLogRecordExporter(flushCode = { error("flush failed") })
+        val processor = SimpleLogRecordProcessor(exporter, this, errorHandler)
+
+        assertEquals(OperationResultCode.Failure, processor.forceFlush())
+        assertEquals("flush failed", errorHandler.userCodeErrors.single().cause.message)
+        assertTrue(errorHandler.sdkCodeErrors.isEmpty())
+    }
+
+    @Test
+    fun testShutdownFailureIsContained() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val exporter = FakeLogRecordExporter(shutdownCode = { error("shutdown failed") })
+        val processor = SimpleLogRecordProcessor(exporter, this, errorHandler)
+
+        assertEquals(OperationResultCode.Failure, processor.shutdown())
+        assertEquals("shutdown failed", errorHandler.userCodeErrors.single().cause.message)
+        assertTrue(errorHandler.sdkCodeErrors.isEmpty())
     }
 
     private class SuspendingLogRecordExporter : LogRecordExporter {

@@ -18,6 +18,13 @@ internal class PlatformSdkErrorHandlerTest {
     }
 
     @Test
+    fun mapsEachSeverityToSameNamedLogLevel() {
+        SdkErrorSeverity.entries.forEach { severity ->
+            assertEquals(severity.name, severity.toPlatformLogLevel().name)
+        }
+    }
+
+    @Test
     fun logsWithoutThrowing() {
         PlatformSdkErrorHandler.onError(SdkError.UserCodeError(exc, "export", SdkErrorSeverity.WARNING))
     }

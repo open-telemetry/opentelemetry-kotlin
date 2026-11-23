@@ -4,7 +4,6 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfoImpl
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
@@ -25,11 +24,9 @@ internal class SpanContextOverrideTest {
     fun setUp() {
         processor = FakeSpanProcessor()
         val idGenerator = IdGeneratorImpl()
-        val contextFactory = ContextFactoryImpl()
         tracer = TracerImpl(
             clock = FakeClock(),
             processor = processor,
-            contextFactory = contextFactory,
             scope = scope,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

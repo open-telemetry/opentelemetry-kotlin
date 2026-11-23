@@ -4,7 +4,11 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaBaggage
 import io.opentelemetry.kotlin.aliases.OtelJavaBaggageEntryMetadata
 
-@OptIn(ExperimentalApi::class)
+/**
+ * Copies opentelemetry-kotlin [Baggage] into opentelemetry-java baggage, keeping each entry's
+ * value and metadata.
+ */
+@ExperimentalApi
 public fun Baggage.toOtelJavaBaggage(): OtelJavaBaggage {
     val builder = OtelJavaBaggage.builder()
     asMap().forEach { (name, entry) ->
@@ -20,7 +24,8 @@ public fun Baggage.toOtelJavaBaggage(): OtelJavaBaggage {
  * rejects (e.g. a key that is not a valid RFC 7230 token) is dropped.
  */
 @OptIn(ExperimentalApi::class)
-internal fun OtelJavaBaggage.toOtelKotlinBaggage(): Baggage = createBaggage {
+@ExperimentalApi
+public fun OtelJavaBaggage.toOtelKotlinBaggage(): Baggage = createBaggage {
     forEach { name, entry ->
         put(name, entry.value, entry.metadata.value)
     }

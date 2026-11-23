@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanEventData
 import io.opentelemetry.kotlin.tracing.data.FakeSpanLinkData
-import io.opentelemetry.kotlin.tracing.model.hex
+import io.opentelemetry.kotlin.tracing.hex
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -48,7 +48,7 @@ internal class ReadableSpanConversionTest {
         assertEquals(original.spanKind.name, observed.kind)
         assertEquals(original.startTimestamp, observed.startTimestamp)
         assertEquals(original.endTimestamp, observed.endTimestamp)
-        assertEquals(original.hasEnded, observed.ended)
+        assertEquals(original.isEnded, observed.ended)
         assertEquals(original.status.statusCode.name, observed.statusData.name)
         assertEquals(original.status.description, observed.statusData.description)
         assertResource(original, observed)
