@@ -345,7 +345,8 @@ fun initWithConfigurators(): OpenTelemetrySdk = createOpenTelemetry {
 ```
 
 The configurator is called when a tracer or logger is created and can be called often, so it
-should return quickly.
+should return quickly. If it throws, the error is reported to the error handler and the tracer or
+logger uses the default config, which is enabled.
 
 ### Error handling and disabling the SDK
 
