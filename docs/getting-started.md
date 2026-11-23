@@ -97,8 +97,9 @@ fun checkout(otel: OpenTelemetry) {
 }
 ```
 
-Run your app and the span and log should print to stdout. On Android this will be Logcat; on iOS it 
-will be the XCode console.
+Run your app and the span and log should appear in the platform log. On the JVM this uses
+`java.util.logging` under `io.opentelemetry.kotlin`; on Android it uses Logcat, and on iOS the
+Xcode console.
 
 ## 6. Send telemetry over OTLP
 
