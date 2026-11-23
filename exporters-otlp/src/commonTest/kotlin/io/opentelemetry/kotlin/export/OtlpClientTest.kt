@@ -355,6 +355,19 @@ internal class OtlpClientTest {
     }
 
     @Test
+    fun testZeroTimeoutWithEngineLeaseUsesInfiniteTimeoutSentinel() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        client = createOtlpHttpClient(errorHandler, OtlpEndpoint.Traces, getEnvVar = { null }) {
+            httpClientEngine = server
+            timeoutMs = 0
+        }
+
+        assertEquals(OtlpResponse.Success, client.exportTraces(spans))
+        assertEquals(0, errorHandler.userCodeErrors.size)
+        assertEquals(0, errorHandler.apiMisuses.size)
+    }
+
+    @Test
     fun testCreateOtlpHttpClientInvalidValuesFallBackToDefault() {
         val fakeHandler = FakeSdkErrorHandler()
         val createdClient = createOtlpHttpClient(fakeHandler, OtlpEndpoint.Traces, getEnvVar = { null }) {
