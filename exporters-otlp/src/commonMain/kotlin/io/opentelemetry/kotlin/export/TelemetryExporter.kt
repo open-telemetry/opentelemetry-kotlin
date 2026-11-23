@@ -208,11 +208,13 @@ internal class TelemetryExporter<T>(
                 }
 
                 is OtlpResponse.UnretryableError -> {
-                    val msg = "OTLP export failed with unretryable error (status=${response.statusCode}, response=$response)"
-                    sdkErrorHandler.reportTransientError(
-                        IllegalStateException(msg),
-                        "OTLP export unretryable error",
-                    )
+                    if (response !is OtlpResponse.EncodingFailed) {
+                        val msg = "OTLP export failed with unretryable error (status=${response.statusCode}, response=$response)"
+                        sdkErrorHandler.reportTransientError(
+                            IllegalStateException(msg),
+                            "OTLP export unretryable error",
+                        )
+                    }
                     onExportComplete(entry, epoch, delivered = false)
                 }
 

@@ -169,6 +169,7 @@ public fun SdkErrorHandler.reportTransientError(
     details: String?,
     severity: SdkErrorSeverity = SdkErrorSeverity.WARNING,
 ) {
+    exc?.unwrapUserCode()?.restoreInterruptIfNeeded()
     reportError(
         SdkError.TransientError(
             exc?.unwrapUserCode(),

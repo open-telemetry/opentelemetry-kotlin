@@ -46,6 +46,15 @@ sealed class io.opentelemetry.kotlin.error/SdkError { // io.opentelemetry.kotlin
         final fun toString(): kotlin/String // io.opentelemetry.kotlin.error/SdkError.SdkCodeError.toString|toString(){}[0]
     }
 
+    final class TransientError : io.opentelemetry.kotlin.error/SdkError { // io.opentelemetry.kotlin.error/SdkError.TransientError|null[0]
+        constructor <init>(kotlin/Throwable?, kotlin/String, io.opentelemetry.kotlin.error/SdkErrorSeverity) // io.opentelemetry.kotlin.error/SdkError.TransientError.<init>|<init>(kotlin.Throwable?;kotlin.String;io.opentelemetry.kotlin.error.SdkErrorSeverity){}[0]
+
+        final val cause // io.opentelemetry.kotlin.error/SdkError.TransientError.cause|{}cause[0]
+            final fun <get-cause>(): kotlin/Throwable? // io.opentelemetry.kotlin.error/SdkError.TransientError.cause.<get-cause>|<get-cause>(){}[0]
+
+        final fun toString(): kotlin/String // io.opentelemetry.kotlin.error/SdkError.TransientError.toString|toString(){}[0]
+    }
+
     final class UserCodeError : io.opentelemetry.kotlin.error/SdkError { // io.opentelemetry.kotlin.error/SdkError.UserCodeError|null[0]
         constructor <init>(kotlin/Throwable, kotlin/String, io.opentelemetry.kotlin.error/SdkErrorSeverity) // io.opentelemetry.kotlin.error/SdkError.UserCodeError.<init>|<init>(kotlin.Throwable;kotlin.String;io.opentelemetry.kotlin.error.SdkErrorSeverity){}[0]
 
