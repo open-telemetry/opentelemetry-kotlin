@@ -11,7 +11,6 @@ import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.model.SpanLink
 import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
 import kotlin.concurrent.Volatile
-import kotlin.math.max
 
 internal class ProbabilitySampler(
     ratio: Double,
@@ -72,18 +71,23 @@ internal class ProbabilitySampler(
             otelTraceState.eraseThreshold()
         }
 
-        otelTraceState.setThreshold(max(otelTraceState.th ?: 0L, rejectionThreshold))
-
         val decision = if (randomness >= rejectionThreshold) {
+            otelTraceState.setThreshold(rejectionThreshold)
             Decision.RECORD_AND_SAMPLE
         } else {
+            otelTraceState.eraseThreshold()
             Decision.DROP
         }
 
+        val encoded = otelTraceState.encode()
         return SamplingResultImpl(
             decision = decision,
             attributes = EmptyAttributeContainer,
-            traceState = traceState.put(KnownTraceState.OT, otelTraceState.encode()),
+            traceState = if (encoded.isEmpty()) {
+                traceState.remove(KnownTraceState.OT)
+            } else {
+                traceState.put(KnownTraceState.OT, encoded)
+            },
         )
     }
 }

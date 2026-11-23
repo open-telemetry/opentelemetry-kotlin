@@ -12,6 +12,7 @@ import io.opentelemetry.kotlin.tracing.createSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 
 @OptIn(ExperimentalApi::class)
 internal class ProbabilitySamplerTest {
@@ -36,7 +37,11 @@ internal class ProbabilitySamplerTest {
                 links = emptyList(),
             )
             assertEquals(expected, result.decision)
-            assertEquals("th:fffffffffefff", result.traceState.get("ot"))
+            val expectedOt = when (expected) {
+                SamplingResult.Decision.DROP -> null
+                else -> "th:fffffffffefff"
+            }
+            assertEquals(expectedOt, result.traceState.get("ot"))
         }
     }
 
@@ -57,13 +62,21 @@ internal class ProbabilitySamplerTest {
                 links = emptyList(),
             )
             assertEquals(expected, result.decision)
-            assertEquals("th:e666", result.traceState.get("ot"))
+            val expectedOt = when (expected) {
+                SamplingResult.Decision.DROP -> null
+                else -> "th:e666"
+            }
+            assertEquals(expectedOt, result.traceState.get("ot"))
         }
     }
 
-    private fun createParentContext(traceId: String, otTraceStateValue: String): Context {
+    private fun createParentContext(
+        traceId: String,
+        otTraceStateValue: String,
+        sampled: Boolean = true,
+    ): Context {
         val parentSpanContext = createSpanContext(traceId.hexToByteArray(), idGenerator.generateSpanIdBytes()) {
-            isSampled = true
+            isSampled = sampled
             isRemote = true
             traceState { put("ot", otTraceStateValue) }
         }
@@ -207,5 +220,63 @@ internal class ProbabilitySamplerTest {
             links = emptyList(),
         )
         assertEquals("rv:a0000000000000;th:8", result.traceState.get("ot"))
+    }
+
+    @Test
+    fun replacesHigherIncomingThresholdWhenSampled() {
+        val traceId = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        val context = createParentContext(
+            traceId = traceId,
+            otTraceStateValue = "rv:a0000000000000;th:c", // consistent with an unsampled parent
+            sampled = false,
+        )
+        val result = ProbabilitySampler(0.5, sdkErrorHandler).shouldSample(
+            context = context,
+            traceIdBytes = traceId.hexToByteArray(),
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+        assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, result.decision)
+        assertEquals("rv:a0000000000000;th:8", result.traceState.get("ot"))
+    }
+
+    @Test
+    fun erasesThresholdWhenDropped() {
+        val traceId = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        val context = createParentContext(
+            traceId = traceId,
+            otTraceStateValue = "rv:a0000000000000;th:8",
+        )
+        val result = ProbabilitySampler(0.25, sdkErrorHandler).shouldSample(
+            context = context,
+            traceIdBytes = traceId.hexToByteArray(),
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+        assertEquals(SamplingResult.Decision.DROP, result.decision)
+        assertEquals("rv:a0000000000000", result.traceState.get("ot"))
+    }
+
+    @Test
+    fun removesOtEntryWhenDroppedWithOnlyThreshold() {
+        val traceId = "aaaaaaaaaaaaaaaaaaa0000000000000"
+        val context = createParentContext(
+            traceId = traceId,
+            otTraceStateValue = "th:8",
+        )
+        val result = ProbabilitySampler(0.25, sdkErrorHandler).shouldSample(
+            context = context,
+            traceIdBytes = traceId.hexToByteArray(),
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = AttributesModel(),
+            links = emptyList(),
+        )
+        assertEquals(SamplingResult.Decision.DROP, result.decision)
+        assertNull(result.traceState.get("ot"))
     }
 }

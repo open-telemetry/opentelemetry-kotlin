@@ -46,6 +46,8 @@ of the OpenTelemetry specification.
   can no longer add list members or write CR, LF or non-ASCII characters into the header.
 - Include `X-B3-Flags` in the multi-header B3 propagator's `fields()`, since inject writes it
   for debug spans.
+- `ProbabilitySampler` now writes its own threshold to `th` when it samples instead of keeping a
+  higher incoming one, and erases `th` when it drops the span.
 
 ## Version 0.10.0 (2026-11-05)
 
