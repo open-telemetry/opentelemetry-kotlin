@@ -114,7 +114,7 @@ internal fun createOtlpHttpClient(
         configParameterName = "timeoutMs",
         value = config.timeoutMs,
         default = EXPORT_REQUEST_TIMEOUT_MS,
-    ) { it >= 0 }
+    ) { it > 0 }
     val suppliedClient = config.httpClient
     val engine = config.httpClientEngine
     val sdkOwnedEngine = config.sdkOwnedEngine.also { config.sdkOwnedEngine = null }
