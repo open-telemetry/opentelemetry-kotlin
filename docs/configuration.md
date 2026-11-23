@@ -209,7 +209,7 @@ The OTLP exporter's settings are:
   Defaults to `http://localhost:4318`.
 - `headers`: a `suspend` function that returns headers for each export request. Because it's
   called for every request, it's a good place to refresh an authentication token.
-- `timeoutMs`: how long a request can take. Defaults to 10 seconds.
+- `timeoutMs`: how long a request can take. Defaults to 10 seconds (0 means no limit).
 - `httpClient` or `httpClientEngine`: a Ktor client or engine to send requests with, if you need
   to customize TLS, proxies or authentication.
 

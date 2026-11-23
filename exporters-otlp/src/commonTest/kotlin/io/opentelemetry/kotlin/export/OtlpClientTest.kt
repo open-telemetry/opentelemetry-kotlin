@@ -337,6 +337,24 @@ internal class OtlpClientTest {
     }
 
     @Test
+    fun testZeroTimeoutMeansNoLimit() = runTest {
+        mockResponseStatus = HttpStatusCode.OK
+        client = createOtlpHttpClient(errorHandler, OtlpEndpoint.Traces, getEnvVar = { null }) {
+            httpClient = createDefaultHttpClient(INFINITE_TIMEOUT_MS, server)
+            timeoutMs = 0
+            headers = {
+                delay(10.milliseconds)
+                mapOf(HttpHeaders.Authorization to "Bearer token")
+            }
+        }
+
+        assertEquals(OtlpResponse.Success, client.exportTraces(spans))
+        assertEquals(0, errorHandler.userCodeErrors.size)
+        assertEquals(0, errorHandler.apiMisuses.size)
+        assertEquals("Bearer token", server.requestHistory.single().headers[HttpHeaders.Authorization])
+    }
+
+    @Test
     fun testCreateOtlpHttpClientInvalidValuesFallBackToDefault() {
         val fakeHandler = FakeSdkErrorHandler()
         val createdClient = createOtlpHttpClient(fakeHandler, OtlpEndpoint.Traces, getEnvVar = { null }) {

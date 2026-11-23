@@ -32,6 +32,7 @@ internal class BatchLogRecordProcessorImpl(
             config = BatchTelemetryConfig(
                 maxQueueSize = maxQueueSize,
                 scheduleDelay = scheduleDelayMs.milliseconds,
+                defaultScheduleDelay = BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS.milliseconds,
                 exportTimeout = exportTimeoutMs.milliseconds,
                 maxExportBatchSize = maxExportBatchSize,
                 sdkErrorHandler = sdkErrorHandler,
