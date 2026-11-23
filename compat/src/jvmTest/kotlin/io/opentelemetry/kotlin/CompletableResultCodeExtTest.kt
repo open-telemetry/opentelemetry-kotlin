@@ -122,7 +122,7 @@ internal class CompletableResultCodeExtTest {
     @Test
     fun `test await honours an explicit timeout`() = runTest {
         assertEquals(
-            OperationResultCode.Failure,
+            OperationResultCode.Timeout,
             awaitOperationResultCode(TIMEOUT_MS) { OtelJavaCompletableResultCode() }
         )
         assertEquals(TIMEOUT_MS, testScheduler.currentTime)
