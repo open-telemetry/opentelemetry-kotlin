@@ -113,7 +113,7 @@ internal class CompletableResultCodeExtTest {
     @Test
     fun `test await times out if the result never completes`() = runTest {
         assertEquals(
-            OperationResultCode.Failure,
+            OperationResultCode.Timeout,
             awaitOperationResultCode { OtelJavaCompletableResultCode() }
         )
         assertEquals(COMPAT_DEFAULT_TIMEOUT_MS, testScheduler.currentTime)

@@ -5,6 +5,7 @@ import io.opentelemetry.kotlin.config.FakeConfigProvider
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
+import io.opentelemetry.kotlin.export.OperationResultCode.Timeout
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.logging.FakeLoggerProvider
 import io.opentelemetry.kotlin.logging.LoggerProvider
@@ -135,7 +136,7 @@ internal class OpenTelemetryImplTest {
         val api = createOpenTelemetry(tracerProvider, loggerProvider)
 
         val result = api.forceFlush()
-        assertEquals(Failure, result)
+        assertEquals(Timeout, result)
     }
 
     @Test
@@ -145,7 +146,7 @@ internal class OpenTelemetryImplTest {
         val api = createOpenTelemetry(tracerProvider, loggerProvider)
 
         val result = api.shutdown()
-        assertEquals(Failure, result)
+        assertEquals(Timeout, result)
     }
 
     @Test

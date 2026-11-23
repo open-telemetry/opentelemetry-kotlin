@@ -52,7 +52,7 @@ internal class SpanProcessorAdapterTest {
     @Test
     fun `test flush times out if the result never completes`() = runTest {
         impl.nextResult = { OtelJavaCompletableResultCode() }
-        assertEquals(OperationResultCode.Failure, wrapper.forceFlush())
+        assertEquals(OperationResultCode.Timeout, wrapper.forceFlush())
     }
 
     @Test
