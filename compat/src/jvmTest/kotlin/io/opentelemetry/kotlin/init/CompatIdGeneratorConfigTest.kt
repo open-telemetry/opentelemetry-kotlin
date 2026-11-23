@@ -9,6 +9,7 @@ import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.GuardedCompatIdGenerator
+import io.opentelemetry.kotlin.factory.IdGenerator
 import org.junit.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
