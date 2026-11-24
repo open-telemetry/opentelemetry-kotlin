@@ -7,8 +7,8 @@ import io.opentelemetry.kotlin.behavior.Behavior
 import io.opentelemetry.kotlin.behavior.mergeNode
 
 /**
- * Batching settings for the tracer provider's processor. The exporter is configured on
- * [SpanProcessorBehavior]. Each null field is unset and defers to a lower configuration
+ * Batching settings for the tracer provider's processor. The exporter is configured via
+ * [exporter]. Each null field is unset and defers to a lower configuration
  * layer or the SDK default.
  *
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#batching-processor
