@@ -10,6 +10,7 @@ minSupportedKotlinPlugin = "2.0.0"
 minSupportedKotlinKlib = "2.4.0"
 minSupportedGradle = "8.0.2"
 detekt = "1.23.8"
+dokka = "2.2.0"
 kotlinxBenchmarkRuntime = "0.5.0"
 kotlinxCoroutines = "1.10.2"
 ktor = "3.2.3"
@@ -98,6 +99,7 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 nexus-publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexus" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "koverGradlePlugin" }
 download = {id = "de.undercouch.download", version.ref = "downloadPlugin" }
