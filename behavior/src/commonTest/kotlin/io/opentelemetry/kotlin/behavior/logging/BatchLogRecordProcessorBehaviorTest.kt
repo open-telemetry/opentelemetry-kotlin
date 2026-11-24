@@ -65,7 +65,10 @@ internal class BatchLogRecordProcessorBehaviorTest {
     fun partialHigherLayerPreservesOtherFields() {
         val higher = BatchLogRecordProcessorBehavior(exportTimeout = 60_000)
 
-        assertEquals(configured.copy(exportTimeout = 60_000), configured.mergeWith(higher))
+        assertEquals(
+            BatchLogRecordProcessorBehavior(configured.delegate.copy(exportTimeout = 60_000)),
+            configured.mergeWith(higher)
+        )
         assertEquals(BatchLogRecordProcessorBehavior(exportTimeout = 60_000), higher)
         assertEquals(30_000L, configured.exportTimeout)
     }
@@ -73,7 +76,9 @@ internal class BatchLogRecordProcessorBehaviorTest {
     @Test
     fun zeroDurationsAreConfiguredValues() {
         val higher = BatchLogRecordProcessorBehavior(scheduleDelay = 0, exportTimeout = 0)
-
-        assertEquals(configured.copy(scheduleDelay = 0, exportTimeout = 0), configured.mergeWith(higher))
+        assertEquals(
+            BatchLogRecordProcessorBehavior(configured.delegate.copy(scheduleDelay = 0, exportTimeout = 0)),
+            configured.mergeWith(higher)
+        )
     }
 }

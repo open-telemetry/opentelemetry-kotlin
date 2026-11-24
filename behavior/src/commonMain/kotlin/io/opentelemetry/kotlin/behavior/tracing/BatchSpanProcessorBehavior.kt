@@ -1,28 +1,49 @@
 package io.opentelemetry.kotlin.behavior.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.BatchProcessor
+import io.opentelemetry.kotlin.behavior.BatchProcessorDelegate
 import io.opentelemetry.kotlin.behavior.Behavior
 import io.opentelemetry.kotlin.behavior.mergeNode
 
-/** Batching settings for a span processor, in milliseconds where applicable. */
+/**
+ * Batching settings for the tracer provider's processor. The exporter is configured via
+ * [exporter]. Each null field is unset and defers to a lower configuration
+ * layer or the SDK default.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#batching-processor
+ */
 @OptIn(ExperimentalApi::class)
 data class BatchSpanProcessorBehavior(
-    /** Delay between consecutive exports, in milliseconds. Must be non-negative. */
-    val scheduleDelay: Long? = null,
-    /** Maximum export duration, in milliseconds. Zero means no limit. Must be non-negative. */
-    val exportTimeout: Long? = null,
-    /** Maximum number of queued spans. Must be positive. */
-    val maxQueueSize: Int? = null,
-    /** Maximum spans per export. Must be positive and no greater than [maxQueueSize]. */
-    val maxExportBatchSize: Int? = null,
-    /** Span exporter. */
-    val exporter: SpanExporterBehavior? = null
-) : Behavior<BatchSpanProcessorBehavior> {
+    val delegate: BatchProcessorDelegate<SpanExporterBehavior> = BatchProcessorDelegate(),
+) : Behavior<BatchSpanProcessorBehavior>, BatchProcessor by delegate {
+
+    constructor(
+        scheduleDelay: Long? = null,
+        exportTimeout: Long? = null,
+        maxQueueSize: Int? = null,
+        maxExportBatchSize: Int? = null,
+        exporter: SpanExporterBehavior? = null,
+    ) : this(
+        BatchProcessorDelegate(
+            scheduleDelay,
+            exportTimeout,
+            maxQueueSize,
+            maxExportBatchSize,
+            exporter
+        )
+    )
+
+    override val exporter: SpanExporterBehavior?
+        get() = delegate.exporter
+
     override fun mergeWith(higher: BatchSpanProcessorBehavior): BatchSpanProcessorBehavior = copy(
-        scheduleDelay = higher.scheduleDelay ?: scheduleDelay,
-        exportTimeout = higher.exportTimeout ?: exportTimeout,
-        maxQueueSize = higher.maxQueueSize ?: maxQueueSize,
-        maxExportBatchSize = higher.maxExportBatchSize ?: maxExportBatchSize,
-        exporter = mergeNode(exporter, higher.exporter)
+        delegate = BatchProcessorDelegate(
+            scheduleDelay = higher.scheduleDelay ?: scheduleDelay,
+            exportTimeout = higher.exportTimeout ?: exportTimeout,
+            maxQueueSize = higher.maxQueueSize ?: maxQueueSize,
+            maxExportBatchSize = higher.maxExportBatchSize ?: maxExportBatchSize,
+            exporter = mergeNode(exporter, higher.exporter)
+        ),
     )
 }
