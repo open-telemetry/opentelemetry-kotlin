@@ -68,8 +68,8 @@ internal class GuardedTextMapPropagatorTest {
         assertEquals(setOf("traceparent", "baggage"), carrier.keys)
 
         val extracted = composite.extract(rootContext(), carrier, FakeTextMapGetter)
-        assertEquals("b7ad6b7169203331", extracted.extractSpan().spanContext.spanId)
-        assertEquals("alice", extracted.extractBaggage().getValue("user"))
+        assertEquals("b7ad6b7169203331", extracted.span.spanContext.spanId)
+        assertEquals("alice", extracted.baggage.getValue("user"))
     }
 
     @Test

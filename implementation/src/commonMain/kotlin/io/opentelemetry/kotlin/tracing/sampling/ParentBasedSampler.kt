@@ -32,7 +32,7 @@ internal class ParentBasedSampler(
         attributes: AttributeContainer,
         links: List<SpanLink>,
     ): SamplingResult {
-        val parent = context.extractSpan().spanContext
+        val parent = context.span.spanContext
         val delegate = when {
             !parent.isValid -> root
             parent.isRemote && parent.traceFlags.isSampled -> remoteParentSampled

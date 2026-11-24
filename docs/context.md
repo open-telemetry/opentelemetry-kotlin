@@ -119,8 +119,8 @@ OpenTelemetry provides syntactic sugar to store `Span` and `Baggage` values in a
 
 | Value   | Store                                              | Read               | Remove           |
 |---------|----------------------------------------------------|--------------------|------------------|
-| Span    | `storeSpan(span)`, `storeSpanContext(spanContext)` | `extractSpan()`    |                  |
-| Baggage | `storeBaggage(baggage)`                            | `extractBaggage()` | `clearBaggage()` |
+| Span    | `storeSpan(span)`, `storeSpanContext(spanContext)` | `span`             |                  |
+| Baggage | `storeBaggage(baggage)`                            | `baggage`          | `clearBaggage()` |
 
 ```kotlin context-span-and-baggage
 fun spanAndBaggage(otel: OpenTelemetry) {
@@ -131,23 +131,23 @@ fun spanAndBaggage(otel: OpenTelemetry) {
         .storeSpan(span)
         .storeBaggage(baggage)
 
-    println(ctx.extractSpan() === span) // true
-    println(ctx.extractBaggage().getValue("user.tier")) // gold
+    println(ctx.span === span) // true
+    println(ctx.baggage.getValue("user.tier")) // gold
 
     // If nothing is stored you get a safe placeholder, never null.
     val empty = rootContext()
-    println(empty.extractSpan().spanContext.isValid) // false: an invalid, non-recording span
-    println(empty.extractBaggage().asMap()) // {}: empty baggage
+    println(empty.span.spanContext.isValid) // false: an invalid, non-recording span
+    println(empty.baggage.asMap()) // {}: empty baggage
 
     // clearBaggage() returns a context without any baggage.
-    println(ctx.clearBaggage().extractBaggage().asMap()) // {}
+    println(ctx.clearBaggage().baggage.asMap()) // {}
 
     span.end()
 }
 ```
 
-The read functions never return null. If nothing is stored, `extractSpan()` returns an invalid,
-non-recording span and `extractBaggage()` returns empty baggage.
+The read properties never return null. If nothing is stored, `span` returns an invalid,
+non-recording span and `baggage` returns empty baggage.
 
 `storeSpanContext()` wraps a `SpanContext` (just the IDs, without a live span) in a non-recording
 span. This is mostly used for spans that originate from another process/machine.
@@ -475,7 +475,7 @@ fun bridgeContexts(kotlinContext: Context) {
 
     // ...and turn a Java context back into a Kotlin one, e.g. to use it as a span parent.
     val backToKotlin: Context = javaContext.toOtelKotlinContext()
-    println(backToKotlin.extractSpan().spanContext.traceId)
+    println(backToKotlin.span.spanContext.traceId)
 }
 ```
 

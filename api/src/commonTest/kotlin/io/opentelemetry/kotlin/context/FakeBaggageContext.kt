@@ -12,7 +12,7 @@ import io.opentelemetry.kotlin.tracing.SpanContext
 @OptIn(ExperimentalApi::class)
 internal class FakeBaggageContext(
     private val values: Map<ContextKey<*>, Any?> = emptyMap(),
-    private val baggage: Baggage = createBaggage(),
+    override val baggage: Baggage = createBaggage(),
 ) : Context {
 
     override fun <T> set(key: ContextKey<T>, value: T?): Context =
@@ -27,11 +27,10 @@ internal class FakeBaggageContext(
 
     override fun storeSpanContext(spanContext: SpanContext): Context = error("Not supported")
 
-    override fun extractSpan(): Span = error("Not supported")
+    override val span: Span
+        get() = error("Not supported")
 
     override fun storeBaggage(baggage: Baggage): Context = FakeBaggageContext(values, baggage)
-
-    override fun extractBaggage(): Baggage = baggage
 
     override fun clearBaggage(): Context = FakeBaggageContext(values)
 }

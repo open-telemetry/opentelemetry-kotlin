@@ -13,16 +13,16 @@ fun spanAndBaggage(otel: OpenTelemetry) {
         .storeSpan(span)
         .storeBaggage(baggage)
 
-    println(ctx.extractSpan() === span) // true
-    println(ctx.extractBaggage().getValue("user.tier")) // gold
+    println(ctx.span === span) // true
+    println(ctx.baggage.getValue("user.tier")) // gold
 
     // If nothing is stored you get a safe placeholder, never null.
     val empty = rootContext()
-    println(empty.extractSpan().spanContext.isValid) // false: an invalid, non-recording span
-    println(empty.extractBaggage().asMap()) // {}: empty baggage
+    println(empty.span.spanContext.isValid) // false: an invalid, non-recording span
+    println(empty.baggage.asMap()) // {}: empty baggage
 
     // clearBaggage() returns a context without any baggage.
-    println(ctx.clearBaggage().extractBaggage().asMap()) // {}
+    println(ctx.clearBaggage().baggage.asMap()) // {}
 
     span.end()
 }

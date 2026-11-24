@@ -113,7 +113,7 @@ internal class ContextValueTest {
 
     @Test
     fun testExtractSpanFromRootReturnsInvalid() {
-        val span = rootContext().extractSpan()
+        val span = rootContext().span
         assertEquals(createInvalidSpanContext(), span.spanContext)
         assertFalse(span.isRecording())
     }
@@ -122,7 +122,7 @@ internal class ContextValueTest {
     fun testStoreSpanRoundTrip() {
         val span = createNonRecordingSpan(spanContext)
         val ctx = rootContext().storeSpan(span)
-        assertSame(span, ctx.extractSpan())
+        assertSame(span, ctx.span)
     }
 
     @Test
@@ -130,7 +130,7 @@ internal class ContextValueTest {
         val root = rootContext()
         val derived = root.storeSpan(createNonRecordingSpan(spanContext))
         assertNotSame(root, derived)
-        assertEquals(createInvalidSpanContext(), root.extractSpan().spanContext)
+        assertEquals(createInvalidSpanContext(), root.span.spanContext)
     }
 
     @Test
@@ -139,9 +139,9 @@ internal class ContextValueTest {
         val ctx = root.storeSpanContext(spanContext)
 
         assertNotSame(root, ctx)
-        assertSame(spanContext, ctx.extractSpan().spanContext)
-        assertTrue(ctx.extractSpan().spanContext.isRemote)
-        assertFalse(root.extractSpan().spanContext.isValid)
+        assertSame(spanContext, ctx.span.spanContext)
+        assertTrue(ctx.span.spanContext.isRemote)
+        assertFalse(root.span.spanContext.isValid)
     }
 
     @Test
@@ -149,12 +149,12 @@ internal class ContextValueTest {
         val ctx = rootContext()
             .storeSpan(createNonRecordingSpan(spanContext))
             .storeSpanContext(createInvalidSpanContext())
-        assertFalse(ctx.extractSpan().spanContext.isValid)
+        assertFalse(ctx.span.spanContext.isValid)
     }
 
     @Test
     fun testExtractBaggageFromRootReturnsEmpty() {
-        assertTrue(rootContext().extractBaggage().asMap().isEmpty())
+        assertTrue(rootContext().baggage.asMap().isEmpty())
     }
 
     @Test
@@ -164,14 +164,14 @@ internal class ContextValueTest {
         val ctx = root.storeBaggage(baggage)
 
         assertNotSame(root, ctx)
-        assertSame(baggage, ctx.extractBaggage())
-        assertTrue(root.extractBaggage().asMap().isEmpty())
+        assertSame(baggage, ctx.baggage)
+        assertTrue(root.baggage.asMap().isEmpty())
     }
 
     @Test
     fun testClearBaggage() {
         val baggage = createBaggage { put("key", "value") }
         val ctx = rootContext().storeBaggage(baggage).clearBaggage()
-        assertTrue(ctx.extractBaggage().asMap().isEmpty())
+        assertTrue(ctx.baggage.asMap().isEmpty())
     }
 }

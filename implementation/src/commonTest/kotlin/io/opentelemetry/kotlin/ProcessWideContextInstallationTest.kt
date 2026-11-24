@@ -55,7 +55,7 @@ internal class ProcessWideContextInstallationTest {
         try {
             val child = tracer.startSpan("child")
             assertEquals(parent.spanContext.traceId, child.spanContext.traceId)
-            assertSame(parent, currentContext().extractSpan())
+            assertSame(parent, currentContext().span)
         } finally {
             scope.detach()
         }

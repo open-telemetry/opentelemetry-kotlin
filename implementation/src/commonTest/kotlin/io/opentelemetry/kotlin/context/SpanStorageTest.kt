@@ -11,7 +11,7 @@ internal class SpanStorageTest {
         val span = FakeSpan()
         val root = rootContext()
         val newCtx = root.storeSpan(span)
-        assertSame(span, newCtx.extractSpan())
+        assertSame(span, newCtx.span)
     }
 
     @Test
@@ -22,6 +22,6 @@ internal class SpanStorageTest {
         val newCtx = root.storeSpan(span)
 
         val finalCtx = newCtx.storeSpan(otherSpan)
-        assertSame(otherSpan, finalCtx.extractSpan())
+        assertSame(otherSpan, finalCtx.span)
     }
 }

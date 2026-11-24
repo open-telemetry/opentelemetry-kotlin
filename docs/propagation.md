@@ -95,7 +95,7 @@ fun firstRoundTrip(otel: OpenTelemetry) {
         carrier = headers,
         getter = createMapTextMapGetter(),
     )
-    val remoteParent = received.extractSpan().spanContext
+    val remoteParent = received.span.spanContext
     println(remoteParent.traceId == span.spanContext.traceId) // true
     println(remoteParent.isRemote) // true
 
@@ -282,7 +282,7 @@ fun handleRequest(otel: OpenTelemetry, request: IncomingRequest) {
 
     // 3. Make the span, plus any baggage the caller sent, current while handling the request.
     remoteCtx.storeSpan(span).runWithContext {
-        val tier = currentContext().extractBaggage().getValue("user.tier")
+        val tier = currentContext().baggage.getValue("user.tier")
         println("handling request for a $tier user")
     }
     span.end()
@@ -297,7 +297,7 @@ the W3C Baggage propagator:
 ```kotlin propagation-baggage
 fun sendWithBaggage(otel: OpenTelemetry, request: OutgoingRequest) {
     // Add to the baggage that is already current rather than replacing it.
-    val baggage = currentContext().extractBaggage().put("user.tier", "gold")
+    val baggage = currentContext().baggage.put("user.tier", "gold")
     val ctx = currentContext().storeBaggage(baggage)
 
     otel.propagator.inject(ctx, request, outgoingRequestSetter)

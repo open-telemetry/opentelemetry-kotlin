@@ -56,7 +56,7 @@ internal class OtelJavaContextAdapter(
     }
 
     private fun getSpan(): OtelJavaSpan? {
-        val span = impl.extractSpan()
+        val span = impl.span
         if (!span.spanContext.isValid) {
             return null
         }
@@ -64,7 +64,7 @@ internal class OtelJavaContextAdapter(
     }
 
     private fun getBaggage(): OtelJavaBaggage? {
-        val baggage = impl.extractBaggage()
+        val baggage = impl.baggage
         return when {
             baggage.asMap().isEmpty() -> null
             else -> baggage.toOtelJavaBaggage()

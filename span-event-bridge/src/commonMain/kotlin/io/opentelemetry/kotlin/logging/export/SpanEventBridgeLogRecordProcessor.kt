@@ -32,7 +32,7 @@ internal class SpanEventBridgeLogRecordProcessor : LogRecordProcessor {
         eventName: String?,
     ): Boolean = !shutdownState.isShutdown &&
         !eventName.isNullOrEmpty() &&
-        context.extractSpan().isRecording()
+        context.span.isRecording()
 
     override suspend fun forceFlush(): OperationResultCode = OperationResultCode.Success
 
@@ -44,7 +44,7 @@ internal class SpanEventBridgeLogRecordProcessor : LogRecordProcessor {
         if (eventName.isNullOrEmpty()) {
             return
         }
-        val span = context.extractSpan()
+        val span = context.span
         if (!span.isRecording() || !log.spanContext.identifies(span)) {
             return
         }

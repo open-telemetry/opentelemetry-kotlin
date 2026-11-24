@@ -166,12 +166,15 @@ abstract interface io.opentelemetry.kotlin.config/ConfigProvider { // io.opentel
 }
 
 abstract interface io.opentelemetry.kotlin.context/Context { // io.opentelemetry.kotlin.context/Context|null[0]
+    abstract val baggage // io.opentelemetry.kotlin.context/Context.baggage|{}baggage[0]
+        abstract fun <get-baggage>(): io.opentelemetry.kotlin.baggage/Baggage // io.opentelemetry.kotlin.context/Context.baggage.<get-baggage>|<get-baggage>(){}[0]
+    abstract val span // io.opentelemetry.kotlin.context/Context.span|{}span[0]
+        abstract fun <get-span>(): io.opentelemetry.kotlin.tracing/Span // io.opentelemetry.kotlin.context/Context.span.<get-span>|<get-span>(){}[0]
+
     abstract fun <#A1: kotlin/Any?> get(io.opentelemetry.kotlin.context/ContextKey<#A1>): #A1? // io.opentelemetry.kotlin.context/Context.get|get(io.opentelemetry.kotlin.context.ContextKey<0:0>){0§<kotlin.Any?>}[0]
     abstract fun <#A1: kotlin/Any?> set(io.opentelemetry.kotlin.context/ContextKey<#A1>, #A1?): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.context/Context.set|set(io.opentelemetry.kotlin.context.ContextKey<0:0>;0:0?){0§<kotlin.Any?>}[0]
     abstract fun attach(): io.opentelemetry.kotlin.context/Scope // io.opentelemetry.kotlin.context/Context.attach|attach(){}[0]
     abstract fun clearBaggage(): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.context/Context.clearBaggage|clearBaggage(){}[0]
-    abstract fun extractBaggage(): io.opentelemetry.kotlin.baggage/Baggage // io.opentelemetry.kotlin.context/Context.extractBaggage|extractBaggage(){}[0]
-    abstract fun extractSpan(): io.opentelemetry.kotlin.tracing/Span // io.opentelemetry.kotlin.context/Context.extractSpan|extractSpan(){}[0]
     abstract fun storeBaggage(io.opentelemetry.kotlin.baggage/Baggage): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.context/Context.storeBaggage|storeBaggage(io.opentelemetry.kotlin.baggage.Baggage){}[0]
     abstract fun storeSpan(io.opentelemetry.kotlin.tracing/Span): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.context/Context.storeSpan|storeSpan(io.opentelemetry.kotlin.tracing.Span){}[0]
     abstract fun storeSpanContext(io.opentelemetry.kotlin.tracing/SpanContext): io.opentelemetry.kotlin.context/Context // io.opentelemetry.kotlin.context/Context.storeSpanContext|storeSpanContext(io.opentelemetry.kotlin.tracing.SpanContext){}[0]

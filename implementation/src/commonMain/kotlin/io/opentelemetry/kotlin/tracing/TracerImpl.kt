@@ -73,7 +73,7 @@ internal class TracerImpl(
 
             val parentSpanContext = when (ctx) {
                 root -> invalidSpanContext
-                else -> ctx.extractSpan().spanContext
+                else -> ctx.span.spanContext
             }
             // only inherit parent trace ID if it matches the format
             val parentTraceIdBytes = parentSpanContext.traceIdBytes
