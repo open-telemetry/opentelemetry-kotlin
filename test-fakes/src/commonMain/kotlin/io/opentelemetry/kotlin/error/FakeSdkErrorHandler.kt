@@ -10,6 +10,9 @@ class FakeSdkErrorHandler : SdkErrorHandler {
     val userCodeErrors: List<SdkError.UserCodeError>
         get() = errors.filterIsInstance<SdkError.UserCodeError>()
 
+    val transientErrors: List<SdkError.TransientError>
+        get() = errors.filterIsInstance<SdkError.TransientError>()
+
     val sdkCodeErrors: List<SdkError.SdkCodeError>
         get() = errors.filterIsInstance<SdkError.SdkCodeError>()
 

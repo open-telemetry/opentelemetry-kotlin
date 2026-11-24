@@ -30,12 +30,23 @@ public sealed class SdkError(
     /**
      * User-supplied code, such as an exporter or processor, threw.
      */
-    public class UserCodeError(
+     public class UserCodeError(
         public val cause: Throwable,
         message: String,
         severity: SdkErrorSeverity,
     ) : SdkError(message, severity) {
         override fun toString(): String = "[$severity] user code failed: $message ($cause)"
+    }
+
+    /**
+     * A transient, intermittent, or network/I/O error occurred during an operation (such as export).
+     */
+    public class TransientError(
+        public val cause: Throwable?,
+        message: String,
+        severity: SdkErrorSeverity,
+    ) : SdkError(message, severity) {
+        override fun toString(): String = "[$severity] transient error: $message" + if (cause != null) " ($cause)" else ""
     }
 
     /**

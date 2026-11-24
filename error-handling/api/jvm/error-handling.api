@@ -21,6 +21,12 @@ public final class io/opentelemetry/kotlin/error/SdkError$SdkCodeError : io/open
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/opentelemetry/kotlin/error/SdkError$TransientError : io/opentelemetry/kotlin/error/SdkError {
+	public fun <init> (Ljava/lang/Throwable;Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;)V
+	public final fun getCause ()Ljava/lang/Throwable;
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/opentelemetry/kotlin/error/SdkError$UserCodeError : io/opentelemetry/kotlin/error/SdkError {
 	public fun <init> (Ljava/lang/Throwable;Ljava/lang/String;Lio/opentelemetry/kotlin/error/SdkErrorSeverity;)V
 	public final fun getCause ()Ljava/lang/Throwable;

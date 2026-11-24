@@ -161,6 +161,25 @@ public fun SdkErrorHandler.reportUserCodeError(exc: Throwable, details: String?)
 }
 
 /**
+ * Reports [exc] to this handler as a [SdkError.TransientError]. A handler that throws in response
+ * must not take down the caller, so any such failure is swallowed.
+ */
+public fun SdkErrorHandler.reportTransientError(
+    exc: Throwable?,
+    details: String?,
+    severity: SdkErrorSeverity = SdkErrorSeverity.WARNING,
+) {
+    exc?.unwrapUserCode()?.restoreInterruptIfNeeded()
+    reportError(
+        SdkError.TransientError(
+            exc?.unwrapUserCode(),
+            details ?: DEFAULT_DETAILS,
+            severity
+        )
+    )
+}
+
+/**
  * Reports [exc] to this handler as a [SdkError.SdkCodeError], unless it was thrown by [userCode],
  * in which case it is reported as a [SdkError.UserCodeError]. A handler that throws in response
  * must not take down the guard that called it, so any such failure is swallowed.

@@ -313,6 +313,7 @@ internal class OtlpServerResponseTest {
             assertIs<OtlpResponse.ResponseTooLarge>(responses.single(), "status $status")
         }
         assertEquals(2, errorHandler.userCodeErrors.size)
+        assertEquals(2, errorHandler.transientErrors.size)
     }
 
     @Test

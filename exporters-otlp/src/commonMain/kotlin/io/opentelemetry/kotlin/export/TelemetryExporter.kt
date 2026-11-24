@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
+import io.opentelemetry.kotlin.error.reportTransientError
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.ioDispatcher
@@ -196,10 +197,24 @@ internal class TelemetryExporter<T>(
                 // The server accepted the request; retrying would only re-send the rejected
                 // portion, so treat a partial success as terminal.
                 is OtlpResponse.PartialSuccess -> {
+                    if (response.rejectedCount > 0) {
+                        val msg = "OTLP export partially rejected (${response.rejectedCount} items): ${response.errorMessage}"
+                        sdkErrorHandler.reportTransientError(
+                            IllegalStateException(msg),
+                            "OTLP export partially rejected",
+                        )
+                    }
                     onExportComplete(entry, epoch, delivered = true)
                 }
 
                 is OtlpResponse.UnretryableError -> {
+                    if (response !is OtlpResponse.EncodingFailed) {
+                        val msg = "OTLP export failed with unretryable error (status=${response.statusCode}, response=$response)"
+                        sdkErrorHandler.reportTransientError(
+                            IllegalStateException(msg),
+                            "OTLP export unretryable error",
+                        )
+                    }
                     onExportComplete(entry, epoch, delivered = false)
                 }
 
@@ -272,6 +287,7 @@ internal class TelemetryExporter<T>(
     }
 
     private suspend fun onExportError(telemetry: QueuedTelemetry<T>, epoch: Long, retryAfterMs: Long?) {
+        var exhausted = false
         mutex.withLock {
             if (epoch == state.epoch) {
                 // Only the first failure from the current epoch advances the backoff and epoch.
@@ -291,11 +307,18 @@ internal class TelemetryExporter<T>(
                 }
             }
             if (telemetry.attempts >= maxAttempts) {
+                exhausted = true
                 removeEntry(telemetry, delivered = false)
-                return
+            } else {
+                telemetry.state = QueuedTelemetryState.Pending
+                workAvailable.trySend(Unit)
             }
-            telemetry.state = QueuedTelemetryState.Pending
-            workAvailable.trySend(Unit)
+        }
+        if (exhausted) {
+            sdkErrorHandler.reportTransientError(
+                IllegalStateException("OTLP export exhausted max attempts ($maxAttempts)"),
+                "OTLP export attempts exhausted"
+            )
         }
     }
 
