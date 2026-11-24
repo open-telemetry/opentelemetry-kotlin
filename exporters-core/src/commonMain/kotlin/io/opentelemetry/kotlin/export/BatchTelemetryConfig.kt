@@ -7,7 +7,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 internal class BatchTelemetryConfig(
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
-    scheduleDelay: Duration = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS.milliseconds,
+    defaultScheduleDelay: Duration = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS.milliseconds,
+    scheduleDelay: Duration = defaultScheduleDelay,
     exportTimeout: Duration = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS.milliseconds,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
     forceFlushTimeoutMs: Long = BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS,
@@ -32,8 +33,8 @@ internal class BatchTelemetryConfig(
         api = API,
         configParameterName = "scheduleDelay",
         value = scheduleDelay,
-        default = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS.milliseconds,
-    ) { it > Duration.ZERO }
+        default = defaultScheduleDelay,
+    ) { it >= Duration.ZERO }
 
     /**
      * Timeout for a single export operation.

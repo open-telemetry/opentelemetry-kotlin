@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.export
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.HttpTimeoutConfig.Companion.INFINITE_TIMEOUT_MS
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.config.validateOrUseDefault
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -114,7 +115,7 @@ internal fun createOtlpHttpClient(
         configParameterName = "timeoutMs",
         value = config.timeoutMs,
         default = EXPORT_REQUEST_TIMEOUT_MS,
-    ) { it > 0 }
+    ) { it >= 0 }
     val suppliedClient = config.httpClient
     val engine = config.httpClientEngine
     val sdkOwnedEngine = config.sdkOwnedEngine.also { config.sdkOwnedEngine = null }
@@ -125,7 +126,11 @@ internal fun createOtlpHttpClient(
     val httpClientLease = if (suppliedClient == null) {
         HttpClientRegistry.lease(
             engine = engine,
-            requestTimeoutMs = timeoutMs,
+            requestTimeoutMs = if (timeoutMs == 0L) {
+                INFINITE_TIMEOUT_MS
+            } else {
+                timeoutMs
+            },
             ownsEngine = ownsEngine,
         )
     } else {
