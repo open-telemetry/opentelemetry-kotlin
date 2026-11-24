@@ -4,17 +4,43 @@ import io.opentelemetry.kotlin.PlatformLogLevel
 import io.opentelemetry.kotlin.platformLog
 
 /**
- * An [SdkErrorHandler] that writes everything reported to it to the platform log (e.g. Logcat on
- * Android). This is the default behavior when no handler is configured.
+ * The default [SdkErrorHandler], which logs the first occurrence of each error pattern in full
+ * and periodically summarizes repetitions to avoid flooding the host's platform log.
+ * Custom error handlers still receive every error without rate limiting.
  */
 public object PlatformSdkErrorHandler : SdkErrorHandler {
+    private val limiter = DefaultErrorLogLimiter()
 
     override fun onError(error: SdkError) {
-        val level = error.severity.toPlatformLogLevel()
-        when (error) {
-            is SdkError.ApiMisuse -> platformLog(error.toLogMessage(), level)
-            is SdkError.UserCodeError -> platformLog(error.toLogMessage(), level, error.cause)
-            is SdkError.SdkCodeError -> platformLog(error.toLogMessage(), level, error.cause)
+        try {
+            when (val decision = limiter.record(error)) {
+                DefaultErrorLogLimiter.Decision.Full -> {
+                    val level = error.severity.toPlatformLogLevel()
+                    when (error) {
+                        is SdkError.ApiMisuse -> platformLog(error.toLogMessage(), level)
+                        is SdkError.UserCodeError -> platformLog(error.toLogMessage(), level, error.cause)
+                        is SdkError.SdkCodeError -> platformLog(error.toLogMessage(), level, error.cause)
+                    }
+                }
+                DefaultErrorLogLimiter.Decision.Skip -> {
+                    return
+                }
+                is DefaultErrorLogLimiter.Decision.Repeated -> {
+                    platformLog(
+                        "${error.toLogMessage()} (repeated ${decision.count} times; subsequent occurrences suppressed)",
+                        error.severity.toPlatformLogLevel(),
+                    )
+                }
+                is DefaultErrorLogLimiter.Decision.Overflow -> {
+                    platformLog(
+                        "SDK error logger reached its 64-pattern limit; ${decision.count} additional errors suppressed",
+                        PlatformLogLevel.WARNING,
+                    )
+                }
+            }
+        } catch (ignored: Throwable) {
+            ignored.restoreInterruptIfNeeded()
+            // Logging should never disrupt the host application.
         }
     }
 }
