@@ -10,7 +10,6 @@ import io.opentelemetry.kotlin.config.schema.model.OtlpHttpExporter
 import io.opentelemetry.kotlin.config.schema.model.SimpleLogRecordProcessor
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class SimpleLogRecordProcessorMapperTest {
     @Test
@@ -41,8 +40,10 @@ internal class SimpleLogRecordProcessorMapperTest {
     }
 
     @Test
-    fun missingExporterLeavesBehaviorUnset() {
-        val processor = SimpleLogRecordProcessor(exporter = LogRecordExporter())
-        assertNull(processor.toBehavior())
+    fun unsetIfNoMappedFields() {
+        assertEquals(
+            SimpleLogRecordProcessorBehavior(exporter = LogRecordExporterBehavior()),
+            SimpleLogRecordProcessor(exporter = LogRecordExporter()).toBehavior()
+        )
     }
 }

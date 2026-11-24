@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.config.schema.model.LogRecordExporter
 import io.opentelemetry.kotlin.config.schema.model.OtlpHttpExporter
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class LogRecordExporterMapperTest {
     @Test
@@ -32,11 +31,10 @@ internal class LogRecordExporterMapperTest {
             ),
             exporter.toBehavior(),
         )
-        assertNull(LogRecordExporter().toBehavior())
     }
 
     @Test
     fun unsetIfNoMappedFields() {
-        assertNull(LogRecordExporter().toBehavior())
+        assertEquals(LogRecordExporterBehavior(), LogRecordExporter().toBehavior())
     }
 }

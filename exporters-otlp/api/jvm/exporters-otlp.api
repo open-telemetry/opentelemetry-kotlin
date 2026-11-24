@@ -1,6 +1,6 @@
 public abstract interface class io/opentelemetry/kotlin/export/OtlpFileExporterConfigDsl {
-	public abstract fun getSink ()Lokio/Sink;
-	public abstract fun setSink (Lokio/Sink;)V
+	public abstract fun getSink ()Lkotlin/jvm/functions/Function1;
+	public abstract fun setSink (Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/opentelemetry/kotlin/export/OtlpHttpExporterConfigDsl {

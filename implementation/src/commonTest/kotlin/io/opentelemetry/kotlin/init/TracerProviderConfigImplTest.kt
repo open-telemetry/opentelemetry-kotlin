@@ -21,7 +21,6 @@ import io.opentelemetry.kotlin.sdkDefaultAttributes
 import io.opentelemetry.kotlin.sdkDefaultSchemaUrl
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 import io.opentelemetry.kotlin.semconv.TelemetryAttributes
-import io.opentelemetry.kotlin.tracing.FakeReadWriteSpan
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
 import io.opentelemetry.kotlin.tracing.createSpanContext
@@ -34,7 +33,6 @@ import io.opentelemetry.kotlin.tracing.sampling.SamplingResult.Decision
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -222,23 +220,26 @@ internal class TracerProviderConfigImplTest {
     }
 
     @Test
-    fun testRepeatedExportCallsProcessorsInRegistrationOrder() {
-        val handler = FakeSdkErrorHandler()
-        val calls = mutableListOf<String>()
-        val first = FakeSpanProcessor(endAction = { calls.add("first") })
-        val second = FakeSpanProcessor(endAction = { calls.add("second") })
-        val cfg = TracerProviderConfigImpl(clock, handler).apply {
+    fun testDoubleExportConfigKeepsFirst() {
+        val first = FakeSpanProcessor()
+        val second = FakeSpanProcessor()
+        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             export { first }
             export { second }
         }.generateTracingConfig(base)
-        val span = FakeReadWriteSpan()
+        assertSame(first, cfg.processor)
+    }
 
-        assertNotNull(cfg.processor).onEnd(span)
-
-        assertEquals(listOf("first", "second"), calls)
-        assertSame(span, first.endCalls.single())
-        assertSame(span, second.endCalls.single())
-        assertFalse(handler.hasErrors())
+    @Test
+    fun testDoubleExportReportsApiMisuse() {
+        val handler = FakeSdkErrorHandler()
+        TracerProviderConfigImpl(clock, handler).apply {
+            export { FakeSpanProcessor() }
+            export { FakeSpanProcessor() }
+        }.generateTracingConfig(base)
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals("TracerProviderConfigDsl.export", handler.apiMisuses.single().api)
+        assertEquals("export() should only be called once.", handler.apiMisuses.single().message)
     }
 
     @Test

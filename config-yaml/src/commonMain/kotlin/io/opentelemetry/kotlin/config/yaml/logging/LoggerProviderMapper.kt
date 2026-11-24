@@ -8,12 +8,9 @@ import io.opentelemetry.kotlin.config.schema.model.LoggerProvider
  * Maps`tracer_provider` onto its behavior.
  */
 @OptIn(ExperimentalApi::class)
-fun LoggerProvider.toBehavior(): LoggerProviderBehavior? {
+fun LoggerProvider.toBehavior(): LoggerProviderBehavior {
     val limits = limits?.toBehavior()
     val processor = processors.toBehavior()
-    if (limits == null && processor == null) {
-        return null
-    }
     return LoggerProviderBehavior(
         logLimits = limits,
         processor = processor,

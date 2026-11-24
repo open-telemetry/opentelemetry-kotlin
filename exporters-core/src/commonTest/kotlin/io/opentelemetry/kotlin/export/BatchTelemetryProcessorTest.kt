@@ -16,6 +16,9 @@ import kotlinx.coroutines.test.runTest
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.microseconds
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
 internal class BatchTelemetryProcessorTest {
@@ -55,8 +58,8 @@ internal class BatchTelemetryProcessorTest {
             config = BatchTelemetryConfig(
                 maxQueueSize = 100,
                 maxExportBatchSize = 1,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = 1000,
+                scheduleDelay = 1.milliseconds,
+                exportTimeout = 1000.milliseconds,
                 sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,
@@ -83,8 +86,8 @@ internal class BatchTelemetryProcessorTest {
             config = BatchTelemetryConfig(
                 maxQueueSize = 100,
                 maxExportBatchSize = 1,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = 1000,
+                scheduleDelay = 1.milliseconds,
+                exportTimeout = 1000.milliseconds,
                 sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,
@@ -101,8 +104,8 @@ internal class BatchTelemetryProcessorTest {
             config = BatchTelemetryConfig(
                 maxQueueSize = 100,
                 maxExportBatchSize = 1,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = 1000,
+                scheduleDelay = 1.milliseconds,
+                exportTimeout = 1000.milliseconds,
                 sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,
@@ -143,12 +146,42 @@ internal class BatchTelemetryProcessorTest {
         val exports = assertTelemetryBatched(
             telemetry = listOf(1, 2, 3),
             batchSize = 1,
-            exportTimeoutMs = 1,
+            exportTimeout = 1.milliseconds,
             exportAction = {
                 delay(2)
             }
         )
         assertEquals(emptyList(), exports)
+    }
+
+    @Test
+    fun testSubMillisecondExportTimeoutAllowsImmediateExport() = runTest {
+        val exports = assertTelemetryBatched(
+            telemetry = listOf(1),
+            exportTimeout = 500.microseconds,
+        )
+
+        assertEquals(listOf(listOf(1)), exports)
+    }
+
+    @Test
+    fun testUnlimitedExportTimeoutsExceedDefaultTimeout() = runTest {
+        for (exportTimeout in listOf(Duration.ZERO, Duration.INFINITE)) {
+            val exports = mutableListOf<List<Int>>()
+            val processor = createProcessor(
+                exportTimeout = exportTimeout,
+                forceFlushTimeoutMs = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS + 1000,
+            ) {
+                delay(BatchTelemetryDefaults.EXPORT_TIMEOUT_MS.milliseconds + 1.milliseconds)
+                exports += it
+                OperationResultCode.Success
+            }
+            processor.processTelemetry(1)
+
+            assertEquals(OperationResultCode.Success, processor.forceFlush())
+            assertEquals(listOf(listOf(1)), exports)
+            processor.shutdown()
+        }
     }
 
     @Test
@@ -230,7 +263,7 @@ internal class BatchTelemetryProcessorTest {
     @Test
     fun testForceFlushTimeoutDoesNotBlockWorker() = runTest {
         val exports = mutableListOf<List<Int>>()
-        val processor = createProcessor(forceFlushTimeoutMs = 10, exportTimeoutMs = 50) {
+        val processor = createProcessor(forceFlushTimeoutMs = 10, exportTimeout = 50.milliseconds) {
             if (it == listOf(1)) {
                 delay(100)
             }
@@ -301,7 +334,7 @@ internal class BatchTelemetryProcessorTest {
     private fun TestScope.createProcessor(
         scheduleDelayMs: Long = 10_000,
         batchSize: Int = 3,
-        exportTimeoutMs: Long = 1000,
+        exportTimeout: Duration = 1000.milliseconds,
         forceFlushTimeoutMs: Long = 1000,
         sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
         flushAction: suspend () -> OperationResultCode = { OperationResultCode.Success },
@@ -310,8 +343,8 @@ internal class BatchTelemetryProcessorTest {
         config = BatchTelemetryConfig(
             maxQueueSize = 100,
             maxExportBatchSize = batchSize,
-            scheduleDelayMs = scheduleDelayMs,
-            exportTimeoutMs = exportTimeoutMs,
+            scheduleDelay = scheduleDelayMs.milliseconds,
+            exportTimeout = exportTimeout,
             forceFlushTimeoutMs = forceFlushTimeoutMs,
             sdkErrorHandler = sdkErrorHandler,
         ),
@@ -323,7 +356,7 @@ internal class BatchTelemetryProcessorTest {
     private suspend fun <T> TestScope.assertTelemetryBatched(
         telemetry: List<T>,
         batchSize: Int = 3,
-        exportTimeoutMs: Long = 1000,
+        exportTimeout: Duration = 1000.milliseconds,
         maxQueueSize: Int = 20,
         exportAction: suspend (telemetry: List<T>) -> Unit = {},
     ): List<List<T>> {
@@ -333,8 +366,8 @@ internal class BatchTelemetryProcessorTest {
             config = BatchTelemetryConfig(
                 maxQueueSize = maxQueueSize,
                 maxExportBatchSize = batchSize,
-                scheduleDelayMs = 1,
-                exportTimeoutMs = exportTimeoutMs,
+                scheduleDelay = 1.milliseconds,
+                exportTimeout = exportTimeout,
                 sdkErrorHandler = NoopSdkErrorHandler,
             ),
             dispatcher = dispatcher,

@@ -10,6 +10,7 @@ kotlin {
             dependencies {
                 implementation(project(":implementation"))
                 implementation(project(":exporters-otlp"))
+                implementation(project(":semconv"))
                 implementation(project(":config-declarative"))
                 implementation(project(":context-threadlocal"))
                 implementation(project(":context-single-slot"))

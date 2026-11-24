@@ -7,7 +7,10 @@ import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.ExportConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.tracing.SpanLimitsConfigDslImpl
+import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.resource.Resource
@@ -15,11 +18,11 @@ import io.opentelemetry.kotlin.tracing.TracerConfigImpl
 import io.opentelemetry.kotlin.tracing.TracerConfigurator
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import io.opentelemetry.kotlin.tracing.export.batchSpanProcessor
-import io.opentelemetry.kotlin.tracing.export.compositeSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.simpleSpanProcessor
 import io.opentelemetry.kotlin.tracing.export.stdoutSpanExporter
 import io.opentelemetry.kotlin.tracing.sampling.Sampler
 import io.opentelemetry.kotlin.tracing.sampling.toSampler
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class TracerProviderConfigImpl(
     private val clock: Clock,
@@ -27,7 +30,7 @@ internal class TracerProviderConfigImpl(
     private val resourceConfig: ResourceConfigDslImpl = ResourceConfigDslImpl()
 ) : TracerProviderConfigDsl, ResourceConfigDsl by resourceConfig {
 
-    private val processors = mutableListOf<SpanProcessor>()
+    private var processor: SpanProcessor? = null
     private var samplerAction: (SamplerConfigDsl.() -> Sampler)? = null
     private val defaultTracerConfig = TracerConfigImpl(true)
     private var tracerConfigurator: TracerConfigurator = TracerConfigurator {
@@ -40,7 +43,17 @@ internal class TracerProviderConfigImpl(
     }
 
     override fun export(action: ExportConfigDsl.() -> SpanProcessor) {
-        processors.add(ExportConfigDslImpl(clock, sdkErrorHandler).action())
+        if (processor != null) {
+            sdkErrorHandler.reportError(
+                SdkError.ApiMisuse(
+                    api = "TracerProviderConfigDsl.export",
+                    message = "export() should only be called once.",
+                    severity = SdkErrorSeverity.WARNING,
+                )
+            )
+            return
+        }
+        processor = ExportConfigDslImpl(clock, sdkErrorHandler).action()
     }
 
     override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
@@ -51,19 +64,13 @@ internal class TracerProviderConfigImpl(
         tracerConfigurator = configurator
     }
 
-    @Suppress("SpreadOperator")
     fun generateTracingConfig(
         base: Resource,
         processorBehavior: SpanProcessorBehavior? = null,
     ): TracingConfig {
         val action = samplerAction ?: { parentBased(root = alwaysOn()) }
         return TracingConfig(
-            processor = when (processors.size) {
-                0 -> processorFromBehavior(processorBehavior)
-                1 -> processors.single()
-                else -> ExportConfigDslImpl(clock, sdkErrorHandler)
-                    .compositeSpanProcessor(*processors.toTypedArray())
-            },
+            processor = processor ?: processorFromBehavior(processorBehavior),
             resource = base.merge(resourceConfig.toBehavior().toResource()),
             sdkErrorHandler = sdkErrorHandler,
             samplerFactory = { SamplerConfigImpl(sdkErrorHandler).action() },
@@ -96,8 +103,8 @@ internal class TracerProviderConfigImpl(
             if (batch != null && simple == null) {
                 batchSpanProcessor(
                     exporter = exporter,
-                    scheduleDelayMs = batch.scheduleDelay ?: BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS,
-                    exportTimeoutMs = batch.exportTimeout ?: BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
+                    scheduleDelay = (batch.scheduleDelay ?: BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS).milliseconds,
+                    exportTimeout = (batch.exportTimeout ?: BatchTelemetryDefaults.EXPORT_TIMEOUT_MS).milliseconds,
                     maxQueueSize = batch.maxQueueSize ?: BatchTelemetryDefaults.MAX_QUEUE_SIZE,
                     maxExportBatchSize = batch.maxExportBatchSize ?: BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
                 )

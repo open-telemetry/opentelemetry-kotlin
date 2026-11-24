@@ -11,8 +11,8 @@ import okio.Path.Companion.toPath
  * Falls back to the system temporary directory if neither XDG_CACHE_HOME nor HOME is an absolute path.
  */
 @ExperimentalApi
-public fun platformDefaultCacheDirectory(): Path =
-    linuxCacheDirectory(getEnvVarValue("XDG_CACHE_HOME"), getEnvVarValue("HOME"))
+public fun platformDefaultCacheDirectory(): String =
+    linuxCacheDirectory(getEnvVarValue("XDG_CACHE_HOME"), getEnvVarValue("HOME")).toString()
 
 internal fun linuxCacheDirectory(cacheHome: String?, home: String?): Path = when {
     cacheHome?.startsWith("/") == true -> cacheHome.toPath()

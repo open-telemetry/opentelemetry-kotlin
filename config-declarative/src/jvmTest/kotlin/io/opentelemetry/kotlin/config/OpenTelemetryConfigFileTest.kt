@@ -97,25 +97,25 @@ internal class OpenTelemetryConfigFileTest {
 
     @Test
     fun `a config file with console exporters installs processors`() {
-        captureStdout { output ->
+        captureJul("io.opentelemetry.kotlin") { messages ->
             val sdk = create { configFile(yamlConfigReader(), writeConfigFile(CONSOLE_CONFIG_FILE)) }
             sdk.tracerProvider.getTracer("test").startSpan("console-span").end()
             sdk.loggerProvider.getLogger("test").emit("console-log")
-            assertTrue(awaitOutput(output, "console-span"))
-            assertTrue(awaitOutput(output, "console-log"))
+            assertTrue(awaitJulOutput(messages, "console-span"))
+            assertTrue(awaitJulOutput(messages, "console-log"))
         }
     }
 
     @Test
     fun `a batch config file buffers telemetry until flush`() {
-        captureStdout { output ->
+        captureJul("io.opentelemetry.kotlin") { messages ->
             val sdk = create { configFile(yamlConfigReader(), writeConfigFile(BATCH_CONSOLE_CONFIG_FILE)) }
             sdk.tracerProvider.getTracer("test").startSpan("batch-console-span").end()
             sdk.loggerProvider.getLogger("test").emit("batch-console-log")
-            assertTrue(output.toString().isEmpty())
+            assertTrue(messages.isEmpty())
             runBlocking { sdk.forceFlush() }
-            assertTrue(output.toString().contains("batch-console-span"))
-            assertTrue(output.toString().contains("batch-console-log"))
+            assertTrue(messages.any { it.contains("batch-console-span") })
+            assertTrue(messages.any { it.contains("batch-console-log") })
         }
     }
 
@@ -123,7 +123,7 @@ internal class OpenTelemetryConfigFileTest {
     fun `the dsl export takes precedence over console in the config file`() {
         val spanProcessor = FakeSpanProcessor()
         val logProcessor = FakeLogRecordProcessor()
-        val stdout = captureStdout {
+        val messages = captureJul("io.opentelemetry.kotlin") {
             val sdk = create {
                 configFile(yamlConfigReader(), writeConfigFile(CONSOLE_CONFIG_FILE))
                 tracerProvider { export { spanProcessor } }
@@ -134,7 +134,7 @@ internal class OpenTelemetryConfigFileTest {
         }
         assertEquals(1, spanProcessor.endCalls.size)
         assertEquals(1, logProcessor.logs.size)
-        assertFalse(stdout.contains("dsl-span"))
+        assertFalse(messages.any { it.contains("dsl-span") || it.contains("dsl-log") })
     }
 
     @Test
