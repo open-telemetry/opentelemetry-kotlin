@@ -61,7 +61,11 @@ internal object HttpClientRegistry {
         requestTimeoutMs: Long,
         ownsEngine: Boolean = false,
     ): HttpClientLease = withGate {
-        val timeoutMs = if (requestTimeoutMs == 0L) INFINITE_TIMEOUT_MS else requestTimeoutMs
+        val timeoutMs = if (requestTimeoutMs == 0L) {
+            INFINITE_TIMEOUT_MS
+        } else {
+            requestTimeoutMs
+        }
         val key = HttpClientKey(engine, timeoutMs)
         val shared = clients[key]
         if (shared != null) {
@@ -138,7 +142,11 @@ internal fun createDefaultHttpClient(
     requestTimeoutMs: Long,
     engine: HttpClientEngine? = null,
 ): HttpClient {
-    val timeoutMillis = if (requestTimeoutMs == 0L) INFINITE_TIMEOUT_MS else requestTimeoutMs
+    val timeoutMillis = if (requestTimeoutMs == 0L) {
+        INFINITE_TIMEOUT_MS
+    } else {
+        requestTimeoutMs
+    }
     val configure: HttpClientConfig<*>.() -> Unit = {
         install(HttpTimeout) {
             requestTimeoutMillis = timeoutMillis

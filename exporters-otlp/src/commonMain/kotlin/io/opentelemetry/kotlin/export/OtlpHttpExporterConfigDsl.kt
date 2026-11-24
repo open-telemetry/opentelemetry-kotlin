@@ -126,7 +126,11 @@ internal fun createOtlpHttpClient(
     val httpClientLease = if (suppliedClient == null) {
         HttpClientRegistry.lease(
             engine = engine,
-            requestTimeoutMs = if (timeoutMs == 0L) INFINITE_TIMEOUT_MS else timeoutMs,
+            requestTimeoutMs = if (timeoutMs == 0L) {
+                INFINITE_TIMEOUT_MS
+            } else {
+                timeoutMs
+            },
             ownsEngine = ownsEngine,
         )
     } else {
