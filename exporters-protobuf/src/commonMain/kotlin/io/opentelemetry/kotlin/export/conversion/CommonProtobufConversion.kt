@@ -24,6 +24,7 @@ fun InstrumentationScopeInfo.toProtobuf(): InstrumentationScope = Instrumentatio
     name = name,
     version = version ?: "",
     attributes = attributes.createKeyValues(),
+    dropped_attributes_count = droppedAttributesCount,
 )
 
 internal fun Resource.toProtobuf() =
@@ -35,7 +36,8 @@ internal fun InstrumentationScope.toInstrumentationScopeInfo(
     name = name,
     version = version.ifEmpty { null },
     schemaUrl = schemaUrl?.ifEmpty { null },
-    attributes = attributes.toAttributeMap()
+    attributes = attributes.toAttributeMap(),
+    droppedAttributesCount = dropped_attributes_count,
 )
 
 internal fun io.opentelemetry.kotlin.proto.resource.v1.Resource.toResource(
@@ -61,6 +63,7 @@ private class DeserializedInstrumentationScopeInfo(
     override val version: String?,
     override val schemaUrl: String?,
     override val attributes: Map<String, Any>,
+    override val droppedAttributesCount: Int,
 ) : InstrumentationScopeInfo
 
 private class DeserializedResource(
