@@ -1,43 +1,43 @@
 package io.opentelemetry.kotlin.config.dsl.logging
 
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-internal class LogLimitsConfigDslImplTest {
+internal class LogRecordLimitsConfigDslImplTest {
 
     @Test
     fun everyLimitStartsUnset() {
-        assertEquals(LogLimitsBehavior(), LogLimitsConfigDslImpl().toBehavior())
+        assertEquals(LogRecordLimitsBehavior(), LogRecordLimitsConfigDslImpl().toBehavior())
     }
 
     @Test
     fun mapsEveryConfiguredLimit() {
-        val dsl = LogLimitsConfigDslImpl().apply {
+        val dsl = LogRecordLimitsConfigDslImpl().apply {
             attributeCountLimit = 64
             attributeValueLengthLimit = 256
         }
 
         assertEquals(
-            LogLimitsBehavior(attributeCountLimit = 64, attributeValueLengthLimit = 256),
+            LogRecordLimitsBehavior(attributeCountLimit = 64, attributeValueLengthLimit = 256),
             dsl.toBehavior(),
         )
     }
 
     @Test
     fun preservesALimitOfZero() {
-        val dsl = LogLimitsConfigDslImpl().apply { attributeCountLimit = 0 }
+        val dsl = LogRecordLimitsConfigDslImpl().apply { attributeCountLimit = 0 }
 
         assertEquals(0, dsl.toBehavior().attributeCountLimit)
     }
 
     @Test
     fun leavesNegativeLimitsUnset() {
-        val dsl = LogLimitsConfigDslImpl().apply {
+        val dsl = LogRecordLimitsConfigDslImpl().apply {
             attributeCountLimit = -1
             attributeValueLengthLimit = -1
         }
 
-        assertEquals(LogLimitsBehavior(), dsl.toBehavior())
+        assertEquals(LogRecordLimitsBehavior(), dsl.toBehavior())
     }
 }

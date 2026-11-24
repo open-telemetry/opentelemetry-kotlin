@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.createOpenTelemetry
 // region logging-limits
 fun initLoggingWithLimits(): OpenTelemetrySdk = createOpenTelemetry {
     loggerProvider {
-        logLimits {
+        logRecordLimits {
             attributeCountLimit = 32 // extra attributes are dropped
             attributeValueLengthLimit = 1024 // longer string values are truncated
         }

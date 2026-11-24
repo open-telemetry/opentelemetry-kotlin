@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.setAttributeMap
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
@@ -40,8 +40,8 @@ internal class CompatSdkConfigFactory(
     val spanLimits: SpanLimitsBehavior =
         behavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior()
 
-    val logLimits: LogLimitsBehavior =
-        behavior.loggerProvider?.logLimits ?: LogLimitsBehavior()
+    val logRecordLimits: LogRecordLimitsBehavior =
+        behavior.loggerProvider?.logRecordLimits ?: LogRecordLimitsBehavior()
 
     private val sampler: SamplerBehavior? = behavior.tracerProvider?.sampler
 
@@ -61,7 +61,7 @@ internal class CompatSdkConfigFactory(
 
     fun buildLoggerProvider(): LoggerProvider {
         cfg.loggerProviderConfig.applyResolvedProcessor(logProcessor)
-        return cfg.loggerProviderConfig.build(clock, baseResource, logLimits, cfg.shutdownTimeoutMs)
+        return cfg.loggerProviderConfig.build(clock, baseResource, logRecordLimits, cfg.shutdownTimeoutMs)
     }
 
     fun buildMeterProvider(): MeterProvider = cfg.meterProviderConfig.build()

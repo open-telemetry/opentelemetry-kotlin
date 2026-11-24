@@ -182,7 +182,7 @@ internal class LogExportTest {
 
     @Test
     fun `test log limit export`() = runTest {
-        harness.config.logLimits = {
+        harness.config.logRecordLimits = {
             attributeCountLimit = 2
             attributeValueLengthLimit = 3
         }

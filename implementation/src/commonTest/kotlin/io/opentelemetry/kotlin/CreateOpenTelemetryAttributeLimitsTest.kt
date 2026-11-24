@@ -113,7 +113,7 @@ internal class CreateOpenTelemetryAttributeLimitsTest {
     }
 
     @Test
-    fun `log limits do not override logger scope attribute limits`() {
+    fun `log record limits do not override logger scope attribute limits`() {
         val logProcessor = FakeLogRecordProcessor()
 
         val api = createOpenTelemetry {
@@ -122,7 +122,7 @@ internal class CreateOpenTelemetryAttributeLimitsTest {
                 attributeValueLengthLimit = 3
             }
             loggerProvider {
-                logLimits {
+                logRecordLimits {
                     attributeCountLimit = 2
                     attributeValueLengthLimit = 6
                 }

@@ -7,4 +7,4 @@ import io.opentelemetry.kotlin.ExperimentalApi
  */
 @ExperimentalApi
 @ConfigDsl
-public interface LogLimitsConfigDsl : AttributeLimitsConfigDsl
+public interface LogRecordLimitsConfigDsl : AttributeLimitsConfigDsl

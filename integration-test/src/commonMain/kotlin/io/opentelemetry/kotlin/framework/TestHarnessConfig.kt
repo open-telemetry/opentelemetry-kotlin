@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.framework
 
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.init.LogLimitsConfigDsl
+import io.opentelemetry.kotlin.init.LogRecordLimitsConfigDsl
 import io.opentelemetry.kotlin.init.LoggerProviderConfigDsl
 import io.opentelemetry.kotlin.init.SpanLimitsConfigDsl
 import io.opentelemetry.kotlin.init.TracerProviderConfigDsl
@@ -14,7 +14,7 @@ data class TestHarnessConfig(
     val spanProcessors: MutableList<SpanProcessor> = mutableListOf(),
     val logRecordProcessors: MutableList<LogRecordProcessor> = mutableListOf(),
     var spanLimits: SpanLimitsConfigDsl.() -> Unit = {},
-    var logLimits: LogLimitsConfigDsl.() -> Unit = {},
+    var logRecordLimits: LogRecordLimitsConfigDsl.() -> Unit = {},
     var tracerProvider: TracerProviderConfigDsl.() -> Unit = {},
     var loggerProvider: LoggerProviderConfigDsl.() -> Unit = {},
 )

@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
-import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
+import io.opentelemetry.kotlin.tracing.fakeLogRecordLimitsConfig
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,9 +29,9 @@ internal class LogRecordSnapshotTest {
             processor = processor,
             key = key,
             resource = FakeResource(),
-            logLimits = AttributeLimitsBehavior(
+            logRecordLimits = AttributeLimitsBehavior(
                 attributeCountLimit = 2,
-                attributeValueLengthLimit = fakeLogLimitsConfig.attributeValueLengthLimit
+                attributeValueLengthLimit = fakeLogRecordLimitsConfig.attributeValueLengthLimit
             ),
             shutdownState = MutableShutdownState(),
             sdkErrorHandler = NoopSdkErrorHandler,

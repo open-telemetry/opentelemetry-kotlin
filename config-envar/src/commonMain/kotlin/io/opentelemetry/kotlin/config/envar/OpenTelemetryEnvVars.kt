@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.toSeverityLevel
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
-import io.opentelemetry.kotlin.config.envar.logging.LogLimitsEnvVars
+import io.opentelemetry.kotlin.config.envar.logging.LogRecordLimitsEnvVars
 import io.opentelemetry.kotlin.config.envar.logging.LogRecordProcessorEnvVars
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Invalid
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadResult.Value
@@ -44,7 +44,7 @@ class OpenTelemetryEnvVars(
             processor = SpanProcessorEnvVars(reader).toBehavior(),
         ),
         loggerProvider = LoggerProviderBehavior(
-            logLimits = LogLimitsEnvVars(reader).toBehavior(),
+            logRecordLimits = LogRecordLimitsEnvVars(reader).toBehavior(),
             processor = LogRecordProcessorEnvVars(reader).toBehavior(),
         ),
     )

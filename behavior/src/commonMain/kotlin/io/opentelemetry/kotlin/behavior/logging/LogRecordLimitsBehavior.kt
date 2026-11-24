@@ -10,4 +10,4 @@ import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
  * https://opentelemetry.io/docs/specs/otel/logs/sdk/#logrecord-limits
  */
 @OptIn(ExperimentalApi::class)
-typealias LogLimitsBehavior = AttributeLimitsBehavior
+typealias LogRecordLimitsBehavior = AttributeLimitsBehavior

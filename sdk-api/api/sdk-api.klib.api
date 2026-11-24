@@ -114,11 +114,11 @@ abstract interface io.opentelemetry.kotlin.init/ExportConfigDsl { // io.opentele
         abstract fun <get-sdkErrorHandler>(): io.opentelemetry.kotlin.error/SdkErrorHandler // io.opentelemetry.kotlin.init/ExportConfigDsl.sdkErrorHandler.<get-sdkErrorHandler>|<get-sdkErrorHandler>(){}[0]
 }
 
-abstract interface io.opentelemetry.kotlin.init/LogLimitsConfigDsl : io.opentelemetry.kotlin.init/AttributeLimitsConfigDsl // io.opentelemetry.kotlin.init/LogLimitsConfigDsl|null[0]
+abstract interface io.opentelemetry.kotlin.init/LogRecordLimitsConfigDsl : io.opentelemetry.kotlin.init/AttributeLimitsConfigDsl // io.opentelemetry.kotlin.init/LogRecordLimitsConfigDsl|null[0]
 
 abstract interface io.opentelemetry.kotlin.init/LoggerProviderConfigDsl : io.opentelemetry.kotlin.init/ResourceConfigDsl { // io.opentelemetry.kotlin.init/LoggerProviderConfigDsl|null[0]
     abstract fun export(kotlin/Function1<io.opentelemetry.kotlin.init/ExportConfigDsl, io.opentelemetry.kotlin.logging.export/LogRecordProcessor>) // io.opentelemetry.kotlin.init/LoggerProviderConfigDsl.export|export(kotlin.Function1<io.opentelemetry.kotlin.init.ExportConfigDsl,io.opentelemetry.kotlin.logging.export.LogRecordProcessor>){}[0]
-    abstract fun logLimits(kotlin/Function1<io.opentelemetry.kotlin.init/LogLimitsConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/LoggerProviderConfigDsl.logLimits|logLimits(kotlin.Function1<io.opentelemetry.kotlin.init.LogLimitsConfigDsl,kotlin.Unit>){}[0]
+    abstract fun logRecordLimits(kotlin/Function1<io.opentelemetry.kotlin.init/LogRecordLimitsConfigDsl, kotlin/Unit>) // io.opentelemetry.kotlin.init/LoggerProviderConfigDsl.logRecordLimits|logRecordLimits(kotlin.Function1<io.opentelemetry.kotlin.init.LogRecordLimitsConfigDsl,kotlin.Unit>){}[0]
     abstract fun loggerConfigurator(io.opentelemetry.kotlin.logging/LoggerConfigurator) // io.opentelemetry.kotlin.init/LoggerProviderConfigDsl.loggerConfigurator|loggerConfigurator(io.opentelemetry.kotlin.logging.LoggerConfigurator){}[0]
 }
 

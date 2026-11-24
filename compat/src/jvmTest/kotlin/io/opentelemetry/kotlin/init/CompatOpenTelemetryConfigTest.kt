@@ -125,18 +125,18 @@ internal class CompatOpenTelemetryConfigTest {
     }
 
     @Test
-    fun `log limits dsl is reflected in resolved behavior`() {
+    fun `log record limits dsl is reflected in resolved behavior`() {
         val cfg = CompatOpenTelemetryConfig()
         cfg.loggerProvider {
-            logLimits {
+            logRecordLimits {
                 attributeCountLimit = 8
                 attributeValueLengthLimit = 16
             }
         }
 
         val behavior = defaultCompatBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
-        val logLimits = CompatSdkConfigFactory(cfg, behavior, clock).logLimits
-        assertEquals(8, logLimits.attributeCountLimit)
-        assertEquals(16, logLimits.attributeValueLengthLimit)
+        val logRecordLimits = CompatSdkConfigFactory(cfg, behavior, clock).logRecordLimits
+        assertEquals(8, logRecordLimits.attributeCountLimit)
+        assertEquals(16, logRecordLimits.attributeValueLengthLimit)
     }
 }

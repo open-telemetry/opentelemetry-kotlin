@@ -1,35 +1,35 @@
 package io.opentelemetry.kotlin.config.envar.logging
 
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-internal class LogLimitsEnvVarsTest {
+internal class LogRecordLimitsEnvVarsTest {
 
     @Test
     fun `should read every limit`() {
         val env = mapOf(
-            LogLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT to "64",
-            LogLimitsEnvVars.ATTRIBUTE_VALUE_LENGTH_LIMIT to "256",
+            LogRecordLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT to "64",
+            LogRecordLimitsEnvVars.ATTRIBUTE_VALUE_LENGTH_LIMIT to "256",
         )
         val behavior = toBehavior(env::get)
         assertEquals(
-            LogLimitsBehavior(attributeCountLimit = 64, attributeValueLengthLimit = 256),
+            LogRecordLimitsBehavior(attributeCountLimit = 64, attributeValueLengthLimit = 256),
             behavior,
         )
     }
 
     @Test
     fun `should leave unset env vars unset`() {
-        assertEquals(LogLimitsBehavior(), toBehavior { null })
+        assertEquals(LogRecordLimitsBehavior(), toBehavior { null })
     }
 
     @Test
     fun `should preserve a limit of zero`() {
         val behavior = toBehavior { "0" }
         assertEquals(
-            LogLimitsBehavior(attributeCountLimit = 0, attributeValueLengthLimit = 0),
+            LogRecordLimitsBehavior(attributeCountLimit = 0, attributeValueLengthLimit = 0),
             behavior,
         )
     }
@@ -39,7 +39,7 @@ internal class LogLimitsEnvVarsTest {
         INVALID_VALUES.forEach { rawValue ->
             val behavior = toBehavior { rawValue }
             assertEquals(
-                LogLimitsBehavior(),
+                LogRecordLimitsBehavior(),
                 behavior,
                 "<$rawValue> should not configure a limit",
             )
@@ -47,7 +47,7 @@ internal class LogLimitsEnvVarsTest {
     }
 
     private fun toBehavior(getEnvVar: (String) -> String?) =
-        LogLimitsEnvVars(reportingEnvVarReader(getEnvVar)).toBehavior()
+        LogRecordLimitsEnvVars(reportingEnvVarReader(getEnvVar)).toBehavior()
 
     private companion object {
         val INVALID_VALUES = listOf("invalid", "", "-1", "2147483648")
