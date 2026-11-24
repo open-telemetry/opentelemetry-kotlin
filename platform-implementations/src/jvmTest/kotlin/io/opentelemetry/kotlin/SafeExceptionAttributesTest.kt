@@ -56,8 +56,36 @@ internal class SafeExceptionAttributesTest {
 
         assertEquals(1024, attributes.message?.length)
         assertTrue(attributes.stackTrace.lines().count { it.trimStart().startsWith("at ") } <= 200)
-        assertContains(attributes.stackTrace, "causes omitted")
+        assertEquals(3, attributes.stackTrace.lines().count { it.startsWith("Caused by: ") })
         assertContains(attributes.stackTrace, "suppressed exceptions omitted")
         assertContains(attributes.stackTrace, "frames omitted")
+    }
+
+    @Test
+    fun truncatesMessagesByUtf8BytesWithoutSplittingCharacters() {
+        val attributes = safeExceptionAttributes(RuntimeException("€".repeat(1024)))
+
+        assertEquals(341, attributes.message?.length)
+        assertEquals("😀".repeat(256), truncateUtf8("😀".repeat(257)))
+    }
+
+    @Test
+    fun skipsStackTraceReadsAfterFrameBudgetIsExhausted() {
+        val cause = CountingStackTraceThrowable()
+        val root = RuntimeException("root", cause)
+        root.stackTrace = Array(200) { index -> StackTraceElement("Example", "method$index", "Example.kt", index) }
+
+        safeExceptionAttributes(root)
+
+        assertEquals(0, cause.stackTraceReads)
+    }
+
+    private class CountingStackTraceThrowable : Throwable("cause") {
+        var stackTraceReads: Int = 0
+
+        override fun getStackTrace(): Array<StackTraceElement> {
+            stackTraceReads++
+            return emptyArray()
+        }
     }
 }

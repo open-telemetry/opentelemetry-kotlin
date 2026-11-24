@@ -5,7 +5,6 @@ import java.util.IdentityHashMap
 private const val MAX_CAUSES = 3
 private const val MAX_SUPPRESSED = 3
 private const val MAX_FRAMES = 200
-private const val MAX_MESSAGE_LENGTH = 1024
 
 public actual fun safeExceptionAttributes(throwable: Throwable): SafeExceptionAttributes {
     val visited = IdentityHashMap<Throwable, Boolean>()
@@ -21,12 +20,18 @@ public actual fun safeExceptionAttributes(throwable: Throwable): SafeExceptionAt
     }
 
     fun safeMessage(current: Throwable): String? = try {
-        current.message?.take(MAX_MESSAGE_LENGTH)
+        current.message?.let(::truncateUtf8)
     } catch (_: Throwable) {
         className(current)
     }
 
-    fun append(current: Throwable, indent: String, relation: String?) {
+    fun append(
+        current: Throwable,
+        indent: String,
+        relation: String?,
+        knownMessage: String? = null,
+        hasKnownMessage: Boolean = false,
+    ) {
         val name = className(current)
         if (visited.containsKey(current)) {
             output.append(indent).append(relation.orEmpty())
@@ -35,70 +40,73 @@ public actual fun safeExceptionAttributes(throwable: Throwable): SafeExceptionAt
         }
         visited[current] = true
 
-        val message = safeMessage(current)
+        val message = if (hasKnownMessage) knownMessage else safeMessage(current)
         output.append(indent).append(relation.orEmpty()).append(name)
         if (message != null) {
             output.append(": ").append(message)
         }
         output.append('\n')
 
-        val frames = try {
-            current.stackTrace
-        } catch (_: Throwable) {
-            emptyArray()
-        }
-        val frameIndent = "$indent\t"
-        val remaining = (MAX_FRAMES - frameCount).coerceAtLeast(0)
-        val visibleFrames = minOf(frames.size, remaining)
-        for (index in 0 until visibleFrames) {
-            val frame = try {
-                frames[index].toString()
+        if (frameCount < MAX_FRAMES) {
+            val frames = try {
+                current.stackTrace
             } catch (_: Throwable) {
-                "<unavailable>"
+                emptyArray()
             }
-            output.append(frameIndent).append("at ").append(frame).append('\n')
-        }
-        frameCount += visibleFrames
-        if (visibleFrames < frames.size) {
-            output.append(frameIndent).append("... ")
-                .append(frames.size - visibleFrames).append(" frames omitted\n")
+            val frameIndent = "$indent\t"
+            val remaining = MAX_FRAMES - frameCount
+            val visibleFrames = minOf(frames.size, remaining)
+            for (index in 0 until visibleFrames) {
+                val frame = try {
+                    frames[index].toString()
+                } catch (_: Throwable) {
+                    "<unavailable>"
+                }
+                output.append(frameIndent).append("at ").append(frame).append('\n')
+            }
+            frameCount += visibleFrames
+            if (visibleFrames < frames.size) {
+                output.append(frameIndent).append("... ")
+                    .append(frames.size - visibleFrames).append(" frames omitted\n")
+            }
         }
 
-        val suppressed = try {
-            current.suppressed
-        } catch (_: Throwable) {
-            emptyArray()
-        }
-        for (item in suppressed) {
-            if (suppressedCount == MAX_SUPPRESSED) {
-                output.append(frameIndent).append("... suppressed exceptions omitted\n")
-                break
+        if (suppressedCount < MAX_SUPPRESSED) {
+            val frameIndent = "$indent\t"
+            val suppressed = try {
+                current.suppressed
+            } catch (_: Throwable) {
+                emptyArray()
             }
-            suppressedCount++
-            append(item, frameIndent, "Suppressed: ")
+            for (item in suppressed) {
+                if (suppressedCount >= MAX_SUPPRESSED) {
+                    output.append(frameIndent).append("... suppressed exceptions omitted\n")
+                    break
+                }
+                suppressedCount++
+                append(item, frameIndent, "Suppressed: ")
+            }
         }
 
-        val cause = try {
-            current.cause
-        } catch (_: Throwable) {
-            null
-        }
-        if (cause != null) {
-            if (causeCount == MAX_CAUSES) {
-                output.append(indent).append("Caused by: ... causes omitted\n")
-            } else {
+        if (causeCount < MAX_CAUSES) {
+            val cause = try {
+                current.cause
+            } catch (_: Throwable) {
+                null
+            }
+            if (cause != null) {
                 causeCount++
                 append(cause, indent, "Caused by: ")
             }
         }
     }
 
-    append(throwable, "", null)
+    val message = safeMessage(throwable)
+    append(throwable, "", null, knownMessage = message, hasKnownMessage = true)
     val type = try {
         throwable.exceptionType()
     } catch (_: Throwable) {
         className(throwable)
     }
-    val message = safeMessage(throwable)
     return SafeExceptionAttributes(type, message, output.toString().trimEnd())
 }

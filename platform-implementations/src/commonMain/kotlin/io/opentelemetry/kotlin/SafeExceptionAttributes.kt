@@ -22,14 +22,39 @@ internal fun safeExceptionAttributesFallback(throwable: Throwable): SafeExceptio
         className
     }
     val message = try {
-        throwable.message?.take(1024)
+        throwable.message?.let(::truncateUtf8)
     } catch (_: Throwable) {
         className
     }
-    val header = if (message == null) {
-        className
-    } else {
-        "$className: $message"
+    val header = buildString {
+        append(className)
+        message?.takeIf { it.isNotEmpty() && it != className }?.let {
+            append(": ").append(it)
+        }
     }
     return SafeExceptionAttributes(type, message, header)
+}
+
+internal const val MAX_SAFE_EXCEPTION_MESSAGE_LENGTH: Int = 1024
+
+internal fun truncateUtf8(value: String): String {
+    var index = 0
+    var byteCount = 0
+    while (index < value.length) {
+        val first = value[index].code
+        val isSurrogatePair = first in 0xD800..0xDBFF &&
+            index + 1 < value.length && value[index + 1].code in 0xDC00..0xDFFF
+        val bytes = when {
+            isSurrogatePair -> 4
+            first <= 0x7F -> 1
+            first <= 0x7FF -> 2
+            else -> 3
+        }
+        if (byteCount + bytes > MAX_SAFE_EXCEPTION_MESSAGE_LENGTH) {
+            break
+        }
+        byteCount += bytes
+        index += if (isSurrogatePair) 2 else 1
+    }
+    return if (index == value.length) value else value.substring(0, index)
 }
