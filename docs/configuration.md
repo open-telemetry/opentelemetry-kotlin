@@ -218,11 +218,9 @@ The batch processor's settings are:
 | Parameter            | Meaning                                                                      | Default                       |
 |----------------------|------------------------------------------------------------------------------|-------------------------------|
 | `maxQueueSize`       | How many items are buffered. When the buffer is full, new items are dropped. | 2048                          |
-| `scheduleDelay`      | How long to wait between span exports.                                       | 5 seconds                     |
-| `scheduleDelayMs`    | How long to wait between log exports.                                        | 1000                          |
+| `scheduleDelay`      | How long to wait between exports.                                            | 5 seconds (spans), 1 second (logs) |
 | `maxExportBatchSize` | The most items sent in one export.                                           | 512                           |
-| `exportTimeout`      | How long a span export can take before it's cancelled.                       | 30 seconds                    |
-| `exportTimeoutMs`    | How long a log export can take before it's cancelled.                        | 30000                         |
+| `exportTimeout`      | How long an export can take before it's cancelled.                           | 30 seconds                    |
 
 ### Sampling
 

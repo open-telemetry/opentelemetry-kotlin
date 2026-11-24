@@ -25,4 +25,9 @@ public interface InstrumentationScopeInfo {
      * The attributes of the instrumentation scope, if set
      */
     public val attributes: Map<String, Any>
+
+    /**
+     * The number of attributes that were dropped because the scope's attribute limit was exceeded.
+     */
+    public val droppedAttributesCount: Int
 }

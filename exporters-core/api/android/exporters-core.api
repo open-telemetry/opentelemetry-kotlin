@@ -10,9 +10,9 @@ public final class io/opentelemetry/kotlin/export/BatchTelemetryDefaults {
 }
 
 public final class io/opentelemetry/kotlin/logging/export/CoreLogRecordExporterApiKt {
-	public static final fun batchLogRecordProcessor (Lio/opentelemetry/kotlin/init/ExportConfigDsl;Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;IJJI)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
-	public static synthetic fun batchLogRecordProcessor$default (Lio/opentelemetry/kotlin/init/ExportConfigDsl;Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;IJJIILjava/lang/Object;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
-	public static final fun batchLogRecordProcessorWithDispatcher (Lio/opentelemetry/kotlin/init/ExportConfigDsl;Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;IJJILkotlinx/coroutines/CoroutineDispatcher;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
+	public static final fun batchLogRecordProcessor-MHpS38I (Lio/opentelemetry/kotlin/init/ExportConfigDsl;Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;IJJI)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
+	public static synthetic fun batchLogRecordProcessor-MHpS38I$default (Lio/opentelemetry/kotlin/init/ExportConfigDsl;Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;IJJIILjava/lang/Object;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
+	public static final fun batchLogRecordProcessorWithDispatcher-2AWqQcw (Lio/opentelemetry/kotlin/init/ExportConfigDsl;Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;IJJILkotlinx/coroutines/CoroutineDispatcher;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
 	public static final fun compositeLogRecordExporter (Lio/opentelemetry/kotlin/init/ExportConfigDsl;[Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;)Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;
 	public static final fun compositeLogRecordProcessor (Lio/opentelemetry/kotlin/init/ExportConfigDsl;[Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;
 	public static final fun simpleLogRecordProcessor (Lio/opentelemetry/kotlin/init/ExportConfigDsl;Lio/opentelemetry/kotlin/logging/export/LogRecordExporter;)Lio/opentelemetry/kotlin/logging/export/LogRecordProcessor;

@@ -23,6 +23,18 @@ class CommonProtobufConversionTest {
         assertEquals(0, protobuf.attributes.size)
         assertEquals("name", protobuf.name)
         assertEquals("", protobuf.version)
+        assertEquals(0, protobuf.dropped_attributes_count)
+    }
+
+    @Test
+    fun testInstrumentationScopeDroppedAttributesCountConversion() {
+        val obj = FakeInstrumentationScopeInfo(
+            attributes = mapOf("foo" to "bar"),
+            droppedAttributesCount = 2,
+        )
+        val protobuf = obj.toProtobuf()
+        assertEquals(1, protobuf.attributes.size)
+        assertEquals(2, protobuf.dropped_attributes_count)
     }
 
     @Test
@@ -75,6 +87,17 @@ class CommonProtobufConversionTest {
         assertEquals("1.0.0", scope.version)
         assertEquals("https://schema.url", scope.schemaUrl)
         assertEquals(0, scope.attributes.size)
+        assertEquals(0, scope.droppedAttributesCount)
+    }
+
+    @Test
+    fun testInstrumentationScopeDeserialization_droppedAttributesCount() {
+        val proto = InstrumentationScope(
+            name = "test-scope",
+            dropped_attributes_count = 3,
+        )
+        val scope = proto.toInstrumentationScopeInfo(null)
+        assertEquals(3, scope.droppedAttributesCount)
     }
 
     @Test
