@@ -9,15 +9,13 @@ import io.opentelemetry.kotlin.export.TelemetryExporter
 import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.encode.JsonLogRecordEncoder
-import okio.blackholeSink
-import okio.buffer
 import kotlin.coroutines.CoroutineContext
 
 /**
  * A [LogRecordExporter] that outputs log records in JSON format to a file.
  */
 internal class OtlpFileLogRecordExporter(
-    private val fileExporter: OtlpFileExporter = OtlpFileExporter(sink = blackholeSink().buffer()),
+    private val fileExporter: OtlpFileExporter = OtlpFileExporter(),
     private val encoder: JsonLogRecordEncoder = JsonLogRecordEncoder(),
     initialDelayMs: Long,
     maxAttemptIntervalMs: Long,

@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.config.envar.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
 import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
 import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 
@@ -13,8 +14,8 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 @OptIn(ExperimentalApi::class)
 class SpanProcessorEnvVars(
     private val reader: ReportingEnvVarReader,
-) {
-    fun toBehavior(): SpanProcessorBehavior = SpanProcessorBehavior(
+) : BehaviorSupplier<SpanProcessorBehavior> {
+    override fun toBehavior(): SpanProcessorBehavior = SpanProcessorBehavior(
         batch = BatchSpanProcessorEnvVars(reader).toBehavior()
     )
 }

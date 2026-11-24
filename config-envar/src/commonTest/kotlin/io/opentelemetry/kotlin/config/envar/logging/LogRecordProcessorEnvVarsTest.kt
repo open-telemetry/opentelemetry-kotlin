@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.config.envar.logging
 
 import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
@@ -22,6 +23,7 @@ internal class LogRecordProcessorEnvVarsTest {
                     exportTimeout = 2,
                     maxQueueSize = 3,
                     requestedQueueSize = 4,
+                    exporter = LogRecordExporterBehavior()
                 )
             ),
             toBehavior(configs::get),

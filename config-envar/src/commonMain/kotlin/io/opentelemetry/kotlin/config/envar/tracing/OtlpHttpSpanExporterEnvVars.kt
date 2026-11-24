@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.config.envar.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
 import io.opentelemetry.kotlin.behavior.OtlpExporter
 import io.opentelemetry.kotlin.behavior.tracing.OtlpHttpSpanExporterBehavior
 import io.opentelemetry.kotlin.config.envar.OpenTelemetryEnvVars
@@ -11,8 +12,10 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
  * behavior configuration.
  */
 @OptIn(ExperimentalApi::class)
-class OtlpHttpSpanExporterEnvVars(private val reader: ReportingEnvVarReader) {
-    fun toBehavior(): OtlpHttpSpanExporterBehavior {
+class OtlpHttpSpanExporterEnvVars(
+    private val reader: ReportingEnvVarReader
+) : BehaviorSupplier<OtlpHttpSpanExporterBehavior> {
+    override fun toBehavior(): OtlpHttpSpanExporterBehavior {
         val signalEndpoint = reader.readString(SpanExporterEnvVars.OTLP_TRACES_ENDPOINT)
         val endpoint = reader.readString(OpenTelemetryEnvVars.OTLP_ENDPOINT)
         val timeout = reader.readNonNegativeLong(SpanExporterEnvVars.OTLP_TRACES_TIMEOUT)

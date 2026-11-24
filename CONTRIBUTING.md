@@ -58,6 +58,8 @@ To add or change a sample:
 1. Create one file per sample in `docs-snippets/src/<sourceSet>/kotlin/...`. Use `commonMain` unless
    the sample is platform-specific. Put the lines to show between `// region <snippet-id>` and
    `// end-region`, both at the start of a line. Keep the package and imports outside the region.
+   Samples that aren't Kotlin source (Gradle `.kts`, Swift) go in `docs-snippets/src/gradle/` or
+   `docs-snippets/src/swift/`. They're synced but not compiled.
 2. In the markdown, add the id after the language on the opening line of a code fence, e.g.
    ```` ```kotlin <snippet-id> ````. GitHub only uses the first word to highlight the code.
 3. Run `./gradlew syncDocSnippets` to copy the sample into the fence.

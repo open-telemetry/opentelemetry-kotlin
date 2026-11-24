@@ -39,7 +39,8 @@ internal fun OtelJavaValue<*>.toOtelKotlinBody(): Any? = when (type) {
     OtelJavaValueType.BOOLEAN,
     OtelJavaValueType.LONG,
     OtelJavaValueType.DOUBLE -> value
-    OtelJavaValueType.EMPTY, null -> null
+    OtelJavaValueType.EMPTY -> AnyValue.NullValue
+    null -> null
     else -> toOtelKotlinAnyValue()
 }
 

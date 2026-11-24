@@ -39,6 +39,7 @@ internal class CreateOpenTelemetryAttributeLimitsTest {
 
         val spanTrace = spanProcessor.endCalls.single()
         assertEquals(mapOf("first" to "abc"), spanTrace.instrumentationScopeInfo.attributes)
+        assertEquals(1, spanTrace.instrumentationScopeInfo.droppedAttributesCount)
     }
 
     @Test
@@ -62,6 +63,7 @@ internal class CreateOpenTelemetryAttributeLimitsTest {
 
         val logRecord = logProcessor.logs.single()
         assertEquals(mapOf("first" to "abc"), logRecord.instrumentationScopeInfo.attributes)
+        assertEquals(1, logRecord.instrumentationScopeInfo.droppedAttributesCount)
     }
 
     @Test
@@ -83,6 +85,7 @@ internal class CreateOpenTelemetryAttributeLimitsTest {
             mapOf("first" to "abc"),
             meterImpl.instrumentationScopeInfo.attributes,
         )
+        assertEquals(1, meterImpl.instrumentationScopeInfo.droppedAttributesCount)
     }
 
     @Test
@@ -153,6 +156,31 @@ internal class CreateOpenTelemetryAttributeLimitsTest {
 
         val meterImpl = assertIs<MeterImpl>(meter)
         assertTrue(meterImpl.instrumentationScopeInfo.attributes.isEmpty())
+        assertEquals(1, meterImpl.instrumentationScopeInfo.droppedAttributesCount)
+    }
+
+    @Test
+    fun `scope dropped attributes count is zero when the limit is not reached`() {
+        val spanProcessor = FakeSpanProcessor()
+
+        val api = createOpenTelemetry {
+            attributeLimits {
+                attributeCountLimit = 2
+            }
+            tracerProvider {
+                export { spanProcessor }
+            }
+        }.also(sdks::track)
+
+        api.tracerProvider.getTracer("test") {
+            setStringAttribute("first", "abc")
+            setStringAttribute("first", "xyz")
+            setStringAttribute("second", "xyz")
+        }.startSpan("span").end()
+
+        val scope = spanProcessor.endCalls.single().instrumentationScopeInfo
+        assertEquals(mapOf("first" to "xyz", "second" to "xyz"), scope.attributes)
+        assertEquals(0, scope.droppedAttributesCount)
     }
 
     @Test

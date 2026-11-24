@@ -4,6 +4,8 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.config.yaml.ConfigFileReaderImpl
 import io.opentelemetry.kotlin.config.yaml.toBehavior
+import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.init.DeclarativeConfigReader
 
 /**
@@ -17,7 +19,10 @@ import io.opentelemetry.kotlin.init.DeclarativeConfigReader
 public fun yamlConfigReader(): DeclarativeConfigReader {
     val fileReader = ConfigFileReaderImpl()
     return object : DeclarativeBehaviorReader {
-        override fun read(path: String): OpenTelemetryBehavior = fileReader.read(path).toBehavior()
+        override fun read(path: String): OpenTelemetryBehavior = read(path, NoopSdkErrorHandler)
+
+        override fun read(path: String, sdkErrorHandler: SdkErrorHandler): OpenTelemetryBehavior =
+            fileReader.read(path).toBehavior(sdkErrorHandler)
 
         override fun readInstrumentation(path: String): ConfigProperties = fileReader.readInstrumentation(path)
     }

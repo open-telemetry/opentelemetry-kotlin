@@ -21,13 +21,17 @@ data class SpanExporterBehavior(
         http: OtlpHttpSpanExporterBehavior? = null,
     ) : this(ExporterDelegate(console = console, http = http))
 
+    /**
+     * Preserve the signal-specific HTTP exporter type, which would otherwise be widened to OtlpExporter by interface
+     * delegation.
+     */
+    override val http: OtlpHttpSpanExporterBehavior?
+        get() = delegate.http
+
     override fun mergeWith(higher: SpanExporterBehavior): SpanExporterBehavior = copy(
         delegate = delegate.copy(
             console = mergeNode(console, higher.console),
-            http = mergeNode(
-                http as OtlpHttpSpanExporterBehavior?,
-                higher.http as OtlpHttpSpanExporterBehavior?
-            ),
+            http = mergeNode(http, higher.http),
         )
     )
 }

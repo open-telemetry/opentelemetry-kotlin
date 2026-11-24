@@ -14,12 +14,14 @@ import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class BatchLogRecordProcessorImpl(
     private val exporter: LogRecordExporter,
     maxQueueSize: Int,
-    scheduleDelayMs: Long,
-    exportTimeoutMs: Long,
+    scheduleDelay: Duration,
+    exportTimeout: Duration,
     maxExportBatchSize: Int,
     private val sdkErrorHandler: SdkErrorHandler,
     dispatcher: CoroutineDispatcher = ioDispatcher,
@@ -30,8 +32,9 @@ internal class BatchLogRecordProcessorImpl(
         BatchTelemetryProcessor(
             config = BatchTelemetryConfig(
                 maxQueueSize = maxQueueSize,
-                scheduleDelayMs = scheduleDelayMs,
-                exportTimeoutMs = exportTimeoutMs,
+                scheduleDelay = scheduleDelay,
+                defaultScheduleDelay = BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS.milliseconds,
+                exportTimeout = exportTimeout,
                 maxExportBatchSize = maxExportBatchSize,
                 sdkErrorHandler = sdkErrorHandler,
             ),

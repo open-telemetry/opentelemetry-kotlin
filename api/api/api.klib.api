@@ -10,6 +10,10 @@ open annotation class io.opentelemetry.kotlin/ExperimentalApi : kotlin/Annotatio
     constructor <init>() // io.opentelemetry.kotlin/ExperimentalApi.<init>|<init>(){}[0]
 }
 
+open annotation class io.opentelemetry.kotlin/InternalApi : kotlin/Annotation { // io.opentelemetry.kotlin/InternalApi|null[0]
+    constructor <init>() // io.opentelemetry.kotlin/InternalApi.<init>|<init>(){}[0]
+}
+
 open annotation class io.opentelemetry.kotlin/OpenTelemetryDsl : kotlin/Annotation { // io.opentelemetry.kotlin/OpenTelemetryDsl|null[0]
     constructor <init>() // io.opentelemetry.kotlin/OpenTelemetryDsl.<init>|<init>(){}[0]
 }
@@ -119,9 +123,8 @@ abstract interface io.opentelemetry.kotlin.attributes/AttributesMutator { // io.
 abstract interface io.opentelemetry.kotlin.baggage/Baggage { // io.opentelemetry.kotlin.baggage/Baggage|null[0]
     abstract fun asMap(): kotlin.collections/Map<kotlin/String, io.opentelemetry.kotlin.baggage/BaggageEntry> // io.opentelemetry.kotlin.baggage/Baggage.asMap|asMap(){}[0]
     abstract fun getValue(kotlin/String): kotlin/String? // io.opentelemetry.kotlin.baggage/Baggage.getValue|getValue(kotlin.String){}[0]
+    abstract fun put(kotlin/String, kotlin/String, kotlin/String = ...): io.opentelemetry.kotlin.baggage/Baggage // io.opentelemetry.kotlin.baggage/Baggage.put|put(kotlin.String;kotlin.String;kotlin.String){}[0]
     abstract fun remove(kotlin/String): io.opentelemetry.kotlin.baggage/Baggage // io.opentelemetry.kotlin.baggage/Baggage.remove|remove(kotlin.String){}[0]
-    abstract fun set(kotlin/String, kotlin/String): io.opentelemetry.kotlin.baggage/Baggage // io.opentelemetry.kotlin.baggage/Baggage.set|set(kotlin.String;kotlin.String){}[0]
-    abstract fun set(kotlin/String, kotlin/String, io.opentelemetry.kotlin.baggage/BaggageEntryMetadata): io.opentelemetry.kotlin.baggage/Baggage // io.opentelemetry.kotlin.baggage/Baggage.set|set(kotlin.String;kotlin.String;io.opentelemetry.kotlin.baggage.BaggageEntryMetadata){}[0]
 }
 
 abstract interface io.opentelemetry.kotlin.baggage/BaggageCreationAction { // io.opentelemetry.kotlin.baggage/BaggageCreationAction|null[0]

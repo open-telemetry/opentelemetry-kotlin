@@ -10,7 +10,6 @@ import io.opentelemetry.kotlin.config.schema.model.SimpleSpanProcessor
 import io.opentelemetry.kotlin.config.schema.model.SpanExporter
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class SimpleSpanProcessorMapperTest {
     @Test
@@ -42,7 +41,9 @@ internal class SimpleSpanProcessorMapperTest {
 
     @Test
     fun missingExporterLeavesBehaviorUnset() {
-        val processor = SimpleSpanProcessor(exporter = SpanExporter())
-        assertNull(processor.toBehavior())
+        assertEquals(
+            SimpleSpanProcessorBehavior(exporter = SpanExporterBehavior()),
+            SimpleSpanProcessor(exporter = SpanExporter()).toBehavior()
+        )
     }
 }

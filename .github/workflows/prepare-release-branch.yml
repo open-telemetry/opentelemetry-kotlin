@@ -25,6 +25,13 @@ jobs:
             exit 1
           fi
 
+          # the release notes must state the targeted spec version (see RELEASING.md)
+          if ! sed -n '/^## Unreleased$/,/^## Version /p' CHANGELOG.md \
+              | grep --quiet "opentelemetry-specification/releases/tag/v[0-9]"; then
+            echo the \"Unreleased\" section of the change log must state the targeted OpenTelemetry specification version
+            exit 1
+          fi
+
   create-pull-request-against-release-branch:
     permissions:
       contents: write  # for Git to git push
@@ -55,7 +62,7 @@ jobs:
         run: .github/scripts/update-version.sh $VERSION
 
       - name: Setup Java
-        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
           java-version: |
@@ -134,7 +141,7 @@ jobs:
         run: .github/scripts/update-version.sh $NEXT_VERSION
 
       - name: Setup Java
-        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
           java-version: |

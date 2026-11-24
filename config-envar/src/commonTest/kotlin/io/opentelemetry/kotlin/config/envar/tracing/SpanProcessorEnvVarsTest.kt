@@ -12,7 +12,10 @@ import kotlin.test.assertEquals
 internal class SpanProcessorEnvVarsTest {
     @Test
     fun `should leave unset env vars unset`() {
-        assertEquals(toBehavior { null }, SpanProcessorBehavior())
+        assertEquals(
+            SpanProcessorBehavior(batch = BatchSpanProcessorBehavior(exporter = SpanExporterBehavior())),
+            toBehavior { null }
+        )
     }
 
     @Test

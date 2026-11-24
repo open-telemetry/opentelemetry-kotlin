@@ -51,6 +51,15 @@ class DocSnippetsTest {
     }
 
     @Test
+    fun `empty fence does not consume text up to the next fence`() {
+        val markdown = "```kotlin greet\n```\n\nmiddle text\n\n```kotlin greet\nstale\n```\n"
+        val body = "fun greet() {\n    println(\"hello\")\n}"
+        val expected = "```kotlin greet\n$body\n```\n\nmiddle text\n\n```kotlin greet\n$body\n```\n"
+        assertEquals(expected, render(markdown))
+        assertEquals(emptyList(), errors)
+    }
+
+    @Test
     fun `leaves fences without an id unchanged`() {
         val markdown = "```kotlin\nval a = 1\n```\n\n```bash\n./gradlew build\n```"
         assertEquals(markdown, render(markdown))

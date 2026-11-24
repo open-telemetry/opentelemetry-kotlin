@@ -2,6 +2,7 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.InternalApi
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.reportError
@@ -13,6 +14,8 @@ import io.opentelemetry.kotlin.platformLog
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Creates a composite log record processor that delegates to a list of processors.
@@ -69,15 +72,36 @@ public fun ExportConfigDsl.compositeLogRecordExporter(vararg exporters: LogRecor
 public fun ExportConfigDsl.batchLogRecordProcessor(
     exporter: LogRecordExporter,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
-    scheduleDelayMs: Long = BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS,
-    exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
+    scheduleDelay: Duration = BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS.milliseconds,
+    exportTimeout: Duration = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS.milliseconds,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
-    dispatcher: CoroutineDispatcher = ioDispatcher,
+): LogRecordProcessor = batchLogRecordProcessorWithDispatcher(
+    exporter,
+    maxQueueSize,
+    scheduleDelay,
+    exportTimeout,
+    maxExportBatchSize,
+    ioDispatcher,
+)
+
+/**
+ * Variant of [batchLogRecordProcessor] that runs the export loop on [dispatcher]. Exists so other
+ * opentelemetry-kotlin modules can inject a test dispatcher without exposing coroutines types in the public API.
+ */
+@ExperimentalApi
+@InternalApi
+public fun ExportConfigDsl.batchLogRecordProcessorWithDispatcher(
+    exporter: LogRecordExporter,
+    maxQueueSize: Int,
+    scheduleDelay: Duration,
+    exportTimeout: Duration,
+    maxExportBatchSize: Int,
+    dispatcher: CoroutineDispatcher,
 ): LogRecordProcessor = BatchLogRecordProcessorImpl(
     exporter,
     maxQueueSize,
-    scheduleDelayMs,
-    exportTimeoutMs,
+    scheduleDelay,
+    exportTimeout,
     maxExportBatchSize,
     sdkErrorHandler,
     dispatcher,

@@ -8,7 +8,6 @@ import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class BatchLogRecordProcessorEnvVarsTest {
     @Test
@@ -44,7 +43,7 @@ internal class BatchLogRecordProcessorEnvVarsTest {
                 exportTimeout = 0,
                 maxQueueSize = null,
                 requestedQueueSize = null,
-                exporter = null,
+                exporter = LogRecordExporterBehavior(),
             ),
             BatchLogRecordProcessorEnvVars(reader).toBehavior(),
         )
@@ -53,7 +52,12 @@ internal class BatchLogRecordProcessorEnvVarsTest {
 
     @Test
     fun leavesUnsetBatchSettingsUnset() {
-        assertNull(BatchLogRecordProcessorEnvVars(reportingEnvVarReader({ null })).toBehavior())
+        assertEquals(
+            BatchLogRecordProcessorBehavior(
+                exporter = LogRecordExporterBehavior(),
+            ),
+            BatchLogRecordProcessorEnvVars(reportingEnvVarReader({ null })).toBehavior()
+        )
     }
 
     @Test
@@ -64,6 +68,11 @@ internal class BatchLogRecordProcessorEnvVarsTest {
             "OTEL_BSP_MAX_QUEUE_SIZE" to "40",
             "OTEL_BSP_MAX_EXPORT_BATCH_SIZE" to "20",
         )
-        assertNull(BatchLogRecordProcessorEnvVars(reportingEnvVarReader(env::get)).toBehavior())
+        assertEquals(
+            BatchLogRecordProcessorBehavior(
+                exporter = LogRecordExporterBehavior()
+            ),
+            BatchLogRecordProcessorEnvVars(reportingEnvVarReader(env::get)).toBehavior()
+        )
     }
 }

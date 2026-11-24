@@ -47,6 +47,12 @@ internal class ApiProviderImpl<T>(
             attributeValueLengthLimit = attributeLimits.attributeValueLengthLimit ?: DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
         )
         userCode { attributes(container) }
-        return InstrumentationScopeInfoImpl(name, version, schemaUrl, container.attributes)
+        return InstrumentationScopeInfoImpl(
+            name = name,
+            version = version,
+            schemaUrl = schemaUrl,
+            attributes = container.attributes,
+            droppedAttributesCount = container.droppedAttributesCount,
+        )
     }
 }

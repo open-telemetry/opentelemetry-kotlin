@@ -4,6 +4,7 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.IdGenerator
+import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 
 /**
@@ -77,4 +78,17 @@ public interface OpenTelemetryConfigDsl : ResourceConfigDsl, ConfigFileDsl {
      * https://opentelemetry.io/docs/specs/otel/error-handling/#configuring-error-handlers
      */
     public fun errorHandler(handler: SdkErrorHandler)
+
+    /**
+     * Disables the SDK when [disabled] is `true`, in which case a no-op implementation is returned.
+     */
+    public fun disabled(disabled: Boolean)
+
+    /**
+     * Sets the lowest severity of the SDK's own diagnostics that are passed to the [SdkErrorHandler].
+     * Reports below [level] are dropped. TRACE, DEBUG and INFO levels pass every report, WARN levels
+     * pass warnings and errors, and ERROR and FATAL levels pass only errors. Defaults to
+     * [SeverityNumber.INFO]. [SeverityNumber.UNKNOWN] is ignored.
+     */
+    public fun logLevel(level: SeverityNumber)
 }

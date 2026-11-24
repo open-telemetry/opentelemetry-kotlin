@@ -1,7 +1,9 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.toMinimumSdkErrorSeverity
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.config.ConfigProviderImpl
 import io.opentelemetry.kotlin.context.CurrentContextStorage
@@ -48,6 +50,8 @@ public fun createOpenTelemetry(
     )
     val configFilePath = cfg.configFilePath
     val behavior = behaviorReader.read(configFilePath = configFilePath, dsl = cfg::toBehavior)
+
+    cfg.minimumErrorSeverity = (behavior.logLevel ?: OpenTelemetryBehavior.DEFAULT_LOG_LEVEL).toMinimumSdkErrorSeverity()
 
     if (behavior.disabled == true) {
         return NoopOpenTelemetrySdk

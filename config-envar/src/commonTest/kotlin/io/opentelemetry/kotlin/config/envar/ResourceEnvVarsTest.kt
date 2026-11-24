@@ -5,13 +5,15 @@ import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class ResourceEnvVarsTest {
 
     @Test
     fun `should leave resource unset when environment configures nothing`() {
-        assertNull(toBehavior(emptyMap()))
+        assertEquals(
+            ResourceBehavior(),
+            toBehavior(emptyMap())
+        )
     }
 
     @Test
@@ -122,7 +124,11 @@ internal class ResourceEnvVarsTest {
                 onWarning = warnings::add,
             )
 
-            assertNull(behavior, "<$value> should not configure a resource")
+            assertEquals(
+                ResourceBehavior(),
+                behavior,
+                "<$value> should not configure a resource"
+            )
             assertEquals(
                 listOf(
                     EnvVarReadWarning(

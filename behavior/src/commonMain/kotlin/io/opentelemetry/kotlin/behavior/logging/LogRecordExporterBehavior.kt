@@ -22,13 +22,17 @@ data class LogRecordExporterBehavior(
         http: OtlpHttpLogsExporterBehavior? = null,
     ) : this(ExporterDelegate(console = console, http = http))
 
+    /**
+     * Preserve the signal-specific HTTP exporter type, which would otherwise be widened to OtlpExporter by interface
+     * delegation.
+     */
+    override val http: OtlpHttpLogsExporterBehavior?
+        get() = delegate.http
+
     override fun mergeWith(higher: LogRecordExporterBehavior): LogRecordExporterBehavior = copy(
         delegate = delegate.copy(
             console = mergeNode(console, higher.console),
-            http = mergeNode(
-                http as OtlpHttpLogsExporterBehavior?,
-                higher.http as OtlpHttpLogsExporterBehavior?
-            ),
+            http = mergeNode(http, higher.http),
         )
     )
 }

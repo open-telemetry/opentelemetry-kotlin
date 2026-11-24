@@ -39,6 +39,7 @@ internal object NoopReadableSpan : ReadableSpan {
         override val version: String? = null
         override val schemaUrl: String? = null
         override val attributes: Map<String, Any> = emptyMap()
+        override val droppedAttributesCount: Int = 0
     }
 
     override fun toSpanData(): SpanData = this

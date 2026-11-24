@@ -19,6 +19,7 @@ import io.opentelemetry.kotlin.logging.export.batchLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.stdoutLogRecordExporter
 import io.opentelemetry.kotlin.resource.Resource
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class LoggerProviderConfigImpl(
     private val clock: Clock,
@@ -80,8 +81,8 @@ internal class LoggerProviderConfigImpl(
             when {
                 batch != null -> batchLogRecordProcessor(
                     exporter = stdoutLogRecordExporter(),
-                    scheduleDelayMs = batch.scheduleDelay ?: BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS,
-                    exportTimeoutMs = batch.exportTimeout ?: BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
+                    scheduleDelay = (batch.scheduleDelay ?: BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS).milliseconds,
+                    exportTimeout = (batch.exportTimeout ?: BatchTelemetryDefaults.EXPORT_TIMEOUT_MS).milliseconds,
                     maxQueueSize = batch.maxQueueSize ?: BatchTelemetryDefaults.MAX_QUEUE_SIZE,
                     maxExportBatchSize = batch.maxExportBatchSize ?: BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE
                 )

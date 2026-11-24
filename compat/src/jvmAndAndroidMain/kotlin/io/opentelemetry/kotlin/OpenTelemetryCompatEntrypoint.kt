@@ -1,5 +1,7 @@
 package io.opentelemetry.kotlin
 
+import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.behavior.toMinimumSdkErrorSeverity
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guard
@@ -46,6 +48,8 @@ public fun createCompatOpenTelemetry(
         sdkErrorHandler = cfg.sdkErrorHandler,
         declarativeConfigReader = cfg.declarativeConfigReader,
     ).read(configFilePath = cfg.configFilePath, dsl = cfg::toBehavior)
+
+    cfg.minimumErrorSeverity = (behavior.logLevel ?: OpenTelemetryBehavior.DEFAULT_LOG_LEVEL).toMinimumSdkErrorSeverity()
 
     if (behavior.disabled == true) {
         return NoopOpenTelemetrySdk

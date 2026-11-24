@@ -6,10 +6,16 @@ import io.opentelemetry.kotlin.behavior.BatchProcessorDelegate
 import io.opentelemetry.kotlin.behavior.Behavior
 import io.opentelemetry.kotlin.behavior.mergeNode
 
-/** Batching settings for a span processor, in milliseconds where applicable. */
+/**
+ * Batching settings for the tracer provider's processor. The exporter is configured via
+ * [exporter]. Each null field is unset and defers to a lower configuration
+ * layer or the SDK default.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#batching-processor
+ */
 @OptIn(ExperimentalApi::class)
 data class BatchSpanProcessorBehavior(
-    val delegate: BatchProcessorDelegate = BatchProcessorDelegate(),
+    val delegate: BatchProcessorDelegate<SpanExporterBehavior> = BatchProcessorDelegate(),
 ) : Behavior<BatchSpanProcessorBehavior>, BatchProcessor by delegate {
 
     constructor(
@@ -27,6 +33,9 @@ data class BatchSpanProcessorBehavior(
             exporter
         )
     )
+
+    override val exporter: SpanExporterBehavior?
+        get() = delegate.exporter
 
     override fun mergeWith(higher: BatchSpanProcessorBehavior): BatchSpanProcessorBehavior = copy(
         delegate = BatchProcessorDelegate(

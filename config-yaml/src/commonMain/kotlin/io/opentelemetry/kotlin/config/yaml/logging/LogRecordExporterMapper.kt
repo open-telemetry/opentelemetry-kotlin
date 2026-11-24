@@ -9,12 +9,8 @@ import io.opentelemetry.kotlin.config.schema.model.LogRecordExporter
  * Maps `logger_provider.processors.exporter` onto its behavior.
  */
 @OptIn(ExperimentalApi::class)
-fun LogRecordExporter.toBehavior(): LogRecordExporterBehavior? {
-    if (console == null && otlpHttp == null) {
-        return null
-    }
-    return LogRecordExporterBehavior(
+fun LogRecordExporter.toBehavior(): LogRecordExporterBehavior =
+    LogRecordExporterBehavior(
         console = console?.let { ConsoleExporterBehavior() },
         http = otlpHttp?.toBehavior()
     )
-}

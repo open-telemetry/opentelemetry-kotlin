@@ -1,8 +1,8 @@
 package io.opentelemetry.kotlin.config.dsl.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
 import io.opentelemetry.kotlin.behavior.logging.OtlpHttpLogsExporterBehavior
-import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
 
 /**
  * Captures the OTLP HTTP logs exporter configured programmatically and maps it onto a behavior.
@@ -14,6 +14,6 @@ class OtlpHttpLogsExporterConfigDslImpl : BehaviorSupplier<OtlpHttpLogsExporterB
     var headers: Map<String, String?>? = null
 
     override fun toBehavior(): OtlpHttpLogsExporterBehavior {
-        return OtlpHttpLogsExporterBehavior(endpoint, timeout, headers)
+        return OtlpHttpLogsExporterBehavior(endpoint, timeout?.takeIf { it >= 0 }, headers)
     }
 }

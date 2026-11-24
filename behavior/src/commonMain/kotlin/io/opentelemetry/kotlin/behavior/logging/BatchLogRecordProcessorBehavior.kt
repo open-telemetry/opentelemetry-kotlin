@@ -15,7 +15,7 @@ import io.opentelemetry.kotlin.behavior.mergeNode
  */
 @OptIn(ExperimentalApi::class)
 data class BatchLogRecordProcessorBehavior(
-    val delegate: BatchProcessorDelegate = BatchProcessorDelegate(),
+    val delegate: BatchProcessorDelegate<LogRecordExporterBehavior> = BatchProcessorDelegate(),
 ) : Behavior<BatchLogRecordProcessorBehavior>, BatchProcessor by delegate {
 
     constructor(
@@ -34,16 +34,16 @@ data class BatchLogRecordProcessorBehavior(
         )
     )
 
+    override val exporter: LogRecordExporterBehavior?
+        get() = delegate.exporter
+
     override fun mergeWith(higher: BatchLogRecordProcessorBehavior): BatchLogRecordProcessorBehavior = copy(
         delegate = BatchProcessorDelegate(
             scheduleDelay = higher.scheduleDelay ?: scheduleDelay,
             exportTimeout = higher.exportTimeout ?: exportTimeout,
             maxQueueSize = higher.maxQueueSize ?: maxQueueSize,
             requestedQueueSize = higher.requestedQueueSize ?: requestedQueueSize,
-            exporter = mergeNode(
-                exporter as LogRecordExporterBehavior?,
-                higher.exporter as LogRecordExporterBehavior?
-            )
+            exporter = mergeNode(exporter, higher.exporter)
         ),
     )
 }

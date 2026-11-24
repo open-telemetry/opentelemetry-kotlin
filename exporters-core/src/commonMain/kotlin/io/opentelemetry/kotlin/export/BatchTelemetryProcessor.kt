@@ -5,12 +5,14 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
-import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.withTimeout
+import kotlin.time.Duration
 
 /**
  * Batches telemetry into a bounded queue (dropping when full) that a single worker coroutine drains,
@@ -94,13 +96,13 @@ internal class BatchTelemetryProcessor<T>(
     }
 
     /**
-     * Collects a batch starting with [first] until it is full or scheduleDelayMs elapses, then exports it.
+     * Collects a batch starting with [first] until it is full or the configured delay elapses, then exports it.
      * A flush request exports the partial batch early. Returns true if the queue was closed.
      */
     private suspend fun fillAndExportBatch(first: T): Boolean {
         val batch = ArrayList<T>(config.maxExportBatchSize)
         batch += first
-        val deadline = scope.launch { delay(config.scheduleDelayMs.milliseconds) }
+        val deadline = scope.launch { delay(config.scheduleDelay) }
         try {
             while (true) {
                 receiveAvailable(batch)
@@ -173,7 +175,19 @@ internal class BatchTelemetryProcessor<T>(
     }
 
     private suspend fun exportBatch(batch: List<T>): OperationResultCode =
-        guardUserCode("Batch export failed", config.exportTimeoutMs) { exportAction(batch) }
+        guardUserCode("Batch export failed", config.exportTimeout) { exportAction(batch) }
+
+    private suspend fun guardUserCode(
+        details: String,
+        timeout: Duration,
+        action: suspend () -> OperationResultCode,
+    ): OperationResultCode = config.sdkErrorHandler.guardExporterCode(details) {
+        try {
+            withTimeout(timeout) { action() }
+        } catch (e: TimeoutCancellationException) {
+            OperationResultCode.Failure
+        }
+    }
 
     private suspend fun guardUserCode(
         details: String,

@@ -19,7 +19,7 @@ internal class BatchSpanProcessorMapperTest {
     fun everyFieldStartsWithDefaultValue() {
         val behavior = BatchSpanProcessor(exporter = SpanExporter()).toBehavior()
         assertEquals(
-            BatchSpanProcessorBehavior(),
+            BatchSpanProcessorBehavior(exporter = SpanExporterBehavior()),
             behavior
         )
     }
@@ -38,7 +38,8 @@ internal class BatchSpanProcessorMapperTest {
                 scheduleDelay = 100,
                 exportTimeout = 200,
                 maxQueueSize = 400,
-                requestedQueueSize = 300
+                requestedQueueSize = 300,
+                exporter = SpanExporterBehavior()
             ),
             behavior
         )
@@ -54,7 +55,7 @@ internal class BatchSpanProcessorMapperTest {
             exporter = SpanExporter()
         ).toBehavior()
         assertEquals(
-            BatchSpanProcessorBehavior(),
+            BatchSpanProcessorBehavior(exporter = SpanExporterBehavior()),
             behavior
         )
     }
