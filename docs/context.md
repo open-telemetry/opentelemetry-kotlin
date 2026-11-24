@@ -360,7 +360,7 @@ fun installStorage() {
 
 The first install wins. `installContextStorage` wraps the storage so that misuse, such as
 detaching scopes out of order, and anything the storage throws are reported to the
-`SdkErrorHandler`.
+`SdkErrorHandler`. A `detach()` that is out of order returns false.
 
 ### Threads and executors
 

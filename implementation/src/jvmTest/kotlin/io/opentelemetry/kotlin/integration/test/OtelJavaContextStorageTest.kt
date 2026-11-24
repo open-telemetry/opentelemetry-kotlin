@@ -16,6 +16,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -148,7 +149,7 @@ internal class OtelJavaContextStorageTest {
         val inner = currentContext().storeSpan(harness.tracer.startSpan("inner"))
         val innerScope = inner.attach()
 
-        assertTrue(outerScope.detach())
+        assertFalse(outerScope.detach())
         assertEquals("Scope.detach", errorHandler.apiMisuses.single().api)
         assertSame(inner, currentContext())
 
