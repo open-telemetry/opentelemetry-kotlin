@@ -47,10 +47,12 @@ internal class OpenTelemetryEnvVarsTest {
                 ),
                 tracerProvider = TracerProviderBehavior(
                     spanLimits = SpanLimitsBehavior(),
-                    processor = SpanProcessorBehavior(
+                    processors = listOfNotNull(
+                        SpanProcessorBehavior(
                         batch = BatchSpanProcessorBehavior(
                             exporter = SpanExporterBehavior()
                         )
+                    )
                     )
                 ),
             ),
@@ -121,13 +123,13 @@ internal class OpenTelemetryEnvVarsTest {
                     attributeCountPerEventLimit = 7,
                     attributeCountPerLinkLimit = 8,
                 ),
-                processor = SpanProcessorBehavior(
+                processors = listOfNotNull(SpanProcessorBehavior(
                     batch = BatchSpanProcessorBehavior(
                         exporter = SpanExporterBehavior(
                             console = ConsoleExporterBehavior()
                         )
                     )
-                )
+                ))
             ),
             loggerProvider = LoggerProviderBehavior(
                 logLimits = LogLimitsBehavior(
@@ -152,11 +154,11 @@ internal class OpenTelemetryEnvVarsTest {
             resource = ResourceBehavior(),
             tracerProvider = TracerProviderBehavior(
                 spanLimits = SpanLimitsBehavior(),
-                processor = SpanProcessorBehavior(
+                processors = listOfNotNull(SpanProcessorBehavior(
                     batch = BatchSpanProcessorBehavior(
                         exporter = SpanExporterBehavior(),
                     ),
-                )
+                ))
             ),
             loggerProvider = LoggerProviderBehavior(
                 logLimits = LogLimitsBehavior(),

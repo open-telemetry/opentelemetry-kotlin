@@ -45,7 +45,7 @@ internal class CompatSdkConfigFactory(
 
     private val sampler: SamplerBehavior? = behavior.tracerProvider?.sampler
 
-    private val spanProcessor: SpanProcessorBehavior? = behavior.tracerProvider?.processor
+    private val spanProcessor: SpanProcessorBehavior? = behavior.tracerProvider?.processors?.getOrNull(0)
 
     private val logProcessor: LogRecordProcessorBehavior? = behavior.loggerProvider?.processor
 

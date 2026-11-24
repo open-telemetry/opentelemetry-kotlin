@@ -49,7 +49,7 @@ internal class TracerProviderConfigDslImplTest {
 
         assertEquals(
             TracerProviderBehavior(
-                processor = SpanProcessorBehavior(),
+                processors = listOfNotNull(SpanProcessorBehavior()),
                 sampler = SamplerBehavior.AlwaysOff
             ),
             dsl.toBehavior()
@@ -63,7 +63,7 @@ internal class TracerProviderConfigDslImplTest {
 
         assertEquals(
             TracerProviderBehavior(
-                processor = SpanProcessorBehavior()
+                processors = listOfNotNull(SpanProcessorBehavior())
             ),
             dsl.toBehavior(),
         )
@@ -82,10 +82,12 @@ internal class TracerProviderConfigDslImplTest {
         }
         assertEquals(
             TracerProviderBehavior(
-                processor = SpanProcessorBehavior(
-                    simple = SimpleSpanProcessorBehavior(
-                        exporter = SpanExporterBehavior(
-                            console = ConsoleExporterBehavior()
+                processors = listOfNotNull(
+                    SpanProcessorBehavior(
+                        simple = SimpleSpanProcessorBehavior(
+                            exporter = SpanExporterBehavior(
+                                console = ConsoleExporterBehavior()
+                            )
                         )
                     )
                 ),
@@ -112,15 +114,18 @@ internal class TracerProviderConfigDslImplTest {
 
         assertEquals(
             TracerProviderBehavior(
-                processor = SpanProcessorBehavior(
-                    batch = BatchSpanProcessorBehavior(
-                        exporter = SpanExporterBehavior(
-                            console = ConsoleExporterBehavior()
-                        ),
-                        scheduleDelay = 1,
-                        exportTimeout = 2,
-                        maxQueueSize = 3,
-                        maxExportBatchSize = 4
+                processors =
+                    listOfNotNull(
+                        SpanProcessorBehavior(
+                        batch = BatchSpanProcessorBehavior(
+                            exporter = SpanExporterBehavior(
+                                console = ConsoleExporterBehavior()
+                            ),
+                            scheduleDelay = 1,
+                            exportTimeout = 2,
+                            maxQueueSize = 3,
+                            maxExportBatchSize = 4
+                        )
                     )
                 ),
             ),
@@ -143,10 +148,12 @@ internal class TracerProviderConfigDslImplTest {
 
         assertEquals(
             TracerProviderBehavior(
-                processor = SpanProcessorBehavior(
-                    simple = SimpleSpanProcessorBehavior(
-                        exporter = SpanExporterBehavior(
-                            console = ConsoleExporterBehavior()
+                processors = listOfNotNull(
+                    SpanProcessorBehavior(
+                        simple = SimpleSpanProcessorBehavior(
+                            exporter = SpanExporterBehavior(
+                                console = ConsoleExporterBehavior()
+                            )
                         )
                     )
                 ),
@@ -170,12 +177,14 @@ internal class TracerProviderConfigDslImplTest {
 
         assertEquals(
             TracerProviderBehavior(
-                processor = SpanProcessorBehavior(
-                    simple = SimpleSpanProcessorBehavior(
-                        exporter = SpanExporterBehavior(
-                            console = ConsoleExporterBehavior()
+                processors = listOfNotNull(
+                    SpanProcessorBehavior(
+                        simple = SimpleSpanProcessorBehavior(
+                            exporter = SpanExporterBehavior(
+                                console = ConsoleExporterBehavior()
+                            )
                         )
-                    )
+                    ),
                 ),
                 sampler = SamplerBehavior.AlwaysOff
             ),

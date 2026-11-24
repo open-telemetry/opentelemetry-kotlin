@@ -248,7 +248,7 @@ internal class OpenTelemetryConfigReaderTest {
         )
         assertEquals(
             mapOf("key" to "value"),
-            behavior.tracerProvider?.processor?.batch?.exporter?.http?.headers
+            behavior.tracerProvider?.processors?.getOrNull(0)?.batch?.exporter?.http?.headers
         )
         assertTrue(handler.sdkCodeErrors.isEmpty())
     }

@@ -19,3 +19,10 @@ internal fun <K, V> mergeMap(lower: Map<K, V>?, higher: Map<K, V>?): Map<K, V>? 
     higher == null -> lower
     else -> lower + higher
 }
+
+/**
+ * Merges two lists, where elements from [higher] are placed before elements from [lower].
+ *
+ * Both lists are concatenated without merging individual elements.
+ */
+internal fun <T : Behavior<T>> mergeList(lower: List<T>, higher: List<T>): List<T> = higher + lower

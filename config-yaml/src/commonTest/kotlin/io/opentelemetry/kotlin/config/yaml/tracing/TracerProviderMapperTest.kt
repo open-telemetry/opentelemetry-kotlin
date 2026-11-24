@@ -24,7 +24,7 @@ internal class TracerProviderMapperTest {
     @Test
     fun unsetIfNoMappedFields() {
         assertEquals(
-            TracerProviderBehavior(processor = SpanProcessorBehavior()),
+            TracerProviderBehavior(processors = listOfNotNull(SpanProcessorBehavior())),
             TracerProvider(processors = emptyList()).toBehavior()
         )
     }
@@ -42,7 +42,7 @@ internal class TracerProviderMapperTest {
                 spanLimits = SpanLimitsBehavior(attributeCountLimit = 1),
                 sampler = SamplerBehavior.AlwaysOff,
                 idGenerator = IdGeneratorBehavior.Random,
-                processor = SpanProcessorBehavior()
+                processors = listOfNotNull(SpanProcessorBehavior())
             ),
             provider.toBehavior(),
         )

@@ -52,7 +52,7 @@ internal class OpenTelemetryConfigurationMapperTest {
                 ),
             ),
             tracerProvider = TracerProviderBehavior(
-                processor = SpanProcessorBehavior(),
+                processors = listOfNotNull(SpanProcessorBehavior()),
                 spanLimits = SpanLimitsBehavior(
                     attributeCountLimit = 128,
                     eventCountLimit = 64,
@@ -92,7 +92,7 @@ internal class OpenTelemetryConfigurationMapperTest {
         )
         assertEquals(
             TracerProviderBehavior(
-                processor = SpanProcessorBehavior(),
+                processors = listOfNotNull(SpanProcessorBehavior()),
                 sampler = SamplerBehavior.AlwaysOff,
             ),
             config.toBehavior()

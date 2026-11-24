@@ -36,6 +36,7 @@ class TracerProviderConfigDslImpl : BehaviorSupplier<TracerProviderBehavior> {
         sampler = impl.toBehavior()
     }
 
-    override fun toBehavior(): TracerProviderBehavior =
-        TracerProviderBehavior(processor = processor, sampler = sampler)
+    override fun toBehavior(): TracerProviderBehavior {
+        return TracerProviderBehavior(processors = listOfNotNull(processor), sampler = sampler)
+    }
 }
