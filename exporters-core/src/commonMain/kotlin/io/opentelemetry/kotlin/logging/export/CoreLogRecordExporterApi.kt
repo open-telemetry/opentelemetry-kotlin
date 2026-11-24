@@ -14,6 +14,8 @@ import io.opentelemetry.kotlin.platformLog
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Creates a composite log record processor that delegates to a list of processors.
@@ -70,14 +72,14 @@ public fun ExportConfigDsl.compositeLogRecordExporter(vararg exporters: LogRecor
 public fun ExportConfigDsl.batchLogRecordProcessor(
     exporter: LogRecordExporter,
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
-    scheduleDelayMs: Long = BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS,
-    exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
+    scheduleDelay: Duration = BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS.milliseconds,
+    exportTimeout: Duration = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS.milliseconds,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
 ): LogRecordProcessor = batchLogRecordProcessorWithDispatcher(
     exporter,
     maxQueueSize,
-    scheduleDelayMs,
-    exportTimeoutMs,
+    scheduleDelay,
+    exportTimeout,
     maxExportBatchSize,
     ioDispatcher,
 )
@@ -91,15 +93,15 @@ public fun ExportConfigDsl.batchLogRecordProcessor(
 public fun ExportConfigDsl.batchLogRecordProcessorWithDispatcher(
     exporter: LogRecordExporter,
     maxQueueSize: Int,
-    scheduleDelayMs: Long,
-    exportTimeoutMs: Long,
+    scheduleDelay: Duration,
+    exportTimeout: Duration,
     maxExportBatchSize: Int,
     dispatcher: CoroutineDispatcher,
 ): LogRecordProcessor = BatchLogRecordProcessorImpl(
     exporter,
     maxQueueSize,
-    scheduleDelayMs,
-    exportTimeoutMs,
+    scheduleDelay,
+    exportTimeout,
     maxExportBatchSize,
     sdkErrorHandler,
     dispatcher,
