@@ -10,7 +10,7 @@ interface BatchProcessor {
     /** Maximum export duration, in milliseconds. Zero means no limit. Must be non-negative. */
     val exportTimeout: Long?
 
-    /** Requested maximum number of queued signals. May be adjusted to satisfy processor constraints. */
+    /** Requested maximum number of signals per export. May be reduced to fit [maxQueueSize]. */
     val requestedQueueSize: Int?
 
     /** Maximum number of queued signals. Must be positive. */
