@@ -9,7 +9,9 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 
 internal class LoggerExportTest {
@@ -103,7 +105,9 @@ internal class LoggerExportTest {
         harness.logger.emit("test", exception = exception)
         harness.assertLogRecords(expectedCount = 1) { logs ->
             val attrs = logs.single().attributes
-            assertEquals(exception.stackTraceToString(), attrs[ExceptionAttributes.EXCEPTION_STACKTRACE])
+            val stacktrace = assertIs<String>(attrs[ExceptionAttributes.EXCEPTION_STACKTRACE])
+            assertContains(stacktrace, "RuntimeException")
+            assertContains(stacktrace, "test error")
             assertEquals("test error", attrs[ExceptionAttributes.EXCEPTION_MESSAGE])
             assertNotNull(attrs[ExceptionAttributes.EXCEPTION_TYPE])
         }

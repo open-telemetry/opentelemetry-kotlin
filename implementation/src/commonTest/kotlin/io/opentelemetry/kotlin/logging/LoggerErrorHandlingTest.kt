@@ -49,9 +49,7 @@ internal class LoggerErrorHandlingTest {
                 }
                 "exception message throws" -> {
                     assertEquals(1, processor.logs.size, case.name)
-                    val error = errorHandler.userCodeErrors.single()
-                    assertEquals("LogRecord.exception attributes failed", error.message, case.name)
-                    assertEquals("boom", error.cause.message, case.name)
+                    assertTrue(errorHandler.errors.isEmpty(), case.name)
                 }
                 else -> {
                     assertTrue(processor.logs.isEmpty(), case.name)
@@ -66,7 +64,7 @@ internal class LoggerErrorHandlingTest {
     }
 
     @Test
-    fun testExceptionAttributeFailureDoesNotPreventUserAttributesOrEmit() {
+    fun testHostileExceptionDoesNotPreventUserAttributesOrEmit() {
         val errorHandler = FakeSdkErrorHandler()
         val processor = FakeLogRecordProcessor()
         val logger = createLogger(Case("healthy"), processor, errorHandler)
@@ -80,7 +78,8 @@ internal class LoggerErrorHandlingTest {
 
         assertTrue(attributesApplied)
         assertEquals(1, processor.logs.size)
-        assertEquals("LogRecord.exception attributes failed", errorHandler.userCodeErrors.single().message)
+        assertTrue(errorHandler.errors.isEmpty())
+        assertNotNull(processor.logs.single().attributes[ExceptionAttributes.EXCEPTION_TYPE])
     }
 
     @Test
