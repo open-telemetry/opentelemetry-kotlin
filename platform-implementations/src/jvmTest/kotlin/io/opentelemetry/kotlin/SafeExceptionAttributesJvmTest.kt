@@ -83,5 +83,4 @@ internal class SafeExceptionAttributesJvmTest {
         override val cause: Throwable
             get() = this
     }
-
 }
