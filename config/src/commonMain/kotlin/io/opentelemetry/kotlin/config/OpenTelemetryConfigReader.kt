@@ -17,7 +17,7 @@ import io.opentelemetry.kotlin.error.SdkErrorSeverity
  * Reads the configuration supplied by every mechanism (DSL, YAML, envars), then resolves their
  * precedence via [BehaviorResolver].
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class OpenTelemetryConfigReader(
     envVarReader: EnvVarReader? = platformEnvVarReader(),
     private val declarativeConfigReader: DeclarativeBehaviorReader? = null,
@@ -113,7 +113,7 @@ class OpenTelemetryConfigReader(
             fallback = OpenTelemetryBehavior(),
             toError = ::configFileError,
         ) {
-            reader.read(path)
+            reader.read(path, SdkErrorHandler(::reportError))
         }
     }
 

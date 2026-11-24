@@ -14,6 +14,7 @@ import io.opentelemetry.kotlin.ioDispatcher
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class BatchLogRecordProcessorImpl(
     private val exporter: LogRecordExporter,
@@ -30,8 +31,9 @@ internal class BatchLogRecordProcessorImpl(
         BatchTelemetryProcessor(
             config = BatchTelemetryConfig(
                 maxQueueSize = maxQueueSize,
-                scheduleDelayMs = scheduleDelayMs,
-                exportTimeoutMs = exportTimeoutMs,
+                scheduleDelay = scheduleDelayMs.milliseconds,
+                defaultScheduleDelay = BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS.milliseconds,
+                exportTimeout = exportTimeoutMs.milliseconds,
                 maxExportBatchSize = maxExportBatchSize,
                 sdkErrorHandler = sdkErrorHandler,
             ),

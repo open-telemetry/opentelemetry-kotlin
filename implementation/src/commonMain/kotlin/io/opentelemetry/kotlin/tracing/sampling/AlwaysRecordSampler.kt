@@ -12,7 +12,8 @@ internal class AlwaysRecordSampler(
     private val root: Sampler,
 ) : Sampler {
 
-    override val description: String = "AlwaysRecordSampler{${root.description}}"
+    override val description: String
+        get() = "AlwaysRecordSampler{${root.description}}"
 
     override fun shouldSample(
         context: Context,

@@ -1,8 +1,10 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
-import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
-import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.toMinimumSdkErrorSeverity
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.config.ConfigProviderImpl
 import io.opentelemetry.kotlin.context.CurrentContextStorage
 import io.opentelemetry.kotlin.context.installContextStorage
@@ -11,7 +13,6 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.setProcessSdkErrorHandler
-import io.opentelemetry.kotlin.factory.ContextFactoryImpl
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigDsl
 import io.opentelemetry.kotlin.init.OpenTelemetryConfigImpl
@@ -31,19 +32,17 @@ import io.opentelemetry.kotlin.tracing.TracerProviderImpl
 public fun createOpenTelemetry(
 
     /**
-     * Defines the [Clock] implementation used by OpenTelemetry.
-     */
-    clock: Clock = ClockImpl(),
-
-    /**
      * Defines configuration for OpenTelemetry.
      */
-    config: OpenTelemetryConfigDsl.() -> Unit = {}
+    config: (OpenTelemetryConfigDsl.() -> Unit)? = null
 ): OpenTelemetrySdk {
-    val cfg = OpenTelemetryConfigImpl(clock)
-    cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
-        cfg.config()
+    val cfg = OpenTelemetryConfigImpl()
+    if (config != null) {
+        cfg.sdkErrorHandler.guard("Failed to apply OpenTelemetry config, continuing with partial config") {
+            cfg.config()
+        }
     }
+    val clock = cfg.clock
     val resourceFactory = ResourceFactoryImpl(cfg.sdkErrorHandler)
     val behaviorReader = defaultBehaviorReader(
         sdkErrorHandler = cfg.sdkErrorHandler,
@@ -51,6 +50,8 @@ public fun createOpenTelemetry(
     )
     val configFilePath = cfg.configFilePath
     val behavior = behaviorReader.read(configFilePath = configFilePath, dsl = cfg::toBehavior)
+
+    cfg.minimumErrorSeverity = (behavior.logLevel ?: OpenTelemetryBehavior.DEFAULT_LOG_LEVEL).toMinimumSdkErrorSeverity()
 
     if (behavior.disabled == true) {
         return NoopOpenTelemetrySdk
@@ -67,17 +68,16 @@ public fun createOpenTelemetry(
     // Claim process-wide state last, so that a failure earlier in init doesn't leave it claimed.
     val installedStorage = installContextStorage(cfg)
     val ownsErrorSink = setProcessSdkErrorHandler(cfg.sdkErrorHandler)
-    val contextFactory = ContextFactoryImpl(cfg.sdkErrorHandler, installedStorage)
     return OpenTelemetryImpl(
         tracerProvider = TracerProviderImpl(
-            clock = clock,
+            clock = cfg.clock,
             tracingConfig = tracingConfig,
             idGenerator = idGenerator,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior(),
             spanLimits = behavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior(),
         ),
         loggerProvider = LoggerProviderImpl(
-            clock = clock,
+            clock = cfg.clock,
             loggingConfig = loggingConfig,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior(),
             logLimits = behavior.loggerProvider?.logLimits ?: LogLimitsBehavior(),
@@ -87,11 +87,8 @@ public fun createOpenTelemetry(
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior()
         ),
         configProvider = ConfigProviderImpl { behaviorReader.readInstrumentation(configFilePath) },
-        clock = clock,
-        context = contextFactory,
-        idGenerator = idGenerator,
-        resource = resourceFactory,
-        propagator = cfg.propagator,
+        clock = cfg.clock,
+        propagator = cfg.createPropagator(),
         installedStorage = installedStorage,
         ownsErrorSink = ownsErrorSink,
         timeoutMs = cfg.shutdownTimeoutMs,
@@ -106,7 +103,7 @@ public fun createOpenTelemetry(
  */
 private fun installContextStorage(cfg: OpenTelemetryConfigImpl): CurrentContextStorage? {
     val contextConfig = cfg.contextConfig
-    val storage = contextConfig.generateStorage()
+    val storage = contextConfig.generateStorage(cfg.sdkErrorHandler)
     if (installContextStorage(storage)) {
         return storage
     }

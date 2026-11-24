@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
-import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.init.config.DEFAULT_EVENT_LIMIT
 import io.opentelemetry.kotlin.init.config.DEFAULT_LINK_LIMIT
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig

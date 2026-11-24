@@ -1,24 +1,24 @@
 package io.opentelemetry.kotlin.config.dsl.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.SamplerBehavior
-import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
-import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
-import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
-import io.opentelemetry.kotlin.init.TraceExportConfigDsl
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
+import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 
 /**
  * Captures tracer provider configuration and maps it onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class TracerProviderConfigDslImpl : BehaviorSupplier<TracerProviderBehavior> {
 
     private var processor: SpanProcessorBehavior? = null
     private var sampler: SamplerBehavior? = null
 
     @Suppress("UnusedParameter")
-    fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
+    fun export(action: ExportConfigDsl.() -> SpanProcessor) {
         if (processor == null) {
             processor = SpanProcessorBehavior()
         }

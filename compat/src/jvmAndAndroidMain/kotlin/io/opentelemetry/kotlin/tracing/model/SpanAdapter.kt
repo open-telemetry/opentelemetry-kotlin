@@ -9,7 +9,7 @@ import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.OtelJavaAttributesMutator
 import io.opentelemetry.kotlin.attributes.attributeSink
-import io.opentelemetry.kotlin.attributes.compatAttributes
+import io.opentelemetry.kotlin.attributes.compatOtelJavaAttributes
 import io.opentelemetry.kotlin.attributes.convertToMap
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.sdkGuard
@@ -20,9 +20,9 @@ import io.opentelemetry.kotlin.tracing.SpanCreationAction
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.StatusData
 import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanContext
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaStatusData
-import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
+import io.opentelemetry.kotlin.tracing.toOtelJavaSpanContext
+import io.opentelemetry.kotlin.tracing.toOtelKotlinSpanContext
 import java.util.concurrent.TimeUnit
 
 internal class SpanAdapter(
@@ -83,8 +83,7 @@ internal class SpanAdapter(
         spanContext: SpanContext,
         attributes: (AttributesMutator.() -> Unit)?
     ) = sdkErrorHandler.sdkGuard("Span.addLink failed") {
-        val container = compatAttributes(attributes)
-        impl.addLink(spanContext.toOtelJavaSpanContext(), container.otelJavaAttributes())
+        impl.addLink(spanContext.toOtelJavaSpanContext(), compatOtelJavaAttributes(attributes))
     }
 
     override fun addEvent(
@@ -92,12 +91,12 @@ internal class SpanAdapter(
         timestamp: Long,
         attributes: (AttributesMutator.() -> Unit)?
     ) = sdkErrorHandler.sdkGuard("Span.addEvent failed") {
-        val container = compatAttributes(attributes)
+        val otelJavaAttributes = compatOtelJavaAttributes(attributes)
         // As with the span start: left unset, the SDK stamps the event with the clock it times the span by.
         if (timestamp > 0) {
-            impl.addEvent(name, container.otelJavaAttributes(), timestamp, TimeUnit.NANOSECONDS)
+            impl.addEvent(name, otelJavaAttributes, timestamp, TimeUnit.NANOSECONDS)
         } else {
-            impl.addEvent(name, container.otelJavaAttributes())
+            impl.addEvent(name, otelJavaAttributes)
         }
     }
 

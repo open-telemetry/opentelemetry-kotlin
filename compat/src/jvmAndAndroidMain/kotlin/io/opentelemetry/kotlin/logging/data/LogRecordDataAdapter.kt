@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceAdapter
 import io.opentelemetry.kotlin.scope.toOtelKotlinInstrumentationScopeInfo
 import io.opentelemetry.kotlin.tracing.SpanContext
-import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
+import io.opentelemetry.kotlin.tracing.toOtelKotlinSpanContext
 
 internal class LogRecordDataAdapter(
     val impl: OtelJavaLogRecordData,

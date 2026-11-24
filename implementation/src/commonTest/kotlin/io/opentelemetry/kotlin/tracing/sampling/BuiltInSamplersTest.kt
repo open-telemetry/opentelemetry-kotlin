@@ -96,6 +96,16 @@ internal class BuiltInSamplersTest {
     }
 
     @Test
+    fun testParentBasedDescriptionReflectsDelegateChanges() {
+        val delegate = mutableDescriptionSampler("initial")
+        val sampler = samplerDsl.parentBased(root = delegate)
+
+        assertTrue(sampler.description.contains("root:initial"))
+        delegate.description = "updated"
+        assertTrue(sampler.description.contains("root:updated"))
+    }
+
+    @Test
     fun testParentBasedRootSampler() {
         val tracer = buildTracer(samplerDsl.parentBased(root = samplerDsl.alwaysOff()))
         val span = tracer.startSpan("root")
@@ -139,6 +149,16 @@ internal class BuiltInSamplersTest {
     fun testAlwaysRecordSamplerDescription() {
         val sampler = samplerDsl.alwaysRecord(root = FakeSampler())
         assertEquals("AlwaysRecordSampler{FakeSampler}", sampler.description)
+    }
+
+    @Test
+    fun testAlwaysRecordSamplerDescriptionReflectsDelegateChanges() {
+        val delegate = mutableDescriptionSampler("initial")
+        val sampler = samplerDsl.alwaysRecord(root = delegate)
+
+        assertEquals("AlwaysRecordSampler{initial}", sampler.description)
+        delegate.description = "updated"
+        assertEquals("AlwaysRecordSampler{updated}", sampler.description)
     }
 
     @Test
@@ -203,4 +223,9 @@ internal class BuiltInSamplersTest {
         assertEquals("value", result.attributes.attributes["key"])
         assertEquals("data", result.traceState.get("vendor"))
     }
+
+    private fun mutableDescriptionSampler(initialDescription: String) =
+        object : Sampler by FakeSampler() {
+            override var description: String = initialDescription
+        }
 }

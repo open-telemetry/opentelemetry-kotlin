@@ -1,0 +1,20 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, tvosArm64, tvosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <opentelemetry-kotlin:propagator-b3>
+final enum class io.opentelemetry.kotlin.propagation/B3Format : kotlin/Enum<io.opentelemetry.kotlin.propagation/B3Format> { // io.opentelemetry.kotlin.propagation/B3Format|null[0]
+    enum entry MULTI // io.opentelemetry.kotlin.propagation/B3Format.MULTI|null[0]
+    enum entry SINGLE // io.opentelemetry.kotlin.propagation/B3Format.SINGLE|null[0]
+
+    final val entries // io.opentelemetry.kotlin.propagation/B3Format.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.opentelemetry.kotlin.propagation/B3Format> // io.opentelemetry.kotlin.propagation/B3Format.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.opentelemetry.kotlin.propagation/B3Format // io.opentelemetry.kotlin.propagation/B3Format.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.opentelemetry.kotlin.propagation/B3Format> // io.opentelemetry.kotlin.propagation/B3Format.values|values#static(){}[0]
+}
+
+final fun io.opentelemetry.kotlin.propagation/createB3Propagator(io.opentelemetry.kotlin.propagation/B3Format = ...): io.opentelemetry.kotlin.propagation/TextMapPropagator // io.opentelemetry.kotlin.propagation/createB3Propagator|createB3Propagator(io.opentelemetry.kotlin.propagation.B3Format){}[0]

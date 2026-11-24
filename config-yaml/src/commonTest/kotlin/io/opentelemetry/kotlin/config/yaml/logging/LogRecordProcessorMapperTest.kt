@@ -1,10 +1,10 @@
 package io.opentelemetry.kotlin.config.yaml.logging
 
-import io.opentelemetry.kotlin.behavior.BatchLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.LogRecordExporterBehavior
-import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
-import io.opentelemetry.kotlin.behavior.SimpleLogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.SimpleLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.config.schema.model.BatchLogRecordProcessor
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
 import io.opentelemetry.kotlin.config.schema.model.LogRecordExporter
@@ -12,13 +12,12 @@ import io.opentelemetry.kotlin.config.schema.model.LogRecordProcessor
 import io.opentelemetry.kotlin.config.schema.model.SimpleLogRecordProcessor
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class LogRecordProcessorMapperTest {
 
     @Test
     fun emptyProcessorsLeaveBehaviorUnset() {
-        assertNull(emptyList<LogRecordProcessor>().toBehavior())
+        assertEquals(LogRecordProcessorBehavior(), emptyList<LogRecordProcessor>().toBehavior())
     }
 
     @Test

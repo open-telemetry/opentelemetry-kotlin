@@ -1,8 +1,8 @@
 package io.opentelemetry.kotlin.config.envar.tracing
 
-import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
 import io.opentelemetry.kotlin.config.envar.Exporter
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
@@ -39,7 +39,11 @@ internal class BatchSpanProcessorEnvVarsTest {
         val warnings = mutableListOf<EnvVarReadWarning>()
         val reader = reportingEnvVarReader({ "0" }, warnings::add)
         assertEquals(
-            BatchSpanProcessorBehavior(scheduleDelay = 0, exportTimeout = 0),
+            BatchSpanProcessorBehavior(
+                scheduleDelay = 0,
+                exportTimeout = 0,
+                exporter = SpanExporterBehavior()
+            ),
             BatchSpanProcessorEnvVars(reader).toBehavior(),
         )
         assertEquals(3, warnings.size)
@@ -47,6 +51,11 @@ internal class BatchSpanProcessorEnvVarsTest {
 
     @Test
     fun leavesUnsetBatchSettingsUnset() {
-        assertEquals(null, BatchSpanProcessorEnvVars(reportingEnvVarReader({ null })).toBehavior())
+        assertEquals(
+            BatchSpanProcessorBehavior(
+                exporter = SpanExporterBehavior(),
+            ),
+            BatchSpanProcessorEnvVars(reportingEnvVarReader({ null })).toBehavior()
+        )
     }
 }

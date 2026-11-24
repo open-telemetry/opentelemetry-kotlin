@@ -5,7 +5,12 @@
 1. Run the
    ["Draft CHANGELOG entries"](https://github.com/open-telemetry/opentelemetry-kotlin/actions/workflows/draft-change-log-entries.yaml)
    GitHub Action.
-2. Create a PR updating the CHANGELOG.md and merge it after approval.
+2. Create a PR updating the CHANGELOG.md and merge it after approval. The `## Unreleased` section must
+   state which [OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/releases)
+   version the release supports, as required by the
+   [version labeling guidelines](https://opentelemetry.io/docs/specs/otel/library-guidelines/#version-labeling).
+   Replace the `vX.Y.Z` placeholder in the drafted entry, or keep the previous release's version if the
+   targeted spec version hasn't changed. This line is copied into the GitHub release notes.
 3. Run the
    ["Prepare release branch"](https://github.com/open-telemetry/opentelemetry-kotlin/actions/workflows/prepare-release-branch.yml)
    GitHub Action.

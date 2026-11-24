@@ -86,7 +86,7 @@ internal class LoggerConfigTest {
         }
 
         val logger = harness.kotlinApi.loggerProvider.getLogger("test")
-        val unsampled = harness.kotlinApi.context.rootContext()
+        val unsampled = rootContext()
             .storeSpan(harness.tracer.startSpan("unsampled"))
 
         assertFalse(logger.enabled(context = unsampled))

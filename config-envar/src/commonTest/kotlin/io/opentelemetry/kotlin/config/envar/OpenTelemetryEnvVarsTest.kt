@@ -1,21 +1,21 @@
 package io.opentelemetry.kotlin.config.envar
 
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
-import io.opentelemetry.kotlin.behavior.BatchLogRecordProcessorBehavior
-import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
-import io.opentelemetry.kotlin.behavior.LogRecordExporterBehavior
-import io.opentelemetry.kotlin.behavior.LogRecordProcessorBehavior
-import io.opentelemetry.kotlin.behavior.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
-import io.opentelemetry.kotlin.behavior.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.SeverityLevel
-import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
-import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
-import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
-import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
+import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.envar.logging.LogLimitsEnvVars
 import io.opentelemetry.kotlin.config.envar.logging.LogRecordExporterEnvVars
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
@@ -36,13 +36,22 @@ internal class OpenTelemetryEnvVarsTest {
             OpenTelemetryBehavior(
                 disabled = false,
                 attributeLimits = AttributeLimitsBehavior(),
+                resource = ResourceBehavior(),
                 loggerProvider = LoggerProviderBehavior(
                     logLimits = LogLimitsBehavior(),
-                    processor = LogRecordProcessorBehavior(),
+                    processor = LogRecordProcessorBehavior(
+                        batch = BatchLogRecordProcessorBehavior(
+                            exporter = LogRecordExporterBehavior()
+                        )
+                    ),
                 ),
                 tracerProvider = TracerProviderBehavior(
                     spanLimits = SpanLimitsBehavior(),
-                    processor = SpanProcessorBehavior()
+                    processor = SpanProcessorBehavior(
+                        batch = BatchSpanProcessorBehavior(
+                            exporter = SpanExporterBehavior()
+                        )
+                    )
                 ),
             ),
             behavior,
@@ -140,13 +149,22 @@ internal class OpenTelemetryEnvVarsTest {
         val expected = OpenTelemetryBehavior(
             disabled = false,
             attributeLimits = AttributeLimitsBehavior(),
+            resource = ResourceBehavior(),
             tracerProvider = TracerProviderBehavior(
                 spanLimits = SpanLimitsBehavior(),
-                processor = SpanProcessorBehavior()
+                processor = SpanProcessorBehavior(
+                    batch = BatchSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(),
+                    ),
+                )
             ),
             loggerProvider = LoggerProviderBehavior(
                 logLimits = LogLimitsBehavior(),
-                processor = LogRecordProcessorBehavior()
+                processor = LogRecordProcessorBehavior(
+                    batch = BatchLogRecordProcessorBehavior(
+                        exporter = LogRecordExporterBehavior(),
+                    ),
+                )
             ),
 
         )

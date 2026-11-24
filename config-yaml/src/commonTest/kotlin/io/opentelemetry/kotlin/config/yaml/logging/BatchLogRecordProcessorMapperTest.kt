@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.config.yaml.logging
 
-import io.opentelemetry.kotlin.behavior.BatchLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.LogRecordExporterBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.OtlpHttpLogsExporterBehavior
 import io.opentelemetry.kotlin.config.schema.model.BatchLogRecordProcessor
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
 import io.opentelemetry.kotlin.config.schema.model.LogRecordExporter
@@ -16,7 +16,7 @@ internal class BatchLogRecordProcessorMapperTest {
     fun everyFieldStartsWithDefaultValue() {
         val behavior = BatchLogRecordProcessor(exporter = LogRecordExporter()).toBehavior()
         assertEquals(
-            BatchLogRecordProcessorBehavior(),
+            BatchLogRecordProcessorBehavior(exporter = LogRecordExporterBehavior()),
             behavior
         )
     }
@@ -62,7 +62,7 @@ internal class BatchLogRecordProcessorMapperTest {
             exporter = LogRecordExporter()
         ).toBehavior()
         assertEquals(
-            BatchLogRecordProcessorBehavior(),
+            BatchLogRecordProcessorBehavior(exporter = LogRecordExporterBehavior()),
             behavior
         )
     }

@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
-import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -269,6 +269,28 @@ internal class TracerProviderImplTest {
     }
 
     @Test
+    fun testThrowingTracerConfiguratorFallsBackToDefaultConfig() {
+        val errorHandler = FakeSdkErrorHandler()
+        var calls = 0
+        val provider = createProvider(
+            errorHandler = errorHandler,
+            tracerConfigurator = {
+                calls++
+                error("boom")
+            },
+        )
+
+        val tracer = provider.getTracer(name = "test")
+
+        assertTrue(tracer.startSpan("test-span").isRecording())
+        assertSame(tracer, provider.getTracer(name = "test"))
+        assertEquals(1, calls)
+        val recorded = errorHandler.userCodeErrors.single()
+        assertEquals("Failed to compute tracer config, using default", recorded.message)
+        assertEquals("boom", recorded.cause.message)
+    }
+
+    @Test
     fun testInvalidComposableProbabilityFallsBackToDefaultSampler() {
         val errorHandler = FakeSdkErrorHandler()
         val provider = createProvider(errorHandler = errorHandler, samplerFactory = {
@@ -382,6 +404,7 @@ internal class TracerProviderImplTest {
         processor: SpanProcessor? = FakeSpanProcessor(),
         errorHandler: SdkErrorHandler = NoopSdkErrorHandler,
         samplerFactory: () -> Sampler = { DefaultSampler },
+        tracerConfigurator: TracerConfigurator = TracerConfigurator { TracerConfigImpl(true) },
     ) = TracerProviderImpl(
         clock = FakeClock(),
         tracingConfig = TracingConfig(
@@ -389,6 +412,7 @@ internal class TracerProviderImplTest {
             FakeResource(),
             errorHandler,
             samplerFactory = samplerFactory,
+            tracerConfigurator = tracerConfigurator,
         ),
         idGenerator = FakeIdGenerator(),
         attributeLimits = AttributeLimitsBehavior(),

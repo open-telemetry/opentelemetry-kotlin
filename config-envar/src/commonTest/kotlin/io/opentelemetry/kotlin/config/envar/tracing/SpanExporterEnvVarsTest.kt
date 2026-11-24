@@ -1,21 +1,23 @@
 package io.opentelemetry.kotlin.config.envar.tracing
 
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
-import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.OtlpHttpSpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
 import io.opentelemetry.kotlin.config.envar.Exporter
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 class SpanExporterEnvVarsTest {
     private val unknownExporter = "not_an_exporter"
 
     @Test
     fun `should leave unset env vars unset`() {
-        assertNull(toBehavior { null })
+        assertEquals(
+            SpanExporterBehavior(),
+            toBehavior { null }
+        )
     }
 
     @Test
@@ -41,7 +43,8 @@ class SpanExporterEnvVarsTest {
     fun `should leave known non-implemented exporters unset`() {
         val exporters = listOf(Exporter.LOGGING, Exporter.NONE, Exporter.OTLP_STDOUT)
         exporters.forEach { exporter ->
-            assertNull(
+            assertEquals(
+                SpanExporterBehavior(),
                 toBehavior(mapOf(SpanExporterEnvVars.TRACES_EXPORTER to exporter.value)::get),
                 "<$exporter> should not configure a processor"
             )
@@ -51,7 +54,10 @@ class SpanExporterEnvVarsTest {
     @Test
     fun `should leave unknown exporter unset`() {
         val configs = mapOf(SpanExporterEnvVars.TRACES_EXPORTER to unknownExporter)
-        assertNull(toBehavior(configs::get))
+        assertEquals(
+            SpanExporterBehavior(),
+            toBehavior(configs::get)
+        )
     }
 
     @Test

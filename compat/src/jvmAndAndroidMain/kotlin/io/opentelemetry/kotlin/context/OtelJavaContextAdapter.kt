@@ -14,8 +14,8 @@ import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.createNonRecordingSpan
 import io.opentelemetry.kotlin.tracing.ext.asOtelJavaSpan
-import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinSpanContext
 import io.opentelemetry.kotlin.tracing.model.OtelJavaSpanAdapter
+import io.opentelemetry.kotlin.tracing.toOtelKotlinSpanContext
 import java.util.WeakHashMap
 
 /**
@@ -24,7 +24,7 @@ import java.util.WeakHashMap
  * Java's span and baggage keys map onto the Kotlin span and baggage. Any other Java key maps to a
  * Kotlin key that is created on first use and held for as long as the Java key is reachable.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class OtelJavaContextAdapter(
     internal val impl: Context,
 ) : OtelJavaContext {

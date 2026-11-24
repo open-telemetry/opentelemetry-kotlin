@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
-import io.opentelemetry.kotlin.behavior.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
 import io.opentelemetry.kotlin.config.dsl.tracing.mapToSampler
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
 

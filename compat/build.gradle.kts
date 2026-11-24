@@ -10,21 +10,22 @@ kotlin {
     sourceSets {
         getByName("jvmAndAndroidMain") {
             dependencies {
-                api(project(":core"))
-                implementation(project(":sdk-api"))
+                api(project(":sdk-api"))
+                api(project(":api-ext"))
+                api(project(":noop"))
+                api(project(":exporters-core"))
                 implementation(project(":sdk-common"))
                 implementation(project(":config"))
-                implementation(project(":context-impl"))
                 implementation(project(":config-dsl"))
                 implementation(project(":semconv"))
                 implementation(project(":model"))
                 implementation(project(":java-typealiases"))
                 implementation(project(":platform-implementations"))
                 implementation(libs.kotlinx.coroutines)
-                implementation(project.dependencies.platform(libs.opentelemetry.bom))
+                api(project.dependencies.platform(libs.opentelemetry.bom))
                 implementation(project.dependencies.platform(libs.opentelemetry.bom.alpha))
-                implementation(libs.opentelemetry.api)
-                implementation(libs.opentelemetry.sdk)
+                api(libs.opentelemetry.api)
+                api(libs.opentelemetry.sdk)
                 implementation(libs.opentelemetry.exporter.logging)
                 implementation(libs.opentelemetry.sdk.extension.incubator)
             }
@@ -32,6 +33,7 @@ kotlin {
         jvmTest {
             dependencies {
                 implementation(project(":context-single-slot"))
+                implementation(project(":propagator-b3"))
                 implementation(project(":test-fakes"))
                 implementation(project(":integration-test"))
                 implementation(libs.kotlinx.coroutines.test)

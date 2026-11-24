@@ -4,13 +4,13 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
-import io.opentelemetry.kotlin.behavior.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.error.sdkGuardOrDefaultSuspend
-import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -34,13 +34,21 @@ internal class LoggerProviderImpl(
         sdkErrorHandler,
     )
     private val noopLogger = NoopOpenTelemetry.loggerProvider.getLogger("")
+    private val defaultLoggerConfig = LoggerConfigImpl()
 
     private val apiProvider by lazy {
         ApiProviderImpl { key ->
             if (loggingConfig.processor == null) {
                 return@ApiProviderImpl noopLogger
             }
-            val loggerConfig = userCode { loggingConfig.loggerConfigurator.loggerConfig(key) }
+            // A throwing configurator falls back to the default config, so the logger is still
+            // cached and the configurator does not run again for this scope.
+            val loggerConfig = sdkErrorHandler.guardOrDefault(
+                defaultLoggerConfig,
+                "Failed to compute logger config, using default",
+            ) {
+                loggingConfig.loggerConfigurator.loggerConfig(key)
+            }
             if (!loggerConfig.enabled) {
                 noopLogger
             } else {

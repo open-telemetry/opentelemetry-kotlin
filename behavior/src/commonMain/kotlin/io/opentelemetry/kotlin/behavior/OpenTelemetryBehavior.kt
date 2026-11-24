@@ -1,13 +1,16 @@
 package io.opentelemetry.kotlin.behavior
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
+import io.opentelemetry.kotlin.behavior.metrics.MeterProviderBehavior
+import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 
 /**
  * Behavior of the SDK, as supplied by one configuration mechanism.
  *
  * https://opentelemetry.io/docs/specs/otel/configuration/
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 data class OpenTelemetryBehavior(
     /**
      * The file format version.
@@ -55,6 +58,10 @@ data class OpenTelemetryBehavior(
      * Logger provider.
      */
     val loggerProvider: LoggerProviderBehavior? = null,
+    /**
+     * Meter provider.
+     */
+    val meterProvider: MeterProviderBehavior? = null,
 ) : Behavior<OpenTelemetryBehavior> {
     init {
         fileFormat?.let {
@@ -105,6 +112,7 @@ data class OpenTelemetryBehavior(
         attributeLimits = mergeNode(attributeLimits, higher.attributeLimits),
         tracerProvider = mergeNode(tracerProvider, higher.tracerProvider),
         loggerProvider = mergeNode(loggerProvider, higher.loggerProvider),
+        meterProvider = mergeNode(meterProvider, higher.meterProvider),
     )
 
     companion object {
@@ -121,7 +129,7 @@ data class OpenTelemetryBehavior(
  * Combines [layers] into a single behavior, where each layer takes precedence over the ones before
  * it.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 fun mergeBehaviors(layers: List<OpenTelemetryBehavior>): OpenTelemetryBehavior =
     layers.fold(OpenTelemetryBehavior(fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION)) {
             merged, layer ->

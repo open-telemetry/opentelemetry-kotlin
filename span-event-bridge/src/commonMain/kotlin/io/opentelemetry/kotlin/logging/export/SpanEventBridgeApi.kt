@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.init.LogExportConfigDsl
+import io.opentelemetry.kotlin.init.ExportConfigDsl
 
 /**
  * Creates a log record processor that copies event log records onto the current span as a span
@@ -12,5 +12,5 @@ import io.opentelemetry.kotlin.init.LogExportConfigDsl
  * See https://opentelemetry.io/docs/specs/otel/logs/sdk/#event-to-span-event-bridge
  */
 @ExperimentalApi
-public fun LogExportConfigDsl.spanEventBridgeLogRecordProcessor(): LogRecordProcessor =
+public fun ExportConfigDsl.spanEventBridgeLogRecordProcessor(): LogRecordProcessor =
     SpanEventBridgeLogRecordProcessor()

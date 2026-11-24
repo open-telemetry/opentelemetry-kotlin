@@ -1,10 +1,16 @@
 package io.opentelemetry.kotlin
 
-import kotlinx.validation.ApiValidationExtension
 import org.gradle.api.Project
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 
-fun Project.configureBinaryCompatValidation() {
-    project.pluginManager.apply("binary-compatibility-validator")
-    val apiValidation = project.extensions.getByType(ApiValidationExtension::class.java)
-    apiValidation.validationDisabled = !project.containsPublicApi()
+/**
+ * Enables the Kotlin Gradle plugin's built-in ABI validation for modules that contain public API.
+ */
+@OptIn(ExperimentalAbiValidation::class)
+fun Project.configureBinaryCompatValidation(kotlin: KotlinMultiplatformExtension) {
+    if (!containsPublicApi()) {
+        return
+    }
+    kotlin.abiValidation()
 }

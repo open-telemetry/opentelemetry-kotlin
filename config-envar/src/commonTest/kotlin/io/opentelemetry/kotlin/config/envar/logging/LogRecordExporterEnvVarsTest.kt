@@ -1,14 +1,13 @@
 package io.opentelemetry.kotlin.config.envar.logging
 
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.LogRecordExporterBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpLogsExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.OtlpHttpLogsExporterBehavior
 import io.opentelemetry.kotlin.config.envar.Exporter
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class LogRecordExporterEnvVarsTest {
     private val unknownExporter = "not_an_exporter"
@@ -37,7 +36,8 @@ internal class LogRecordExporterEnvVarsTest {
         val exporters =
             listOf(Exporter.LOGGING, Exporter.NONE, Exporter.OTLP_STDOUT)
         exporters.forEach { exporter ->
-            assertNull(
+            assertEquals(
+                LogRecordExporterBehavior(),
                 toBehavior(mapOf(LogRecordExporterEnvVars.LOGS_EXPORTER to exporter.value)::get),
                 "<$exporter> should not configure a processor"
             )
@@ -47,7 +47,10 @@ internal class LogRecordExporterEnvVarsTest {
     @Test
     fun `should leave unknown exporter unset`() {
         val configs = mapOf(LogRecordExporterEnvVars.LOGS_EXPORTER to unknownExporter)
-        assertNull(toBehavior(configs::get))
+        assertEquals(
+            LogRecordExporterBehavior(),
+            toBehavior(configs::get)
+        )
     }
 
     @Test

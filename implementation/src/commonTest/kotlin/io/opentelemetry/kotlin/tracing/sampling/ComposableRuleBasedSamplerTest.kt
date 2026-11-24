@@ -3,8 +3,11 @@ package io.opentelemetry.kotlin.tracing.sampling
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
+import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.init.SamplerConfigImpl
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -55,6 +58,20 @@ internal class ComposableRuleBasedSamplerTest {
 
         sampler.intentFor()
         assertFalse(laterPredicateEvaluated)
+    }
+
+    @Test
+    fun `throwing predicate is treated as no match and the next rule is tried`() {
+        val errorHandler = FakeSdkErrorHandler()
+        val sampler = SamplerConfigImpl(errorHandler).composableRuleBased {
+            rule({ _, _, _, _, _ -> error("boom") }) { composableAlwaysOff() }
+            rule(matchesEverything) { composableAlwaysOn() }
+        }
+
+        val intent = sampler.intentFor()
+        assertEquals(0L, intent.threshold)
+        assertTrue(intent.adjustedCountReliable)
+        assertEquals("boom", errorHandler.userCodeErrors.single().cause.message)
     }
 
     @Test
@@ -150,7 +167,9 @@ internal class ComposableRuleBasedSamplerTest {
 
         val context = contextWithParent(sampled = true, isRemote = true)
         val attributes = AttributesModel().apply { setStringAttribute("http.route", "/checkout") }
-        val links = listOf(SpanLinkImpl(createInvalidSpanContext(), AttributesModel()))
+        val links = listOf(
+            SpanLinkImpl(createInvalidSpanContext(), DEFAULT_ATTRIBUTE_LIMIT, DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT)
+        )
         sampler.intentFor(
             context = context,
             name = "checkout",

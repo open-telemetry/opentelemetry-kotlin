@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.aliases.OtelJavaComposableSampler
+import io.opentelemetry.kotlin.aliases.OtelJavaSamplingDecision
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.toOtelJavaAttributes
@@ -8,7 +9,7 @@ import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.toOtelJavaContext
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.TraceState
-import io.opentelemetry.kotlin.tracing.ext.toOtelJavaLinkData
+import io.opentelemetry.kotlin.tracing.data.toOtelJavaLinkData
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaSpanKind
 import io.opentelemetry.kotlin.tracing.ext.toOtelJavaTraceState
 import io.opentelemetry.kotlin.tracing.ext.toOtelKotlinTraceState
@@ -23,10 +24,8 @@ internal class OtelJavaBackedComposableSampler(internal val impl: OtelJavaCompos
         attributes: AttributeContainer,
         links: List<SpanLink>,
     ): SamplingIntent {
-        val traceId = context.extractSpan().spanContext.traceId
         val javaIntent = impl.getSamplingIntent(
             context.toOtelJavaContext(),
-            traceId,
             name,
             spanKind.toOtelJavaSpanKind(),
             attributes.toOtelJavaAttributes(),
@@ -40,7 +39,7 @@ internal class OtelJavaBackedComposableSampler(internal val impl: OtelJavaCompos
         return object : SamplingIntent {
             override val threshold: Long? =
                 javaThreshold.takeIf { it in VALID_THRESHOLD_RANGE }
-            override val adjustedCountReliable: Boolean = javaIntent.isThresholdReliable
+            override val adjustedCountReliable: Boolean = javaIntent.isAdjustedCountReliable
             override val attributesProvider: (() -> AttributeContainer)? = if (javaSamplingAttributes.isEmpty) {
                 null
             } else {
@@ -49,8 +48,9 @@ internal class OtelJavaBackedComposableSampler(internal val impl: OtelJavaCompos
             override val traceStateProvider: ((TraceState, SamplingResult.Decision) -> TraceState)? =
                 javaTraceStateUpdater?.let { updater ->
                     {
-                            traceState, _ ->
-                        updater.apply(traceState.toOtelJavaTraceState()).toOtelKotlinTraceState()
+                            traceState, decision ->
+                        val javaDecision = OtelJavaSamplingDecision.valueOf(decision.name)
+                        updater.apply(traceState.toOtelJavaTraceState(), javaDecision).toOtelKotlinTraceState()
                     }
                 }
         }

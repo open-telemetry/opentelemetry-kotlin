@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.config.envar
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
 import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
 
 /**
@@ -10,12 +11,12 @@ import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
  *
  * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#attribute-limits
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class AttributeLimitsEnvVars(
     private val reader: ReportingEnvVarReader,
-) {
+) : BehaviorSupplier<AttributeLimitsBehavior> {
 
-    fun toBehavior(): AttributeLimitsBehavior = AttributeLimitsBehavior(
+    override fun toBehavior(): AttributeLimitsBehavior = AttributeLimitsBehavior(
         attributeCountLimit = reader.readNonNegativeInt(ATTRIBUTE_COUNT_LIMIT),
         attributeValueLengthLimit = reader.readNonNegativeInt(ATTRIBUTE_VALUE_LENGTH_LIMIT),
     )

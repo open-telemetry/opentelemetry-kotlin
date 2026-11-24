@@ -3,14 +3,13 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
-import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guardOrDefault
 import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.error.sdkGuardOrDefaultSuspend
-import io.opentelemetry.kotlin.error.userCode
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.export.CompositeTelemetryCloseable
 import io.opentelemetry.kotlin.export.MutableShutdownState
@@ -23,6 +22,7 @@ import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.provider.ApiProviderImpl
 import io.opentelemetry.kotlin.tracing.sampling.SamplerCloseable
+import io.opentelemetry.kotlin.tracing.sampling.guarded
 
 internal class TracerProviderImpl(
     private val clock: Clock,
@@ -36,7 +36,7 @@ internal class TracerProviderImpl(
     private val shutdownState: MutableShutdownState = MutableShutdownState()
     private val sampler = sdkErrorHandler.guardOrDefault(DefaultSampler, "Failed to create sampler, using default") {
         tracingConfig.samplerFactory()
-    }
+    }.guarded(sdkErrorHandler)
 
     // Processors shut down first so that any spans still in flight finish before the sampler
     // releases its resources.
@@ -45,13 +45,21 @@ internal class TracerProviderImpl(
         sdkErrorHandler,
     )
     private val noopTracer = PropagatingNoopTracer(sdkErrorHandler)
+    private val defaultTracerConfig = TracerConfigImpl(true)
     private val spanLimitConfig = SpanLimitConfig(spanLimits)
 
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
         if (tracingConfig.processor == null) {
             return@ApiProviderImpl noopTracer
         }
-        val tracerConfig = userCode { tracingConfig.tracerConfigurator.tracerConfig(key) }
+        // A throwing configurator falls back to the default config, so the tracer is still cached
+        // and the configurator does not run again for this scope.
+        val tracerConfig = sdkErrorHandler.guardOrDefault(
+            defaultTracerConfig,
+            "Failed to compute tracer config, using default",
+        ) {
+            tracingConfig.tracerConfigurator.tracerConfig(key)
+        }
         if (!tracerConfig.enabled) {
             noopTracer
         } else {

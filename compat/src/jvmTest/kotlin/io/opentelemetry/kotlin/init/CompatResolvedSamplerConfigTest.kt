@@ -1,14 +1,13 @@
 package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.behavior.SamplerBehavior
-import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
-import io.opentelemetry.kotlin.factory.CompatContextFactory
 import io.opentelemetry.kotlin.tracing.Span
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import io.opentelemetry.kotlin.tracing.sampling.FakeSampler
@@ -22,7 +21,6 @@ import kotlin.test.assertTrue
 internal class CompatResolvedSamplerConfigTest {
 
     private val clock = FakeClock()
-    private val contextFactory = CompatContextFactory()
 
     private fun startSpan(
         getEnvVar: (String) -> String? = { null },
@@ -30,7 +28,7 @@ internal class CompatResolvedSamplerConfigTest {
         errorHandler: SdkErrorHandler? = null,
         configure: TracerProviderConfigDsl.() -> Unit = {},
     ): Span {
-        val cfg = CompatOpenTelemetryConfig(clock).apply {
+        val cfg = CompatOpenTelemetryConfig().apply {
             if (errorHandler != null) {
                 errorHandler(errorHandler)
             }
@@ -43,7 +41,7 @@ internal class CompatResolvedSamplerConfigTest {
             envVarReader = EnvVarReader(getEnvVar),
             sdkErrorHandler = cfg.sdkErrorHandler,
         ).read(cfg.configFilePath, cfg::toBehavior)
-        return CompatSdkConfigFactory(cfg, behavior, clock, contextFactory)
+        return CompatSdkConfigFactory(cfg, behavior, clock)
             .buildTracerProvider()
             .getTracer("test")
             .startSpan("span")

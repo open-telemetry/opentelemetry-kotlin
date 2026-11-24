@@ -1,8 +1,10 @@
 package io.opentelemetry.kotlin.init
 
+import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.factory.IdGenerator
+import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.propagation.TextMapPropagator
 
 /**
@@ -49,9 +51,13 @@ public interface OpenTelemetryConfigDsl : ResourceConfigDsl, ConfigFileDsl {
 
     /**
      * Configures the [TextMapPropagator] used to inject and extract context across process boundaries.
+     * [action] is invoked when the SDK is created and should return a propagator built with the
+     * `create*Propagator()` functions in [io.opentelemetry.kotlin.propagation], e.g.
+     * [io.opentelemetry.kotlin.propagation.createW3CTraceContextPropagator]. If this is not set, or
+     * [action] throws, the SDK uses a noop propagator.
      * https://opentelemetry.io/docs/specs/otel/context/api-propagators/
      */
-    public fun propagator(action: PropagatorConfigDsl.() -> TextMapPropagator)
+    public fun propagator(action: () -> TextMapPropagator)
 
     /**
      * Configures a custom [IdGenerator] that is used to generate trace and span IDs. If this is
@@ -61,9 +67,28 @@ public interface OpenTelemetryConfigDsl : ResourceConfigDsl, ConfigFileDsl {
     public fun idGenerator(action: () -> IdGenerator)
 
     /**
+     * Configures the [Clock] used to timestamp telemetry. If this is not set the SDK uses the
+     * platform's wall clock.
+     */
+    public fun clock(clock: Clock)
+
+    /**
      * Configures the [SdkErrorHandler] that is notified of errors and misuse detected by the SDK.
      * If this is not set the SDK writes these reports to the platform log (e.g. Logcat).
      * https://opentelemetry.io/docs/specs/otel/error-handling/#configuring-error-handlers
      */
     public fun errorHandler(handler: SdkErrorHandler)
+
+    /**
+     * Disables the SDK when [disabled] is `true`, in which case a no-op implementation is returned.
+     */
+    public fun disabled(disabled: Boolean)
+
+    /**
+     * Sets the lowest severity of the SDK's own diagnostics that are passed to the [SdkErrorHandler].
+     * Reports below [level] are dropped. TRACE, DEBUG and INFO levels pass every report, WARN levels
+     * pass warnings and errors, and ERROR and FATAL levels pass only errors. Defaults to
+     * [SeverityNumber.INFO]. [SeverityNumber.UNKNOWN] is ignored.
+     */
+    public fun logLevel(level: SeverityNumber)
 }

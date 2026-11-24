@@ -1,5 +1,10 @@
 package io.opentelemetry.kotlin.behavior
 
+import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
+
 /**
  * Folds the global attribute limits into each signal's limits, so a consumer can read a signal's
  * node on its own rather than repeating the fallback.

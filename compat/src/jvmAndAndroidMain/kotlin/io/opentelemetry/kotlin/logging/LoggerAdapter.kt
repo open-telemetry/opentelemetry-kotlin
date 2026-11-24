@@ -2,7 +2,6 @@ package io.opentelemetry.kotlin.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaLogger
-import io.opentelemetry.kotlin.aliases.OtelJavaValueType
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.compatAttributes
 import io.opentelemetry.kotlin.attributes.setExceptionAttributes
@@ -15,7 +14,7 @@ import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import java.util.concurrent.TimeUnit
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class LoggerAdapter(
     private val impl: OtelJavaLogger,
     private val sdkErrorHandler: SdkErrorHandler,
@@ -74,7 +73,7 @@ internal class LoggerAdapter(
         val builder = impl.logRecordBuilder()
 
         val otelJavaBody = sdkErrorHandler.guardOrDefault(null, "LogRecord.body failed") {
-            body?.toOtelJavaValue()?.takeIf { it.type != OtelJavaValueType.EMPTY }
+            body?.toOtelJavaValue()
         }
         if (otelJavaBody != null) {
             builder.setBody(otelJavaBody)

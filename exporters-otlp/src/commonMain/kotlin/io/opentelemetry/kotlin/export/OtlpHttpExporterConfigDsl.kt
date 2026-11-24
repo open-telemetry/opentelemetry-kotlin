@@ -2,10 +2,12 @@ package io.opentelemetry.kotlin.export
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.HttpTimeoutConfig.Companion.INFINITE_TIMEOUT_MS
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.config.validateOrUseDefault
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guard
+import io.opentelemetry.kotlin.error.sdkGuard
 import io.opentelemetry.kotlin.getEnvVarValue
 import io.opentelemetry.kotlin.init.ConfigDsl
 
@@ -38,7 +40,9 @@ public interface OtlpHttpExporterConfigDsl {
     public var timeoutMs: Long
 
     /**
-     * Optional Ktor engine. When unset, exporters share a default engine.
+     * Optional Ktor engine. When unset, exporters with the same [timeoutMs] share an SDK-created
+     * engine that is closed when the last of them shuts down. An engine you supply is never closed
+     * by the SDK; one installed by `configureTls` is SDK-created and closed on shutdown.
      * Ignored when [httpClient] is set.
      */
     public var httpClientEngine: HttpClientEngine?
@@ -66,17 +70,20 @@ internal class OtlpHttpExporterConfig : OtlpHttpExporterConfigDsl {
     override var timeoutMs: Long = EXPORT_REQUEST_TIMEOUT_MS
     override var httpClientEngine: HttpClientEngine? = null
     override var httpClient: HttpClient? = null
+    internal var sdkOwnedEngine: HttpClientEngine? = null
 }
 
 internal fun createOtlpHttpClient(
     sdkErrorHandler: SdkErrorHandler,
     signal: OtlpEndpoint,
     getEnvVar: (String) -> String? = ::getEnvVarValue,
-    block: OtlpHttpExporterConfigDsl.() -> Unit,
+    block: (OtlpHttpExporterConfigDsl.() -> Unit)?,
 ): OtlpClient {
     val config = OtlpHttpExporterConfig()
-    sdkErrorHandler.guard("Failed to apply OTLP HTTP exporter config, continuing with partial config") {
-        config.block()
+    if (block != null) {
+        sdkErrorHandler.guard("Failed to apply OTLP HTTP exporter config, continuing with partial config") {
+            config.block()
+        }
     }
     val signalEndpoint = if (config.endpointConfigured) {
         null
@@ -108,12 +115,23 @@ internal fun createOtlpHttpClient(
         configParameterName = "timeoutMs",
         value = config.timeoutMs,
         default = EXPORT_REQUEST_TIMEOUT_MS,
-    ) { it > 0 }
+    ) { it >= 0 }
     val suppliedClient = config.httpClient
+    val engine = config.httpClientEngine
+    val sdkOwnedEngine = config.sdkOwnedEngine.also { config.sdkOwnedEngine = null }
+    val ownsEngine = sdkOwnedEngine != null && sdkOwnedEngine === engine
+    if (sdkOwnedEngine != null && (suppliedClient != null || !ownsEngine)) {
+        sdkErrorHandler.sdkGuard("Failed to close unused OTLP HTTP engine") { sdkOwnedEngine.close() }
+    }
     val httpClientLease = if (suppliedClient == null) {
         HttpClientRegistry.lease(
-            engine = config.httpClientEngine,
-            requestTimeoutMs = timeoutMs,
+            engine = engine,
+            requestTimeoutMs = if (timeoutMs == 0L) {
+                INFINITE_TIMEOUT_MS
+            } else {
+                timeoutMs
+            },
+            ownsEngine = ownsEngine,
         )
     } else {
         null

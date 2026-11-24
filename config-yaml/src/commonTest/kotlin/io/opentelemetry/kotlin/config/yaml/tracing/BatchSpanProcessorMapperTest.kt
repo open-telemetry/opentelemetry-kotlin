@@ -1,9 +1,9 @@
 package io.opentelemetry.kotlin.config.yaml.tracing
 
-import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.OtlpHttpSpanExporterBehavior
-import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.OtlpHttpSpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
 import io.opentelemetry.kotlin.config.schema.model.BatchSpanProcessor
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
 import io.opentelemetry.kotlin.config.schema.model.NameStringValuePair
@@ -19,7 +19,7 @@ internal class BatchSpanProcessorMapperTest {
     fun everyFieldStartsWithDefaultValue() {
         val behavior = BatchSpanProcessor(exporter = SpanExporter()).toBehavior()
         assertEquals(
-            BatchSpanProcessorBehavior(),
+            BatchSpanProcessorBehavior(exporter = SpanExporterBehavior()),
             behavior
         )
     }
@@ -38,7 +38,8 @@ internal class BatchSpanProcessorMapperTest {
                 scheduleDelay = 100,
                 exportTimeout = 200,
                 maxQueueSize = 400,
-                maxExportBatchSize = 300
+                maxExportBatchSize = 300,
+                exporter = SpanExporterBehavior()
             ),
             behavior
         )
@@ -54,7 +55,7 @@ internal class BatchSpanProcessorMapperTest {
             exporter = SpanExporter()
         ).toBehavior()
         assertEquals(
-            BatchSpanProcessorBehavior(),
+            BatchSpanProcessorBehavior(exporter = SpanExporterBehavior()),
             behavior
         )
     }

@@ -1,14 +1,14 @@
 package io.opentelemetry.kotlin.config.dsl.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.BatchSpanProcessorBehavior
-import io.opentelemetry.kotlin.behavior.SpanExporterBehavior
-import io.opentelemetry.kotlin.config.dsl.BehaviorSupplier
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
+import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
 
 /**
  * Captures the batch span processor configured programmatically and maps it onto a behavior.
  */
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 class BatchSpanProcessorConfigDslImpl : BehaviorSupplier<BatchSpanProcessorBehavior> {
     private var exporter: SpanExporterBehavior? = null
     var scheduleDelay: Long? = null

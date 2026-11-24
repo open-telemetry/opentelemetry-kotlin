@@ -15,16 +15,14 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.setAttributeMap
-import io.opentelemetry.kotlin.behavior.SamplerBehavior
-import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
-import io.opentelemetry.kotlin.behavior.SpanProcessorBehavior
-import io.opentelemetry.kotlin.behavior.TracerProviderBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
+import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
+import io.opentelemetry.kotlin.config.dsl.ExportConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.tracing.SpanLimitsConfigDslImpl
-import io.opentelemetry.kotlin.config.dsl.tracing.TraceExportConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefault
-import io.opentelemetry.kotlin.factory.CompatContextFactory
-import io.opentelemetry.kotlin.factory.ContextFactory
 import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.factory.OtelJavaIdGeneratorAdapter
 import io.opentelemetry.kotlin.resource.Resource
@@ -45,7 +43,7 @@ import java.util.concurrent.TimeUnit
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor as OtelJavaBatchSpanProcessor
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor as OtelJavaSimpleSpanProcessor
 
-@ExperimentalApi
+@OptIn(ExperimentalApi::class)
 internal class CompatTracerProviderConfig(
     private val clock: Clock,
     private val sdkErrorHandler: SdkErrorHandler,
@@ -80,9 +78,9 @@ internal class CompatTracerProviderConfig(
         spanLimitsDsl.action()
     }
 
-    override fun export(action: TraceExportConfigDsl.() -> SpanProcessor) {
+    override fun export(action: ExportConfigDsl.() -> SpanProcessor) {
         exportConfigured = true
-        val processor = TraceExportConfigDslImpl(clock, sdkErrorHandler).action()
+        val processor = ExportConfigDslImpl(clock, sdkErrorHandler).action()
         processors.add(processor)
     }
 
@@ -156,7 +154,6 @@ internal class CompatTracerProviderConfig(
         idGenerator: IdGenerator,
         baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build()),
         spanLimits: SpanLimitsBehavior,
-        contextFactory: ContextFactory = CompatContextFactory(),
         timeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS,
     ): TracerProvider {
         builder.setIdGenerator(
@@ -186,7 +183,7 @@ internal class CompatTracerProviderConfig(
         processors.forEach {
             builder.addSpanProcessor(OtelJavaSpanProcessorAdapter(it, sdkErrorHandler, timeoutMs))
         }
-        return TracerProviderAdapter(builder.build(), contextFactory, sdkErrorHandler, timeoutMs)
+        return TracerProviderAdapter(builder.build(), sdkErrorHandler, timeoutMs)
     }
 
     fun toBehavior(): TracerProviderBehavior =
