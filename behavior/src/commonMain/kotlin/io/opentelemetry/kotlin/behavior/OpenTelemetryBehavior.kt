@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.behavior
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
+import io.opentelemetry.kotlin.behavior.metrics.MeterProviderBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 
 /**
@@ -57,6 +58,10 @@ data class OpenTelemetryBehavior(
      * Logger provider.
      */
     val loggerProvider: LoggerProviderBehavior? = null,
+    /**
+     * Meter provider.
+     */
+    val meterProvider: MeterProviderBehavior? = null,
 ) : Behavior<OpenTelemetryBehavior> {
     init {
         fileFormat?.let {
@@ -107,6 +112,7 @@ data class OpenTelemetryBehavior(
         attributeLimits = mergeNode(attributeLimits, higher.attributeLimits),
         tracerProvider = mergeNode(tracerProvider, higher.tracerProvider),
         loggerProvider = mergeNode(loggerProvider, higher.loggerProvider),
+        meterProvider = mergeNode(meterProvider, higher.meterProvider),
     )
 
     companion object {
