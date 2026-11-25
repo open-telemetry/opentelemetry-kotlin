@@ -3,6 +3,9 @@ package io.opentelemetry.kotlin.resource
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.convertToMap
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 
 internal class ResourceAdapter(
     impl: OtelJavaResource
@@ -24,7 +27,7 @@ internal class ResourceAdapter(
             schemaUrl == null -> other.schemaUrl
             other.schemaUrl == null -> schemaUrl
             schemaUrl == other.schemaUrl -> schemaUrl
-            else -> other.schemaUrl
+            else -> other.schemaUrl.also { reportSchemaUrlConflict(schemaUrl, it) }
         }
         return ResourceAdapter(OtelJavaResource.create(attrsFromMap(mergedAttrs), mergedSchema))
     }
@@ -44,4 +47,17 @@ internal class ResourceAdapter(
         result = 31 * result + (schemaUrl?.hashCode() ?: 0)
         return result
     }
+}
+
+private fun reportSchemaUrlConflict(base: String?, other: String?) {
+    if (base.isNullOrEmpty() || other.isNullOrEmpty()) {
+        return
+    }
+    reportError(
+        SdkError.ApiMisuse(
+            "Resource.merge",
+            "Conflicting schema URLs '$base' and '$other', using '$other'.",
+            SdkErrorSeverity.WARNING,
+        )
+    )
 }
