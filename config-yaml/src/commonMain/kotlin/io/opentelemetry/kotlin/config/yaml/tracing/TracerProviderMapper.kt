@@ -11,7 +11,7 @@ import io.opentelemetry.kotlin.config.schema.model.TracerProvider
 fun TracerProvider.toBehavior(): TracerProviderBehavior {
     val behavior = TracerProviderBehavior(
         spanLimits = limits?.toBehavior(),
-        processors = listOfNotNull(processors.toBehavior()),
+        processors = processors.toBehavior(),
         sampler = sampler?.toBehavior(),
         idGenerator = idGenerator?.toBehavior(),
     )

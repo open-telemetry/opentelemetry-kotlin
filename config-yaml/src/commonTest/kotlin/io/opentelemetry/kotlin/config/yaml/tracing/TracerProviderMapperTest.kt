@@ -3,7 +3,6 @@ package io.opentelemetry.kotlin.config.yaml.tracing
 import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
-import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.schema.model.AlwaysOffSampler
 import io.opentelemetry.kotlin.config.schema.model.ConsoleExporter
@@ -24,7 +23,7 @@ internal class TracerProviderMapperTest {
     @Test
     fun unsetIfNoMappedFields() {
         assertEquals(
-            TracerProviderBehavior(processors = listOfNotNull(SpanProcessorBehavior())),
+            TracerProviderBehavior(processors = emptyList()),
             TracerProvider(processors = emptyList()).toBehavior()
         )
     }
@@ -42,7 +41,7 @@ internal class TracerProviderMapperTest {
                 spanLimits = SpanLimitsBehavior(attributeCountLimit = 1),
                 sampler = SamplerBehavior.AlwaysOff,
                 idGenerator = IdGeneratorBehavior.Random,
-                processors = listOfNotNull(SpanProcessorBehavior())
+                processors = emptyList(),
             ),
             provider.toBehavior(),
         )

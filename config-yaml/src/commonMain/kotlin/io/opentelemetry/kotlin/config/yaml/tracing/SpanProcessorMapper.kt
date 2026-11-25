@@ -8,19 +8,17 @@ import io.opentelemetry.kotlin.config.schema.model.SpanProcessor
  * Maps`tracer_provider.processors` onto processor behavior.
  */
 @OptIn(ExperimentalApi::class)
-fun List<SpanProcessor>.toBehavior(): SpanProcessorBehavior {
-    // TODO: Add support to multiple exporters being in use simultaneously once we have the SpanProcessor
-    //  fully implemented.
+fun List<SpanProcessor>.toBehavior(): List<SpanProcessorBehavior> {
+    val processors = mutableListOf<SpanProcessorBehavior>()
     for ((batch, simple) in this) {
         when {
-            batch != null -> return SpanProcessorBehavior(
+            batch != null -> processors += SpanProcessorBehavior(
                 batch = batch.toBehavior()
             )
-            simple != null -> return SpanProcessorBehavior(
+            simple != null -> processors += SpanProcessorBehavior(
                 simple = simple.toBehavior()
             )
         }
     }
-
-    return SpanProcessorBehavior()
+    return processors
 }
