@@ -22,14 +22,14 @@ data class BatchSpanProcessorBehavior(
         scheduleDelay: Long? = null,
         exportTimeout: Long? = null,
         maxQueueSize: Int? = null,
-        maxExportBatchSize: Int? = null,
+        requestedQueueSize: Int? = null,
         exporter: SpanExporterBehavior? = null,
     ) : this(
         BatchProcessorDelegate(
             scheduleDelay,
             exportTimeout,
             maxQueueSize,
-            maxExportBatchSize,
+            requestedQueueSize,
             exporter
         )
     )
@@ -42,8 +42,8 @@ data class BatchSpanProcessorBehavior(
             scheduleDelay = higher.scheduleDelay ?: scheduleDelay,
             exportTimeout = higher.exportTimeout ?: exportTimeout,
             maxQueueSize = higher.maxQueueSize ?: maxQueueSize,
-            maxExportBatchSize = higher.maxExportBatchSize ?: maxExportBatchSize,
-            exporter = mergeNode(exporter, higher.exporter)
+            requestedQueueSize = higher.requestedQueueSize ?: requestedQueueSize,
+            exporter = mergeNode(exporter as SpanExporterBehavior?, higher.exporter as SpanExporterBehavior?)
         ),
     )
 }

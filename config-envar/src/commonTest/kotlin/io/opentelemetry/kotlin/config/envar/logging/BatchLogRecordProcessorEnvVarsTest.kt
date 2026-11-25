@@ -24,7 +24,7 @@ internal class BatchLogRecordProcessorEnvVarsTest {
                 scheduleDelay = 100,
                 exportTimeout = 0,
                 maxQueueSize = 40,
-                maxExportBatchSize = 20,
+                requestedQueueSize = 20,
                 exporter = LogRecordExporterBehavior(
                     console = ConsoleExporterBehavior(),
                 ),
@@ -42,7 +42,7 @@ internal class BatchLogRecordProcessorEnvVarsTest {
                 scheduleDelay = 0,
                 exportTimeout = 0,
                 maxQueueSize = null,
-                maxExportBatchSize = null,
+                requestedQueueSize = null,
                 exporter = LogRecordExporterBehavior(),
             ),
             BatchLogRecordProcessorEnvVars(reader).toBehavior(),

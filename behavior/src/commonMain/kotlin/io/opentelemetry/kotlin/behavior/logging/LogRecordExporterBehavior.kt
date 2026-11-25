@@ -32,10 +32,7 @@ data class LogRecordExporterBehavior(
     override fun mergeWith(higher: LogRecordExporterBehavior): LogRecordExporterBehavior = copy(
         delegate = delegate.copy(
             console = mergeNode(console, higher.console),
-            http = mergeNode(
-                http,
-                higher.http
-            ),
+            http = mergeNode(http, higher.http),
         )
     )
 }

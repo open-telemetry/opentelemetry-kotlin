@@ -10,7 +10,7 @@ internal class BatchLogRecordProcessorBehaviorTest {
         scheduleDelay = 1_000,
         exportTimeout = 30_000,
         maxQueueSize = 2_048,
-        maxExportBatchSize = 512,
+        requestedQueueSize = 512,
         exporter = LogRecordExporterBehavior(
             http = OtlpHttpLogsExporterBehavior(
                 endpoint = "http://example.com/logs"
@@ -50,7 +50,7 @@ internal class BatchLogRecordProcessorBehaviorTest {
             scheduleDelay = 2_000,
             exportTimeout = 60_000,
             maxQueueSize = 4_096,
-            maxExportBatchSize = 1_024,
+            requestedQueueSize = 1_024,
             exporter = LogRecordExporterBehavior(
                 http = OtlpHttpLogsExporterBehavior(
                     endpoint = "http://example.com/logs/higher"

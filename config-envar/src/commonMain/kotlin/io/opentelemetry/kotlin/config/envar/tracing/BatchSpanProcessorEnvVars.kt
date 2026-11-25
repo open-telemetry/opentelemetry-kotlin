@@ -14,7 +14,7 @@ internal class BatchSpanProcessorEnvVars(
         scheduleDelay = reader.readNonNegativeLong(SCHEDULE_DELAY),
         exportTimeout = reader.readNonNegativeLong(EXPORT_TIMEOUT),
         maxQueueSize = reader.readNonNegativeInt(MAX_QUEUE_SIZE, acceptZero = false),
-        maxExportBatchSize = reader.readNonNegativeInt(MAX_EXPORT_BATCH_SIZE, acceptZero = false),
+        requestedQueueSize = reader.readNonNegativeInt(MAX_EXPORT_BATCH_SIZE, acceptZero = false),
         exporter = SpanExporterEnvVars(reader).toBehavior(),
     )
 

@@ -22,7 +22,7 @@ internal class BatchSpanProcessorBehaviorTest {
             scheduleDelay = 100,
             exportTimeout = 200,
             maxQueueSize = 300,
-            maxExportBatchSize = 400,
+            requestedQueueSize = 400,
             exporter = SpanExporterBehavior()
         )
         assertEquals(higher, BatchSpanProcessorBehavior().mergeWith(higher))
@@ -34,7 +34,7 @@ internal class BatchSpanProcessorBehaviorTest {
             scheduleDelay = 100,
             exportTimeout = 200,
             maxQueueSize = 300,
-            maxExportBatchSize = 400,
+            requestedQueueSize = 400,
             exporter = SpanExporterBehavior(console = ConsoleExporterBehavior())
         )
         val higher = BatchSpanProcessorBehavior(scheduleDelay = 9_999)
@@ -53,14 +53,14 @@ internal class BatchSpanProcessorBehaviorTest {
             scheduleDelay = 100,
             exportTimeout = 200,
             maxQueueSize = 300,
-            maxExportBatchSize = 400,
+            requestedQueueSize = 400,
             exporter = SpanExporterBehavior(http = OtlpHttpSpanExporterBehavior(endpoint = "www.example1.com"))
         )
         val higher = BatchSpanProcessorBehavior(
             scheduleDelay = 1_000,
             exportTimeout = 2_000,
             maxQueueSize = 3_000,
-            maxExportBatchSize = 4_000,
+            requestedQueueSize = 4_000,
             exporter = SpanExporterBehavior(http = OtlpHttpSpanExporterBehavior(endpoint = "www.example2.com"))
         )
         assertEquals(higher, lower.mergeWith(higher))
