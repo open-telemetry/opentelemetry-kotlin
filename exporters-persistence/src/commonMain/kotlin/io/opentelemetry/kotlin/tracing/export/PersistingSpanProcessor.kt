@@ -29,6 +29,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Creates a processor that persists telemetry before exporting it. This effectively glues
@@ -72,8 +73,8 @@ internal class PersistingSpanProcessor(
     private val batchingProcessor = dsl.batchSpanProcessorWithDispatcher(
         persistingExporter,
         maxQueueSize,
-        scheduleDelayMs,
-        exportTimeoutMs,
+        scheduleDelayMs.milliseconds,
+        exportTimeoutMs.milliseconds,
         maxExportBatchSize,
         dispatcher,
     )

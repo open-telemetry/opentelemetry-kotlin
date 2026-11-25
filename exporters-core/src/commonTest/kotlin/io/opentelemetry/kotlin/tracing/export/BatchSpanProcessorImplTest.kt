@@ -16,6 +16,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalApi::class, ExperimentalCoroutinesApi::class)
 internal class BatchSpanProcessorImplTest {
@@ -41,8 +42,8 @@ internal class BatchSpanProcessorImplTest {
         processor = BatchSpanProcessorImpl(
             exporter = exporter,
             maxQueueSize = 100,
-            scheduleDelayMs = 1,
-            exportTimeoutMs = 1000,
+            scheduleDelay = 1.milliseconds,
+            exportTimeout = 1000.milliseconds,
             maxExportBatchSize = 10,
             sdkErrorHandler = errorHandler,
             dispatcher = dispatcher,

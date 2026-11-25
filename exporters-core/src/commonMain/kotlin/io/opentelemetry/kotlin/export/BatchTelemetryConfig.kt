@@ -2,11 +2,14 @@ package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.config.validateOrUseDefault
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class BatchTelemetryConfig(
     maxQueueSize: Int = BatchTelemetryDefaults.MAX_QUEUE_SIZE,
-    scheduleDelayMs: Long = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS,
-    exportTimeoutMs: Long = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
+    defaultScheduleDelay: Duration = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS.milliseconds,
+    scheduleDelay: Duration = defaultScheduleDelay,
+    exportTimeout: Duration = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS.milliseconds,
     maxExportBatchSize: Int = BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE,
     forceFlushTimeoutMs: Long = BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS,
     val sdkErrorHandler: SdkErrorHandler,
@@ -23,29 +26,29 @@ internal class BatchTelemetryConfig(
     ) { it > 0 }
 
     /**
-     * Delay between scheduled flushes, in milliseconds.
+     * Delay between scheduled flushes.
      */
-    val scheduleDelayMs: Long = validateOrUseDefault(
+    val scheduleDelay: Duration = validateOrUseDefault(
         sdkErrorHandler = sdkErrorHandler,
         api = API,
-        configParameterName = "scheduleDelayMs",
-        value = scheduleDelayMs,
-        default = BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS,
-    ) { it > 0 }
+        configParameterName = "scheduleDelay",
+        value = scheduleDelay,
+        default = defaultScheduleDelay,
+    ) { it >= Duration.ZERO }
 
     /**
-     * Timeout for a single export operation, in milliseconds.
+     * Timeout for a single export operation.
      * Zero means no limit (infinity).
      */
-    val exportTimeoutMs: Long = validateOrUseDefault(
+    val exportTimeout: Duration = validateOrUseDefault(
         sdkErrorHandler = sdkErrorHandler,
         api = API,
-        configParameterName = "exportTimeoutMs",
-        value = exportTimeoutMs,
-        default = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
-    ) { it >= 0 }.let { timeout ->
-        if (timeout == 0L) {
-            Long.MAX_VALUE
+        configParameterName = "exportTimeout",
+        value = exportTimeout,
+        default = BatchTelemetryDefaults.EXPORT_TIMEOUT_MS.milliseconds,
+    ) { it >= Duration.ZERO }.let { timeout ->
+        if (timeout == Duration.ZERO) {
+            Duration.INFINITE
         } else {
             timeout
         }

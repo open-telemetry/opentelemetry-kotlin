@@ -2,6 +2,7 @@ import io.opentelemetry.kotlin.CheckDuplicatePublicApiTask
 import io.opentelemetry.kotlin.docs.DocSnippetsTask
 import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 
 plugins {
@@ -9,7 +10,17 @@ plugins {
     id("com.android.kotlin.multiplatform.library") apply false
     id("org.jetbrains.kotlin.multiplatform") apply false
     id("com.vanniktech.maven.publish") apply false
+    alias(libs.plugins.dokka)
     id("org.jetbrains.kotlinx.kover") version "0.9.11" apply false
+}
+
+subprojects {
+    pluginManager.withPlugin("org.jetbrains.dokka") {
+        rootProject.dependencies.add(
+            "dokka",
+            rootProject.dependencies.project(mapOf("path" to path)),
+        )
+    }
 }
 
 plugins.withType<YarnPlugin> {
@@ -22,6 +33,23 @@ plugins.withType<YarnPlugin> {
         resolution("serialize-javascript", ">=7.1.4")
         resolution("**/ws", "8.21.0")
         resolution("ws", "8.21.0")
+    }
+
+    if (providers.gradleProperty("io.opentelemetry.kotlin.useLocalYarn").orNull.toBoolean()) {
+        extensions.configure<YarnRootEnvSpec> {
+            download.set(false)
+        }
+    }
+    providers.gradleProperty("io.opentelemetry.kotlin.npmRegistry").orNull?.let { registry ->
+        val yarnrc = layout.buildDirectory.file("js/.yarnrc")
+        tasks.named("kotlinNpmInstall") {
+            doFirst {
+                yarnrc.get().asFile.apply {
+                    parentFile.mkdirs()
+                    writeText("registry \"$registry\"\n")
+                }
+            }
+        }
     }
 }
 

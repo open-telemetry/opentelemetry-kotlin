@@ -510,6 +510,8 @@ abstract interface io.opentelemetry.kotlin.tracing/TracerConfig { // io.opentele
 abstract interface io.opentelemetry.kotlin/InstrumentationScopeInfo { // io.opentelemetry.kotlin/InstrumentationScopeInfo|null[0]
     abstract val attributes // io.opentelemetry.kotlin/InstrumentationScopeInfo.attributes|{}attributes[0]
         abstract fun <get-attributes>(): kotlin.collections/Map<kotlin/String, kotlin/Any> // io.opentelemetry.kotlin/InstrumentationScopeInfo.attributes.<get-attributes>|<get-attributes>(){}[0]
+    abstract val droppedAttributesCount // io.opentelemetry.kotlin/InstrumentationScopeInfo.droppedAttributesCount|{}droppedAttributesCount[0]
+        abstract fun <get-droppedAttributesCount>(): kotlin/Int // io.opentelemetry.kotlin/InstrumentationScopeInfo.droppedAttributesCount.<get-droppedAttributesCount>|<get-droppedAttributesCount>(){}[0]
     abstract val name // io.opentelemetry.kotlin/InstrumentationScopeInfo.name|{}name[0]
         abstract fun <get-name>(): kotlin/String // io.opentelemetry.kotlin/InstrumentationScopeInfo.name.<get-name>|<get-name>(){}[0]
     abstract val schemaUrl // io.opentelemetry.kotlin/InstrumentationScopeInfo.schemaUrl|{}schemaUrl[0]

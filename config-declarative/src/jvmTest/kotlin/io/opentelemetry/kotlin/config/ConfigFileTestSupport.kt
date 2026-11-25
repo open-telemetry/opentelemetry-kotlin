@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.config
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.logging.Handler
 import java.util.logging.Level
 import java.util.logging.LogRecord
@@ -42,9 +43,20 @@ internal fun awaitOutput(buffer: ByteArrayOutputStream, text: String, timeoutMs:
     return buffer.toString().contains(text)
 }
 
+internal fun awaitJulOutput(messages: List<String>, text: String, timeoutMs: Long = 5_000): Boolean {
+    val deadline = System.currentTimeMillis() + timeoutMs
+    while (System.currentTimeMillis() < deadline) {
+        if (messages.any { it.contains(text) }) {
+            return true
+        }
+        Thread.sleep(10)
+    }
+    return messages.any { it.contains(text) }
+}
+
 internal fun captureJul(loggerName: String, block: (List<String>) -> Unit): List<String> {
     val logger = Logger.getLogger(loggerName)
-    val messages = mutableListOf<String>()
+    val messages = CopyOnWriteArrayList<String>()
     val handler = object : Handler() {
         override fun publish(record: LogRecord) {
             messages.add(record.message.orEmpty())

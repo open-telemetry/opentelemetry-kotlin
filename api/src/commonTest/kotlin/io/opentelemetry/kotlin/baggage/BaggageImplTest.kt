@@ -1,8 +1,14 @@
 package io.opentelemetry.kotlin.baggage
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.RecordingSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertSame
@@ -10,6 +16,19 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
 internal class BaggageImplTest {
+
+    private val errorHandler = RecordingSdkErrorHandler()
+
+    @BeforeTest
+    fun setUp() {
+        BaggageImpl.entryLimitReported.set(false)
+        errorHandler.install()
+    }
+
+    @AfterTest
+    fun tearDown() {
+        errorHandler.uninstall()
+    }
 
     @Test
     fun `getValue returns value for present key`() {
@@ -120,10 +139,8 @@ internal class BaggageImplTest {
     }
 
     @Test
-    fun `put silently drops new entry beyond MAX_ENTRIES`() {
-        val full = (0 until BaggageImpl.MAX_ENTRIES).fold(BaggageImpl.EMPTY) { acc, idx ->
-            acc.put("k$idx", "v")
-        }
+    fun `put drops new entry beyond MAX_ENTRIES`() {
+        val full = fullBaggage()
         assertEquals(BaggageImpl.MAX_ENTRIES, full.asMap().size)
         val attempted = full.put("kExtra", "v")
         assertSame(full, attempted)
@@ -131,13 +148,33 @@ internal class BaggageImplTest {
     }
 
     @Test
+    fun `put reports the first entry dropped beyond MAX_ENTRIES`() {
+        val full = fullBaggage()
+        assertEquals(emptyList(), errorHandler.errors)
+
+        full.put("kExtra", "v")
+
+        val error = assertIs<SdkError.ApiMisuse>(errorHandler.errors.single())
+        assertEquals("Baggage.put", error.api)
+        assertEquals(SdkErrorSeverity.WARNING, error.severity)
+    }
+
+    @Test
+    fun `put does not report later entries dropped beyond MAX_ENTRIES`() {
+        val full = fullBaggage()
+        full.put("kExtra1", "v")
+        full.put("kExtra2", "v")
+        fullBaggage().put("kExtra3", "v", "m")
+        assertEquals(1, errorHandler.errors.size, "errors: ${errorHandler.errors}")
+    }
+
+    @Test
     fun `put replaces existing key when at MAX_ENTRIES cap`() {
-        val full = (0 until BaggageImpl.MAX_ENTRIES).fold(BaggageImpl.EMPTY) { acc, idx ->
-            acc.put("k$idx", "v")
-        }
+        val full = fullBaggage()
         val updated = full.put("k0", "new")
         assertEquals(BaggageImpl.MAX_ENTRIES, updated.asMap().size)
         assertEquals("new", updated.getValue("k0"))
+        assertEquals(emptyList(), errorHandler.errors)
     }
 
     @Test
@@ -165,4 +202,9 @@ internal class BaggageImplTest {
         val original = BaggageImpl.EMPTY.put("k1", "v1")
         assertEquals(original, original.put("k2", "v2").remove("k2"))
     }
+
+    private fun fullBaggage(): Baggage =
+        (0 until BaggageImpl.MAX_ENTRIES).fold(BaggageImpl.EMPTY) { acc, idx ->
+            acc.put("k$idx", "v")
+        }
 }

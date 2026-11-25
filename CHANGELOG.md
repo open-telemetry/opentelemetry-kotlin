@@ -41,6 +41,8 @@ of the OpenTelemetry specification.
 
 ### 🐞 Bug fixes
 
+- Accept 0 for OTLP timeouts as infinite and for schedule delay as immediate, and fall back to the signal-specific default for logs schedule delay.
+  ([#1683](https://github.com/open-telemetry/opentelemetry-kotlin/issues/1683))
 - Move new and updated trace-state entries to the front after protobuf deserialization.
 - Drop baggage entry metadata on inject when it doesn't match the W3C property grammar, so it
   can no longer add list members or write CR, LF or non-ASCII characters into the header.

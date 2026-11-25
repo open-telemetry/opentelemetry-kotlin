@@ -13,6 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @Suppress("InjectDispatcher")
@@ -73,7 +74,7 @@ internal class BatchTelemetryProcessorConcurrencyTest {
         BatchTelemetryProcessor(
             config = BatchTelemetryConfig(
                 maxQueueSize = maxQueueSize,
-                scheduleDelayMs = 1,
+                scheduleDelay = 1.milliseconds,
                 maxExportBatchSize = batchSize,
                 sdkErrorHandler = NoopSdkErrorHandler,
             ),

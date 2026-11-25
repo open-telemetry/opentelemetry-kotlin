@@ -21,6 +21,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 internal class LoggerProviderImplTest {
 
@@ -247,6 +248,28 @@ internal class LoggerProviderImplTest {
     }
 
     @Test
+    fun testThrowingLoggerConfiguratorFallsBackToDefaultConfig() {
+        val errorHandler = FakeSdkErrorHandler()
+        var calls = 0
+        val provider = createProvider(
+            errorHandler = errorHandler,
+            configurator = {
+                calls++
+                error("boom")
+            },
+        )
+
+        val logger = provider.getLogger(name = "test")
+
+        assertTrue(logger.enabled())
+        assertSame(logger, provider.getLogger(name = "test"))
+        assertEquals(1, calls)
+        val recorded = errorHandler.userCodeErrors.single()
+        assertEquals("Failed to compute logger config, using default", recorded.message)
+        assertEquals("boom", recorded.cause.message)
+    }
+
+    @Test
     fun testThrowingErrorHandlerDoesNotEscapeForceFlush() = runTest {
         val provider = createProvider(
             processor = FakeLogRecordProcessor(flushCode = { error("boom") }),
@@ -271,9 +294,10 @@ internal class LoggerProviderImplTest {
     private fun createProvider(
         processor: LogRecordProcessor? = FakeLogRecordProcessor(),
         errorHandler: SdkErrorHandler = NoopSdkErrorHandler,
+        configurator: LoggerConfigurator = loggerConfigurator,
     ) = LoggerProviderImpl(
         clock,
-        LoggingConfig(processor, FakeResource(), errorHandler, loggerConfigurator),
+        LoggingConfig(processor, FakeResource(), errorHandler, configurator),
         attributeLimits,
         logLimits,
     )

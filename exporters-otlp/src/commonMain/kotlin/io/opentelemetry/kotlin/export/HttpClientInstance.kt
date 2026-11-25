@@ -5,6 +5,7 @@ import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.HttpTimeoutConfig.Companion.INFINITE_TIMEOUT_MS
 import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.compression.ContentEncodingConfig
 import io.ktor.util.collections.ConcurrentMap
@@ -60,7 +61,12 @@ internal object HttpClientRegistry {
         requestTimeoutMs: Long,
         ownsEngine: Boolean = false,
     ): HttpClientLease = withGate {
-        val key = HttpClientKey(engine, requestTimeoutMs)
+        val timeoutMs = if (requestTimeoutMs == 0L) {
+            INFINITE_TIMEOUT_MS
+        } else {
+            requestTimeoutMs
+        }
+        val key = HttpClientKey(engine, timeoutMs)
         val shared = clients[key]
         if (shared != null) {
             shared.users++
@@ -69,7 +75,7 @@ internal object HttpClientRegistry {
 
         val created = SharedClient(
             key = key,
-            client = createDefaultHttpClient(requestTimeoutMs, key.engine),
+            client = createDefaultHttpClient(timeoutMs, key.engine),
             users = 1,
             ownsEngine = ownsEngine,
         )
@@ -136,9 +142,14 @@ internal fun createDefaultHttpClient(
     requestTimeoutMs: Long,
     engine: HttpClientEngine? = null,
 ): HttpClient {
+    val timeoutMillis = if (requestTimeoutMs == 0L) {
+        INFINITE_TIMEOUT_MS
+    } else {
+        requestTimeoutMs
+    }
     val configure: HttpClientConfig<*>.() -> Unit = {
         install(HttpTimeout) {
-            requestTimeoutMillis = requestTimeoutMs
+            requestTimeoutMillis = timeoutMillis
         }
         install(ContentEncoding) {
             mode = ContentEncodingConfig.Mode.All

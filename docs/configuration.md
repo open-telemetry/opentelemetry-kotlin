@@ -171,7 +171,7 @@ These functions are available inside `export { }`:
 | `simpleSpanProcessor`, `simpleLogRecordProcessor`         | Export each span or log record as soon as it ends. Useful for debugging.           | `implementation`        |
 | `compositeSpanProcessor`, `compositeLogRecordProcessor`   | Pass telemetry to several processors, in order.                                    | `implementation`        |
 | `compositeSpanExporter`, `compositeLogRecordExporter`     | Pass each batch to several exporters.                                              | `implementation`        |
-| `stdoutSpanExporter`, `stdoutLogRecordExporter`           | Print telemetry to the platform log.                                               | `implementation`        |
+| `stdoutSpanExporter`, `stdoutLogRecordExporter`           | Print telemetry to the platform log (Java logging on JVM).                                               | `implementation`        |
 | `otlpHttpSpanExporter`, `otlpHttpLogRecordExporter`       | Send telemetry to an OTLP/HTTP endpoint.                                           | `exporters-otlp`        |
 | `persistingSpanProcessor`, `persistingLogRecordProcessor` | Write telemetry to disk before exporting, so it survives the process being killed. | `exporters-persistence` |
 | `inMemorySpanExporter`, `inMemoryLogRecordExporter`       | Keep telemetry in memory, for tests.                                               | `exporters-in-memory`   |
@@ -194,9 +194,9 @@ fun initWithTunedExport(fetchToken: suspend () -> String): OpenTelemetrySdk = cr
                     headers = { mapOf("Authorization" to "Bearer ${fetchToken()}") } // called per export
                 },
                 maxQueueSize = 4096, // spans buffered before new ones are dropped
-                scheduleDelayMs = 2_000, // how often a batch is exported
+                scheduleDelay = 2.seconds, // how often a batch is exported
                 maxExportBatchSize = 256,
-                exportTimeoutMs = 10_000,
+                exportTimeout = 10.seconds,
             )
         }
     }
@@ -209,7 +209,7 @@ The OTLP exporter's settings are:
   Defaults to `http://localhost:4318`.
 - `headers`: a `suspend` function that returns headers for each export request. Because it's
   called for every request, it's a good place to refresh an authentication token.
-- `timeoutMs`: how long a request can take. Defaults to 10 seconds.
+- `timeoutMs`: how long a request can take. Defaults to 10 seconds (0 means no limit).
 - `httpClient` or `httpClientEngine`: a Ktor client or engine to send requests with, if you need
   to customize TLS, proxies or authentication.
 
@@ -218,9 +218,9 @@ The batch processor's settings are:
 | Parameter            | Meaning                                                                      | Default                       |
 |----------------------|------------------------------------------------------------------------------|-------------------------------|
 | `maxQueueSize`       | How many items are buffered. When the buffer is full, new items are dropped. | 2048                          |
-| `scheduleDelayMs`    | How long to wait between exports.                                            | 5000 for spans, 1000 for logs |
+| `scheduleDelay`      | How long to wait between exports.                                            | 5 seconds (spans), 1 second (logs) |
 | `maxExportBatchSize` | The most items sent in one export.                                           | 512                           |
-| `exportTimeoutMs`    | How long an export can take before it's cancelled.                           | 30000                         |
+| `exportTimeout`      | How long an export can take before it's cancelled.                           | 30 seconds                    |
 
 ### Sampling
 
@@ -345,7 +345,8 @@ fun initWithConfigurators(): OpenTelemetrySdk = createOpenTelemetry {
 ```
 
 The configurator is called when a tracer or logger is created and can be called often, so it
-should return quickly.
+should return quickly. If it throws, the error is reported to the error handler and the tracer or
+logger uses the default config, which is enabled.
 
 ### Error handling and disabling the SDK
 
@@ -370,7 +371,9 @@ fun initWithDiagnostics(isDebugBuild: Boolean, userOptedOut: Boolean): OpenTelem
 }
 ```
 
-- `errorHandler` replaces the default handler, which writes to the platform log. Your handler
+- `errorHandler` replaces the default handler, which writes to the platform log. On the JVM, it
+  uses `java.util.logging` with logger name `io.opentelemetry.kotlin`. The `INFO`, `WARNING`, and
+  `ERROR` severities map to Java logging levels `INFO`, `WARNING`, and `SEVERE`. Your handler
   shouldn't throw.
 - `logLevel` sets the lowest severity that reaches the handler. `INFO` and below pass
   everything, `WARN` passes warnings and errors, and `ERROR` and above pass errors only.
