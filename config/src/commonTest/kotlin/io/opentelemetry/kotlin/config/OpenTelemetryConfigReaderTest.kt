@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.config
 import io.opentelemetry.kotlin.behavior.BehaviorResolver
 import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReader
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
@@ -402,20 +402,20 @@ internal class OpenTelemetryConfigReaderTest {
     }
 
     private fun OpenTelemetryBehavior.logRecordAttributeCountLimit() =
-        loggerProvider?.logLimits?.attributeCountLimit
+        loggerProvider?.logRecordLimits?.attributeCountLimit
 
     private fun OpenTelemetryBehavior.logRecordAttributeValueLengthLimit() =
-        loggerProvider?.logLimits?.attributeValueLengthLimit
+        loggerProvider?.logRecordLimits?.attributeValueLengthLimit
 
     private fun logAttributeCountLimit(limit: Int) = OpenTelemetryBehavior(
         loggerProvider = LoggerProviderBehavior(
-            logLimits = LogLimitsBehavior(attributeCountLimit = limit),
+            logRecordLimits = LogRecordLimitsBehavior(attributeCountLimit = limit),
         ),
     )
 
     private fun logAttributeValueLengthLimit(limit: Int) = OpenTelemetryBehavior(
         loggerProvider = LoggerProviderBehavior(
-            logLimits = LogLimitsBehavior(attributeValueLengthLimit = limit),
+            logRecordLimits = LogRecordLimitsBehavior(attributeValueLengthLimit = limit),
         ),
     )
 

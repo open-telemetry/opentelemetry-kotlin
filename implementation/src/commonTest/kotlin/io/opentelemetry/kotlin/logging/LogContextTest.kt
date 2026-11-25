@@ -14,7 +14,7 @@ import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.TracerImpl
 import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
-import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
+import io.opentelemetry.kotlin.tracing.fakeLogRecordLimitsConfig
 import io.opentelemetry.kotlin.tracing.fakeSpanLimitsConfig
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -42,7 +42,7 @@ internal class LogContextTest {
             processor,
             key,
             FakeResource(),
-            fakeLogLimitsConfig,
+            fakeLogRecordLimitsConfig,
             MutableShutdownState(),
             sdkErrorHandler = NoopSdkErrorHandler,
         )

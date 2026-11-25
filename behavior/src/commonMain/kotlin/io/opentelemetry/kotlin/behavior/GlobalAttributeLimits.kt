@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.behavior
 
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
@@ -19,7 +19,7 @@ internal fun OpenTelemetryBehavior.applyGlobalAttributeLimits(): OpenTelemetryBe
     val logger = loggerProvider ?: LoggerProviderBehavior()
     return copy(
         tracerProvider = tracer.copy(spanLimits = global.mergeInto(tracer.spanLimits)),
-        loggerProvider = logger.copy(logLimits = global.mergeWith(logger.logLimits ?: LogLimitsBehavior())),
+        loggerProvider = logger.copy(logRecordLimits = global.mergeWith(logger.logRecordLimits ?: LogRecordLimitsBehavior())),
     )
 }
 

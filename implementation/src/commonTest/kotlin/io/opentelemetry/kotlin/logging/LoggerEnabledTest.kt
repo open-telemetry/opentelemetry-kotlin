@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeSpan
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
 import io.opentelemetry.kotlin.tracing.FakeTraceFlags
-import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
+import io.opentelemetry.kotlin.tracing.fakeLogRecordLimitsConfig
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -115,7 +115,7 @@ internal class LoggerEnabledTest {
             processor = processor,
             key = key,
             resource = FakeResource(),
-            logLimits = fakeLogLimitsConfig,
+            logRecordLimits = fakeLogRecordLimitsConfig,
             shutdownState = MutableShutdownState(),
             loggerConfig = config,
             sdkErrorHandler = NoopSdkErrorHandler,

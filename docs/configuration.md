@@ -297,12 +297,12 @@ fun initWithLimits(): OpenTelemetrySdk = createOpenTelemetry {
         }
     }
     loggerProvider {
-        logLimits { attributeValueLengthLimit = 4096 }
+        logRecordLimits { attributeValueLengthLimit = 4096 }
     }
 }
 ```
 
-`attributeLimits { }` applies to every signal. Limits set on `spanLimits { }` or `logLimits { }`
+`attributeLimits { }` applies to every signal. Limits set on `spanLimits { }` or `logRecordLimits { }`
 override it for that specific signal.
 
 ### Turning tracers and loggers off

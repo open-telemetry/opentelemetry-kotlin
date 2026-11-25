@@ -34,7 +34,7 @@ internal class LoggerProviderImplTest {
         loggerConfigurator,
     )
     private val attributeLimits = AttributeLimitsBehavior()
-    private val logLimits = AttributeLimitsBehavior(100, 100)
+    private val logRecordLimits = AttributeLimitsBehavior(100, 100)
     private lateinit var impl: LoggerProviderImpl
 
     @BeforeTest
@@ -43,7 +43,7 @@ internal class LoggerProviderImplTest {
             clock,
             loggingConfig,
             attributeLimits,
-            logLimits,
+            logRecordLimits,
         )
     }
 
@@ -65,7 +65,7 @@ internal class LoggerProviderImplTest {
             clock,
             config,
             attributeLimits,
-            logLimits,
+            logRecordLimits,
         )
         provider.getLogger(name = "")
         assertEquals(1, handler.apiMisuses.size)
@@ -161,7 +161,7 @@ internal class LoggerProviderImplTest {
             clock,
             config,
             attributeLimits,
-            logLimits,
+            logRecordLimits,
         )
         impl.getLogger(name = "test")
 
@@ -189,7 +189,7 @@ internal class LoggerProviderImplTest {
             clock,
             config,
             attributeLimits,
-            logLimits,
+            logRecordLimits,
         )
         impl.getLogger(name = "test")
 
@@ -218,7 +218,7 @@ internal class LoggerProviderImplTest {
             clock,
             config,
             attributeLimits,
-            logLimits,
+            logRecordLimits,
         )
         val logger = impl.getLogger(name = "test")
         impl.shutdown()
@@ -299,7 +299,7 @@ internal class LoggerProviderImplTest {
         clock,
         LoggingConfig(processor, FakeResource(), errorHandler, configurator),
         attributeLimits,
-        logLimits,
+        logRecordLimits,
     )
 
     private class ThrowingSdkErrorHandler : SdkErrorHandler {

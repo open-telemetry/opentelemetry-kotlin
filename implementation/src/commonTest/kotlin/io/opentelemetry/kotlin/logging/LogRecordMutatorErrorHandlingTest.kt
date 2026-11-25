@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.logging.model.LogRecordModel
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.FakeSpanContext
-import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
+import io.opentelemetry.kotlin.tracing.fakeLogRecordLimitsConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -94,7 +94,7 @@ internal class LogRecordMutatorErrorHandlingTest {
         severityText = null,
         severityNumber = SeverityNumber.INFO,
         spanContext = FakeSpanContext.VALID,
-        logLimits = fakeLogLimitsConfig,
+        logRecordLimits = fakeLogRecordLimitsConfig,
         sdkErrorHandler = errorHandler,
     )
 

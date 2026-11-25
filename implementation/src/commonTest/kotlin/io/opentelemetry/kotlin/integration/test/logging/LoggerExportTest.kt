@@ -21,7 +21,7 @@ internal class LoggerExportTest {
     fun setUp() = runTest {
         harness = IntegrationTestHarness(testScheduler)
             .apply {
-                config.logLimits = {
+                config.logRecordLimits = {
                     attributeCountLimit = logAttributeLimit
                 }
             }

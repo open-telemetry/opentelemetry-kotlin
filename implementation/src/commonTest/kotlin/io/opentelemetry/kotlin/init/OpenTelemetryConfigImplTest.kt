@@ -6,7 +6,7 @@ import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT
 import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
 import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
@@ -168,7 +168,7 @@ internal class OpenTelemetryConfigImplTest {
         }
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         assertEquals(64, behavior.spanLimitConfig().attributeCountLimit)
-        assertEquals(64, behavior.logLimits().attributeCountLimit)
+        assertEquals(64, behavior.logRecordLimits().attributeCountLimit)
     }
 
     @Test
@@ -185,7 +185,7 @@ internal class OpenTelemetryConfigImplTest {
         }
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         assertEquals(32, behavior.spanLimitConfig().attributeCountLimit)
-        assertEquals(64, behavior.logLimits().attributeCountLimit)
+        assertEquals(64, behavior.logRecordLimits().attributeCountLimit)
     }
 
     @Test
@@ -225,43 +225,43 @@ internal class OpenTelemetryConfigImplTest {
             assertEquals(64, attributeCountLimit)
             assertEquals(256, attributeValueLengthLimit)
         }
-        assertEquals(64, behavior.logLimits().attributeCountLimit)
+        assertEquals(64, behavior.logRecordLimits().attributeCountLimit)
     }
 
     @Test
-    fun testLocalLogLimits() {
+    fun testLocalLogRecordLimits() {
         val cfg = OpenTelemetryConfigImpl().apply {
             attributeLimits {
                 attributeCountLimit = 64
                 attributeValueLengthLimit = 256
             }
             loggerProvider {
-                logLimits {
+                logRecordLimits {
                     attributeCountLimit = 8
                     attributeValueLengthLimit = 16
                 }
             }
         }
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
-        val logLimits = behavior.logLimits()
-        assertEquals(8, logLimits.attributeCountLimit)
-        assertEquals(16, logLimits.attributeValueLengthLimit)
+        val logRecordLimits = behavior.logRecordLimits()
+        assertEquals(8, logRecordLimits.attributeCountLimit)
+        assertEquals(16, logRecordLimits.attributeValueLengthLimit)
     }
 
     @Test
-    fun testLocalLogLimits2() {
+    fun testLocalLogRecordLimits2() {
         val cfg = OpenTelemetryConfigImpl().apply {
             attributeLimits {
                 attributeCountLimit = 64
             }
             loggerProvider {
-                logLimits {
+                logRecordLimits {
                     attributeValueLengthLimit = 256
                 }
             }
         }
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
-        with(behavior.logLimits()) {
+        with(behavior.logRecordLimits()) {
             assertEquals(64, attributeCountLimit)
             assertEquals(256, attributeValueLengthLimit)
         }
@@ -279,14 +279,14 @@ internal class OpenTelemetryConfigImplTest {
                 }
             }
             loggerProvider {
-                logLimits {
+                logRecordLimits {
                     attributeCountLimit = 0
                 }
             }
         }
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         assertEquals(0, behavior.spanLimitConfig().attributeCountLimit)
-        assertEquals(0, behavior.logLimits().attributeCountLimit)
+        assertEquals(0, behavior.logRecordLimits().attributeCountLimit)
     }
 
     @Test
@@ -302,7 +302,7 @@ internal class OpenTelemetryConfigImplTest {
             assertEquals(DEFAULT_ATTRIBUTE_LIMIT, attributeCountLimit)
             assertEquals(DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT, attributeValueLengthLimit)
         }
-        with(behavior.logLimits()) {
+        with(behavior.logRecordLimits()) {
             assertNull(attributeCountLimit)
             assertNull(attributeValueLengthLimit)
         }
@@ -385,7 +385,7 @@ internal class OpenTelemetryConfigImplTest {
             assertEquals(DEFAULT_ATTRIBUTE_LIMIT, attributeCountLimit)
             assertEquals(DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT, attributeValueLengthLimit)
         }
-        with(behavior.logLimits()) {
+        with(behavior.logRecordLimits()) {
             assertNull(attributeCountLimit)
             assertNull(attributeValueLengthLimit)
         }
@@ -396,5 +396,5 @@ internal class OpenTelemetryConfigImplTest {
 
     private fun OpenTelemetryBehavior.spanLimitConfig() = SpanLimitConfig(tracerProvider?.spanLimits ?: SpanLimitsBehavior())
 
-    private fun OpenTelemetryBehavior.logLimits() = loggerProvider?.logLimits ?: LogLimitsBehavior()
+    private fun OpenTelemetryBehavior.logRecordLimits() = loggerProvider?.logRecordLimits ?: LogRecordLimitsBehavior()
 }

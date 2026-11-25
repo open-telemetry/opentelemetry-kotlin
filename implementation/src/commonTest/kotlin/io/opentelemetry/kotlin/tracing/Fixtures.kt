@@ -12,7 +12,7 @@ internal val fakeSpanLimitsConfig = SpanLimitConfig(
     attributeCountPerLinkLimit = 100
 )
 
-internal val fakeLogLimitsConfig = AttributeLimitsBehavior(
+internal val fakeLogRecordLimitsConfig = AttributeLimitsBehavior(
     attributeCountLimit = 100,
     attributeValueLengthLimit = 100,
 )

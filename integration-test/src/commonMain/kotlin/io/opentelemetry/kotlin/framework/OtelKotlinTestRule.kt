@@ -68,7 +68,7 @@ abstract class OtelKotlinTestRule(context: TestCoroutineScheduler) {
                 ),
             )
         }
-        logLimits(config.logLimits)
+        logRecordLimits(config.logRecordLimits)
         config.loggerProvider(this)
     }
 

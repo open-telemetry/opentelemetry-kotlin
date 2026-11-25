@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.config.yaml.logging
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.limitOrUnset
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.config.schema.model.LogRecordLimits
 
 /**
@@ -10,7 +10,7 @@ import io.opentelemetry.kotlin.config.schema.model.LogRecordLimits
  * supplies. Anything the file omits, or sets to a value the spec disallows, is left unset.
  */
 @OptIn(ExperimentalApi::class)
-fun LogRecordLimits.toBehavior(): LogLimitsBehavior = LogLimitsBehavior(
+fun LogRecordLimits.toBehavior(): LogRecordLimitsBehavior = LogRecordLimitsBehavior(
     attributeCountLimit = limitOrUnset(attributeCountLimit),
     attributeValueLengthLimit = limitOrUnset(attributeValueLengthLimit),
 )

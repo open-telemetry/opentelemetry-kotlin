@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.clock.ClockAdapter
 import io.opentelemetry.kotlin.clock.FakeClock
@@ -73,7 +73,7 @@ internal class CompatClockTest {
         val logProcessor = FakeLogRecordProcessor()
         CompatLoggerProviderConfig(clock, NoopSdkErrorHandler)
             .apply { export { logProcessor } }
-            .build(clock, logLimits = LogLimitsBehavior())
+            .build(clock, logRecordLimits = LogRecordLimitsBehavior())
             .getLogger("test")
             .emit(body = "log")
         assertEquals(100L, logProcessor.logs.single().observedTimestamp)

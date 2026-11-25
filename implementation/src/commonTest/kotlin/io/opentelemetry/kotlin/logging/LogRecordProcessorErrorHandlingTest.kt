@@ -7,7 +7,7 @@ import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
-import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
+import io.opentelemetry.kotlin.tracing.fakeLogRecordLimitsConfig
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -30,7 +30,7 @@ internal class LogRecordProcessorErrorHandlingTest {
             processor = processor,
             key = key,
             resource = FakeResource(),
-            logLimits = fakeLogLimitsConfig,
+            logRecordLimits = fakeLogRecordLimitsConfig,
             shutdownState = MutableShutdownState(),
             sdkErrorHandler = errorHandler,
         )
