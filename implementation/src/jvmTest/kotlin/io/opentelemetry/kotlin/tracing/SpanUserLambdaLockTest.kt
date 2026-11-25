@@ -62,7 +62,7 @@ internal class SpanUserLambdaLockTest {
 
     private fun tracer(processor: FakeSpanProcessor): TracerImpl = TracerImpl(
         clock = FakeClock(),
-        processor = processor,
+        processors = listOf(processor),
         scope = InstrumentationScopeInfoImpl("key", null, null, emptyMap()),
         resource = FakeResource(),
         spanLimitConfig = fakeSpanLimitsConfig,

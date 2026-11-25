@@ -52,7 +52,7 @@ internal class TracerEnabledTest {
         shutdownState: MutableShutdownState = MutableShutdownState(),
     ) = TracerImpl(
         clock = clock,
-        processor = processor,
+        processors = listOfNotNull(processor),
         scope = key,
         resource = FakeResource(),
         spanLimitConfig = fakeSpanLimitsConfig,

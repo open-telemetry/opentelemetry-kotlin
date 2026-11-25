@@ -45,7 +45,7 @@ internal class TracerInvalidSpanNameTest {
 
     private fun createTracer() = TracerImpl(
         clock = clock,
-        processor = processor,
+        processors = listOf(processor),
         scope = key,
         resource = FakeResource(),
         spanLimitConfig = fakeSpanLimitsConfig,

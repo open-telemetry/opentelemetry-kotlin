@@ -18,7 +18,7 @@ internal class SpanModelTest {
     fun `testSpanModelEnd`() {
         val span = SpanModel(
             FakeClock(),
-            null,
+            emptyList(),
             "span",
             SpanKind.INTERNAL,
             0L,

@@ -22,7 +22,7 @@ internal class SpanSimplePropertiesTest {
         clock = FakeClock()
         tracer = TracerImpl(
             clock = clock,
-            processor = FakeSpanProcessor(),
+            processors = listOf(FakeSpanProcessor()),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

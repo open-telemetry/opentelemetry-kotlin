@@ -97,7 +97,7 @@ internal class TracerRandomTraceIdFlagTest {
     ): TracerImpl {
         return TracerImpl(
             clock = FakeClock(),
-            processor = FakeSpanProcessor(),
+            processors = listOf(FakeSpanProcessor()),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

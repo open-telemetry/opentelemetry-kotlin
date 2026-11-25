@@ -33,7 +33,7 @@ import kotlin.test.assertTrue
 internal class TracerProviderImplTest {
 
     private val tracingConfig = TracingConfig(
-        null,
+        emptyList(),
         ResourceImpl(AttributesModel(), null),
         NoopSdkErrorHandler,
     )
@@ -60,7 +60,7 @@ internal class TracerProviderImplTest {
     fun testEmptyTracerNameReportsApiMisuse() {
         val handler = FakeSdkErrorHandler()
         val config = TracingConfig(
-            null,
+            emptyList(),
             ResourceImpl(AttributesModel(), null),
             handler,
         )
@@ -172,7 +172,7 @@ internal class TracerProviderImplTest {
             }
         )
         val config = TracingConfig(
-            processor,
+            listOf(processor),
             FakeResource(),
             NoopSdkErrorHandler,
         )
@@ -200,7 +200,7 @@ internal class TracerProviderImplTest {
             }
         )
         val config = TracingConfig(
-            processor,
+            listOf(processor),
             FakeResource(),
             NoopSdkErrorHandler,
         )
@@ -408,7 +408,7 @@ internal class TracerProviderImplTest {
     ) = TracerProviderImpl(
         clock = FakeClock(),
         tracingConfig = TracingConfig(
-            processor,
+            listOfNotNull(processor),
             FakeResource(),
             errorHandler,
             samplerFactory = samplerFactory,

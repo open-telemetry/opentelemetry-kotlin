@@ -146,7 +146,7 @@ internal class SpanMutatorErrorHandlingTest {
         errorHandler: SdkErrorHandler,
     ) = SpanModel(
         clock = clock,
-        processor = processor,
+        processors = listOfNotNull(processor),
         name = "span",
         spanKind = SpanKind.INTERNAL,
         startTimestamp = 0L,

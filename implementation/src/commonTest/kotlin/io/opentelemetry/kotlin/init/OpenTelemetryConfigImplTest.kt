@@ -54,7 +54,7 @@ internal class OpenTelemetryConfigImplTest {
         val cfg = OpenTelemetryConfigImpl()
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
-        assertNull(resolver.generateTracingConfig().processor)
+        assertEquals(resolver.generateTracingConfig().processors.size, 0)
         assertNull(resolver.generateLoggingConfig().processor)
         assertFalse(cfg.contextConfig.explicitlyConfigured)
         assertSame(NoopOpenTelemetry.propagator, cfg.createPropagator())
@@ -122,7 +122,7 @@ internal class OpenTelemetryConfigImplTest {
         }
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         val resolver = SdkConfigFactory(cfg, behavior)
-        assertNotNull(resolver.generateTracingConfig().processor)
+        assertNotNull(resolver.generateTracingConfig().processors)
         assertNotNull(resolver.generateLoggingConfig().processor)
     }
 

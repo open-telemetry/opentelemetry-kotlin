@@ -30,7 +30,7 @@ internal class TracerProviderConfigImpl(
     private val resourceConfig: ResourceConfigDslImpl = ResourceConfigDslImpl()
 ) : TracerProviderConfigDsl, ResourceConfigDsl by resourceConfig {
 
-    private var processor: SpanProcessor? = null
+    private var processors: List<SpanProcessor> = emptyList()
     private var samplerAction: (SamplerConfigDsl.() -> Sampler)? = null
     private val defaultTracerConfig = TracerConfigImpl(true)
     private var tracerConfigurator: TracerConfigurator = TracerConfigurator {
@@ -43,17 +43,7 @@ internal class TracerProviderConfigImpl(
     }
 
     override fun export(action: ExportConfigDsl.() -> SpanProcessor) {
-        if (processor != null) {
-            sdkErrorHandler.reportError(
-                SdkError.ApiMisuse(
-                    api = "TracerProviderConfigDsl.export",
-                    message = "export() should only be called once.",
-                    severity = SdkErrorSeverity.WARNING,
-                )
-            )
-            return
-        }
-        processor = ExportConfigDslImpl(clock, sdkErrorHandler).action()
+        processors += ExportConfigDslImpl(clock, sdkErrorHandler).action()
     }
 
     override fun sampler(action: SamplerConfigDsl.() -> Sampler) {
@@ -66,11 +56,11 @@ internal class TracerProviderConfigImpl(
 
     fun generateTracingConfig(
         base: Resource,
-        processorBehavior: SpanProcessorBehavior? = null,
+        processorBehaviors: List<SpanProcessorBehavior> = emptyList(),
     ): TracingConfig {
         val action = samplerAction ?: { parentBased(root = alwaysOn()) }
         return TracingConfig(
-            processor = processor ?: processorFromBehavior(processorBehavior),
+            processors = processors.ifEmpty { processorBehaviors.mapNotNull{ processorFromBehavior(it) } },
             resource = base.merge(resourceConfig.toBehavior().toResource()),
             sdkErrorHandler = sdkErrorHandler,
             samplerFactory = { SamplerConfigImpl(sdkErrorHandler).action() },

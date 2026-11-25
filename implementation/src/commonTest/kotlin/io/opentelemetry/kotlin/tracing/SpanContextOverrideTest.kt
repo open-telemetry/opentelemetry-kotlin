@@ -7,6 +7,7 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
+import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,7 +27,7 @@ internal class SpanContextOverrideTest {
         val idGenerator = IdGeneratorImpl()
         tracer = TracerImpl(
             clock = FakeClock(),
-            processor = processor,
+            processors = listOf(processor),
             scope = scope,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

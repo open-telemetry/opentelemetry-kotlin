@@ -28,7 +28,7 @@ internal class SpanProcessorErrorHandlingTest {
         errorHandler = FakeSdkErrorHandler()
         tracer = TracerImpl(
             clock = FakeClock(),
-            processor = processor,
+            processors = listOf(processor),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

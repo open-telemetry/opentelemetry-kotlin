@@ -32,7 +32,7 @@ internal class SdkConfigFactory(
 
     private val sampler: SamplerBehavior? = behavior.tracerProvider?.sampler
 
-    private val spanProcessor: SpanProcessorBehavior? = behavior.tracerProvider?.processors?.getOrNull(0)
+    private val spanProcessors: List<SpanProcessorBehavior> = behavior.tracerProvider?.processors ?: emptyList()
 
     private val logProcessor: LogRecordProcessorBehavior? = behavior.loggerProvider?.processor
 
@@ -42,7 +42,7 @@ internal class SdkConfigFactory(
 
     fun generateTracingConfig(): TracingConfig {
         cfg.tracingConfig.applyResolvedSampler(sampler)
-        return cfg.tracingConfig.generateTracingConfig(baseResource, spanProcessor)
+        return cfg.tracingConfig.generateTracingConfig(baseResource, spanProcessors)
     }
 
     fun generateLoggingConfig(): LoggingConfig =
