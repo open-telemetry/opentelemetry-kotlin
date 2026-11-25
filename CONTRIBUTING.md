@@ -105,6 +105,7 @@ The following guidelines should be followed during development:
 8. Default values for parameters is permissible. Default values for lambda parameters should be non-complex
 9. Annotate new APIs with `@ExperimentalApi` until they are considered stable
 10. Platform-specific code that isn't specific to a module (e.g. getting the current time) should go in `platform-implementations` to promote reuse
+11. Don't add global state to the public API (e.g. a global `OpenTelemetry` instance or propagator), even where the OTel specification allows it. Callers should pass an instance they created themselves. See [spec notes](SPEC_NOTES.md#global-state-is-discouraged)
 
 ## Adding a new target
 
