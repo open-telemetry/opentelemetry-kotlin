@@ -590,4 +590,34 @@ internal class TelemetryExporterTest {
             assertEquals(OperationResultCode.Success, throwingExporter.export(listOf("data")))
         }
     }
+
+    @Test
+    fun testWorkersSurviveUnexpectedFailures() = runTest {
+        // Fails the jitter calculation once per worker, which would stop every worker if failures escaped the loop.
+        val random = object : Random() {
+            var failuresLeft = 5
+            override fun nextBits(bitCount: Int): Int = 0
+            override fun nextLong(from: Long, until: Long): Long {
+                if (failuresLeft > 0) {
+                    failuresLeft--
+                    throw IllegalStateException("boom")
+                }
+                return from
+            }
+        }
+        var attempts = 0
+        val exporter = initTelemetryExporter(random = random) {
+            attempts++
+            when (attempts) {
+                1 -> OtlpResponse.Unknown
+                else -> OtlpResponse.Success
+            }
+        }
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            advanceTimeBy(5_000)
+            assertEquals(0, random.failuresLeft)
+            assertEquals(2, attempts)
+        }
+    }
 }

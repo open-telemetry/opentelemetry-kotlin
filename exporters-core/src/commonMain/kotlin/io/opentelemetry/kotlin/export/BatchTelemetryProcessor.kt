@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.export
 
+import io.opentelemetry.kotlin.error.sdkGuardOrDefaultSuspend
 import io.opentelemetry.kotlin.ioDispatcher
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
@@ -71,13 +72,16 @@ internal class BatchTelemetryProcessor<T>(
         var exitedNormally = false
         try {
             while (true) {
-                val closed = select {
-                    flushRequests.onReceive { request ->
-                        request.complete(flush(emptyList()))
-                        false
-                    }
-                    queue.onReceiveCatching { first ->
-                        first.isClosed || fillAndExportBatch(first.getOrThrow())
+                // Guard each iteration so that an unexpected failure cannot permanently stop the worker.
+                val closed = config.sdkErrorHandler.sdkGuardOrDefaultSuspend(false, "Batch processor worker failed") {
+                    select {
+                        flushRequests.onReceive { request ->
+                            request.complete(flush(emptyList()))
+                            false
+                        }
+                        queue.onReceiveCatching { first ->
+                            first.isClosed || fillAndExportBatch(first.getOrThrow())
+                        }
                     }
                 }
                 if (closed) {
