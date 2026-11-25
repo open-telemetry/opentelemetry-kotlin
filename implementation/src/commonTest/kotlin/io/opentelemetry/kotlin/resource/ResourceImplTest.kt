@@ -4,12 +4,31 @@ import io.opentelemetry.kotlin.attributes.AttributeValue
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.toAttributeValues
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.setProcessSdkErrorHandler
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 
 internal class ResourceImplTest {
+
+    private val errorHandler = FakeSdkErrorHandler()
+
+    @BeforeTest
+    fun setUp() {
+        setProcessSdkErrorHandler(null)
+        check(setProcessSdkErrorHandler(errorHandler))
+    }
+
+    @AfterTest
+    fun tearDown() {
+        setProcessSdkErrorHandler(null)
+    }
 
     @Test
     fun testResourceImpl() {
@@ -164,6 +183,48 @@ internal class ResourceImplTest {
         assertEquals(a.hashCode(), b.hashCode())
         assertNotEquals(a, differentAttrs)
         assertNotEquals(a, differentSchema)
+    }
+
+    @Test
+    fun testAsNewResourceDropsEmptyKey() {
+        val resource = ResourceImpl(AttributesModel(attrs = typed(mapOf("key" to "value"))), null)
+        val another = resource.asNewResource {
+            attributes[""] = "empty"
+        }
+        assertEquals(mapOf("key" to "value"), another.attributes)
+        assertFalse(another.attributes.containsKey(""))
+
+        val error = errorHandler.apiMisuses.single()
+        assertEquals("Resource.asNewResource", error.api)
+        assertEquals(SdkErrorSeverity.WARNING, error.severity)
+    }
+
+    @Test
+    fun testMergeDropsEmptyKey() {
+        val base = ResourceImpl(AttributesModel(attrs = typed(mapOf("a" to "1"))), null)
+        val other = FakeResource(mapOf("" to "empty", "b" to "2"))
+        val merged = base.merge(other)
+        assertEquals(mapOf("a" to "1", "b" to "2"), merged.attributes)
+
+        val error = errorHandler.apiMisuses.single()
+        assertEquals("Resource.merge", error.api)
+        assertEquals(SdkErrorSeverity.WARNING, error.severity)
+    }
+
+    @Test
+    fun testValidKeysAreNotReported() {
+        val base = ResourceImpl(AttributesModel(attrs = typed(mapOf("a" to "1"))), null)
+        base.asNewResource { attributes["b"] = "2" }
+            .merge(ResourceImpl(AttributesModel(attrs = typed(mapOf("c" to "3"))), null))
+        assertEquals(emptyList(), errorHandler.errors)
+    }
+
+    private class FakeResource(
+        override val attributes: Map<String, Any>,
+        override val schemaUrl: String? = null,
+    ) : Resource {
+        override fun asNewResource(action: MutableResource.() -> Unit): Resource = this
+        override fun merge(other: Resource): Resource = this
     }
 
     private fun typed(attrs: Map<String, Any>): MutableMap<String, AttributeValue> =

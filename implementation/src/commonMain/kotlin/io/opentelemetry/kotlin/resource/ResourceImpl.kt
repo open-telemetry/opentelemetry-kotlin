@@ -1,9 +1,6 @@
 package io.opentelemetry.kotlin.resource
 
 import io.opentelemetry.kotlin.attributes.AttributeContainer
-import io.opentelemetry.kotlin.attributes.AttributesModel
-import io.opentelemetry.kotlin.attributes.NO_ATTRIBUTE_LIMIT
-import io.opentelemetry.kotlin.attributes.toAttributeValues
 
 internal class ResourceImpl(
     container: AttributeContainer,
@@ -15,22 +12,19 @@ internal class ResourceImpl(
     override fun asNewResource(action: MutableResource.() -> Unit): Resource {
         val impl = MutableResourceImpl(attributes.toMutableMap(), schemaUrl)
         impl.apply(action)
-        val container = AttributesModel(
-            attributeLimit = NO_ATTRIBUTE_LIMIT,
-            attrs = impl.attributes.toAttributeValues().toMutableMap(),
-        )
+        val container = resourceAttributesOf(impl.attributes, "Resource.asNewResource")
         return ResourceImpl(container, impl.schemaUrl)
     }
 
     override fun merge(other: Resource): Resource {
-        val mergedAttrs = (attributes + other.attributes).toAttributeValues().toMutableMap()
+        val mergedAttrs = resourceAttributesOf(attributes + other.attributes, "Resource.merge")
         val mergedSchema = when {
             schemaUrl == null -> other.schemaUrl
             other.schemaUrl == null -> schemaUrl
             schemaUrl == other.schemaUrl -> schemaUrl
             else -> other.schemaUrl
         }
-        return ResourceImpl(AttributesModel(attributeLimit = NO_ATTRIBUTE_LIMIT, attrs = mergedAttrs), mergedSchema)
+        return ResourceImpl(mergedAttrs, mergedSchema)
     }
 
     override fun equals(other: Any?): Boolean {
