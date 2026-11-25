@@ -1,13 +1,13 @@
 package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
+import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
-import io.opentelemetry.kotlin.export.ExportTracker
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.and
@@ -17,9 +17,14 @@ import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -40,12 +45,45 @@ internal class SimpleLogRecordProcessor(
 ) : LogRecordProcessor {
 
     private val monotonicMark = TimeSource.Monotonic.markNow()
+    private val now: () -> Long = nowMs ?: { monotonicMark.elapsedNow().inWholeMilliseconds }
 
     // Serializes exporter.export calls; the spec only forbids concurrent Export calls, so
     // forceFlush/shutdown deliberately do not take this mutex.
     private val exportMutex = Mutex()
     private val shutdownState = MutableShutdownState()
-    private val exportTracker = ExportTracker(scope.coroutineContext)
+
+    // Tracks admitted export jobs so drain can wait for them and shutdown can reject new
+    // admissions. Exports are children of a dedicated SupervisorJob that is deliberately
+    // not parented to the scope's Job (see init); admission and closure are serialized by
+    // trackerLock so an admitted export can never escape drain's children snapshot.
+    internal val trackerJob = SupervisorJob()
+    private val trackerScope = CoroutineScope(scope.coroutineContext + trackerJob)
+    private val trackerLock = ReentrantReadWriteLock()
+    private var trackerClosed = false
+
+    init {
+        // Propagate parent completion/cancellation without making trackerJob a child of the
+        // parent's Job: a child Job would be reported as an uncompleted child coroutine
+        // by runTest-style scopes that never complete until the test ends.
+        scope.coroutineContext[Job]?.invokeOnCompletion { trackerJob.cancel() }
+    }
+
+    private fun launchExport(block: suspend CoroutineScope.() -> Unit): Boolean = trackerLock.write {
+        if (trackerClosed) {
+            false
+        } else {
+            trackerScope.launch(block = block)
+            true
+        }
+    }
+
+    private suspend fun drainExports() {
+        trackerJob.children.toList().joinAll()
+    }
+
+    private fun closeExports() {
+        trackerLock.write { trackerClosed = true }
+    }
 
     override fun onEmit(
         log: ReadWriteLogRecord,
@@ -54,7 +92,7 @@ internal class SimpleLogRecordProcessor(
         // Snapshot the log record data before launching the async export, because the
         // live record may be mutated after onEmit returns.
         val data = log.toLogRecordData()
-        exportTracker.launch {
+        launchExport {
             exportMutex.withLock { exportLogRecord(data) }
         }
     }
@@ -100,7 +138,7 @@ internal class SimpleLogRecordProcessor(
             return OperationResultCode.Success
         }
         return runWithTimeout(BatchTelemetryDefaults.FORCE_FLUSH_TIMEOUT_MS) {
-            exportTracker.drain()
+            drainExports()
             sdkErrorHandler.guardExporterCode("Exporter forceFlush failed") {
                 exporter.forceFlush()
             }
@@ -110,49 +148,49 @@ internal class SimpleLogRecordProcessor(
     override suspend fun shutdown(): OperationResultCode {
         // Stop admissions before the shutdown transition so an export racing shutdown is
         // either already tracked as a child job or rejected outright.
-        exportTracker.close()
+        closeExports()
         return shutdownState.shutdown(BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS) {
             shutdownWithinDeadline()
         }
     }
 
     /**
-     * Runs drain, exporter forceFlush and exporter shutdown against a single overall deadline.
-     * Each phase is bounded by the time remaining in [BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS],
-     * so the phases cannot each consume a fresh timeout. Cleanup runs in [NonCancellable] so
-     * caller cancellation cannot skip exporter shutdown, and [ensureActive] re-propagates that
-     * cancellation once cleanup has finished or the deadline has expired.
+     * Runs drain, exporter forceFlush and exporter shutdown against a single overall deadline:
+     * each phase gets only the time remaining in [BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS].
+     * Phases run in [NonCancellable] so caller cancellation cannot skip exporter cleanup;
+     * [ensureActive] re-propagates that cancellation once cleanup finishes or times out.
      */
-    private fun now(): Long =
-        nowMs?.invoke() ?: monotonicMark.elapsedNow().inWholeMilliseconds
-
     private suspend fun shutdownWithinDeadline(): OperationResultCode {
         val start = now()
         fun remainingMs(): Long =
-            (BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS - (now() - start))
-                .coerceAtLeast(0)
+            (BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS - (now() - start)).coerceAtLeast(0)
+
+        suspend fun exporterPhase(
+            errorMessage: String,
+            floorMs: Long = 0,
+            block: suspend () -> OperationResultCode,
+        ): OperationResultCode = withContext(NonCancellable) {
+            sdkErrorHandler.guardExporterCode(errorMessage) {
+                runWithTimeout(remainingMs().coerceAtLeast(floorMs)) { block() }
+            }
+        }
 
         var result = withContext(NonCancellable) {
             runWithTimeout(remainingMs()) {
-                exportTracker.drain()
+                drainExports()
                 OperationResultCode.Success
             }
         }
-        exportTracker.cancelRemaining()
-        result = result and withContext(NonCancellable) {
-            sdkErrorHandler.guardExporterCode("Exporter forceFlush failed") {
-                runWithTimeout(remainingMs()) { exporter.forceFlush() }
-            }
-        }
-        result = result and withContext(NonCancellable) {
-            sdkErrorHandler.guardExporterCode("Exporter shutdown failed") {
-                // Single 1ms floor so the shutdown call is still attempted when the
-                // deadline is exactly exhausted; drain and forceFlush get no such floor.
-                runWithTimeout(remainingMs().coerceAtLeast(1)) { exporter.shutdown() }
-            }
+        trackerJob.cancelChildren()
+        result = result and exporterPhase("Exporter forceFlush failed") { exporter.forceFlush() }
+        // Single 1ms floor so shutdown is still attempted when the deadline is exactly
+        // exhausted; drain and forceFlush get no such floor.
+        result = result and exporterPhase("Exporter shutdown failed", floorMs = 1) {
+            exporter.shutdown()
         }
         // All admitted exports have been drained or cancelled; release the tracker job.
-        exportTracker.terminate()
+        closeExports()
+        trackerJob.cancel()
         coroutineContext.ensureActive()
         return result
     }
