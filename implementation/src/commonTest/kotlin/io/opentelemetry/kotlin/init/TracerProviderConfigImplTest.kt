@@ -11,7 +11,6 @@ import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.rootContext
-import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
@@ -35,7 +34,6 @@ import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertSame
 
 internal class TracerProviderConfigImplTest {
@@ -183,13 +181,15 @@ internal class TracerProviderConfigImplTest {
             export { dslProcessor }
         }.generateTracingConfig(
             base,
-            listOf(SpanProcessorBehavior(
-                simple = SimpleSpanProcessorBehavior(
-                    exporter = SpanExporterBehavior(
-                        console = ConsoleExporterBehavior(),
-                    ),
+            listOf(
+                SpanProcessorBehavior(
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(
+                            console = ConsoleExporterBehavior(),
+                        ),
+                    )
                 )
-            )),
+            ),
         )
         assertEquals(cfg.processors.size, 1)
         assertSame(dslProcessor, cfg.processors[0])

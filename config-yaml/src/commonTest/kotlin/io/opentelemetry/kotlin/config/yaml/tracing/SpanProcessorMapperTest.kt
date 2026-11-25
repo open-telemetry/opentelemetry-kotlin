@@ -57,11 +57,13 @@ internal class SpanProcessorMapperTest {
             SpanProcessor(simple = SimpleSpanProcessor(exporter = consoleExporter())),
         )
         assertEquals(
-            listOf(SpanProcessorBehavior(
-                simple = SimpleSpanProcessorBehavior(
-                    exporter = SpanExporterBehavior(console = ConsoleExporterBehavior())
-                ),
-            )),
+            listOf(
+                SpanProcessorBehavior(
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(console = ConsoleExporterBehavior())
+                    ),
+                )
+            ),
             processors.toBehavior(),
         )
     }
@@ -78,13 +80,14 @@ internal class SpanProcessorMapperTest {
         )
         assertEquals(
             listOf(
-            SpanProcessorBehavior(
-                simple = SimpleSpanProcessorBehavior(
-                    exporter = SpanExporterBehavior(
-                        http = http
-                    )
-                ),
-            )),
+                SpanProcessorBehavior(
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(
+                            http = http
+                        )
+                    ),
+                )
+            ),
             processors.toBehavior(),
         )
     }
@@ -96,11 +99,12 @@ internal class SpanProcessorMapperTest {
         )
         assertEquals(
             listOf(
-            SpanProcessorBehavior(
-                batch = BatchSpanProcessorBehavior(
-                    exporter = SpanExporterBehavior(console = ConsoleExporterBehavior()),
-                ),
-            )),
+                SpanProcessorBehavior(
+                    batch = BatchSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(console = ConsoleExporterBehavior()),
+                    ),
+                )
+            ),
             processors.toBehavior(),
         )
     }
@@ -110,17 +114,18 @@ internal class SpanProcessorMapperTest {
         val processors = listOf(SpanProcessor(batch = BatchSpanProcessor(exporter = httpExporter())))
         assertEquals(
             listOf(
-            SpanProcessorBehavior(
-                batch = BatchSpanProcessorBehavior(
-                    exporter = SpanExporterBehavior(
-                        http = OtlpHttpSpanExporterBehavior(
-                            endpoint = "http://localhost:4317",
-                            timeout = 10_000,
-                            headers = mapOf("key" to "value")
-                        )
+                SpanProcessorBehavior(
+                    batch = BatchSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(
+                            http = OtlpHttpSpanExporterBehavior(
+                                endpoint = "http://localhost:4317",
+                                timeout = 10_000,
+                                headers = mapOf("key" to "value")
+                            )
+                        ),
                     ),
-                ),
-            )),
+                )
+            ),
             processors.toBehavior(),
         )
     }
