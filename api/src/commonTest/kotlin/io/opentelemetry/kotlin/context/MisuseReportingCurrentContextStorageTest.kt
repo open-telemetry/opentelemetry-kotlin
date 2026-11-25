@@ -72,19 +72,21 @@ internal class MisuseReportingCurrentContextStorageTest {
     }
 
     @Test
-    fun testOutOfOrderDetachReportsButStillDetaches() {
+    fun testOutOfOrderDetachReportsStillDetachesAndReturnsFalse() {
         val scope1 = storage.attach(ContextValue(NoStorage))
         val ctx2 = ContextValue(NoStorage)
         val scope2 = storage.attach(ctx2)
 
-        assertTrue(scope1.detach())
+        assertFalse(scope1.detach())
         assertEquals(1, delegate.detachCount)
+        assertSame(root, storage.current())
         val error = assertIs<SdkError.ApiMisuse>(errors.single())
         assertEquals("Scope.detach", error.api)
         assertEquals("Scope.detach() called out of order — context has already changed", error.message)
 
-        assertTrue(scope2.detach())
+        assertFalse(scope2.detach())
         assertEquals(2, delegate.detachCount)
+        assertEquals(2, errors.size)
     }
 
     @Test
@@ -184,7 +186,7 @@ internal class MisuseReportingCurrentContextStorageTest {
         val high = ContextValue(NoStorage)
         val highScope = storage.attach(high)
 
-        assertTrue(lowScope.detach())
+        assertFalse(lowScope.detach())
         assertTrue(highScope.detach())
         assertSame(root, storage.current())
         val error = assertIs<SdkError.ApiMisuse>(errors.single())

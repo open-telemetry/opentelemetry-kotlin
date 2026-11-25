@@ -11,6 +11,9 @@ private const val OUT_OF_ORDER_MSG = "Scope.detach() called out of order — con
 
 /**
  * Wraps the [Scope] returned by a storage and reports misuse of it.
+ *
+ * An out-of-order detach still calls the delegate, so the storage handles it as before, but
+ * [detach] returns false.
  */
 @OptIn(ExperimentalApi::class)
 internal class MisuseReportingScope(
@@ -27,15 +30,17 @@ internal class MisuseReportingScope(
             reportMisuse(ALREADY_DETACHED_MSG)
             return false
         }
-        if (current() !== attached) {
+        val inOrder = current() === attached
+        if (!inOrder) {
             reportMisuse(OUT_OF_ORDER_MSG)
         }
-        return try {
+        val detachedByDelegate = try {
             delegate.detach()
         } catch (e: Throwable) {
             report(SdkError.UserCodeError(e, "Scope.detach threw", SdkErrorSeverity.WARNING))
             false
         }
+        return inOrder && detachedByDelegate
     }
 
     private fun reportMisuse(message: String) {
