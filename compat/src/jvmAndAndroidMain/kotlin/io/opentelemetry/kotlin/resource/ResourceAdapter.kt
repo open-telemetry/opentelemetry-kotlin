@@ -50,6 +50,9 @@ internal class ResourceAdapter(
 }
 
 private fun reportSchemaUrlConflict(base: String?, other: String?) {
+    if (base.isNullOrEmpty() || other.isNullOrEmpty()) {
+        return
+    }
     reportError(
         SdkError.ApiMisuse(
             "Resource.merge",

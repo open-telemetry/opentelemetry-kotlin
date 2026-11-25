@@ -79,6 +79,15 @@ internal class ResourceAdapterTest {
     }
 
     @Test
+    fun testMergeEmptySchemaUrlReportsNothing() {
+        val empty = ResourceAdapter(OtelJavaResource.builder().setSchemaUrl("").build())
+        val schema = ResourceAdapter(OtelJavaResource.builder().setSchemaUrl("https://base.com").build())
+        empty.merge(schema)
+        schema.merge(empty)
+        assertEquals(emptyList<SdkError>(), errors)
+    }
+
+    @Test
     fun testAsNewResource() {
         val impl = OtelJavaResource.builder()
             .put("str", "hello")

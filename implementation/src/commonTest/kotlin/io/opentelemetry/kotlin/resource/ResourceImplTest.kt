@@ -171,6 +171,15 @@ internal class ResourceImplTest {
     }
 
     @Test
+    fun testMergeEmptySchemaUrlReportsNothing() {
+        val empty = ResourceImpl(AttributesModel(), "")
+        val schema = ResourceImpl(AttributesModel(), "https://example.com/schema")
+        empty.merge(schema)
+        schema.merge(empty)
+        assertEquals(emptyList(), errors)
+    }
+
+    @Test
     fun testMergeNoAttributeLimit() {
         val baseAttrs = (0 until DEFAULT_ATTRIBUTE_LIMIT).associate { "base$it" to "v$it" }
         val otherAttrs = mapOf("extra" to "value")
