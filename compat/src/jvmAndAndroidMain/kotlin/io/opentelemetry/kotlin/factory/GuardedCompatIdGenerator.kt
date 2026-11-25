@@ -1,32 +1,51 @@
 package io.opentelemetry.kotlin.factory
 
+import io.opentelemetry.kotlin.aliases.OtelJavaIdGenerator
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.error.guardOrDefault
+import io.opentelemetry.kotlin.error.reportUserCodeError
 
 /**
  * Wraps a user-supplied [IdGenerator] so one that throws cannot destabilize the SDK: the failure
- * is reported to [sdkErrorHandler] and the fallback generator's ID is used instead.
+ * is reported to [sdkErrorHandler] and the fallback generator's ID is used instead. The fallback is
+ * only consulted after [delegate] throws.
+ *
+ * It is also the [OtelJavaIdGenerator] handed to the Java SDK. A [delegate] that implements
+ * [OtelJavaIdGenerator] itself is read through that interface, exactly as it would be unwrapped;
+ * any other is adapted from its byte-array methods.
  */
 internal class GuardedCompatIdGenerator(
     private val delegate: IdGenerator,
     private val sdkErrorHandler: SdkErrorHandler,
     private val fallback: IdGenerator = CompatIdGenerator(),
-) : IdGenerator {
+) : IdGenerator, OtelJavaIdGenerator {
+
+    private val javaDelegate: OtelJavaIdGenerator =
+        delegate as? OtelJavaIdGenerator ?: OtelJavaIdGeneratorAdapter(delegate)
 
     override fun generateSpanIdBytes(): ByteArray =
-        sdkErrorHandler.guardOrDefault(fallback.generateSpanIdBytes(), "IdGenerator.generateSpanIdBytes failed, using fallback") {
-            delegate.generateSpanIdBytes()
-        }
+        guard("generateSpanIdBytes", fallback::generateSpanIdBytes, delegate::generateSpanIdBytes)
 
     override fun generateTraceIdBytes(): ByteArray =
-        sdkErrorHandler.guardOrDefault(fallback.generateTraceIdBytes(), "IdGenerator.generateTraceIdBytes failed, using fallback") {
-            delegate.generateTraceIdBytes()
-        }
+        guard("generateTraceIdBytes", fallback::generateTraceIdBytes, delegate::generateTraceIdBytes)
 
     override val generatesRandomTraceIds: Boolean
-        get() = sdkErrorHandler.guardOrDefault(false, "IdGenerator.generatesRandomTraceIds failed, using fallback") {
-            delegate.generatesRandomTraceIds
-        }
+        get() = guard("generatesRandomTraceIds", { false }, delegate::generatesRandomTraceIds)
+
+    override fun generateSpanId(): String =
+        guard("generateSpanId", { fallback.generateSpanIdBytes().toHexString() }, javaDelegate::generateSpanId)
+
+    override fun generateTraceId(): String =
+        guard("generateTraceId", { fallback.generateTraceIdBytes().toHexString() }, javaDelegate::generateTraceId)
+
+    override fun generatesRandomTraceIds(): Boolean =
+        guard("generatesRandomTraceIds", { false }, javaDelegate::generatesRandomTraceIds)
+
+    private inline fun <T> guard(member: String, fallback: () -> T, action: () -> T): T = try {
+        action()
+    } catch (exc: Throwable) {
+        sdkErrorHandler.reportUserCodeError(exc, "IdGenerator.$member failed, using fallback")
+        fallback()
+    }
 }
 
 /**
