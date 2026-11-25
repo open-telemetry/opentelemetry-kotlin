@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.config.dsl.tracing
 
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
+import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SimpleSpanProcessorBehavior
@@ -206,6 +207,19 @@ internal class TracerProviderConfigDslImplTest {
                     attributeCountPerEventLimit = 5,
                     attributeCountPerLinkLimit = 6
                 )
+            ),
+            dsl.toBehavior()
+        )
+    }
+
+    @Test
+    fun idGeneratorCallSetsIdGenerator() {
+        val dsl = TracerProviderConfigDslImpl().apply {
+            idGenerator()
+        }
+        assertEquals(
+            TracerProviderBehavior(
+                idGenerator = IdGeneratorBehavior.Random
             ),
             dsl.toBehavior()
         )
