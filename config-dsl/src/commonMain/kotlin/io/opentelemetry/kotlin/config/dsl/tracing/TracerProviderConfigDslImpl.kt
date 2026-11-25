@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.config.dsl.tracing
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.BehaviorSupplier
 import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import io.opentelemetry.kotlin.init.ExportConfigDsl
@@ -16,6 +17,7 @@ class TracerProviderConfigDslImpl : BehaviorSupplier<TracerProviderBehavior> {
 
     private var processor: SpanProcessorBehavior? = null
     private var sampler: SamplerBehavior? = null
+    private var limits: SpanLimitsBehavior? = null
 
     @Suppress("UnusedParameter")
     fun export(action: ExportConfigDsl.() -> SpanProcessor) {
@@ -36,6 +38,12 @@ class TracerProviderConfigDslImpl : BehaviorSupplier<TracerProviderBehavior> {
         sampler = impl.toBehavior()
     }
 
+    fun limits(action: SpanLimitsConfigDslImpl.() -> Unit) {
+        val impl = SpanLimitsConfigDslImpl()
+        impl.action()
+        limits = impl.toBehavior()
+    }
+
     override fun toBehavior(): TracerProviderBehavior =
-        TracerProviderBehavior(processor = processor, sampler = sampler)
+        TracerProviderBehavior(processor = processor, sampler = sampler, spanLimits = limits)
 }
