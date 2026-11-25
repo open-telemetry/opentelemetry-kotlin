@@ -244,6 +244,31 @@ internal class OtlpHttpSpanExporterTest {
     }
 
     @Test
+    fun testFactoryWithZeroTimeoutAndCustomEngine() = runTest {
+        val mockServer = MockEngine {
+            respond(content = ByteReadChannel(""), status = HttpStatusCode.OK)
+        }
+        val factoryExporter = fakeConfig().otlpHttpSpanExporter {
+            endpoint = baseUrl
+            timeoutMs = 0
+            httpClientEngine = mockServer
+        }
+        try {
+            val code = factoryExporter.export(spans)
+            assertEquals(OperationResultCode.Success, code)
+            val shutdownCode = withContext(Dispatchers.Default) { factoryExporter.shutdown() }
+            assertEquals(OperationResultCode.Success, shutdownCode)
+            assertEquals(1, mockServer.requestHistory.size)
+        } finally {
+            withContext(NonCancellable) {
+                factoryExporter.shutdown()
+                HttpClientRegistry.clear()
+                mockServer.close()
+            }
+        }
+    }
+
+    @Test
     fun testHttpClientRegistryIsReused() {
         val engine = httpEngineFactory.create()
         val client1 = HttpClientRegistry.getOrCreate(

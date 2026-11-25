@@ -107,4 +107,27 @@ internal class BatchTelemetryConfigTest {
         assertEquals(BatchTelemetryDefaults.SPAN_SCHEDULE_DELAY_MS.milliseconds, cfg.scheduleDelay)
         assertEquals(BatchTelemetryDefaults.EXPORT_TIMEOUT_MS.milliseconds, cfg.exportTimeout)
     }
+
+    @Test
+    fun testZeroScheduleDelayMeansImmediate() {
+        val handler = FakeSdkErrorHandler()
+        val cfg = BatchTelemetryConfig(
+            scheduleDelay = Duration.ZERO,
+            sdkErrorHandler = handler,
+        )
+        assertTrue(handler.apiMisuses.isEmpty())
+        assertEquals(Duration.ZERO, cfg.scheduleDelay)
+    }
+
+    @Test
+    fun testSignalSpecificDefaultScheduleDelay() {
+        val handler = FakeSdkErrorHandler()
+        val cfg = BatchTelemetryConfig(
+            scheduleDelay = (-1).milliseconds,
+            defaultScheduleDelay = BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS.milliseconds,
+            sdkErrorHandler = handler,
+        )
+        assertEquals(1, handler.apiMisuses.size)
+        assertEquals(BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS.milliseconds, cfg.scheduleDelay)
+    }
 }

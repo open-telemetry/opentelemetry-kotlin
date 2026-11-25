@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.tracing
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
+import io.opentelemetry.kotlin.ThreadSafe
 
 /**
  * Dynamically controls how a [Tracer] should behave by constructing a [TracerConfig].
@@ -10,6 +11,7 @@ import io.opentelemetry.kotlin.InstrumentationScopeInfo
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#tracerconfigurator
  */
 @ExperimentalApi
+@ThreadSafe
 public fun interface TracerConfigurator {
 
     /**

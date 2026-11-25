@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.logging.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
+import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.logging.SeverityNumber
@@ -9,8 +10,11 @@ import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
 
 /**
  * Processes logs before they are exported as batches.
+ *
+ * https://opentelemetry.io/docs/specs/otel/logs/sdk/#logrecordprocessor
  */
 @ExperimentalApi
+@ThreadSafe
 public interface LogRecordProcessor : TelemetryCloseable {
 
     /**

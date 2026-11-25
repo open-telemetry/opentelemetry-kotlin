@@ -26,7 +26,7 @@ internal class CompatContextTest {
         val tracer = createCompatOpenTelemetry().also(sdks::track).tracerProvider.getTracer("tracer")
         val span = tracer.startSpan("span")
         val ctx = rootContext().storeSpan(span)
-        val retrievedSpan = ctx.extractSpan()
+        val retrievedSpan = ctx.span
         assertSpanContextsMatch(span.spanContext, retrievedSpan.spanContext)
     }
 

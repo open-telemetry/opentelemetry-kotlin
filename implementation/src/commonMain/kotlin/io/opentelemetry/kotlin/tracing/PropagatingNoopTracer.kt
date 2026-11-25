@@ -28,7 +28,7 @@ internal class PropagatingNoopTracer(
             if (ctx == root) {
                 return@sdkGuardOrDefault invalidSpan
             }
-            val parentSpanContext = ctx.extractSpan().spanContext
+            val parentSpanContext = ctx.span.spanContext
             when {
                 parentSpanContext.isValid -> createNonRecordingSpan(parentSpanContext)
                 else -> invalidSpan

@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.behavior.SeverityLevel
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.toSeverityLevel
@@ -60,7 +60,7 @@ internal class OpenTelemetryConfigurationMapperTest {
             ),
             loggerProvider = LoggerProviderBehavior(
                 processor = LogRecordProcessorBehavior(),
-                logLimits = LogLimitsBehavior(
+                logRecordLimits = LogRecordLimitsBehavior(
                     attributeCountLimit = 64,
                     attributeValueLengthLimit = 256,
                 ),

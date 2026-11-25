@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.config.yaml.logging
 
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.logging.OtlpHttpLogsExporterBehavior
@@ -45,7 +45,7 @@ internal class LoggerProviderMapperTest {
             )
         )
         val behavior = LoggerProviderBehavior(
-            logLimits = LogLimitsBehavior(
+            logRecordLimits = LogRecordLimitsBehavior(
                 attributeValueLengthLimit = 1,
                 attributeCountLimit = 2
             ),

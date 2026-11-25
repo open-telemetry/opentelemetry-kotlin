@@ -9,7 +9,6 @@ import io.opentelemetry.kotlin.attributes.AttributesMutator
  *
  * https://opentelemetry.io/docs/specs/otel/trace/api/#tracerprovider
  */
-@ExperimentalApi
 @ThreadSafe
 public interface TracerProvider {
 
@@ -19,6 +18,7 @@ public interface TracerProvider {
      *
      * The name must document the instrumentation scope: https://opentelemetry.io/docs/specs/otel/glossary/#instrumentation-scope
      */
+    @OptIn(ExperimentalApi::class)
     @ThreadSafe
     public fun getTracer(
         name: String,

@@ -28,7 +28,7 @@ internal class B3Propagator private constructor(
     }
 
     override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {
-        val spanContext = context.extractSpan().spanContext
+        val spanContext = context.span.spanContext
         if (!spanContext.isValid) { return }
         val debug = context.isB3Debug()
         when (format) {

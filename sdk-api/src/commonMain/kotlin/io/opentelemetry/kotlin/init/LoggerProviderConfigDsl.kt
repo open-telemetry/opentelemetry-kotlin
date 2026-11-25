@@ -12,9 +12,9 @@ import io.opentelemetry.kotlin.logging.export.LogRecordProcessor
 public interface LoggerProviderConfigDsl : ResourceConfigDsl {
 
     /**
-     * The log limits configuration for this logger provider.
+     * The log record limits configuration for this logger provider.
      */
-    public fun logLimits(action: LogLimitsConfigDsl.() -> Unit)
+    public fun logRecordLimits(action: LogRecordLimitsConfigDsl.() -> Unit)
 
     /**
      * Configures how log records should be processed and exported.

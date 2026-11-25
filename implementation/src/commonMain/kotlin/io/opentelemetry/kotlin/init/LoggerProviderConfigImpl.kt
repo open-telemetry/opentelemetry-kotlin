@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.ExportConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceConfigDslImpl
-import io.opentelemetry.kotlin.config.dsl.logging.LogLimitsConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.logging.LogRecordLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -19,6 +19,7 @@ import io.opentelemetry.kotlin.logging.export.batchLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.simpleLogRecordProcessor
 import io.opentelemetry.kotlin.logging.export.stdoutLogRecordExporter
 import io.opentelemetry.kotlin.resource.Resource
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class LoggerProviderConfigImpl(
     private val clock: Clock,
@@ -27,7 +28,7 @@ internal class LoggerProviderConfigImpl(
 ) : LoggerProviderConfigDsl, ResourceConfigDsl by resourceConfig {
 
     private var processor: LogRecordProcessor? = null
-    private val logLimits = LogLimitsConfigDslImpl()
+    private val logRecordLimits = LogRecordLimitsConfigDslImpl()
     private val defaultLoggerConfig = LoggerConfigImpl(true)
     private var loggerConfigurator: LoggerConfigurator = LoggerConfigurator {
         defaultLoggerConfig
@@ -47,8 +48,8 @@ internal class LoggerProviderConfigImpl(
         processor = ExportConfigDslImpl(clock, sdkErrorHandler).action()
     }
 
-    override fun logLimits(action: LogLimitsConfigDsl.() -> Unit) {
-        logLimits.action()
+    override fun logRecordLimits(action: LogRecordLimitsConfigDsl.() -> Unit) {
+        logRecordLimits.action()
     }
 
     override fun loggerConfigurator(configurator: LoggerConfigurator) {
@@ -67,7 +68,7 @@ internal class LoggerProviderConfigImpl(
 
     fun toBehavior(): LoggerProviderBehavior =
         LoggerProviderBehavior(
-            logLimits = logLimits.toBehavior(),
+            logRecordLimits = logRecordLimits.toBehavior(),
         )
 
     private fun processorFromBehavior(processorBehavior: LogRecordProcessorBehavior?): LogRecordProcessor? {
@@ -80,8 +81,8 @@ internal class LoggerProviderConfigImpl(
             when {
                 batch != null -> batchLogRecordProcessor(
                     exporter = stdoutLogRecordExporter(),
-                    scheduleDelayMs = batch.scheduleDelay ?: BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS,
-                    exportTimeoutMs = batch.exportTimeout ?: BatchTelemetryDefaults.EXPORT_TIMEOUT_MS,
+                    scheduleDelay = (batch.scheduleDelay ?: BatchTelemetryDefaults.LOG_SCHEDULE_DELAY_MS).milliseconds,
+                    exportTimeout = (batch.exportTimeout ?: BatchTelemetryDefaults.EXPORT_TIMEOUT_MS).milliseconds,
                     maxQueueSize = batch.maxQueueSize ?: BatchTelemetryDefaults.MAX_QUEUE_SIZE,
                     maxExportBatchSize = batch.maxExportBatchSize ?: BatchTelemetryDefaults.MAX_EXPORT_BATCH_SIZE
                 )

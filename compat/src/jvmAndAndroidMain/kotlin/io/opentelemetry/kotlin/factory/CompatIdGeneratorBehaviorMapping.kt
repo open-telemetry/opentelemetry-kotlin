@@ -8,5 +8,6 @@ internal fun IdGeneratorBehavior.toIdGenerator(sdkErrorHandler: SdkErrorHandler)
     IdGeneratorBehavior.Random -> CompatIdGenerator()
     is IdGeneratorBehavior.Custom ->
         sdkErrorHandler.guardOrDefault(null, "Failed to create IdGenerator, using default") { supplier() }
+            ?.let { it.guarded(sdkErrorHandler) }
             ?: CompatIdGenerator()
 }

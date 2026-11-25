@@ -45,11 +45,13 @@ internal class ContextValue(
     override fun storeSpanContext(spanContext: SpanContext): Context =
         storeSpan(createNonRecordingSpan(spanContext))
 
-    override fun extractSpan(): Span = get(SPAN_KEY) ?: INVALID_SPAN
+    override val span: Span
+        get() = get(SPAN_KEY) ?: INVALID_SPAN
 
     override fun storeBaggage(baggage: Baggage): Context = set(BAGGAGE_KEY, baggage)
 
-    override fun extractBaggage(): Baggage = get(BAGGAGE_KEY) ?: EMPTY_BAGGAGE
+    override val baggage: Baggage
+        get() = get(BAGGAGE_KEY) ?: EMPTY_BAGGAGE
 
     override fun clearBaggage(): Context = set(BAGGAGE_KEY, null)
 }

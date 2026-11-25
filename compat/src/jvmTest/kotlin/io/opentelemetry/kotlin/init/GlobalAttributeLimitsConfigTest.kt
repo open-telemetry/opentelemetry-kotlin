@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanLimits
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.BehaviorResolverImpl
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
@@ -27,7 +27,7 @@ internal class GlobalAttributeLimitsConfigTest {
         val global = AttributeLimitsBehavior(attributeCountLimit = 64)
 
         assertEquals(64, buildSpanLimits(global).attributeCountLimit)
-        assertEquals(64, buildLogLimits(global).attributeCountLimit)
+        assertEquals(64, buildLogRecordLimits(global).attributeCountLimit)
     }
 
     @Test
@@ -37,8 +37,8 @@ internal class GlobalAttributeLimitsConfigTest {
         val spanLimits = buildSpanLimits(global, SpanLimitsBehavior(attributeCountLimit = 32))
         assertEquals(32, spanLimits.attributeCountLimit)
 
-        val logLimits = buildLogLimits(global, LogLimitsBehavior(attributeCountLimit = 16))
-        assertEquals(16, logLimits.attributeCountLimit)
+        val logRecordLimits = buildLogRecordLimits(global, LogRecordLimitsBehavior(attributeCountLimit = 16))
+        assertEquals(16, logRecordLimits.attributeCountLimit)
     }
 
     @Test
@@ -46,7 +46,7 @@ internal class GlobalAttributeLimitsConfigTest {
         val global = AttributeLimitsBehavior(attributeCountLimit = 64)
 
         assertEquals(0, buildSpanLimits(global, SpanLimitsBehavior(attributeCountLimit = 0)).attributeCountLimit)
-        assertEquals(0, buildLogLimits(global, LogLimitsBehavior(attributeCountLimit = 0)).attributeCountLimit)
+        assertEquals(0, buildLogRecordLimits(global, LogRecordLimitsBehavior(attributeCountLimit = 0)).attributeCountLimit)
     }
 
     @Test
@@ -57,9 +57,9 @@ internal class GlobalAttributeLimitsConfigTest {
         assertEquals(64, spanLimits.attributeCountLimit)
         assertEquals(256, spanLimits.attributeValueLengthLimit)
 
-        val logLimits = buildLogLimits(global, LogLimitsBehavior(attributeValueLengthLimit = 256))
-        assertEquals(64, logLimits.attributeCountLimit)
-        assertEquals(256, logLimits.attributeValueLengthLimit)
+        val logRecordLimits = buildLogRecordLimits(global, LogRecordLimitsBehavior(attributeValueLengthLimit = 256))
+        assertEquals(64, logRecordLimits.attributeCountLimit)
+        assertEquals(256, logRecordLimits.attributeValueLengthLimit)
     }
 
     @Test
@@ -69,10 +69,10 @@ internal class GlobalAttributeLimitsConfigTest {
         assertNull(spanLimits.attributeValueLengthLimit)
         assertEquals(OtelJavaSpanLimits.getDefault(), spanLimits.build())
 
-        val logLimits = buildLogLimits()
-        assertNull(logLimits.attributeCountLimit)
-        assertNull(logLimits.attributeValueLengthLimit)
-        assertEquals(OtelJavaLogLimits.getDefault(), logLimits.toOtelJavaLogLimits())
+        val logRecordLimits = buildLogRecordLimits()
+        assertNull(logRecordLimits.attributeCountLimit)
+        assertNull(logRecordLimits.attributeValueLengthLimit)
+        assertEquals(OtelJavaLogLimits.getDefault(), logRecordLimits.toOtelJavaLogLimits())
     }
 
     @Test
@@ -109,27 +109,27 @@ internal class GlobalAttributeLimitsConfigTest {
         return config.spanLimitsConfig
     }
 
-    private fun buildLogLimits(
+    private fun buildLogRecordLimits(
         global: AttributeLimitsBehavior? = null,
-        logLimits: LogLimitsBehavior? = null,
+        logRecordLimits: LogRecordLimitsBehavior? = null,
     ): AttributeLimitsBehavior {
-        val resolved = resolve(global, logLimits = logLimits)
+        val resolved = resolve(global, logRecordLimits = logRecordLimits)
         val config = CompatLoggerProviderConfig(clock, NoopSdkErrorHandler)
-        config.build(clock, logLimits = resolved.loggerProvider?.logLimits ?: LogLimitsBehavior())
-        return config.logLimits
+        config.build(clock, logRecordLimits = resolved.loggerProvider?.logRecordLimits ?: LogRecordLimitsBehavior())
+        return config.logRecordLimits
     }
 
     private fun resolve(
         global: AttributeLimitsBehavior? = null,
         spanLimits: SpanLimitsBehavior? = null,
-        logLimits: LogLimitsBehavior? = null,
+        logRecordLimits: LogRecordLimitsBehavior? = null,
     ): OpenTelemetryBehavior = BehaviorResolverImpl().resolve(
         envars = null,
         declarativeFile = null,
         dsl = OpenTelemetryBehavior(
             attributeLimits = global,
             tracerProvider = spanLimits?.let { TracerProviderBehavior(spanLimits = it) },
-            loggerProvider = logLimits?.let { LoggerProviderBehavior(logLimits = it) },
+            loggerProvider = logRecordLimits?.let { LoggerProviderBehavior(logRecordLimits = it) },
         ),
     )
 }

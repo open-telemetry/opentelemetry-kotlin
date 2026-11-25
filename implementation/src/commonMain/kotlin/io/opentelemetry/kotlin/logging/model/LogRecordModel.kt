@@ -34,7 +34,7 @@ internal class LogRecordModel(
     severityText: String?,
     severityNumber: SeverityNumber?,
     spanContext: SpanContext,
-    logLimits: AttributeLimitsBehavior,
+    logRecordLimits: AttributeLimitsBehavior,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : ReadWriteLogRecord {
 
@@ -109,8 +109,8 @@ internal class LogRecordModel(
 
     private val attrs by lazy {
         AttributesModel(
-            attributeLimit = logLimits.attributeCountLimit ?: DEFAULT_ATTRIBUTE_LIMIT,
-            attributeValueLengthLimit = logLimits.attributeValueLengthLimit
+            attributeLimit = logRecordLimits.attributeCountLimit ?: DEFAULT_ATTRIBUTE_LIMIT,
+            attributeValueLengthLimit = logRecordLimits.attributeValueLengthLimit
                 ?: DEFAULT_ATTRIBUTE_VALUE_LENGTH_LIMIT,
             attrs = mutableMapOf()
         )

@@ -8,10 +8,12 @@ import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.CompatIdGenerator
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
+import io.opentelemetry.kotlin.factory.GuardedCompatIdGenerator
+import io.opentelemetry.kotlin.factory.IdGenerator
 import org.junit.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
-import kotlin.test.assertSame
 
 internal class CompatIdGeneratorConfigTest {
 
@@ -59,7 +61,36 @@ internal class CompatIdGeneratorConfigTest {
         )
         val idGenerator = CompatSdkConfigFactory(cfg, behavior, clock).idGenerator
 
-        assertSame(custom, idGenerator)
+        val guarded = assertIs<GuardedCompatIdGenerator>(idGenerator)
+        assertContentEquals(custom.generateTraceIdBytes(), guarded.generateTraceIdBytes())
+        assertContentEquals(custom.generateSpanIdBytes(), guarded.generateSpanIdBytes())
+    }
+
+    @Test
+    fun throwingCustomIdGeneratorFallsBackPerCall() {
+        val handler = FakeSdkErrorHandler()
+        val cfg = CompatOpenTelemetryConfig().apply {
+            errorHandler(handler)
+            idGenerator { HostileIdGenerator }
+        }
+        val idGenerator = CompatSdkConfigFactory(cfg, cfg.toBehavior(), clock).idGenerator
+
+        val traceId = idGenerator.generateTraceIdBytes()
+        val spanId = idGenerator.generateSpanIdBytes()
+        assertEquals(16, traceId.size)
+        assertEquals(8, spanId.size)
+        assertEquals(
+            listOf(
+                "IdGenerator.generateTraceIdBytes failed, using fallback",
+                "IdGenerator.generateSpanIdBytes failed, using fallback",
+            ),
+            handler.userCodeErrors.map { it.message },
+        )
+    }
+
+    private object HostileIdGenerator : IdGenerator {
+        override fun generateSpanIdBytes(): ByteArray = error("span boom")
+        override fun generateTraceIdBytes(): ByteArray = error("trace boom")
     }
 
     @Test

@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.config.yaml.logging
 
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.config.schema.model.LogRecordLimits
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -11,14 +11,14 @@ internal class LogRecordLimitsMapperTest {
     fun mapsEveryLimit() {
         val limits = LogRecordLimits(attributeCountLimit = 64, attributeValueLengthLimit = 256)
         assertEquals(
-            LogLimitsBehavior(attributeCountLimit = 64, attributeValueLengthLimit = 256),
+            LogRecordLimitsBehavior(attributeCountLimit = 64, attributeValueLengthLimit = 256),
             limits.toBehavior(),
         )
     }
 
     @Test
     fun leavesOmittedLimitsUnset() {
-        assertEquals(LogLimitsBehavior(), LogRecordLimits().toBehavior())
+        assertEquals(LogRecordLimitsBehavior(), LogRecordLimits().toBehavior())
     }
 
     @Test
@@ -36,7 +36,7 @@ internal class LogRecordLimitsMapperTest {
                 attributeCountLimit = value,
                 attributeValueLengthLimit = value,
             ).toBehavior()
-            assertEquals(LogLimitsBehavior(), behavior, "<$value> should not configure a limit")
+            assertEquals(LogRecordLimitsBehavior(), behavior, "<$value> should not configure a limit")
         }
     }
 }

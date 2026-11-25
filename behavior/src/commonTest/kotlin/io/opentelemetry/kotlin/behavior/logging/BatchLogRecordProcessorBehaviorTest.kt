@@ -10,7 +10,7 @@ internal class BatchLogRecordProcessorBehaviorTest {
         scheduleDelay = 1_000,
         exportTimeout = 30_000,
         maxQueueSize = 2_048,
-        maxExportBatchSize = 512,
+        requestedQueueSize = 512,
         exporter = LogRecordExporterBehavior(
             http = OtlpHttpLogsExporterBehavior(
                 endpoint = "http://example.com/logs"
@@ -50,7 +50,7 @@ internal class BatchLogRecordProcessorBehaviorTest {
             scheduleDelay = 2_000,
             exportTimeout = 60_000,
             maxQueueSize = 4_096,
-            maxExportBatchSize = 1_024,
+            requestedQueueSize = 1_024,
             exporter = LogRecordExporterBehavior(
                 http = OtlpHttpLogsExporterBehavior(
                     endpoint = "http://example.com/logs/higher"
@@ -65,7 +65,10 @@ internal class BatchLogRecordProcessorBehaviorTest {
     fun partialHigherLayerPreservesOtherFields() {
         val higher = BatchLogRecordProcessorBehavior(exportTimeout = 60_000)
 
-        assertEquals(configured.copy(exportTimeout = 60_000), configured.mergeWith(higher))
+        assertEquals(
+            BatchLogRecordProcessorBehavior(configured.delegate.copy(exportTimeout = 60_000)),
+            configured.mergeWith(higher)
+        )
         assertEquals(BatchLogRecordProcessorBehavior(exportTimeout = 60_000), higher)
         assertEquals(30_000L, configured.exportTimeout)
     }
@@ -73,7 +76,9 @@ internal class BatchLogRecordProcessorBehaviorTest {
     @Test
     fun zeroDurationsAreConfiguredValues() {
         val higher = BatchLogRecordProcessorBehavior(scheduleDelay = 0, exportTimeout = 0)
-
-        assertEquals(configured.copy(scheduleDelay = 0, exportTimeout = 0), configured.mergeWith(higher))
+        assertEquals(
+            BatchLogRecordProcessorBehavior(configured.delegate.copy(scheduleDelay = 0, exportTimeout = 0)),
+            configured.mergeWith(higher)
+        )
     }
 }

@@ -1,7 +1,9 @@
 package io.opentelemetry.kotlin.behavior
 
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
+import io.opentelemetry.kotlin.behavior.metrics.MeterProviderBehavior
+import io.opentelemetry.kotlin.behavior.metrics.MetricReaderBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import kotlin.test.Test
@@ -24,6 +26,7 @@ internal class OpenTelemetryBehaviorTest {
         assertNull(behavior.attributeLimits)
         assertNull(behavior.tracerProvider)
         assertNull(behavior.loggerProvider)
+        assertNull(behavior.meterProvider)
     }
 
     @Test
@@ -82,7 +85,7 @@ internal class OpenTelemetryBehaviorTest {
             entities = "entities",
             resource = ResourceBehavior(attributes = mapOf("a" to 1L)),
             attributeLimits = AttributeLimitsBehavior(attributeCountLimit = 1),
-            loggerProvider = LoggerProviderBehavior(logLimits = LogLimitsBehavior(attributeCountLimit = 1)),
+            loggerProvider = LoggerProviderBehavior(logRecordLimits = LogRecordLimitsBehavior(attributeCountLimit = 1)),
             tracerProvider = TracerProviderBehavior(spanLimits = SpanLimitsBehavior(linkCountLimit = 3)),
         )
 
@@ -106,7 +109,7 @@ internal class OpenTelemetryBehaviorTest {
             entities = "entities",
             resource = ResourceBehavior(attributes = mapOf("a" to 1L)),
             attributeLimits = AttributeLimitsBehavior(attributeCountLimit = 1),
-            loggerProvider = LoggerProviderBehavior(logLimits = LogLimitsBehavior(attributeCountLimit = 1)),
+            loggerProvider = LoggerProviderBehavior(logRecordLimits = LogRecordLimitsBehavior(attributeCountLimit = 1)),
             tracerProvider = TracerProviderBehavior(spanLimits = SpanLimitsBehavior(linkCountLimit = 3)),
         )
 
@@ -192,13 +195,39 @@ internal class OpenTelemetryBehaviorTest {
         )
         val logging = OpenTelemetryBehavior(
             fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
-            loggerProvider = LoggerProviderBehavior(logLimits = LogLimitsBehavior(attributeCountLimit = 7)),
+            loggerProvider = LoggerProviderBehavior(logRecordLimits = LogRecordLimitsBehavior(attributeCountLimit = 7)),
         )
 
         val merged = tracing.mergeWith(logging)
 
         assertEquals(3, merged.tracerProvider?.spanLimits?.linkCountLimit)
-        assertEquals(7, merged.loggerProvider?.logLimits?.attributeCountLimit)
+        assertEquals(7, merged.loggerProvider?.logRecordLimits?.attributeCountLimit)
+    }
+
+    @Test
+    fun adoptsMeterProviderFromWhicheverLayerSuppliedIt() {
+        val meterProvider = MeterProviderBehavior(readers = listOf(MetricReaderBehavior()))
+
+        assertEquals(
+            meterProvider,
+            OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
+            ).mergeWith(
+                OpenTelemetryBehavior(
+                    fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
+                    meterProvider = meterProvider,
+                ),
+            ).meterProvider,
+        )
+        assertEquals(
+            meterProvider,
+            OpenTelemetryBehavior(
+                fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
+                meterProvider = meterProvider,
+            ).mergeWith(
+                OpenTelemetryBehavior(fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION),
+            ).meterProvider,
+        )
     }
 
     @Test

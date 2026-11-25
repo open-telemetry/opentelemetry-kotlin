@@ -12,7 +12,7 @@ fun LoggerProvider.toBehavior(): LoggerProviderBehavior {
     val limits = limits?.toBehavior()
     val processor = processors.toBehavior()
     return LoggerProviderBehavior(
-        logLimits = limits,
+        logRecordLimits = limits,
         processor = processor,
     )
 }

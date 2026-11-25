@@ -2,7 +2,7 @@ package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.behavior.toMinimumSdkErrorSeverity
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.config.ConfigProviderImpl
@@ -80,7 +80,7 @@ public fun createOpenTelemetry(
             clock = cfg.clock,
             loggingConfig = loggingConfig,
             attributeLimits = behavior.attributeLimits ?: AttributeLimitsBehavior(),
-            logLimits = behavior.loggerProvider?.logLimits ?: LogLimitsBehavior(),
+            logRecordLimits = behavior.loggerProvider?.logRecordLimits ?: LogRecordLimitsBehavior(),
         ),
         meterProvider = MeterProviderImpl(
             metricsConfig = metricsConfig,

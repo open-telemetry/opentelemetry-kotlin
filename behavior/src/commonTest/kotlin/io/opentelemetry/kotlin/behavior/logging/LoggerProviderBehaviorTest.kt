@@ -7,20 +7,20 @@ import kotlin.test.assertNull
 internal class LoggerProviderBehaviorTest {
 
     @Test
-    fun logLimitsStartUnset() {
-        assertNull(LoggerProviderBehavior().logLimits)
+    fun logRecordLimitsStartUnset() {
+        assertNull(LoggerProviderBehavior().logRecordLimits)
     }
 
     @Test
-    fun mergesLogLimitsWhenBothLayersSuppliedThem() {
+    fun mergesLogRecordLimitsWhenBothLayersSuppliedThem() {
         val merged = LoggerProviderBehavior(
-            logLimits = LogLimitsBehavior(attributeCountLimit = 1, attributeValueLengthLimit = 3),
+            logRecordLimits = LogRecordLimitsBehavior(attributeCountLimit = 1, attributeValueLengthLimit = 3),
         ).mergeWith(
-            LoggerProviderBehavior(logLimits = LogLimitsBehavior(attributeValueLengthLimit = 99)),
+            LoggerProviderBehavior(logRecordLimits = LogRecordLimitsBehavior(attributeValueLengthLimit = 99)),
         )
 
-        assertEquals(1, merged.logLimits?.attributeCountLimit)
-        assertEquals(99, merged.logLimits?.attributeValueLengthLimit)
+        assertEquals(1, merged.logRecordLimits?.attributeCountLimit)
+        assertEquals(99, merged.logRecordLimits?.attributeValueLengthLimit)
     }
 
     @Test

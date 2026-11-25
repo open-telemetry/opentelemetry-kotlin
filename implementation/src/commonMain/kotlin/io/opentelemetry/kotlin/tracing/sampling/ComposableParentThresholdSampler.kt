@@ -20,7 +20,7 @@ internal class ComposableParentThresholdSampler(private val root: ComposableSamp
         attributes: AttributeContainer,
         links: List<SpanLink>
     ): SamplingIntent {
-        val parent = context.extractSpan().spanContext
+        val parent = context.span.spanContext
         val parentThreshold = parent.traceState.get(KnownTraceState.OT)?.let(OtelTraceState::parse)?.th
 
         return when {

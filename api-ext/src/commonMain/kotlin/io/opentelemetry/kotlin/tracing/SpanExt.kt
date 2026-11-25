@@ -3,7 +3,7 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.attributes.AttributesMutator
-import io.opentelemetry.kotlin.exceptionType
+import io.opentelemetry.kotlin.safeExceptionAttributes
 
 /**
  * Adds a link to the span that associates it with another [Span].
@@ -28,12 +28,13 @@ public fun Span.wrapOperation(action: () -> StatusData) {
     try {
         setStatus(action())
     } catch (exc: Throwable) {
+        val safeAttributes = safeExceptionAttributes(exc)
         addEvent("exception") {
-            setStringAttribute("exception.stacktrace", exc.stackTraceToString())
-            exc.message?.let { setStringAttribute("exception.message", it) }
-            exc.exceptionType()?.let { setStringAttribute("exception.type", it) }
+            safeAttributes.stacktrace?.let { setStringAttribute("exception.stacktrace", it) }
+            safeAttributes.message?.let { setStringAttribute("exception.message", it) }
+            safeAttributes.type?.let { setStringAttribute("exception.type", it) }
         }
-        setStatus(StatusData.Error(exc.message))
+        setStatus(StatusData.Error(safeAttributes.message))
         throw exc
     } finally {
         end()

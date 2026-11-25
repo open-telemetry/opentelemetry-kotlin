@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.tracing.model.ReadWriteSpan
@@ -8,8 +9,11 @@ import io.opentelemetry.kotlin.tracing.model.ReadableSpan
 
 /**
  * Processes spans before they are exported as batches.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#span-processor
  */
 @ExperimentalApi
+@ThreadSafe
 public interface SpanProcessor : TelemetryCloseable {
 
     /**

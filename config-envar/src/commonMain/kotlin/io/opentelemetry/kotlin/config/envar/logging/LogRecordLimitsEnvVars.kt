@@ -1,0 +1,28 @@
+package io.opentelemetry.kotlin.config.envar.logging
+
+import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.behavior.BehaviorSupplier
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
+import io.opentelemetry.kotlin.config.envar.reader.ReportingEnvVarReader
+
+/**
+ * Maps the log record limit environment variables onto the behavior they supply. A variable that is
+ * unset, or that holds a value the spec disallows, leaves its limit unset.
+ *
+ * https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#attribute-limits
+ */
+@OptIn(ExperimentalApi::class)
+class LogRecordLimitsEnvVars(
+    private val reader: ReportingEnvVarReader,
+) : BehaviorSupplier<LogRecordLimitsBehavior> {
+
+    override fun toBehavior(): LogRecordLimitsBehavior = LogRecordLimitsBehavior(
+        attributeCountLimit = reader.readNonNegativeInt(ATTRIBUTE_COUNT_LIMIT),
+        attributeValueLengthLimit = reader.readNonNegativeInt(ATTRIBUTE_VALUE_LENGTH_LIMIT),
+    )
+
+    internal companion object {
+        const val ATTRIBUTE_COUNT_LIMIT = "OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT"
+        const val ATTRIBUTE_VALUE_LENGTH_LIMIT = "OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT"
+    }
+}

@@ -4,7 +4,8 @@ data class InstrumentationScopeInfoImpl(
     override val name: String,
     override val version: String?,
     override val schemaUrl: String?,
-    override val attributes: Map<String, Any>
+    override val attributes: Map<String, Any>,
+    override val droppedAttributesCount: Int = 0,
 ) : InstrumentationScopeInfo {
 
     override fun equals(other: Any?): Boolean {
@@ -17,6 +18,7 @@ data class InstrumentationScopeInfoImpl(
         return name == other.name &&
             version == other.version &&
             schemaUrl == other.schemaUrl &&
+            droppedAttributesCount == other.droppedAttributesCount &&
             attributesEqual(attributes, other.attributes)
     }
 
@@ -24,6 +26,7 @@ data class InstrumentationScopeInfoImpl(
         var result = name.hashCode()
         result = 31 * result + (version?.hashCode() ?: 0)
         result = 31 * result + (schemaUrl?.hashCode() ?: 0)
+        result = 31 * result + droppedAttributesCount
         result = 31 * result + attributesHashCode(attributes)
         return result
     }

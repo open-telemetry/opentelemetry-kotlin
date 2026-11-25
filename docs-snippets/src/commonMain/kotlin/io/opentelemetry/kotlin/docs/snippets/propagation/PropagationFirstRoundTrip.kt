@@ -27,7 +27,7 @@ fun firstRoundTrip(otel: OpenTelemetry) {
         carrier = headers,
         getter = createMapTextMapGetter(),
     )
-    val remoteParent = received.extractSpan().spanContext
+    val remoteParent = received.span.spanContext
     println(remoteParent.traceId == span.spanContext.traceId) // true
     println(remoteParent.isRemote) // true
 

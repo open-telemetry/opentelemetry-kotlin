@@ -57,7 +57,7 @@ internal class MapTextMapCarriersTest {
         val headers = carrier.mapKeys { (key, _) -> key.uppercase() }
         val extracted = propagator.extract(rootContext(), headers, createMapTextMapGetter())
 
-        val extractedSpanContext = extracted.extractSpan().spanContext
+        val extractedSpanContext = extracted.span.spanContext
         assertEquals(spanContext.traceId, extractedSpanContext.traceId)
         assertEquals(spanContext.spanId, extractedSpanContext.spanId)
         assertEquals(spanContext.traceFlags, extractedSpanContext.traceFlags)

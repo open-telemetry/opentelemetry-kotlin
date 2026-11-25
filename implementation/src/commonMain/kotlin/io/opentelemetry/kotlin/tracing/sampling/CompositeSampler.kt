@@ -29,7 +29,7 @@ internal class CompositeSampler(
         attributes: AttributeContainer,
         links: List<SpanLink>
     ): SamplingResult {
-        val traceState = context.extractSpan().spanContext.traceState
+        val traceState = context.span.spanContext.traceState
         val otelTraceState = OtelTraceState.parse(traceState.get(KnownTraceState.OT))
 
         val intent = delegate.getSamplingIntent(context, name, spanKind, attributes, links)

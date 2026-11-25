@@ -15,7 +15,7 @@ as described in [Getting started](getting-started.md).
     - [Checking whether a log will be emitted](#checking-whether-a-log-will-be-emitted)
 - [Part 2: Configuring logging](#part-2-configuring-logging)
     - [Processors and exporters](#processors-and-exporters)
-    - [Log limits](#log-limits)
+    - [Log record limits](#log-record-limits)
     - [Configuring loggers by scope](#configuring-loggers-by-scope)
     - [Writing a log record processor](#writing-a-log-record-processor)
 
@@ -232,14 +232,14 @@ fun initLogging(): OpenTelemetrySdk = createOpenTelemetry {
 }
 ```
 
-### Log limits
+### Log record limits
 
-Log limits stop a single log from using too much memory or bandwidth:
+Log record limits stop a single log record from using too much memory or bandwidth:
 
 ```kotlin logging-limits
 fun initLoggingWithLimits(): OpenTelemetrySdk = createOpenTelemetry {
     loggerProvider {
-        logLimits {
+        logRecordLimits {
             attributeCountLimit = 32 // extra attributes are dropped
             attributeValueLengthLimit = 1024 // longer string values are truncated
         }

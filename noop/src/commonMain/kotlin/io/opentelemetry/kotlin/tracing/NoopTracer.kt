@@ -23,7 +23,7 @@ internal object NoopTracer : Tracer {
         startTimestamp: Long,
         action: (SpanCreationAction.() -> Unit)?
     ): Span = runCatching {
-        val parentSpan = (parentContext ?: currentContext()).extractSpan()
+        val parentSpan = (parentContext ?: currentContext()).span
         val parentSpanContext = parentSpan.spanContext
         when {
             !parentSpanContext.isValid -> NoopSpan

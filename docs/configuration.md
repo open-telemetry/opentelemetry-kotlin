@@ -209,7 +209,7 @@ The OTLP exporter's settings are:
   Defaults to `http://localhost:4318`.
 - `headers`: a `suspend` function that returns headers for each export request. Because it's
   called for every request, it's a good place to refresh an authentication token.
-- `timeoutMs`: how long a request can take. Defaults to 10 seconds.
+- `timeoutMs`: how long a request can take. Defaults to 10 seconds (0 means no limit).
 - `httpClient` or `httpClientEngine`: a Ktor client or engine to send requests with, if you need
   to customize TLS, proxies or authentication.
 
@@ -218,11 +218,9 @@ The batch processor's settings are:
 | Parameter            | Meaning                                                                      | Default                       |
 |----------------------|------------------------------------------------------------------------------|-------------------------------|
 | `maxQueueSize`       | How many items are buffered. When the buffer is full, new items are dropped. | 2048                          |
-| `scheduleDelay`      | How long to wait between span exports.                                       | 5 seconds                     |
-| `scheduleDelayMs`    | How long to wait between log exports.                                        | 1000                          |
+| `scheduleDelay`      | How long to wait between exports.                                            | 5 seconds (spans), 1 second (logs) |
 | `maxExportBatchSize` | The most items sent in one export.                                           | 512                           |
-| `exportTimeout`      | How long a span export can take before it's cancelled.                       | 30 seconds                    |
-| `exportTimeoutMs`    | How long a log export can take before it's cancelled.                        | 30000                         |
+| `exportTimeout`      | How long an export can take before it's cancelled.                           | 30 seconds                    |
 
 ### Sampling
 
@@ -299,12 +297,12 @@ fun initWithLimits(): OpenTelemetrySdk = createOpenTelemetry {
         }
     }
     loggerProvider {
-        logLimits { attributeValueLengthLimit = 4096 }
+        logRecordLimits { attributeValueLengthLimit = 4096 }
     }
 }
 ```
 
-`attributeLimits { }` applies to every signal. Limits set on `spanLimits { }` or `logLimits { }`
+`attributeLimits { }` applies to every signal. Limits set on `spanLimits { }` or `logRecordLimits { }`
 override it for that specific signal.
 
 ### Turning tracers and loggers off

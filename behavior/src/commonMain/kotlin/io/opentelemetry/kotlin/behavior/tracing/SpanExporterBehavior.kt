@@ -31,10 +31,7 @@ data class SpanExporterBehavior(
     override fun mergeWith(higher: SpanExporterBehavior): SpanExporterBehavior = copy(
         delegate = delegate.copy(
             console = mergeNode(console, higher.console),
-            http = mergeNode(
-                http,
-                higher.http
-            ),
+            http = mergeNode(http, higher.http),
         )
     )
 }

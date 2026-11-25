@@ -33,13 +33,18 @@ object AppConfig {
     const val APP_NAME = "example-app"
 
     /**
+     * The `service.name` resource attribute attached to all telemetry.
+     */
+    const val SERVICE_NAME = "otel-kotlin-example"
+
+    /**
      * The implementation of the Kotlin API that should be used to capture telemetry.
      */
     val sdkMode = SdkMode.IMPLEMENTATION
 
     /**
-     * URL of an OpenTelemetry collector endpoint. If set, telemetry will be exported
-     * to the collector via OTLP/HTTP, otherwise telemetry will be printed to stdout.
+     * Base URL of the OTLP/HTTP endpoint that telemetry is exported to. Defaults to
+     * `examples/local-collector` as seen from the current platform.
      */
-    val url: String? = null
+    val url: String = defaultCollectorUrl
 }

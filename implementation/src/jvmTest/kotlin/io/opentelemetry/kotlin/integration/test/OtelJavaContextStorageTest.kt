@@ -80,7 +80,7 @@ internal class OtelJavaContextStorageTest {
     fun testJavaMakeCurrentParentsKotlinSpan() = runTest {
         val javaSpan = javaApi.tracerProvider.get("tracer").spanBuilder("java_span").startSpan()
         OtelJavaContext.current().with(javaSpan).makeCurrent().use {
-            assertEquals(javaSpan.spanContext.spanId, currentContext().extractSpan().spanContext.spanId)
+            assertEquals(javaSpan.spanContext.spanId, currentContext().span.spanContext.spanId)
             harness.tracer.startSpan("kotlin_span").end()
         }
         javaSpan.end()
@@ -101,7 +101,7 @@ internal class OtelJavaContextStorageTest {
             OtelJavaContext.current().with(javaSpan).makeCurrent().use {
                 val current = currentContext()
                 assertEquals("value", current.get(key))
-                assertEquals(javaSpan.spanContext.spanId, current.extractSpan().spanContext.spanId)
+                assertEquals(javaSpan.spanContext.spanId, current.span.spanContext.spanId)
                 assertTrue(current.set(key, "inner").attach().detach())
                 harness.tracer.startSpan("kotlin_span").end()
             }
@@ -121,7 +121,7 @@ internal class OtelJavaContextStorageTest {
     @Test
     fun testJavaBaggageVisibleToKotlin() {
         OtelJavaBaggage.builder().put("key", "value").build().makeCurrent().use {
-            assertEquals("value", currentContext().extractBaggage().asMap()["key"]?.value)
+            assertEquals("value", currentContext().baggage.asMap()["key"]?.value)
         }
         assertSame(rootContext(), currentContext())
     }

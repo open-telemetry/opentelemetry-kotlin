@@ -19,7 +19,7 @@ fun initWithLimits(): OpenTelemetrySdk = createOpenTelemetry {
         }
     }
     loggerProvider {
-        logLimits { attributeValueLengthLimit = 4096 }
+        logRecordLimits { attributeValueLengthLimit = 4096 }
     }
 }
 // end-region
