@@ -29,4 +29,17 @@ internal class UnsupportedLogRecordWriteReporter(
             )
         )
     }
+
+    fun reportRemoval(property: String) {
+        if (!reported.add(property)) {
+            return
+        }
+        sdkErrorHandler.reportError(
+            SdkError.ApiMisuse(
+                api = "ReadWriteLogRecord.$property",
+                message = "opentelemetry-java does not support removing $property, so the removal was ignored.",
+                severity = SdkErrorSeverity.WARNING,
+            )
+        )
+    }
 }

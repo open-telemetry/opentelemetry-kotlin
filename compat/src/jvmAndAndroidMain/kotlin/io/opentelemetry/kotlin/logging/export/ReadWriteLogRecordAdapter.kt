@@ -70,7 +70,7 @@ internal class ReadWriteLogRecordAdapter(
 
     override fun removeAttribute(key: String) {
         // The opentelemetry-java ReadWriteLogRecord API does not support attribute removal.
-        unsupportedWrites.report("attributes")
+        unsupportedWrites.reportRemoval("attributes")
     }
 
     override val attributes: Map<String, Any>

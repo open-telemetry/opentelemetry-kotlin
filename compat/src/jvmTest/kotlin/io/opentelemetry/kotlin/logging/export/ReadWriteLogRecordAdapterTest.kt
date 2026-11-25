@@ -40,6 +40,10 @@ internal class ReadWriteLogRecordAdapterTest {
         assertEquals("value", record.attributes["key"])
         val error = errorHandler.apiMisuses.single()
         assertEquals("ReadWriteLogRecord.attributes", error.api)
+        assertEquals(
+            "opentelemetry-java does not support removing attributes, so the removal was ignored.",
+            error.message,
+        )
         assertEquals(SdkErrorSeverity.WARNING, error.severity)
     }
 
