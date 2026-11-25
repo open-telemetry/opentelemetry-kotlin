@@ -16,8 +16,6 @@ import io.opentelemetry.kotlin.export.runWithTimeout
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.data.LogRecordData
 import io.opentelemetry.kotlin.logging.model.ReadWriteLogRecord
-import kotlin.coroutines.coroutineContext
-import kotlin.time.TimeSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.TimeoutCancellationException
@@ -26,6 +24,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import kotlin.coroutines.coroutineContext
+import kotlin.time.TimeSource
 
 /**
  * A simple log record processor that immediately exports log records to a [LogRecordExporter].
@@ -36,7 +36,10 @@ internal class SimpleLogRecordProcessor(
     private val exporter: LogRecordExporter,
     private val scope: CoroutineScope,
     private val sdkErrorHandler: SdkErrorHandler,
+    private val nowMs: (() -> Long)? = null,
 ) : LogRecordProcessor {
+
+    private val monotonicMark = TimeSource.Monotonic.markNow()
 
     // Serializes exporter.export calls; the spec only forbids concurrent Export calls, so
     // forceFlush/shutdown deliberately do not take this mutex.
@@ -73,6 +76,10 @@ internal class SimpleLogRecordProcessor(
                 }
                 result
             } catch (e: TimeoutCancellationException) {
+                // A timeout raised by our own withTimeout leaves the coroutine active; an
+                // externally cancelled export coroutine must propagate instead of being
+                // misreported as an exporter failure.
+                coroutineContext.ensureActive()
                 sdkErrorHandler.reportError(
                     SdkError.UserCodeError(e, "Export timed out", SdkErrorSeverity.WARNING)
                 )
@@ -116,11 +123,14 @@ internal class SimpleLogRecordProcessor(
      * caller cancellation cannot skip exporter shutdown, and [ensureActive] re-propagates that
      * cancellation once cleanup has finished or the deadline has expired.
      */
+    private fun now(): Long =
+        nowMs?.invoke() ?: monotonicMark.elapsedNow().inWholeMilliseconds
+
     private suspend fun shutdownWithinDeadline(): OperationResultCode {
-        val start = TimeSource.Monotonic.markNow()
+        val start = now()
         fun remainingMs(): Long =
-            (BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS - start.elapsedNow().inWholeMilliseconds)
-                .coerceAtLeast(1)
+            (BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS - (now() - start))
+                .coerceAtLeast(0)
 
         var result = withContext(NonCancellable) {
             runWithTimeout(remainingMs()) {
@@ -136,9 +146,13 @@ internal class SimpleLogRecordProcessor(
         }
         result = result and withContext(NonCancellable) {
             sdkErrorHandler.guardExporterCode("Exporter shutdown failed") {
-                runWithTimeout(remainingMs()) { exporter.shutdown() }
+                // Single 1ms floor so the shutdown call is still attempted when the
+                // deadline is exactly exhausted; drain and forceFlush get no such floor.
+                runWithTimeout(remainingMs().coerceAtLeast(1)) { exporter.shutdown() }
             }
         }
+        // All admitted exports have been drained or cancelled; release the tracker job.
+        exportTracker.terminate()
         coroutineContext.ensureActive()
         return result
     }

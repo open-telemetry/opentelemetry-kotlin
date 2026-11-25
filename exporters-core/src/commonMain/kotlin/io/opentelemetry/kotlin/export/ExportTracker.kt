@@ -1,7 +1,6 @@
 package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.ReentrantReadWriteLock
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -9,6 +8,7 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.job
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Tracks export jobs launched by a simple processor so that [drain] can wait for them and
@@ -25,9 +25,16 @@ import kotlinx.coroutines.launch
 internal class ExportTracker(parentContext: CoroutineContext) {
 
     // Keeps the parent's dispatcher and other context elements; the SupervisorJob replaces
-    // the Job key so export jobs are its children and still observe parent cancellation.
-    private val scope =
-        CoroutineScope(parentContext + SupervisorJob(parentContext[Job]))
+    // the Job key so export jobs are its children.
+    private val scopeJob = SupervisorJob()
+    private val scope = CoroutineScope(parentContext + scopeJob)
+
+    init {
+        // Propagate parent completion/cancellation without parenting scopeJob to the
+        // parent's Job: a child Job would be reported as an uncompleted child coroutine
+        // by runTest-style scopes that never complete until the test ends.
+        parentContext[Job]?.invokeOnCompletion { scopeJob.cancel() }
+    }
     private val lock = ReentrantReadWriteLock()
     private var closed = false
 
@@ -62,6 +69,20 @@ internal class ExportTracker(parentContext: CoroutineContext) {
      * Cancels exports still running, e.g. after a drain timed out.
      */
     fun cancelRemaining() {
-        scope.coroutineContext.job.cancelChildren()
+        scopeJob.cancelChildren()
     }
+
+    /**
+     * Cancels the tracker job itself along with any remaining export children. Call only
+     * after [drain] has had its chance to wait for admitted exports; afterwards the tracker
+     * must not be used again.
+     */
+    fun terminate() {
+        close()
+        scopeJob.cancel()
+    }
+
+    /** The job parenting all tracked export coroutines. Exposed for lifecycle tests. */
+    internal val job: Job
+        get() = scopeJob
 }

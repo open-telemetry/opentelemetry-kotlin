@@ -38,7 +38,13 @@ internal class SimpleLogRecordProcessorTest {
         exporter: LogRecordExporter,
         handler: SdkErrorHandler = NoopSdkErrorHandler,
         testScheduler: TestCoroutineScheduler,
-    ) = SimpleLogRecordProcessor(exporter, CoroutineScope(StandardTestDispatcher(testScheduler)), handler)
+        nowMs: (() -> Long)? = null,
+    ) = SimpleLogRecordProcessor(
+        exporter,
+        CoroutineScope(StandardTestDispatcher(testScheduler)),
+        handler,
+        nowMs,
+    )
 
     @Test
     fun testSpanProcessorDefaults() = runTest {
@@ -372,6 +378,34 @@ internal class SimpleLogRecordProcessorTest {
     }
 
     @Test
+    fun testShutdownUsesSingleOverallDeadline() = runTest {
+        // Both the export and the exporter forceFlush are gated, so drain and the flush
+        // phase each want the full timeout; the shutdown deadline must still bound the
+        // total rather than granting each phase a fresh budget.
+        val exporter = TestLogRecordExporter(
+            exportGate = CompletableDeferred(),
+            flushGate = CompletableDeferred(),
+        )
+        val processor = newProcessor(
+            exporter,
+            testScheduler = testScheduler,
+            nowMs = { testScheduler.currentTime },
+        )
+        processor.onEmit(FakeReadWriteLogRecord(body = "log1"), FakeContext())
+        runCurrent()
+
+        val result = async { processor.shutdown() }
+        advanceUntilIdle()
+
+        assertEquals(OperationResultCode.Failure, result.await())
+        assertEquals(1, exporter.shutdownCalls)
+        assertTrue(
+            testScheduler.currentTime <= BatchTelemetryDefaults.SHUTDOWN_TIMEOUT_MS + 1,
+            "shutdown exceeded its single deadline: ${testScheduler.currentTime}ms",
+        )
+    }
+
+    @Test
     fun testExportFailureIsContained() = runTest {
         val errorHandler = FakeSdkErrorHandler()
         var exportCount = 0
@@ -404,6 +438,9 @@ internal class SimpleLogRecordProcessorTest {
         assertEquals(OperationResultCode.Failure, processor.forceFlush())
         assertEquals("flush failed", errorHandler.userCodeErrors.single().cause.message)
         assertTrue(errorHandler.sdkCodeErrors.isEmpty())
+
+        // Flush-only usage must still release the processor's export tracker.
+        processor.shutdown()
     }
 
     @Test
