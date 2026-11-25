@@ -256,6 +256,57 @@ internal class AttributesMutatorExtTest {
     }
 
     @Test
+    fun `map-key collisions disambiguate multiple colliding keys efficiently`() {
+        val mutator = FakeAttributesMutator()
+        val map = linkedMapOf<Any, String>(
+            CollidingKey(1) to "first",
+            CollidingKey(2) to "second",
+            CollidingKey(3) to "third",
+        )
+        mutator.setAttributes(mapOf("colliding" to map))
+        val observed = mutator.attributes["colliding"]
+        assertEquals(
+            AnyValue.MapValue(
+                mapOf(
+                    "same" to AnyValue.StringValue("first"),
+                    "same_1" to AnyValue.StringValue("second"),
+                    "same_2" to AnyValue.StringValue("third"),
+                )
+            ),
+            observed
+        )
+    }
+
+    @Test
+    fun `recursive conversion preserves DoubleValue for whole-valued Double and negative zero`() {
+        val mutator = FakeAttributesMutator()
+        mutator.setAttributes(
+            mapOf(
+                "nested" to mapOf("whole" to 1.0, "negZero" to -0.0),
+                "nestedList" to listOf(mapOf("d" to 2.0)),
+            )
+        )
+        val observed = mutator.attributes
+        assertEquals(
+            AnyValue.MapValue(
+                mapOf(
+                    "whole" to AnyValue.DoubleValue(1.0),
+                    "negZero" to AnyValue.DoubleValue(-0.0),
+                )
+            ),
+            observed["nested"]
+        )
+        assertEquals(
+            AnyValue.ListValue(
+                listOf(
+                    AnyValue.MapValue(mapOf("d" to AnyValue.DoubleValue(2.0)))
+                )
+            ),
+            observed["nestedList"]
+        )
+    }
+
+    @Test
     fun `nested maps depth boundary preserves leaf up to maximum depth`() {
         val mutator = FakeAttributesMutator()
         var current: Any = "leaf"
@@ -307,6 +358,10 @@ internal class AttributesMutatorExtTest {
     }
 
     private data class TestObj(val first: String, val second: Long)
+
+    private class CollidingKey(val id: Int) {
+        override fun toString(): String = "same"
+    }
 
     private class ComplexObject {
         override fun toString(): String = "ComplexObject"

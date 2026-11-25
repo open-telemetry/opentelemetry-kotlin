@@ -179,6 +179,39 @@ internal class AttributeValueTest {
     }
 
     @Test
+    fun testFromPublicMapKeyCollisionsWithMultipleKeys() {
+        val map = linkedMapOf<Any, String>(
+            CollidingKey(1) to "first",
+            CollidingKey(2) to "second",
+            CollidingKey(3) to "third",
+        )
+        val expected = AttributeValue.Value(
+            AnyValue.MapValue(
+                mapOf(
+                    "same" to AnyValue.StringValue("first"),
+                    "same_1" to AnyValue.StringValue("second"),
+                    "same_2" to AnyValue.StringValue("third"),
+                )
+            )
+        )
+        assertEquals(expected, AttributeValue.fromPublic(map))
+    }
+
+    @Test
+    fun testFromPublicPreservesDoubleValueForWholeValuedDoubleAndNegativeZero() {
+        val map = mapOf("whole" to 1.0, "negZero" to -0.0)
+        val expected = AttributeValue.Value(
+            AnyValue.MapValue(
+                mapOf(
+                    "whole" to AnyValue.DoubleValue(1.0),
+                    "negZero" to AnyValue.DoubleValue(-0.0),
+                )
+            )
+        )
+        assertEquals(expected, AttributeValue.fromPublic(map))
+    }
+
+    @Test
     fun testFromPublicNestedMapsDepthBoundary() {
         var current: Any = "leaf"
         repeat(15) {
@@ -340,6 +373,10 @@ internal class AttributeValueTest {
     private fun Any.toAnyForm(): Any = when (this) {
         is ByteArray -> AnyValue.BytesValue(this)
         else -> this
+    }
+
+    private class CollidingKey(val id: Int) {
+        override fun toString(): String = "same"
     }
 
     private class RecordingAttributesMutator : AttributesMutator {

@@ -94,6 +94,7 @@ private fun Any?.toAnyValue(ancestors: List<Any> = emptyList()): AnyValue {
         is String -> AnyValue.StringValue(this)
         is Boolean -> AnyValue.BoolValue(this)
         is Long -> AnyValue.LongValue(this)
+        is Double -> AnyValue.DoubleValue(this)
         is Number -> when {
             isWholeNumber() -> AnyValue.LongValue(toLong())
             else -> AnyValue.DoubleValue(toDouble())
@@ -116,14 +117,16 @@ private fun Any?.toAnyValue(ancestors: List<Any> = emptyList()): AnyValue {
 private fun Map<*, *>.toAnyValueMap(ancestors: List<Any> = emptyList()): AnyValue.MapValue {
     val path = ancestors + this
     val result = LinkedHashMap<String, AnyValue>(size)
+    val nextSuffix = mutableMapOf<String, Int>()
     for ((key, value) in this) {
         val baseKey = key.toString()
         var candidateKey = baseKey
-        var counter = 1
+        var counter = nextSuffix[baseKey] ?: 1
         while (result.containsKey(candidateKey)) {
             candidateKey = "${baseKey}_$counter"
             counter++
         }
+        nextSuffix[baseKey] = counter
         result[candidateKey] = value.toAnyValue(path)
     }
     return AnyValue.MapValue(result)
