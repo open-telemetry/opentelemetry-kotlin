@@ -236,6 +236,55 @@ internal class AttributesMutatorExtTest {
     }
 
     @Test
+    fun `map-key collisions are deterministically disambiguated`() {
+        val mutator = FakeAttributesMutator()
+        mutator.setAttributes(
+            mapOf(
+                "collidingMap" to mapOf(1 to "numeric", "1" to "text"),
+            )
+        )
+        val observed = mutator.attributes["collidingMap"]
+        assertEquals(
+            AnyValue.MapValue(
+                mapOf(
+                    "1" to AnyValue.StringValue("numeric"),
+                    "1_1" to AnyValue.StringValue("text"),
+                )
+            ),
+            observed
+        )
+    }
+
+    @Test
+    fun `nested maps depth boundary preserves leaf up to maximum depth`() {
+        val mutator = FakeAttributesMutator()
+        var current: Any = "leaf"
+        repeat(15) {
+            current = mapOf("next" to current)
+        }
+        mutator.setAttributes(mapOf("chain15" to current))
+
+        var node = mutator.attributes["chain15"] as AnyValue
+        repeat(15) {
+            val mapValue = node as AnyValue.MapValue
+            node = checkNotNull(mapValue.value["next"])
+        }
+        assertEquals(AnyValue.StringValue("leaf"), node)
+
+        var deeper: Any = "leaf"
+        repeat(16) {
+            deeper = mapOf("next" to deeper)
+        }
+        mutator.setAttributes(mapOf("chain16" to deeper))
+        var deepNode = mutator.attributes["chain16"] as AnyValue
+        repeat(16) {
+            val mapValue = deepNode as AnyValue.MapValue
+            deepNode = checkNotNull(mapValue.value["next"])
+        }
+        assertEquals(AnyValue.NullValue, deepNode)
+    }
+
+    @Test
     fun `byteArray elements inside lists become BytesValue`() {
         val mutator = FakeAttributesMutator()
         val bytes1 = byteArrayOf(1, 2)

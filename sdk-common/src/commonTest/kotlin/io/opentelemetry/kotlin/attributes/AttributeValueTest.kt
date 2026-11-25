@@ -165,6 +165,47 @@ internal class AttributeValueTest {
     }
 
     @Test
+    fun testFromPublicMapKeyCollisions() {
+        val map = mapOf(1 to "numeric", "1" to "text")
+        val expected = AttributeValue.Value(
+            AnyValue.MapValue(
+                mapOf(
+                    "1" to AnyValue.StringValue("numeric"),
+                    "1_1" to AnyValue.StringValue("text"),
+                )
+            )
+        )
+        assertEquals(expected, AttributeValue.fromPublic(map))
+    }
+
+    @Test
+    fun testFromPublicNestedMapsDepthBoundary() {
+        var current: Any = "leaf"
+        repeat(15) {
+            current = mapOf("next" to current)
+        }
+        val attr15 = AttributeValue.fromPublic(current) as AttributeValue.Value
+        var node: AnyValue = attr15.value
+        repeat(15) {
+            val mapValue = node as AnyValue.MapValue
+            node = checkNotNull(mapValue.value["next"])
+        }
+        assertEquals(AnyValue.StringValue("leaf"), node)
+
+        var deeper: Any = "leaf"
+        repeat(16) {
+            deeper = mapOf("next" to deeper)
+        }
+        val attr16 = AttributeValue.fromPublic(deeper) as AttributeValue.Value
+        var deepNode: AnyValue = attr16.value
+        repeat(16) {
+            val mapValue = deepNode as AnyValue.MapValue
+            deepNode = checkNotNull(mapValue.value["next"])
+        }
+        assertEquals(AnyValue.NullValue, deepNode)
+    }
+
+    @Test
     fun testFromPublicListsWithBytes() {
         val b1 = byteArrayOf(1, 2)
         val b2 = byteArrayOf(3, 4)

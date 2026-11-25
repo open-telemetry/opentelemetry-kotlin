@@ -227,7 +227,7 @@ public sealed class AttributeValue {
                 is DoubleArray -> AnyValue.ListValue(map { AnyValue.DoubleValue(it) })
                 is FloatArray -> AnyValue.ListValue(map { AnyValue.DoubleValue(it.toDouble()) })
                 is CharArray -> AnyValue.ListValue(map { AnyValue.StringValue(it.toString()) })
-                is Map<*, *> -> toAnyValueMap(path)
+                is Map<*, *> -> toAnyValueMap(ancestors)
                 is Collection<*> -> AnyValue.ListValue(map { it.toAnyValue(path) })
                 is Array<*> -> AnyValue.ListValue(map { it.toAnyValue(path) })
                 else -> AnyValue.StringValue(toString())
@@ -236,9 +236,18 @@ public sealed class AttributeValue {
 
         private fun Map<*, *>.toAnyValueMap(ancestors: List<Any> = emptyList()): AnyValue.MapValue {
             val path = ancestors + this
-            return AnyValue.MapValue(
-                entries.associate { (k, v) -> k.toString() to v.toAnyValue(path) }
-            )
+            val result = LinkedHashMap<String, AnyValue>(size)
+            for ((key, value) in this) {
+                val baseKey = key.toString()
+                var candidateKey = baseKey
+                var counter = 1
+                while (result.containsKey(candidateKey)) {
+                    candidateKey = "${baseKey}_$counter"
+                    counter++
+                }
+                result[candidateKey] = value.toAnyValue(path)
+            }
+            return AnyValue.MapValue(result)
         }
     }
 }
