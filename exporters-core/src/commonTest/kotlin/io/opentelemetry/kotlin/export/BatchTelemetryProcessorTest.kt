@@ -284,7 +284,7 @@ internal class BatchTelemetryProcessorTest {
 
     @Test
     fun testForceFlushReportsExportTimeout() = runTest {
-        val processor = createProcessor(exportTimeoutMs = 10) {
+        val processor = createProcessor(exportTimeout = 10.milliseconds) {
             delay(100)
             OperationResultCode.Success
         }
