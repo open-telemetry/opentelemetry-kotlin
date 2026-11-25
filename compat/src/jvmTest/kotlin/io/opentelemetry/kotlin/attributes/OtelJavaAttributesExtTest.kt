@@ -125,7 +125,7 @@ internal class OtelJavaAttributesExtTest {
     }
 
     @Test
-    fun testAttrsFromMapStringifiesUnsupportedValues() {
+    fun testAttrsFromMapUnsupportedValues() {
         val attrs = attrsFromMap(
             mapOf(
                 "mixedList" to listOf("a", 1L),
@@ -133,8 +133,11 @@ internal class OtelJavaAttributesExtTest {
                 "object" to Any0
             )
         )
-        // A heterogeneous list has no typed equivalent, so each element is stringified.
-        assertEquals(listOf("a", "1"), attrs.get(AttributeKey.stringArrayKey("mixedList")))
+        // A heterogeneous list becomes an AnyValue.ListValue rather than being stringified.
+        assertEquals(
+            Value.of(listOf(Value.of("a"), Value.of(1L))),
+            attrs.get(AttributeKey.valueKey("mixedList"))
+        )
         assertEquals(emptyList<String>(), attrs.get(AttributeKey.stringArrayKey("emptyList")))
         assertEquals("Any0", attrs.get(AttributeKey.stringKey("object")))
     }

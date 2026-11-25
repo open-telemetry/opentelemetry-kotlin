@@ -17,11 +17,14 @@ internal class CopyAttributesTest {
     }
 
     @Test
-    fun testHeterogeneousListIsStringified() {
+    fun testHeterogeneousListBecomesAnyValueListValue() {
         val attrs = AttributesModel().apply {
             copyAttributes(untyped(mapOf("mixed" to listOf(1.5, "a"))))
         }.attributes
-        assertEquals(mapOf("mixed" to listOf("1.5", "a")), attrs)
+        assertEquals(
+            mapOf("mixed" to AnyValue.ListValue(listOf(AnyValue.DoubleValue(1.5), AnyValue.StringValue("a")))),
+            attrs
+        )
     }
 
     @Test

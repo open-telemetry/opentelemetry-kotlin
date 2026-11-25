@@ -122,9 +122,62 @@ internal class AttributeValueTest {
     @Test
     fun testFromPublicLists() {
         assertEquals(AttributeValue.StrList(emptyList()), AttributeValue.fromPublic(emptyList<Long>()))
-        assertEquals(AttributeValue.StrList(listOf("a", "true", "null")), AttributeValue.fromPublic(listOf("a", true, null)))
+        assertEquals(
+            AttributeValue.Value(
+                AnyValue.ListValue(
+                    listOf(
+                        AnyValue.StringValue("a"),
+                        AnyValue.BoolValue(true),
+                        AnyValue.NullValue,
+                    )
+                )
+            ),
+            AttributeValue.fromPublic(listOf("a", true, null))
+        )
         assertEquals(AttributeValue.BoolList(listOf(true)), AttributeValue.fromPublic(setOf(true)))
         assertEquals(AttributeValue.StrList(listOf("a")), AttributeValue.fromPublic(arrayOf("a")))
+    }
+
+    @Test
+    fun testFromPublicPrimitiveArrays() {
+        assertEquals(AttributeValue.BoolList(listOf(true, false)), AttributeValue.fromPublic(booleanArrayOf(true, false)))
+        assertEquals(AttributeValue.LongList(listOf(10L, 20L)), AttributeValue.fromPublic(longArrayOf(10L, 20L)))
+        assertEquals(AttributeValue.LongList(listOf(1L, 2L)), AttributeValue.fromPublic(intArrayOf(1, 2)))
+        assertEquals(AttributeValue.LongList(listOf(3L, 4L)), AttributeValue.fromPublic(shortArrayOf(3.toShort(), 4.toShort())))
+        assertEquals(AttributeValue.DoubleList(listOf(1.5, 2.5)), AttributeValue.fromPublic(doubleArrayOf(1.5, 2.5)))
+        assertEquals(AttributeValue.DoubleList(listOf(3.5, 4.5)), AttributeValue.fromPublic(floatArrayOf(3.5f, 4.5f)))
+        assertEquals(AttributeValue.StrList(listOf("x", "y")), AttributeValue.fromPublic(charArrayOf('x', 'y')))
+    }
+
+    @Test
+    fun testFromPublicMaps() {
+        val map = mapOf("k" to "v", 123 to 456L, "nullKey" to null)
+        val expected = AttributeValue.Value(
+            AnyValue.MapValue(
+                mapOf(
+                    "k" to AnyValue.StringValue("v"),
+                    "123" to AnyValue.LongValue(456L),
+                    "nullKey" to AnyValue.NullValue,
+                )
+            )
+        )
+        assertEquals(expected, AttributeValue.fromPublic(map))
+    }
+
+    @Test
+    fun testFromPublicListsWithBytes() {
+        val b1 = byteArrayOf(1, 2)
+        val b2 = byteArrayOf(3, 4)
+        val list = listOf(b1, b2)
+        val expected = AttributeValue.Value(
+            AnyValue.ListValue(
+                listOf(
+                    AnyValue.BytesValue(b1),
+                    AnyValue.BytesValue(b2),
+                )
+            )
+        )
+        assertEquals(expected, AttributeValue.fromPublic(list))
     }
 
     @Test

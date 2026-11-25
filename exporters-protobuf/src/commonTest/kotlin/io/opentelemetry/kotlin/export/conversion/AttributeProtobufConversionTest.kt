@@ -41,10 +41,10 @@ class AttributeProtobufConversionTest {
     }
 
     @Test
-    fun testHeterogeneousListIsStringified() {
-        // matches setAttributes, which stores a heterogeneous list as a list of strings
+    fun testHeterogeneousListConvertedToTypedArray() {
         val array = checkNotNull(createForValue(listOf("val", 32L)).value_?.array_value?.values)
-        assertEquals(listOf("val", "32"), array.map { it.string_value })
+        assertEquals("val", array[0].string_value)
+        assertEquals(32L, array[1].int_value)
     }
 
     @Test
@@ -89,8 +89,10 @@ class AttributeProtobufConversionTest {
     }
 
     @Test
-    fun testUnknownTypeIsStringified_map() {
-        assertEquals("{a=1}", createForValue(mapOf("a" to 1)).value_?.string_value)
+    fun testMapConvertedToKvlist() {
+        val kvlist = checkNotNull(createForValue(mapOf("a" to 1L)).value_?.kvlist_value?.values)
+        assertEquals("a", kvlist[0].key)
+        assertEquals(1L, kvlist[0].value_?.int_value)
     }
 
     @Test
@@ -106,7 +108,8 @@ class AttributeProtobufConversionTest {
     @Test
     fun testListWithNullElementDoesNotThrow() {
         val array = checkNotNull(createForValue(listOf("a", null)).value_?.array_value?.values)
-        assertEquals(listOf("a", "null"), array.map { it.string_value })
+        assertEquals("a", array[0].string_value)
+        assertEquals(AnyValue(), array[1])
     }
 
     @Test
@@ -114,7 +117,10 @@ class AttributeProtobufConversionTest {
         val deserialized = mapOf<String, Any>("key" to listOf("a", null))
             .createKeyValues()
             .toAttributeMap()
-        assertEquals(listOf("a", "null"), deserialized["key"])
+        assertEquals(
+            KotlinAnyValue.ListValue(listOf(KotlinAnyValue.StringValue("a"), KotlinAnyValue.NullValue)),
+            deserialized["key"]
+        )
     }
 
     @Test
