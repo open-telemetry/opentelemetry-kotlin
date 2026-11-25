@@ -21,19 +21,19 @@ internal class SpanExtTest {
 
     @Test
     fun `test store span context valid`() {
-        val span = rootContext().storeSpanContext(validSpanContext).extractSpan()
+        val span = rootContext().storeSpanContext(validSpanContext).span
         assertSpanContextsMatch(validSpanContext, span.spanContext)
     }
 
     @Test
     fun `test store span context invalid`() {
-        val span = rootContext().storeSpanContext(createInvalidSpanContext()).extractSpan()
+        val span = rootContext().storeSpanContext(createInvalidSpanContext()).span
         assertFalse(span.spanContext.isValid)
     }
 
     @Test
     fun `test from context invalid`() {
-        val span = rootContext().extractSpan()
+        val span = rootContext().span
         assertSpanContextsMatch(createInvalidSpanContext(), span.spanContext)
     }
 
@@ -53,10 +53,10 @@ internal class SpanExtTest {
         )
         val root = rootContext()
         val ctx = root.storeSpan(span)
-        val observed = root.extractSpan().spanContext
+        val observed = root.span.spanContext
         assertSpanContextsMatch(createInvalidSpanContext(), observed)
 
-        val retrievedSpan = ctx.extractSpan()
+        val retrievedSpan = ctx.span
         assertSpanContextsMatch(spanContext.toOtelKotlinSpanContext(), retrievedSpan.spanContext)
     }
 
@@ -64,13 +64,13 @@ internal class SpanExtTest {
     fun `test store span context round trip`() {
         val root = rootContext()
         val ctx = root.storeSpanContext(validSpanContext)
-        assertSpanContextsMatch(validSpanContext, ctx.extractSpan().spanContext)
-        assertSpanContextsMatch(createInvalidSpanContext(), root.extractSpan().spanContext)
+        assertSpanContextsMatch(validSpanContext, ctx.span.spanContext)
+        assertSpanContextsMatch(createInvalidSpanContext(), root.span.spanContext)
     }
 
     @Test
     fun `test store invalid span context`() {
         val ctx = rootContext().storeSpanContext(createInvalidSpanContext())
-        assertSpanContextsMatch(createInvalidSpanContext(), ctx.extractSpan().spanContext)
+        assertSpanContextsMatch(createInvalidSpanContext(), ctx.span.spanContext)
     }
 }

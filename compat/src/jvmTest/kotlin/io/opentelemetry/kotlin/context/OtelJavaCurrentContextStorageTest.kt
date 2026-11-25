@@ -89,7 +89,7 @@ internal class OtelJavaCurrentContextStorageTest {
         storage.attach(root.set(key, "value").storeSpan(kotlinSpan)).use {
             OtelJavaContext.current().with(javaKey, "java").with(javaSpan).makeCurrent().use {
                 val current = storage.current()
-                assertEquals(JAVA_SPAN_ID, current.extractSpan().spanContext.spanId)
+                assertEquals(JAVA_SPAN_ID, current.span.spanContext.spanId)
                 assertEquals("value", current.get(key))
                 assertSame(current, storage.current())
 
@@ -115,10 +115,10 @@ internal class OtelJavaCurrentContextStorageTest {
             }
             val wrapped = span("d7ad6b7169203331")
             OtelJavaContext.current().with(OtelJavaSpanAdapter(wrapped)).makeCurrent().use {
-                assertSame(wrapped, storage.current().extractSpan())
+                assertSame(wrapped, storage.current().span)
             }
             OtelJavaContext.current().with(OtelJavaSpan.getInvalid()).makeCurrent().use {
-                assertFalse(storage.current().extractSpan().spanContext.isValid)
+                assertFalse(storage.current().span.spanContext.isValid)
                 storage.attach(storage.current().set(key, "changed")).use {
                     assertFalse(OtelJavaSpan.current().spanContext.isValid)
                 }
@@ -131,8 +131,8 @@ internal class OtelJavaCurrentContextStorageTest {
         storage.attach(root.set(key, "value").storeBaggage(alice)).use {
             OtelJavaBaggage.builder().put("x", "y").build().makeCurrent().use {
                 val current = storage.current()
-                assertEquals("y", current.extractBaggage().getValue("x"))
-                assertNull(current.extractBaggage().getValue("user"))
+                assertEquals("y", current.baggage.getValue("x"))
+                assertNull(current.baggage.getValue("user"))
                 assertEquals("value", current.get(key))
                 assertSame(current, storage.current())
 
@@ -141,7 +141,7 @@ internal class OtelJavaCurrentContextStorageTest {
                 }
             }
             OtelJavaBaggage.empty().makeCurrent().use {
-                assertTrue(storage.current().extractBaggage().asMap().isEmpty())
+                assertTrue(storage.current().baggage.asMap().isEmpty())
                 storage.attach(storage.current().set(key, "changed")).use {
                     assertTrue(OtelJavaBaggage.current().isEmpty)
                 }
@@ -169,7 +169,7 @@ internal class OtelJavaCurrentContextStorageTest {
     fun `foreign java contexts keep java keys and are identity-stable`() {
         OtelJavaContext.root().with(javaKey, "java").with(javaSpan).makeCurrent().use {
             val current = storage.current()
-            assertEquals(JAVA_SPAN_ID, current.extractSpan().spanContext.spanId)
+            assertEquals(JAVA_SPAN_ID, current.span.spanContext.spanId)
             assertSame(current, storage.current())
             assertSame(current, OtelJavaContext.current().toOtelKotlinContext())
             assertSame(OtelJavaContext.current(), current.toOtelJavaContext())
@@ -197,7 +197,7 @@ internal class OtelJavaCurrentContextStorageTest {
 
     @Test
     fun `failing user code falls back and is reported once`() {
-        val failsOnAttach = MapContext(failOn = setOf("extractSpan"))
+        val failsOnAttach = MapContext(failOn = setOf("span"))
         storage.attach(failsOnAttach).use {
             assertIs<OtelJavaContextAdapter>(OtelJavaContext.current())
             assertSame(failsOnAttach, storage.current())
@@ -210,7 +210,7 @@ internal class OtelJavaCurrentContextStorageTest {
                 val current = storage.current()
                 assertNull(current.get(key))
                 assertSame(current, storage.current())
-                assertEquals(JAVA_SPAN_ID, current.extractSpan().spanContext.spanId)
+                assertEquals(JAVA_SPAN_ID, current.span.spanContext.spanId)
             }
         }
         assertEquals(3, errors.userCodeErrors.size)
@@ -243,9 +243,11 @@ internal class OtelJavaCurrentContextStorageTest {
         override fun storeSpan(span: Span): Context = fail("storeSpan").let { set(SPAN, span) }
         override fun storeSpanContext(spanContext: SpanContext): Context =
             storeSpan(createNonRecordingSpan(spanContext))
-        override fun extractSpan(): Span = fail("extractSpan").let { values[SPAN] as Span? ?: INVALID_SPAN }
+        override val span: Span
+            get() = fail("span").let { values[SPAN] as Span? ?: INVALID_SPAN }
         override fun storeBaggage(baggage: Baggage): Context = set(BAGGAGE, baggage)
-        override fun extractBaggage(): Baggage = values[BAGGAGE] as Baggage? ?: EMPTY_BAGGAGE
+        override val baggage: Baggage
+            get() = values[BAGGAGE] as Baggage? ?: EMPTY_BAGGAGE
         override fun clearBaggage(): Context = set(BAGGAGE, null)
 
         private companion object {

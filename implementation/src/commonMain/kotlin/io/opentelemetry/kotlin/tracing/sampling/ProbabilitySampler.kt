@@ -42,7 +42,7 @@ internal class ProbabilitySampler(
         attributes: AttributeContainer,
         links: List<SpanLink>
     ): SamplingResult {
-        val parentSpanContext = context.extractSpan().spanContext
+        val parentSpanContext = context.span.spanContext
         val traceState = parentSpanContext.traceState
         val otelTraceState = OtelTraceState.parse(traceState.get(KnownTraceState.OT))
 

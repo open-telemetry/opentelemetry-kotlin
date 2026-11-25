@@ -15,18 +15,18 @@ import kotlin.test.assertTrue
 internal class CompatContextBaggageTest {
 
     @Test
-    fun `extractBaggage on root returns empty baggage`() {
-        assertTrue(rootContext().extractBaggage().asMap().isEmpty())
+    fun `baggage on root returns empty baggage`() {
+        assertTrue(rootContext().baggage.asMap().isEmpty())
     }
 
     @Test
-    fun `storeBaggage then extractBaggage round-trips entries`() {
+    fun `storeBaggage then baggage round-trips entries`() {
         val baggage = createBaggage {
             put("user", "alice")
             put("region", "eu")
         }
 
-        val extracted = rootContext().storeBaggage(baggage).extractBaggage()
+        val extracted = rootContext().storeBaggage(baggage).baggage
 
         assertEquals("alice", extracted.getValue("user"))
         assertEquals("eu", extracted.getValue("region"))
@@ -37,8 +37,8 @@ internal class CompatContextBaggageTest {
         val baggage = createBaggage { put("user", "alice") }
         val cleared = rootContext().storeBaggage(baggage).clearBaggage()
 
-        assertTrue(cleared.extractBaggage().asMap().isEmpty())
-        assertNull(cleared.extractBaggage().getValue("user"))
+        assertTrue(cleared.baggage.asMap().isEmpty())
+        assertNull(cleared.baggage.getValue("user"))
     }
 
     @Test
@@ -52,21 +52,21 @@ internal class CompatContextBaggageTest {
     }
 
     @Test
-    fun `otel-java storeInContext interops with kotlin extractBaggage`() {
+    fun `otel-java storeInContext interops with kotlin baggage`() {
         val javaBaggage = OtelJavaBaggage.builder().put("user", "alice").build()
         val javaCtx = javaBaggage.storeInContext(rootContext().toOtelJavaContext())
 
-        val extracted = javaCtx.toOtelKotlinContext().extractBaggage()
+        val extracted = javaCtx.toOtelKotlinContext().baggage
 
         assertEquals("alice", extracted.getValue("user"))
     }
 
     @Test
-    fun `extractBaggage preserves otel-java entries with non-token keys`() {
+    fun `baggage preserves otel-java entries with non-token keys`() {
         val javaBaggage = OtelJavaBaggage.builder().put("bad key", "b").put("good", "g").build()
         val javaCtx = javaBaggage.storeInContext(rootContext().toOtelJavaContext())
 
-        val extracted = javaCtx.toOtelKotlinContext().extractBaggage()
+        val extracted = javaCtx.toOtelKotlinContext().baggage
 
         assertEquals("b", extracted.getValue("bad key"))
         assertEquals("g", extracted.getValue("good"))
@@ -77,7 +77,7 @@ internal class CompatContextBaggageTest {
         val javaBaggage = OtelJavaBaggage.builder().put("bad key", "b").put("good", "g").build()
         val ctx = javaBaggage.storeInContext(rootContext().toOtelJavaContext()).toOtelKotlinContext()
 
-        val updated = ctx.storeBaggage(ctx.extractBaggage().put("user", "alice"))
+        val updated = ctx.storeBaggage(ctx.baggage.put("user", "alice"))
         val written = OtelJavaBaggage.fromContext(updated.toOtelJavaContext())
 
         assertEquals(mapOf("bad key" to "b", "good" to "g", "user" to "alice"), written.asMap().mapValues { it.value.value })
@@ -91,7 +91,7 @@ internal class CompatContextBaggageTest {
                 "region" to FakeBaggageEntry("eu", FakeBaggageEntryMetadata("meta")),
             )
         )
-        val extracted = rootContext().storeBaggage(baggage).extractBaggage()
+        val extracted = rootContext().storeBaggage(baggage).baggage
         assertEquals("alice", extracted.getValue("user"))
         assertEquals("eu", extracted.getValue("region"))
         assertEquals("", extracted.asMap().getValue("user").metadata.value)
@@ -109,6 +109,6 @@ internal class CompatContextBaggageTest {
     @Test
     fun `storeBaggage of an empty foreign baggage yields empty baggage`() {
         val stored = rootContext().storeBaggage(FakeBaggage())
-        assertTrue(stored.extractBaggage().asMap().isEmpty())
+        assertTrue(stored.baggage.asMap().isEmpty())
     }
 }

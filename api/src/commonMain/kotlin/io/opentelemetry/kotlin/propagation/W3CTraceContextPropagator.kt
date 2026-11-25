@@ -20,7 +20,7 @@ internal object W3CTraceContextPropagator : TextMapPropagator {
     override fun fields(): Collection<String> = FIELDS
 
     override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {
-        val spanContext = context.extractSpan().spanContext
+        val spanContext = context.span.spanContext
         if (!spanContext.isValid) {
             return
         }

@@ -150,9 +150,9 @@ public abstract interface class io/opentelemetry/kotlin/config/ConfigProvider {
 public abstract interface class io/opentelemetry/kotlin/context/Context {
 	public abstract fun attach ()Lio/opentelemetry/kotlin/context/Scope;
 	public abstract fun clearBaggage ()Lio/opentelemetry/kotlin/context/Context;
-	public abstract fun extractBaggage ()Lio/opentelemetry/kotlin/baggage/Baggage;
-	public abstract fun extractSpan ()Lio/opentelemetry/kotlin/tracing/Span;
 	public abstract fun get (Lio/opentelemetry/kotlin/context/ContextKey;)Ljava/lang/Object;
+	public abstract fun getBaggage ()Lio/opentelemetry/kotlin/baggage/Baggage;
+	public abstract fun getSpan ()Lio/opentelemetry/kotlin/tracing/Span;
 	public abstract fun set (Lio/opentelemetry/kotlin/context/ContextKey;Ljava/lang/Object;)Lio/opentelemetry/kotlin/context/Context;
 	public abstract fun storeBaggage (Lio/opentelemetry/kotlin/baggage/Baggage;)Lio/opentelemetry/kotlin/context/Context;
 	public abstract fun storeSpan (Lio/opentelemetry/kotlin/tracing/Span;)Lio/opentelemetry/kotlin/context/Context;

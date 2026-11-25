@@ -138,7 +138,7 @@ internal class LoggerImpl(
 
     private fun spanContextFrom(ctx: Context): SpanContext = when (ctx) {
         root -> invalidSpanContext
-        else -> ctx.extractSpan().spanContext
+        else -> ctx.span.spanContext
     }
 
     /**

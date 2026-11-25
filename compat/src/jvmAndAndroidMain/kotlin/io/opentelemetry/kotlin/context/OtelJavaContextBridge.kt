@@ -85,11 +85,11 @@ internal object OtelJavaContextBridge {
 
     private fun build(context: Context, origin: Origin?): OtelJavaContext {
         var java = origin?.java ?: OtelJavaContext.root()
-        val span = context.extractSpan()
+        val span = context.span
         if (origin == null || span !== origin.kotlinSpan) {
             java = java.withOrClear(otelJavaSpanContextKey, span.toJavaSpanOrNull(), OtelJavaSpan.getInvalid())
         }
-        val baggage = context.extractBaggage()
+        val baggage = context.baggage
         if (origin == null || baggage !== origin.kotlinBaggage) {
             java = java.withOrClear(otelJavaBaggageContextKey, baggage.toJavaBaggageOrNull(), OtelJavaBaggage.empty())
         }
@@ -143,7 +143,7 @@ internal object OtelJavaContextBridge {
                 else -> context.storeBaggage(javaBaggage.toOtelKotlinBaggage())
             }
         }
-        return context.set(JAVA_ORIGIN, Origin(java, context.extractSpan(), context.extractBaggage()))
+        return context.set(JAVA_ORIGIN, Origin(java, context.span, context.baggage))
     }
 
     /**

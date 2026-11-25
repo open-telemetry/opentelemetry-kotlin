@@ -120,7 +120,7 @@ internal class OtelJavaContextAdapterTest {
             )
         )
         val ctx = OtelJavaContextAdapter(rootContext()).with(javaSpan)
-        val span = ctx.toOtelKotlinContext().extractSpan()
+        val span = ctx.toOtelKotlinContext().span
         assertEquals(javaSpan.spanContext.traceId, span.spanContext.traceId)
         assertEquals(javaSpan.spanContext.spanId, span.spanContext.spanId)
     }
@@ -128,7 +128,7 @@ internal class OtelJavaContextAdapterTest {
     @Test
     fun `kotlin span round trips through java`() {
         val ctx = OtelJavaContextAdapter(rootContext()).with(OtelJavaSpanAdapter(kotlinSpan))
-        assertSame(kotlinSpan, ctx.toOtelKotlinContext().extractSpan())
+        assertSame(kotlinSpan, ctx.toOtelKotlinContext().span)
     }
 
     @Test
@@ -143,10 +143,10 @@ internal class OtelJavaContextAdapterTest {
     fun `kotlin reads baggage stored by java`() {
         val baggage = OtelJavaBaggage.builder().put("key", "value").build()
         val ctx = baggage.storeInContext(OtelJavaContextAdapter(rootContext()))
-        assertEquals("value", ctx.toOtelKotlinContext().extractBaggage().getValue("key"))
+        assertEquals("value", ctx.toOtelKotlinContext().baggage.getValue("key"))
 
         val cleared = ctx.with(OtelJavaBaggage.empty())
-        assertTrue(cleared.toOtelKotlinContext().extractBaggage().asMap().isEmpty())
+        assertTrue(cleared.toOtelKotlinContext().baggage.asMap().isEmpty())
     }
 
     @Test

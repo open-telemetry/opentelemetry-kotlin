@@ -322,7 +322,7 @@ internal class W3CBaggagePropagatorTest {
     fun `extract combines multiple baggage headers`() {
         val carrier = mapOf("baggage" to listOf("a=1", "b=2,c=3"))
         val ctx = propagator.extract(root(), carrier, MultiValueMapTextMapGetter)
-        val baggage = ctx.extractBaggage()
+        val baggage = ctx.baggage
         assertEquals("1", baggage.getValue("a"))
         assertEquals("2", baggage.getValue("b"))
         assertEquals("3", baggage.getValue("c"))
@@ -333,7 +333,7 @@ internal class W3CBaggagePropagatorTest {
     fun `extract reads a single baggage header via getAll`() {
         val carrier = mapOf("baggage" to listOf("k=v"))
         val baggage = propagator.extract(root(), carrier, MultiValueMapTextMapGetter)
-            .extractBaggage()
+            .baggage
         assertEquals("v", baggage.getValue("k"))
         assertEquals(1, baggage.asMap().size)
     }
@@ -353,7 +353,7 @@ internal class W3CBaggagePropagatorTest {
         val carrier = injectInto(original)
 
         val ctx = root()
-        val extracted = propagator.extract(ctx, carrier, MapTextMapGetter).extractBaggage()
+        val extracted = propagator.extract(ctx, carrier, MapTextMapGetter).baggage
         assertEquals("alice", extracted.getValue("user.id"))
         assertEquals("propagation=public", extracted.asMap()["user.id"]?.metadata?.value)
         assertEquals("café 1!2@3", extracted.getValue("session"))
@@ -372,7 +372,7 @@ internal class W3CBaggagePropagatorTest {
             mapOf("baggage" to header),
             MapTextMapGetter,
         )
-        return ctx.extractBaggage()
+        return ctx.baggage
     }
 
     private fun root(): Context = FakeBaggageContext()
