@@ -140,21 +140,32 @@ internal class TelemetryExporterTest {
             }
         }
         val errorHandler = FakeSdkErrorHandler()
-        var attempts = 0
+        val gate = CompletableDeferred<Unit>()
+        var calls = 0
+        var inFlight = 0
         val exporter = initTelemetryExporter(random = random, sdkErrorHandler = errorHandler) {
-            attempts++
-            when (attempts) {
-                1 -> OtlpResponse.Unknown
-                else -> OtlpResponse.Success
+            calls++
+            if (calls == 1) {
+                OtlpResponse.Unknown
+            } else {
+                inFlight++
+                gate.await()
+                OtlpResponse.Success
             }
         }
         exporter.withShutdown {
             exporter.export(listOf("data"))
             advanceTimeBy(5_000)
-            assertEquals(2, attempts)
-            assertEquals(OperationResultCode.Success, exporter.forceFlush())
             assertEquals(5, errorHandler.sdkCodeErrors.size)
             assertTrue(errorHandler.sdkCodeErrors.all { it.message == "OTLP export worker failed" })
+
+            // Every worker must still be able to take an entry.
+            repeat(4) { exporter.export(listOf("more$it")) }
+            advanceTimeBy(5_000)
+            assertEquals(5, inFlight)
+
+            gate.complete(Unit)
+            assertEquals(OperationResultCode.Success, exporter.forceFlush())
         }
     }
 

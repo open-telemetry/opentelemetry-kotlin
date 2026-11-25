@@ -118,10 +118,15 @@ internal class TelemetryExporter<T>(
         repeat(EXPORT_WORKER_COUNT) {
             scope.launch {
                 // Guard each iteration so that an unexpected failure is reported without stopping the worker.
+                // Wait before the next iteration after a failure, so a failure that keeps recurring cannot
+                // spin the worker or flood the error handler.
                 var running = true
                 while (running && isActive) {
-                    running = sdkErrorHandler.sdkGuardOrDefaultSuspend(true, "OTLP export worker failed") {
+                    running = sdkErrorHandler.sdkGuardOrDefaultSuspend(null, "OTLP export worker failed") {
                         runWorkerIteration()
+                    } ?: run {
+                        delay(initialDelayMs)
+                        true
                     }
                 }
             }
