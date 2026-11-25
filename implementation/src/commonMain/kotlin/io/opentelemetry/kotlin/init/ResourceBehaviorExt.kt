@@ -1,11 +1,9 @@
 package io.opentelemetry.kotlin.init
 
-import io.opentelemetry.kotlin.attributes.AttributesModel
-import io.opentelemetry.kotlin.attributes.NO_ATTRIBUTE_LIMIT
-import io.opentelemetry.kotlin.attributes.toAttributeValues
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.resource.Resource
 import io.opentelemetry.kotlin.resource.ResourceImpl
+import io.opentelemetry.kotlin.resource.resourceAttributesOf
 import io.opentelemetry.kotlin.semconv.ServiceAttributes
 
 /**
@@ -17,6 +15,6 @@ internal fun ResourceBehavior.toResource(): Resource {
     serviceName?.let { attrs[ServiceAttributes.SERVICE_NAME] = it }
     return ResourceImpl(
         schemaUrl = schemaUrl,
-        container = AttributesModel(attributeLimit = NO_ATTRIBUTE_LIMIT, attrs = attrs.toAttributeValues().toMutableMap())
+        container = resourceAttributesOf(attrs, "ResourceBehavior")
     )
 }
