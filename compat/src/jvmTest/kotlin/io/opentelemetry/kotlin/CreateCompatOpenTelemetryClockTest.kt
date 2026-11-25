@@ -1,12 +1,13 @@
 package io.opentelemetry.kotlin
 
 import io.opentelemetry.kotlin.clock.FakeClock
+import io.opentelemetry.kotlin.clock.GuardedCompatClock
 import io.opentelemetry.kotlin.framework.SdkTracker
 import io.opentelemetry.kotlin.tracing.export.FakeSpanProcessor
 import org.junit.Test
 import kotlin.test.AfterTest
 import kotlin.test.assertEquals
-import kotlin.test.assertSame
+import kotlin.test.assertIs
 
 @OptIn(ExperimentalApi::class)
 internal class CreateCompatOpenTelemetryClockTest {
@@ -33,7 +34,8 @@ internal class CreateCompatOpenTelemetryClockTest {
 
         api.tracerProvider.getTracer("test").startSpan("span").end()
 
-        assertSame(clock, api.clock)
+        assertIs<GuardedCompatClock>(api.clock)
+        assertEquals(42, api.clock.now())
         assertEquals(42, exportClock?.now())
         assertEquals(42, processor.endCalls.single().startTimestamp)
     }

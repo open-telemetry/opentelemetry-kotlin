@@ -3,9 +3,9 @@ package io.opentelemetry.kotlin.factory
 import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import org.junit.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
-import kotlin.test.assertSame
 
 internal class CompatIdGeneratorBehaviorMappingTest {
 
@@ -20,7 +20,11 @@ internal class CompatIdGeneratorBehaviorMappingTest {
     fun mapsCustomBehavior() {
         val custom = FakeIdGenerator()
 
-        assertSame(custom, IdGeneratorBehavior.Custom { custom }.toIdGenerator(errorHandler))
+        val generator = IdGeneratorBehavior.Custom { custom }.toIdGenerator(errorHandler)
+
+        assertIs<GuardedCompatIdGenerator>(generator)
+        assertContentEquals(custom.generateTraceIdBytes(), generator.generateTraceIdBytes())
+        assertContentEquals(custom.generateSpanIdBytes(), generator.generateSpanIdBytes())
     }
 
     @Test
