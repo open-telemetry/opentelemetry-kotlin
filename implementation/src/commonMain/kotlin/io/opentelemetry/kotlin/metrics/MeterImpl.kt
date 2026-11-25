@@ -10,6 +10,7 @@ import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.metrics.instrument.InstrumentDescriptor
 import io.opentelemetry.kotlin.metrics.instrument.InstrumentKind
 import io.opentelemetry.kotlin.metrics.instrument.InstrumentValueType
+import io.opentelemetry.kotlin.metrics.instrument.SdkInstrument
 import io.opentelemetry.kotlin.resource.Resource
 
 internal class MeterImpl(
@@ -18,14 +19,12 @@ internal class MeterImpl(
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Meter {
     private val lock = ReentrantReadWriteLock()
-    private val instrumentRegistry = mutableMapOf<String, MutableList<InstrumentEntry>>()
+    private val instrumentRegistry = mutableMapOf<String, MutableList<SdkInstrument>>()
 
-    /**
-     * Test-only hook invoked after the read-lock lookup misses, immediately before the
-     * write lock is acquired. Allows tests to deterministically coordinate a write-lock
-     * race. Not part of the public API.
-     */
-    internal var beforeWriteLock: ((instrumentName: String) -> Unit)? = null
+    // Conflicts already reported, keyed by the requested registration. Reporting the same
+    // conflict twice would let an error handler that re-registers instruments recurse
+    // without bound, so each distinct conflict is reported at most once.
+    private val reportedConflicts = mutableSetOf<String>()
 
     override fun createLongGauge(
         name: String,
@@ -65,10 +64,9 @@ internal class MeterImpl(
             name,
             unit,
             description,
+            InstrumentKind.UP_DOWN_COUNTER,
             InstrumentValueType.DOUBLE,
-            create = {
-                DoubleUpDownCounterImpl(it, unit, description)
-            },
+            create = { DoubleUpDownCounterImpl(it) },
         )
     }
 
@@ -85,10 +83,9 @@ internal class MeterImpl(
             name,
             unit,
             description,
+            InstrumentKind.UP_DOWN_COUNTER,
             InstrumentValueType.LONG,
-            create = {
-                LongUpDownCounterImpl(it, unit, description)
-            },
+            create = { LongUpDownCounterImpl(it) },
         )
     }
 
@@ -148,55 +145,48 @@ internal class MeterImpl(
         name: String,
         unit: String?,
         description: String?,
+        kind: InstrumentKind,
         valueType: InstrumentValueType,
-        create: (resolvedName: String) -> T,
+        create: (resolvedDescriptor: InstrumentDescriptor) -> SdkInstrument,
     ): T {
-        val requested = InstrumentDescriptor(
-            name = name,
-            unit = unit,
-            description = description,
-            kind = InstrumentKind.HISTOGRAM, // Placeholder, only valueType matters for registry
-            valueType = valueType,
-        )
+        val requested = InstrumentDescriptor(name, unit, description, kind, valueType)
         val key = name.lowercase()
         var conflict: SdkError? = null
-        // The read lookup reuses an existing registration when possible; anything else
-        // (new name or conflicting descriptor) takes the write lock to register.
-        val found = lock.read { instrumentRegistry[key]?.let { lookupEntry(it, requested) } }
-        val entry = if (found != null) {
-            conflict = found.second
-            found.first
-        } else {
-            beforeWriteLock?.invoke(name)
-            lock.write {
-                val entries = instrumentRegistry.getOrPut(key) { mutableListOf() }
-                val resolved = lookupEntry(entries, requested)
-                if (resolved != null) {
-                    conflict = resolved.second
-                    resolved.first
-                } else {
-                    val baseline = entries.firstOrNull()
-                    conflict = baseline?.let { conflictFor(entries, requested) }
-                    // Conflicting registrations keep the bucket's first-seen name casing
-                    // while retaining their own unit, description, and value type.
-                    val resolvedName = baseline?.descriptor?.name ?: requested.name
-                    val resolvedDescriptor = InstrumentDescriptor(
-                        name = resolvedName,
-                        unit = unit,
-                        description = description,
-                        kind = InstrumentKind.HISTOGRAM,
-                        valueType = valueType,
-                    )
-                    InstrumentEntry(create(resolvedName), resolvedDescriptor).also { entries += it }
-                }
+        // Lookup and registration are atomic under a single write lock, so a concurrent
+        // registration can never slip between the two.
+        val instrument = lock.write {
+            val entries = instrumentRegistry.getOrPut(key) { mutableListOf() }
+            val resolved = lookupEntry(entries, requested)
+            if (resolved != null) {
+                conflict = resolved.second?.takeIf { reportedConflicts.add(conflictKey(requested)) }
+                resolved.first
+            } else {
+                val baseline = entries.firstOrNull()
+                val newConflict = baseline?.let { conflictFor(entries, requested) }
+                conflict = newConflict?.takeIf { reportedConflicts.add(conflictKey(requested)) }
+                // Conflicting registrations keep the bucket's first-seen name casing
+                // while retaining their own unit, description, and value type.
+                val resolvedName = baseline?.descriptor?.name ?: requested.name
+                val resolvedDescriptor = InstrumentDescriptor(
+                    resolvedName,
+                    unit,
+                    description,
+                    kind,
+                    valueType,
+                )
+                create(resolvedDescriptor).also { entries += it }
             }
         }
         // Conflicts are reported only after the registry lock has been released so the
         // user-provided error handler never executes under the lock.
         conflict?.let(sdkErrorHandler::reportError)
         @Suppress("UNCHECKED_CAST")
-        return entry.instrument as T
+        return instrument as T
     }
+
+    private fun conflictKey(requested: InstrumentDescriptor): String =
+        "${requested.name.lowercase()}|${requested.valueType}|" +
+            "${requested.unit.orEmpty()}|${requested.description.orEmpty()}"
 
     /**
      * Finds an existing [entries] registration reusable for [requested]. Returns the entry
@@ -205,9 +195,9 @@ internal class MeterImpl(
      * first-seen registration and reports the case difference.
      */
     private fun lookupEntry(
-        entries: List<InstrumentEntry>,
+        entries: List<SdkInstrument>,
         requested: InstrumentDescriptor,
-    ): Pair<InstrumentEntry, SdkError?>? {
+    ): Pair<SdkInstrument, SdkError?>? {
         // InstrumentDescriptor.equals is case-insensitive, so an exact-name match is
         // checked first; a case-only variant then reuses the first-seen registration.
         entries.firstOrNull { it.descriptor == requested && it.descriptor.name == requested.name }
@@ -229,7 +219,7 @@ internal class MeterImpl(
      * reported as warnings; otherwise reports the numeric-type conflict as an error.
      */
     private fun conflictFor(
-        entries: List<InstrumentEntry>,
+        entries: List<SdkInstrument>,
         requested: InstrumentDescriptor,
     ): SdkError {
         val baseline = entries.firstOrNull { it.descriptor.valueType == requested.valueType }
@@ -268,11 +258,6 @@ internal class MeterImpl(
         )
         else -> null
     }
-
-    private data class InstrumentEntry(
-        val instrument: Any,
-        val descriptor: InstrumentDescriptor,
-    )
 
     override fun createObservableDoubleGauge(
         name: String,

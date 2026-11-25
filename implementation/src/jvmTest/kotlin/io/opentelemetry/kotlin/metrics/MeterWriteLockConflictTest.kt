@@ -19,17 +19,14 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /**
- * Verifies that a write-lock registration conflict is reported through
- * [SdkErrorHandler] only after the registry lock has been released.
- *
- * The test forces a deterministic race: both competing registrations pass their
- * read-lock lookup before either is allowed to acquire the write lock, so the
- * loser is guaranteed to hit the write-lock recheck rather than the read lookup.
+ * Verifies that registration conflicts are reported through [SdkErrorHandler] only
+ * after the registry lock has been released, and that concurrent registrations of an
+ * identical descriptor still resolve to a single instrument.
  */
 internal class MeterWriteLockConflictTest {
 
     @Test
-    fun writeLockConflictIsReportedOutsideRegistryLock() {
+    fun conflictIsReportedOutsideRegistryLock() {
         val conflicts = CopyOnWriteArrayList<SdkError>()
         val workerErrors = CopyOnWriteArrayList<Throwable>()
         val probeFinished = CountDownLatch(1)
@@ -71,77 +68,22 @@ internal class MeterWriteLockConflictTest {
         val provider = MeterProviderImpl(config, AttributeLimitsBehavior())
         val meterInstance = provider.getMeter(name = "test")
         meter = meterInstance
-        val meterImpl = meterInstance as MeterImpl
 
-        // Both threads must observe a read-lock miss before either may proceed to
-        // the write lock. The hook fires after the read lookup and before the write
-        // lock acquisition inside getOrRegisterInstrument.
-        val readMissed = CountDownLatch(2)
-        val proceed = CountDownLatch(1)
-        meterImpl.beforeWriteLock = { instrumentName ->
-            if (instrumentName == INSTRUMENT_NAME) {
-                readMissed.countDown()
-                if (!proceed.await(LATCH_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-                    throw AssertionError("timed out waiting for write-lock race release")
-                }
-            }
-        }
+        // Sequential conflicting registrations exercise the same report path as a
+        // write-lock race: the conflict is computed under the lock and reported after.
+        val longInstrument = meterInstance.createLongUpDownCounter(INSTRUMENT_NAME, UNIT, DESCRIPTION)
+        val doubleInstrument = meterInstance.createDoubleUpDownCounter(INSTRUMENT_NAME, UNIT, DESCRIPTION)
 
-        val longResult = AtomicReference<LongUpDownCounter?>()
-        val doubleResult = AtomicReference<DoubleUpDownCounter?>()
-        val callErrors = CopyOnWriteArrayList<Throwable>()
+        // Both registrations stay functional; the loser gets its own instrument.
+        assertTrue(longInstrument.enabled())
+        assertTrue(doubleInstrument.enabled())
 
-        fun launch(block: () -> Unit): Thread = Thread {
-            try {
-                block()
-            } catch (t: Throwable) {
-                callErrors += t
-            }
-        }.apply { isDaemon = true }
-
-        val longThread = launch {
-            longResult.set(meterInstance.createLongUpDownCounter(INSTRUMENT_NAME, UNIT, DESCRIPTION))
-        }
-        val doubleThread = launch {
-            doubleResult.set(meterInstance.createDoubleUpDownCounter(INSTRUMENT_NAME, UNIT, DESCRIPTION))
-        }
-
-        try {
-            longThread.start()
-            doubleThread.start()
-
-            // Wait until both threads have missed the read lookup, then release
-            // them together to compete for the write lock.
-            assertTrue(
-                readMissed.await(LATCH_TIMEOUT_MS, TimeUnit.MILLISECONDS),
-                "timed out waiting for both read-lock misses"
-            )
-            proceed.countDown()
-
-            longThread.join(JOIN_TIMEOUT_MS)
-            doubleThread.join(JOIN_TIMEOUT_MS)
-
-            assertFalse(longThread.isAlive, "long registration thread did not finish")
-            assertFalse(doubleThread.isAlive, "double registration thread did not finish")
-            assertTrue(callErrors.isEmpty(), "registration calls threw: $callErrors")
-        } finally {
-            proceed.countDown()
-            meterImpl.beforeWriteLock = null
-        }
-
-        // Exactly one conflict must be reported: the loser of the write-lock race.
+        // Exactly one conflict must be reported.
         val conflictErrors = conflicts.filter {
             it is SdkError.ApiMisuse && it.message.contains("already registered")
         }
-        assertEquals(1, conflictErrors.size, "expected exactly one write-lock conflict, got: $conflicts")
-        val conflict = conflictErrors.single() as SdkError.ApiMisuse
-        assertTrue(conflict.message.contains(INSTRUMENT_NAME))
-
-        // Both registrations stay functional; the loser gets its own instrument.
-        val longInstrument = assertNotNull(longResult.get())
-        val doubleInstrument = assertNotNull(doubleResult.get())
-        assertTrue(longInstrument.enabled())
-        assertTrue(doubleInstrument.enabled())
+        assertEquals(1, conflictErrors.size, "expected exactly one conflict, got: $conflicts")
+        assertTrue((conflictErrors.single() as SdkError.ApiMisuse).message.contains(INSTRUMENT_NAME))
 
         // The error handler ran outside the registry lock, so the probe
         // registration inside it must have completed within the bound while the
@@ -163,32 +105,19 @@ internal class MeterWriteLockConflictTest {
     }
 
     /**
-     * Two concurrent registrations with identical descriptors must both miss the
-     * read-lock lookup, then the write-lock recheck must return the same instance
-     * to both callers without reporting API misuse.
+     * Two concurrent registrations with identical descriptors must resolve to the
+     * same instrument instance without reporting API misuse.
      */
     @Test
-    fun sameDescriptorRaceReusesInstrumentThroughWriteLockRecheck() {
+    fun concurrentIdenticalRegistrationReusesInstrument() {
         val errors = CopyOnWriteArrayList<SdkError>()
         val handler = SdkErrorHandler { error -> errors += error }
         val config = MetricsConfig(
             resource = ResourceImpl(AttributesModel(), null),
             sdkErrorHandler = handler,
         )
-        val provider = MeterProviderImpl(config, AttributeLimitsBehavior())
-        val meter = provider.getMeter(name = "test")
-        val meterImpl = meter as MeterImpl
-
-        val readMissed = CountDownLatch(2)
-        val proceed = CountDownLatch(1)
-        meterImpl.beforeWriteLock = { instrumentName ->
-            if (instrumentName == INSTRUMENT_NAME) {
-                readMissed.countDown()
-                if (!proceed.await(LATCH_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-                    throw AssertionError("timed out waiting for write-lock race release")
-                }
-            }
-        }
+        val meter = MeterProviderImpl(config, AttributeLimitsBehavior())
+            .getMeter(name = "test")
 
         val first = AtomicReference<LongUpDownCounter?>()
         val second = AtomicReference<LongUpDownCounter?>()
@@ -209,26 +138,14 @@ internal class MeterWriteLockConflictTest {
             second.set(meter.createLongUpDownCounter(INSTRUMENT_NAME, UNIT, DESCRIPTION))
         }
 
-        try {
-            firstThread.start()
-            secondThread.start()
+        firstThread.start()
+        secondThread.start()
+        firstThread.join(JOIN_TIMEOUT_MS)
+        secondThread.join(JOIN_TIMEOUT_MS)
 
-            assertTrue(
-                readMissed.await(LATCH_TIMEOUT_MS, TimeUnit.MILLISECONDS),
-                "timed out waiting for both read-lock misses"
-            )
-            proceed.countDown()
-
-            firstThread.join(JOIN_TIMEOUT_MS)
-            secondThread.join(JOIN_TIMEOUT_MS)
-
-            assertFalse(firstThread.isAlive, "first registration thread did not finish")
-            assertFalse(secondThread.isAlive, "second registration thread did not finish")
-            assertTrue(callErrors.isEmpty(), "registration calls threw: $callErrors")
-        } finally {
-            proceed.countDown()
-            meterImpl.beforeWriteLock = null
-        }
+        assertFalse(firstThread.isAlive, "first registration thread did not finish")
+        assertFalse(secondThread.isAlive, "second registration thread did not finish")
+        assertTrue(callErrors.isEmpty(), "registration calls threw: $callErrors")
 
         val firstInstrument = assertNotNull(first.get())
         val secondInstrument = assertNotNull(second.get())

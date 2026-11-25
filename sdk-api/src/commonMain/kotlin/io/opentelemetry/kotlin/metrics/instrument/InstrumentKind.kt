@@ -10,4 +10,5 @@ import io.opentelemetry.kotlin.ExperimentalApi
 @ExperimentalApi
 public enum class InstrumentKind {
     HISTOGRAM,
+    UP_DOWN_COUNTER,
 }
