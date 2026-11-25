@@ -92,13 +92,19 @@ private class StacktraceState {
 
 private fun safeMessage(throwable: Throwable, fallback: String): String? = try {
     throwable.message?.let(::truncateMessage)
-} catch (_: Throwable) {
+} catch (ignored: Throwable) {
+    if (ignored is InterruptedException) {
+        Thread.currentThread().interrupt()
+    }
     fallback
 }
 
 private fun safeStackTrace(throwable: Throwable): Array<StackTraceElement> = try {
     throwable.stackTrace
-} catch (_: Throwable) {
+} catch (ignored: Throwable) {
+    if (ignored is InterruptedException) {
+        Thread.currentThread().interrupt()
+    }
     emptyArray()
 }
 
@@ -110,7 +116,10 @@ private fun safeSuppressed(throwable: Throwable): Array<Throwable> = try {
 
 private fun safeCause(throwable: Throwable): Throwable? = try {
     throwable.cause
-} catch (_: Throwable) {
+} catch (ignored: Throwable) {
+    if (ignored is InterruptedException) {
+        Thread.currentThread().interrupt()
+    }
     null
 }
 
