@@ -7,6 +7,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalApi::class)
@@ -30,7 +31,8 @@ internal class TimeoutOperationTest {
     @Test
     fun testTimeoutIsAFailure() {
         assertIs<OperationResultCode.Failure>(OperationResultCode.Timeout)
-        assertTrue(OperationResultCode.Failure != OperationResultCode.Timeout)
+        // widen to OperationResultCode: Failure's companion and Timeout are distinct object types
+        assertNotEquals<OperationResultCode>(OperationResultCode.Failure, OperationResultCode.Timeout)
     }
 
     @Test
