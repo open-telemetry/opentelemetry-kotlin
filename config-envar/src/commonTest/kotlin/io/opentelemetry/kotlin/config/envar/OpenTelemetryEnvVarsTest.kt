@@ -49,10 +49,10 @@ internal class OpenTelemetryEnvVarsTest {
                     spanLimits = SpanLimitsBehavior(),
                     processors = listOfNotNull(
                         SpanProcessorBehavior(
-                        batch = BatchSpanProcessorBehavior(
-                            exporter = SpanExporterBehavior()
+                            batch = BatchSpanProcessorBehavior(
+                                exporter = SpanExporterBehavior()
+                            )
                         )
-                    )
                     )
                 ),
             ),
@@ -123,13 +123,15 @@ internal class OpenTelemetryEnvVarsTest {
                     attributeCountPerEventLimit = 7,
                     attributeCountPerLinkLimit = 8,
                 ),
-                processors = listOfNotNull(SpanProcessorBehavior(
-                    batch = BatchSpanProcessorBehavior(
-                        exporter = SpanExporterBehavior(
-                            console = ConsoleExporterBehavior()
+                processors = listOfNotNull(
+                    SpanProcessorBehavior(
+                        batch = BatchSpanProcessorBehavior(
+                            exporter = SpanExporterBehavior(
+                                console = ConsoleExporterBehavior()
+                            )
                         )
                     )
-                ))
+                )
             ),
             loggerProvider = LoggerProviderBehavior(
                 logRecordLimits = LogRecordLimitsBehavior(
@@ -154,11 +156,13 @@ internal class OpenTelemetryEnvVarsTest {
             resource = ResourceBehavior(),
             tracerProvider = TracerProviderBehavior(
                 spanLimits = SpanLimitsBehavior(),
-                processors = listOfNotNull(SpanProcessorBehavior(
-                    batch = BatchSpanProcessorBehavior(
-                        exporter = SpanExporterBehavior(),
-                    ),
-                ))
+                processors = listOfNotNull(
+                    SpanProcessorBehavior(
+                        batch = BatchSpanProcessorBehavior(
+                            exporter = SpanExporterBehavior(),
+                        ),
+                    )
+                )
             ),
             loggerProvider = LoggerProviderBehavior(
                 logRecordLimits = LogRecordLimitsBehavior(),

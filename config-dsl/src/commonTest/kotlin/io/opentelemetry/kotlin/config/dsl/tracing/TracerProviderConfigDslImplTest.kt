@@ -115,8 +115,8 @@ internal class TracerProviderConfigDslImplTest {
         assertEquals(
             TracerProviderBehavior(
                 processors =
-                    listOfNotNull(
-                        SpanProcessorBehavior(
+                listOfNotNull(
+                    SpanProcessorBehavior(
                         batch = BatchSpanProcessorBehavior(
                             exporter = SpanExporterBehavior(
                                 console = ConsoleExporterBehavior()
