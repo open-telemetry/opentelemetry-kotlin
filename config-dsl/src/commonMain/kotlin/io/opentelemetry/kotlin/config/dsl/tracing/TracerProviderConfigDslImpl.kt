@@ -7,7 +7,6 @@ import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
-import io.opentelemetry.kotlin.factory.IdGenerator
 import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 
