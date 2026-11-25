@@ -10,7 +10,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                api(project(":sdk-api"))
+                implementation(project(":sdk-api"))
             }
         }
         commonTest {
