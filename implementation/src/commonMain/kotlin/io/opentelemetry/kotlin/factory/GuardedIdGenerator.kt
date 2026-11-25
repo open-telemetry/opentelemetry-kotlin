@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.factory
 
-import io.opentelemetry.kotlin.AtomicBoolean
+import io.opentelemetry.kotlin.ReportOnce
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
@@ -16,14 +16,18 @@ internal class GuardedIdGenerator(
     private val fallback: IdGenerator = IdGeneratorImpl(),
 ) : IdGenerator {
 
-    private val invalidSpanIdReported = AtomicBoolean(false)
-    private val invalidTraceIdReported = AtomicBoolean(false)
+    private val invalidSpanId = ReportOnce()
+    private val invalidTraceId = ReportOnce()
+    private val spanIdFailure = ReportOnce()
+    private val traceIdFailure = ReportOnce()
+    private val randomTraceIdsFailure = ReportOnce()
 
     override fun generateSpanIdBytes(): ByteArray =
         guardId(
             member = "generateSpanIdBytes",
             expectedSize = SPAN_ID_BYTES,
-            reported = invalidSpanIdReported,
+            invalid = invalidSpanId,
+            failure = spanIdFailure,
             fallback = fallback::generateSpanIdBytes,
             action = delegate::generateSpanIdBytes,
         )
@@ -32,30 +36,39 @@ internal class GuardedIdGenerator(
         guardId(
             member = "generateTraceIdBytes",
             expectedSize = TRACE_ID_BYTES,
-            reported = invalidTraceIdReported,
+            invalid = invalidTraceId,
+            failure = traceIdFailure,
             fallback = fallback::generateTraceIdBytes,
             action = delegate::generateTraceIdBytes,
         )
 
     override val generatesRandomTraceIds: Boolean
-        get() = guard("generatesRandomTraceIds", { false }, delegate::generatesRandomTraceIds)
+        get() = try {
+            delegate.generatesRandomTraceIds
+        } catch (exc: Throwable) {
+            reportFailure("generatesRandomTraceIds", randomTraceIdsFailure, exc)
+            false
+        }
 
-    private inline fun <T> guard(member: String, fallback: () -> T, action: () -> T): T = try {
-        action()
-    } catch (exc: Throwable) {
-        sdkErrorHandler.reportUserCodeError(exc, "IdGenerator.$member failed, using fallback")
-        fallback()
+    private fun reportFailure(member: String, failure: ReportOnce, exc: Throwable) {
+        sdkErrorHandler.reportUserCodeError(
+            exc,
+            "IdGenerator.$member failed, using fallback. Later failures are not reported.",
+            failure,
+        )
     }
 
     /**
      * Runs [action], which may be user-supplied code, then checks the returned ID. An ID that is
      * not [expectedSize] bytes or is all zero falls back to the built-in generator, which produces
-     * valid ones. Each generator member reports its invalid IDs once, on the first occurrence.
+     * valid ones. Each generator member reports its invalid IDs and its failures once each, on the
+     * first occurrence.
      */
     private inline fun guardId(
         member: String,
         expectedSize: Int,
-        reported: AtomicBoolean,
+        invalid: ReportOnce,
+        failure: ReportOnce,
         fallback: () -> ByteArray,
         action: () -> ByteArray,
     ): ByteArray = try {
@@ -63,13 +76,13 @@ internal class GuardedIdGenerator(
         if (id.size == expectedSize && !id.isAllZeroBytes()) {
             id
         } else {
-            if (reported.compareAndSet(false, true)) {
+            if (invalid.tryAcquire()) {
                 reportInvalidId(member, expectedSize, id.size)
             }
             fallback()
         }
     } catch (exc: Throwable) {
-        sdkErrorHandler.reportUserCodeError(exc, "IdGenerator.$member failed, using fallback")
+        reportFailure(member, failure, exc)
         fallback()
     }
 

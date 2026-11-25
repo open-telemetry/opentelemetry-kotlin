@@ -1,13 +1,17 @@
 package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.ReportOnce
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.reportError
 
+private const val LATER_FAILURES_MSG = "Later failures are not reported."
+
 /**
  * Wraps a [CurrentContextStorage] so that misuse of it is reported and so that nothing the
- * storage throws escapes.
+ * storage throws escapes. Each kind of failure or misuse is reported the first time only, because
+ * context operations run on hot paths.
  */
 @OptIn(ExperimentalApi::class)
 internal class MisuseReportingCurrentContextStorage(
@@ -16,27 +20,24 @@ internal class MisuseReportingCurrentContextStorage(
     private val report: (SdkError) -> Unit = ::reportError,
 ) : CurrentContextStorage {
 
+    private val currentFailure = ReportOnce()
+    private val attachFailure = ReportOnce()
+    private val detachFailure = ReportOnce()
+    private val doubleDetachMisuse = ReportOnce()
+    private val outOfOrderMisuse = ReportOnce()
+
     override fun current(): Context = try {
         delegate.current()
     } catch (e: Throwable) {
-        reportUserCodeError(e, "CurrentContextStorage.current threw")
+        reportUserCodeError(currentFailure, e, "CurrentContextStorage.current threw. $LATER_FAILURES_MSG")
         root()
     }
 
     override fun attach(context: Context): Scope {
-        if (current() === context) {
-            report(
-                SdkError.ApiMisuse(
-                    api = "Context.attach",
-                    message = "Context.attach() called with the context that is already current",
-                    severity = SdkErrorSeverity.WARNING,
-                )
-            )
-        }
         val scope = try {
             delegate.attach(context)
         } catch (e: Throwable) {
-            reportUserCodeError(e, "CurrentContextStorage.attach threw")
+            reportUserCodeError(attachFailure, e, "CurrentContextStorage.attach threw. $LATER_FAILURES_MSG")
             return FallbackScope
         }
         return MisuseReportingScope(
@@ -44,10 +45,15 @@ internal class MisuseReportingCurrentContextStorage(
             attached = current(),
             current = ::current,
             report = report,
+            detachFailure = detachFailure,
+            doubleDetachMisuse = doubleDetachMisuse,
+            outOfOrderMisuse = outOfOrderMisuse,
         )
     }
 
-    private fun reportUserCodeError(e: Throwable, message: String) {
-        report(SdkError.UserCodeError(e, message, SdkErrorSeverity.WARNING))
+    private fun reportUserCodeError(failure: ReportOnce, e: Throwable, message: String) {
+        if (failure.tryAcquire()) {
+            report(SdkError.UserCodeError(e, message, SdkErrorSeverity.WARNING))
+        }
     }
 }

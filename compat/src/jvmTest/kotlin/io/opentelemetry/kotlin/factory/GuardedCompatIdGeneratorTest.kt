@@ -48,7 +48,24 @@ internal class GuardedCompatIdGeneratorTest {
                 "generateTraceId",
                 "generateSpanId",
                 "generatesRandomTraceIds",
-            ).map { "IdGenerator.$it failed, using fallback" },
+            ).map { "IdGenerator.$it failed, using fallback. Later failures are not reported." },
+            errorHandler.userCodeErrors.map { it.message },
+        )
+    }
+
+    @Test
+    fun `repeated failures are reported once per member`() {
+        val fallback = CountingIdGenerator()
+        val generator = GuardedCompatIdGenerator(HostileIdGenerator, errorHandler, fallback)
+
+        repeat(1000) {
+            assertEquals(fallback.spanId.toHexString(), generator.generateSpanId())
+            assertContentEquals(fallback.spanId, generator.generateSpanIdBytes())
+        }
+        assertEquals(2000, fallback.calls)
+        assertEquals(
+            listOf("generateSpanId", "generateSpanIdBytes")
+                .map { "IdGenerator.$it failed, using fallback. Later failures are not reported." },
             errorHandler.userCodeErrors.map { it.message },
         )
     }

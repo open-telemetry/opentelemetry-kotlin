@@ -50,9 +50,9 @@ internal class CreateOpenTelemetryGuardedDependenciesTest {
         assertTrue(checkNotNull(logProcessor.logs.single().observedTimestamp) > 0)
         assertEquals(
             setOf(
-                "Clock.now failed, using fallback clock",
-                "IdGenerator.generateTraceIdBytes failed, using fallback",
-                "IdGenerator.generateSpanIdBytes failed, using fallback",
+                "Clock.now failed, using fallback clock. Later failures are not reported.",
+                "IdGenerator.generateTraceIdBytes failed, using fallback. Later failures are not reported.",
+                "IdGenerator.generateSpanIdBytes failed, using fallback. Later failures are not reported.",
                 "Sampler failed, using fallback sampler",
             ),
             handler.userCodeErrors.map { it.message }.toSet(),
