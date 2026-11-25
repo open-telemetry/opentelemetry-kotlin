@@ -22,7 +22,7 @@ public sealed class OperationResultCode {
      * `Failure` itself stands for a generic failure. Subtypes such as [Timeout] convey the kind
      * of failure.
      */
-    public open class Failure public constructor() : OperationResultCode() {
+    public open class Failure : OperationResultCode() {
 
         /**
          * The [Failure] result returned for a generic failure; the same instance every time.

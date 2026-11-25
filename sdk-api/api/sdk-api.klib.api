@@ -553,9 +553,17 @@ sealed interface io.opentelemetry.kotlin.metrics.data/PointData : io.opentelemet
 }
 
 sealed class io.opentelemetry.kotlin.export/OperationResultCode { // io.opentelemetry.kotlin.export/OperationResultCode|null[0]
-    final object Failure : io.opentelemetry.kotlin.export/OperationResultCode // io.opentelemetry.kotlin.export/OperationResultCode.Failure|null[0]
+    open class Failure : io.opentelemetry.kotlin.export/OperationResultCode { // io.opentelemetry.kotlin.export/OperationResultCode.Failure|null[0]
+        constructor <init>() // io.opentelemetry.kotlin.export/OperationResultCode.Failure.<init>|<init>(){}[0]
+
+        final object Companion : io.opentelemetry.kotlin.export/OperationResultCode.Failure { // io.opentelemetry.kotlin.export/OperationResultCode.Failure.Companion|null[0]
+            final fun toString(): kotlin/String // io.opentelemetry.kotlin.export/OperationResultCode.Failure.Companion.toString|toString(){}[0]
+        }
+    }
 
     final object Success : io.opentelemetry.kotlin.export/OperationResultCode // io.opentelemetry.kotlin.export/OperationResultCode.Success|null[0]
+
+    final object Timeout : io.opentelemetry.kotlin.export/OperationResultCode.Failure // io.opentelemetry.kotlin.export/OperationResultCode.Timeout|null[0]
 }
 
 final fun (kotlin/ByteArray).io.opentelemetry.kotlin.factory/toHexString(): kotlin/String // io.opentelemetry.kotlin.factory/toHexString|toHexString@kotlin.ByteArray(){}[0]
