@@ -27,7 +27,7 @@ internal class LoggerImpl(
     private val processor: LogRecordProcessor?,
     private val key: InstrumentationScopeInfo,
     private val resource: Resource,
-    private val logLimits: AttributeLimitsBehavior,
+    private val logRecordLimits: AttributeLimitsBehavior,
     private val shutdownState: ShutdownState,
     private val loggerConfig: LoggerConfig = LoggerConfigImpl(),
     private val sdkErrorHandler: SdkErrorHandler,
@@ -112,7 +112,7 @@ internal class LoggerImpl(
                     severityText = severityText,
                     severityNumber = severityNumber ?: SeverityNumber.UNKNOWN,
                     spanContext = spanContext,
-                    logLimits = logLimits,
+                    logRecordLimits = logRecordLimits,
                     eventName = eventName,
                     sdkErrorHandler = sdkErrorHandler,
                 )
@@ -138,7 +138,7 @@ internal class LoggerImpl(
 
     private fun spanContextFrom(ctx: Context): SpanContext = when (ctx) {
         root -> invalidSpanContext
-        else -> ctx.extractSpan().spanContext
+        else -> ctx.span.spanContext
     }
 
     /**

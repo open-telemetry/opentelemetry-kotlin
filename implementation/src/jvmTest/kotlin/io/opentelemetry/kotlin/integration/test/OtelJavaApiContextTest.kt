@@ -108,7 +108,7 @@ internal class OtelJavaApiContextTest {
         val before = currentContext()
         val javaSpan = startJavaSpan("java_span")
         javaSpan.makeCurrent().use {
-            assertEquals(javaSpan.spanContext.spanId, currentContext().extractSpan().spanContext.spanId)
+            assertEquals(javaSpan.spanContext.spanId, currentContext().span.spanContext.spanId)
         }
         javaSpan.end()
         assertSame(before, currentContext())

@@ -88,7 +88,7 @@ internal class CompatCurrentContextIntegrationTest {
         val parent = javaTracer.spanBuilder("java").startSpan()
         val child = try {
             parent.makeCurrent().use {
-                assertEquals(parent.spanContext.spanId, currentContext().extractSpan().spanContext.spanId)
+                assertEquals(parent.spanContext.spanId, currentContext().span.spanContext.spanId)
                 tracer.startSpan("kotlin")
             }
         } finally {
@@ -128,9 +128,9 @@ internal class CompatCurrentContextIntegrationTest {
     @Test
     fun `java baggage is visible to kotlin`() {
         OtelJavaBaggage.builder().put("key", "value").build().makeCurrent().use {
-            assertEquals("value", currentContext().extractBaggage().getValue("key"))
+            assertEquals("value", currentContext().baggage.getValue("key"))
         }
-        assertTrue(currentContext().extractBaggage().asMap().isEmpty())
+        assertTrue(currentContext().baggage.asMap().isEmpty())
     }
 
     @Test

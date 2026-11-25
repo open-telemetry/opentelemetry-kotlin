@@ -12,6 +12,6 @@ fun bridgeContexts(kotlinContext: Context) {
 
     // ...and turn a Java context back into a Kotlin one, e.g. to use it as a span parent.
     val backToKotlin: Context = javaContext.toOtelKotlinContext()
-    println(backToKotlin.extractSpan().spanContext.traceId)
+    println(backToKotlin.span.spanContext.traceId)
 }
 // end-region

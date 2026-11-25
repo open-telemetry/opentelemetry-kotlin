@@ -30,7 +30,7 @@ internal class MakeCurrentTest {
         val span = FakeSpan()
         val scope = currentContext().storeSpan(span).attach()
         try {
-            assertSame(span, currentContext().extractSpan())
+            assertSame(span, currentContext().span)
         } finally {
             scope.detach()
         }
@@ -51,13 +51,13 @@ internal class MakeCurrentTest {
         val span2 = FakeSpan("b")
 
         val scope1 = currentContext().storeSpan(span1).attach()
-        assertSame(span1, currentContext().extractSpan())
+        assertSame(span1, currentContext().span)
 
         val scope2 = currentContext().storeSpan(span2).attach()
-        assertSame(span2, currentContext().extractSpan())
+        assertSame(span2, currentContext().span)
 
         scope2.detach()
-        assertSame(span1, currentContext().extractSpan())
+        assertSame(span1, currentContext().span)
 
         scope1.detach()
         assertSame(rootContext(), currentContext())

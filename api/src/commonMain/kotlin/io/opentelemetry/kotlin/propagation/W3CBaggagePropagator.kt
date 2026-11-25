@@ -31,7 +31,7 @@ internal object W3CBaggagePropagator : TextMapPropagator {
     override fun fields(): Collection<String> = FIELDS
 
     override fun <T> inject(context: Context, carrier: T, setter: TextMapSetter<T>) {
-        val entries = context.extractBaggage().asMap()
+        val entries = context.baggage.asMap()
         if (entries.isEmpty()) {
             return
         }

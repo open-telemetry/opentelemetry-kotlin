@@ -8,7 +8,7 @@ import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
-import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
+import io.opentelemetry.kotlin.tracing.fakeLogRecordLimitsConfig
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -38,9 +38,9 @@ internal class LogAttributesTest {
             processor = processor,
             key = key,
             resource = FakeResource(),
-            logLimits = AttributeLimitsBehavior(
+            logRecordLimits = AttributeLimitsBehavior(
                 attributeCountLimit = 8,
-                attributeValueLengthLimit = fakeLogLimitsConfig.attributeValueLengthLimit
+                attributeValueLengthLimit = fakeLogRecordLimitsConfig.attributeValueLengthLimit
             ),
             shutdownState = MutableShutdownState(),
             sdkErrorHandler = NoopSdkErrorHandler,
@@ -146,7 +146,7 @@ internal class LogAttributesTest {
         processor = processor,
         key = key,
         resource = FakeResource(),
-        logLimits = AttributeLimitsBehavior(
+        logRecordLimits = AttributeLimitsBehavior(
             attributeCountLimit = 8,
             attributeValueLengthLimit = limit,
         ),

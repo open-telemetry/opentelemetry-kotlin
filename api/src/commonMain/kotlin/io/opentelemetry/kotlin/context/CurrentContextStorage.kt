@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.context
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.ThreadSafe
 
 /**
  * Defines a storage mechanism for the current Context.
@@ -8,6 +9,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * https://opentelemetry.io/docs/specs/otel/context/#optional-global-operations
  */
 @ExperimentalApi
+@ThreadSafe
 public interface CurrentContextStorage {
 
     /**

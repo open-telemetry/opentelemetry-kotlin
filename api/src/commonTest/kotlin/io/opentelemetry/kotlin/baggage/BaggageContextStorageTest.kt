@@ -13,16 +13,16 @@ import kotlin.test.assertTrue
 internal class BaggageContextStorageTest {
 
     @Test
-    fun `extractBaggage on root returns empty baggage`() {
-        assertSame(createBaggage(), rootContext().extractBaggage())
+    fun `baggage on root returns empty baggage`() {
+        assertSame(createBaggage(), rootContext().baggage)
     }
 
     @Test
-    fun `storeBaggage then extractBaggage round-trips entries`() {
+    fun `storeBaggage then baggage round-trips entries`() {
         val baggage = createBaggage().put("user", "alice").put("region", "eu")
         val stored = rootContext().storeBaggage(baggage)
 
-        val extracted = stored.extractBaggage()
+        val extracted = stored.baggage
 
         assertEquals("alice", extracted.getValue("user"))
         assertEquals("eu", extracted.getValue("region"))
@@ -34,8 +34,8 @@ internal class BaggageContextStorageTest {
 
         val cleared = populated.clearBaggage()
 
-        assertSame(createBaggage(), cleared.extractBaggage())
-        assertNull(cleared.extractBaggage().getValue("user"))
+        assertSame(createBaggage(), cleared.baggage)
+        assertNull(cleared.baggage.getValue("user"))
     }
 
     @Test
@@ -44,8 +44,8 @@ internal class BaggageContextStorageTest {
         val derived = root.storeBaggage(createBaggage().put("user", "alice"))
 
         assertNotSame(root, derived)
-        assertSame(createBaggage(), root.extractBaggage())
-        assertEquals("alice", derived.extractBaggage().getValue("user"))
+        assertSame(createBaggage(), root.baggage)
+        assertEquals("alice", derived.baggage.getValue("user"))
     }
 
     @Test
@@ -55,11 +55,11 @@ internal class BaggageContextStorageTest {
         val cleared = populated.clearBaggage()
 
         assertNotSame(populated, cleared)
-        assertEquals("alice", populated.extractBaggage().getValue("user"))
+        assertEquals("alice", populated.baggage.getValue("user"))
     }
 
     @Test
     fun `clearBaggage on root context still yields empty baggage`() {
-        assertTrue(rootContext().clearBaggage().extractBaggage().asMap().isEmpty())
+        assertTrue(rootContext().clearBaggage().baggage.asMap().isEmpty())
     }
 }

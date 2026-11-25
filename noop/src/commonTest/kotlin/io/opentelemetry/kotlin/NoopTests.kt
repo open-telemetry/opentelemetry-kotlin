@@ -133,7 +133,8 @@ internal class NoopTests {
     fun testNoopTracerSurvivesThrowingParentContext() {
         val tracer = NoopOpenTelemetry.tracerProvider.getTracer("test-tracer")
         val parent = object : Context by rootContext() {
-            override fun extractSpan(): Span = error("hostile")
+            override val span: Span
+                get() = error("hostile")
         }
         assertSame(NoopSpan, tracer.startSpan("span", parentContext = parent))
     }
@@ -247,15 +248,15 @@ internal class NoopTests {
         val otel = NoopOpenTelemetry
         val span = otel.tracerProvider.getTracer("tracer").startSpan("span")
         val ctx = rootContext().storeSpan(span)
-        assertSame(span, ctx.extractSpan())
+        assertSame(span, ctx.span)
     }
 
     @Test
     fun testStoreSpanContext() {
         val root = rootContext()
         val ctx = root.storeSpanContext(FakeSpanContext.VALID)
-        assertSame(FakeSpanContext.VALID, ctx.extractSpan().spanContext)
-        assertFalse(root.extractSpan().spanContext.isValid)
+        assertSame(FakeSpanContext.VALID, ctx.span.spanContext)
+        assertFalse(root.span.spanContext.isValid)
     }
 
     @Test
@@ -268,8 +269,8 @@ internal class NoopTests {
         val carrier = mapOf("traceparent" to traceparent, "baggage" to "key=value")
 
         val extracted = propagator.extract(rootContext(), carrier, MapGetter)
-        assertEquals("0af7651916cd43dd8448eb211c80319c", extracted.extractSpan().spanContext.traceId)
-        assertEquals("value", extracted.extractBaggage().getValue("key"))
+        assertEquals("0af7651916cd43dd8448eb211c80319c", extracted.span.spanContext.traceId)
+        assertEquals("value", extracted.baggage.getValue("key"))
 
         val injected = mutableMapOf<String, String>()
         propagator.inject(extracted, injected, TextMapSetter { map, key, value -> map[key] = value })
@@ -277,7 +278,7 @@ internal class NoopTests {
         assertEquals("key=value", injected["baggage"])
 
         val span = NoopOpenTelemetry.tracerProvider.getTracer("").startSpan("x", parentContext = extracted)
-        assertEquals(extracted.extractSpan().spanContext, span.spanContext)
+        assertEquals(extracted.span.spanContext, span.spanContext)
     }
 
     @Test

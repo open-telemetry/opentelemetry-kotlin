@@ -13,7 +13,7 @@ import io.opentelemetry.kotlin.export.MutableShutdownState
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.resource.FakeResource
 import io.opentelemetry.kotlin.semconv.ExceptionAttributes
-import io.opentelemetry.kotlin.tracing.fakeLogLimitsConfig
+import io.opentelemetry.kotlin.tracing.fakeLogRecordLimitsConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -49,9 +49,7 @@ internal class LoggerErrorHandlingTest {
                 }
                 "exception message throws" -> {
                     assertEquals(1, processor.logs.size, case.name)
-                    val error = errorHandler.userCodeErrors.single()
-                    assertEquals("LogRecord.exception attributes failed", error.message, case.name)
-                    assertEquals("boom", error.cause.message, case.name)
+                    assertTrue(errorHandler.errors.isEmpty(), case.name)
                 }
                 else -> {
                     assertTrue(processor.logs.isEmpty(), case.name)
@@ -66,7 +64,7 @@ internal class LoggerErrorHandlingTest {
     }
 
     @Test
-    fun testExceptionAttributeFailureDoesNotPreventUserAttributesOrEmit() {
+    fun testHostileExceptionDoesNotPreventUserAttributesOrEmit() {
         val errorHandler = FakeSdkErrorHandler()
         val processor = FakeLogRecordProcessor()
         val logger = createLogger(Case("healthy"), processor, errorHandler)
@@ -80,7 +78,8 @@ internal class LoggerErrorHandlingTest {
 
         assertTrue(attributesApplied)
         assertEquals(1, processor.logs.size)
-        assertEquals("LogRecord.exception attributes failed", errorHandler.userCodeErrors.single().message)
+        assertTrue(errorHandler.errors.isEmpty())
+        assertNotNull(processor.logs.single().attributes[ExceptionAttributes.EXCEPTION_TYPE])
     }
 
     @Test
@@ -131,13 +130,13 @@ internal class LoggerErrorHandlingTest {
     fun testUserAttributesSurviveAttributeCountLimit() {
         val errorHandler = FakeSdkErrorHandler()
         val processor = FakeLogRecordProcessor()
-        val logLimits = AttributeLimitsBehavior(attributeCountLimit = 2, attributeValueLengthLimit = 128)
+        val logRecordLimits = AttributeLimitsBehavior(attributeCountLimit = 2, attributeValueLengthLimit = 128)
         val logger = LoggerImpl(
             clock = FakeClock(),
             processor = processor,
             key = key,
             resource = FakeResource(),
-            logLimits = logLimits,
+            logRecordLimits = logRecordLimits,
             shutdownState = MutableShutdownState(),
             sdkErrorHandler = errorHandler,
         )
@@ -164,13 +163,13 @@ internal class LoggerErrorHandlingTest {
     fun testExceptionAttributesAddedWhenCapacityRemains() {
         val errorHandler = FakeSdkErrorHandler()
         val processor = FakeLogRecordProcessor()
-        val logLimits = AttributeLimitsBehavior(attributeCountLimit = 5, attributeValueLengthLimit = 128)
+        val logRecordLimits = AttributeLimitsBehavior(attributeCountLimit = 5, attributeValueLengthLimit = 128)
         val logger = LoggerImpl(
             clock = FakeClock(),
             processor = processor,
             key = key,
             resource = FakeResource(),
-            logLimits = logLimits,
+            logRecordLimits = logRecordLimits,
             shutdownState = MutableShutdownState(),
             sdkErrorHandler = errorHandler,
         )
@@ -219,13 +218,13 @@ internal class LoggerErrorHandlingTest {
     fun testAttributeCountRemainsBounded() {
         val errorHandler = FakeSdkErrorHandler()
         val processor = FakeLogRecordProcessor()
-        val logLimits = AttributeLimitsBehavior(attributeCountLimit = 3, attributeValueLengthLimit = 128)
+        val logRecordLimits = AttributeLimitsBehavior(attributeCountLimit = 3, attributeValueLengthLimit = 128)
         val logger = LoggerImpl(
             clock = FakeClock(),
             processor = processor,
             key = key,
             resource = FakeResource(),
-            logLimits = logLimits,
+            logRecordLimits = logRecordLimits,
             shutdownState = MutableShutdownState(),
             sdkErrorHandler = errorHandler,
         )
@@ -282,7 +281,7 @@ internal class LoggerErrorHandlingTest {
         processor = processor,
         key = key,
         resource = FakeResource(),
-        logLimits = fakeLogLimitsConfig,
+        logRecordLimits = fakeLogRecordLimitsConfig,
         shutdownState = MutableShutdownState(),
         sdkErrorHandler = errorHandler,
     )

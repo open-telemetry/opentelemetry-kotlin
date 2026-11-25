@@ -1,6 +1,6 @@
 package io.opentelemetry.kotlin.behavior
 
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
@@ -17,8 +17,8 @@ internal class GlobalAttributeLimitsTest {
         val resolved = resolve(AttributeLimitsBehavior(attributeCountLimit = 64, attributeValueLengthLimit = 8))
         assertEquals(64, resolved.tracerProvider?.spanLimits?.attributeCountLimit)
         assertEquals(8, resolved.tracerProvider?.spanLimits?.attributeValueLengthLimit)
-        assertEquals(64, resolved.loggerProvider?.logLimits?.attributeCountLimit)
-        assertEquals(8, resolved.loggerProvider?.logLimits?.attributeValueLengthLimit)
+        assertEquals(64, resolved.loggerProvider?.logRecordLimits?.attributeCountLimit)
+        assertEquals(8, resolved.loggerProvider?.logRecordLimits?.attributeValueLengthLimit)
     }
 
     @Test
@@ -33,12 +33,12 @@ internal class GlobalAttributeLimitsTest {
                     spanLimits = SpanLimitsBehavior(attributeCountLimit = 32),
                 ),
                 loggerProvider = LoggerProviderBehavior(
-                    logLimits = LogLimitsBehavior(attributeCountLimit = 16),
+                    logRecordLimits = LogRecordLimitsBehavior(attributeCountLimit = 16),
                 ),
             ),
         )
         assertEquals(32, resolved.tracerProvider?.spanLimits?.attributeCountLimit)
-        assertEquals(16, resolved.loggerProvider?.logLimits?.attributeCountLimit)
+        assertEquals(16, resolved.loggerProvider?.logRecordLimits?.attributeCountLimit)
     }
 
     @Test
@@ -75,14 +75,14 @@ internal class GlobalAttributeLimitsTest {
             ),
         )
         assertEquals(50, resolved.tracerProvider?.spanLimits?.attributeCountLimit)
-        assertEquals(50, resolved.loggerProvider?.logLimits?.attributeCountLimit)
+        assertEquals(50, resolved.loggerProvider?.logRecordLimits?.attributeCountLimit)
     }
 
     @Test
     fun preservesAValueOfZero() {
         val resolved = resolve(AttributeLimitsBehavior(attributeCountLimit = 0))
         assertEquals(0, resolved.tracerProvider?.spanLimits?.attributeCountLimit)
-        assertEquals(0, resolved.loggerProvider?.logLimits?.attributeCountLimit)
+        assertEquals(0, resolved.loggerProvider?.logRecordLimits?.attributeCountLimit)
     }
 
     private fun resolve(attributeLimits: AttributeLimitsBehavior) = resolver.resolve(

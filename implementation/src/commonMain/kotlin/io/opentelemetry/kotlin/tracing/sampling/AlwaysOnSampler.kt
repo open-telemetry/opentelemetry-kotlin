@@ -19,7 +19,7 @@ internal object AlwaysOnSampler : Sampler {
         attributes: AttributeContainer,
         links: List<SpanLink>,
     ): SamplingResult {
-        val parentTraceState = context.extractSpan().spanContext.traceState
+        val parentTraceState = context.span.spanContext.traceState
         return SamplingResultImpl(
             decision = Decision.RECORD_AND_SAMPLE,
             attributes = EmptyAttributeContainer,

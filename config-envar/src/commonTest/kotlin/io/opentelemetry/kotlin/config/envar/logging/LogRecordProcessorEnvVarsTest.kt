@@ -22,7 +22,7 @@ internal class LogRecordProcessorEnvVarsTest {
                     scheduleDelay = 1,
                     exportTimeout = 2,
                     maxQueueSize = 3,
-                    maxExportBatchSize = 4,
+                    requestedQueueSize = 4,
                     exporter = LogRecordExporterBehavior()
                 )
             ),

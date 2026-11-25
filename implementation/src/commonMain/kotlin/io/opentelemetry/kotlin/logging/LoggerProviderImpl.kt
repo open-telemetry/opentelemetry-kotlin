@@ -4,7 +4,7 @@ import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guardOrDefault
@@ -24,7 +24,7 @@ internal class LoggerProviderImpl(
     private val clock: Clock,
     loggingConfig: LoggingConfig,
     private val attributeLimits: AttributeLimitsBehavior,
-    private val logLimits: LogLimitsBehavior,
+    private val logRecordLimits: LogRecordLimitsBehavior,
 ) : LoggerProvider, TelemetryCloseable {
 
     private val sdkErrorHandler = loggingConfig.sdkErrorHandler
@@ -57,7 +57,7 @@ internal class LoggerProviderImpl(
                     loggingConfig.processor,
                     key,
                     loggingConfig.resource,
-                    logLimits,
+                    logRecordLimits,
                     shutdownState,
                     loggerConfig,
                     loggingConfig.sdkErrorHandler,

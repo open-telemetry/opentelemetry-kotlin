@@ -60,7 +60,7 @@ internal class TextMapPropagatorAdapterTest {
             mapOf("baggage" to "k=v"),
             MapGetter
         )
-        assertEquals("v", extracted.extractBaggage().getValue("k"))
+        assertEquals("v", extracted.baggage.getValue("k"))
     }
 
     @Test

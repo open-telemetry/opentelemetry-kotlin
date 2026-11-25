@@ -2,27 +2,44 @@
 set -e
 
 cd "$(dirname "$0")"
+source ./ios-simulator.sh
+
+BUNDLE_ID=io.opentelemetry.kotlin.example.ExampleApp
+APP_PATH=iosApp/build/Build/Products/Debug-iphonesimulator/ExampleApp.app
+
+check_xcode_version
 
 echo "Finding available iOS simulator..."
-DEVICE_LINE=$(xcrun simctl list devices available iPhone | grep "iPhone" | head -1)
-SIMULATOR_NAME=$(echo "$DEVICE_LINE" | sed -E 's/^[[:space:]]+([^(]+) \(.*/\1/' | xargs)
-SIMULATOR_ID=$(echo "$DEVICE_LINE" | sed -E 's/.*\(([A-F0-9-]+)\).*/\1/')
-
+find_simulator
 if [ -z "$SIMULATOR_ID" ]; then
-    echo "Error: No iPhone simulator found. Please create one in Xcode."
-    exit 1
+    fail "No iPhone simulator with iOS $MIN_IOS_MAJOR+ found. Install an iOS runtime and create an iPhone simulator in Xcode."
 fi
 echo "Using simulator: $SIMULATOR_NAME (ID: $SIMULATOR_ID)"
 
-# Build the app
-./build-ios.sh
+# Build the app for the same simulator
+SIMULATOR_ID="$SIMULATOR_ID" SIMULATOR_NAME="$SIMULATOR_NAME" ./build-ios.sh
 
 # Launch in simulator
 echo ""
 echo "Launching iOS simulator..."
-xcrun simctl boot "$SIMULATOR_ID" 2>/dev/null || echo "Simulator already running"
-open -a Simulator
-xcrun simctl install booted iosApp/build/Build/Products/Debug-iphonesimulator/ExampleApp.app
-APP_PID=$(xcrun simctl launch booted io.opentelemetry.kotlin.example.ExampleApp | awk '{print $NF}')
-echo "App launched successfully (PID: $APP_PID)"
-echo "The app is now running in the iOS Simulator."
+
+# Boots the device if needed and blocks until boot completes; non-zero on failure.
+xcrun simctl bootstatus "$SIMULATOR_ID" -b || fail "Simulator $SIMULATOR_NAME ($SIMULATOR_ID) failed to boot."
+
+open_simulator_ui
+
+xcrun simctl install "$SIMULATOR_ID" "$APP_PATH" || fail "Failed to install $APP_PATH on $SIMULATOR_NAME."
+
+LAUNCH_OUTPUT=$(xcrun simctl launch "$SIMULATOR_ID" "$BUNDLE_ID") || fail "Failed to launch $BUNDLE_ID: $LAUNCH_OUTPUT"
+APP_PID=$(echo "$LAUNCH_OUTPUT" | awk '{print $NF}')
+case "$APP_PID" in
+    ''|*[!0-9]*) fail "Unexpected output from simctl launch: $LAUNCH_OUTPUT" ;;
+esac
+
+# Catch apps that crash on startup, e.g. an unsupported SdkMode in AppConfig.
+sleep 3
+if ! xcrun simctl spawn "$SIMULATOR_ID" launchctl list | grep "UIKitApplication:$BUNDLE_ID" >/dev/null; then
+    fail "App exited shortly after launch (PID $APP_PID). Check crash logs in ~/Library/Logs/DiagnosticReports."
+fi
+
+echo "App launched successfully on $SIMULATOR_NAME (PID: $APP_PID)"

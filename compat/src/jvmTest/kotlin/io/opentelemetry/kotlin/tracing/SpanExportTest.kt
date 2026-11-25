@@ -488,7 +488,7 @@ internal class SpanExportTest {
             linkCountLimit = 1
             eventCountLimit = 1
             attributeCountPerLinkLimit = 1
-            attributeCountPerEventLimit
+            attributeCountPerEventLimit = 1
         }
         val a = harness.tracer.startSpan("a")
         val b = harness.tracer.startSpan("b")

@@ -1,7 +1,7 @@
 package io.opentelemetry.kotlin.behavior
 
 import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.logging.SimpleLogRecordProcessorBehavior
@@ -229,16 +229,16 @@ internal class BehaviorResolverImplTest {
     }
 
     @Test
-    fun dslOverridesEnvarsForLogLimits() {
+    fun dslOverridesEnvarsForLogRecordLimits() {
         val resolved = resolver.resolve(
-            envars = configWithLogLimits(
-                LogLimitsBehavior(attributeCountLimit = 5, attributeValueLengthLimit = 6),
+            envars = configWithLogRecordLimits(
+                LogRecordLimitsBehavior(attributeCountLimit = 5, attributeValueLengthLimit = 6),
             ),
             declarativeFile = null,
-            dsl = configWithLogLimits(LogLimitsBehavior(attributeCountLimit = 50)),
+            dsl = configWithLogRecordLimits(LogRecordLimitsBehavior(attributeCountLimit = 50)),
         )
 
-        val limits = resolved.loggerProvider?.logLimits
+        val limits = resolved.loggerProvider?.logRecordLimits
         assertEquals(50, limits?.attributeCountLimit)
         assertEquals(6, limits?.attributeValueLengthLimit)
     }
@@ -309,9 +309,9 @@ internal class BehaviorResolverImplTest {
             attributeLimits = attributeLimits
         )
 
-    private fun configWithLogLimits(logLimits: LogLimitsBehavior) =
+    private fun configWithLogRecordLimits(logRecordLimits: LogRecordLimitsBehavior) =
         OpenTelemetryBehavior(
             fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
-            loggerProvider = LoggerProviderBehavior(logLimits = logLimits)
+            loggerProvider = LoggerProviderBehavior(logRecordLimits = logRecordLimits)
         )
 }

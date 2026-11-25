@@ -107,7 +107,7 @@ internal class TracerProviderConfigDslImplTest {
                     scheduleDelay = 1
                     exporterTimeout = 2
                     maxQueueSize = 3
-                    maxExportBatchSize = 4
+                    requestedQueueSize = 4
                 }
             }
         }
@@ -124,7 +124,7 @@ internal class TracerProviderConfigDslImplTest {
                             scheduleDelay = 1,
                             exportTimeout = 2,
                             maxQueueSize = 3,
-                            maxExportBatchSize = 4
+                            requestedQueueSize = 4
                         )
                     )
                 ),

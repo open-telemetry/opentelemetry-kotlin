@@ -18,7 +18,7 @@ fun handleRequest(otel: OpenTelemetry, request: IncomingRequest) {
 
     // 3. Make the span, plus any baggage the caller sent, current while handling the request.
     remoteCtx.storeSpan(span).runWithContext {
-        val tier = currentContext().extractBaggage().getValue("user.tier")
+        val tier = currentContext().baggage.getValue("user.tier")
         println("handling request for a $tier user")
     }
     span.end()

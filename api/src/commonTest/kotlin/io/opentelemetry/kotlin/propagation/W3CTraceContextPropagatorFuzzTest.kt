@@ -86,11 +86,11 @@ internal class W3CTraceContextPropagatorFuzzTest {
             val extracted = propagator.extract(root, carrier, FakeTextMapGetter)
             if (extracted != root) {
                 assertTrue(
-                    extracted.extractSpan().spanContext.isValid,
+                    extracted.span.spanContext.isValid,
                     "non-root context with invalid SpanContext from carrier=$carrier",
                 )
             } else {
-                assertFalse(extracted.extractSpan().spanContext.isValid)
+                assertFalse(extracted.span.spanContext.isValid)
             }
         }
     }
@@ -118,7 +118,7 @@ internal class W3CTraceContextPropagatorFuzzTest {
             propagator.inject(context, carrier, FakeTextMapSetter)
 
             val extracted = propagator.extract(rootContext(), carrier, FakeTextMapGetter)
-            val sc = extracted.extractSpan().spanContext
+            val sc = extracted.span.spanContext
 
             assertEquals(traceId, sc.traceId)
             assertEquals(spanId, sc.spanId)

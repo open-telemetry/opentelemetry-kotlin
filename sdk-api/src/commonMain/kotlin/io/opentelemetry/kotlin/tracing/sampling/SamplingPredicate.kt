@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.tracing.SpanKind
@@ -15,6 +16,7 @@ import io.opentelemetry.kotlin.tracing.model.SpanLink
  * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composablerulebased
  */
 @ExperimentalApi
+@ThreadSafe
 public fun interface SamplingPredicate {
 
     /**

@@ -37,7 +37,7 @@ Point an OTLP exporter at the collector's base URL:
 
 Android apps need a network security config that allows cleartext traffic to that host.
 
-The JVM console example app sends data here by default:
+All the [example apps](../README.md) send data here by default. For example:
 
 ```shell
 ./gradlew :examples:example-app:runConsoleExampleApp

@@ -15,11 +15,11 @@ import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.attrsFromMap
 import io.opentelemetry.kotlin.attributes.setAttributeMap
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.ExportConfigDslImpl
-import io.opentelemetry.kotlin.config.dsl.logging.LogLimitsConfigDslImpl
+import io.opentelemetry.kotlin.config.dsl.logging.LogRecordLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.logging.LoggerConfigurator
 import io.opentelemetry.kotlin.logging.LoggerProvider
@@ -43,7 +43,7 @@ internal class CompatLoggerProviderConfig(
 
     private val builder: OtelJavaSdkLoggerProviderBuilder = OtelJavaSdkLoggerProvider.builder()
 
-    internal var logLimits: AttributeLimitsBehavior = AttributeLimitsBehavior()
+    internal var logRecordLimits: AttributeLimitsBehavior = AttributeLimitsBehavior()
         private set
     private var loggerConfigurator: LoggerConfigurator? = null
     override var serviceName: String? = null
@@ -54,7 +54,7 @@ internal class CompatLoggerProviderConfig(
 
     private val resourceAttrs = CompatAttributesModel()
     private var resourceSchemaUrl: String? = null
-    private val logLimitsDsl = LogLimitsConfigDslImpl()
+    private val logRecordLimitsDsl = LogRecordLimitsConfigDslImpl()
     private val processors = mutableListOf<LogRecordProcessor>()
     private var exportConfigured = false
 
@@ -97,8 +97,8 @@ internal class CompatLoggerProviderConfig(
         }
     }
 
-    override fun logLimits(action: LogLimitsConfigDsl.() -> Unit) {
-        logLimitsDsl.action()
+    override fun logRecordLimits(action: LogRecordLimitsConfigDsl.() -> Unit) {
+        logRecordLimitsDsl.action()
     }
 
     override fun loggerConfigurator(configurator: LoggerConfigurator) {
@@ -121,11 +121,11 @@ internal class CompatLoggerProviderConfig(
     fun build(
         clock: Clock,
         baseResource: Resource = ResourceAdapter(OtelJavaResource.builder().build()),
-        logLimits: LogLimitsBehavior,
+        logRecordLimits: LogRecordLimitsBehavior,
         timeoutMs: Long = COMPAT_DEFAULT_TIMEOUT_MS,
     ): LoggerProvider {
-        this.logLimits = logLimits
-        val otelJavaLogLimits = logLimits.toOtelJavaLogLimits()
+        this.logRecordLimits = logRecordLimits
+        val otelJavaLogLimits = logRecordLimits.toOtelJavaLogLimits()
         builder.setLogLimits { otelJavaLogLimits }
         loggerConfigurator?.let(::applyLoggerConfigurator)
         val resource = ResourceAdapter(
@@ -145,6 +145,6 @@ internal class CompatLoggerProviderConfig(
 
     fun toBehavior(): LoggerProviderBehavior =
         LoggerProviderBehavior(
-            logLimits = logLimitsDsl.toBehavior(),
+            logRecordLimits = logRecordLimitsDsl.toBehavior(),
         )
 }

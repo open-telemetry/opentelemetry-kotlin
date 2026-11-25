@@ -116,11 +116,10 @@
       {
         "name": "first",
         "attributes": {
-          "key1": "value",
-          "key2": "value"
+          "key1": "value"
         },
         "timestamp": 0,
-        "totalAttributesCount": 2
+        "totalAttributesCount": 1
       }
     ],
     "links": [

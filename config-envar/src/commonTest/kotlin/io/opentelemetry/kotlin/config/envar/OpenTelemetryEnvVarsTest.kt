@@ -6,8 +6,8 @@ import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
 import io.opentelemetry.kotlin.behavior.ResourceBehavior
 import io.opentelemetry.kotlin.behavior.SeverityLevel
 import io.opentelemetry.kotlin.behavior.logging.BatchLogRecordProcessorBehavior
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
@@ -16,8 +16,8 @@ import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
-import io.opentelemetry.kotlin.config.envar.logging.LogLimitsEnvVars
 import io.opentelemetry.kotlin.config.envar.logging.LogRecordExporterEnvVars
+import io.opentelemetry.kotlin.config.envar.logging.LogRecordLimitsEnvVars
 import io.opentelemetry.kotlin.config.envar.reader.EnvVarReadWarning
 import io.opentelemetry.kotlin.config.envar.reader.reportingEnvVarReader
 import io.opentelemetry.kotlin.config.envar.tracing.SamplerEnvVars
@@ -38,7 +38,7 @@ internal class OpenTelemetryEnvVarsTest {
                 attributeLimits = AttributeLimitsBehavior(),
                 resource = ResourceBehavior(),
                 loggerProvider = LoggerProviderBehavior(
-                    logLimits = LogLimitsBehavior(),
+                    logRecordLimits = LogRecordLimitsBehavior(),
                     processor = LogRecordProcessorBehavior(
                         batch = BatchLogRecordProcessorBehavior(
                             exporter = LogRecordExporterBehavior()
@@ -66,14 +66,14 @@ internal class OpenTelemetryEnvVarsTest {
             mapOf(
                 AttributeLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT to "64",
                 AttributeLimitsEnvVars.ATTRIBUTE_VALUE_LENGTH_LIMIT to "256",
-                LogLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT to "8",
+                LogRecordLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT to "8",
             )
         )
         assertEquals(
             AttributeLimitsBehavior(attributeCountLimit = 64, attributeValueLengthLimit = 256),
             behavior.attributeLimits,
         )
-        assertEquals(8, behavior.loggerProvider?.logLimits?.attributeCountLimit)
+        assertEquals(8, behavior.loggerProvider?.logRecordLimits?.attributeCountLimit)
     }
 
     @Test
@@ -95,8 +95,8 @@ internal class OpenTelemetryEnvVarsTest {
             SpanLimitsEnvVars.EVENT_COUNT_LIMIT to "6",
             SpanLimitsEnvVars.EVENT_ATTRIBUTE_COUNT_LIMIT to "7",
             SpanLimitsEnvVars.LINK_ATTRIBUTE_COUNT_LIMIT to "8",
-            LogLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT to "9",
-            LogLimitsEnvVars.ATTRIBUTE_VALUE_LENGTH_LIMIT to "10",
+            LogRecordLimitsEnvVars.ATTRIBUTE_COUNT_LIMIT to "9",
+            LogRecordLimitsEnvVars.ATTRIBUTE_VALUE_LENGTH_LIMIT to "10",
             ResourceEnvVars.RESOURCE_ATTRIBUTES to "region=eu",
             ResourceEnvVars.SERVICE_NAME to "checkout",
             SpanExporterEnvVars.TRACES_EXPORTER to Exporter.CONSOLE.value,
@@ -132,7 +132,7 @@ internal class OpenTelemetryEnvVarsTest {
                 ))
             ),
             loggerProvider = LoggerProviderBehavior(
-                logLimits = LogLimitsBehavior(
+                logRecordLimits = LogRecordLimitsBehavior(
                     attributeCountLimit = 9,
                     attributeValueLengthLimit = 10,
                 ),
@@ -161,7 +161,7 @@ internal class OpenTelemetryEnvVarsTest {
                 ))
             ),
             loggerProvider = LoggerProviderBehavior(
-                logLimits = LogLimitsBehavior(),
+                logRecordLimits = LogRecordLimitsBehavior(),
                 processor = LogRecordProcessorBehavior(
                     batch = BatchLogRecordProcessorBehavior(
                         exporter = LogRecordExporterBehavior(),

@@ -2,8 +2,8 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.exporter.logging.LoggingSpanExporter
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
-import io.opentelemetry.kotlin.behavior.logging.LogLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordExporterBehavior
+import io.opentelemetry.kotlin.behavior.logging.LogRecordLimitsBehavior
 import io.opentelemetry.kotlin.behavior.logging.LogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.logging.SimpleLogRecordProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
@@ -32,7 +32,7 @@ internal class CompatConsoleExporterConfigTest {
     private val clock = FakeClock()
     private val idGenerator = CompatIdGenerator()
     private val noSpanLimits = SpanLimitsBehavior()
-    private val noLogLimits = LogLimitsBehavior()
+    private val noLogRecordLimits = LogRecordLimitsBehavior()
 
     @Test
     fun testSimpleBehaviorExportsOnEnd() {
@@ -127,7 +127,7 @@ internal class CompatConsoleExporterConfigTest {
                     )
                 )
             )
-        }.build(clock, logLimits = noLogLimits)
+        }.build(clock, logRecordLimits = noLogRecordLimits)
         provider.getLogger("test").emit(body = "dsl-log")
         assertEquals(1, dslProcessor.logs.size)
     }

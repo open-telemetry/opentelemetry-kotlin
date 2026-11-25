@@ -1,15 +1,10 @@
 package io.opentelemetry.kotlin.tracing
 
-import io.opentelemetry.kotlin.ExperimentalApi
-import io.opentelemetry.kotlin.ThreadSafe
-
 /**
  * Clarifies the relationship between spans correlated via parent/child relationship or span links.
  *
  * https://opentelemetry.io/docs/specs/otel/trace/api/#spankind
  */
-@ThreadSafe
-@ExperimentalApi
 public enum class SpanKind {
 
     /**

@@ -1,6 +1,10 @@
 package io.opentelemetry.kotlin.baggage
 
+import io.opentelemetry.kotlin.AtomicBoolean
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 
 @OptIn(ExperimentalApi::class)
 internal class BaggageImpl private constructor(
@@ -13,6 +17,7 @@ internal class BaggageImpl private constructor(
 
     override fun put(name: String, value: String, metadata: String): Baggage {
         if (entries.size >= MAX_ENTRIES && name !in entries) {
+            reportEntryLimitReached()
             return this
         }
         val entryMetadata = when {
@@ -42,8 +47,31 @@ internal class BaggageImpl private constructor(
 
     override fun toString(): String = "BaggageImpl(entries=$entries)"
 
+    /**
+     * Reports the first [put] that is dropped because the baggage is full. Later drops are not
+     * reported, so code that keeps adding names to a full baggage can't flood the error handler.
+     */
+    private fun reportEntryLimitReached() {
+        if (!entryLimitReported.compareAndSet(expect = false, update = true)) {
+            return
+        }
+        reportError(
+            SdkError.ApiMisuse(
+                api = "Baggage.put",
+                message = "Baggage already has $MAX_ENTRIES entries, so a new name was dropped. " +
+                    "Later dropped names are not reported.",
+                severity = SdkErrorSeverity.WARNING,
+            )
+        )
+    }
+
     companion object {
         const val MAX_ENTRIES = 180
+
+        /**
+         * Whether a [put] dropped because of [MAX_ENTRIES] has been reported in this process.
+         */
+        internal val entryLimitReported = AtomicBoolean(false)
 
         val EMPTY: Baggage = BaggageImpl(emptyMap())
 

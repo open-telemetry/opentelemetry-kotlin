@@ -18,16 +18,12 @@ import io.opentelemetry.kotlin.tracing.SpanKind
 
 /**
  * Runs platform-independent examples demonstrating how to use opentelemetry-kotlin's API.
- * Telemetry is exported to [url] via OTLP/HTTP if set, otherwise it is printed to stdout.
+ * Telemetry is exported to [url] via OTLP/HTTP.
  */
-suspend fun runAllExamples(platform: String, url: String? = AppConfig.url) {
+suspend fun runAllExamples(platform: String, url: String = AppConfig.url) {
     println("=== OpenTelemetry Kotlin Example ($platform) ===")
     println()
-    if (url != null) {
-        println("Telemetry will be exported to: $url")
-    } else {
-        println("Telemetry will be printed to stdout.")
-    }
+    println("Telemetry will be exported to: $url")
     println()
 
     val otel = initializeOtelSdk(url)
