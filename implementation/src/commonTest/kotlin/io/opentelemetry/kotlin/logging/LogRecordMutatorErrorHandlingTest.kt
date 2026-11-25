@@ -84,6 +84,52 @@ internal class LogRecordMutatorErrorHandlingTest {
         assertNull(log.attributes["key"])
     }
 
+    @Test
+    fun testRemoveAttributeRemovesExistingAttribute() {
+        val log = createLogRecord(FakeSdkErrorHandler())
+        log.setStringAttribute("key1", "value1")
+        log.setStringAttribute("key2", "value2")
+
+        log.removeAttribute("key1")
+
+        assertNull(log.attributes["key1"])
+        assertEquals("value2", log.attributes["key2"])
+    }
+
+    @Test
+    fun testRemoveMissingAttributeIsNoOp() {
+        val log = createLogRecord(FakeSdkErrorHandler())
+        log.setStringAttribute("key1", "value1")
+
+        log.removeAttribute("missing")
+
+        assertEquals("value1", log.attributes["key1"])
+    }
+
+    @Test
+    fun testAddModifyThenRemoveSameKey() {
+        val log = createLogRecord(FakeSdkErrorHandler())
+        log.setStringAttribute("key", "original")
+        log.setStringAttribute("key", "modified")
+
+        log.removeAttribute("key")
+
+        assertFalse(log.attributes.containsKey("key"))
+    }
+
+    @Test
+    fun testRemoveAttributeReflectedInLogRecordData() {
+        val log = createLogRecord(FakeSdkErrorHandler())
+        log.setStringAttribute("sensitive", "secret")
+        log.setStringAttribute("safe", "public")
+
+        log.removeAttribute("sensitive")
+
+        val data = log.toLogRecordData()
+        assertFalse(data.attributes.containsKey("sensitive"))
+        assertEquals("public", data.attributes["safe"])
+    }
+
     private fun createLogRecord(errorHandler: SdkErrorHandler) = LogRecordModel(
         resource = FakeResource(),
         instrumentationScopeInfo = FakeInstrumentationScopeInfo(),
