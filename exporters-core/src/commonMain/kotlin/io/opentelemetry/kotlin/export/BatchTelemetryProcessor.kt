@@ -185,7 +185,7 @@ internal class BatchTelemetryProcessor<T>(
         try {
             withTimeout(timeout) { action() }
         } catch (e: TimeoutCancellationException) {
-            OperationResultCode.Failure
+            OperationResultCode.Timeout
         }
     }
 
