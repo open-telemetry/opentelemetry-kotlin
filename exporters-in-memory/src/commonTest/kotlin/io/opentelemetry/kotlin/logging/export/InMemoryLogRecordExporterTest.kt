@@ -46,6 +46,38 @@ internal class InMemoryLogRecordExporterTest {
     }
 
     @Test
+    fun testResetClearsTelemetryAndAllowsFurtherExports() = runTest {
+        exporter.export(fakeTelemetry)
+        val snapshot = exporter.exportedLogRecords
+
+        exporter.reset()
+
+        assertTrue(exporter.exportedLogRecords.isEmpty())
+        assertEquals(fakeTelemetry, snapshot)
+        assertEquals(OperationResultCode.Success, exporter.export(fakeTelemetry))
+        assertEquals(fakeTelemetry, exporter.exportedLogRecords)
+    }
+
+    @Test
+    fun testResetIsIdempotent() {
+        exporter.reset()
+        exporter.reset()
+        assertTrue(exporter.exportedLogRecords.isEmpty())
+    }
+
+    @Test
+    fun testResetAfterShutdownDoesNotReactivateExporter() = runTest {
+        exporter.export(fakeTelemetry)
+        exporter.shutdown()
+
+        exporter.reset()
+
+        assertTrue(exporter.exportedLogRecords.isEmpty())
+        assertEquals(OperationResultCode.Failure, exporter.export(fakeTelemetry))
+        assertTrue(exporter.exportedLogRecords.isEmpty())
+    }
+
+    @Test
     fun testExportReturnsFailureAfterShutdown() = runTest {
         exporter.shutdown()
         val result = exporter.export(fakeTelemetry)

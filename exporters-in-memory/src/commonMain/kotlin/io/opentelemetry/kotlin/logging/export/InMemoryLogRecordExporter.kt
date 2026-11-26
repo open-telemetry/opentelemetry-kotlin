@@ -10,7 +10,13 @@ import io.opentelemetry.kotlin.logging.data.LogRecordData
 @ExperimentalApi
 public interface InMemoryLogRecordExporter : LogRecordExporter {
     /**
-     * A list of log records that have been exported.
+     * A snapshot of log records that have been exported since the last [reset].
      */
     public val exportedLogRecords: List<LogRecordData>
+
+    /**
+     * Clears exported log records, leaving previously returned snapshots unchanged.
+     * This does not shut down the exporter or reactivate it after shutdown.
+     */
+    public fun reset()
 }
