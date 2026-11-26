@@ -56,7 +56,8 @@ internal class CompatSdkConfigFactory(
     fun buildTracerProvider(): TracerProvider {
         cfg.tracerProviderConfig.applyResolvedSampler(sampler)
         spanProcessors.forEach {
-            spanProcessor -> cfg.tracerProviderConfig.applyResolvedProcessor(spanProcessor)
+                spanProcessor ->
+            cfg.tracerProviderConfig.applyResolvedProcessor(spanProcessor)
         }
         return cfg.tracerProviderConfig.build(clock, idGenerator, baseResource, spanLimits, cfg.shutdownTimeoutMs)
     }
