@@ -105,7 +105,7 @@ internal class BatchSpanProcessorImplTest {
         assertEquals(OperationResultCode.Success, processor.forceFlush())
         processor.onEnd(FakeReadWriteSpan())
         assertEquals(OperationResultCode.Failure, processor.shutdown())
-        assertEquals(listOf("export 1", "flush", "export 1", "shutdown"), events)
+        assertEquals(listOf("export 1", "flush", "export 1", "flush", "shutdown"), events)
     }
 
     @Test

@@ -62,7 +62,7 @@ internal class BatchTelemetryProcessor<T>(
             try {
                 queue.close()
                 worker.join()
-                OperationResultCode.Success
+                guardUserCode("Exporter forceFlush failed", config.forceFlushTimeoutMs, flushAction)
             } finally {
                 scope.cancel()
             }
