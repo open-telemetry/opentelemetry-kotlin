@@ -108,6 +108,15 @@ internal class BuiltInCompositeSamplerTest {
     }
 
     @Test
+    fun `composableProbability below the minimum ratio behaves like composableAlwaysOff`() {
+        listOf(1e-20, MIN_SAMPLING_RATIO / 2).forEach { ratio ->
+            assertSame(ComposableAlwaysOffSampler, samplerDsl.composableProbability(ratio), "ratio $ratio")
+            val result = samplerDsl.composite { composableProbability(ratio) }.sample()
+            assertEquals(SamplingResult.Decision.DROP, result.decision, "ratio $ratio")
+        }
+    }
+
+    @Test
     fun `composableProbability reports adjustedCountReliable true per spec`() {
         assertTrue(samplerDsl.composableProbability(0.5).intent().adjustedCountReliable)
     }

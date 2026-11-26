@@ -58,8 +58,9 @@ internal class SamplerConfigImpl(
 
     override fun composableAlwaysOff(): ComposableSampler = ComposableAlwaysOffSampler
 
+    // As with probability(), a ratio below 2^-56 rounds to "never sample" instead of failing validation.
     override fun composableProbability(ratio: Double): ComposableSampler =
-        if (ratio == 0.0) {
+        if (ratio >= 0.0 && ratio < MIN_SAMPLING_RATIO) {
             ComposableAlwaysOffSampler
         } else {
             ComposableProbabilitySampler(ratio)
