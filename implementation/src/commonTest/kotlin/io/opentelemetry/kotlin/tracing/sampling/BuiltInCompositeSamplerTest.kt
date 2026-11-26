@@ -108,6 +108,15 @@ internal class BuiltInCompositeSamplerTest {
     }
 
     @Test
+    fun `composableProbability below the minimum ratio behaves like composableAlwaysOff`() {
+        listOf(1e-20, MIN_SAMPLING_RATIO / 2).forEach { ratio ->
+            assertSame(ComposableAlwaysOffSampler, samplerDsl.composableProbability(ratio), "ratio $ratio")
+            val result = samplerDsl.composite { composableProbability(ratio) }.sample()
+            assertEquals(SamplingResult.Decision.DROP, result.decision, "ratio $ratio")
+        }
+    }
+
+    @Test
     fun `composableProbability reports adjustedCountReliable true per spec`() {
         assertTrue(samplerDsl.composableProbability(0.5).intent().adjustedCountReliable)
     }
@@ -176,6 +185,32 @@ internal class BuiltInCompositeSamplerTest {
             .sample(context = contextWithParent(sampled = true, isRemote = true, otValue = "th:8"))
         assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, result.decision)
         assertEquals("th:8", result.traceState.get("ot"))
+    }
+
+    @Test
+    fun `propagates parent threshold consistent with the parent rv via composableParentThreshold`() {
+        val result = samplerDsl.composite { composableParentThreshold(root = composableAlwaysOff()) }
+            .sample(context = contextWithParent(sampled = true, isRemote = true, otValue = "rv:ffffffffffffff;th:f"))
+        assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, result.decision)
+        assertEquals("rv:ffffffffffffff;th:f", result.traceState.get("ot"))
+    }
+
+    @Test
+    fun `erases a parent threshold that disagrees with a sampled parent via composableParentThreshold`() {
+        // The parent's randomness (0x90123456789012) is below th:f, so the threshold says "drop".
+        val result = samplerDsl.composite { composableParentThreshold(root = composableAlwaysOff()) }
+            .sample(context = contextWithParent(sampled = true, isRemote = true, otValue = "th:f"))
+        assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, result.decision)
+        assertNull(result.traceState.get("ot"))
+    }
+
+    @Test
+    fun `erases a parent threshold that disagrees with a dropped parent via composableParentThreshold`() {
+        // The parent's randomness (0x90123456789012) is at least th:8, so the threshold says "sample".
+        val result = samplerDsl.composite { composableParentThreshold(root = composableAlwaysOn()) }
+            .sample(context = contextWithParent(sampled = false, isRemote = true, otValue = "th:8"))
+        assertEquals(SamplingResult.Decision.DROP, result.decision)
+        assertNull(result.traceState.get("ot"))
     }
 
     @Test
@@ -250,6 +285,37 @@ internal class BuiltInCompositeSamplerTest {
         assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, result.decision)
         assertEquals("rv:a0000000000000", result.traceState.get("ot"))
         assertEquals("boom", errorHandler.userCodeErrors.single().cause.message)
+    }
+
+    @Test
+    fun `keeps non-ot entries returned by traceStateProvider`() {
+        val delegate = fakeComposableSampler(
+            SamplingIntentImpl(
+                threshold = 0,
+                adjustedCountReliable = false,
+                traceStateProvider = { traceState, _ -> traceState.put("vendor", "value") },
+            )
+        )
+        val result = CompositeSampler(delegate, FakeSdkErrorHandler()).sample(
+            context = contextWithParent(sampled = true, isRemote = true, otValue = "rv:a0000000000000"),
+        )
+        assertEquals("value", result.traceState.get("vendor"))
+        assertEquals("rv:a0000000000000", result.traceState.get("ot"))
+    }
+
+    @Test
+    fun `ignores ot changes made by traceStateProvider`() {
+        val delegate = fakeComposableSampler(
+            SamplingIntentImpl(
+                threshold = 0,
+                adjustedCountReliable = true,
+                traceStateProvider = { traceState, _ -> traceState.put("ot", "rv:b0000000000000;th:4") },
+            )
+        )
+        val result = CompositeSampler(delegate, FakeSdkErrorHandler()).sample(
+            context = contextWithParent(sampled = true, isRemote = true, otValue = "rv:a0000000000000"),
+        )
+        assertEquals("rv:a0000000000000;th:0", result.traceState.get("ot"))
     }
 
     @Test

@@ -53,22 +53,24 @@ internal class CompositeSampler(
             SamplingResult.Decision.DROP
         }
 
-        val providedOtValue = intent.traceStateProvider?.let { provider ->
-            sdkErrorHandler.guardOrDefault(null, "Sampling intent traceStateProvider failed") {
-                provider(traceState, decision).get(KnownTraceState.OT)
+        // Start from the TraceState the provider returns. ComposableSamplers must not modify `ot`,
+        // so `ot` is always derived from the incoming value and written on top.
+        val providedTraceState = intent.traceStateProvider?.let { provider ->
+            sdkErrorHandler.guardOrDefault(traceState, "Sampling intent traceStateProvider failed") {
+                provider(traceState, decision)
             }
-        }
-        val derivedOtelTraceState = providedOtValue?.let(OtelTraceState::parse) ?: otelTraceState
+        } ?: traceState
         if (sampled && adjustableThreshold) {
-            intentThreshold?.let(derivedOtelTraceState::setThreshold)
+            intentThreshold?.let(otelTraceState::setThreshold)
         } else {
-            derivedOtelTraceState.eraseThreshold()
+            otelTraceState.eraseThreshold()
         }
 
-        val derivedTraceState = if (derivedOtelTraceState.encode().isEmpty()) {
-            traceState.remove(KnownTraceState.OT)
+        val encodedOt = otelTraceState.encode()
+        val derivedTraceState = if (encodedOt.isEmpty()) {
+            providedTraceState.remove(KnownTraceState.OT)
         } else {
-            traceState.put(KnownTraceState.OT, derivedOtelTraceState.encode())
+            providedTraceState.put(KnownTraceState.OT, encodedOt)
         }
         val attr = if (sampled) {
             intent.attributesProvider?.let { provider ->

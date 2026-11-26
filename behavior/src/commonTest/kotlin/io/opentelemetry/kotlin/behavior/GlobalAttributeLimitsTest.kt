@@ -22,6 +22,24 @@ internal class GlobalAttributeLimitsTest {
     }
 
     @Test
+    fun globalLimitsReachEveryAttributeLimitOfEachSignal() {
+        val resolved = resolve(AttributeLimitsBehavior(attributeCountLimit = 64, attributeValueLengthLimit = 8))
+        assertEquals(
+            SpanLimitsBehavior(
+                attributeCountLimit = 64,
+                attributeValueLengthLimit = 8,
+                attributeCountPerEventLimit = 64,
+                attributeCountPerLinkLimit = 64,
+            ),
+            resolved.tracerProvider?.spanLimits,
+        )
+        assertEquals(
+            LogRecordLimitsBehavior(attributeCountLimit = 64, attributeValueLengthLimit = 8),
+            resolved.loggerProvider?.logRecordLimits,
+        )
+    }
+
+    @Test
     fun signalLimitWinsOverGlobal() {
         val resolved = resolver.resolve(
             envars = null,
@@ -30,7 +48,11 @@ internal class GlobalAttributeLimitsTest {
                 fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 attributeLimits = AttributeLimitsBehavior(attributeCountLimit = 64),
                 tracerProvider = TracerProviderBehavior(
-                    spanLimits = SpanLimitsBehavior(attributeCountLimit = 32),
+                    spanLimits = SpanLimitsBehavior(
+                        attributeCountLimit = 32,
+                        attributeCountPerEventLimit = 16,
+                        attributeCountPerLinkLimit = 8,
+                    ),
                 ),
                 loggerProvider = LoggerProviderBehavior(
                     logRecordLimits = LogRecordLimitsBehavior(attributeCountLimit = 16),
@@ -38,6 +60,8 @@ internal class GlobalAttributeLimitsTest {
             ),
         )
         assertEquals(32, resolved.tracerProvider?.spanLimits?.attributeCountLimit)
+        assertEquals(16, resolved.tracerProvider?.spanLimits?.attributeCountPerEventLimit)
+        assertEquals(8, resolved.tracerProvider?.spanLimits?.attributeCountPerLinkLimit)
         assertEquals(16, resolved.loggerProvider?.logRecordLimits?.attributeCountLimit)
     }
 
@@ -58,7 +82,6 @@ internal class GlobalAttributeLimitsTest {
         assertEquals(5, spanLimits?.linkCountLimit)
         assertEquals(64, spanLimits?.attributeCountLimit)
         assertNull(spanLimits?.eventCountLimit)
-        assertNull(spanLimits?.attributeCountPerEventLimit)
     }
 
     @Test
@@ -82,6 +105,8 @@ internal class GlobalAttributeLimitsTest {
     fun preservesAValueOfZero() {
         val resolved = resolve(AttributeLimitsBehavior(attributeCountLimit = 0))
         assertEquals(0, resolved.tracerProvider?.spanLimits?.attributeCountLimit)
+        assertEquals(0, resolved.tracerProvider?.spanLimits?.attributeCountPerEventLimit)
+        assertEquals(0, resolved.tracerProvider?.spanLimits?.attributeCountPerLinkLimit)
         assertEquals(0, resolved.loggerProvider?.logRecordLimits?.attributeCountLimit)
     }
 

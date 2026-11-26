@@ -15,6 +15,8 @@ import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.factory.FakeIdGenerator
 import io.opentelemetry.kotlin.factory.IdGeneratorImpl
+import io.opentelemetry.kotlin.init.config.DEFAULT_EVENT_LIMIT
+import io.opentelemetry.kotlin.init.config.DEFAULT_LINK_LIMIT
 import io.opentelemetry.kotlin.init.config.SpanLimitConfig
 import io.opentelemetry.kotlin.logging.export.FakeLogRecordProcessor
 import io.opentelemetry.kotlin.propagation.FakeTextMapPropagator
@@ -169,6 +171,50 @@ internal class OpenTelemetryConfigImplTest {
         val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
         assertEquals(64, behavior.spanLimitConfig().attributeCountLimit)
         assertEquals(64, behavior.logRecordLimits().attributeCountLimit)
+    }
+
+    @Test
+    fun testGlobalAttrLimitsReachEveryAttributeLimit() {
+        val cfg = OpenTelemetryConfigImpl().apply {
+            attributeLimits {
+                attributeCountLimit = 64
+                attributeValueLengthLimit = 256
+            }
+        }
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
+        with(behavior.spanLimitConfig()) {
+            assertEquals(64, attributeCountLimit)
+            assertEquals(256, attributeValueLengthLimit)
+            assertEquals(64, attributeCountPerEventLimit)
+            assertEquals(64, attributeCountPerLinkLimit)
+            assertEquals(DEFAULT_EVENT_LIMIT, eventCountLimit)
+            assertEquals(DEFAULT_LINK_LIMIT, linkCountLimit)
+        }
+        with(behavior.logRecordLimits()) {
+            assertEquals(64, attributeCountLimit)
+            assertEquals(256, attributeValueLengthLimit)
+        }
+    }
+
+    @Test
+    fun testLocalEventAndLinkAttrLimitsBeatGlobal() {
+        val cfg = OpenTelemetryConfigImpl().apply {
+            attributeLimits {
+                attributeCountLimit = 64
+            }
+            tracerProvider {
+                spanLimits {
+                    attributeCountPerEventLimit = 4
+                    attributeCountPerLinkLimit = 0
+                }
+            }
+        }
+        val behavior = defaultBehaviorReader().read(cfg.configFilePath, cfg::toBehavior)
+        with(behavior.spanLimitConfig()) {
+            assertEquals(64, attributeCountLimit)
+            assertEquals(4, attributeCountPerEventLimit)
+            assertEquals(0, attributeCountPerLinkLimit)
+        }
     }
 
     @Test

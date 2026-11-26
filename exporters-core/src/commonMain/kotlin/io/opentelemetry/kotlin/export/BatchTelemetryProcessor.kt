@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.export
 
+import io.opentelemetry.kotlin.error.sdkGuardOrDefaultSuspend
 import io.opentelemetry.kotlin.ioDispatcher
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
@@ -71,13 +72,16 @@ internal class BatchTelemetryProcessor<T>(
         var exitedNormally = false
         try {
             while (true) {
-                val closed = select {
-                    flushRequests.onReceive { request ->
-                        request.complete(flush(emptyList()))
-                        false
-                    }
-                    queue.onReceiveCatching { first ->
-                        first.isClosed || fillAndExportBatch(first.getOrThrow())
+                // Guard each iteration so that an unexpected failure is reported without stopping the worker.
+                val closed = config.sdkErrorHandler.sdkGuardOrDefaultSuspend(false, "Batch processor worker failed") {
+                    select {
+                        flushRequests.onReceive { request ->
+                            request.complete(guardedFlush(emptyList()))
+                            false
+                        }
+                        queue.onReceiveCatching { first ->
+                            first.isClosed || fillAndExportBatch(first.getOrThrow())
+                        }
                     }
                 }
                 if (closed) {
@@ -112,7 +116,7 @@ internal class BatchTelemetryProcessor<T>(
                 }
                 val closed: Boolean? = select {
                     flushRequests.onReceive { request ->
-                        request.complete(flush(batch))
+                        request.complete(guardedFlush(batch))
                         false
                     }
                     queue.onReceiveCatching { next ->
@@ -137,6 +141,15 @@ internal class BatchTelemetryProcessor<T>(
             deadline.cancel()
         }
     }
+
+    /**
+     * As [flush], but reports an unexpected failure and returns [OperationResultCode.Failure] so that the
+     * waiting forceFlush caller is always completed.
+     */
+    private suspend fun guardedFlush(pending: List<T>): OperationResultCode =
+        config.sdkErrorHandler.sdkGuardOrDefaultSuspend(OperationResultCode.Failure, "Batch processor flush failed") {
+            flush(pending)
+        }
 
     /**
      * Exports [pending] and everything currently queued, then flushes the exporter.

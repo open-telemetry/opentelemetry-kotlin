@@ -244,6 +244,8 @@ abstract interface io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord : io
     abstract var timestamp // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.timestamp|{}timestamp[0]
         abstract fun <get-timestamp>(): kotlin/Long? // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.timestamp.<get-timestamp>|<get-timestamp>(){}[0]
         abstract fun <set-timestamp>(kotlin/Long?) // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.timestamp.<set-timestamp>|<set-timestamp>(kotlin.Long?){}[0]
+
+    abstract fun removeAttribute(kotlin/String) // io.opentelemetry.kotlin.logging.model/ReadWriteLogRecord.removeAttribute|removeAttribute(kotlin.String){}[0]
 }
 
 abstract interface io.opentelemetry.kotlin.logging.model/ReadableLogRecord : io.opentelemetry.kotlin.logging.data/LogRecordData { // io.opentelemetry.kotlin.logging.model/ReadableLogRecord|null[0]

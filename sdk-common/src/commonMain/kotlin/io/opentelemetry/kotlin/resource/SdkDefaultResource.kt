@@ -15,7 +15,7 @@ private const val UNKNOWN_SERVICE = "unknown_service"
  *
  * https://opentelemetry.io/docs/specs/semconv/resource/service/
  */
-public val SDK_DEFAULT_SERVICE_NAME: String = defaultServiceName(getProcessExecutableName())
+public val SDK_DEFAULT_SERVICE_NAME: String by lazy { defaultServiceName(getProcessExecutableName()) }
 
 internal fun defaultServiceName(executableName: String?): String =
     if (executableName.isNullOrBlank()) {

@@ -3,12 +3,32 @@ package io.opentelemetry.kotlin.resource
 import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.attributes.AnyValue
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.setProcessSdkErrorHandler
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 
 internal class ResourceAdapterTest {
+
+    private val errors = mutableListOf<SdkError>()
+
+    @Before
+    fun setUp() {
+        setProcessSdkErrorHandler(null)
+        check(setProcessSdkErrorHandler(SdkErrorHandler { errors += it }))
+    }
+
+    @After
+    fun tearDown() {
+        setProcessSdkErrorHandler(null)
+    }
 
     @Test
     fun testResourceAdapter() {
@@ -37,6 +57,16 @@ internal class ResourceAdapterTest {
         )
 
         val merged = base.merge(other)
+        val error = errors.single()
+        assertTrue(error is SdkError.ApiMisuse)
+        assertEquals("Resource.merge", (error as SdkError.ApiMisuse).api)
+        assertEquals(SdkErrorSeverity.WARNING, error.severity)
+        assertEquals(
+            "Conflicting schema URLs 'https://base.com' and 'https://other.com', using 'https://other.com'.",
+            error.message,
+        )
+        errors.clear()
+
         assertEquals("1", merged.attributes["a"])
         assertEquals("2", merged.attributes["b"])
         assertEquals("other", merged.attributes["shared"])
@@ -45,6 +75,16 @@ internal class ResourceAdapterTest {
         assertNull(noSchema.merge(noSchema).schemaUrl)
         assertEquals("https://other.com", noSchema.merge(other).schemaUrl)
         assertEquals("https://base.com", base.merge(noSchema).schemaUrl)
+        assertEquals(emptyList<SdkError>(), errors)
+    }
+
+    @Test
+    fun testMergeEmptySchemaUrlReportsNothing() {
+        val empty = ResourceAdapter(OtelJavaResource.builder().setSchemaUrl("").build())
+        val schema = ResourceAdapter(OtelJavaResource.builder().setSchemaUrl("https://base.com").build())
+        empty.merge(schema)
+        schema.merge(empty)
+        assertEquals(emptyList<SdkError>(), errors)
     }
 
     @Test

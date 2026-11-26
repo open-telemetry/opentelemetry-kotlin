@@ -50,4 +50,9 @@ public interface ReadWriteLogRecord : ReadableLogRecord, AttributesMutator, Attr
      * The span context associated with the log record
      */
     public override var spanContext: SpanContext
+
+    /**
+     * Removes the attribute with the given key. If the key does not exist, this is a no-op.
+     */
+    public fun removeAttribute(key: String)
 }

@@ -5,12 +5,32 @@ import io.opentelemetry.kotlin.attributes.AttributeValue
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.toAttributeValues
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.setProcessSdkErrorHandler
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 
 internal class ResourceImplTest {
+
+    private val errors = mutableListOf<SdkError>()
+
+    @BeforeTest
+    fun setUp() {
+        setProcessSdkErrorHandler(null)
+        check(setProcessSdkErrorHandler(SdkErrorHandler { errors += it }))
+    }
+
+    @AfterTest
+    fun tearDown() {
+        setProcessSdkErrorHandler(null)
+    }
 
     @Test
     fun testResourceImpl() {
@@ -129,6 +149,35 @@ internal class ResourceImplTest {
         val base = ResourceImpl(AttributesModel(), "https://example.com/base")
         val other = ResourceImpl(AttributesModel(), "https://example.com/other")
         assertEquals("https://example.com/other", base.merge(other).schemaUrl)
+
+        val error = assertIs<SdkError.ApiMisuse>(errors.single())
+        assertEquals("Resource.merge", error.api)
+        assertEquals(SdkErrorSeverity.WARNING, error.severity)
+        assertEquals(
+            "Conflicting schema URLs 'https://example.com/base' and 'https://example.com/other', " +
+                "using 'https://example.com/other'.",
+            error.message,
+        )
+    }
+
+    @Test
+    fun testMergeSchemaUrlWithoutConflictReportsNothing() {
+        val none = ResourceImpl(AttributesModel(), null)
+        val schema = ResourceImpl(AttributesModel(), "https://example.com/schema")
+        none.merge(none)
+        none.merge(schema)
+        schema.merge(none)
+        schema.merge(schema)
+        assertEquals(emptyList(), errors)
+    }
+
+    @Test
+    fun testMergeEmptySchemaUrlReportsNothing() {
+        val empty = ResourceImpl(AttributesModel(), "")
+        val schema = ResourceImpl(AttributesModel(), "https://example.com/schema")
+        empty.merge(schema)
+        schema.merge(empty)
+        assertEquals(emptyList(), errors)
     }
 
     @Test

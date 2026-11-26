@@ -28,5 +28,7 @@ private fun AttributeLimitsBehavior.mergeInto(spanLimits: SpanLimitsBehavior?): 
     return limits.copy(
         attributeCountLimit = limits.attributeCountLimit ?: attributeCountLimit,
         attributeValueLengthLimit = limits.attributeValueLengthLimit ?: attributeValueLengthLimit,
+        attributeCountPerEventLimit = limits.attributeCountPerEventLimit ?: attributeCountLimit,
+        attributeCountPerLinkLimit = limits.attributeCountPerLinkLimit ?: attributeCountLimit,
     )
 }

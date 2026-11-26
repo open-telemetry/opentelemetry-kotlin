@@ -303,7 +303,8 @@ fun initWithLimits(): OpenTelemetrySdk = createOpenTelemetry {
 ```
 
 `attributeLimits { }` applies to every signal. Limits set on `spanLimits { }` or `logRecordLimits { }`
-override it for that specific signal.
+override it for that specific signal. The global `attributeCountLimit` also applies to the attributes
+of each span event and link, unless `attributeCountPerEventLimit` or `attributeCountPerLinkLimit` is set.
 
 ### Turning tracers and loggers off
 

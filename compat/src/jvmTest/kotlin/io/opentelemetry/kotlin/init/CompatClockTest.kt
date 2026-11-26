@@ -89,7 +89,7 @@ internal class CompatClockTest {
         assertTrue(ended.startTimestamp > 0)
         assertTrue(handler.userCodeErrors.isNotEmpty())
         assertEquals(
-            "Clock.now failed, using fallback clock",
+            "Clock.now failed, using fallback clock. Later failures are not reported.",
             handler.userCodeErrors.first().message,
         )
     }

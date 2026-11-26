@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.factory
 
+import io.opentelemetry.kotlin.ReportOnce
 import io.opentelemetry.kotlin.aliases.OtelJavaIdGenerator
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.reportUserCodeError
@@ -22,28 +23,69 @@ internal class GuardedCompatIdGenerator(
     private val javaDelegate: OtelJavaIdGenerator =
         delegate as? OtelJavaIdGenerator ?: OtelJavaIdGeneratorAdapter(delegate)
 
+    private val spanIdBytesFailure = ReportOnce()
+    private val traceIdBytesFailure = ReportOnce()
+    private val randomTraceIdsPropertyFailure = ReportOnce()
+    private val spanIdFailure = ReportOnce()
+    private val traceIdFailure = ReportOnce()
+    private val randomTraceIdsFailure = ReportOnce()
+
     override fun generateSpanIdBytes(): ByteArray =
-        guard("generateSpanIdBytes", fallback::generateSpanIdBytes, delegate::generateSpanIdBytes)
+        guard(
+            "generateSpanIdBytes",
+            spanIdBytesFailure,
+            fallback::generateSpanIdBytes,
+            delegate::generateSpanIdBytes,
+        )
 
     override fun generateTraceIdBytes(): ByteArray =
-        guard("generateTraceIdBytes", fallback::generateTraceIdBytes, delegate::generateTraceIdBytes)
+        guard(
+            "generateTraceIdBytes",
+            traceIdBytesFailure,
+            fallback::generateTraceIdBytes,
+            delegate::generateTraceIdBytes,
+        )
 
     override val generatesRandomTraceIds: Boolean
-        get() = guard("generatesRandomTraceIds", { false }, delegate::generatesRandomTraceIds)
+        get() = guard(
+            "generatesRandomTraceIds",
+            randomTraceIdsPropertyFailure,
+            { false },
+            delegate::generatesRandomTraceIds,
+        )
 
     override fun generateSpanId(): String =
-        guard("generateSpanId", { fallback.generateSpanIdBytes().toHexString() }, javaDelegate::generateSpanId)
+        guard(
+            "generateSpanId",
+            spanIdFailure,
+            { fallback.generateSpanIdBytes().toHexString() },
+            javaDelegate::generateSpanId,
+        )
 
     override fun generateTraceId(): String =
-        guard("generateTraceId", { fallback.generateTraceIdBytes().toHexString() }, javaDelegate::generateTraceId)
+        guard(
+            "generateTraceId",
+            traceIdFailure,
+            { fallback.generateTraceIdBytes().toHexString() },
+            javaDelegate::generateTraceId,
+        )
 
     override fun generatesRandomTraceIds(): Boolean =
-        guard("generatesRandomTraceIds", { false }, javaDelegate::generatesRandomTraceIds)
+        guard("generatesRandomTraceIds", randomTraceIdsFailure, { false }, javaDelegate::generatesRandomTraceIds)
 
-    private inline fun <T> guard(member: String, fallback: () -> T, action: () -> T): T = try {
+    private inline fun <T> guard(
+        member: String,
+        failure: ReportOnce,
+        fallback: () -> T,
+        action: () -> T,
+    ): T = try {
         action()
     } catch (exc: Throwable) {
-        sdkErrorHandler.reportUserCodeError(exc, "IdGenerator.$member failed, using fallback")
+        sdkErrorHandler.reportUserCodeError(
+            exc,
+            "IdGenerator.$member failed, using fallback. Later failures are not reported.",
+            failure,
+        )
         fallback()
     }
 }

@@ -34,9 +34,18 @@ internal class GuardedIdGeneratorTest {
                 "generateTraceIdBytes",
                 "generateSpanIdBytes",
                 "generatesRandomTraceIds",
-            ).map { "IdGenerator.$it failed, using fallback" },
+            ).map { "IdGenerator.$it failed, using fallback. Later failures are not reported." },
             errorHandler.userCodeErrors.map { it.message },
         )
+    }
+
+    @Test
+    fun testRepeatedFailuresReportOncePerMember() {
+        val generator = GuardedIdGenerator(HostileIdGenerator, errorHandler, ids)
+        repeat(1000) {
+            assertContentEquals(ids.generateSpanIdBytes(), generator.generateSpanIdBytes())
+        }
+        assertEquals(1, errorHandler.userCodeErrors.size)
     }
 
     @Test
