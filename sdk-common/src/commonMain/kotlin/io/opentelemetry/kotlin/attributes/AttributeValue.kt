@@ -166,8 +166,8 @@ public sealed class AttributeValue {
             is FloatArray -> DoubleList(value.map { it.toDouble() })
             is CharArray -> StrList(value.map { it.toString() })
             is Map<*, *> -> Value(value.toAnyValueMap())
-            is Collection<*> -> fromList(value.toList())
-            is Array<*> -> fromList(value.toList())
+            is Collection<*> -> fromList(value, value.toList())
+            is Array<*> -> fromList(value, value.toList())
             else -> Str(value.toString())
         }
 
@@ -179,15 +179,15 @@ public sealed class AttributeValue {
 
         // cast after type check to avoid a second copy
         @Suppress("UNCHECKED_CAST")
-        private fun fromList(values: List<*>): AttributeValue = when {
+        private fun fromList(root: Any, values: List<*>): AttributeValue = when {
             values.isEmpty() -> StrList(emptyList())
-            values.any { it == null } -> Value(AnyValue.ListValue(values.map { it.toAnyValue() }))
+            values.any { it == null } -> Value(AnyValue.ListValue(values.map { it.toAnyValue(listOf(root)) }))
             values.all { it is String } -> StrList(values as List<String>)
             values.all { it is Boolean } -> BoolList(values as List<Boolean>)
             values.all { it is kotlin.Long } -> LongList(values as List<kotlin.Long>)
             values.all { it is kotlin.Double } -> DoubleList(values as List<kotlin.Double>)
             values.all { it is Number } -> fromNumberList(values as List<Number>)
-            else -> Value(AnyValue.ListValue(values.map { it.toAnyValue() }))
+            else -> Value(AnyValue.ListValue(values.map { it.toAnyValue(listOf(root)) }))
         }
 
         private fun fromNumberList(values: List<Number>): AttributeValue =

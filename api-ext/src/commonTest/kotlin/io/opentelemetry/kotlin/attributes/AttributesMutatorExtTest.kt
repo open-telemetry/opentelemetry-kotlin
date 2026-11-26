@@ -357,6 +357,44 @@ internal class AttributesMutatorExtTest {
         )
     }
 
+    @Test
+    fun `self-referential root list replaces self-reference with NullValue without extra nesting`() {
+        val mutator = FakeAttributesMutator()
+        val list = ArrayList<Any?>()
+        list.add(list)
+        mutator.setAttributes(mapOf("selfList" to list))
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.NullValue)),
+            mutator.attributes["selfList"]
+        )
+    }
+
+    @Test
+    fun `self-referential root array replaces self-reference with NullValue without extra nesting`() {
+        val mutator = FakeAttributesMutator()
+        val arr = arrayOfNulls<Any>(1)
+        arr[0] = arr
+        mutator.setAttributes(mapOf("selfArray" to arr))
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.NullValue)),
+            mutator.attributes["selfArray"]
+        )
+    }
+
+    @Test
+    fun `self-referential root list with other elements and nulls preserves elements and avoids extra nesting`() {
+        val mutator = FakeAttributesMutator()
+        val list = ArrayList<Any?>()
+        list.add("start")
+        list.add(null)
+        list.add(list)
+        mutator.setAttributes(mapOf("mixedSelfList" to list))
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.StringValue("start"), AnyValue.NullValue, AnyValue.NullValue)),
+            mutator.attributes["mixedSelfList"]
+        )
+    }
+
     private data class TestObj(val first: String, val second: Long)
 
     private class CollidingKey(val id: Int) {

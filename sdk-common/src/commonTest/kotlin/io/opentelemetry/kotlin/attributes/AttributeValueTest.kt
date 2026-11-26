@@ -255,6 +255,40 @@ internal class AttributeValueTest {
     }
 
     @Test
+    fun testFromPublicSelfReferentialRootList() {
+        val list = ArrayList<Any?>()
+        list.add(list)
+        val expected = AttributeValue.Value(AnyValue.ListValue(listOf(AnyValue.NullValue)))
+        assertEquals(expected, AttributeValue.fromPublic(list))
+    }
+
+    @Test
+    fun testFromPublicSelfReferentialRootArray() {
+        val arr = arrayOfNulls<Any>(1)
+        arr[0] = arr
+        val expected = AttributeValue.Value(AnyValue.ListValue(listOf(AnyValue.NullValue)))
+        assertEquals(expected, AttributeValue.fromPublic(arr))
+    }
+
+    @Test
+    fun testFromPublicSelfReferentialRootListWithNullAndElements() {
+        val list = ArrayList<Any?>()
+        list.add("entry")
+        list.add(null)
+        list.add(list)
+        val expected = AttributeValue.Value(
+            AnyValue.ListValue(
+                listOf(
+                    AnyValue.StringValue("entry"),
+                    AnyValue.NullValue,
+                    AnyValue.NullValue,
+                )
+            )
+        )
+        assertEquals(expected, AttributeValue.fromPublic(list))
+    }
+
+    @Test
     fun testFromPublicOther() {
         val obj = object {
             override fun toString(): String = "custom"

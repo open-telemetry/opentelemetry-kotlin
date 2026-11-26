@@ -38,8 +38,8 @@ public fun AttributesMutator.setAttributes(attributes: Map<String, Any>) {
             is FloatArray -> setDoubleListAttribute(it.key, input.map { n -> n.toDouble() })
             is CharArray -> setStringListAttribute(it.key, input.map { c -> c.toString() })
             is Map<*, *> -> setAnyValueAttribute(it.key, input.toAnyValueMap())
-            is Collection<*> -> handleCollection(it.key, input.toList())
-            is Array<*> -> handleCollection(it.key, input.toList())
+            is Collection<*> -> handleCollection(it.key, input, input.toList())
+            is Array<*> -> handleCollection(it.key, input, input.toList())
             else -> setStringAttribute(it.key, input.toString())
         }
     }
@@ -54,10 +54,13 @@ private fun AttributesMutator.setNumericAttribute(key: String, value: Number) {
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun AttributesMutator.handleCollection(key: String, input: List<*>) {
+private fun AttributesMutator.handleCollection(key: String, root: Any, input: List<*>) {
     when {
         input.isEmpty() -> setStringListAttribute(key, emptyList())
-        input.any { it == null } -> setAnyValueAttribute(key, AnyValue.ListValue(input.map { it.toAnyValue() }))
+        input.any { it == null } -> setAnyValueAttribute(
+            key,
+            AnyValue.ListValue(input.map { it.toAnyValue(listOf(root)) })
+        )
         input.all { it is String } -> setStringListAttribute(key, input as List<String>)
         input.all { it is Boolean } -> setBooleanListAttribute(key, input as List<Boolean>)
         input.all { it is Long } -> setLongListAttribute(key, input as List<Long>)
@@ -65,7 +68,10 @@ private fun AttributesMutator.handleCollection(key: String, input: List<*>) {
             key,
             input.filterIsInstance<Number>()
         )
-        else -> setAnyValueAttribute(key, AnyValue.ListValue(input.map { it.toAnyValue() }))
+        else -> setAnyValueAttribute(
+            key,
+            AnyValue.ListValue(input.map { it.toAnyValue(listOf(root)) })
+        )
     }
 }
 
