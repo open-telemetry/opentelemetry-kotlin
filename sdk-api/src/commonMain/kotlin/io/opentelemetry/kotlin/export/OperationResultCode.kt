@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import kotlin.jvm.JvmField
 
 /**
  * Whether an operation was successful or not.
@@ -29,6 +30,17 @@ public sealed class OperationResultCode {
          */
         public companion object : Failure() {
             override fun toString(): String = "Failure"
+
+            /**
+             * Keeps JVM binaries compiled against the former `object Failure` working: they read
+             * this static field. Hidden from Kotlin sources, which use [Failure] itself.
+             */
+            @JvmField
+            @Deprecated(
+                "Binary compatibility only. Use OperationResultCode.Failure instead.",
+                level = DeprecationLevel.HIDDEN,
+            )
+            public val INSTANCE: Failure = this
         }
     }
 

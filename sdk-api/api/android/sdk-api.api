@@ -23,6 +23,7 @@ public abstract class io/opentelemetry/kotlin/export/OperationResultCode {
 
 public class io/opentelemetry/kotlin/export/OperationResultCode$Failure : io/opentelemetry/kotlin/export/OperationResultCode {
 	public static final field Companion Lio/opentelemetry/kotlin/export/OperationResultCode$Failure$Companion;
+	public static final field INSTANCE Lio/opentelemetry/kotlin/export/OperationResultCode$Failure;
 	public fun <init> ()V
 }
 

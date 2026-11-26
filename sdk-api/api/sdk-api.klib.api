@@ -559,6 +559,9 @@ sealed class io.opentelemetry.kotlin.export/OperationResultCode { // io.opentele
         constructor <init>() // io.opentelemetry.kotlin.export/OperationResultCode.Failure.<init>|<init>(){}[0]
 
         final object Companion : io.opentelemetry.kotlin.export/OperationResultCode.Failure { // io.opentelemetry.kotlin.export/OperationResultCode.Failure.Companion|null[0]
+            final val INSTANCE // io.opentelemetry.kotlin.export/OperationResultCode.Failure.Companion.INSTANCE|{}INSTANCE[0]
+                final fun <get-INSTANCE>(): io.opentelemetry.kotlin.export/OperationResultCode.Failure // io.opentelemetry.kotlin.export/OperationResultCode.Failure.Companion.INSTANCE.<get-INSTANCE>|<get-INSTANCE>(){}[0]
+
             final fun toString(): kotlin/String // io.opentelemetry.kotlin.export/OperationResultCode.Failure.Companion.toString|toString(){}[0]
         }
     }
