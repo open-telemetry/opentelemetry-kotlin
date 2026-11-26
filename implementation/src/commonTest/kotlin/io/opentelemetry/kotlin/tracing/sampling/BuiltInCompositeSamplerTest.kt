@@ -188,6 +188,32 @@ internal class BuiltInCompositeSamplerTest {
     }
 
     @Test
+    fun `propagates parent threshold consistent with the parent rv via composableParentThreshold`() {
+        val result = samplerDsl.composite { composableParentThreshold(root = composableAlwaysOff()) }
+            .sample(context = contextWithParent(sampled = true, isRemote = true, otValue = "rv:ffffffffffffff;th:f"))
+        assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, result.decision)
+        assertEquals("rv:ffffffffffffff;th:f", result.traceState.get("ot"))
+    }
+
+    @Test
+    fun `erases a parent threshold that disagrees with a sampled parent via composableParentThreshold`() {
+        // The parent's randomness (0x90123456789012) is below th:f, so the threshold says "drop".
+        val result = samplerDsl.composite { composableParentThreshold(root = composableAlwaysOff()) }
+            .sample(context = contextWithParent(sampled = true, isRemote = true, otValue = "th:f"))
+        assertEquals(SamplingResult.Decision.RECORD_AND_SAMPLE, result.decision)
+        assertNull(result.traceState.get("ot"))
+    }
+
+    @Test
+    fun `erases a parent threshold that disagrees with a dropped parent via composableParentThreshold`() {
+        // The parent's randomness (0x90123456789012) is at least th:8, so the threshold says "sample".
+        val result = samplerDsl.composite { composableParentThreshold(root = composableAlwaysOn()) }
+            .sample(context = contextWithParent(sampled = false, isRemote = true, otValue = "th:8"))
+        assertEquals(SamplingResult.Decision.DROP, result.decision)
+        assertNull(result.traceState.get("ot"))
+    }
+
+    @Test
     fun `does not publish threshold when parent sampled without a threshold via composableParentThreshold`() {
         val result = samplerDsl.composite { composableParentThreshold(root = composableAlwaysOff()) }
             .sample(context = contextWithParent(sampled = true, isRemote = true))
