@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.error
 
+import io.opentelemetry.kotlin.ReportOnce
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -43,6 +44,42 @@ internal class InterruptRestoreJvmTest {
             handler.sdkGuard { throw InterruptedException("stop") }
             assertTrue(Thread.currentThread().isInterrupted)
             assertEquals(1, seen.filterIsInstance<SdkError.SdkCodeError>().size)
+        } finally {
+            Thread.interrupted()
+        }
+    }
+
+    @Test
+    fun testReportOnceRestoresInterruptOnEveryCall() {
+        val seen = mutableListOf<SdkError>()
+        val handler = SdkErrorHandler { seen += it }
+        val once = ReportOnce()
+        try {
+            Thread.interrupted()
+            handler.reportUserCodeError(InterruptedException("first"), "test", once)
+            assertTrue(Thread.interrupted())
+
+            handler.reportUserCodeError(InterruptedException("suppressed"), "test", once)
+            assertTrue(Thread.interrupted())
+
+            handler.reportUserCodeError(UserCodeException(InterruptedException("wrapped")), "test", once)
+            assertTrue(Thread.interrupted())
+
+            assertEquals(1, seen.filterIsInstance<SdkError.UserCodeError>().size)
+        } finally {
+            Thread.interrupted()
+        }
+    }
+
+    @Test
+    fun testReportOnceRestoresWrappedInterruptOnFirstCall() {
+        val seen = mutableListOf<SdkError>()
+        val handler = SdkErrorHandler { seen += it }
+        try {
+            Thread.interrupted()
+            handler.reportUserCodeError(UserCodeException(InterruptedException("wrapped")), "test", ReportOnce())
+            assertTrue(Thread.interrupted())
+            assertEquals(1, seen.filterIsInstance<SdkError.UserCodeError>().size)
         } finally {
             Thread.interrupted()
         }

@@ -42,20 +42,16 @@ internal class MisuseReportingCurrentContextStorageTest {
     }
 
     @Test
-    fun testAttachingCurrentContextReportsButStillAttaches() {
+    fun testAttachingCurrentContextReportsNothing() {
         val ctx = ContextValue(NoStorage)
         val outer = storage.attach(ctx)
         val inner = storage.attach(ctx)
 
         assertEquals(2, delegate.attachCount)
-        val error = assertIs<SdkError.ApiMisuse>(errors.single())
-        assertEquals("Context.attach", error.api)
-        assertEquals(SdkErrorSeverity.WARNING, error.severity)
-
         assertTrue(inner.detach())
         assertTrue(outer.detach())
         assertSame(root, storage.current())
-        assertEquals(1, errors.size)
+        assertTrue(errors.isEmpty())
     }
 
     @Test
@@ -67,7 +63,7 @@ internal class MisuseReportingCurrentContextStorageTest {
         assertEquals(1, delegate.detachCount)
         val error = assertIs<SdkError.ApiMisuse>(errors.single())
         assertEquals("Scope.detach", error.api)
-        assertEquals("Scope.detach() called on an already-detached scope", error.message)
+        assertEquals(ALREADY_DETACHED_MSG, error.message)
         assertEquals(SdkErrorSeverity.WARNING, error.severity)
     }
 
@@ -81,10 +77,42 @@ internal class MisuseReportingCurrentContextStorageTest {
         assertEquals(1, delegate.detachCount)
         val error = assertIs<SdkError.ApiMisuse>(errors.single())
         assertEquals("Scope.detach", error.api)
-        assertEquals("Scope.detach() called out of order — context has already changed", error.message)
+        assertEquals(OUT_OF_ORDER_MSG, error.message)
 
         assertTrue(scope2.detach())
         assertEquals(2, delegate.detachCount)
+    }
+
+    @Test
+    fun testRepeatedDoubleDetachReportsOnce() {
+        repeat(1000) {
+            val scope = storage.attach(ContextValue(NoStorage))
+            assertTrue(scope.detach())
+            assertFalse(scope.detach())
+        }
+        assertEquals(1000, delegate.detachCount)
+        assertEquals(listOf(ALREADY_DETACHED_MSG), errors.map { it.message })
+    }
+
+    @Test
+    fun testRepeatedOutOfOrderDetachReportsOnce() {
+        repeat(1000) {
+            val scope1 = storage.attach(ContextValue(NoStorage))
+            val scope2 = storage.attach(ContextValue(NoStorage))
+            assertTrue(scope1.detach())
+            assertTrue(scope2.detach())
+        }
+        assertEquals(2000, delegate.detachCount)
+        assertEquals(listOf(OUT_OF_ORDER_MSG), errors.map { it.message })
+    }
+
+    @Test
+    fun testMisuseLatchesAreIndependent() {
+        val scope1 = storage.attach(ContextValue(NoStorage))
+        storage.attach(ContextValue(NoStorage))
+        assertTrue(scope1.detach())
+        assertFalse(scope1.detach())
+        assertEquals(listOf(OUT_OF_ORDER_MSG, ALREADY_DETACHED_MSG), errors.map { it.message })
     }
 
     @Test
@@ -100,7 +128,24 @@ internal class MisuseReportingCurrentContextStorageTest {
         assertSame(root, storage.current())
         val error = assertIs<SdkError.UserCodeError>(errors.single())
         assertIs<IllegalStateException>(error.cause)
-        assertEquals("CurrentContextStorage.current threw", error.message)
+        assertEquals("CurrentContextStorage.current threw. Later failures are not reported.", error.message)
+    }
+
+    @Test
+    fun testRepeatedThrowingCurrentReportsOnce() {
+        val storage = MisuseReportingCurrentContextStorage(ThrowingStorage(), { root }, errors::add)
+        repeat(1000) { assertSame(root, storage.current()) }
+        assertEquals(1, errors.size)
+    }
+
+    @Test
+    fun testRepeatedThrowingAttachReportsOncePerMember() {
+        val storage = MisuseReportingCurrentContextStorage(ThrowingStorage(), { root }, errors::add)
+        repeat(1000) { assertSame(FallbackScope, storage.attach(ContextValue(NoStorage))) }
+        assertEquals(
+            listOf("CurrentContextStorage.attach threw. Later failures are not reported."),
+            errors.map { it.message },
+        )
     }
 
     @Test
@@ -111,7 +156,7 @@ internal class MisuseReportingCurrentContextStorageTest {
         assertSame(FallbackScope, scope)
         assertTrue(scope.detach())
         assertEquals(
-            listOf("CurrentContextStorage.current threw", "CurrentContextStorage.attach threw"),
+            listOf("CurrentContextStorage.attach threw. Later failures are not reported."),
             errors.map { it.message },
         )
         errors.forEach { assertIs<SdkError.UserCodeError>(it) }
@@ -129,7 +174,10 @@ internal class MisuseReportingCurrentContextStorageTest {
 
         assertFalse(storage.attach(ContextValue(NoStorage)).detach())
         val error = assertIs<SdkError.UserCodeError>(errors.single())
-        assertEquals("Scope.detach threw", error.message)
+        assertEquals("Scope.detach threw. Later failures are not reported.", error.message)
+
+        repeat(1000) { assertFalse(storage.attach(ContextValue(NoStorage)).detach()) }
+        assertEquals(1, errors.size, "detach failures are latched across scopes")
     }
 
     @Test
@@ -188,7 +236,14 @@ internal class MisuseReportingCurrentContextStorageTest {
         assertTrue(highScope.detach())
         assertSame(root, storage.current())
         val error = assertIs<SdkError.ApiMisuse>(errors.single())
-        assertEquals("Scope.detach() called out of order — context has already changed", error.message)
+        assertEquals(OUT_OF_ORDER_MSG, error.message)
+    }
+
+    private companion object {
+        const val ALREADY_DETACHED_MSG =
+            "Scope.detach() called on an already-detached scope. Later occurrences are not reported."
+        const val OUT_OF_ORDER_MSG =
+            "Scope.detach() called out of order — context has already changed. Later occurrences are not reported."
     }
 
     private object NoStorage : CurrentContextStorageSource {

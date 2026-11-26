@@ -81,8 +81,8 @@ internal class CompatIdGeneratorConfigTest {
         assertEquals(8, spanId.size)
         assertEquals(
             listOf(
-                "IdGenerator.generateTraceIdBytes failed, using fallback",
-                "IdGenerator.generateSpanIdBytes failed, using fallback",
+                "IdGenerator.generateTraceIdBytes failed, using fallback. Later failures are not reported.",
+                "IdGenerator.generateSpanIdBytes failed, using fallback. Later failures are not reported.",
             ),
             handler.userCodeErrors.map { it.message },
         )

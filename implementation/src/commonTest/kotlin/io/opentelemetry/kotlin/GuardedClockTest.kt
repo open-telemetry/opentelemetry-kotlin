@@ -17,8 +17,15 @@ internal class GuardedClockTest {
         assertEquals(10, GuardedClock({ error("boom") }, errorHandler, FakeClock(10)).now())
 
         val error = errorHandler.userCodeErrors.single()
-        assertEquals("Clock.now failed, using fallback clock", error.message)
+        assertEquals("Clock.now failed, using fallback clock. Later failures are not reported.", error.message)
         assertEquals("boom", error.cause.message)
+    }
+
+    @Test
+    fun testRepeatedFailuresReportOnce() {
+        val clock = GuardedClock({ error("boom") }, errorHandler, FakeClock(10))
+        repeat(1000) { assertEquals(10, clock.now()) }
+        assertEquals(1, errorHandler.userCodeErrors.size)
     }
 
     @Test

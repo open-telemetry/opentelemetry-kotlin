@@ -1,11 +1,14 @@
 package io.opentelemetry.kotlin.clock
 
 import io.opentelemetry.kotlin.Clock
+import io.opentelemetry.kotlin.ReportOnce
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.reportUserCodeError
 
+private const val CLOCK_FAILED_MSG = "Clock.now failed, using fallback clock. Later failures are not reported."
+
 /**
- * Wraps a user-supplied [Clock] so one that throws cannot destabilize the SDK: the failure is
+ * Wraps a user-supplied [Clock] so one that throws cannot destabilize the SDK: the first failure is
  * reported to [sdkErrorHandler] and the fallback clock's reading is used instead. The fallback is
  * only read after [delegate] throws.
  *
@@ -18,10 +21,12 @@ internal class GuardedCompatClock(
     private val fallback: Clock = ClockAdapter(),
 ) : Clock {
 
+    private val nowFailure = ReportOnce()
+
     override fun now(): Long = try {
         delegate.now()
     } catch (exc: Throwable) {
-        sdkErrorHandler.reportUserCodeError(exc, "Clock.now failed, using fallback clock")
+        sdkErrorHandler.reportUserCodeError(exc, CLOCK_FAILED_MSG, nowFailure)
         fallback.now()
     }
 }
