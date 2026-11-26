@@ -13,6 +13,10 @@ internal class InMemorySpanExporterImpl : InMemorySpanExporter {
     override val exportedSpans: List<SpanData>
         get() = impl.toList()
 
+    override fun reset() {
+        impl.clear()
+    }
+
     override suspend fun export(telemetry: List<SpanData>): OperationResultCode =
         shutdownState.ifActive {
             impl += telemetry

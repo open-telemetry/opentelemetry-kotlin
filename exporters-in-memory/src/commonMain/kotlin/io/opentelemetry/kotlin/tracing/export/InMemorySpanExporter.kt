@@ -10,7 +10,13 @@ import io.opentelemetry.kotlin.tracing.data.SpanData
 @ExperimentalApi
 public interface InMemorySpanExporter : SpanExporter {
     /**
-     * A list of spans that have been exported.
+     * A snapshot of spans that have been exported since the last [reset].
      */
     public val exportedSpans: List<SpanData>
+
+    /**
+     * Clears exported spans, leaving previously returned snapshots unchanged.
+     * This does not shut down the exporter or reactivate it after shutdown.
+     */
+    public fun reset()
 }

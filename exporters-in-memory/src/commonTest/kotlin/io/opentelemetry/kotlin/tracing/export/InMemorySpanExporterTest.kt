@@ -46,6 +46,38 @@ internal class InMemorySpanExporterTest {
     }
 
     @Test
+    fun testResetClearsTelemetryAndAllowsFurtherExports() = runTest {
+        exporter.export(fakeTelemetry)
+        val snapshot = exporter.exportedSpans
+
+        exporter.reset()
+
+        assertTrue(exporter.exportedSpans.isEmpty())
+        assertEquals(fakeTelemetry, snapshot)
+        assertEquals(OperationResultCode.Success, exporter.export(fakeTelemetry))
+        assertEquals(fakeTelemetry, exporter.exportedSpans)
+    }
+
+    @Test
+    fun testResetIsIdempotent() {
+        exporter.reset()
+        exporter.reset()
+        assertTrue(exporter.exportedSpans.isEmpty())
+    }
+
+    @Test
+    fun testResetAfterShutdownDoesNotReactivateExporter() = runTest {
+        exporter.export(fakeTelemetry)
+        exporter.shutdown()
+
+        exporter.reset()
+
+        assertTrue(exporter.exportedSpans.isEmpty())
+        assertEquals(OperationResultCode.Failure, exporter.export(fakeTelemetry))
+        assertTrue(exporter.exportedSpans.isEmpty())
+    }
+
+    @Test
     fun testExportReturnsFailureAfterShutdown() = runTest {
         exporter.shutdown()
         val result = exporter.export(fakeTelemetry)

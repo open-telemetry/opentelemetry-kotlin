@@ -13,6 +13,10 @@ internal class InMemoryLogRecordExporterImpl : InMemoryLogRecordExporter {
     override val exportedLogRecords: List<LogRecordData>
         get() = impl.toList()
 
+    override fun reset() {
+        impl.clear()
+    }
+
     override suspend fun export(telemetry: List<LogRecordData>): OperationResultCode =
         shutdownState.ifActive {
             impl += telemetry
