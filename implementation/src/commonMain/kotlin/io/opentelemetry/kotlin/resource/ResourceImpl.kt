@@ -4,6 +4,9 @@ import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.NO_ATTRIBUTE_LIMIT
 import io.opentelemetry.kotlin.attributes.toAttributeValues
+import io.opentelemetry.kotlin.error.SdkError
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 
 internal class ResourceImpl(
     container: AttributeContainer,
@@ -28,7 +31,7 @@ internal class ResourceImpl(
             schemaUrl == null -> other.schemaUrl
             other.schemaUrl == null -> schemaUrl
             schemaUrl == other.schemaUrl -> schemaUrl
-            else -> other.schemaUrl
+            else -> other.schemaUrl.also { reportSchemaUrlConflict(schemaUrl, it) }
         }
         return ResourceImpl(AttributesModel(attributeLimit = NO_ATTRIBUTE_LIMIT, attrs = mergedAttrs), mergedSchema)
     }
@@ -48,4 +51,17 @@ internal class ResourceImpl(
         result = 31 * result + (schemaUrl?.hashCode() ?: 0)
         return result
     }
+}
+
+private fun reportSchemaUrlConflict(base: String?, other: String?) {
+    if (base.isNullOrEmpty() || other.isNullOrEmpty()) {
+        return
+    }
+    reportError(
+        SdkError.ApiMisuse(
+            "Resource.merge",
+            "Conflicting schema URLs '$base' and '$other', using '$other'.",
+            SdkErrorSeverity.WARNING,
+        )
+    )
 }

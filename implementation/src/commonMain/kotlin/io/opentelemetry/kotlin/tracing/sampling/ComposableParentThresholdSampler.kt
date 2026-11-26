@@ -21,7 +21,13 @@ internal class ComposableParentThresholdSampler(private val root: ComposableSamp
         links: List<SpanLink>
     ): SamplingIntent {
         val parent = context.span.spanContext
-        val parentThreshold = parent.traceState.get(KnownTraceState.OT)?.let(OtelTraceState::parse)?.th
+        val parentOt = parent.traceState.get(KnownTraceState.OT)?.let(OtelTraceState::parse)
+        // A threshold that disagrees with the parent's sampled flag is erased, and the parent's
+        // sampled flag decides instead.
+        val parentThreshold = parentOt?.th?.takeIf { threshold ->
+            val randomness = parentOt.rv ?: randomnessFromTraceIdBytes(parent.traceIdBytes)
+            parent.traceFlags.isSampled == (randomness >= threshold)
+        }
 
         return when {
             !parent.isValid -> root.getSamplingIntent(context, name, spanKind, attributes, links)

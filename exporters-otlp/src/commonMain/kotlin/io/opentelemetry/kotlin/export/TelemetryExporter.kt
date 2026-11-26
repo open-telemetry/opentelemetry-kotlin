@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.guardOrDefaultSuspend
+import io.opentelemetry.kotlin.error.sdkGuardOrDefaultSuspend
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
 import io.opentelemetry.kotlin.ioDispatcher
@@ -116,30 +117,44 @@ internal class TelemetryExporter<T>(
     init {
         repeat(EXPORT_WORKER_COUNT) {
             scope.launch {
-                while (isActive) {
-                    when (val action = nextAction()) {
-                        is WorkerAction.Export<T> -> {
-                            attemptExportEntry(action)
-                        }
-
-                        is WorkerAction.WaitUntil -> {
-                            // Another request may extend the endpoint cooldown while this worker sleeps.
-                            // Recheck the endpoint state on the next iteration.
-                            delay(action.deadline - timeSource.markNow())
-                        }
-
-                        WorkerAction.WaitForWorkAvailable -> {
-                            if (workAvailable.receiveCatching().isClosed) {
-                                return@launch
-                            }
-                        }
-
-                        WorkerAction.Shutdown -> {
-                            return@launch
-                        }
+                // Guard each iteration so that an unexpected failure is reported without stopping the worker.
+                // Wait before the next iteration after a failure, so a failure that keeps recurring cannot
+                // spin the worker or flood the error handler.
+                var running = true
+                while (running && isActive) {
+                    running = sdkErrorHandler.sdkGuardOrDefaultSuspend(null, "OTLP export worker failed") {
+                        runWorkerIteration()
+                    } ?: run {
+                        delay(initialDelayMs)
+                        true
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Performs one unit of worker work. Returns false once the worker should exit.
+     */
+    private suspend fun runWorkerIteration(): Boolean = when (val action = nextAction()) {
+        is WorkerAction.Export<T> -> {
+            attemptExportEntry(action)
+            true
+        }
+
+        is WorkerAction.WaitUntil -> {
+            // Another request may extend the endpoint cooldown while this worker sleeps.
+            // Recheck the endpoint state on the next iteration.
+            delay(action.deadline - timeSource.markNow())
+            true
+        }
+
+        WorkerAction.WaitForWorkAvailable -> {
+            !workAvailable.receiveCatching().isClosed
+        }
+
+        WorkerAction.Shutdown -> {
+            false
         }
     }
 

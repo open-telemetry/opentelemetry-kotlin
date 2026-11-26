@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.error
 
+import io.opentelemetry.kotlin.ReportOnce
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlin.coroutines.cancellation.CancellationException
@@ -158,6 +159,18 @@ public fun SdkErrorHandler.reportUserCodeError(exc: Throwable, details: String?)
             SdkErrorSeverity.WARNING
         )
     )
+}
+
+/**
+ * Reports [exc] like [reportUserCodeError], but only the first time [once] is acquired. A thread
+ * interrupt carried by [exc] is restored on every call, including those that are not reported.
+ */
+public fun SdkErrorHandler.reportUserCodeError(exc: Throwable, details: String, once: ReportOnce) {
+    if (once.tryAcquire()) {
+        reportUserCodeError(exc, details)
+    } else {
+        exc.unwrapUserCode().restoreInterruptIfNeeded()
+    }
 }
 
 /**

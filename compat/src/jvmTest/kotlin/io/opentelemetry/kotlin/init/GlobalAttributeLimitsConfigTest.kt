@@ -83,6 +83,19 @@ internal class GlobalAttributeLimitsConfigTest {
     }
 
     @Test
+    fun `the global count limit reaches the Java per-event and per-link limits`() {
+        val global = AttributeLimitsBehavior(attributeCountLimit = 64, attributeValueLengthLimit = 8)
+
+        val javaLimits = buildSpanLimits(global).build()
+        assertEquals(64, javaLimits.maxNumberOfAttributes)
+        assertEquals(64, javaLimits.maxNumberOfAttributesPerEvent)
+        assertEquals(64, javaLimits.maxNumberOfAttributesPerLink)
+        assertEquals(8, javaLimits.maxAttributeValueLength)
+        assertEquals(OtelJavaSpanLimits.getDefault().maxNumberOfEvents, javaLimits.maxNumberOfEvents)
+        assertEquals(OtelJavaSpanLimits.getDefault().maxNumberOfLinks, javaLimits.maxNumberOfLinks)
+    }
+
+    @Test
     fun `a negative global limit is treated as unset`() {
         val global = AttributeLimitsConfigDslImpl().apply {
             attributeCountLimit = -1

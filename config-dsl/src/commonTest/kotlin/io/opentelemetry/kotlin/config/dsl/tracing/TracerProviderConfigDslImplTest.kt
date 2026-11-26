@@ -1,10 +1,12 @@
 package io.opentelemetry.kotlin.config.dsl.tracing
 
 import io.opentelemetry.kotlin.behavior.ConsoleExporterBehavior
+import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.BatchSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SimpleSpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanExporterBehavior
+import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import kotlin.test.Test
@@ -85,6 +87,46 @@ internal class TracerProviderConfigDslImplTest {
                         )
                     ),
                 ),
+            ),
+            dsl.toBehavior()
+        )
+    }
+
+    @Test
+    fun limitsCallSetsLimits() {
+        val dsl = TracerProviderConfigDslImpl().apply {
+            limits {
+                attributeCountLimit = 1
+                attributeValueLengthLimit = 2
+                linkCountLimit = 3
+                eventCountLimit = 4
+                attributeCountPerEventLimit = 5
+                attributeCountPerLinkLimit = 6
+            }
+        }
+        assertEquals(
+            TracerProviderBehavior(
+                spanLimits = SpanLimitsBehavior(
+                    attributeCountLimit = 1,
+                    attributeValueLengthLimit = 2,
+                    linkCountLimit = 3,
+                    eventCountLimit = 4,
+                    attributeCountPerEventLimit = 5,
+                    attributeCountPerLinkLimit = 6
+                )
+            ),
+            dsl.toBehavior()
+        )
+    }
+
+    @Test
+    fun idGeneratorCallSetsIdGenerator() {
+        val dsl = TracerProviderConfigDslImpl().apply {
+            idGenerator()
+        }
+        assertEquals(
+            TracerProviderBehavior(
+                idGenerator = IdGeneratorBehavior.Random
             ),
             dsl.toBehavior()
         )

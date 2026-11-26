@@ -1,7 +1,9 @@
 package io.opentelemetry.kotlin.export
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorHandler
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -28,12 +30,13 @@ internal class TelemetryExporterTest {
         maxAttemptIntervalMs: Long = 1000,
         maxAttempts: Int = 3,
         random: Random = Random.Default,
+        sdkErrorHandler: SdkErrorHandler = NoopSdkErrorHandler,
         exportAction: suspend (List<String>) -> OtlpResponse = { OtlpResponse.Success },
     ) = TelemetryExporter(
         initialDelayMs = initialDelayMs,
         maxAttemptIntervalMs = maxAttemptIntervalMs,
         maxAttempts = maxAttempts,
-        sdkErrorHandler = NoopSdkErrorHandler,
+        sdkErrorHandler = sdkErrorHandler,
         coroutineContext = StandardTestDispatcher(testScheduler),
         timeSource = testScheduler.timeSource,
         random = random,
@@ -118,6 +121,51 @@ internal class TelemetryExporterTest {
             exporter.export(listOf("data"))
             advanceTimeBy(5_000)
             assertEquals(3, attempts)
+        }
+    }
+
+    @Test
+    fun testWorkersSurviveUnexpectedFailures() = runTest {
+        // The jitter applied after a backoff runs outside the guarded export call. Failing it once
+        // per worker used to stop all five workers, so nothing was exported again.
+        val random = object : Random() {
+            var failuresLeft = 5
+
+            override fun nextBits(bitCount: Int): Int {
+                if (failuresLeft > 0) {
+                    failuresLeft--
+                    error("unexpected failure")
+                }
+                return 0
+            }
+        }
+        val errorHandler = FakeSdkErrorHandler()
+        val gate = CompletableDeferred<Unit>()
+        var calls = 0
+        var inFlight = 0
+        val exporter = initTelemetryExporter(random = random, sdkErrorHandler = errorHandler) {
+            calls++
+            if (calls == 1) {
+                OtlpResponse.Unknown
+            } else {
+                inFlight++
+                gate.await()
+                OtlpResponse.Success
+            }
+        }
+        exporter.withShutdown {
+            exporter.export(listOf("data"))
+            advanceTimeBy(5_000)
+            assertEquals(5, errorHandler.sdkCodeErrors.size)
+            assertTrue(errorHandler.sdkCodeErrors.all { it.message == "OTLP export worker failed" })
+
+            // Every worker must still be able to take an entry.
+            repeat(4) { exporter.export(listOf("more$it")) }
+            advanceTimeBy(5_000)
+            assertEquals(5, inFlight)
+
+            gate.complete(Unit)
+            assertEquals(OperationResultCode.Success, exporter.forceFlush())
         }
     }
 
