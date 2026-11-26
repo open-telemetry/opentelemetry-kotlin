@@ -253,6 +253,37 @@ internal class BuiltInCompositeSamplerTest {
     }
 
     @Test
+    fun `keeps non-ot entries returned by traceStateProvider`() {
+        val delegate = fakeComposableSampler(
+            SamplingIntentImpl(
+                threshold = 0,
+                adjustedCountReliable = false,
+                traceStateProvider = { traceState, _ -> traceState.put("vendor", "value") },
+            )
+        )
+        val result = CompositeSampler(delegate, FakeSdkErrorHandler()).sample(
+            context = contextWithParent(sampled = true, isRemote = true, otValue = "rv:a0000000000000"),
+        )
+        assertEquals("value", result.traceState.get("vendor"))
+        assertEquals("rv:a0000000000000", result.traceState.get("ot"))
+    }
+
+    @Test
+    fun `ignores ot changes made by traceStateProvider`() {
+        val delegate = fakeComposableSampler(
+            SamplingIntentImpl(
+                threshold = 0,
+                adjustedCountReliable = true,
+                traceStateProvider = { traceState, _ -> traceState.put("ot", "rv:b0000000000000;th:4") },
+            )
+        )
+        val result = CompositeSampler(delegate, FakeSdkErrorHandler()).sample(
+            context = contextWithParent(sampled = true, isRemote = true, otValue = "rv:a0000000000000"),
+        )
+        assertEquals("rv:a0000000000000;th:0", result.traceState.get("ot"))
+    }
+
+    @Test
     fun `merges delegate attributes via composableAnnotating`() {
         val traceStateProvider: (TraceState, SamplingResult.Decision) -> TraceState =
             { traceState, _ -> traceState.put("vendor", "value") }
