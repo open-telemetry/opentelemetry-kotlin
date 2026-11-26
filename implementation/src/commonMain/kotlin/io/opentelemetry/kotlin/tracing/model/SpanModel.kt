@@ -22,7 +22,6 @@ import io.opentelemetry.kotlin.tracing.SpanDataImpl
 import io.opentelemetry.kotlin.tracing.SpanEventImpl
 import io.opentelemetry.kotlin.tracing.SpanKind
 import io.opentelemetry.kotlin.tracing.StatusData
-import io.opentelemetry.kotlin.tracing.data.SpanData
 import io.opentelemetry.kotlin.tracing.data.SpanEventData
 import io.opentelemetry.kotlin.tracing.data.SpanLinkData
 import io.opentelemetry.kotlin.tracing.export.SpanProcessor
@@ -165,7 +164,7 @@ internal class SpanModel(
                 // take a snapshot so that processors retain plain data rather than this
                 // model, releasing its properties once the span
                 // has ended. Only built if a processor needs it.
-                val endingProcessors = processors.filter { userCode { it.isEndRequired() }}
+                val endingProcessors = processors.filter { userCode { it.isEndRequired() } }
                 if (endingProcessors.isEmpty()) {
                     return@write emptyList()
                 }

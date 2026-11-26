@@ -41,7 +41,10 @@ internal class TracerProviderImpl(
     // Processors shut down first so that any spans still in flight finish before the sampler
     // releases its resources.
     private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(
-        listOfNotNull(*tracingConfig.processors.toTypedArray(), SamplerCloseable(sampler)),
+        buildList {
+            addAll(tracingConfig.processors)
+            add(SamplerCloseable(sampler))
+        },
         sdkErrorHandler,
     )
     private val noopTracer = PropagatingNoopTracer(sdkErrorHandler)

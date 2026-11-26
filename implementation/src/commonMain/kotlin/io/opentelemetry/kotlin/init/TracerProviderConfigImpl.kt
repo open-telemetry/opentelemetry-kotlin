@@ -7,10 +7,7 @@ import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.dsl.ExportConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.ResourceConfigDslImpl
 import io.opentelemetry.kotlin.config.dsl.tracing.SpanLimitsConfigDslImpl
-import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
-import io.opentelemetry.kotlin.error.SdkErrorSeverity
-import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.export.BatchTelemetryDefaults
 import io.opentelemetry.kotlin.init.config.TracingConfig
 import io.opentelemetry.kotlin.resource.Resource
@@ -60,7 +57,7 @@ internal class TracerProviderConfigImpl(
     ): TracingConfig {
         val action = samplerAction ?: { parentBased(root = alwaysOn()) }
         return TracingConfig(
-            processors = processors.ifEmpty { processorBehaviors.mapNotNull{ processorFromBehavior(it) } },
+            processors = processors.ifEmpty { processorBehaviors.mapNotNull { processorFromBehavior(it) } },
             resource = base.merge(resourceConfig.toBehavior().toResource()),
             sdkErrorHandler = sdkErrorHandler,
             samplerFactory = { SamplerConfigImpl(sdkErrorHandler).action() },
