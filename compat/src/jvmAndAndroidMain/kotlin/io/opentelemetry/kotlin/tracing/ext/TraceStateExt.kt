@@ -7,14 +7,21 @@ import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 internal fun TraceState.toOtelJavaTraceState(): OtelJavaTraceState {
     return OtelJavaTraceState.builder().apply {
         try {
-            asMap().entries.reversed().forEach { // reverse to preserve original order
+            asMap().entries.reversed().forEach {
                 put(it.key, it.value)
             }
         } catch (exc: Throwable) {
-            // Silently ignore errors from custom TraceState implementations
+            // Preserve existing behavior for custom TraceState implementations.
         }
     }.build()
 }
+
+internal fun Map<String, String>.toOtelJavaTraceState(): OtelJavaTraceState =
+    OtelJavaTraceState.builder().apply {
+        entries.toList().asReversed().forEach { (key, value) ->
+            put(key, value)
+        }
+    }.build()
 
 /**
  * Copies an opentelemetry-java trace state into the Kotlin [TraceState] implementation, preserving
@@ -24,7 +31,7 @@ internal fun OtelJavaTraceState.toOtelKotlinTraceState(): TraceState {
     val entries = mutableListOf<Pair<String, String>>()
     forEach { key, value -> entries.add(key to value) }
 
-    // reverse to preserve original order
+    // Reverse to preserve original order.
     return entries.asReversed().fold(createInvalidSpanContext().traceState) { state, (key, value) ->
         state.put(key, value)
     }

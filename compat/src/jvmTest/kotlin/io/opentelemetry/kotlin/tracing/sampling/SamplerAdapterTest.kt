@@ -1,3 +1,4 @@
+
 package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.ExperimentalApi
@@ -8,11 +9,15 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSampler
 import io.opentelemetry.kotlin.aliases.OtelJavaSamplingDecision
 import io.opentelemetry.kotlin.aliases.OtelJavaSamplingResult
 import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
+import io.opentelemetry.kotlin.attributes.AttributeContainer
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.EmptyAttributeContainer
+import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.tracing.SpanKind
+import io.opentelemetry.kotlin.tracing.model.SpanLink
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -42,6 +47,51 @@ internal class SamplerAdapterTest {
 
         assertIs<CompatAttributesModel>(result.attributes)
         assertEquals(mapOf("key" to "value"), result.attributes.attributes)
+    }
+
+    @Test
+    fun `direct composite sampler call does not expose user code exception`() {
+        val errorHandler = FakeSdkErrorHandler()
+
+        val sampler = CompatSamplerConfig().composite {
+            object : ComposableSampler {
+                override val description: String = "ThrowingComposableSampler"
+
+                override fun getSamplingIntent(
+                    context: Context,
+                    name: String,
+                    spanKind: SpanKind,
+                    attributes: AttributeContainer,
+                    links: List<SpanLink>,
+                ): SamplingIntent = error("boom")
+            }
+        }
+
+        val guardedSampler = SamplerAdapter(
+            (sampler as SamplerAdapter).impl,
+            errorHandler,
+        )
+
+        val result = guardedSampler.shouldSample(
+            context = FakeContext(),
+            traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
+            name = "span",
+            spanKind = SpanKind.INTERNAL,
+            attributes = CompatAttributesModel(),
+            links = emptyList(),
+        )
+
+        assertEquals(SamplingResult.Decision.DROP, result.decision)
+
+        assertEquals(1, errorHandler.errors.size)
+        assertEquals(
+            "Sampler.shouldSample failed",
+            errorHandler.userCodeErrors.single().message,
+        )
+        assertEquals(
+            "boom",
+            errorHandler.userCodeErrors.single().cause.message,
+        )
     }
 
     private fun SamplerAdapter.sample(): SamplingResult = shouldSample(
