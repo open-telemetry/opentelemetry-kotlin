@@ -341,6 +341,10 @@ abstract interface io.opentelemetry.kotlin.metrics.data/MetricData { // io.opent
         open fun <get-isEmpty>(): kotlin/Boolean // io.opentelemetry.kotlin.metrics.data/MetricData.isEmpty.<get-isEmpty>|<get-isEmpty>(){}[0]
 }
 
+abstract interface io.opentelemetry.kotlin.metrics.export/MetricExporter : io.opentelemetry.kotlin.export/TelemetryCloseable { // io.opentelemetry.kotlin.metrics.export/MetricExporter|null[0]
+    abstract suspend fun export(kotlin.collections/List<io.opentelemetry.kotlin.metrics.data/MetricData>): io.opentelemetry.kotlin.export/OperationResultCode // io.opentelemetry.kotlin.metrics.export/MetricExporter.export|export(kotlin.collections.List<io.opentelemetry.kotlin.metrics.data.MetricData>){}[0]
+}
+
 abstract interface io.opentelemetry.kotlin.resource/Entity { // io.opentelemetry.kotlin.resource/Entity|null[0]
     abstract val description // io.opentelemetry.kotlin.resource/Entity.description|{}description[0]
         abstract fun <get-description>(): kotlin.collections/Map<kotlin/String, kotlin/Any> // io.opentelemetry.kotlin.resource/Entity.description.<get-description>|<get-description>(){}[0]

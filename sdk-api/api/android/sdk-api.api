@@ -342,6 +342,10 @@ public abstract interface class io/opentelemetry/kotlin/metrics/data/SumData$Dou
 public abstract interface class io/opentelemetry/kotlin/metrics/data/SumData$LongSumData : io/opentelemetry/kotlin/metrics/data/SumData {
 }
 
+public abstract interface class io/opentelemetry/kotlin/metrics/export/MetricExporter : io/opentelemetry/kotlin/export/TelemetryCloseable {
+	public abstract fun export (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class io/opentelemetry/kotlin/metrics/instrument/InstrumentKind : java/lang/Enum {
 	public static final field HISTOGRAM Lio/opentelemetry/kotlin/metrics/instrument/InstrumentKind;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
