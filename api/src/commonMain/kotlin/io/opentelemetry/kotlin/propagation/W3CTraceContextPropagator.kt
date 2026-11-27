@@ -32,11 +32,11 @@ internal object W3CTraceContextPropagator : TextMapPropagator {
             traceFlags = spanContext.traceFlags,
         )?.let {
             setter.set(carrier, TRACEPARENT, it.encode())
-        }
 
-        val tracestate = TraceStateMarshaller(spanContext.traceState).encode()
-        if (tracestate.isNotEmpty()) {
-            setter.set(carrier, TRACESTATE, tracestate)
+            val tracestate = TraceStateMarshaller(spanContext.traceState).encode()
+            if (tracestate.isNotEmpty()) {
+                setter.set(carrier, TRACESTATE, tracestate)
+            }
         }
     }
 

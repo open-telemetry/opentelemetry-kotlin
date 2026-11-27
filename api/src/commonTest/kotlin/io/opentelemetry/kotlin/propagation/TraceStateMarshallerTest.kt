@@ -1,6 +1,7 @@
 package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
+import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.createInvalidSpanContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -44,6 +45,26 @@ internal class TraceStateMarshallerTest {
         val state = emptyTraceState.put("tenant@vendor", "value")
         val ts = TraceStateMarshaller(state)
         assertEquals("tenant@vendor=value", ts.encode())
+    }
+
+    @Test
+    fun `encode drops entries with invalid keys or values`() {
+        val entries = linkedMapOf(
+            "valid" to "value",
+            "INVALID" to "value",
+            "also-valid" to "invalid,value",
+        )
+        val traceState = object : TraceState {
+            override fun get(key: String): String? = entries[key]
+
+            override fun asMap(): Map<String, String> = entries
+
+            override fun put(key: String, value: String): TraceState = this
+
+            override fun remove(key: String): TraceState = this
+        }
+
+        assertEquals("valid=value", TraceStateMarshaller(traceState).encode())
     }
 
     @Test
