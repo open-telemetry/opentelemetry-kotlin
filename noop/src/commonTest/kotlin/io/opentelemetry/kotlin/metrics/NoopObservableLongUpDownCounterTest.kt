@@ -9,7 +9,7 @@ import kotlin.test.assertFalse
 internal class NoopObservableLongUpDownCounterTest {
 
     @Test
-    fun ignoresCallbacksAndPreservesInstrumentMetadata() {
+    fun ignoresCallbacksAndExposesPlaceholderMetadata() {
         var called = false
         val counter = NoopMeter.createObservableLongUpDownCounter(
             name = "process.memory.working_set",
@@ -21,9 +21,9 @@ internal class NoopObservableLongUpDownCounterTest {
         counter.registerCallback { called = true }.close()
         counter.close()
 
-        assertEquals("process.memory.working_set", counter.name)
-        assertEquals("By", counter.unit)
-        assertEquals("Process working set size", counter.description)
+        assertEquals("", counter.name)
+        assertEquals(null, counter.unit)
+        assertEquals(null, counter.description)
         assertFalse(called)
     }
 }

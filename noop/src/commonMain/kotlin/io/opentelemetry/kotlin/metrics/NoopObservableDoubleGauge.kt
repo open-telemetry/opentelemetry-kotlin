@@ -6,11 +6,11 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * No-op implementation of [ObservableDoubleGauge].
  */
 @OptIn(ExperimentalApi::class)
-internal class NoopObservableDoubleGauge(
-    override val name: String,
-    override val unit: String?,
-    override val description: String?,
-) : ObservableDoubleGauge {
+internal object NoopObservableDoubleGauge : ObservableDoubleGauge {
+    override val name: String = ""
+    override val unit: String? = null
+    override val description: String? = null
+
     override val measurement: ObservableDoubleMeasurement = NoopObservableDoubleMeasurement()
 
     override fun registerCallback(callback: (ObservableDoubleMeasurement) -> Unit): AutoCloseable =
