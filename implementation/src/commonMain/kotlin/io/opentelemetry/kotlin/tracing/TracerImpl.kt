@@ -28,7 +28,7 @@ import io.opentelemetry.kotlin.tracing.sampling.SamplingResult
 
 internal class TracerImpl(
     private val clock: Clock,
-    private val processor: SpanProcessor?,
+    private val processors: List<SpanProcessor>,
     private val idGenerator: IdGenerator,
     private val scope: InstrumentationScopeInfo,
     private val resource: Resource,
@@ -45,7 +45,7 @@ internal class TracerImpl(
 
     override fun enabled(): Boolean =
         sdkErrorHandler.sdkGuardOrDefault(false, "Tracer.enabled failed") {
-            !shutdownState.isShutdown && processor != null
+            !shutdownState.isShutdown && processors.isNotEmpty()
         }
 
     override fun startSpan(
@@ -122,7 +122,7 @@ internal class TracerImpl(
 
             val spanModel = SpanModel(
                 clock = clock,
-                processor = processor,
+                processors = processors,
                 name = name,
                 spanKind = spanKind,
                 startTimestamp = when {
@@ -142,8 +142,10 @@ internal class TracerImpl(
             collector?.let { spanModel.copyAttributes(it.attributes) }
             spanModel.copyAttributes(userCode { result.attributes.typedAttributesOrConvert() })
             sdkErrorHandler.guard {
-                processor?.takeIf(SpanProcessor::isStartRequired)
-                    ?.onStart(ReadWriteSpanImpl(spanModel), ctx)
+                processors.forEach { processor ->
+                    processor.takeIf(SpanProcessor::isStartRequired)
+                        ?.onStart(ReadWriteSpanImpl(spanModel), ctx)
+                }
             }
             CreatedSpan(spanModel)
         }

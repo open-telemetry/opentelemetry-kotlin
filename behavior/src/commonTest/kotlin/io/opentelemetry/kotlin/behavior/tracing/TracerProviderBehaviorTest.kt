@@ -14,7 +14,7 @@ internal class TracerProviderBehaviorTest {
 
     @Test
     fun processorStartsUnset() {
-        assertNull(TracerProviderBehavior().processor)
+        assertEquals(emptyList(), TracerProviderBehavior().processors)
     }
 
     @Test
@@ -24,7 +24,7 @@ internal class TracerProviderBehaviorTest {
 
     @Test
     fun staysUnsetWhenNeitherLayerConfiguredProcessor() {
-        assertNull(TracerProviderBehavior().mergeWith(TracerProviderBehavior()).processor)
+        assertEquals(emptyList(), TracerProviderBehavior().mergeWith(TracerProviderBehavior()).processors)
     }
 
     @Test
@@ -43,10 +43,10 @@ internal class TracerProviderBehaviorTest {
 
     @Test
     fun adoptsProcessorFromWhicheverLayerSuppliedIt() {
-        val processor = SpanProcessorBehavior()
+        val processors = listOf(SpanProcessorBehavior())
 
-        assertEquals(processor, TracerProviderBehavior().mergeWith(TracerProviderBehavior(processor = processor)).processor)
-        assertEquals(processor, TracerProviderBehavior(processor = processor).mergeWith(TracerProviderBehavior()).processor)
+        assertEquals(processors, TracerProviderBehavior().mergeWith(TracerProviderBehavior(processors = processors)).processors)
+        assertEquals(processors, TracerProviderBehavior(processors = processors).mergeWith(TracerProviderBehavior()).processors)
     }
 
     @Test

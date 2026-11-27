@@ -14,15 +14,40 @@ import io.opentelemetry.kotlin.config.schema.model.SpanExporter
 import io.opentelemetry.kotlin.config.schema.model.SpanProcessor
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class SpanProcessorMapperTest {
 
     @Test
     fun emptyProcessorsLeaveBehaviorUnset() {
         assertEquals(
-            SpanProcessorBehavior(),
+            emptyList(),
             emptyList<SpanProcessor>().toBehavior()
+        )
+    }
+
+    @Test
+    fun mapsMultipleProcessors() {
+        val http = OtlpHttpSpanExporterBehavior(
+            endpoint = "http://localhost:4317",
+            timeout = 10_000,
+            headers = mapOf("key" to "value")
+        )
+        val processors = listOf(
+            SpanProcessor(simple = SimpleSpanProcessor(exporter = consoleExporter())),
+            SpanProcessor(batch = BatchSpanProcessor(exporter = httpExporter())),
+        )
+        assertEquals(
+            listOf(
+                SpanProcessorBehavior(
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(console = ConsoleExporterBehavior())
+                    )
+                ),
+                SpanProcessorBehavior(
+                    batch = BatchSpanProcessorBehavior(exporter = SpanExporterBehavior(http = http))
+                )
+            ),
+            processors.toBehavior()
         )
     }
 
@@ -32,10 +57,12 @@ internal class SpanProcessorMapperTest {
             SpanProcessor(simple = SimpleSpanProcessor(exporter = consoleExporter())),
         )
         assertEquals(
-            SpanProcessorBehavior(
-                simple = SimpleSpanProcessorBehavior(
-                    exporter = SpanExporterBehavior(console = ConsoleExporterBehavior())
-                ),
+            listOf(
+                SpanProcessorBehavior(
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(console = ConsoleExporterBehavior())
+                    ),
+                )
             ),
             processors.toBehavior(),
         )
@@ -52,12 +79,14 @@ internal class SpanProcessorMapperTest {
             SpanProcessor(simple = SimpleSpanProcessor(exporter = httpExporter())),
         )
         assertEquals(
-            SpanProcessorBehavior(
-                simple = SimpleSpanProcessorBehavior(
-                    exporter = SpanExporterBehavior(
-                        http = http
-                    )
-                ),
+            listOf(
+                SpanProcessorBehavior(
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(
+                            http = http
+                        )
+                    ),
+                )
             ),
             processors.toBehavior(),
         )
@@ -69,10 +98,12 @@ internal class SpanProcessorMapperTest {
             SpanProcessor(batch = BatchSpanProcessor(exporter = consoleExporter())),
         )
         assertEquals(
-            SpanProcessorBehavior(
-                batch = BatchSpanProcessorBehavior(
-                    exporter = SpanExporterBehavior(console = ConsoleExporterBehavior()),
-                ),
+            listOf(
+                SpanProcessorBehavior(
+                    batch = BatchSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(console = ConsoleExporterBehavior()),
+                    ),
+                )
             ),
             processors.toBehavior(),
         )
@@ -82,27 +113,21 @@ internal class SpanProcessorMapperTest {
     fun mapsHttpFromABatchProcessor() {
         val processors = listOf(SpanProcessor(batch = BatchSpanProcessor(exporter = httpExporter())))
         assertEquals(
-            SpanProcessorBehavior(
-                batch = BatchSpanProcessorBehavior(
-                    exporter = SpanExporterBehavior(
-                        http = OtlpHttpSpanExporterBehavior(
-                            endpoint = "http://localhost:4317",
-                            timeout = 10_000,
-                            headers = mapOf("key" to "value")
-                        )
+            listOf(
+                SpanProcessorBehavior(
+                    batch = BatchSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(
+                            http = OtlpHttpSpanExporterBehavior(
+                                endpoint = "http://localhost:4317",
+                                timeout = 10_000,
+                                headers = mapOf("key" to "value")
+                            )
+                        ),
                     ),
-                ),
+                )
             ),
             processors.toBehavior(),
         )
-    }
-
-    @Test
-    fun leavesSimpleUnsetForABatchProcessor() {
-        val processors = listOf(
-            SpanProcessor(batch = BatchSpanProcessor(exporter = consoleExporter())),
-        )
-        assertNull(processors.toBehavior().simple)
     }
 
     private fun consoleExporter() = SpanExporter(console = ConsoleExporter())

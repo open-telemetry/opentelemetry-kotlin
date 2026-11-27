@@ -42,7 +42,7 @@ internal class SpanLinkTest {
         )
         tracer = TracerImpl(
             clock = clock,
-            processor = processor,
+            processors = listOf(processor),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = spanLimitConfig,

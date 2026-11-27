@@ -44,35 +44,7 @@ internal class TracerProviderConfigDslImplTest {
     }
 
     @Test
-    fun samplerDoesNotDropProcessor() {
-        val dsl = TracerProviderConfigDslImpl()
-        dsl.export { error("behavior mapping does not run the export lambda") }
-        dsl.sampler { alwaysOff() }
-
-        assertEquals(
-            TracerProviderBehavior(
-                processor = SpanProcessorBehavior(),
-                sampler = SamplerBehavior.AlwaysOff
-            ),
-            dsl.toBehavior()
-        )
-    }
-
-    @Test
-    fun exportCallSetsProcessor() {
-        val dsl = TracerProviderConfigDslImpl()
-        dsl.export { error("behavior mapping does not run the export lambda") }
-
-        assertEquals(
-            TracerProviderBehavior(
-                processor = SpanProcessorBehavior()
-            ),
-            dsl.toBehavior(),
-        )
-    }
-
-    @Test
-    fun processorCallSetsSimple() {
+    fun processorCallSetsProcessors() {
         val dsl = TracerProviderConfigDslImpl().apply {
             processor {
                 simple {
@@ -81,24 +53,6 @@ internal class TracerProviderConfigDslImplTest {
                     }
                 }
             }
-        }
-        assertEquals(
-            TracerProviderBehavior(
-                processor = SpanProcessorBehavior(
-                    simple = SimpleSpanProcessorBehavior(
-                        exporter = SpanExporterBehavior(
-                            console = ConsoleExporterBehavior()
-                        )
-                    )
-                ),
-            ),
-            dsl.toBehavior()
-        )
-    }
-
-    @Test
-    fun processorCallSetsBatch() {
-        val dsl = TracerProviderConfigDslImpl().apply {
             processor {
                 batch {
                     exporter {
@@ -111,75 +65,28 @@ internal class TracerProviderConfigDslImplTest {
                 }
             }
         }
-
         assertEquals(
             TracerProviderBehavior(
-                processor = SpanProcessorBehavior(
-                    batch = BatchSpanProcessorBehavior(
-                        exporter = SpanExporterBehavior(
-                            console = ConsoleExporterBehavior()
-                        ),
-                        scheduleDelay = 1,
-                        exportTimeout = 2,
-                        maxQueueSize = 3,
-                        requestedQueueSize = 4
-                    )
-                ),
-            ),
-            dsl.toBehavior()
-        )
-    }
-
-    @Test
-    fun exportKeepsProcessorAlreadyChosen() {
-        val dsl = TracerProviderConfigDslImpl().apply {
-            processor {
-                simple {
-                    exporter {
-                        console()
-                    }
-                }
-            }
-        }
-        dsl.export { error("behavior mapping does not run the export lambda") }
-
-        assertEquals(
-            TracerProviderBehavior(
-                processor = SpanProcessorBehavior(
-                    simple = SimpleSpanProcessorBehavior(
-                        exporter = SpanExporterBehavior(
-                            console = ConsoleExporterBehavior()
+                processors = listOf(
+                    SpanProcessorBehavior(
+                        simple = SimpleSpanProcessorBehavior(
+                            exporter = SpanExporterBehavior(
+                                console = ConsoleExporterBehavior()
+                            )
                         )
-                    )
-                ),
-            ),
-            dsl.toBehavior()
-        )
-    }
-
-    @Test
-    fun processorDoesNotDropSampler() {
-        val dsl = TracerProviderConfigDslImpl().apply {
-            sampler { alwaysOff() }
-            processor {
-                simple {
-                    exporter {
-                        console()
-                    }
-                }
-            }
-        }
-
-        assertEquals(
-            TracerProviderBehavior(
-                processor = SpanProcessorBehavior(
-                    simple = SimpleSpanProcessorBehavior(
-                        exporter = SpanExporterBehavior(
-                            console = ConsoleExporterBehavior()
+                    ),
+                    SpanProcessorBehavior(
+                        batch = BatchSpanProcessorBehavior(
+                            scheduleDelay = 1,
+                            exportTimeout = 2,
+                            maxQueueSize = 3,
+                            requestedQueueSize = 4,
+                            exporter = SpanExporterBehavior(
+                                console = ConsoleExporterBehavior()
+                            )
                         )
-                    )
+                    ),
                 ),
-                sampler = SamplerBehavior.AlwaysOff
             ),
             dsl.toBehavior()
         )

@@ -103,7 +103,7 @@ internal class TracerErrorHandlingTest {
         errorHandler: SdkErrorHandler,
     ) = TracerImpl(
         clock = case.clock,
-        processor = processor,
+        processors = listOf(processor),
         scope = key,
         resource = FakeResource(),
         spanLimitConfig = fakeSpanLimitsConfig,

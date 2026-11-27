@@ -31,7 +31,7 @@ internal class SpanProcessorGatingTest {
     private fun createTracer(processor: SpanProcessor): TracerImpl =
         TracerImpl(
             clock = FakeClock(),
-            processor = processor,
+            processors = listOf(processor),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

@@ -41,7 +41,10 @@ internal class TracerProviderImpl(
     // Processors shut down first so that any spans still in flight finish before the sampler
     // releases its resources.
     private val closeable: TelemetryCloseable = CompositeTelemetryCloseable(
-        listOfNotNull(tracingConfig.processor, SamplerCloseable(sampler)),
+        buildList {
+            addAll(tracingConfig.processors)
+            add(SamplerCloseable(sampler))
+        },
         sdkErrorHandler,
     )
     private val noopTracer = PropagatingNoopTracer(sdkErrorHandler)
@@ -49,7 +52,7 @@ internal class TracerProviderImpl(
     private val spanLimitConfig = SpanLimitConfig(spanLimits)
 
     private val apiProvider = ApiProviderImpl<Tracer> { key ->
-        if (tracingConfig.processor == null) {
+        if (tracingConfig.processors.isEmpty()) {
             return@ApiProviderImpl noopTracer
         }
         // A throwing configurator falls back to the default config, so the tracer is still cached
@@ -65,7 +68,7 @@ internal class TracerProviderImpl(
         } else {
             TracerImpl(
                 clock = clock,
-                processor = tracingConfig.processor,
+                processors = tracingConfig.processors,
                 scope = key,
                 resource = tracingConfig.resource,
                 spanLimitConfig = spanLimitConfig,

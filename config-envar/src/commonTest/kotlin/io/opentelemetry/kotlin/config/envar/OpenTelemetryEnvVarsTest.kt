@@ -47,9 +47,11 @@ internal class OpenTelemetryEnvVarsTest {
                 ),
                 tracerProvider = TracerProviderBehavior(
                     spanLimits = SpanLimitsBehavior(),
-                    processor = SpanProcessorBehavior(
-                        batch = BatchSpanProcessorBehavior(
-                            exporter = SpanExporterBehavior()
+                    processors = listOf(
+                        SpanProcessorBehavior(
+                            batch = BatchSpanProcessorBehavior(
+                                exporter = SpanExporterBehavior()
+                            )
                         )
                     )
                 ),
@@ -121,10 +123,12 @@ internal class OpenTelemetryEnvVarsTest {
                     attributeCountPerEventLimit = 7,
                     attributeCountPerLinkLimit = 8,
                 ),
-                processor = SpanProcessorBehavior(
-                    batch = BatchSpanProcessorBehavior(
-                        exporter = SpanExporterBehavior(
-                            console = ConsoleExporterBehavior()
+                processors = listOf(
+                    SpanProcessorBehavior(
+                        batch = BatchSpanProcessorBehavior(
+                            exporter = SpanExporterBehavior(
+                                console = ConsoleExporterBehavior()
+                            )
                         )
                     )
                 )
@@ -152,10 +156,12 @@ internal class OpenTelemetryEnvVarsTest {
             resource = ResourceBehavior(),
             tracerProvider = TracerProviderBehavior(
                 spanLimits = SpanLimitsBehavior(),
-                processor = SpanProcessorBehavior(
-                    batch = BatchSpanProcessorBehavior(
-                        exporter = SpanExporterBehavior(),
-                    ),
+                processors = listOf(
+                    SpanProcessorBehavior(
+                        batch = BatchSpanProcessorBehavior(
+                            exporter = SpanExporterBehavior(),
+                        ),
+                    )
                 )
             ),
             loggerProvider = LoggerProviderBehavior(

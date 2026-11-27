@@ -42,7 +42,7 @@ internal class TracerSamplerTest {
         limitsCfg: SpanLimitConfig = fakeSpanLimitsConfig
     ) = TracerImpl(
         clock = clock,
-        processor = processor,
+        processors = listOf(processor),
         scope = key,
         resource = FakeResource(),
         spanLimitConfig = limitsCfg,

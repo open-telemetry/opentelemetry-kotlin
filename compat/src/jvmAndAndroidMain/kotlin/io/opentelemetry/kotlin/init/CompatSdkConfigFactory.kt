@@ -45,7 +45,7 @@ internal class CompatSdkConfigFactory(
 
     private val sampler: SamplerBehavior? = behavior.tracerProvider?.sampler
 
-    private val spanProcessor: SpanProcessorBehavior? = behavior.tracerProvider?.processor
+    private val spanProcessors: List<SpanProcessorBehavior> = behavior.tracerProvider?.processors ?: emptyList()
 
     private val logProcessor: LogRecordProcessorBehavior? = behavior.loggerProvider?.processor
 
@@ -55,7 +55,10 @@ internal class CompatSdkConfigFactory(
 
     fun buildTracerProvider(): TracerProvider {
         cfg.tracerProviderConfig.applyResolvedSampler(sampler)
-        cfg.tracerProviderConfig.applyResolvedProcessor(spanProcessor)
+        spanProcessors.forEach {
+                spanProcessor ->
+            cfg.tracerProviderConfig.applyResolvedProcessor(spanProcessor)
+        }
         return cfg.tracerProviderConfig.build(clock, idGenerator, baseResource, spanLimits, cfg.shutdownTimeoutMs)
     }
 

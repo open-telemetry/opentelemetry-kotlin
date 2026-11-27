@@ -7,8 +7,6 @@ import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
-import io.opentelemetry.kotlin.init.ExportConfigDsl
-import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 
 /**
  * Captures tracer provider configuration and maps it onto a behavior.
@@ -16,22 +14,15 @@ import io.opentelemetry.kotlin.tracing.export.SpanProcessor
 @OptIn(ExperimentalApi::class)
 class TracerProviderConfigDslImpl : BehaviorSupplier<TracerProviderBehavior> {
 
-    private var processor: SpanProcessorBehavior? = null
+    private var processors: MutableList<SpanProcessorBehavior> = mutableListOf()
     private var sampler: SamplerBehavior? = null
     private var limits: SpanLimitsBehavior? = null
     private var idGenerator: IdGeneratorBehavior? = null
 
-    @Suppress("UnusedParameter")
-    fun export(action: ExportConfigDsl.() -> SpanProcessor) {
-        if (processor == null) {
-            processor = SpanProcessorBehavior()
-        }
-    }
-
     fun processor(action: SpanProcessorConfigDslImpl.() -> Unit) {
         val impl = SpanProcessorConfigDslImpl()
         impl.action()
-        processor = impl.toBehavior()
+        processors += impl.toBehavior()
     }
 
     fun sampler(action: SamplerConfigDslImpl.() -> Unit) {
@@ -50,6 +41,7 @@ class TracerProviderConfigDslImpl : BehaviorSupplier<TracerProviderBehavior> {
         idGenerator = IdGeneratorBehavior.Random
     }
 
-    override fun toBehavior(): TracerProviderBehavior =
-        TracerProviderBehavior(processor = processor, sampler = sampler, spanLimits = limits, idGenerator = idGenerator)
+    override fun toBehavior(): TracerProviderBehavior {
+        return TracerProviderBehavior(processors = processors, sampler = sampler, spanLimits = limits, idGenerator = idGenerator)
+    }
 }

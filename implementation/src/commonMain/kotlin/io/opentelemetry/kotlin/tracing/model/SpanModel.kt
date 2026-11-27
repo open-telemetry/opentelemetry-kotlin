@@ -34,7 +34,7 @@ import io.opentelemetry.kotlin.tracing.toSnapshot
  */
 internal class SpanModel(
     override val clock: Clock,
-    private val processor: SpanProcessor?,
+    private val processors: List<SpanProcessor>,
     name: String,
     override val spanKind: SpanKind,
     override val startTimestamp: Long,
@@ -146,14 +146,16 @@ internal class SpanModel(
                 return
             }
             sdkErrorHandler.guard {
-                processor?.takeIf(SpanProcessor::isOnEndingRequired)?.let { endingProcessor ->
-                    val callbackSpan = endingSpan.value
-                    val previousEndingSpan = callbackSpan.get()
-                    callbackSpan.set(this)
-                    try {
-                        endingProcessor.onEnding(ReadWriteSpanImpl(this))
-                    } finally {
-                        callbackSpan.set(previousEndingSpan)
+                for (processor in processors) {
+                    processor.takeIf(SpanProcessor::isOnEndingRequired)?.let { endingProcessor ->
+                        val callbackSpan = endingSpan.value
+                        val previousEndingSpan = callbackSpan.get()
+                        callbackSpan.set(this)
+                        try {
+                            endingProcessor.onEnding(ReadWriteSpanImpl(this))
+                        } finally {
+                            callbackSpan.set(previousEndingSpan)
+                        }
                     }
                 }
             }
@@ -162,12 +164,15 @@ internal class SpanModel(
                 // take a snapshot so that processors retain plain data rather than this
                 // model, releasing its properties once the span
                 // has ended. Only built if a processor needs it.
-                processor?.takeIf { userCode { it.isEndRequired() } }?.let { endProcessor ->
-                    endProcessor to toSpanData()
+                val endingProcessors = processors.filter { userCode { it.isEndRequired() } }
+                if (endingProcessors.isEmpty()) {
+                    return@write emptyList()
                 }
+                val spanData = toSpanData()
+                endingProcessors.map { endProcessor -> endProcessor to spanData }
             }
-            if (toExport != null) {
-                val (endProcessor, snapshot) = toExport
+
+            toExport.forEach { (endProcessor, snapshot) ->
                 sdkErrorHandler.guard {
                     endProcessor.onEnd(snapshot)
                 }

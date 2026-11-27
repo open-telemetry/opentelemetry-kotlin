@@ -11,7 +11,6 @@ import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.rootContext
-import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.factory.ResourceFactoryImpl
 import io.opentelemetry.kotlin.factory.hexToByteArray
@@ -35,7 +34,6 @@ import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertSame
 
 internal class TracerProviderConfigImplTest {
@@ -101,7 +99,7 @@ internal class TracerProviderConfigImplTest {
     @Test
     fun testDefaultTracingConfig() {
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).generateTracingConfig(base)
-        assertNull(cfg.processor)
+        assertEquals(cfg.processors.size, 0)
         assertEquals(sdkDefaultAttributes, cfg.resource.attributes)
         assertEquals(sdkDefaultSchemaUrl, cfg.resource.schemaUrl)
     }
@@ -171,9 +169,9 @@ internal class TracerProviderConfigImplTest {
     fun testSimpleWithoutConsoleInstallsNothing() {
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).generateTracingConfig(
             base,
-            SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior()),
+            listOf(SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior())),
         )
-        assertNull(cfg.processor)
+        assertEquals(0, cfg.processors.size)
     }
 
     @Test
@@ -183,15 +181,18 @@ internal class TracerProviderConfigImplTest {
             export { dslProcessor }
         }.generateTracingConfig(
             base,
-            SpanProcessorBehavior(
-                simple = SimpleSpanProcessorBehavior(
-                    exporter = SpanExporterBehavior(
-                        console = ConsoleExporterBehavior(),
-                    ),
+            listOf(
+                SpanProcessorBehavior(
+                    simple = SimpleSpanProcessorBehavior(
+                        exporter = SpanExporterBehavior(
+                            console = ConsoleExporterBehavior(),
+                        ),
+                    )
                 )
             ),
         )
-        assertSame(dslProcessor, cfg.processor)
+        assertEquals(cfg.processors.size, 1)
+        assertSame(dslProcessor, cfg.processors[0])
     }
 
     @Test
@@ -214,32 +215,31 @@ internal class TracerProviderConfigImplTest {
             }
         }.generateTracingConfig(base)
 
-        assertNotNull(cfg.processor)
+        assertNotNull(cfg.processors)
         assertEquals(schemaUrl, cfg.resource.schemaUrl)
         assertEquals(sdkDefaultAttributes + mapOf("key" to "value"), cfg.resource.attributes)
     }
 
     @Test
-    fun testDoubleExportConfigKeepsFirst() {
+    fun testMultipleExporters() {
         val first = FakeSpanProcessor()
         val second = FakeSpanProcessor()
         val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
             export { first }
             export { second }
         }.generateTracingConfig(base)
-        assertSame(first, cfg.processor)
+        assertEquals(listOf(first, second), cfg.processors)
     }
 
     @Test
-    fun testDoubleExportReportsApiMisuse() {
-        val handler = FakeSdkErrorHandler()
-        TracerProviderConfigImpl(clock, handler).apply {
-            export { FakeSpanProcessor() }
-            export { FakeSpanProcessor() }
+    fun testEachExportSavesAProcessor() {
+        val first = FakeSpanProcessor()
+        val second = FakeSpanProcessor()
+        val cfg = TracerProviderConfigImpl(clock, NoopSdkErrorHandler).apply {
+            export { first }
+            export { second }
         }.generateTracingConfig(base)
-        assertEquals(1, handler.apiMisuses.size)
-        assertEquals("TracerProviderConfigDsl.export", handler.apiMisuses.single().api)
-        assertEquals("export() should only be called once.", handler.apiMisuses.single().message)
+        assertEquals(listOf(first, second), cfg.processors)
     }
 
     @Test
@@ -307,8 +307,8 @@ internal class TracerProviderConfigImplTest {
 
     private fun processorClassName(behavior: SpanProcessorBehavior): String? =
         TracerProviderConfigImpl(clock, NoopSdkErrorHandler)
-            .generateTracingConfig(base, behavior)
-            .processor
+            .generateTracingConfig(base, listOf(behavior))
+            .processors[0]
             ?.let { it::class.simpleName }
 
     private fun defaultSampler(): Sampler =

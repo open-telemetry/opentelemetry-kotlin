@@ -26,7 +26,7 @@ internal class SpanContextOverrideTest {
         val idGenerator = IdGeneratorImpl()
         tracer = TracerImpl(
             clock = FakeClock(),
-            processor = processor,
+            processors = listOf(processor),
             scope = scope,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

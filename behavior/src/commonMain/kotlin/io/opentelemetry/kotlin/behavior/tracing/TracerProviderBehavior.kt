@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.behavior.tracing
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.Behavior
 import io.opentelemetry.kotlin.behavior.IdGeneratorBehavior
+import io.opentelemetry.kotlin.behavior.mergeList
 import io.opentelemetry.kotlin.behavior.mergeNode
 
 /**
@@ -21,7 +22,7 @@ data class TracerProviderBehavior(
     /**
      * Processor used by the tracer provider.
      */
-    val processor: SpanProcessorBehavior? = null,
+    val processors: List<SpanProcessorBehavior> = emptyList(),
 
     /**
      * Sampler the tracer provider should use.
@@ -37,7 +38,7 @@ data class TracerProviderBehavior(
 
     override fun mergeWith(higher: TracerProviderBehavior): TracerProviderBehavior = copy(
         spanLimits = mergeNode(spanLimits, higher.spanLimits),
-        processor = mergeNode(processor, higher.processor),
+        processors = mergeList(processors, higher.processors),
         sampler = mergeNode(sampler, higher.sampler),
         idGenerator = mergeNode(idGenerator, higher.idGenerator),
     )

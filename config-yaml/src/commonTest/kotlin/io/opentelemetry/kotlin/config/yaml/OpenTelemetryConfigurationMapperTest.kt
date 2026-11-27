@@ -11,7 +11,6 @@ import io.opentelemetry.kotlin.behavior.logging.LoggerProviderBehavior
 import io.opentelemetry.kotlin.behavior.toSeverityLevel
 import io.opentelemetry.kotlin.behavior.tracing.SamplerBehavior
 import io.opentelemetry.kotlin.behavior.tracing.SpanLimitsBehavior
-import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import io.opentelemetry.kotlin.config.schema.model.AlwaysOffSampler
 import io.opentelemetry.kotlin.config.schema.model.IdGenerator
@@ -52,7 +51,7 @@ internal class OpenTelemetryConfigurationMapperTest {
                 ),
             ),
             tracerProvider = TracerProviderBehavior(
-                processor = SpanProcessorBehavior(),
+                processors = emptyList(),
                 spanLimits = SpanLimitsBehavior(
                     attributeCountLimit = 128,
                     eventCountLimit = 64,
@@ -92,7 +91,7 @@ internal class OpenTelemetryConfigurationMapperTest {
         )
         assertEquals(
             TracerProviderBehavior(
-                processor = SpanProcessorBehavior(),
+                processors = emptyList(),
                 sampler = SamplerBehavior.AlwaysOff,
             ),
             config.toBehavior()

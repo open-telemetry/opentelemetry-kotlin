@@ -44,7 +44,7 @@ internal class SpanAttributesTest {
         )
         tracer = TracerImpl(
             clock = FakeClock(),
-            processor = FakeSpanProcessor(),
+            processors = listOf(FakeSpanProcessor()),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = spanLimitConfig,
@@ -223,7 +223,7 @@ internal class SpanAttributesTest {
         )
         return TracerImpl(
             clock = FakeClock(),
-            processor = FakeSpanProcessor(),
+            processors = listOf(FakeSpanProcessor()),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = config,

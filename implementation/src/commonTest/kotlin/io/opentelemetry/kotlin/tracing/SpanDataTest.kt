@@ -37,7 +37,7 @@ internal class SpanDataTest {
         shutdownState = MutableShutdownState()
         tracer = TracerImpl(
             clock = clock,
-            processor = processor,
+            processors = listOf(processor),
             scope = key,
             resource = fakeResource,
             spanLimitConfig = fakeSpanLimitsConfig,

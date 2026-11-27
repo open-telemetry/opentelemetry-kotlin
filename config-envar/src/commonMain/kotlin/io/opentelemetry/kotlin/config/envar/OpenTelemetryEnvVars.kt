@@ -41,7 +41,7 @@ class OpenTelemetryEnvVars(
         tracerProvider = TracerProviderBehavior(
             spanLimits = SpanLimitsEnvVars(reader).toBehavior(),
             sampler = SamplerEnvVars(reader).toBehavior(),
-            processor = SpanProcessorEnvVars(reader).toBehavior(),
+            processors = listOf(SpanProcessorEnvVars(reader).toBehavior()),
         ),
         loggerProvider = LoggerProviderBehavior(
             logRecordLimits = LogRecordLimitsEnvVars(reader).toBehavior(),

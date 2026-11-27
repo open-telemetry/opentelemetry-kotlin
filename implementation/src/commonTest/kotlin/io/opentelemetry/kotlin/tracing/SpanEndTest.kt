@@ -28,7 +28,7 @@ internal class SpanEndTest {
         processor = FakeSpanProcessor()
         tracer = TracerImpl(
             clock = clock,
-            processor = processor,
+            processors = listOf(processor),
             scope = key,
             resource = FakeResource(),
             spanLimitConfig = fakeSpanLimitsConfig,

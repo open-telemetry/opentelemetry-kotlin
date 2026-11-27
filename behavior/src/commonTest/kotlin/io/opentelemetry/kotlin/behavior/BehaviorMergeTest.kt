@@ -40,6 +40,17 @@ internal class BehaviorMergeTest {
         assertEquals(mapOf("a" to 1, "b" to 99, "c" to 3), merged)
     }
 
+    @Test
+    fun combinesListsWithHigherEntriesFirst() {
+        val lower = listOf(Node(1), Node(2))
+        val higher = listOf(Node(3), Node(4))
+
+        assertEquals(
+            listOf(Node(3), Node(4), Node(1), Node(2)),
+            mergeList(lower, higher),
+        )
+    }
+
     /**
      * Sums on merge, so a merge performed when only one layer supplied a node shows up as a wrong
      * value rather than silently passing.

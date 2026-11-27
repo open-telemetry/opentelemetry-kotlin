@@ -12,6 +12,7 @@ import io.opentelemetry.kotlin.behavior.tracing.SpanProcessorBehavior
 import io.opentelemetry.kotlin.behavior.tracing.TracerProviderBehavior
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
@@ -81,19 +82,23 @@ internal class BehaviorResolverImplTest {
             declarativeFile = OpenTelemetryBehavior(
                 fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 tracerProvider = TracerProviderBehavior(
-                    processor = SpanProcessorBehavior(),
+                    processors = listOf(SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior())),
                 ),
             ),
             dsl = OpenTelemetryBehavior(
                 fileFormat = OpenTelemetryBehavior.DEFAULT_FILE_FORMAT_VERSION,
                 tracerProvider = TracerProviderBehavior(
-                    processor = SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior()),
+                    processors = listOf(SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior())),
                 ),
             ),
         )
 
-        val processor = resolved.tracerProvider?.processor
-        assertEquals(SimpleSpanProcessorBehavior(), processor?.simple)
+        val processors = resolved.tracerProvider?.processors
+        assertNotNull(processors)
+        assertEquals(2, processors.size)
+        for (processor in processors) {
+            assertEquals(SpanProcessorBehavior(simple = SimpleSpanProcessorBehavior()), processor)
+        }
     }
 
     @Test
