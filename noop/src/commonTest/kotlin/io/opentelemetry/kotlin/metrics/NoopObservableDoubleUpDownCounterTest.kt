@@ -9,7 +9,7 @@ import kotlin.test.assertFalse
 internal class NoopObservableDoubleUpDownCounterTest {
 
     @Test
-    fun ignoresCallbacksAndPreservesInstrumentMetadata() {
+    fun ignoresCallbacksAndExposesPlaceholderMetadata() {
         var called = false
         val counter = NoopMeter.createObservableDoubleUpDownCounter(
             name = "process.cpu.load",
@@ -21,9 +21,9 @@ internal class NoopObservableDoubleUpDownCounterTest {
         counter.registerCallback { called = true }.close()
         counter.close()
 
-        assertEquals("process.cpu.load", counter.name)
-        assertEquals("1", counter.unit)
-        assertEquals("Process CPU load", counter.description)
+        assertEquals("", counter.name)
+        assertEquals(null, counter.unit)
+        assertEquals(null, counter.description)
         assertFalse(called)
     }
 }

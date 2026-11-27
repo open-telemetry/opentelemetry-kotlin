@@ -9,7 +9,7 @@ import kotlin.test.assertFalse
 internal class NoopDoubleGaugeTest {
 
     @Test
-    fun ignoresRecordsAndPreservesMetadata() {
+    fun ignoresRecordsAndExposesPlaceholderMetadata() {
         val gauge = NoopMeter.createDoubleGauge(
             name = "temperature",
             unit = "Cel",
@@ -19,9 +19,9 @@ internal class NoopDoubleGaugeTest {
         gauge.record(21.5)
         gauge.record(22.0) { setStringAttribute("room", "server") }
 
-        assertEquals("temperature", gauge.name)
-        assertEquals("Cel", gauge.unit)
-        assertEquals("Current temperature", gauge.description)
+        assertEquals("", gauge.name)
+        assertEquals(null, gauge.unit)
+        assertEquals(null, gauge.description)
         assertFalse(gauge.enabled())
     }
 }

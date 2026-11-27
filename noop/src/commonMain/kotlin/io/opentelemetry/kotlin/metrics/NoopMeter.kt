@@ -10,64 +10,64 @@ import io.opentelemetry.kotlin.ExperimentalApi
 @OptIn(ExperimentalApi::class)
 internal object NoopMeter : Meter {
     override fun createLongGauge(name: String, unit: String?, description: String?): LongGauge =
-        NoopLongGauge(name, unit, description)
+        NoopLongGauge
 
     override fun createDoubleGauge(name: String, unit: String?, description: String?): DoubleGauge =
-        NoopDoubleGauge(name, unit, description)
+        NoopDoubleGauge
 
     override fun createDoubleUpDownCounter(
         name: String,
         unit: String?,
         description: String?,
-    ): DoubleUpDownCounter = NoopDoubleUpDownCounter(name, unit, description)
+    ): DoubleUpDownCounter = NoopDoubleUpDownCounter
 
     override fun createLongUpDownCounter(
         name: String,
         unit: String?,
         description: String?,
-    ): LongUpDownCounter = NoopLongUpDownCounter(name, unit, description)
+    ): LongUpDownCounter = NoopLongUpDownCounter
 
     override fun createObservableDoubleCounter(
         name: String,
         unit: String?,
         description: String?,
         vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
-    ): ObservableDoubleCounter = NoopObservableDoubleCounter(name, unit, description)
+    ): ObservableDoubleCounter = NoopObservableDoubleCounter
 
     override fun createObservableLongCounter(
         name: String,
         unit: String?,
         description: String?,
         vararg callbacks: (ObservableLongMeasurement) -> Unit,
-    ): ObservableLongCounter = NoopObservableLongCounter(name, unit, description)
+    ): ObservableLongCounter = NoopObservableLongCounter
 
     override fun createObservableLongUpDownCounter(
         name: String,
         unit: String?,
         description: String?,
         vararg callbacks: (ObservableLongMeasurement) -> Unit,
-    ): ObservableLongUpDownCounter = NoopObservableLongUpDownCounter(name, unit, description)
+    ): ObservableLongUpDownCounter = NoopObservableLongUpDownCounter
 
     override fun createObservableDoubleUpDownCounter(
         name: String,
         unit: String?,
         description: String?,
         vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
-    ): ObservableDoubleUpDownCounter = NoopObservableDoubleUpDownCounter(name, unit, description)
+    ): ObservableDoubleUpDownCounter = NoopObservableDoubleUpDownCounter
 
     override fun createObservableLongGauge(
         name: String,
         unit: String?,
         description: String?,
         vararg callbacks: (ObservableLongMeasurement) -> Unit,
-    ): ObservableLongGauge = NoopObservableLongGauge(name, unit, description)
+    ): ObservableLongGauge = NoopObservableLongGauge
 
     override fun createObservableDoubleGauge(
         name: String,
         unit: String?,
         description: String?,
         vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
-    ): ObservableDoubleGauge = NoopObservableDoubleGauge(name, unit, description)
+    ): ObservableDoubleGauge = NoopObservableDoubleGauge
 
     override fun batchCallback(
         measurement: ObservableMeasurement,

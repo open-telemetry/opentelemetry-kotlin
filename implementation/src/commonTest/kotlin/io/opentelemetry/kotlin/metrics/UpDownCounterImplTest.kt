@@ -108,7 +108,9 @@ internal class UpDownCounterImplTest {
 
         val counter = invalidMeter.createDoubleUpDownCounter("1 invalid name")
 
-        assertEquals("1 invalid name", counter.name)
+        assertEquals("", counter.name)
+        assertEquals(null, counter.unit)
+        assertEquals(null, counter.description)
         assertFalse(counter.enabled())
         assertEquals(1, handler.apiMisuses.size)
         assertEquals("Instrument.name", handler.apiMisuses.single().api)

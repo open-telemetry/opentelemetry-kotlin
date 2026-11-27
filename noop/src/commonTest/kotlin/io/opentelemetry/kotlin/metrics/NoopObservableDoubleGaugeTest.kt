@@ -9,7 +9,7 @@ import kotlin.test.assertFalse
 internal class NoopObservableDoubleGaugeTest {
 
     @Test
-    fun ignoresCallbacksAndPreservesInstrumentMetadata() {
+    fun ignoresCallbacksAndExposesPlaceholderMetadata() {
         var called = false
         val gauge = NoopMeter.createObservableDoubleGauge(
             name = "temperature",
@@ -21,9 +21,9 @@ internal class NoopObservableDoubleGaugeTest {
         gauge.registerCallback { called = true }.close()
         gauge.close()
 
-        assertEquals("temperature", gauge.name)
-        assertEquals("Cel", gauge.unit)
-        assertEquals("Current temperature", gauge.description)
+        assertEquals("", gauge.name)
+        assertEquals(null, gauge.unit)
+        assertEquals(null, gauge.description)
         assertFalse(called)
     }
 }

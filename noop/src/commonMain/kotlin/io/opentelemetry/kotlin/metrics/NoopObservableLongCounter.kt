@@ -6,11 +6,11 @@ import io.opentelemetry.kotlin.ExperimentalApi
  * No-op implementation of [ObservableLongCounter].
  */
 @OptIn(ExperimentalApi::class)
-internal class NoopObservableLongCounter(
-    override val name: String,
-    override val unit: String?,
-    override val description: String?,
-) : ObservableLongCounter {
+internal object NoopObservableLongCounter : ObservableLongCounter {
+    override val name: String = ""
+    override val unit: String? = null
+    override val description: String? = null
+
     override val measurement: ObservableLongMeasurement = NoopObservableLongMeasurement()
 
     override fun registerCallback(callback: (ObservableLongMeasurement) -> Unit): AutoCloseable =

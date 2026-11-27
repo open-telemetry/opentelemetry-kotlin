@@ -380,6 +380,8 @@ fun initWithDiagnostics(isDebugBuild: Boolean, userOptedOut: Boolean): OpenTelem
   everything, `WARN` passes warnings and errors, and `ERROR` and above pass errors only.
 - `disabled(true)` makes `createOpenTelemetry` return a no-op SDK. This is useful for respecting
   a user's choice to opt out of telemetry.
+  No-op metric instruments are shared by instrument type and do not retain their creation metadata:
+  `name` returns an empty string, while `unit` and `description` return `null`.
 
 ### Everything else
 

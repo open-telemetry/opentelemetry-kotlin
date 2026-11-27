@@ -350,9 +350,9 @@ internal class NoopTests {
             unit = "{item}",
             description = "items in stock",
         )
-        assertEquals("store.inventory", longCounter.name)
-        assertEquals("{item}", longCounter.unit)
-        assertEquals("items in stock", longCounter.description)
+        assertEquals("", longCounter.name)
+        assertEquals(null, longCounter.unit)
+        assertEquals(null, longCounter.description)
         assertFalse(longCounter.enabled())
         longCounter.add(1)
         longCounter.add(-1) { setStringAttribute("account.type", "commercial") }
@@ -362,9 +362,9 @@ internal class NoopTests {
             unit = "{item}",
             description = "queue size",
         )
-        assertEquals("queue.depth", doubleCounter.name)
-        assertEquals("{item}", doubleCounter.unit)
-        assertEquals("queue size", doubleCounter.description)
+        assertEquals("", doubleCounter.name)
+        assertEquals(null, doubleCounter.unit)
+        assertEquals(null, doubleCounter.description)
         assertFalse(doubleCounter.enabled())
         doubleCounter.add(1.0)
         doubleCounter.add(-1.0) { setStringAttribute("account.type", "commercial") }

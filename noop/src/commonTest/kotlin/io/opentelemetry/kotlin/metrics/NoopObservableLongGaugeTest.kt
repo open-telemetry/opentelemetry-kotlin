@@ -9,7 +9,7 @@ import kotlin.test.assertFalse
 internal class NoopObservableLongGaugeTest {
 
     @Test
-    fun ignoresCallbacksAndPreservesInstrumentMetadata() {
+    fun ignoresCallbacksAndExposesPlaceholderMetadata() {
         var called = false
         val gauge = NoopMeter.createObservableLongGauge(
             name = "queue.depth",
@@ -21,9 +21,9 @@ internal class NoopObservableLongGaugeTest {
         gauge.registerCallback { called = true }.close()
         gauge.close()
 
-        assertEquals("queue.depth", gauge.name)
-        assertEquals("{item}", gauge.unit)
-        assertEquals("Current queue depth", gauge.description)
+        assertEquals("", gauge.name)
+        assertEquals(null, gauge.unit)
+        assertEquals(null, gauge.description)
         assertFalse(called)
     }
 }

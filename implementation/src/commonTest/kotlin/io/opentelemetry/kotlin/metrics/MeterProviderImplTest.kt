@@ -50,7 +50,9 @@ internal class MeterProviderImplTest {
             callbacks = arrayOf({ called = true }),
         )
 
-        assertEquals("process.page.faults", counter.name)
+        assertEquals("", counter.name)
+        assertEquals(null, counter.unit)
+        assertEquals(null, counter.description)
         counter.registerCallback { called = true }.close()
         counter.close()
         assertFalse(called)
@@ -65,7 +67,9 @@ internal class MeterProviderImplTest {
             callbacks = arrayOf({ called = true }),
         )
 
-        assertEquals("process.memory.working_set", counter.name)
+        assertEquals("", counter.name)
+        assertEquals(null, counter.unit)
+        assertEquals(null, counter.description)
         counter.registerCallback { called = true }.close()
         counter.close()
         assertFalse(called)
@@ -80,7 +84,9 @@ internal class MeterProviderImplTest {
             callbacks = arrayOf<(ObservableDoubleMeasurement) -> Unit>({ called = true }),
         )
 
-        assertEquals("process.cpu.load", counter.name)
+        assertEquals("", counter.name)
+        assertEquals(null, counter.unit)
+        assertEquals(null, counter.description)
         counter.registerCallback { called = true }.close()
         counter.close()
         assertFalse(called)
@@ -95,7 +101,9 @@ internal class MeterProviderImplTest {
             callbacks = arrayOf({ called = true }),
         )
 
-        assertEquals("queue.depth", gauge.name)
+        assertEquals("", gauge.name)
+        assertEquals(null, gauge.unit)
+        assertEquals(null, gauge.description)
         gauge.registerCallback { called = true }.close()
         gauge.close()
         assertFalse(called)
@@ -110,7 +118,9 @@ internal class MeterProviderImplTest {
             callbacks = arrayOf<(ObservableDoubleMeasurement) -> Unit>({ called = true }),
         )
 
-        assertEquals("temperature", gauge.name)
+        assertEquals("", gauge.name)
+        assertEquals(null, gauge.unit)
+        assertEquals(null, gauge.description)
         gauge.registerCallback { called = true }.close()
         gauge.close()
         assertFalse(called)
