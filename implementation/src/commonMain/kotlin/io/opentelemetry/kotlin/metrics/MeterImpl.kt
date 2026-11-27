@@ -2,10 +2,15 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.NoopOpenTelemetry
+import io.opentelemetry.kotlin.ReentrantReadWriteLock
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.reportError
+import io.opentelemetry.kotlin.metrics.instrument.InstrumentDescriptor
+import io.opentelemetry.kotlin.metrics.instrument.InstrumentKind
+import io.opentelemetry.kotlin.metrics.instrument.InstrumentValueType
+import io.opentelemetry.kotlin.metrics.instrument.SdkInstrument
 import io.opentelemetry.kotlin.resource.Resource
 
 internal class MeterImpl(
@@ -13,6 +18,14 @@ internal class MeterImpl(
     val resource: Resource,
     private val sdkErrorHandler: SdkErrorHandler,
 ) : Meter {
+    private val lock = ReentrantReadWriteLock()
+    private val instrumentRegistry = mutableMapOf<String, MutableList<SdkInstrument>>()
+
+    // Conflicts already reported, keyed by the requested registration. Reporting the same
+    // conflict twice would let an error handler that re-registers instruments recurse
+    // without bound, so each distinct conflict is reported at most once.
+    private val reportedConflicts = mutableSetOf<String>()
+
     override fun createLongGauge(
         name: String,
         unit: String?,
@@ -38,18 +51,23 @@ internal class MeterImpl(
         )
         return noopMeter.createDoubleGauge(name, unit, description)
     }
-
     override fun createDoubleUpDownCounter(
         name: String,
         unit: String?,
         description: String?,
     ): DoubleUpDownCounter {
-        val noopMeter = obtainNoopMeterIfInvalid(name) ?: return DoubleUpDownCounterImpl(
+        val noopMeter = obtainNoopMeterIfInvalid(name)
+        if (noopMeter != null) {
+            return noopMeter.createDoubleUpDownCounter(name, unit, description)
+        }
+        return getOrRegisterInstrument(
             name,
             unit,
             description,
+            InstrumentKind.UP_DOWN_COUNTER,
+            InstrumentValueType.DOUBLE,
+            create = { DoubleUpDownCounterImpl(it) },
         )
-        return noopMeter.createDoubleUpDownCounter(name, unit, description)
     }
 
     override fun createLongUpDownCounter(
@@ -57,12 +75,18 @@ internal class MeterImpl(
         unit: String?,
         description: String?,
     ): LongUpDownCounter {
-        val noopMeter = obtainNoopMeterIfInvalid(name) ?: return LongUpDownCounterImpl(
+        val noopMeter = obtainNoopMeterIfInvalid(name)
+        if (noopMeter != null) {
+            return noopMeter.createLongUpDownCounter(name, unit, description)
+        }
+        return getOrRegisterInstrument(
             name,
             unit,
             description,
+            InstrumentKind.UP_DOWN_COUNTER,
+            InstrumentValueType.LONG,
+            create = { LongUpDownCounterImpl(it) },
         )
-        return noopMeter.createLongUpDownCounter(name, unit, description)
     }
 
     override fun createObservableDoubleCounter(
@@ -72,6 +96,7 @@ internal class MeterImpl(
         vararg callbacks: (ObservableDoubleMeasurement) -> Unit,
     ): ObservableDoubleCounter {
         val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
+
         return noopMeter.createObservableDoubleCounter(name, unit, description, *callbacks)
     }
 
@@ -82,6 +107,7 @@ internal class MeterImpl(
         vararg callbacks: (ObservableLongMeasurement) -> Unit,
     ): ObservableLongCounter {
         val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
+
         return noopMeter.createObservableLongCounter(name, unit, description, *callbacks)
     }
 
@@ -113,6 +139,124 @@ internal class MeterImpl(
     ): ObservableLongGauge {
         val noopMeter = obtainNoopMeterIfInvalid(name) ?: getNoopMeter()
         return noopMeter.createObservableLongGauge(name, unit, description, *callbacks)
+    }
+
+    private fun <T : Any> getOrRegisterInstrument(
+        name: String,
+        unit: String?,
+        description: String?,
+        kind: InstrumentKind,
+        valueType: InstrumentValueType,
+        create: (resolvedDescriptor: InstrumentDescriptor) -> SdkInstrument,
+    ): T {
+        val requested = InstrumentDescriptor(name, unit, description, kind, valueType)
+        val key = name.lowercase()
+        var conflict: SdkError? = null
+        // Lookup and registration are atomic under a single write lock, so a concurrent
+        // registration can never slip between the two.
+        val instrument = lock.write {
+            val entries = instrumentRegistry.getOrPut(key) { mutableListOf() }
+            val resolved = lookupEntry(entries, requested)
+            if (resolved != null) {
+                conflict = resolved.second?.takeIf { reportedConflicts.add(conflictKey(requested)) }
+                resolved.first
+            } else {
+                val baseline = entries.firstOrNull()
+                val newConflict = baseline?.let { conflictFor(entries, requested) }
+                conflict = newConflict?.takeIf { reportedConflicts.add(conflictKey(requested)) }
+                // Conflicting registrations keep the bucket's first-seen name casing
+                // while retaining their own unit, description, and value type.
+                val resolvedName = baseline?.descriptor?.name ?: requested.name
+                val resolvedDescriptor = InstrumentDescriptor(
+                    resolvedName,
+                    unit,
+                    description,
+                    kind,
+                    valueType,
+                )
+                create(resolvedDescriptor).also { entries += it }
+            }
+        }
+        // Conflicts are reported only after the registry lock has been released so the
+        // user-provided error handler never executes under the lock.
+        conflict?.let(sdkErrorHandler::reportError)
+        @Suppress("UNCHECKED_CAST")
+        return instrument as T
+    }
+
+    private fun conflictKey(requested: InstrumentDescriptor): String =
+        "${requested.name.lowercase()}|${requested.valueType}|" +
+            "${requested.unit.orEmpty()}|${requested.description.orEmpty()}"
+
+    /**
+     * Finds an existing [entries] registration reusable for [requested]. Returns the entry
+     * paired with the conflict to report, or `null` when a new instrument must be created.
+     * An identical descriptor reuses silently; a name differing only in case reuses the
+     * first-seen registration and reports the case difference.
+     */
+    private fun lookupEntry(
+        entries: List<SdkInstrument>,
+        requested: InstrumentDescriptor,
+    ): Pair<SdkInstrument, SdkError?>? {
+        // InstrumentDescriptor.equals is case-insensitive, so an exact-name match is
+        // checked first; a case-only variant then reuses the first-seen registration.
+        entries.firstOrNull { it.descriptor == requested && it.descriptor.name == requested.name }
+            ?.let { return it to null }
+        entries.firstOrNull { it.descriptor == requested }?.let { entry ->
+            return entry to SdkError.ApiMisuse(
+                api = "Meter",
+                message = "Instrument name '${requested.name}' differs only in case " +
+                    "from existing '${entry.descriptor.name}'. Using first-seen name.",
+                severity = SdkErrorSeverity.ERROR,
+            )
+        }
+        return null
+    }
+
+    /**
+     * Builds the conflict diagnostic for a registration that cannot reuse any existing
+     * entry. Prefers an entry with the same value type so unit/description mismatches are
+     * reported as warnings; otherwise reports the numeric-type conflict as an error.
+     */
+    private fun conflictFor(
+        entries: List<SdkInstrument>,
+        requested: InstrumentDescriptor,
+    ): SdkError {
+        val baseline = entries.firstOrNull { it.descriptor.valueType == requested.valueType }
+            ?: entries.first()
+        return checkForConflict(requested, baseline.descriptor)
+            ?: SdkError.ApiMisuse(
+                api = "Meter",
+                message = "Instrument '${requested.name}' conflicts with an existing " +
+                    "registration. Using first-seen descriptor.",
+                severity = SdkErrorSeverity.WARNING,
+            )
+    }
+
+    private fun checkForConflict(
+        requested: InstrumentDescriptor,
+        existing: InstrumentDescriptor,
+    ): SdkError? = when {
+        requested.valueType != existing.valueType -> SdkError.ApiMisuse(
+            api = "Meter",
+            message = "Instrument '${requested.name}' is already registered as " +
+                "${existing.valueType}, cannot re-register as ${requested.valueType}",
+            severity = SdkErrorSeverity.ERROR,
+        )
+        requested.name != existing.name &&
+            requested.name.equals(existing.name, ignoreCase = true) -> SdkError.ApiMisuse(
+            api = "Meter",
+            message = "Instrument name '${requested.name}' differs only in case " +
+                "from existing '${existing.name}'. Using first-seen name.",
+            severity = SdkErrorSeverity.ERROR,
+        )
+        requested != existing -> SdkError.ApiMisuse(
+            api = "Meter",
+            message = "Instrument '${requested.name}' is already registered with " +
+                "different unit or description. Using first-seen descriptor.",
+            severity = SdkErrorSeverity.WARNING,
+        )
+        else -> null
     }
 
     override fun createObservableDoubleGauge(

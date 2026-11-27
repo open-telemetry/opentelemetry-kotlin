@@ -334,6 +334,7 @@ public abstract interface class io/opentelemetry/kotlin/metrics/data/SumData$Lon
 
 public final class io/opentelemetry/kotlin/metrics/instrument/InstrumentKind : java/lang/Enum {
 	public static final field HISTOGRAM Lio/opentelemetry/kotlin/metrics/instrument/InstrumentKind;
+	public static final field UP_DOWN_COUNTER Lio/opentelemetry/kotlin/metrics/instrument/InstrumentKind;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/opentelemetry/kotlin/metrics/instrument/InstrumentKind;
 	public static fun values ()[Lio/opentelemetry/kotlin/metrics/instrument/InstrumentKind;

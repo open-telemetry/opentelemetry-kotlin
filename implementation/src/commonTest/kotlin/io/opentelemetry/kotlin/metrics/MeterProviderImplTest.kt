@@ -263,6 +263,25 @@ internal class MeterProviderImplTest {
     }
 
     @Test
+    fun testInvalidInstrumentNameReturnsNoopInstrument() {
+        val handler = FakeSdkErrorHandler()
+        val config = MetricsConfig(
+            resource = ResourceImpl(AttributesModel(), null),
+            sdkErrorHandler = handler,
+        )
+        val attributeLimits = AttributeLimitsBehavior()
+        val provider = MeterProviderImpl(config, attributeLimits)
+        val meter = provider.getMeter(name = "test")
+
+        val counter = meter.createLongUpDownCounter("invalid-name!", unit = "1", description = "test")
+
+        // Should return a noop instrument
+        assertFalse(counter.enabled())
+        assertEquals(1, handler.apiMisuses.size)
+        assertTrue(handler.apiMisuses.single().message.contains("invalid"))
+    }
+
+    @Test
     fun testNullUnitPreserved() {
         val gauge = impl.getMeter("test").createLongGauge(
             name = "test.counter",
