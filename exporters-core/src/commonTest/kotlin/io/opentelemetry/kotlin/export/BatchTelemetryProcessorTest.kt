@@ -239,6 +239,69 @@ internal class BatchTelemetryProcessorTest {
     }
 
     @Test
+    fun testShutdownExportsThenFlushes() = runTest {
+        val events = mutableListOf<String>()
+        val processor = createProcessor(
+            flushAction = {
+                events += "flush"
+                OperationResultCode.Success
+            },
+        ) {
+            events += "export $it"
+            OperationResultCode.Success
+        }
+        listOf(1, 2).forEach(processor::processTelemetry)
+        assertEquals(OperationResultCode.Success, processor.shutdown())
+        assertEquals(listOf("export [1, 2]", "flush"), events)
+    }
+
+    @Test
+    fun testRepeatedShutdownDoesNotFlushAgain() = runTest {
+        var flushes = 0
+        val processor = createProcessor(
+            flushAction = {
+                flushes++
+                OperationResultCode.Success
+            },
+        ) {
+            OperationResultCode.Success
+        }
+        processor.shutdown()
+        assertEquals(1, flushes)
+
+        assertEquals(OperationResultCode.Success, processor.shutdown())
+        assertEquals(1, flushes)
+    }
+
+    @Test
+    fun testShutdownFlushFailure() = runTest {
+        val errorHandler = FakeSdkErrorHandler()
+        val processor = createProcessor(
+            sdkErrorHandler = errorHandler,
+            flushAction = { throw IllegalStateException("flush failed") },
+        ) {
+            OperationResultCode.Success
+        }
+        processor.processTelemetry(1)
+        assertEquals(OperationResultCode.Failure, processor.shutdown())
+        assertEquals(1, errorHandler.userCodeErrors.size)
+    }
+
+    @Test
+    fun testShutdownFlushTimeout() = runTest {
+        val processor = createProcessor(
+            forceFlushTimeoutMs = 10,
+            flushAction = {
+                delay(100)
+                OperationResultCode.Success
+            },
+        ) {
+            OperationResultCode.Success
+        }
+        assertEquals(OperationResultCode.Failure, processor.shutdown())
+    }
+
+    @Test
     fun testExportIsNeverConcurrent() = runTest {
         var inFlight = 0
         var maxInFlight = 0
