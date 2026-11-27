@@ -8,7 +8,10 @@ import io.opentelemetry.kotlin.attributes.typedAttributesOrConvert
 import io.opentelemetry.kotlin.context.Context
 import io.opentelemetry.kotlin.context.currentContext
 import io.opentelemetry.kotlin.context.rootContext
+import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorHandler
+import io.opentelemetry.kotlin.error.SdkErrorSeverity
+import io.opentelemetry.kotlin.error.reportError
 import io.opentelemetry.kotlin.error.guard
 import io.opentelemetry.kotlin.error.sdkGuardOrDefault
 import io.opentelemetry.kotlin.error.userCode
@@ -65,16 +68,24 @@ internal class TracerImpl(
                     action = action,
                 )
             }
-            if (name.isBlank()) {
-                return@sdkGuardOrDefault invalidSpan
-            }
-
             val ctx = parentContext ?: currentContext()
 
             val parentSpanContext = when (ctx) {
                 root -> invalidSpanContext
                 else -> ctx.span.spanContext
             }
+            if (name.isBlank()) {
+                // the name is required but the parent must not be dropped, so propagate it
+                sdkErrorHandler.reportError(
+                    SdkError.ApiMisuse(
+                        api = "Tracer.startSpan",
+                        message = "Span name must be non-empty",
+                        severity = SdkErrorSeverity.WARNING,
+                    )
+                )
+                return@sdkGuardOrDefault createNonRecordingSpan(parentSpanContext)
+            }
+
             // only inherit parent trace ID if it matches the format
             val parentTraceIdBytes = parentSpanContext.traceIdBytes
             val inheritTraceId = parentSpanContext.isValid && parentTraceIdBytes.isValidTraceIdBytes()
