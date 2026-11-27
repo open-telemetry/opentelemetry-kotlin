@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 0.11.0 (2026-11-27)
+
 This release targets version [v1.62.0](https://github.com/open-telemetry/opentelemetry-specification/releases/tag/v1.62.0)
 of the OpenTelemetry specification.
 

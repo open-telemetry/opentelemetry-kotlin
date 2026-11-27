@@ -28,7 +28,7 @@ Import the BOM then add the SDK and OTLP exporter:
 
 ```kotlin getting-started-install
 dependencies {
-    implementation(platform("io.opentelemetry.kotlin:bom:0.10.0"))
+    implementation(platform("io.opentelemetry.kotlin:bom:0.11.0"))
     implementation("io.opentelemetry.kotlin:implementation")
     implementation("io.opentelemetry.kotlin:exporters-otlp")
 }
