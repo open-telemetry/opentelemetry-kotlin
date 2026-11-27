@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.resource
 
+import io.opentelemetry.kotlin.attributes.AnyValue
 import io.opentelemetry.kotlin.attributes.AttributeValue
 import io.opentelemetry.kotlin.attributes.AttributesModel
 import io.opentelemetry.kotlin.attributes.DEFAULT_ATTRIBUTE_LIMIT
@@ -213,6 +214,52 @@ internal class ResourceImplTest {
         assertEquals(a.hashCode(), b.hashCode())
         assertNotEquals(a, differentAttrs)
         assertNotEquals(a, differentSchema)
+    }
+
+    @Test
+    fun testPreservesComplexAttributesOnMergeAndMutate() {
+        val base = ResourceImpl(
+            AttributesModel(
+                attrs = typed(
+                    mapOf(
+                        "map" to mapOf("k" to "v"),
+                        "listWithNull" to listOf("a", null),
+                    )
+                )
+            ),
+            null
+        )
+        val other = ResourceImpl(
+            AttributesModel(
+                attrs = typed(
+                    mapOf(
+                        "mixed" to listOf("x", 1L),
+                    )
+                )
+            ),
+            null
+        )
+        val merged = base.merge(other)
+        assertEquals(
+            AnyValue.MapValue(mapOf("k" to AnyValue.StringValue("v"))),
+            merged.attributes["map"]
+        )
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.StringValue("a"), AnyValue.NullValue)),
+            merged.attributes["listWithNull"]
+        )
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.StringValue("x"), AnyValue.LongValue(1L))),
+            merged.attributes["mixed"]
+        )
+
+        val mutated = merged.asNewResource {
+            attributes["addedMap"] = mapOf("inner" to 42L)
+        }
+        assertEquals(
+            AnyValue.MapValue(mapOf("inner" to AnyValue.LongValue(42L))),
+            mutated.attributes["addedMap"]
+        )
     }
 
     private fun typed(attrs: Map<String, Any>): MutableMap<String, AttributeValue> =

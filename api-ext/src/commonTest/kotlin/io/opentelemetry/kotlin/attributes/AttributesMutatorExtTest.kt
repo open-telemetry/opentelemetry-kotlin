@@ -33,8 +33,13 @@ internal class AttributesMutatorExtTest {
         assertEquals(listOf("foo", "bar", "baz"), mutator.attributes["list"])
         assertEquals("TestObj(first=flim, second=66)", mutator.attributes["tostring"])
         assertEquals(
-            listOf("TestObj(first=one, second=1)", "TestObj(first=two, second=2)"),
-            mutator.attributes["arrayobj"] as List<*>
+            AnyValue.ListValue(
+                listOf(
+                    AnyValue.StringValue("TestObj(first=one, second=1)"),
+                    AnyValue.StringValue("TestObj(first=two, second=2)")
+                )
+            ),
+            mutator.attributes["arrayobj"]
         )
         assertEquals(55.44.toLong(), mutator.attributes["existing"])
         assertEquals(anyValue, mutator.attributes["anyvalue"])
@@ -137,7 +142,7 @@ internal class AttributesMutatorExtTest {
     }
 
     @Test
-    fun `collections containing nulls are stringified`() {
+    fun `collections containing nulls become AnyValue ListValue with NullValue`() {
         val mutator = FakeAttributesMutator()
         mutator.setAttributes(
             mapOf(
@@ -148,20 +153,253 @@ internal class AttributesMutatorExtTest {
             )
         )
         val observed = mutator.attributes
-        assertEquals(listOf("a", "null"), observed["stringsAndNull"])
-        assertEquals(listOf("1", "null"), observed["longsAndNull"])
-        assertEquals(listOf("null", "null"), observed["onlyNulls"])
-        assertEquals(listOf("a", "null"), observed["arrayWithNull"])
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.StringValue("a"), AnyValue.NullValue)),
+            observed["stringsAndNull"]
+        )
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.LongValue(1L), AnyValue.NullValue)),
+            observed["longsAndNull"]
+        )
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.NullValue, AnyValue.NullValue)),
+            observed["onlyNulls"]
+        )
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.StringValue("a"), AnyValue.NullValue)),
+            observed["arrayWithNull"]
+        )
     }
 
     @Test
-    fun `heterogeneous collections are stringified`() {
+    fun `heterogeneous collections become AnyValue ListValue`() {
         val mutator = FakeAttributesMutator()
         mutator.setAttributes(mapOf("mixed" to listOf("a", 1L, true)))
-        assertEquals(listOf("a", "1", "true"), mutator.attributes["mixed"])
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.StringValue("a"), AnyValue.LongValue(1L), AnyValue.BoolValue(true))),
+            mutator.attributes["mixed"]
+        )
+    }
+
+    @Test
+    fun `primitive arrays become matching typed list`() {
+        val mutator = FakeAttributesMutator()
+        mutator.setAttributes(
+            mapOf(
+                "booleans" to booleanArrayOf(true, false),
+                "longs" to longArrayOf(10L, 20L),
+                "ints" to intArrayOf(1, 2),
+                "shorts" to shortArrayOf(3.toShort(), 4.toShort()),
+                "doubles" to doubleArrayOf(1.5, 2.5),
+                "floats" to floatArrayOf(3.5f, 4.5f),
+                "chars" to charArrayOf('x', 'y'),
+            )
+        )
+        val observed = mutator.attributes
+        assertEquals(listOf(true, false), observed["booleans"])
+        assertEquals(listOf(10L, 20L), observed["longs"])
+        assertEquals(listOf(1L, 2L), observed["ints"])
+        assertEquals(listOf(3L, 4L), observed["shorts"])
+        assertEquals(listOf(1.5, 2.5), observed["doubles"])
+        assertEquals(listOf(3.5, 4.5), observed["floats"])
+        assertEquals(listOf("x", "y"), observed["chars"])
+    }
+
+    @Test
+    fun `maps become AnyValue MapValue with keys converted via toString`() {
+        val mutator = FakeAttributesMutator()
+        mutator.setAttributes(
+            mapOf(
+                "simpleMap" to mapOf("k" to "v", "num" to 42L),
+                "nonStringKeyMap" to mapOf(123 to "val", true to false),
+                "nestedMap" to mapOf("inner" to mapOf("a" to 1L)),
+                "mapWithNull" to mapOf("nullKey" to null),
+            )
+        )
+        val observed = mutator.attributes
+        assertEquals(
+            AnyValue.MapValue(mapOf("k" to AnyValue.StringValue("v"), "num" to AnyValue.LongValue(42L))),
+            observed["simpleMap"]
+        )
+        assertEquals(
+            AnyValue.MapValue(mapOf("123" to AnyValue.StringValue("val"), "true" to AnyValue.BoolValue(false))),
+            observed["nonStringKeyMap"]
+        )
+        assertEquals(
+            AnyValue.MapValue(mapOf("inner" to AnyValue.MapValue(mapOf("a" to AnyValue.LongValue(1L))))),
+            observed["nestedMap"]
+        )
+        assertEquals(
+            AnyValue.MapValue(mapOf("nullKey" to AnyValue.NullValue)),
+            observed["mapWithNull"]
+        )
+    }
+
+    @Test
+    fun `map-key collisions are deterministically disambiguated`() {
+        val mutator = FakeAttributesMutator()
+        mutator.setAttributes(
+            mapOf(
+                "collidingMap" to mapOf(1 to "numeric", "1" to "text"),
+            )
+        )
+        val observed = mutator.attributes["collidingMap"]
+        assertEquals(
+            AnyValue.MapValue(
+                mapOf(
+                    "1" to AnyValue.StringValue("numeric"),
+                    "1_1" to AnyValue.StringValue("text"),
+                )
+            ),
+            observed
+        )
+    }
+
+    @Test
+    fun `map-key collisions disambiguate multiple colliding keys efficiently`() {
+        val mutator = FakeAttributesMutator()
+        val map = linkedMapOf<Any, String>(
+            CollidingKey(1) to "first",
+            CollidingKey(2) to "second",
+            CollidingKey(3) to "third",
+        )
+        mutator.setAttributes(mapOf("colliding" to map))
+        val observed = mutator.attributes["colliding"]
+        assertEquals(
+            AnyValue.MapValue(
+                mapOf(
+                    "same" to AnyValue.StringValue("first"),
+                    "same_1" to AnyValue.StringValue("second"),
+                    "same_2" to AnyValue.StringValue("third"),
+                )
+            ),
+            observed
+        )
+    }
+
+    @Test
+    fun `recursive conversion preserves DoubleValue for whole-valued Double and negative zero`() {
+        val mutator = FakeAttributesMutator()
+        mutator.setAttributes(
+            mapOf(
+                "nested" to mapOf("whole" to 1.0, "negZero" to -0.0),
+                "nestedList" to listOf(mapOf("d" to 2.0)),
+            )
+        )
+        val observed = mutator.attributes
+        assertEquals(
+            AnyValue.MapValue(
+                mapOf(
+                    "whole" to AnyValue.DoubleValue(1.0),
+                    "negZero" to AnyValue.DoubleValue(-0.0),
+                )
+            ),
+            observed["nested"]
+        )
+        assertEquals(
+            AnyValue.ListValue(
+                listOf(
+                    AnyValue.MapValue(mapOf("d" to AnyValue.DoubleValue(2.0)))
+                )
+            ),
+            observed["nestedList"]
+        )
+    }
+
+    @Test
+    fun `nested maps depth boundary preserves leaf up to maximum depth`() {
+        val mutator = FakeAttributesMutator()
+        var current: Any = "leaf"
+        repeat(15) {
+            current = mapOf("next" to current)
+        }
+        mutator.setAttributes(mapOf("chain15" to current))
+
+        var node = mutator.attributes["chain15"] as AnyValue
+        repeat(15) {
+            val mapValue = node as AnyValue.MapValue
+            node = checkNotNull(mapValue.value["next"])
+        }
+        assertEquals(AnyValue.StringValue("leaf"), node)
+
+        var deeper: Any = "leaf"
+        repeat(16) {
+            deeper = mapOf("next" to deeper)
+        }
+        mutator.setAttributes(mapOf("chain16" to deeper))
+        var deepNode = mutator.attributes["chain16"] as AnyValue
+        repeat(16) {
+            val mapValue = deepNode as AnyValue.MapValue
+            deepNode = checkNotNull(mapValue.value["next"])
+        }
+        assertEquals(AnyValue.NullValue, deepNode)
+    }
+
+    @Test
+    fun `byteArray elements inside lists become BytesValue`() {
+        val mutator = FakeAttributesMutator()
+        val bytes1 = byteArrayOf(1, 2)
+        val bytes2 = byteArrayOf(3, 4)
+        mutator.setAttributes(
+            mapOf(
+                "byteArrayList" to listOf(bytes1, bytes2),
+                "mixedWithBytes" to listOf("text", bytes1, null),
+            )
+        )
+        val observed = mutator.attributes
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.BytesValue(bytes1), AnyValue.BytesValue(bytes2))),
+            observed["byteArrayList"]
+        )
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.StringValue("text"), AnyValue.BytesValue(bytes1), AnyValue.NullValue)),
+            observed["mixedWithBytes"]
+        )
+    }
+
+    @Test
+    fun `self-referential root list replaces self-reference with NullValue without extra nesting`() {
+        val mutator = FakeAttributesMutator()
+        val list = ArrayList<Any?>()
+        list.add(list)
+        mutator.setAttributes(mapOf("selfList" to list))
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.NullValue)),
+            mutator.attributes["selfList"]
+        )
+    }
+
+    @Test
+    fun `self-referential root array replaces self-reference with NullValue without extra nesting`() {
+        val mutator = FakeAttributesMutator()
+        val arr = arrayOfNulls<Any>(1)
+        arr[0] = arr
+        mutator.setAttributes(mapOf("selfArray" to arr))
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.NullValue)),
+            mutator.attributes["selfArray"]
+        )
+    }
+
+    @Test
+    fun `self-referential root list with other elements and nulls preserves elements and avoids extra nesting`() {
+        val mutator = FakeAttributesMutator()
+        val list = ArrayList<Any?>()
+        list.add("start")
+        list.add(null)
+        list.add(list)
+        mutator.setAttributes(mapOf("mixedSelfList" to list))
+        assertEquals(
+            AnyValue.ListValue(listOf(AnyValue.StringValue("start"), AnyValue.NullValue, AnyValue.NullValue)),
+            mutator.attributes["mixedSelfList"]
+        )
     }
 
     private data class TestObj(val first: String, val second: Long)
+
+    private class CollidingKey(val id: Int) {
+        override fun toString(): String = "same"
+    }
 
     private class ComplexObject {
         override fun toString(): String = "ComplexObject"

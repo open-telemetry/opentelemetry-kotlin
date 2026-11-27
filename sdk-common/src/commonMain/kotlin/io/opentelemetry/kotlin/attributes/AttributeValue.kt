@@ -141,9 +141,12 @@ public sealed class AttributeValue {
          *   [kotlin.Long] is a [kotlin.Double].
          * - Other numbers are widened to [Long] when whole, and to [Double] otherwise.
          * - A [ByteArray] is copied into an [AnyValue.BytesValue].
+         * - A [Map] is recorded as an [AnyValue.MapValue] wrapped in [Value], with keys converted via [toString].
+         * - Primitive arrays become the matching typed list.
          * - A homogeneous collection or array maps to the matching list case, with numbers widened
-         *   as above. An empty one is a [StrList]. A heterogeneous one is a [StrList] of each
-         *   element's toString(), where `null` renders as `"null"`.
+         *   as above. An empty one is a [StrList]. A collection containing nulls or mixed types
+         *   becomes an [AnyValue.ListValue] wrapped in [Value], with [AnyValue.NullValue] for each null
+         *   and [AnyValue.BytesValue] for [ByteArray] elements.
          * - Anything else is converted via toString().
          */
         public fun fromPublic(value: Any): AttributeValue = when (value) {
@@ -155,8 +158,16 @@ public sealed class AttributeValue {
             is kotlin.Double -> Double(value)
             is Number -> fromNumber(value)
             is ByteArray -> Value(AnyValue.BytesValue(value))
-            is Collection<*> -> fromList(value.toList())
-            is Array<*> -> fromList(value.toList())
+            is BooleanArray -> BoolList(value.toList())
+            is LongArray -> LongList(value.toList())
+            is IntArray -> LongList(value.map { it.toLong() })
+            is ShortArray -> LongList(value.map { it.toLong() })
+            is DoubleArray -> DoubleList(value.toList())
+            is FloatArray -> DoubleList(value.map { it.toDouble() })
+            is CharArray -> StrList(value.map { it.toString() })
+            is Map<*, *> -> Value(value.toAnyValueMap())
+            is Collection<*> -> fromList(value, value.toList())
+            is Array<*> -> fromList(value, value.toList())
             else -> Str(value.toString())
         }
 
@@ -168,13 +179,15 @@ public sealed class AttributeValue {
 
         // cast after type check to avoid a second copy
         @Suppress("UNCHECKED_CAST")
-        private fun fromList(values: List<*>): AttributeValue = when {
+        private fun fromList(root: Any, values: List<*>): AttributeValue = when {
+            values.isEmpty() -> StrList(emptyList())
+            values.any { it == null } -> Value(AnyValue.ListValue(values.map { it.toAnyValue(listOf(root)) }))
             values.all { it is String } -> StrList(values as List<String>)
             values.all { it is Boolean } -> BoolList(values as List<Boolean>)
             values.all { it is kotlin.Long } -> LongList(values as List<kotlin.Long>)
             values.all { it is kotlin.Double } -> DoubleList(values as List<kotlin.Double>)
             values.all { it is Number } -> fromNumberList(values as List<Number>)
-            else -> StrList(values.map { it.toString() })
+            else -> Value(AnyValue.ListValue(values.map { it.toAnyValue(listOf(root)) }))
         }
 
         private fun fromNumberList(values: List<Number>): AttributeValue =
@@ -187,6 +200,56 @@ public sealed class AttributeValue {
         private fun Number.isWholeNumber(): Boolean {
             val doubleValue = toDouble()
             return doubleValue.isFinite() && doubleValue == toLong().toDouble()
+        }
+
+        private const val MAX_DEPTH = 16
+
+        private fun Any?.toAnyValue(ancestors: List<Any> = emptyList()): AnyValue {
+            if (this == null || ancestors.size >= MAX_DEPTH || ancestors.any { it === this }) {
+                return AnyValue.NullValue
+            }
+            val path = ancestors + this
+            return when (this) {
+                is AnyValue -> this
+                is String -> AnyValue.StringValue(this)
+                is Boolean -> AnyValue.BoolValue(this)
+                is kotlin.Long -> AnyValue.LongValue(this)
+                is kotlin.Double -> AnyValue.DoubleValue(this)
+                is Number -> when {
+                    isWholeNumber() -> AnyValue.LongValue(toLong())
+                    else -> AnyValue.DoubleValue(toDouble())
+                }
+                is ByteArray -> AnyValue.BytesValue(copyOf())
+                is BooleanArray -> AnyValue.ListValue(map { AnyValue.BoolValue(it) })
+                is LongArray -> AnyValue.ListValue(map { AnyValue.LongValue(it) })
+                is IntArray -> AnyValue.ListValue(map { AnyValue.LongValue(it.toLong()) })
+                is ShortArray -> AnyValue.ListValue(map { AnyValue.LongValue(it.toLong()) })
+                is DoubleArray -> AnyValue.ListValue(map { AnyValue.DoubleValue(it) })
+                is FloatArray -> AnyValue.ListValue(map { AnyValue.DoubleValue(it.toDouble()) })
+                is CharArray -> AnyValue.ListValue(map { AnyValue.StringValue(it.toString()) })
+                is Map<*, *> -> toAnyValueMap(ancestors)
+                is Collection<*> -> AnyValue.ListValue(map { it.toAnyValue(path) })
+                is Array<*> -> AnyValue.ListValue(map { it.toAnyValue(path) })
+                else -> AnyValue.StringValue(toString())
+            }
+        }
+
+        private fun Map<*, *>.toAnyValueMap(ancestors: List<Any> = emptyList()): AnyValue.MapValue {
+            val path = ancestors + this
+            val result = LinkedHashMap<String, AnyValue>(size)
+            val nextSuffix = mutableMapOf<String, Int>()
+            for ((key, value) in this) {
+                val baseKey = key.toString()
+                var candidateKey = baseKey
+                var counter = nextSuffix[baseKey] ?: 1
+                while (result.containsKey(candidateKey)) {
+                    candidateKey = "${baseKey}_$counter"
+                    counter++
+                }
+                nextSuffix[baseKey] = counter
+                result[candidateKey] = value.toAnyValue(path)
+            }
+            return AnyValue.MapValue(result)
         }
     }
 }
