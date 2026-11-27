@@ -5,7 +5,8 @@ import kotlinx.coroutines.withTimeout
 
 /**
  * Runs [action] within [timeoutMs] milliseconds.
- * Returns [OperationResultCode.Failure] if the timeout elapses before [action] completes.
+ * Returns [OperationResultCode.Timeout], a kind of [OperationResultCode.Failure], if the timeout
+ * elapses before [action] completes. Other results of [action] are returned unchanged.
  */
 public suspend fun runWithTimeout(
     timeoutMs: Long,
@@ -14,5 +15,5 @@ public suspend fun runWithTimeout(
     try {
         withTimeout(timeoutMs) { action() }
     } catch (e: TimeoutCancellationException) {
-        OperationResultCode.Failure
+        OperationResultCode.Timeout
     }

@@ -21,12 +21,22 @@ public abstract interface class io/opentelemetry/kotlin/attributes/AttributeCont
 public abstract class io/opentelemetry/kotlin/export/OperationResultCode {
 }
 
-public final class io/opentelemetry/kotlin/export/OperationResultCode$Failure : io/opentelemetry/kotlin/export/OperationResultCode {
+public class io/opentelemetry/kotlin/export/OperationResultCode$Failure : io/opentelemetry/kotlin/export/OperationResultCode {
+	public static final field Companion Lio/opentelemetry/kotlin/export/OperationResultCode$Failure$Companion;
 	public static final field INSTANCE Lio/opentelemetry/kotlin/export/OperationResultCode$Failure;
+	public fun <init> ()V
+}
+
+public final class io/opentelemetry/kotlin/export/OperationResultCode$Failure$Companion : io/opentelemetry/kotlin/export/OperationResultCode$Failure {
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/opentelemetry/kotlin/export/OperationResultCode$Success : io/opentelemetry/kotlin/export/OperationResultCode {
 	public static final field INSTANCE Lio/opentelemetry/kotlin/export/OperationResultCode$Success;
+}
+
+public final class io/opentelemetry/kotlin/export/OperationResultCode$Timeout : io/opentelemetry/kotlin/export/OperationResultCode$Failure {
+	public static final field INSTANCE Lio/opentelemetry/kotlin/export/OperationResultCode$Timeout;
 }
 
 public abstract interface class io/opentelemetry/kotlin/export/TelemetryCloseable {

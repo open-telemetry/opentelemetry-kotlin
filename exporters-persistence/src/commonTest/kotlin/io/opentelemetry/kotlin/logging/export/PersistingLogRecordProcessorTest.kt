@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.export.FakeTelemetryFileSystem
 import io.opentelemetry.kotlin.export.OperationResultCode
 import io.opentelemetry.kotlin.export.OperationResultCode.Failure
 import io.opentelemetry.kotlin.export.OperationResultCode.Success
+import io.opentelemetry.kotlin.export.OperationResultCode.Timeout
 import io.opentelemetry.kotlin.init.ExportConfigDsl
 import io.opentelemetry.kotlin.logging.SeverityNumber
 import io.opentelemetry.kotlin.logging.model.FakeReadWriteLogRecord
@@ -296,7 +297,7 @@ internal class PersistingLogRecordProcessorTest {
         advanceTimeBy(2500)
         val result = resultDeferred.await()
 
-        assertEquals(Failure, result)
+        assertEquals(Timeout, result)
         processor.shutdown()
     }
 
@@ -329,7 +330,7 @@ internal class PersistingLogRecordProcessorTest {
         advanceTimeBy(5500)
         val result = resultDeferred.await()
 
-        assertEquals(Failure, result)
+        assertEquals(Timeout, result)
     }
 
     /**

@@ -8,7 +8,8 @@ import kotlinx.coroutines.supervisorScope
 
 /**
  * Performs an export operation on each element in a List and returns a success code if each
- * operation is successful, or a failure code if any operation fails.
+ * operation is successful, or a failure code if any operation fails. [OperationResultCode.Timeout]
+ * is returned if any operation timed out (even if others failed for other reasons).
  */
 public fun <T> batchExportOperation(
     elements: List<T>,
@@ -16,6 +17,7 @@ public fun <T> batchExportOperation(
     action: (T) -> OperationResultCode
 ): OperationResultCode {
     var success = true
+    var timedOut = false
 
     elements.forEach {
         val exportResult = sdkErrorHandler.guardOrDefault(
@@ -24,10 +26,12 @@ public fun <T> batchExportOperation(
         ) {
             action(it)
         }
+        timedOut = timedOut || exportResult is OperationResultCode.Timeout
         success = success && exportResult == OperationResultCode.Success
     }
     return when {
         success -> OperationResultCode.Success
+        timedOut -> OperationResultCode.Timeout
         else -> OperationResultCode.Failure
     }
 }
@@ -52,7 +56,8 @@ public suspend fun <T> batchExportOperationConcurrent(
 
 /**
  * Performs an export operation on each element in a List and returns a success code if each
- * operation is successful, or a failure code if any operation fails.
+ * operation is successful, or a failure code if any operation fails. [OperationResultCode.Timeout]
+ * is returned if any operation timed out (even if others failed for other reasons).
  */
 public suspend fun <T> batchExportOperationSuspend(
     elements: List<T>,
@@ -60,6 +65,7 @@ public suspend fun <T> batchExportOperationSuspend(
     action: suspend (T) -> OperationResultCode
 ): OperationResultCode {
     var success = true
+    var timedOut = false
 
     elements.forEach {
         val exportResult = sdkErrorHandler.guardOrDefaultSuspend(
@@ -68,10 +74,12 @@ public suspend fun <T> batchExportOperationSuspend(
         ) {
             action(it)
         }
+        timedOut = timedOut || exportResult is OperationResultCode.Timeout
         success = success && exportResult == OperationResultCode.Success
     }
     return when {
         success -> OperationResultCode.Success
+        timedOut -> OperationResultCode.Timeout
         else -> OperationResultCode.Failure
     }
 }

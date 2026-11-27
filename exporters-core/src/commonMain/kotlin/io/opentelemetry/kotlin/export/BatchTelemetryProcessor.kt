@@ -198,7 +198,7 @@ internal class BatchTelemetryProcessor<T>(
         try {
             withTimeout(timeout) { action() }
         } catch (e: TimeoutCancellationException) {
-            OperationResultCode.Failure
+            OperationResultCode.Timeout
         }
     }
 
@@ -211,5 +211,6 @@ internal class BatchTelemetryProcessor<T>(
 
 internal infix fun OperationResultCode.and(other: OperationResultCode): OperationResultCode = when {
     this == OperationResultCode.Success && other == OperationResultCode.Success -> OperationResultCode.Success
+    this is OperationResultCode.Timeout || other is OperationResultCode.Timeout -> OperationResultCode.Timeout
     else -> OperationResultCode.Failure
 }

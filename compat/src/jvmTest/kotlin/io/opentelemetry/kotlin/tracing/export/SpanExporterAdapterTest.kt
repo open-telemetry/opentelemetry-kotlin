@@ -121,13 +121,13 @@ internal class SpanExporterAdapterTest {
     @Test
     fun `test flush times out if the result never completes`() = runTest {
         impl.nextResult = { OtelJavaCompletableResultCode() }
-        assertEquals(OperationResultCode.Failure, wrapper.forceFlush())
+        assertEquals(OperationResultCode.Timeout, wrapper.forceFlush())
     }
 
     @Test
     fun `test export times out if the result never completes`() = runTest {
         impl.nextResult = { OtelJavaCompletableResultCode() }
-        assertEquals(OperationResultCode.Failure, wrapper.export(listOf(FakeSpanData())))
+        assertEquals(OperationResultCode.Timeout, wrapper.export(listOf(FakeSpanData())))
     }
 
     @Test

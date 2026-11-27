@@ -26,7 +26,8 @@ public class MutableShutdownState : ShutdownState() {
 
     /**
      * If not already shut down, call [shutdownNow] and run [action] within [timeoutMs] milliseconds.
-     * Returns [OperationResultCode.Failure] if the timeout elapses before [action] completes.
+     * Returns [OperationResultCode.Timeout] if the timeout elapses before [action] completes, and
+     * any other [OperationResultCode.Failure] if [action] fails.
      * If already shut down, returns [OperationResultCode.Success].
      *
      * The shutdown transition is atomic, so if several callers race only one of them runs [action].

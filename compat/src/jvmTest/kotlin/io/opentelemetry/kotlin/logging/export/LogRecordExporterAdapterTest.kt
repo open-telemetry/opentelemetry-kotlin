@@ -109,13 +109,13 @@ internal class LogRecordExporterAdapterTest {
     @Test
     fun `test flush times out if the result never completes`() = runTest {
         impl.nextResult = { OtelJavaCompletableResultCode() }
-        assertEquals(OperationResultCode.Failure, wrapper.forceFlush())
+        assertEquals(OperationResultCode.Timeout, wrapper.forceFlush())
     }
 
     @Test
     fun `test export times out if the result never completes`() = runTest {
         impl.nextResult = { OtelJavaCompletableResultCode() }
-        assertEquals(OperationResultCode.Failure, wrapper.export(listOf(FakeLogRecordData())))
+        assertEquals(OperationResultCode.Timeout, wrapper.export(listOf(FakeLogRecordData())))
     }
 
     @Test

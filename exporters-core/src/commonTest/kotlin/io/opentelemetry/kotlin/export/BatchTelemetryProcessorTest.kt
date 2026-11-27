@@ -334,7 +334,7 @@ internal class BatchTelemetryProcessorTest {
             OperationResultCode.Success
         }
         processor.processTelemetry(1)
-        assertEquals(OperationResultCode.Failure, processor.forceFlush())
+        assertEquals(OperationResultCode.Timeout, processor.forceFlush())
 
         // the worker recovers once the stuck export hits its timeout
         advanceTimeBy(100)
@@ -343,6 +343,41 @@ internal class BatchTelemetryProcessorTest {
         assertEquals(listOf(listOf(2)), exports)
 
         processor.shutdown()
+    }
+
+    @Test
+    fun testForceFlushReportsExportTimeout() = runTest {
+        val processor = createProcessor(exportTimeout = 10.milliseconds) {
+            delay(100)
+            OperationResultCode.Success
+        }
+        processor.processTelemetry(1)
+        assertEquals(OperationResultCode.Timeout, processor.forceFlush())
+
+        processor.shutdown()
+    }
+
+    @Test
+    fun testForceFlushReportsExporterFlushTimeoutOverExportFailure() = runTest {
+        val processor = createProcessor(flushAction = { OperationResultCode.Timeout }) {
+            OperationResultCode.Failure
+        }
+        processor.processTelemetry(1)
+        assertEquals(OperationResultCode.Timeout, processor.forceFlush())
+
+        processor.shutdown()
+    }
+
+    @Test
+    fun testAndPreservesTimeout() {
+        val timeout = OperationResultCode.Timeout
+        listOf(OperationResultCode.Success, OperationResultCode.Failure, timeout).forEach { other ->
+            assertEquals(timeout, timeout and other)
+            assertEquals(timeout, other and timeout)
+        }
+        assertEquals(OperationResultCode.Success, OperationResultCode.Success and OperationResultCode.Success)
+        assertEquals(OperationResultCode.Failure, OperationResultCode.Success and OperationResultCode.Failure)
+        assertEquals(OperationResultCode.Failure, OperationResultCode.Failure and OperationResultCode.Success)
     }
 
     @Test
