@@ -100,6 +100,20 @@ internal class W3CTraceContextPropagatorTest {
     }
 
     @Test
+    fun `inject does not write tracestate when traceparent cannot be encoded`() {
+        val delegate = spanContext(traceState = emptyTraceState.put("foo", "bar"))
+        val spanContext = object : SpanContext by delegate {
+            override val traceId: String = "invalid"
+            override val isValid: Boolean = true
+        }
+
+        val carrier = injectInto(contextWithSpan(spanContext))
+
+        assertNull(carrier["traceparent"])
+        assertNull(carrier["tracestate"])
+    }
+
+    @Test
     fun `inject preserves multiple tracestate entries in insertion order`() {
         val state = emptyTraceState
             .put("foo", "1")

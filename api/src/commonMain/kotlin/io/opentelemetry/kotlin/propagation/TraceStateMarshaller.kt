@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.propagation
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateCodec
+import io.opentelemetry.kotlin.propagation.utils.W3CTraceStateValidator
 import io.opentelemetry.kotlin.tracing.TraceState
 import io.opentelemetry.kotlin.tracing.createSpanContext
 
@@ -21,7 +22,11 @@ internal class TraceStateMarshaller(val traceState: TraceState) {
         }
     }
 
-    fun encode(): String = W3CTraceStateCodec.encode(state)
+    fun encode(): String = W3CTraceStateCodec.encode(
+        state.filter { (key, value) ->
+            W3CTraceStateValidator.isValidKey(key) && W3CTraceStateValidator.isValidValue(value)
+        },
+    )
 
     companion object {
         fun decode(header: String): TraceStateMarshaller {
